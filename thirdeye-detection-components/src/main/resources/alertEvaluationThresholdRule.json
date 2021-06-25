@@ -1,0 +1,77 @@
+{
+  "alert": {
+    "name": "percentage-change-template",
+    "description": "Percentage drop template",
+    "cron": "0 0/1 * 1/1 * ? *"
+  },
+  "nodes": [
+    {
+      "planNodeName": "root",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.detector.type": "THRESHOLD_RULE",
+        "component.detector.max": "10000",
+        "component.detector.offset": "mo1m",
+        "component.detector.pattern": "down",
+        "component.detector.timestamp": "ts",
+        "component.detector.metric": "met",
+        "component.detector.dimensions": [],
+        "startTime": "20200202",
+        "endTime": "20200214"
+      },
+      "inputs": [
+        {
+          "targetProperty": "baseline",
+          "sourcePlanNode": "baselineDataFetcher",
+          "sourceProperty": "baselineOutput"
+        },
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "planNodeName": "baselineDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+        "component.pinot.dataSource": "pinot1",
+        "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" < 20200214 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
+        "component.pinot.tableName": "pageviews",
+        "startTime": "20200202",
+        "endTime": "20200214"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "baselineOutput"
+        }
+      ]
+    },
+    {
+      "planNodeName": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+        "component.pinot.dataSource": "pinot1",
+        "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200302 AND \"date\" < 20200314 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
+        "component.pinot.tableName": "pageviews",
+        "startTime": "20200202",
+        "endTime": "20200214"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "currentOutput"
+        }
+      ]
+    }
+  ],
+  "start": "1621300000000",
+  "end": "1621200000000"
+}

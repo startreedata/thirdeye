@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.components.detectors.GenericAnomalyDetectorFactory;
+import org.apache.pinot.thirdeye.detection.components.GenericAnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorSpec;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyDetectorWrapper;

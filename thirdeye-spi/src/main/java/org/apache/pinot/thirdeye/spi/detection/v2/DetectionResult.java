@@ -94,7 +94,7 @@ public class DetectionResult implements DetectionPipelineResult {
   public DetectionEvaluationApi toApi() {
     DetectionEvaluationApi api = new DetectionEvaluationApi();
     final List<AnomalyApi> anomalyApis = new ArrayList<>();
-    for (MergedAnomalyResultDTO anomalyDto : this.anomalies) {
+    for (MergedAnomalyResultDTO anomalyDto : anomalies) {
       anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
     }
     api.setAnomalies(anomalyApis);
@@ -104,11 +104,15 @@ public class DetectionResult implements DetectionPipelineResult {
 
   private DetectionDataApi getData() {
     final DetectionDataApi detectionDataApi = new DetectionDataApi();
-    detectionDataApi.setCurrent(this.timeseries.getCurrent().toList());
-    detectionDataApi.setExpected(this.timeseries.getPredictedBaseline().toList());
-    detectionDataApi.setTimestamp(this.timeseries.getTime().toList());
-    detectionDataApi.setLowerBound(this.timeseries.getPredictedLowerBound().toList());
-    detectionDataApi.setUpperBound(this.timeseries.getPredictedUpperBound().toList());
+    detectionDataApi.setCurrent(timeseries.getCurrent().toList());
+    detectionDataApi.setExpected(timeseries.getPredictedBaseline().toList());
+    detectionDataApi.setTimestamp(timeseries.getTime().toList());
+    if (timeseries.hasLowerBound()) {
+      detectionDataApi.setLowerBound(timeseries.getPredictedLowerBound().toList());
+    }
+    if (timeseries.hasUpperBound()) {
+      detectionDataApi.setUpperBound(timeseries.getPredictedUpperBound().toList());
+    }
     return detectionDataApi;
   }
 

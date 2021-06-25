@@ -7,6 +7,10 @@ import org.joda.time.Interval;
 
 public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent<T> {
 
+  // Keys available in Map<String, DataTable> timeSeriesMap
+  String KEY_CURRENT = "current";
+  String KEY_BASELINE = "baseline";
+
   /**
    * Run detection for a given interval with provided baseline and current DataTable. Then returns
    * the detection result.

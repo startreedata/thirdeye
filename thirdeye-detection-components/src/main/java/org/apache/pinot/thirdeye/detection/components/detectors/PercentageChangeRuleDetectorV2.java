@@ -56,8 +56,6 @@ public class PercentageChangeRuleDetectorV2 implements
   private static final String COL_ANOMALY = "anomaly";
   private static final String COL_PATTERN = "pattern";
   private static final String COL_CHANGE_VIOLATION = "change_violation";
-  private static final String CURRENT_KEY = "current";
-  private static final String BASELINE_KEY = "baseline";
   private double percentageChange;
   private Pattern pattern;
   private String monitoringGranularity;
@@ -94,8 +92,8 @@ public class PercentageChangeRuleDetectorV2 implements
   @Override
   public DetectionPipelineResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap) throws DetectorException {
-    DataTable baseline = timeSeriesMap.get(BASELINE_KEY);
-    DataTable current = timeSeriesMap.get(CURRENT_KEY);
+    DataTable baseline = timeSeriesMap.get(KEY_BASELINE);
+    DataTable current = timeSeriesMap.get(KEY_CURRENT);
     final Map<DimensionInfo, DataTable> baselineDataTableMap = DataTableUtils.splitDataTable(
         baseline);
     final Map<DimensionInfo, DataTable> currentDataTableMap = DataTableUtils.splitDataTable(

@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.spi.detection.model;
 
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
+
 import com.google.common.base.Preconditions;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -46,8 +49,8 @@ public class TimeSeries {
       DoubleSeries upperBoundValues, DoubleSeries lowerBoundValues) {
     this(timestamps, baselineValues);
     this.df.addSeries(DataFrame.COL_CURRENT, currentValues);
-    this.df.addSeries(DataFrame.COL_UPPER_BOUND, upperBoundValues);
-    this.df.addSeries(DataFrame.COL_LOWER_BOUND, lowerBoundValues);
+    this.df.addSeries(COL_UPPER_BOUND, upperBoundValues);
+    this.df.addSeries(COL_LOWER_BOUND, lowerBoundValues);
   }
 
   /**
@@ -81,8 +84,8 @@ public class TimeSeries {
     ts.df.addSeries(DataFrame.COL_TIME, LongSeries.empty())
         .addSeries(DataFrame.COL_VALUE, DoubleSeries.empty())
         .addSeries(DataFrame.COL_CURRENT, DoubleSeries.empty())
-        .addSeries(DataFrame.COL_UPPER_BOUND, DoubleSeries.empty())
-        .addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.empty())
+        .addSeries(COL_UPPER_BOUND, DoubleSeries.empty())
+        .addSeries(COL_LOWER_BOUND, DoubleSeries.empty())
         .setIndex(DataFrame.COL_TIME);
     return ts;
   }
@@ -104,9 +107,9 @@ public class TimeSeries {
     // current values
     addSeries(ts, df, DataFrame.COL_CURRENT);
     // upper bound
-    addSeries(ts, df, DataFrame.COL_UPPER_BOUND);
+    addSeries(ts, df, COL_UPPER_BOUND);
     // lower bound
-    addSeries(ts, df, DataFrame.COL_LOWER_BOUND);
+    addSeries(ts, df, COL_LOWER_BOUND);
     return ts;
   }
 
@@ -122,12 +125,20 @@ public class TimeSeries {
     return this.df.getDoubles(DataFrame.COL_VALUE);
   }
 
+  public boolean hasUpperBound() {
+    return df.contains(COL_UPPER_BOUND);
+  }
+
   public DoubleSeries getPredictedUpperBound() {
-    return this.df.getDoubles(DataFrame.COL_UPPER_BOUND);
+    return this.df.getDoubles(COL_UPPER_BOUND);
+  }
+
+  public boolean hasLowerBound() {
+    return df.contains(COL_LOWER_BOUND);
   }
 
   public DoubleSeries getPredictedLowerBound() {
-    return this.df.getDoubles(DataFrame.COL_LOWER_BOUND);
+    return this.df.getDoubles(COL_LOWER_BOUND);
   }
 
   public DataFrame getDataFrame() {

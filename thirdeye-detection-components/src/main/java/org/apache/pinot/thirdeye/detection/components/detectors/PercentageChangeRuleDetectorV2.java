@@ -56,6 +56,8 @@ public class PercentageChangeRuleDetectorV2 implements
   private static final String COL_ANOMALY = "anomaly";
   private static final String COL_PATTERN = "pattern";
   private static final String COL_CHANGE_VIOLATION = "change_violation";
+  private static final String CURRENT_KEY = "current";
+  private static final String BASELINE_KEY = "baseline";
   private double percentageChange;
   private Pattern pattern;
   private String monitoringGranularity;
@@ -90,9 +92,10 @@ public class PercentageChangeRuleDetectorV2 implements
   }
 
   @Override
-  public DetectionPipelineResult runDetection(Interval window, DataTable baseline,
-      DataTable current)
-      throws DetectorException {
+  public DetectionPipelineResult runDetection(final Interval window,
+      final Map<String, DataTable> timeSeriesMap) throws DetectorException {
+    DataTable baseline = timeSeriesMap.get(BASELINE_KEY);
+    DataTable current = timeSeriesMap.get(CURRENT_KEY);
     final Map<DimensionInfo, DataTable> baselineDataTableMap = DataTableUtils.splitDataTable(
         baseline);
     final Map<DimensionInfo, DataTable> currentDataTableMap = DataTableUtils.splitDataTable(
@@ -102,6 +105,7 @@ public class PercentageChangeRuleDetectorV2 implements
       final DetectionResult detectionResult = runDetectionOnSingleDataTable(window,
           baselineDataTableMap.get(dimensionInfo),
           currentDataTableMap.get(dimensionInfo));
+
       detectionResults.add(detectionResult);
     }
     return new GroupedDetectionResults(detectionResults);
@@ -148,7 +152,9 @@ public class PercentageChangeRuleDetectorV2 implements
 
     List<MergedAnomalyResultDTO> anomalies = DetectionUtils.makeAnomalies(slice, df, COL_ANOMALY);
     DataFrame baselineWithBoundaries = constructPercentageChangeBoundaries(df);
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
+    final DetectionResult detectionResult = DetectionResult.from(anomalies,
+        TimeSeries.fromDataFrame(baselineWithBoundaries));
+    return detectionResult;
   }
 
   private DataFrame constructPercentageChangeBoundaries(DataFrame dfBase) {

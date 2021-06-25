@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
@@ -97,7 +98,18 @@ public class DetectionResult implements DetectionPipelineResult {
       anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
     }
     api.setAnomalies(anomalyApis);
+    api.setData(getData());
     return api;
+  }
+
+  private DetectionDataApi getData() {
+    final DetectionDataApi detectionDataApi = new DetectionDataApi();
+    detectionDataApi.setCurrent(this.timeseries.getCurrent().toList());
+    detectionDataApi.setExpected(this.timeseries.getPredictedBaseline().toList());
+    detectionDataApi.setTimestamp(this.timeseries.getTime().toList());
+    detectionDataApi.setLowerBound(this.timeseries.getPredictedLowerBound().toList());
+    detectionDataApi.setUpperBound(this.timeseries.getPredictedUpperBound().toList());
+    return detectionDataApi;
   }
 
   @Override

@@ -1,7 +1,9 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -12,8 +14,6 @@ import org.joda.time.Interval;
 public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable> {
 
   private static String DEFAULT_OUTPUT_KEY = "AnomalyDetectorResult";
-  private static String CURRENT_KEY = "current";
-  private static String BASELINE_KEY = "baseline";
 
   public AnomalyDetectorOperator() {
     super();
@@ -31,15 +31,26 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
       final BaseComponent component = this.getComponents().get(key);
       if (component instanceof AnomalyDetectorV2) {
         for (Interval interval : getMonitoringWindows()) {
+          final Map<String, DataTable> timeSeriesMap = getTimeSeriesMap(inputMap);
           DetectionPipelineResult detectionResult = ((AnomalyDetectorV2) component)
-              .runDetection(interval,
-                  (DataTable) inputMap.get(BASELINE_KEY),
-                  (DataTable) inputMap.get(CURRENT_KEY));
+              .runDetection(interval, timeSeriesMap);
           String outputKey = key + "_" + DEFAULT_OUTPUT_KEY;
           setOutput(outputKey, detectionResult);
         }
       }
     }
+  }
+
+  private Map<String, DataTable> getTimeSeriesMap(
+      final Map<String, DetectionPipelineResult> inputMap) {
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    for (String key : inputMap.keySet()) {
+      DetectionPipelineResult input = inputMap.get(key);
+      if (input instanceof DataTable) {
+        timeSeriesMap.put(key, (DataTable) input);
+      }
+    }
+    return timeSeriesMap;
   }
 
   private List<Interval> getMonitoringWindows() {

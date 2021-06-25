@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
+import java.util.Map;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.joda.time.Interval;
@@ -12,6 +13,6 @@ public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent
    *
    * @return the detection result which contains anomalies.
    */
-  DetectionPipelineResult runDetection(Interval interval, DataTable baseline, DataTable current)
+  DetectionPipelineResult runDetection(Interval interval, Map<String, DataTable> timeSeriesMap)
       throws DetectorException;
 }

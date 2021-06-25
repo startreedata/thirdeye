@@ -25,7 +25,6 @@ public class AbsoluteChangeRuleDetectorSpec extends AbstractSpec {
 
   private double absoluteChange = Double.NaN;
   private String offset = "wo1w";
-  private String timezone = DEFAULT_TIMEZONE;
   private String pattern = "UP_OR_DOWN";
 
   public double getAbsoluteChange() {
@@ -43,15 +42,6 @@ public class AbsoluteChangeRuleDetectorSpec extends AbstractSpec {
 
   public AbsoluteChangeRuleDetectorSpec setOffset(final String offset) {
     this.offset = offset;
-    return this;
-  }
-
-  public String getTimezone() {
-    return timezone;
-  }
-
-  public AbsoluteChangeRuleDetectorSpec setTimezone(final String timezone) {
-    this.timezone = timezone;
     return this;
   }
 

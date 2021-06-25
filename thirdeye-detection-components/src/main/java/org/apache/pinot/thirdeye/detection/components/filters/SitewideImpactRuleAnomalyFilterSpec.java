@@ -26,7 +26,6 @@ import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public class SitewideImpactRuleAnomalyFilterSpec extends AbstractSpec {
 
-  private String timezone = DEFAULT_TIMEZONE;
   private double threshold = Double.NaN;
   private String offset;
   private String pattern = "UP_OR_DOWN";
@@ -34,59 +33,60 @@ public class SitewideImpactRuleAnomalyFilterSpec extends AbstractSpec {
   private String sitewideCollection;
   private Map<String, Collection<String>> filters = new HashMap<>();
 
-  public String getSitewideMetricName() {
-    return sitewideMetricName;
+  public double getThreshold() {
+    return threshold;
   }
 
-  public void setSitewideMetricName(String sitewideMetricName) {
-    this.sitewideMetricName = sitewideMetricName;
-  }
-
-  public String getSitewideCollection() {
-    return sitewideCollection;
-  }
-
-  public void setSitewideCollection(String sitewideCollection) {
-    this.sitewideCollection = sitewideCollection;
-  }
-
-  public Map<String, Collection<String>> getFilters() {
-    return filters;
-  }
-
-  public void setFilters(Map<String, Collection<String>> filters) {
-    this.filters = filters;
-  }
-
-  public String getPattern() {
-    return pattern;
-  }
-
-  public void setPattern(String pattern) {
-    this.pattern = pattern;
+  public SitewideImpactRuleAnomalyFilterSpec setThreshold(final double threshold) {
+    this.threshold = threshold;
+    return this;
   }
 
   public String getOffset() {
     return offset;
   }
 
-  public void setOffset(String offset) {
+  public SitewideImpactRuleAnomalyFilterSpec setOffset(final String offset) {
     this.offset = offset;
+    return this;
   }
 
-  public String getTimezone() {
-    return timezone;
+  public String getPattern() {
+    return pattern;
   }
 
-  public void setTimezone(String timezone) {
-    this.timezone = timezone;
+  public SitewideImpactRuleAnomalyFilterSpec setPattern(final String pattern) {
+    this.pattern = pattern;
+    return this;
   }
 
-  public double getThreshold() {
-    return threshold;
+  public String getSitewideMetricName() {
+    return sitewideMetricName;
   }
 
-  public void setThreshold(double threshold) {
-    this.threshold = threshold;
+  public SitewideImpactRuleAnomalyFilterSpec setSitewideMetricName(
+      final String sitewideMetricName) {
+    this.sitewideMetricName = sitewideMetricName;
+    return this;
+  }
+
+  public String getSitewideCollection() {
+    return sitewideCollection;
+  }
+
+  public SitewideImpactRuleAnomalyFilterSpec setSitewideCollection(
+      final String sitewideCollection) {
+    this.sitewideCollection = sitewideCollection;
+    return this;
+  }
+
+  public Map<String, Collection<String>> getFilters() {
+    return filters;
+  }
+
+  public SitewideImpactRuleAnomalyFilterSpec setFilters(
+      final Map<String, Collection<String>> filters) {
+    this.filters = filters;
+    return this;
   }
 }

@@ -23,40 +23,34 @@ import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public class AbsoluteChangeRuleAnomalyFilterSpec extends AbstractSpec {
 
-  private String timezone = DEFAULT_TIMEZONE;
   private double threshold = Double.NaN;
   private String offset;
   private String pattern = "UP_OR_DOWN";
-
-  public String getTimezone() {
-    return timezone;
-  }
-
-  public void setTimezone(String timezone) {
-    this.timezone = timezone;
-  }
 
   public double getThreshold() {
     return threshold;
   }
 
-  public void setThreshold(double threshold) {
+  public AbsoluteChangeRuleAnomalyFilterSpec setThreshold(final double threshold) {
     this.threshold = threshold;
+    return this;
   }
 
   public String getOffset() {
     return offset;
   }
 
-  public void setOffset(String offset) {
+  public AbsoluteChangeRuleAnomalyFilterSpec setOffset(final String offset) {
     this.offset = offset;
+    return this;
   }
 
   public String getPattern() {
     return pattern;
   }
 
-  public void setPattern(String pattern) {
+  public AbsoluteChangeRuleAnomalyFilterSpec setPattern(final String pattern) {
     this.pattern = pattern;
+    return this;
   }
 }

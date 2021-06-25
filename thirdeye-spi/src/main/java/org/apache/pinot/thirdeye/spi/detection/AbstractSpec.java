@@ -35,6 +35,7 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
 
+  private String timezone = DEFAULT_TIMEZONE;
   private String timestamp = "timestamp";
   private String metric = "value";
   private List<String> dimensions = Collections.emptyList();
@@ -57,6 +58,15 @@ public abstract class AbstractSpec implements Serializable {
     // use strict mapping to ensure no mismatches or ambiguity occurs
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
     return modelMapper.map(properties, specClass);
+  }
+
+  public String getTimezone() {
+    return timezone;
+  }
+
+  public AbstractSpec setTimezone(final String timezone) {
+    this.timezone = timezone;
+    return this;
   }
 
   public String getTimestamp() {

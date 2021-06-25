@@ -15,8 +15,8 @@ import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFact
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

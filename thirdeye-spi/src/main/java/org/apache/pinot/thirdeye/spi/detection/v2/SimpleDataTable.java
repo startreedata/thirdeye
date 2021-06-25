@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.spi.detection.v2;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 
 public class SimpleDataTable implements DataTable {
 

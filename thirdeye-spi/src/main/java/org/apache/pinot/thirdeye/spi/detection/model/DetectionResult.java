@@ -21,15 +21,22 @@
  */
 package org.apache.pinot.thirdeye.spi.detection.model;
 
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 
 /**
  * The detection result. Contains a list of anomalies detected and time series
  * (which can include time stamps, predicted baseline, current value, upper/lower bounds)
  */
-public class DetectionResult {
+public class DetectionResult implements DetectionPipelineResult {
 
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
@@ -37,14 +44,6 @@ public class DetectionResult {
   private DetectionResult(List<MergedAnomalyResultDTO> anomalies, TimeSeries timeseries) {
     this.anomalies = anomalies;
     this.timeseries = timeseries;
-  }
-
-  public List<MergedAnomalyResultDTO> getAnomalies() {
-    return anomalies;
-  }
-
-  public TimeSeries getTimeseries() {
-    return timeseries;
   }
 
   /**
@@ -79,8 +78,46 @@ public class DetectionResult {
     return new DetectionResult(anomalies, timeSeries);
   }
 
+  public List<MergedAnomalyResultDTO> getAnomalies() {
+    return anomalies;
+  }
+
+  public TimeSeries getTimeseries() {
+    return timeseries;
+  }
+
   @Override
   public String toString() {
     return "DetectionResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + '}';
+  }
+
+  public DetectionEvaluationApi toApi() {
+    DetectionEvaluationApi api = new DetectionEvaluationApi();
+    final List<AnomalyApi> anomalyApis = new ArrayList<>();
+    for (MergedAnomalyResultDTO anomalyDto : anomalies) {
+      anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
+    }
+    api.setAnomalies(anomalyApis);
+    api.setData(getData());
+    return api;
+  }
+
+  private DetectionDataApi getData() {
+    final DetectionDataApi detectionDataApi = new DetectionDataApi();
+    detectionDataApi.setCurrent(timeseries.getCurrent().toList());
+    detectionDataApi.setExpected(timeseries.getPredictedBaseline().toList());
+    detectionDataApi.setTimestamp(timeseries.getTime().toList());
+    if (timeseries.hasLowerBound()) {
+      detectionDataApi.setLowerBound(timeseries.getPredictedLowerBound().toList());
+    }
+    if (timeseries.hasUpperBound()) {
+      detectionDataApi.setUpperBound(timeseries.getPredictedUpperBound().toList());
+    }
+    return detectionDataApi;
+  }
+
+  @Override
+  public List<DetectionResult> getDetectionResults() {
+    return ImmutableList.of(this);
   }
 }

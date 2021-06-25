@@ -43,7 +43,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-detectors</artifactId>
+      <artifactId>thirdeye-detection-components</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

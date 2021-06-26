@@ -50,13 +50,13 @@ public class ThresholdRuleDetectorTest {
   public void beforeMethod() {
     Map<MetricSlice, DataFrame> timeSeries = new HashMap<>();
     timeSeries.put(MetricSlice.from(123L, 0, 10),
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 0, 100, 200, 500, 1000).addSeries(
-            DataFrame.COL_TIME, 0, 2, 4, 6, 8));
+        new DataFrame()
+            .addSeries(DataFrame.COL_VALUE, 0, 100, 200, 500, 1000)
+            .addSeries(DataFrame.COL_TIME, 0, 2, 4, 6, 8));
     timeSeries.put(MetricSlice.from(123L, 1546214400000L, 1551398400000L),
         new DataFrame()
             .addSeries(DataFrame.COL_TIME, 1546214400000L, 1548892800000L, 1551312000000L)
-            .addSeries(
-                DataFrame.COL_VALUE, 100, 200, 300));
+            .addSeries(DataFrame.COL_VALUE, 100, 200, 300));
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     metricConfigDTO.setId(123L);
@@ -103,6 +103,7 @@ public class ThresholdRuleDetectorTest {
     Assert.assertEquals(anomalies.get(0).getEndTime(), 2);
     Assert.assertEquals(anomalies.get(1).getStartTime(), 8);
     Assert.assertEquals(anomalies.get(1).getEndTime(), 10);
+
     TimeSeries ts = result.getTimeseries();
     Assert.assertEquals(ts.getPredictedUpperBound(), DoubleSeries.fillValues(ts.size(), 500));
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.fillValues(ts.size(), 100));

@@ -10,6 +10,8 @@
       "type": "AnomalyDetector",
       "params": {
         "component.detector.type": "THRESHOLD_RULE",
+        "component.detector.timezone": "US/Pacific",
+        "component.detector.monitoringGranularity": "1_DAYS",
         "component.detector.max": "10000",
         "component.detector.offset": "mo1m",
         "component.detector.pattern": "down",

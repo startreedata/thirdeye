@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.common.collect.Multimap;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
@@ -101,9 +104,32 @@ public class DetectionUtils {
    * @param dataset dataset config for the metric
    * @return list of anomalies
    */
-  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df,
+  @Deprecated
+  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice,
+      DataFrame df,
       String seriesName,
-      Period monitoringGranularityPeriod, DatasetConfigDTO dataset) {
+      Period monitoringGranularityPeriod,
+      DatasetConfigDTO dataset) {
+    return buildAnomalies(slice,
+        df,
+        seriesName,
+        optional(dataset).map(DatasetConfigBean::getTimezone).orElse(null),
+        monitoringGranularityPeriod
+    );
+  }
+
+  @Deprecated
+  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice,
+      DataFrame df,
+      String seriesName) {
+    return makeAnomalies(slice, df, seriesName, null, null);
+  }
+
+  public static List<MergedAnomalyResultDTO> buildAnomalies(final MetricSlice slice,
+      final DataFrame df,
+      final String seriesName,
+      final String datasetTimezone,
+      final Period monitoringGranularityPeriod) {
     if (df.isEmpty()) {
       return Collections.emptyList();
     }
@@ -136,51 +162,14 @@ public class DetectionUtils {
       long end = start + 1;
 
       // guess-timate of next time series timestamp
-      if (dataset != null) {
-        DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
+      if (datasetTimezone != null) {
+        final DateTimeZone timezone = DateTimeZone.forID(datasetTimezone);
+        final long lastTimestamp = sTime.getLong(sTime.size() - 1);
 
-        long lastTimestamp = sTime.getLong(sTime.size() - 1);
-
-        end = new DateTime(lastTimestamp, timezone).plus(monitoringGranularityPeriod).getMillis();
+        end = new DateTime(lastTimestamp, timezone)
+            .plus(monitoringGranularityPeriod)
+            .getMillis();
       }
-      anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
-    }
-
-    return anomalies;
-  }
-
-  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice, DataFrame df,
-      String seriesName) {
-    if (df.isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
-    LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
-    BooleanSeries sVal = df.getBooleans(seriesName);
-
-    int lastStart = -1;
-    for (int i = 0; i < df.size(); i++) {
-      if (sVal.isNull(i) || !BooleanSeries.booleanValueOf(sVal.get(i))) {
-        // end of a run
-        if (lastStart >= 0) {
-          long start = sTime.get(lastStart);
-          long end = sTime.get(i);
-          anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
-        }
-        lastStart = -1;
-      } else {
-        // start of a run
-        if (lastStart < 0) {
-          lastStart = i;
-        }
-      }
-    }
-
-    // end of current run
-    if (lastStart >= 0) {
-      long start = sTime.get(lastStart);
-      long end = start + 1;
       anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
     }
 

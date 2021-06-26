@@ -14,7 +14,6 @@ import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChange
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorV2;
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetectorSpec;
-import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetectorV2;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
@@ -68,7 +67,7 @@ public class DetectionComponentsPlugin implements Plugin {
         new GenericAnomalyDetectorV2Factory<>(
             "THRESHOLD_RULE",
             ThresholdRuleDetectorSpec.class,
-            ThresholdRuleDetectorV2.class
+            ThresholdRuleDetector.class
         )
     );
   }

@@ -11,6 +11,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
@@ -169,8 +170,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Path("evaluateV2")
   @POST
   @Timed
-  public Response evaluate(
+  public Response evaluateV2(
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @HeaderParam("UseV1Format") final boolean useV1Format,
       final AlertEvaluationPlanApi request
   ) throws ExecutionException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
@@ -182,11 +184,23 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    final Map<String, Map<String, DetectionEvaluationApi>> evaluation = alertEvaluatorV2
-        .evaluate(request);
-    return Response
-        .ok(evaluation)
-        .build();
+    Map<String, Map<String, DetectionEvaluationApi>> evaluation = alertEvaluatorV2.evaluate(request);
+    if (useV1Format) {
+      return Response.ok(convertEvaluationResultV2ToV1(evaluation)).build();
+    }
+    return Response.ok(evaluation).build();
+  }
+
+  private AlertEvaluationApi convertEvaluationResultV2ToV1(
+      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
+    for (String key : v2Result.keySet()) {
+      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
+      for (String apiKey : detectionEvaluationApiMap.keySet()) {
+        map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey));
+      }
+    }
+    return new AlertEvaluationApi().setDetectionEvaluations(map);
   }
 
   @Path("evaluate")

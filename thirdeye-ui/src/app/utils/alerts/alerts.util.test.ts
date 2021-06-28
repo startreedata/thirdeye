@@ -69,6 +69,7 @@ describe("Alerts Util", () => {
     it("getUiAlert should return appropriate UI alert for alert and invalid subscription groups", () => {
         const expectedUiAlert = cloneDeep(mockUiAlert1);
         expectedUiAlert.subscriptionGroups = [];
+        expectedUiAlert.subscriptionGroupsCount = "0";
 
         expect(
             getUiAlert(mockAlert1, (null as unknown) as SubscriptionGroup[])
@@ -78,6 +79,7 @@ describe("Alerts Util", () => {
     it("getUiAlert should return appropriate UI alert for alert and empty subscription groups", () => {
         const expectedUiAlert = cloneDeep(mockUiAlert1);
         expectedUiAlert.subscriptionGroups = [];
+        expectedUiAlert.subscriptionGroupsCount = "0";
 
         expect(getUiAlert(mockAlert1, [])).toEqual(expectedUiAlert);
     });
@@ -101,10 +103,13 @@ describe("Alerts Util", () => {
     it("getUiAlerts should return appropriate UI alerts for alerts and invalid subscription groups", () => {
         const expectedUiAlert1 = cloneDeep(mockUiAlert1);
         expectedUiAlert1.subscriptionGroups = [];
+        expectedUiAlert1.subscriptionGroupsCount = "0";
         const expectedUiAlert2 = cloneDeep(mockUiAlert2);
         expectedUiAlert2.subscriptionGroups = [];
+        expectedUiAlert2.subscriptionGroupsCount = "0";
         const expectedUiAlert3 = cloneDeep(mockUiAlert3);
         expectedUiAlert3.subscriptionGroups = [];
+        expectedUiAlert3.subscriptionGroupsCount = "0";
 
         expect(
             getUiAlerts(mockAlerts, (null as unknown) as SubscriptionGroup[])
@@ -114,10 +119,13 @@ describe("Alerts Util", () => {
     it("getUiAlerts should return appropriate UI alerts for alerts and empty subscription groups", () => {
         const expectedUiAlert1 = cloneDeep(mockUiAlert1);
         expectedUiAlert1.subscriptionGroups = [];
+        expectedUiAlert1.subscriptionGroupsCount = "0";
         const expectedUiAlert2 = cloneDeep(mockUiAlert2);
         expectedUiAlert2.subscriptionGroups = [];
+        expectedUiAlert2.subscriptionGroupsCount = "0";
         const expectedUiAlert3 = cloneDeep(mockUiAlert3);
         expectedUiAlert3.subscriptionGroups = [];
+        expectedUiAlert3.subscriptionGroupsCount = "0";
 
         expect(getUiAlerts(mockAlerts, [])).toEqual([
             expectedUiAlert1,

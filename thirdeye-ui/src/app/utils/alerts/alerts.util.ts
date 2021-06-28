@@ -236,6 +236,7 @@ const getUiAlertInternal = (
         uiAlert.datasetAndMetrics.push(uiAlertDatasetAndMetric);
     }
 
+    uiAlert.detectionTypesCount = formatNumber(uiAlert.detectionTypes.length);
     uiAlert.datasetAndMetricsCount = formatNumber(
         uiAlert.datasetAndMetrics.length
     );

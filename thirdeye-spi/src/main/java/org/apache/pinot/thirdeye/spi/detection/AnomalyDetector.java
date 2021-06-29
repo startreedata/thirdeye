@@ -29,5 +29,6 @@ public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T
    *
    * @return the detection result which contains anomalies and current, predicted baselines.
    */
+  @Deprecated
   DetectionResult runDetection(Interval window, String metricUrn) throws DetectorException;
 }

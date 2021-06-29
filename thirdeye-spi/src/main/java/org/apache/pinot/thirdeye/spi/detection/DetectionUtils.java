@@ -339,8 +339,10 @@ public class DetectionUtils {
    * @param aggregationGranularityPeriod the granularity after aggregation
    * @return the filtered data frame
    */
-  public static DataFrame filterIncompleteAggregation(DataFrame df, long latestDataTimeStamp,
-      TimeGranularity bucketTimeGranularity, Period aggregationGranularityPeriod) {
+  public static DataFrame filterIncompleteAggregation(DataFrame df,
+      long latestDataTimeStamp,
+      TimeGranularity bucketTimeGranularity,
+      Period aggregationGranularityPeriod) {
     long latestAggregationStartTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
     if (latestDataTimeStamp + bucketTimeGranularity.toMillis()
         < latestAggregationStartTimeStamp + aggregationGranularityPeriod.toStandardDuration()

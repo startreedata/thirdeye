@@ -30,8 +30,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
@@ -41,7 +39,6 @@ import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
  * above the threshold.
  * If not, filters the anomaly.
  */
-@Components(type = "ABSOLUTE_CHANGE_FILTER", tags = {DetectionTag.RULE_FILTER})
 public class AbsoluteChangeRuleAnomalyFilter implements
     AnomalyFilter<AbsoluteChangeRuleAnomalyFilterSpec> {
 
@@ -49,6 +46,22 @@ public class AbsoluteChangeRuleAnomalyFilter implements
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
   private Pattern pattern;
+
+  @Override
+  public void init(AbsoluteChangeRuleAnomalyFilterSpec spec) {
+    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
+    // customize baseline offset
+    if (StringUtils.isNotBlank(spec.getOffset())) {
+      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
+    }
+    this.threshold = spec.getThreshold();
+  }
+
+  @Override
+  public void init(AbsoluteChangeRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
@@ -77,16 +90,5 @@ public class AbsoluteChangeRuleAnomalyFilter implements
       return false;
     }
     return Math.abs(currentValue - baselineValue) >= this.threshold;
-  }
-
-  @Override
-  public void init(AbsoluteChangeRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
-    this.dataFetcher = dataFetcher;
-    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
-    // customize baseline offset
-    if (StringUtils.isNotBlank(spec.getOffset())) {
-      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
-    }
-    this.threshold = spec.getThreshold();
   }
 }

@@ -67,6 +67,28 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   private TimeGranularity timeGranularity;
 
   @Override
+  public void init(AbsoluteChangeRuleDetectorSpec spec) {
+    this.absoluteChange = spec.getAbsoluteChange();
+    String timezone = spec.getTimezone();
+    String offset = spec.getOffset();
+    this.baseline = BaselineParsingUtils.parseOffset(offset, timezone);
+    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
+
+    this.monitoringGranularity = spec.getMonitoringGranularity();
+    if (this.monitoringGranularity.equals("1_MONTHS")) {
+      this.timeGranularity = MetricSlice.NATIVE_GRANULARITY;
+    } else {
+      this.timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
+    }
+  }
+
+  @Override
+  public void init(AbsoluteChangeRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
+
+  @Override
   public DetectionResult runDetection(Interval window, String metricUrn) {
     MetricEntity me = MetricEntity.fromURN(metricUrn);
     MetricSlice slice = MetricSlice
@@ -140,22 +162,5 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   private void fillAbsoluteChangeBound(DataFrame dfBase, String colBound, double change) {
     dfBase.addSeries(colBound, map((DoubleFunction) values -> values[0] + change, dfBase.getDoubles(
         DataFrame.COL_VALUE)));
-  }
-
-  @Override
-  public void init(AbsoluteChangeRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
-    this.absoluteChange = spec.getAbsoluteChange();
-    this.dataFetcher = dataFetcher;
-    String timezone = spec.getTimezone();
-    String offset = spec.getOffset();
-    this.baseline = BaselineParsingUtils.parseOffset(offset, timezone);
-    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
-
-    this.monitoringGranularity = spec.getMonitoringGranularity();
-    if (this.monitoringGranularity.equals("1_MONTHS")) {
-      this.timeGranularity = MetricSlice.NATIVE_GRANULARITY;
-    } else {
-      this.timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    }
   }
 }

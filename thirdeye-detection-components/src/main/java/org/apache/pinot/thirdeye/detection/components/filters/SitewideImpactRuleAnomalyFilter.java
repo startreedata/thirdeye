@@ -37,8 +37,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
@@ -47,7 +45,6 @@ import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 /**
  * Site-wide impact anomaly filter
  */
-@Components(type = "SITEWIDE_IMPACT_FILTER", tags = {DetectionTag.RULE_FILTER})
 public class SitewideImpactRuleAnomalyFilter implements
     AnomalyFilter<SitewideImpactRuleAnomalyFilterSpec> {
 
@@ -56,6 +53,50 @@ public class SitewideImpactRuleAnomalyFilter implements
   private Baseline baseline;
   private String siteWideMetricUrn;
   private Pattern pattern;
+
+  @Override
+  public void init(SitewideImpactRuleAnomalyFilterSpec spec) {
+    this.threshold = spec.getThreshold();
+    Preconditions.checkArgument(Math.abs(this.threshold) <= 1,
+        "Site wide impact threshold should be less or equal than 1");
+
+    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
+
+    // customize baseline offset
+    if (StringUtils.isNotBlank(spec.getOffset())) {
+      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
+    }
+
+    if (!Strings.isNullOrEmpty(spec.getSitewideCollection()) && !Strings
+        .isNullOrEmpty(spec.getSitewideMetricName())) {
+      // build filters
+      Map<String, Collection<String>> filterMaps = spec.getFilters();
+      Multimap<String, String> filters = ArrayListMultimap.create();
+      if (filterMaps != null) {
+        for (Map.Entry<String, Collection<String>> entry : filterMaps.entrySet()) {
+          filters.putAll(entry.getKey(), entry.getValue());
+        }
+      }
+
+      // build site wide metric Urn
+      InputDataSpec.MetricAndDatasetName metricAndDatasetName =
+          new InputDataSpec.MetricAndDatasetName(spec.getSitewideMetricName(),
+              spec.getSitewideCollection());
+      InputData data = this.dataFetcher.fetchData(
+          new InputDataSpec()
+              .withMetricNamesAndDatasetNames(Collections.singletonList(metricAndDatasetName)));
+      MetricConfigDTO metricConfigDTO = data.getMetricForMetricAndDatasetNames()
+          .get(metricAndDatasetName);
+      MetricEntity me = MetricEntity.fromMetric(1.0, metricConfigDTO.getId(), filters);
+      this.siteWideMetricUrn = me.getUrn();
+    }
+  }
+
+  @Override
+  public void init(SitewideImpactRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
@@ -103,45 +144,6 @@ public class SitewideImpactRuleAnomalyFilter implements
     // if doesn't pass the threshold, filter the anomaly
     return siteWideValue == 0
         || !((Math.abs(currentValue - baselineValue) / siteWideValue) < this.threshold);
-  }
-
-  @Override
-  public void init(SitewideImpactRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
-    this.dataFetcher = dataFetcher;
-    this.threshold = spec.getThreshold();
-    Preconditions.checkArgument(Math.abs(this.threshold) <= 1,
-        "Site wide impact threshold should be less or equal than 1");
-
-    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
-
-    // customize baseline offset
-    if (StringUtils.isNotBlank(spec.getOffset())) {
-      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
-    }
-
-    if (!Strings.isNullOrEmpty(spec.getSitewideCollection()) && !Strings
-        .isNullOrEmpty(spec.getSitewideMetricName())) {
-      // build filters
-      Map<String, Collection<String>> filterMaps = spec.getFilters();
-      Multimap<String, String> filters = ArrayListMultimap.create();
-      if (filterMaps != null) {
-        for (Map.Entry<String, Collection<String>> entry : filterMaps.entrySet()) {
-          filters.putAll(entry.getKey(), entry.getValue());
-        }
-      }
-
-      // build site wide metric Urn
-      InputDataSpec.MetricAndDatasetName metricAndDatasetName =
-          new InputDataSpec.MetricAndDatasetName(spec.getSitewideMetricName(),
-              spec.getSitewideCollection());
-      InputData data = this.dataFetcher.fetchData(
-          new InputDataSpec()
-              .withMetricNamesAndDatasetNames(Collections.singletonList(metricAndDatasetName)));
-      MetricConfigDTO metricConfigDTO = data.getMetricForMetricAndDatasetNames()
-          .get(metricAndDatasetName);
-      MetricEntity me = MetricEntity.fromMetric(1.0, metricConfigDTO.getId(), filters);
-      this.siteWideMetricUrn = me.getUrn();
-    }
   }
 
   private double getValueFromAggregates(MetricSlice slice, Map<MetricSlice, DataFrame> aggregates) {

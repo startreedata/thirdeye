@@ -92,8 +92,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   @Override
-  public void init(MeanVarianceRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
-    this.dataFetcher = dataFetcher;
+  public void init(MeanVarianceRuleDetectorSpec spec) {
     this.pattern = spec.getPattern();
     this.lookback = spec.getLookback();
     this.sensitivity = spec.getSensitivity();
@@ -112,6 +111,12 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
           .format("Lookback of %d is too small. Please increase to greater than 9.",
               this.lookback));
     }
+  }
+
+  @Override
+  public void init(MeanVarianceRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
   }
 
   @Override

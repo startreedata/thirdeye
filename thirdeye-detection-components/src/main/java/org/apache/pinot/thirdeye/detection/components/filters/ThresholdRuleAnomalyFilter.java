@@ -25,19 +25,17 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.Interval;
 
 /**
+ * Aggregate Threshold Filter
+ *
  * This threshold rule filter stage filters the anomalies if either the min or max thresholds do not
- * pass.
+ * pass. filters the anomalies if either the min or max thresholds do not satisfied.
  */
-@Components(title = "Aggregate Threshold Filter", type = "THRESHOLD_RULE_FILTER", tags = {
-    DetectionTag.RULE_FILTER}, description = "Threshold rule filter. filters the anomalies if either the min or max thresholds do not satisfied.")
 public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFilterSpec> {
 
   private double minValueHourly;
@@ -47,6 +45,22 @@ public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFi
   private double maxValue;
   private double minValue;
   private InputDataFetcher dataFetcher;
+
+  @Override
+  public void init(ThresholdRuleFilterSpec spec) {
+    this.minValueHourly = spec.getMinValueHourly();
+    this.maxValueHourly = spec.getMaxValueHourly();
+    this.minValueDaily = spec.getMinValueDaily();
+    this.maxValueDaily = spec.getMaxValueDaily();
+    this.maxValue = spec.getMaxValue();
+    this.minValue = spec.getMinValue();
+  }
+
+  @Override
+  public void init(ThresholdRuleFilterSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
@@ -82,16 +96,5 @@ public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFi
     }
     return Double.isNaN(this.maxValueDaily) || !(currentValue * dailyMultiplier
         > this.maxValueDaily);
-  }
-
-  @Override
-  public void init(ThresholdRuleFilterSpec spec, InputDataFetcher dataFetcher) {
-    this.minValueHourly = spec.getMinValueHourly();
-    this.maxValueHourly = spec.getMaxValueHourly();
-    this.minValueDaily = spec.getMinValueDaily();
-    this.maxValueDaily = spec.getMaxValueDaily();
-    this.maxValue = spec.getMaxValue();
-    this.minValue = spec.getMinValue();
-    this.dataFetcher = dataFetcher;
   }
 }

@@ -22,11 +22,11 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.spec.MockModelEvaluatorSpec;
 import org.apache.pinot.thirdeye.detection.spi.components.ModelEvaluator;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.joda.time.Instant;
 
 public class MockModelEvaluator implements ModelEvaluator<MockModelEvaluatorSpec> {
@@ -34,12 +34,17 @@ public class MockModelEvaluator implements ModelEvaluator<MockModelEvaluatorSpec
   private ModelStatus status;
 
   @Override
-  public ModelEvaluationResult evaluateModel(Instant evaluationTimeStamp) {
-    return new ModelEvaluationResult(status);
+  public void init(MockModelEvaluatorSpec spec) {
+    this.status = spec.getMockModelStatus();
   }
 
   @Override
   public void init(MockModelEvaluatorSpec spec, InputDataFetcher dataFetcher) {
-    this.status = spec.getMockModelStatus();
+    init(spec);
+  }
+
+  @Override
+  public ModelEvaluationResult evaluateModel(Instant evaluationTimeStamp) {
+    return new ModelEvaluationResult(status);
   }
 }

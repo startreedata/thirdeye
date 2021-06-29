@@ -72,7 +72,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     AnomalyDetector<HoltWintersDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
-  private InputDataFetcher dataFetcher;
   private static final String COL_CURR = "current";
   private static final String COL_ANOMALY = "anomaly";
   private static final String COL_PATTERN = "pattern";
@@ -82,6 +81,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private static final long KERNEL_PERIOD = 3600000L;
   private static final int LOOKBACK = 60;
 
+  private InputDataFetcher dataFetcher;
   private int period;
   private double alpha;
   private double beta;
@@ -93,13 +93,110 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private TimeGranularity timeGranularity;
   private DayOfWeek weekStart;
 
+  private static double calculateInitialLevel(double[] y) {
+    return y[0];
+  }
+
+  /**
+   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
+   *
+   * @return - Initial trend - Bt[1]
+   */
+  private static double calculateInitialTrend(double[] y, int period) {
+    double sum = 0;
+
+    for (int i = 0; i < period; i++) {
+      sum += y[period + i] - y[i];
+    }
+
+    return sum / (period * period);
+  }
+
+  /**
+   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
+   *
+   * @return - Seasonal Indices.
+   */
+  private static double[] calculateSeasonalIndices(double[] y, int period,
+      int seasons) {
+    double[] seasonalMean = new double[seasons];
+    double[] seasonalIndices = new double[period];
+
+    double[] averagedObservations = new double[y.length];
+
+    for (int i = 0; i < seasons; i++) {
+      for (int j = 0; j < period; j++) {
+        seasonalMean[i] += y[(i * period) + j];
+      }
+      seasonalMean[i] /= period;
+    }
+
+    for (int i = 0; i < seasons; i++) {
+      for (int j = 0; j < period; j++) {
+        averagedObservations[(i * period) + j] = y[(i * period) + j]
+            / seasonalMean[i];
+      }
+    }
+
+    for (int i = 0; i < period; i++) {
+      for (int j = 0; j < seasons; j++) {
+        seasonalIndices[i] += averagedObservations[(j * period) + i];
+      }
+      seasonalIndices[i] /= seasons;
+    }
+
+    return seasonalIndices;
+  }
+
+  /**
+   * Returns the error bound of given list based on mean, std and given zscore
+   *
+   * @param givenNumbers double list
+   * @param zscore zscore used to multiply by std
+   * @return the error bound
+   */
+  private static double calculateErrorBound(List<Double> givenNumbers, double zscore) {
+    // calculate the mean value (= average)
+    double sum = 0.0;
+    for (double num : givenNumbers) {
+      sum += num;
+    }
+    double mean = sum / givenNumbers.size();
+
+    // calculate standard deviation
+    double squaredDifferenceSum = 0.0;
+    for (double num : givenNumbers) {
+      squaredDifferenceSum += (num - mean) * (num - mean);
+    }
+    double variance = squaredDifferenceSum / givenNumbers.size();
+    double standardDeviation = Math.sqrt(variance);
+
+    return zscore * standardDeviation;
+  }
+
+  /**
+   * Mapping of sensitivity to zscore on range of 1 - 3
+   *
+   * @param sensitivity double from 0 to 10
+   * @return zscore
+   */
+  private static double sensitivityToZscore(double sensitivity) {
+    // If out of bound, use boundary sensitivity
+    if (sensitivity < 0) {
+      sensitivity = 0;
+    } else if (sensitivity > 10) {
+      sensitivity = 10;
+    }
+    double z = 1 + 0.2 * (10 - sensitivity);
+    return z;
+  }
+
   @Override
-  public void init(HoltWintersDetectorSpec spec, InputDataFetcher dataFetcher) {
+  public void init(HoltWintersDetectorSpec spec) {
     this.period = spec.getPeriod();
     this.alpha = spec.getAlpha();
     this.beta = spec.getBeta();
     this.gamma = spec.getGamma();
-    this.dataFetcher = dataFetcher;
     this.pattern = spec.getPattern();
     this.smoothing = spec.isSmoothing();
     this.sensitivity = spec.getSensitivity();
@@ -114,6 +211,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     if (this.monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
       this.weekStart = DayOfWeek.valueOf(spec.getWeekStart());
     }
+  }
+
+  @Override
+  public void init(HoltWintersDetectorSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
   }
 
   @Override
@@ -327,61 +430,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     return df;
   }
 
-  private static double calculateInitialLevel(double[] y) {
-    return y[0];
-  }
-
-  /**
-   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-   *
-   * @return - Initial trend - Bt[1]
-   */
-  private static double calculateInitialTrend(double[] y, int period) {
-    double sum = 0;
-
-    for (int i = 0; i < period; i++) {
-      sum += y[period + i] - y[i];
-    }
-
-    return sum / (period * period);
-  }
-
-  /**
-   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-   *
-   * @return - Seasonal Indices.
-   */
-  private static double[] calculateSeasonalIndices(double[] y, int period,
-      int seasons) {
-    double[] seasonalMean = new double[seasons];
-    double[] seasonalIndices = new double[period];
-
-    double[] averagedObservations = new double[y.length];
-
-    for (int i = 0; i < seasons; i++) {
-      for (int j = 0; j < period; j++) {
-        seasonalMean[i] += y[(i * period) + j];
-      }
-      seasonalMean[i] /= period;
-    }
-
-    for (int i = 0; i < seasons; i++) {
-      for (int j = 0; j < period; j++) {
-        averagedObservations[(i * period) + j] = y[(i * period) + j]
-            / seasonalMean[i];
-      }
-    }
-
-    for (int i = 0; i < period; i++) {
-      for (int j = 0; j < seasons; j++) {
-        seasonalIndices[i] += averagedObservations[(j * period) + i];
-      }
-      seasonalIndices[i] /= seasons;
-    }
-
-    return seasonalIndices;
-  }
-
   /**
    * Holt Winters forecasting method
    *
@@ -519,32 +567,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   /**
-   * Returns the error bound of given list based on mean, std and given zscore
-   *
-   * @param givenNumbers double list
-   * @param zscore zscore used to multiply by std
-   * @return the error bound
-   */
-  private static double calculateErrorBound(List<Double> givenNumbers, double zscore) {
-    // calculate the mean value (= average)
-    double sum = 0.0;
-    for (double num : givenNumbers) {
-      sum += num;
-    }
-    double mean = sum / givenNumbers.size();
-
-    // calculate standard deviation
-    double squaredDifferenceSum = 0.0;
-    for (double num : givenNumbers) {
-      squaredDifferenceSum += (num - mean) * (num - mean);
-    }
-    double variance = squaredDifferenceSum / givenNumbers.size();
-    double standardDeviation = Math.sqrt(variance);
-
-    return zscore * standardDeviation;
-  }
-
-  /**
    * Fit alpha, beta, gamma by optimizing SSE (Sum of squared errors) using BOBYQA
    * It is a derivative free bound constrained optimization algorithm
    * https://en.wikipedia.org/wiki/BOBYQA
@@ -590,23 +612,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma);
     }
     return params;
-  }
-
-  /**
-   * Mapping of sensitivity to zscore on range of 1 - 3
-   *
-   * @param sensitivity double from 0 to 10
-   * @return zscore
-   */
-  private static double sensitivityToZscore(double sensitivity) {
-    // If out of bound, use boundary sensitivity
-    if (sensitivity < 0) {
-      sensitivity = 0;
-    } else if (sensitivity > 10) {
-      sensitivity = 10;
-    }
-    double z = 1 + 0.2 * (10 - sensitivity);
-    return z;
   }
 
   // Check whether monitoring timeGranularity is multiple days

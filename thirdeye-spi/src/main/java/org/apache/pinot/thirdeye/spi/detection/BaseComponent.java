@@ -25,9 +25,7 @@ public interface BaseComponent<T extends AbstractSpec> {
    * This is the v2 interface and should be only used with the v2 pipeline
    * @param spec
    */
-  default void init(T spec) {
-    throw new UnsupportedOperationException();
-  }
+  void init(T spec);
 
   /**
    * Legacy interface to initialize the base component.

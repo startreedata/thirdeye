@@ -25,26 +25,23 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.Grouper;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Param;
-import org.apache.pinot.thirdeye.spi.detection.annotation.PresentationOption;
 
 /**
  * A sample mock grouper to test the Grouper Interface
  */
-@Components(title = "MockGrouper", type = "MOCK_GROUPER",
-    tags = {DetectionTag.GROUPER}, description = "A mock grouper for testing.",
-    presentation = {
-        @PresentationOption(name = "group param value", template = "group by ${mockParam}")},
-    params = {@Param(name = "mockParam", placeholder = "value")})
 public class MockGrouper implements Grouper<MockGrouperSpec> {
 
   private static final String mockDimKey = "mock_dimension_name";
   private static final String mockDimValue = "test_value";
 
-  private double mockParam;
-  private InputDataFetcher dataFetcher;
+  @Override
+  public void init(MockGrouperSpec spec, InputDataFetcher dataFetcher) {
+  }
+
+  @Override
+  public void init(final MockGrouperSpec spec) {
+
+  }
 
   @Override
   public List<MergedAnomalyResultDTO> group(List<MergedAnomalyResultDTO> anomalies) {
@@ -63,11 +60,5 @@ public class MockGrouper implements Grouper<MockGrouperSpec> {
     }
 
     return groupedAnomalies;
-  }
-
-  @Override
-  public void init(MockGrouperSpec spec, InputDataFetcher dataFetcher) {
-    this.mockParam = spec.getMockParam();
-    this.dataFetcher = dataFetcher;
   }
 }

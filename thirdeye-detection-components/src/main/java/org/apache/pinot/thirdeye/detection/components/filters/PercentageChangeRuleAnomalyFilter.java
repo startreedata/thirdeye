@@ -30,8 +30,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyFilter;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
@@ -43,7 +41,6 @@ import org.slf4j.LoggerFactory;
  * is above the threshold.
  * If not, filters the anomaly.
  */
-@Components(type = "PERCENTAGE_CHANGE_FILTER", tags = {DetectionTag.RULE_FILTER})
 public class PercentageChangeRuleAnomalyFilter implements
     AnomalyFilter<PercentageChangeRuleAnomalyFilterSpec> {
 
@@ -55,6 +52,24 @@ public class PercentageChangeRuleAnomalyFilter implements
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
   private Pattern pattern;
+
+  @Override
+  public void init(PercentageChangeRuleAnomalyFilterSpec spec) {
+    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
+    // customize baseline offset
+    if (StringUtils.isNotBlank(spec.getOffset())) {
+      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
+    }
+    this.threshold = spec.getThreshold();
+    this.upThreshold = spec.getUpThreshold();
+    this.downThreshold = spec.getDownThreshold();
+  }
+
+  @Override
+  public void init(PercentageChangeRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
@@ -106,18 +121,5 @@ public class PercentageChangeRuleAnomalyFilter implements
       double upThreshold = Double.isNaN(this.upThreshold) ? this.threshold : this.upThreshold;
       return Double.compare(upThreshold, percentageChange) <= 0;
     }
-  }
-
-  @Override
-  public void init(PercentageChangeRuleAnomalyFilterSpec spec, InputDataFetcher dataFetcher) {
-    this.dataFetcher = dataFetcher;
-    this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
-    // customize baseline offset
-    if (StringUtils.isNotBlank(spec.getOffset())) {
-      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
-    }
-    this.threshold = spec.getThreshold();
-    this.upThreshold = spec.getUpThreshold();
-    this.downThreshold = spec.getDownThreshold();
   }
 }

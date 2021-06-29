@@ -40,17 +40,22 @@ public class RuleBaselineProvider implements BaselineProvider<RuleBaselineProvid
   private InputDataFetcher dataFetcher;
 
   @Override
-  public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    return TimeSeries.fromDataFrame(DetectionUtils.buildBaselines(slice,
-        this.baseline,
-        this.dataFetcher));
+  public void init(RuleBaselineProviderSpec spec) {
+    this.offset = spec.getOffset();
+    this.timezone = spec.getTimezone();
+    this.baseline = BaselineParsingUtils.parseOffset(this.offset, this.timezone);
   }
 
   @Override
   public void init(RuleBaselineProviderSpec spec, InputDataFetcher dataFetcher) {
-    this.offset = spec.getOffset();
-    this.timezone = spec.getTimezone();
-    this.baseline = BaselineParsingUtils.parseOffset(this.offset, this.timezone);
+    init(spec);
     this.dataFetcher = dataFetcher;
+  }
+
+  @Override
+  public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
+    return TimeSeries.fromDataFrame(DetectionUtils.buildBaselines(slice,
+        this.baseline,
+        this.dataFetcher));
   }
 }

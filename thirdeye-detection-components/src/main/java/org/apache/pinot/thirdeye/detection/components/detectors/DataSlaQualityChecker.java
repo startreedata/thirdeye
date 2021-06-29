@@ -80,6 +80,17 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
   }
 
   @Override
+  public void init(DataSlaQualityCheckerSpec spec) {
+    this.sla = spec.getSla();
+  }
+
+  @Override
+  public void init(DataSlaQualityCheckerSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
+
+  @Override
   public DetectionResult runDetection(Interval window, String metricUrn) {
     return DetectionResult.from(runSLACheck(MetricEntity.fromURN(metricUrn), window));
   }
@@ -87,12 +98,6 @@ public class DataSlaQualityChecker implements AnomalyDetector<DataSlaQualityChec
   @Override
   public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
     return TimeSeries.empty();
-  }
-
-  @Override
-  public void init(DataSlaQualityCheckerSpec spec, InputDataFetcher dataFetcher) {
-    this.sla = spec.getSla();
-    this.dataFetcher = dataFetcher;
   }
 
   /**

@@ -27,19 +27,17 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Labeler;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A threshold-based labeler for anomaly severity
+ *
  * Threshold-based severity labeler, which labels anomalies with severity based on deviation from
  * baseline and duration
  * of the anomalies. It tries to label anomalies from highest to lowest if deviation or duration
  * exceeds the threshold
  */
-@Components(title = "ThresholdSeverityLabeler", type = "THRESHOLD_SEVERITY_LABELER",
-    tags = {DetectionTag.LABELER}, description = "An threshold-based labeler for anomaly severity")
 public class ThresholdSeverityLabeler implements Labeler<SeverityThresholdLabelerSpec> {
 
   private final static Logger LOG = LoggerFactory.getLogger(ThresholdSeverityLabeler.class);
@@ -47,31 +45,7 @@ public class ThresholdSeverityLabeler implements Labeler<SeverityThresholdLabele
   private TreeMap<AnomalySeverity, Threshold> severityMap;
 
   @Override
-  public Map<MergedAnomalyResultDTO, AnomalySeverity> label(
-      List<MergedAnomalyResultDTO> anomalies) {
-    Map<MergedAnomalyResultDTO, AnomalySeverity> res = new HashMap<>();
-    for (MergedAnomalyResultDTO anomaly : anomalies) {
-      double currVal = anomaly.getAvgCurrentVal();
-      double baseVal = anomaly.getAvgBaselineVal();
-      if (Double.isNaN(currVal) || Double.isNaN(baseVal)) {
-        LOG.warn("Unable to label anomaly for detection {} from {} to {}, so skipping labeling...",
-            anomaly.getDetectionConfigId(), anomaly.getStartTime(), anomaly.getEndTime());
-        continue;
-      }
-      double deviation = Math.abs(currVal - baseVal) / baseVal;
-      long duration = anomaly.getEndTime() - anomaly.getStartTime();
-      for (Map.Entry<AnomalySeverity, Threshold> entry : severityMap.entrySet()) {
-        if (deviation >= entry.getValue().change || duration >= entry.getValue().duration) {
-          res.put(anomaly, entry.getKey());
-          break;
-        }
-      }
-    }
-    return res;
-  }
-
-  @Override
-  public void init(SeverityThresholdLabelerSpec spec, InputDataFetcher dataFetcher) {
+  public void init(SeverityThresholdLabelerSpec spec) {
     this.severityMap = new TreeMap<>();
     for (String key : spec.getSeverity().keySet()) {
       try {
@@ -98,6 +72,35 @@ public class ThresholdSeverityLabeler implements Labeler<SeverityThresholdLabele
         LOG.error("Cannot find valid anomaly severity, so ignoring...", e);
       }
     }
+  }
+
+  @Override
+  public void init(SeverityThresholdLabelerSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+  }
+
+  @Override
+  public Map<MergedAnomalyResultDTO, AnomalySeverity> label(
+      List<MergedAnomalyResultDTO> anomalies) {
+    Map<MergedAnomalyResultDTO, AnomalySeverity> res = new HashMap<>();
+    for (MergedAnomalyResultDTO anomaly : anomalies) {
+      double currVal = anomaly.getAvgCurrentVal();
+      double baseVal = anomaly.getAvgBaselineVal();
+      if (Double.isNaN(currVal) || Double.isNaN(baseVal)) {
+        LOG.warn("Unable to label anomaly for detection {} from {} to {}, so skipping labeling...",
+            anomaly.getDetectionConfigId(), anomaly.getStartTime(), anomaly.getEndTime());
+        continue;
+      }
+      double deviation = Math.abs(currVal - baseVal) / baseVal;
+      long duration = anomaly.getEndTime() - anomaly.getStartTime();
+      for (Map.Entry<AnomalySeverity, Threshold> entry : severityMap.entrySet()) {
+        if (deviation >= entry.getValue().change || duration >= entry.getValue().duration) {
+          res.put(anomaly, entry.getKey());
+          break;
+        }
+      }
+    }
+    return res;
   }
 
   public static class Threshold {

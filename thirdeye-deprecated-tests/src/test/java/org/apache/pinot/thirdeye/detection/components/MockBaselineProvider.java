@@ -28,8 +28,13 @@ public class MockBaselineProvider implements BaselineProvider<MockBaselineProvid
   private MockBaselineProviderSpec mockSpec;
 
   @Override
-  public void init(MockBaselineProviderSpec spec, InputDataFetcher dataFetcher) {
+  public void init(final MockBaselineProviderSpec spec) {
     this.mockSpec = spec;
+  }
+
+  @Override
+  public void init(MockBaselineProviderSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
   }
 
   @Override

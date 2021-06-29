@@ -37,6 +37,16 @@ public class MockTunableDetector implements AnomalyDetector<MockTunableSpec>,
 
   private int tuneRunes = 0;
 
+  @Override
+  public void init(final MockTunableSpec spec) {
+
+  }
+
+  @Override
+  public void init(MockTunableSpec spec, InputDataFetcher dataFetcher) {
+    // left empty
+  }
+
   public int getTuneRuns() {
     return tuneRunes;
   }
@@ -51,10 +61,5 @@ public class MockTunableDetector implements AnomalyDetector<MockTunableSpec>,
   @Override
   public DetectionResult runDetection(Interval window, String metricUrn) throws DetectorException {
     return DetectionResult.empty();
-  }
-
-  @Override
-  public void init(MockTunableSpec spec, InputDataFetcher dataFetcher) {
-    // left empty
   }
 }

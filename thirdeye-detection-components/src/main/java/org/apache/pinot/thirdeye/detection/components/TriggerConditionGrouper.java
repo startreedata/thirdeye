@@ -35,16 +35,12 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.Grouper;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.annotation.DetectionTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Expression based grouper - supports AND, OR and nested combinations of grouping
  */
-@Components(title = "TriggerCondition", type = "GROUPER",
-    tags = {DetectionTag.GROUPER}, description = "An expression based grouper")
 public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperSpec> {
 
   protected static final Logger LOG = LoggerFactory.getLogger(TriggerConditionGrouper.class);
@@ -61,7 +57,19 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
   private String operator;
   private Map<String, Object> leftOp;
   private Map<String, Object> rightOp;
-  private InputDataFetcher dataFetcher;
+
+  @Override
+  public void init(TriggerConditionGrouperSpec spec) {
+    this.expression = spec.getExpression();
+    this.operator = spec.getOperator();
+    this.leftOp = spec.getLeftOp();
+    this.rightOp = spec.getRightOp();
+  }
+
+  @Override
+  public void init(TriggerConditionGrouperSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
+  }
 
   /**
    * Group based on 'AND' criteria - Entity has anomaly if both sub-entities A and B have anomalies
@@ -191,14 +199,5 @@ public class TriggerConditionGrouper implements Grouper<TriggerConditionGrouperS
       operatorTreeRoot = ExpressionParser.generateOperators(expression);
     }
     return groupAnomaliesByOperator(operatorTreeRoot, anomalies);
-  }
-
-  @Override
-  public void init(TriggerConditionGrouperSpec spec, InputDataFetcher dataFetcher) {
-    this.expression = spec.getExpression();
-    this.operator = spec.getOperator();
-    this.leftOp = spec.getLeftOp();
-    this.rightOp = spec.getRightOp();
-    this.dataFetcher = dataFetcher;
   }
 }

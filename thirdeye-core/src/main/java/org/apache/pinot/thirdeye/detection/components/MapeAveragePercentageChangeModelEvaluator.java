@@ -55,6 +55,18 @@ public class MapeAveragePercentageChangeModelEvaluator implements
   private double threshold;
 
   @Override
+  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec) {
+    this.threshold = spec.getThreshold();
+  }
+
+  @Override
+  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec,
+      InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
+
+  @Override
   public ModelEvaluationResult evaluateModel(Instant evaluationTimeStamp) {
     EvaluationSlice evaluationSlice =
         new EvaluationSlice().withStartTime(
@@ -134,12 +146,5 @@ public class MapeAveragePercentageChangeModelEvaluator implements
             Collectors
                 .groupingBy(e -> String.format("%s:%s", e.getMetricUrn(), e.getDetectorName()),
                     Collectors.averagingDouble(EvaluationBean::getMape)));
-  }
-
-  @Override
-  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec,
-      InputDataFetcher dataFetcher) {
-    this.dataFetcher = dataFetcher;
-    this.threshold = spec.getThreshold();
   }
 }

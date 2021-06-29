@@ -64,6 +64,11 @@ public class DetectionComponentsPlugin implements Plugin {
             PercentageChangeRuleDetector.class
         ),
         new GenericAnomalyDetectorV2Factory<>(
+            "ABSOLUTE_CHANGE",
+            AbsoluteChangeRuleDetectorSpec.class,
+            AbsoluteChangeRuleDetector.class
+        ),
+        new GenericAnomalyDetectorV2Factory<>(
             "THRESHOLD_RULE",
             ThresholdRuleDetectorSpec.class,
             ThresholdRuleDetector.class

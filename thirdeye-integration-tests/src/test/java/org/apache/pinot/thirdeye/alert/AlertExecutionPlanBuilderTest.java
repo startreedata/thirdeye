@@ -151,7 +151,7 @@ public class AlertExecutionPlanBuilderTest {
     assertThat(map).isEqualTo(expected);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testBuildDetectionProperties_1D_1F() {
     final AlertNodeApi detectionNode = sampleDetectionNode();
     final AlertNodeApi filterNode = sampleFilterNode();
@@ -193,7 +193,7 @@ public class AlertExecutionPlanBuilderTest {
     assertThat(map).isEqualTo(expected);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testBuildDetectionProperties_2D_1F() {
     final AlertNodeApi d1 = sampleDetectionNode();
     final AlertNodeApi d2 = sampleDetectionNode().setName("d2");

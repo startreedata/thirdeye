@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.alert.v2;
+package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 
@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.alert.v2.PlanExecutor;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
@@ -22,10 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class AlertEvaluator {
+public class AlertEvaluatorV2 {
 
   public static final String ROOT_OPERATOR_KEY = "root";
-  protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
   // max time allowed for a preview task
@@ -35,7 +36,7 @@ public class AlertEvaluator {
   private final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory;
 
   @Inject
-  public AlertEvaluator(
+  public AlertEvaluatorV2(
       final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
     this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
     this.executorService = Executors.newFixedThreadPool(PARALLELISM);

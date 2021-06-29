@@ -30,6 +30,7 @@ import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertDeleter;
 import org.apache.pinot.thirdeye.alert.AlertEvaluator;
+import org.apache.pinot.thirdeye.alert.AlertEvaluatorV2;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
@@ -64,7 +65,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AuthService authService;
   private final AlertEvaluator alertEvaluator;
-  private org.apache.pinot.thirdeye.alert.v2.AlertEvaluator alertEvaluatorV2;
+  private final AlertEvaluatorV2 alertEvaluatorV2;
 
   @Inject
   public AlertResource(
@@ -75,7 +76,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
       final AlertEvaluator alertEvaluator,
-      final org.apache.pinot.thirdeye.alert.v2.AlertEvaluator alertEvaluatorV2) {
+      final AlertEvaluatorV2 alertEvaluatorV2) {
     super(authService, alertManager, ImmutableMap.of());
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;

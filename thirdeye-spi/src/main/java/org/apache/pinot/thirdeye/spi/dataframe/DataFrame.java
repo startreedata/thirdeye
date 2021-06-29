@@ -64,169 +64,79 @@ public class DataFrame {
   public static final String COLUMN_JOIN_LEFT = "_left";
   public static final String COLUMN_JOIN_RIGHT = "_right";
   public static final int DEFAULT_MAX_COLUMN_WIDTH = 30;
-
-  /**
-   * Builder for DataFrame in row-by-row sequence. Constructs each column as a StringSeries
-   * and attempts to infer a tighter native type on completion.
-   */
-  public static final class Builder {
-
-    final List<String> seriesNames;
-    final List<Object[]> rows = new ArrayList<>();
-
-    Builder(List<String> seriesNames) {
-      this.seriesNames = seriesNames;
-    }
-
-    public Builder append(Collection<Object[]> rows) {
-      for (Object[] row : rows) {
-        if (row.length != this.seriesNames.size()) {
-          throw new IllegalArgumentException(
-              String.format("Expected %d values, but got %d", seriesNames.size(), row.length));
-        }
-        this.rows.add(row);
-      }
-      return this;
-    }
-
-    public Builder append(Object[]... rows) {
-      return this.append(Arrays.asList(rows));
-    }
-
-    public Builder append(Object... row) {
-      return this.append(Collections.singleton(row));
-    }
-
-    public DataFrame build() {
-      DataFrame df = new DataFrame();
-
-      // infer column types
-      for (int i = 0; i < seriesNames.size(); i++) {
-        String rawName = seriesNames.get(i);
-
-        String[] parts = rawName.split(":");
-        String typeString = parts[parts.length - 1];
-
-        if (parts.length > 1 && getValidTypes().contains(typeString)) {
-          // user specified type
-          String name = StringUtils.join(Arrays.copyOf(parts, parts.length - 1), ":");
-          Series.SeriesType type = Series.SeriesType.valueOf(typeString);
-          Series series = buildSeries(type, i);
-          df.addSeries(name, series);
-        } else {
-          // dynamic type
-          ObjectSeries series = buildObjectSeries(i);
-          Series.SeriesType type = series.inferType();
-          df.addSeries(rawName, series.get(type));
-        }
-      }
-
-      return df;
-    }
-
-    private Series buildSeries(Series.SeriesType type, int columnIndex) {
-      switch (type) {
-        case DOUBLE:
-          return buildDoubleSeries(columnIndex);
-        case LONG:
-          return buildLongSeries(columnIndex);
-        case STRING:
-          return buildStringSeries(columnIndex);
-        case BOOLEAN:
-          return buildBooleanSeries(columnIndex);
-        case OBJECT:
-          return buildObjectSeries(columnIndex);
-        default:
-          throw new IllegalArgumentException(String.format("Unknown series type '%s'", type));
-      }
-    }
-
-    // TODO implement ObjectSeries
-    private DoubleSeries buildDoubleSeries(int columnIndex) {
-      double[] values = new double[this.rows.size()];
-      int i = 0;
-      for (Object[] r : this.rows) {
-        values[i++] = toDouble(r[columnIndex]);
-      }
-      return DoubleSeries.buildFrom(values);
-    }
-
-    private static double toDouble(Object o) {
-      if (o == null) {
-        return DoubleSeries.NULL;
-      }
-      if (o instanceof Number) {
-        return ((Number) o).doubleValue();
-      }
-      return StringSeries.getDouble(o.toString());
-    }
-
-    private LongSeries buildLongSeries(int columnIndex) {
-      long[] values = new long[this.rows.size()];
-      int i = 0;
-      for (Object[] r : this.rows) {
-        values[i++] = toLong(r[columnIndex]);
-      }
-      return LongSeries.buildFrom(values);
-    }
-
-    private static long toLong(Object o) {
-      if (o == null) {
-        return LongSeries.NULL;
-      }
-      if (o instanceof Number) {
-        return ((Number) o).longValue();
-      }
-      return StringSeries.getLong(o.toString());
-    }
-
-    private StringSeries buildStringSeries(int columnIndex) {
-      String[] values = new String[this.rows.size()];
-      int i = 0;
-      for (Object[] r : this.rows) {
-        values[i++] = toString(r[columnIndex]);
-      }
-      return StringSeries.buildFrom(values);
-    }
-
-    private static String toString(Object o) {
-      if (o == null) {
-        return StringSeries.NULL;
-      }
-      return StringSeries.getString(o.toString());
-    }
-
-    private BooleanSeries buildBooleanSeries(int columnIndex) {
-      byte[] values = new byte[this.rows.size()];
-      int i = 0;
-      for (Object[] r : this.rows) {
-        values[i++] = toBoolean(r[columnIndex]);
-      }
-      return BooleanSeries.buildFrom(values);
-    }
-
-    private static byte toBoolean(Object o) {
-      if (o == null) {
-        return BooleanSeries.NULL;
-      }
-      if (o instanceof Number) {
-        return BooleanSeries.valueOf(((Number) o).doubleValue() != 0.0d);
-      }
-      return StringSeries.getBoolean(o.toString());
-    }
-
-    private ObjectSeries buildObjectSeries(int columnIndex) {
-      Object[] values = new Object[this.rows.size()];
-      int i = 0;
-      for (Object[] r : this.rows) {
-        values[i++] = r[columnIndex];
-      }
-      return ObjectSeries.buildFrom(values);
-    }
-  }
-
   final List<String> indexNames = new ArrayList<>();
   final Map<String, Series> series = new LinkedHashMap<>();
+
+  /**
+   * Creates a new DataFrame with a column "index" (as determined by {@code COLUMN_INDEX_DEFAULT})
+   * with
+   * length {@code defaultIndexSize}, ranging from 0 to {@code defaultIndexSize - 1}.
+   *
+   * @param defaultIndexSize index column size
+   */
+  public DataFrame(int defaultIndexSize) {
+    long[] indexValues = new long[defaultIndexSize];
+    for (int i = 0; i < defaultIndexSize; i++) {
+      indexValues[i] = i;
+    }
+    this.addSeries(COLUMN_INDEX_DEFAULT, LongSeries.buildFrom(indexValues));
+    this.indexNames.add(COLUMN_INDEX_DEFAULT);
+  }
+
+  /**
+   * Creates a new DataFrame with a column "index" (as determined by {@code COLUMN_INDEX_DEFAULT})
+   * that
+   * wraps the array {@code indexValues}.
+   *
+   * @param indexValues index values
+   */
+  public DataFrame(long... indexValues) {
+    this.addSeries(COLUMN_INDEX_DEFAULT, LongSeries.buildFrom(indexValues));
+    this.indexNames.add(COLUMN_INDEX_DEFAULT);
+  }
+
+  /**
+   * Creates a new DataFrame with a column "index" (as determined by {@code COLUMN_INDEX_DEFAULT})
+   * referencing
+   * the Series {@code index}.
+   *
+   * @param index index series
+   */
+  public DataFrame(Series index) {
+    this.addSeries(COLUMN_INDEX_DEFAULT, index);
+    this.indexNames.add(COLUMN_INDEX_DEFAULT);
+  }
+
+  /**
+   * Creates a new DataFrame with a column {@code indexName} referencing the Series {@code index}.
+   *
+   * @param indexName index series column name
+   * @param index index series
+   */
+  public DataFrame(String indexName, Series index) {
+    this.addSeries(indexName, index);
+    this.indexNames.add(indexName);
+  }
+
+  /**
+   * Creates a new DataFrame that copies the properties of {@code df}.
+   *
+   * <br/><b>NOTE:</b> the copy is shallow, i.e. the contained series are not copied but referenced.
+   *
+   * @param df DataFrame to copy properties from
+   */
+  public DataFrame(DataFrame df) {
+    this.indexNames.addAll(df.indexNames);
+    this.series.putAll(df.series);
+  }
+
+  /**
+   * Creates a new DataFrame without any columns. The row count of the DataFrame is determined
+   * by the first series added.
+   */
+  public DataFrame() {
+    // left blank
+  }
 
   /**
    * Returns a DoubleSeries wrapping the values array
@@ -354,74 +264,401 @@ public class DataFrame {
   }
 
   /**
-   * Creates a new DataFrame with a column "index" (as determined by {@code COLUMN_INDEX_DEFAULT})
-   * with
-   * length {@code defaultIndexSize}, ranging from 0 to {@code defaultIndexSize - 1}.
+   * Applies {@code function} to {@code series} row by row
+   * and returns the results as a new series. The series' values are mapped to arguments
+   * of {@code function} in the same order as they appear in {@code series}.
+   * If the series' native types do not match the required input types of {@code function},
+   * the series are converted transparently. The native type of the returned series is
+   * determined by {@code function}'s output type.
    *
-   * @param defaultIndexSize index column size
+   * @param function function to apply to each row
+   * @param series input series for function
+   * @return series with evaluation results
+   * @throws IllegalArgumentException if the series does not exist
    */
-  public DataFrame(int defaultIndexSize) {
-    long[] indexValues = new long[defaultIndexSize];
-    for (int i = 0; i < defaultIndexSize; i++) {
-      indexValues[i] = i;
+  public static Series map(Series.Function function, Series... series) {
+    return Series.map(function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static DoubleSeries map(Series.DoubleFunction function, Series... series) {
+    return (DoubleSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static LongSeries map(Series.LongFunction function, Series... series) {
+    return (LongSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static StringSeries map(Series.StringFunction function, Series... series) {
+    return (StringSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.BooleanFunction function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.BooleanFunctionEx function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static ObjectSeries map(Series.ObjectFunction function, Series... series) {
+    return (ObjectSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.Conditional function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.DoubleConditional function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.LongConditional function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.StringConditional function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.BooleanConditional function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * @see DataFrame#map(Series.Function, Series...)
+   */
+  public static BooleanSeries map(Series.ObjectConditional function, Series... series) {
+    return (BooleanSeries) map((Series.Function) function, series);
+  }
+
+  /**
+   * Performs a join between two DataFrames and returns the result as a new DataFrame. The join
+   * can be performed across multiple series. If (non-joined) series with the same name exist
+   * in both DataFrames, their names are appended with {@code COLUMN_JOIN_LEFT} and
+   * {@code COLUMN_JOIN_RIGHT} in the returned DataFrame.
+   *
+   * <b>NOTE:</b> the series names of the left join series survive.
+   *
+   * @param left left DataFrame
+   * @param right right DataFrame
+   * @param onSeriesLeft left series names to join on
+   * @param onSeriesRight right series names to join on
+   * @param joinType type of join to perform
+   * @return joined DataFrame
+   */
+  public static DataFrame join(DataFrame left, DataFrame right, String[] onSeriesLeft,
+      String[] onSeriesRight, Series.JoinType joinType) {
+    return join(left, right, Arrays.asList(onSeriesLeft), Arrays.asList(onSeriesRight), joinType);
+  }
+
+  /**
+   * Performs a join between two DataFrames and returns the result as a new DataFrame. The join
+   * can be performed across multiple series. If (non-joined) series with the same name exist
+   * in both DataFrames, their names are appended with {@code COLUMN_JOIN_LEFT} and
+   * {@code COLUMN_JOIN_RIGHT} in the returned DataFrame.
+   *
+   * <b>NOTE:</b> the series names of the left join series survive.
+   *
+   * @param left left DataFrame
+   * @param right right DataFrame
+   * @param onSeriesLeft left series names to join on
+   * @param onSeriesRight right series names to join on
+   * @param joinType type of join to perform
+   * @return joined DataFrame
+   */
+  public static DataFrame join(DataFrame left, DataFrame right, List<String> onSeriesLeft,
+      List<String> onSeriesRight, Series.JoinType joinType) {
+    if (onSeriesLeft.size() != onSeriesRight.size()) {
+      throw new IllegalArgumentException(
+          "Number of series on the left side of the join must equal the number of series on the right side");
     }
-    this.addSeries(COLUMN_INDEX_DEFAULT, LongSeries.buildFrom(indexValues));
-    this.indexNames.add(COLUMN_INDEX_DEFAULT);
+
+    final int numSeries = onSeriesLeft.size();
+
+    // extract source series
+    Series[] leftSeries = new Series[numSeries];
+    for (int i = 0; i < numSeries; i++) {
+      leftSeries[i] = left.get(onSeriesLeft.get(i));
+    }
+
+    Series[] rightSeries = new Series[numSeries];
+    for (int i = 0; i < numSeries; i++) {
+      rightSeries[i] = right.get(onSeriesRight.get(i));
+    }
+
+    // perform join, generate row pairs
+    Series.JoinPairs pairs = filterJoinPairs(Series.hashJoinOuter(leftSeries, rightSeries),
+        joinType);
+
+    // extract projection indices
+    int[] fromIndexLeft = new int[pairs.size()];
+    for (int i = 0; i < pairs.size(); i++) {
+      fromIndexLeft[i] = pairs.left(i);
+    }
+
+    int[] fromIndexRight = new int[pairs.size()];
+    for (int i = 0; i < pairs.size(); i++) {
+      fromIndexRight[i] = pairs.right(i);
+    }
+
+    byte[] maskValues = new byte[pairs.size()];
+    for (int i = 0; i < pairs.size(); i++) {
+      if (pairs.left(i) == -1) {
+        maskValues[i] = BooleanSeries.TRUE;
+      }
+    }
+
+    // perform projection
+    DataFrame leftData = left.project(fromIndexLeft);
+    DataFrame rightData = right.project(fromIndexRight);
+
+    // merge values of join columns
+    Series[] joinKeys = new Series[numSeries];
+    for (int i = 0; i < numSeries; i++) {
+      joinKeys[i] = leftData.get(onSeriesLeft.get(i))
+          .set(BooleanSeries.buildFrom(maskValues), rightData.get(onSeriesRight.get(i)));
+    }
+
+    // select series names
+    Set<String> seriesLeft = new HashSet<>(left.getSeriesNames());
+    Set<String> seriesRight = new HashSet<>(right.getSeriesNames());
+
+    seriesLeft.removeAll(onSeriesLeft);
+    seriesRight.removeAll(onSeriesRight);
+
+    final List<String> joinKeyNames = onSeriesLeft;
+
+    // construct result
+    DataFrame joined = new DataFrame();
+
+    for (int i = 0; i < numSeries; i++) {
+      joined.addSeries(joinKeyNames.get(i), joinKeys[i]);
+    }
+
+    List<String> newIndex = new ArrayList<>();
+    for (String name : joinKeyNames) {
+      if (left.indexNames.contains(name)) {
+        newIndex.add(name);
+      }
+    }
+    joined.setIndex(newIndex);
+
+    for (String name : seriesRight) {
+      Series s = rightData.get(name);
+      if (!seriesLeft.contains(name)) {
+        joined.addSeries(name, s);
+      } else {
+        joined.addSeries(name + COLUMN_JOIN_RIGHT, s);
+      }
+    }
+
+    for (String name : seriesLeft) {
+      Series s = leftData.get(name);
+      if (!seriesRight.contains(name)) {
+        joined.addSeries(name, s);
+      } else {
+        joined.addSeries(name + COLUMN_JOIN_LEFT, s);
+      }
+    }
+
+    return joined;
+  }
+
+  private static Series.JoinPairs filterJoinPairs(Series.JoinPairs pairs, Series.JoinType type) {
+    Series.JoinPairs output = new Series.JoinPairs(pairs.size());
+    switch (type) {
+      case LEFT:
+        for (int i = 0; i < pairs.size(); i++) {
+          if (pairs.left(i) != -1) {
+            output.add(pairs.get(i));
+          }
+        }
+        return output;
+      case RIGHT:
+        for (int i = 0; i < pairs.size(); i++) {
+          if (pairs.right(i) != -1) {
+            output.add(pairs.get(i));
+          }
+        }
+        return output;
+      case INNER:
+        for (int i = 0; i < pairs.size(); i++) {
+          if (pairs.left(i) != -1 && pairs.right(i) != -1) {
+            output.add(pairs.get(i));
+          }
+        }
+        return output;
+      case OUTER:
+        return pairs;
+      default:
+        throw new IllegalArgumentException(String.format("Unknown join type '%s'", type));
+    }
   }
 
   /**
-   * Creates a new DataFrame with a column "index" (as determined by {@code COLUMN_INDEX_DEFAULT})
-   * that
-   * wraps the array {@code indexValues}.
+   * Returns a new DataFrame concatenated from a list of given DataFrames.
+   * Returns an empty DataFrame on empty input, otherwise follows the conventions of {@code
+   * append()}.
    *
-   * @param indexValues index values
+   * @param dataframes DataFrames to concatenate in sequence
+   * @return concatenated DataFrame
+   * @see DataFrame#append(DataFrame...)
    */
-  public DataFrame(long... indexValues) {
-    this.addSeries(COLUMN_INDEX_DEFAULT, LongSeries.buildFrom(indexValues));
-    this.indexNames.add(COLUMN_INDEX_DEFAULT);
+  public static DataFrame concatenate(DataFrame... dataframes) {
+    return concatenate(Arrays.asList(dataframes));
   }
 
   /**
-   * Creates a new DataFrame with a column "index" (as determined by {@code COLUMN_INDEX_DEFAULT})
-   * referencing
-   * the Series {@code index}.
+   * Returns a new DataFrame concatenated from a list of given DataFrames.
+   * Returns an empty DataFrame on empty input, otherwise follows the conventions of {@code
+   * append()}.
    *
-   * @param index index series
+   * @param dataframes DataFrames to concatenate in sequence
+   * @return concatenated DataFrame
+   * @see DataFrame#append(List)
    */
-  public DataFrame(Series index) {
-    this.addSeries(COLUMN_INDEX_DEFAULT, index);
-    this.indexNames.add(COLUMN_INDEX_DEFAULT);
+  public static DataFrame concatenate(List<DataFrame> dataframes) {
+    if (dataframes.isEmpty()) {
+      return new DataFrame();
+    }
+
+    if (dataframes.size() == 1) {
+      return dataframes.get(0);
+    }
+
+    DataFrame first = dataframes.get(0);
+    List<DataFrame> others = dataframes.subList(1, dataframes.size());
+
+    return first.append(others);
+  }
+
+  static String truncateToString(String value, int maxWidth) {
+    if (value.length() > maxWidth) {
+      value = value.substring(0, maxWidth - 3) + "...";
+    }
+    return value;
+  }
+
+  static void assertSameLength(Series... series) {
+    for (int i = 0; i < series.length - 1; i++) {
+      if (series[i].size() != series[i + 1].size()) {
+        throw new IllegalArgumentException("Series size must be equals to DataFrame size");
+      }
+    }
+  }
+
+  static void assertIndex(DataFrame... dataframes) {
+    for (DataFrame d : dataframes) {
+      if (!d.hasIndex()) {
+        throw new IllegalArgumentException("DataFrames must have a valid index");
+      }
+    }
   }
 
   /**
-   * Creates a new DataFrame with a column {@code indexName} referencing the Series {@code index}.
+   * Reads in a CSV structured stream and returns it as a DataFrame. The native series type is
+   * chosen to be as specific as possible based on the data ingested.
+   * <br/><b>NOTE:</b> Expects the first line to contain
+   * column headers. The column headers are transformed into series names by replacing non-word
+   * character sequences with underscores ({@code "_"}). Leading digits in series names are also
+   * escaped with a leading underscore.
    *
-   * @param indexName index series column name
-   * @param index index series
+   * @param in input reader
+   * @return CSV as DataFrame
+   * @throws IOException if a read error is encountered
+   * @throws IllegalArgumentException if the column headers cannot be transformed into valid
+   *     series names
    */
-  public DataFrame(String indexName, Series index) {
-    this.addSeries(indexName, index);
-    this.indexNames.add(indexName);
+  public static DataFrame fromCsv(Reader in) throws IOException {
+    Iterator<CSVRecord> it = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in).iterator();
+    if (!it.hasNext()) {
+      return new DataFrame();
+    }
+
+    CSVRecord first = it.next();
+    Set<String> headers = first.toMap().keySet();
+
+    // transform column headers into series names
+    Map<String, String> header2name = new HashMap<>();
+    for (String h : headers) {
+      // remove spaces
+      String name = Pattern.compile("\\W+").matcher(h).replaceAll("_");
+
+      // underscore escape leading number
+      if (Pattern.compile("\\A[0-9]").matcher(name).find()) {
+        name = "_" + name;
+      }
+
+      header2name.put(h, name);
+    }
+
+    // read first line and initialize builders
+    Map<String, StringSeries.Builder> builders = new HashMap<>();
+    for (String h : headers) {
+      StringSeries.Builder builder = StringSeries.builder();
+      builder.addValues(first.get(h));
+      builders.put(h, builder);
+    }
+
+    while (it.hasNext()) {
+      CSVRecord record = it.next();
+      for (String h : headers) {
+        String value = record.get(h);
+        builders.get(h).addValues(value);
+      }
+    }
+
+    // construct dataframe and detect native data types
+    DataFrame df = new DataFrame();
+    for (Map.Entry<String, StringSeries.Builder> e : builders.entrySet()) {
+      StringSeries s = e.getValue().build();
+      Series conv = s.get(s.inferType());
+      String name = header2name.get(e.getKey());
+      df.addSeries(name, conv);
+    }
+
+    return df;
   }
 
-  /**
-   * Creates a new DataFrame that copies the properties of {@code df}.
-   *
-   * <br/><b>NOTE:</b> the copy is shallow, i.e. the contained series are not copied but referenced.
-   *
-   * @param df DataFrame to copy properties from
-   */
-  public DataFrame(DataFrame df) {
-    this.indexNames.addAll(df.indexNames);
-    this.series.putAll(df.series);
-  }
-
-  /**
-   * Creates a new DataFrame without any columns. The row count of the DataFrame is determined
-   * by the first series added.
-   */
-  public DataFrame() {
-    // left blank
+  private static Set<String> getValidTypes() {
+    Set<String> values = new HashSet<>();
+    for (Series.SeriesType type : Series.SeriesType.values()) {
+      values.add(type.name());
+    }
+    return values;
   }
 
   /**
@@ -649,7 +886,10 @@ public class DataFrame {
       throw new IllegalArgumentException("series name must not be null");
     }
     if (!this.series.isEmpty() && series.size() != this.size()) {
-      throw new IllegalArgumentException("DataFrame index and series must be of same length");
+      throw new IllegalArgumentException(String.format(
+          "DataFrame index and series must be of same length. df length: %d, series length: %d",
+          size(),
+          series.size()));
     }
     this.series.put(seriesName, series);
     return this;
@@ -1188,107 +1428,6 @@ public class DataFrame {
   }
 
   /**
-   * Applies {@code function} to {@code series} row by row
-   * and returns the results as a new series. The series' values are mapped to arguments
-   * of {@code function} in the same order as they appear in {@code series}.
-   * If the series' native types do not match the required input types of {@code function},
-   * the series are converted transparently. The native type of the returned series is
-   * determined by {@code function}'s output type.
-   *
-   * @param function function to apply to each row
-   * @param series input series for function
-   * @return series with evaluation results
-   * @throws IllegalArgumentException if the series does not exist
-   */
-  public static Series map(Series.Function function, Series... series) {
-    return Series.map(function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static DoubleSeries map(Series.DoubleFunction function, Series... series) {
-    return (DoubleSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static LongSeries map(Series.LongFunction function, Series... series) {
-    return (LongSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static StringSeries map(Series.StringFunction function, Series... series) {
-    return (StringSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.BooleanFunction function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.BooleanFunctionEx function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static ObjectSeries map(Series.ObjectFunction function, Series... series) {
-    return (ObjectSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.Conditional function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.DoubleConditional function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.LongConditional function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.StringConditional function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.BooleanConditional function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
-   * @see DataFrame#map(Series.Function, Series...)
-   */
-  public static BooleanSeries map(Series.ObjectConditional function, Series... series) {
-    return (BooleanSeries) map((Series.Function) function, series);
-  }
-
-  /**
    * Applies {@code doubleExpression} compiled to an expression to the series referenced by
    * {@code seriesNames} row by row and returns the results as a new series. The series' values
    * are mapped to variables in {@code doubleExpression} by series names. Only series referenced
@@ -1703,6 +1842,10 @@ public class DataFrame {
     return this.project(Arrays.copyOf(fromIndex, countNotNull));
   }
 
+  /* **************************************************************************
+   * Joins across data frames
+   ***************************************************************************/
+
   /**
    * Returns {@code true} if series {@code seriesName} value at {@code index} is null.
    *
@@ -1823,10 +1966,6 @@ public class DataFrame {
     }
     return df;
   }
-
-  /* **************************************************************************
-   * Joins across data frames
-   ***************************************************************************/
 
   /**
    * Performs an inner join on the index column of two DataFrames.
@@ -2065,170 +2204,6 @@ public class DataFrame {
   }
 
   /**
-   * Performs a join between two DataFrames and returns the result as a new DataFrame. The join
-   * can be performed across multiple series. If (non-joined) series with the same name exist
-   * in both DataFrames, their names are appended with {@code COLUMN_JOIN_LEFT} and
-   * {@code COLUMN_JOIN_RIGHT} in the returned DataFrame.
-   *
-   * <b>NOTE:</b> the series names of the left join series survive.
-   *
-   * @param left left DataFrame
-   * @param right right DataFrame
-   * @param onSeriesLeft left series names to join on
-   * @param onSeriesRight right series names to join on
-   * @param joinType type of join to perform
-   * @return joined DataFrame
-   */
-  public static DataFrame join(DataFrame left, DataFrame right, String[] onSeriesLeft,
-      String[] onSeriesRight, Series.JoinType joinType) {
-    return join(left, right, Arrays.asList(onSeriesLeft), Arrays.asList(onSeriesRight), joinType);
-  }
-
-  /**
-   * Performs a join between two DataFrames and returns the result as a new DataFrame. The join
-   * can be performed across multiple series. If (non-joined) series with the same name exist
-   * in both DataFrames, their names are appended with {@code COLUMN_JOIN_LEFT} and
-   * {@code COLUMN_JOIN_RIGHT} in the returned DataFrame.
-   *
-   * <b>NOTE:</b> the series names of the left join series survive.
-   *
-   * @param left left DataFrame
-   * @param right right DataFrame
-   * @param onSeriesLeft left series names to join on
-   * @param onSeriesRight right series names to join on
-   * @param joinType type of join to perform
-   * @return joined DataFrame
-   */
-  public static DataFrame join(DataFrame left, DataFrame right, List<String> onSeriesLeft,
-      List<String> onSeriesRight, Series.JoinType joinType) {
-    if (onSeriesLeft.size() != onSeriesRight.size()) {
-      throw new IllegalArgumentException(
-          "Number of series on the left side of the join must equal the number of series on the right side");
-    }
-
-    final int numSeries = onSeriesLeft.size();
-
-    // extract source series
-    Series[] leftSeries = new Series[numSeries];
-    for (int i = 0; i < numSeries; i++) {
-      leftSeries[i] = left.get(onSeriesLeft.get(i));
-    }
-
-    Series[] rightSeries = new Series[numSeries];
-    for (int i = 0; i < numSeries; i++) {
-      rightSeries[i] = right.get(onSeriesRight.get(i));
-    }
-
-    // perform join, generate row pairs
-    Series.JoinPairs pairs = filterJoinPairs(Series.hashJoinOuter(leftSeries, rightSeries),
-        joinType);
-
-    // extract projection indices
-    int[] fromIndexLeft = new int[pairs.size()];
-    for (int i = 0; i < pairs.size(); i++) {
-      fromIndexLeft[i] = pairs.left(i);
-    }
-
-    int[] fromIndexRight = new int[pairs.size()];
-    for (int i = 0; i < pairs.size(); i++) {
-      fromIndexRight[i] = pairs.right(i);
-    }
-
-    byte[] maskValues = new byte[pairs.size()];
-    for (int i = 0; i < pairs.size(); i++) {
-      if (pairs.left(i) == -1) {
-        maskValues[i] = BooleanSeries.TRUE;
-      }
-    }
-
-    // perform projection
-    DataFrame leftData = left.project(fromIndexLeft);
-    DataFrame rightData = right.project(fromIndexRight);
-
-    // merge values of join columns
-    Series[] joinKeys = new Series[numSeries];
-    for (int i = 0; i < numSeries; i++) {
-      joinKeys[i] = leftData.get(onSeriesLeft.get(i))
-          .set(BooleanSeries.buildFrom(maskValues), rightData.get(onSeriesRight.get(i)));
-    }
-
-    // select series names
-    Set<String> seriesLeft = new HashSet<>(left.getSeriesNames());
-    Set<String> seriesRight = new HashSet<>(right.getSeriesNames());
-
-    seriesLeft.removeAll(onSeriesLeft);
-    seriesRight.removeAll(onSeriesRight);
-
-    final List<String> joinKeyNames = onSeriesLeft;
-
-    // construct result
-    DataFrame joined = new DataFrame();
-
-    for (int i = 0; i < numSeries; i++) {
-      joined.addSeries(joinKeyNames.get(i), joinKeys[i]);
-    }
-
-    List<String> newIndex = new ArrayList<>();
-    for (String name : joinKeyNames) {
-      if (left.indexNames.contains(name)) {
-        newIndex.add(name);
-      }
-    }
-    joined.setIndex(newIndex);
-
-    for (String name : seriesRight) {
-      Series s = rightData.get(name);
-      if (!seriesLeft.contains(name)) {
-        joined.addSeries(name, s);
-      } else {
-        joined.addSeries(name + COLUMN_JOIN_RIGHT, s);
-      }
-    }
-
-    for (String name : seriesLeft) {
-      Series s = leftData.get(name);
-      if (!seriesRight.contains(name)) {
-        joined.addSeries(name, s);
-      } else {
-        joined.addSeries(name + COLUMN_JOIN_LEFT, s);
-      }
-    }
-
-    return joined;
-  }
-
-  private static Series.JoinPairs filterJoinPairs(Series.JoinPairs pairs, Series.JoinType type) {
-    Series.JoinPairs output = new Series.JoinPairs(pairs.size());
-    switch (type) {
-      case LEFT:
-        for (int i = 0; i < pairs.size(); i++) {
-          if (pairs.left(i) != -1) {
-            output.add(pairs.get(i));
-          }
-        }
-        return output;
-      case RIGHT:
-        for (int i = 0; i < pairs.size(); i++) {
-          if (pairs.right(i) != -1) {
-            output.add(pairs.get(i));
-          }
-        }
-        return output;
-      case INNER:
-        for (int i = 0; i < pairs.size(); i++) {
-          if (pairs.left(i) != -1 && pairs.right(i) != -1) {
-            output.add(pairs.get(i));
-          }
-        }
-        return output;
-      case OUTER:
-        return pairs;
-      default:
-        throw new IllegalArgumentException(String.format("Unknown join type '%s'", type));
-    }
-  }
-
-  /**
    * Returns a copy of the DataFrame with data from {@code others} appended at the end. Matches
    * series by names and uses the native type of the original (this) DataFrame. If {@code others}
    * do not contain series with matching names, a sequence of {@code nulls} is appended. Any series
@@ -2270,43 +2245,6 @@ public class DataFrame {
     }
 
     return df;
-  }
-
-  /**
-   * Returns a new DataFrame concatenated from a list of given DataFrames.
-   * Returns an empty DataFrame on empty input, otherwise follows the conventions of {@code
-   * append()}.
-   *
-   * @param dataframes DataFrames to concatenate in sequence
-   * @return concatenated DataFrame
-   * @see DataFrame#append(DataFrame...)
-   */
-  public static DataFrame concatenate(DataFrame... dataframes) {
-    return concatenate(Arrays.asList(dataframes));
-  }
-
-  /**
-   * Returns a new DataFrame concatenated from a list of given DataFrames.
-   * Returns an empty DataFrame on empty input, otherwise follows the conventions of {@code
-   * append()}.
-   *
-   * @param dataframes DataFrames to concatenate in sequence
-   * @return concatenated DataFrame
-   * @see DataFrame#append(List)
-   */
-  public static DataFrame concatenate(List<DataFrame> dataframes) {
-    if (dataframes.isEmpty()) {
-      return new DataFrame();
-    }
-
-    if (dataframes.size() == 1) {
-      return dataframes.get(0);
-    }
-
-    DataFrame first = dataframes.get(0);
-    List<DataFrame> others = dataframes.subList(1, dataframes.size());
-
-    return first.append(others);
   }
 
   @Override
@@ -2388,13 +2326,6 @@ public class DataFrame {
     return sb.toString();
   }
 
-  static String truncateToString(String value, int maxWidth) {
-    if (value.length() > maxWidth) {
-      value = value.substring(0, maxWidth - 3) + "...";
-    }
-    return value;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -2447,21 +2378,9 @@ public class DataFrame {
     }
   }
 
-  static void assertSameLength(Series... series) {
-    for (int i = 0; i < series.length - 1; i++) {
-      if (series[i].size() != series[i + 1].size()) {
-        throw new IllegalArgumentException("Series size must be equals to DataFrame size");
-      }
-    }
-  }
-
-  static void assertIndex(DataFrame... dataframes) {
-    for (DataFrame d : dataframes) {
-      if (!d.hasIndex()) {
-        throw new IllegalArgumentException("DataFrames must have a valid index");
-      }
-    }
-  }
+  /* **************************************************************************
+   * DataFrame parsers
+   ***************************************************************************/
 
   Set<String> extractSeriesNames(String doubleExpression) {
     Matcher m = PATTERN_FORMULA_VARIABLE.matcher(doubleExpression);
@@ -2479,86 +2398,173 @@ public class DataFrame {
     return variables;
   }
 
-  /* **************************************************************************
-   * DataFrame parsers
-   ***************************************************************************/
-
   /**
-   * Reads in a CSV structured stream and returns it as a DataFrame. The native series type is
-   * chosen to be as specific as possible based on the data ingested.
-   * <br/><b>NOTE:</b> Expects the first line to contain
-   * column headers. The column headers are transformed into series names by replacing non-word
-   * character sequences with underscores ({@code "_"}). Leading digits in series names are also
-   * escaped with a leading underscore.
-   *
-   * @param in input reader
-   * @return CSV as DataFrame
-   * @throws IOException if a read error is encountered
-   * @throws IllegalArgumentException if the column headers cannot be transformed into valid
-   *     series names
+   * Builder for DataFrame in row-by-row sequence. Constructs each column as a StringSeries
+   * and attempts to infer a tighter native type on completion.
    */
-  public static DataFrame fromCsv(Reader in) throws IOException {
-    Iterator<CSVRecord> it = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in).iterator();
-    if (!it.hasNext()) {
-      return new DataFrame();
+  public static final class Builder {
+
+    final List<String> seriesNames;
+    final List<Object[]> rows = new ArrayList<>();
+
+    Builder(List<String> seriesNames) {
+      this.seriesNames = seriesNames;
     }
 
-    CSVRecord first = it.next();
-    Set<String> headers = first.toMap().keySet();
+    private static double toDouble(Object o) {
+      if (o == null) {
+        return DoubleSeries.NULL;
+      }
+      if (o instanceof Number) {
+        return ((Number) o).doubleValue();
+      }
+      return StringSeries.getDouble(o.toString());
+    }
 
-    // transform column headers into series names
-    Map<String, String> header2name = new HashMap<>();
-    for (String h : headers) {
-      // remove spaces
-      String name = Pattern.compile("\\W+").matcher(h).replaceAll("_");
+    private static long toLong(Object o) {
+      if (o == null) {
+        return LongSeries.NULL;
+      }
+      if (o instanceof Number) {
+        return ((Number) o).longValue();
+      }
+      return StringSeries.getLong(o.toString());
+    }
 
-      // underscore escape leading number
-      if (Pattern.compile("\\A[0-9]").matcher(name).find()) {
-        name = "_" + name;
+    private static String toString(Object o) {
+      if (o == null) {
+        return StringSeries.NULL;
+      }
+      return StringSeries.getString(o.toString());
+    }
+
+    private static byte toBoolean(Object o) {
+      if (o == null) {
+        return BooleanSeries.NULL;
+      }
+      if (o instanceof Number) {
+        return BooleanSeries.valueOf(((Number) o).doubleValue() != 0.0d);
+      }
+      return StringSeries.getBoolean(o.toString());
+    }
+
+    public Builder append(Collection<Object[]> rows) {
+      for (Object[] row : rows) {
+        if (row.length != this.seriesNames.size()) {
+          throw new IllegalArgumentException(
+              String.format("Expected %d values, but got %d", seriesNames.size(), row.length));
+        }
+        this.rows.add(row);
+      }
+      return this;
+    }
+
+    public Builder append(Object[]... rows) {
+      return this.append(Arrays.asList(rows));
+    }
+
+    public Builder append(Object... row) {
+      return this.append(Collections.singleton(row));
+    }
+
+    public DataFrame build() {
+      DataFrame df = new DataFrame();
+
+      // infer column types
+      for (int i = 0; i < seriesNames.size(); i++) {
+        String rawName = seriesNames.get(i);
+
+        String[] parts = rawName.split(":");
+        String typeString = parts[parts.length - 1];
+
+        if (parts.length > 1 && getValidTypes().contains(typeString)) {
+          // user specified type
+          String name = StringUtils.join(Arrays.copyOf(parts, parts.length - 1), ":");
+          Series.SeriesType type = Series.SeriesType.valueOf(typeString);
+          Series series = buildSeries(type, i);
+          df.addSeries(name, series);
+        } else {
+          // dynamic type
+          ObjectSeries series = buildObjectSeries(i);
+          Series.SeriesType type = series.inferType();
+          df.addSeries(rawName, series.get(type));
+        }
       }
 
-      header2name.put(h, name);
+      return df;
     }
 
-    // read first line and initialize builders
-    Map<String, StringSeries.Builder> builders = new HashMap<>();
-    for (String h : headers) {
-      StringSeries.Builder builder = StringSeries.builder();
-      builder.addValues(first.get(h));
-      builders.put(h, builder);
-    }
-
-    while (it.hasNext()) {
-      CSVRecord record = it.next();
-      for (String h : headers) {
-        String value = record.get(h);
-        builders.get(h).addValues(value);
+    private Series buildSeries(Series.SeriesType type, int columnIndex) {
+      switch (type) {
+        case DOUBLE:
+          return buildDoubleSeries(columnIndex);
+        case LONG:
+          return buildLongSeries(columnIndex);
+        case STRING:
+          return buildStringSeries(columnIndex);
+        case BOOLEAN:
+          return buildBooleanSeries(columnIndex);
+        case OBJECT:
+          return buildObjectSeries(columnIndex);
+        default:
+          throw new IllegalArgumentException(String.format("Unknown series type '%s'", type));
       }
     }
 
-    // construct dataframe and detect native data types
-    DataFrame df = new DataFrame();
-    for (Map.Entry<String, StringSeries.Builder> e : builders.entrySet()) {
-      StringSeries s = e.getValue().build();
-      Series conv = s.get(s.inferType());
-      String name = header2name.get(e.getKey());
-      df.addSeries(name, conv);
+    // TODO implement ObjectSeries
+    private DoubleSeries buildDoubleSeries(int columnIndex) {
+      double[] values = new double[this.rows.size()];
+      int i = 0;
+      for (Object[] r : this.rows) {
+        values[i++] = toDouble(r[columnIndex]);
+      }
+      return DoubleSeries.buildFrom(values);
     }
 
-    return df;
-  }
-  
-  private static Set<String> getValidTypes() {
-    Set<String> values = new HashSet<>();
-    for (Series.SeriesType type : Series.SeriesType.values()) {
-      values.add(type.name());
+    private LongSeries buildLongSeries(int columnIndex) {
+      long[] values = new long[this.rows.size()];
+      int i = 0;
+      for (Object[] r : this.rows) {
+        values[i++] = toLong(r[columnIndex]);
+      }
+      return LongSeries.buildFrom(values);
     }
-    return values;
+
+    private StringSeries buildStringSeries(int columnIndex) {
+      String[] values = new String[this.rows.size()];
+      int i = 0;
+      for (Object[] r : this.rows) {
+        values[i++] = toString(r[columnIndex]);
+      }
+      return StringSeries.buildFrom(values);
+    }
+
+    private BooleanSeries buildBooleanSeries(int columnIndex) {
+      byte[] values = new byte[this.rows.size()];
+      int i = 0;
+      for (Object[] r : this.rows) {
+        values[i++] = toBoolean(r[columnIndex]);
+      }
+      return BooleanSeries.buildFrom(values);
+    }
+
+    private ObjectSeries buildObjectSeries(int columnIndex) {
+      Object[] values = new Object[this.rows.size()];
+      int i = 0;
+      for (Object[] r : this.rows) {
+        values[i++] = r[columnIndex];
+      }
+      return ObjectSeries.buildFrom(values);
+    }
   }
 
   public static class Tuple implements Comparable<Tuple> {
 
     private final Object[] values;
+
+    private Tuple(Object... values) {
+      this.values = values;
+    }
 
     public static Tuple buildFrom(Object... values) {
       return new Tuple(values);
@@ -2574,10 +2580,6 @@ public class DataFrame {
         values[i] = series[i].getObject(row);
       }
       return new Tuple(values);
-    }
-
-    private Tuple(Object... values) {
-      this.values = values;
     }
 
     public Object[] getValues() {

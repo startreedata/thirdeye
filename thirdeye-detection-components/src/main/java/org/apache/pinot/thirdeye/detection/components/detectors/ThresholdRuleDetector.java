@@ -20,10 +20,10 @@
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils;
@@ -74,14 +74,14 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
 
     final String monitoringGranularity = spec.getMonitoringGranularity();
     if (monitoringGranularity.equals("1_MONTHS")) {
-      this.timeGranularity = MetricSlice.NATIVE_GRANULARITY;
+      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
     } else {
-      this.timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
+      timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
     }
   }
 
   @Override
-  public void init(ThresholdRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
+  public void init(final ThresholdRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
     init(spec);
     this.dataFetcher = dataFetcher;
   }
@@ -95,8 +95,8 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final Map<DimensionInfo, DataTable> currentDataTableMap = DataTableUtils.splitDataTable(
         current);
-    List<DetectionResult> detectionResults = new ArrayList<>();
-    for (DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
+    final List<DetectionResult> detectionResults = new ArrayList<>();
+    for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
       currentDf.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
       currentDf.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
@@ -113,25 +113,28 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
         spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
 
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity(),
+    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
+        spec.getMonitoringGranularity(),
         null);
   }
 
   @Override
-  public DetectionResult runDetection(Interval window, String metricUrn) {
+  public DetectionResult runDetection(final Interval window, final String metricUrn) {
     final MetricEntity me = MetricEntity.fromURN(metricUrn);
     final long endTime = window.getEndMillis();
     final MetricSlice slice = MetricSlice
         .from(me.getId(), window.getStartMillis(), endTime, me.getFilters(), timeGranularity);
 
-    final InputData data = this.dataFetcher.fetchData(new InputDataSpec()
-        .withTimeseriesSlices(Collections.singletonList(slice))
-        .withMetricIdsForDataset(Collections.singletonList(me.getId()))
+    final InputData data = dataFetcher.fetchData(new InputDataSpec()
+        .withTimeseriesSlices(singletonList(slice))
+        .withMetricIdsForDataset(singletonList(me.getId()))
     );
 
     final DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
     monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity(),
         datasetConfig);
+
+    // Hack. To be removed when deprecating v1 pipeline
     spec.setTimezone(datasetConfig.getTimezone());
 
     final DataFrame df = data.getTimeseries()
@@ -158,7 +161,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     }
     df.mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
-    MetricSlice slice = MetricSlice
+    final MetricSlice slice = MetricSlice
         .from(-1, window.getStartMillis(), window.getEndMillis(), null,
             timeGranularity);
 
@@ -168,23 +171,22 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    DataFrame baselineWithBoundaries = constructBaselineAndBoundaries(df);
+    final DataFrame baselineWithBoundaries = constructBaselineAndBoundaries(df);
     return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
   }
 
   @Override
-  public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    InputData data =
-        this.dataFetcher
-            .fetchData(new InputDataSpec().withTimeseriesSlices(Collections.singletonList(slice)));
-    DataFrame df = data.getTimeseries().get(slice);
+  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
+    final InputData data = dataFetcher.fetchData(new InputDataSpec()
+        .withTimeseriesSlices(singletonList(slice)));
+    final DataFrame df = data.getTimeseries().get(slice);
     return TimeSeries.fromDataFrame(constructBaselineAndBoundaries(df));
   }
 
   /**
    * Populate the dataframe with upper/lower boundaries and baseline
    */
-  private DataFrame constructBaselineAndBoundaries(DataFrame df) {
+  private DataFrame constructBaselineAndBoundaries(final DataFrame df) {
     // Set default baseline as the actual value
     df.addSeries(DataFrame.COL_VALUE, df.get(DataFrame.COL_CURRENT));
     if (!Double.isNaN(spec.getMin())) {

@@ -192,6 +192,8 @@ public class PercentageChangeRuleDetector implements
     final DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
     monitoringGranularityPeriod = DetectionUtils
         .getMonitoringGranularityPeriod(spec.getMonitoringGranularity(), datasetConfig);
+    // Hack. To be removed when deprecating v1 pipeline
+    spec.setTimezone(datasetConfig.getTimezone());
 
     // aggregate data to specified weekly granularity
     if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {

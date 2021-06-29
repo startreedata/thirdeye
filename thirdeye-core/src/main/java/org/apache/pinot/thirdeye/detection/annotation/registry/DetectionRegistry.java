@@ -183,10 +183,9 @@ public class DetectionRegistry {
   public AnomalyDetectorV2<AbstractSpec> buildDetectorV2(
       String factoryName,
       AnomalyDetectorFactoryContext context) {
-    if (anomalyDetectorV2FactoryMap.containsKey(factoryName)) {
-      return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
-    }
-    return null;
+    checkArgument(anomalyDetectorV2FactoryMap.containsKey(factoryName),
+        "Detector type not registered: " + factoryName);
+    return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
   }
 
   /**

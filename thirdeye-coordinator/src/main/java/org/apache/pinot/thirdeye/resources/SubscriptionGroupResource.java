@@ -54,9 +54,13 @@ public class SubscriptionGroupResource extends
     super.validate(api, existing);
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
-    ensure(subscriptionGroupManager.findByPredicate(
-        Predicate.EQ("name", api.getName())).size() == 0,
-        ERR_DUPLICATE_NAME);
+
+    // For new Subscription Group or existing Subscription Group with different name
+    if (existing == null || !existing.getName().equals(api.getName())) {
+      ensure(subscriptionGroupManager.findByPredicate(
+          Predicate.EQ("name", api.getName())).size() == 0,
+          ERR_DUPLICATE_NAME);
+    }
   }
 
   @Override

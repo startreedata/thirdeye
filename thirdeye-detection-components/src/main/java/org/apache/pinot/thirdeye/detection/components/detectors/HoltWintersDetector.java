@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
@@ -37,7 +36,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -93,7 +92,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private TimeGranularity timeGranularity;
   private DayOfWeek weekStart;
 
-  private static double calculateInitialLevel(double[] y) {
+  private static double calculateInitialLevel(final double[] y) {
     return y[0];
   }
 
@@ -102,7 +101,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    *
    * @return - Initial trend - Bt[1]
    */
-  private static double calculateInitialTrend(double[] y, int period) {
+  private static double calculateInitialTrend(final double[] y, final int period) {
     double sum = 0;
 
     for (int i = 0; i < period; i++) {
@@ -117,12 +116,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    *
    * @return - Seasonal Indices.
    */
-  private static double[] calculateSeasonalIndices(double[] y, int period,
-      int seasons) {
-    double[] seasonalMean = new double[seasons];
-    double[] seasonalIndices = new double[period];
+  private static double[] calculateSeasonalIndices(final double[] y, final int period,
+      final int seasons) {
+    final double[] seasonalMean = new double[seasons];
+    final double[] seasonalIndices = new double[period];
 
-    double[] averagedObservations = new double[y.length];
+    final double[] averagedObservations = new double[y.length];
 
     for (int i = 0; i < seasons; i++) {
       for (int j = 0; j < period; j++) {
@@ -155,21 +154,21 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param zscore zscore used to multiply by std
    * @return the error bound
    */
-  private static double calculateErrorBound(List<Double> givenNumbers, double zscore) {
+  private static double calculateErrorBound(final List<Double> givenNumbers, final double zscore) {
     // calculate the mean value (= average)
     double sum = 0.0;
-    for (double num : givenNumbers) {
+    for (final double num : givenNumbers) {
       sum += num;
     }
-    double mean = sum / givenNumbers.size();
+    final double mean = sum / givenNumbers.size();
 
     // calculate standard deviation
     double squaredDifferenceSum = 0.0;
-    for (double num : givenNumbers) {
+    for (final double num : givenNumbers) {
       squaredDifferenceSum += (num - mean) * (num - mean);
     }
-    double variance = squaredDifferenceSum / givenNumbers.size();
-    double standardDeviation = Math.sqrt(variance);
+    final double variance = squaredDifferenceSum / givenNumbers.size();
+    final double standardDeviation = Math.sqrt(variance);
 
     return zscore * standardDeviation;
   }
@@ -187,50 +186,50 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     } else if (sensitivity > 10) {
       sensitivity = 10;
     }
-    double z = 1 + 0.2 * (10 - sensitivity);
+    final double z = 1 + 0.2 * (10 - sensitivity);
     return z;
   }
 
   @Override
-  public void init(HoltWintersDetectorSpec spec) {
-    this.period = spec.getPeriod();
-    this.alpha = spec.getAlpha();
-    this.beta = spec.getBeta();
-    this.gamma = spec.getGamma();
-    this.pattern = spec.getPattern();
-    this.smoothing = spec.isSmoothing();
-    this.sensitivity = spec.getSensitivity();
-    this.monitoringGranularity = spec.getMonitoringGranularity();
+  public void init(final HoltWintersDetectorSpec spec) {
+    period = spec.getPeriod();
+    alpha = spec.getAlpha();
+    beta = spec.getBeta();
+    gamma = spec.getGamma();
+    pattern = spec.getPattern();
+    smoothing = spec.isSmoothing();
+    sensitivity = spec.getSensitivity();
+    monitoringGranularity = spec.getMonitoringGranularity();
 
-    if (this.monitoringGranularity.endsWith(TimeGranularity.MONTHS) || this.monitoringGranularity
+    if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
         .endsWith(TimeGranularity.WEEKS)) {
-      this.timeGranularity = MetricSlice.NATIVE_GRANULARITY;
+      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
     } else {
-      this.timeGranularity = TimeGranularity.fromString(this.monitoringGranularity);
+      timeGranularity = TimeGranularity.fromString(monitoringGranularity);
     }
-    if (this.monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      this.weekStart = DayOfWeek.valueOf(spec.getWeekStart());
+    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
+      weekStart = DayOfWeek.valueOf(spec.getWeekStart());
     }
   }
 
   @Override
-  public void init(HoltWintersDetectorSpec spec, InputDataFetcher dataFetcher) {
+  public void init(final HoltWintersDetectorSpec spec, final InputDataFetcher dataFetcher) {
     init(spec);
     this.dataFetcher = dataFetcher;
   }
 
   @Override
-  public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
-    Interval window = new Interval(slice.getStart(), slice.getEnd());
-    DateTime trainStart = getTrainingStartTime(window.getStart());
+  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
+    final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
+    final Interval window = new Interval(slice.getStart(), slice.getEnd());
+    final DateTime trainStart = getTrainingStartTime(window.getStart());
 
-    DatasetConfigDTO datasetConfig = this.dataFetcher.fetchData(new InputDataSpec()
+    final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
         .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
         .getDatasetForMetricId()
         .get(metricEntity.getId());
 
-    DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
+    final DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
         datasetConfig);
     DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis(),
         datasetConfig.getTimezone());
@@ -245,13 +244,13 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     return TimeSeries.fromDataFrame(resultDF);
   }
 
-  private DateTime getTrainingStartTime(DateTime windowStart) {
-    DateTime trainStart;
+  private DateTime getTrainingStartTime(final DateTime windowStart) {
+    final DateTime trainStart;
     if (isMultiDayGranularity()) {
       trainStart = windowStart.minusDays(timeGranularity.getSize() * LOOKBACK);
-    } else if (this.monitoringGranularity.endsWith(TimeGranularity.MONTHS)) {
+    } else if (monitoringGranularity.endsWith(TimeGranularity.MONTHS)) {
       trainStart = windowStart.minusMonths(LOOKBACK);
-    } else if (this.monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
+    } else if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
       trainStart = windowStart.minusWeeks(LOOKBACK);
     } else {
       trainStart = windowStart.minusDays(LOOKBACK);
@@ -260,33 +259,34 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   @Override
-  public DetectionResult runDetection(Interval window, String metricUrn) {
-    MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
+  public DetectionResult runDetection(final Interval window, final String metricUrn) {
+    final MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
     DateTime windowStart = window.getStart();
     // align start day to the user specified week start
-    if (Objects.nonNull(this.weekStart)) {
+    if (Objects.nonNull(weekStart)) {
       windowStart = window.getStart().withTimeAtStartOfDay().withDayOfWeek(weekStart.getValue())
           .minusWeeks(1);
     }
 
-    DateTime trainStart = getTrainingStartTime(windowStart);
+    final DateTime trainStart = getTrainingStartTime(windowStart);
 
-    DatasetConfigDTO datasetConfig = this.dataFetcher.fetchData(new InputDataSpec()
+    final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
         .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
         .getDatasetForMetricId()
         .get(metricEntity.getId());
-    MetricSlice sliceData = MetricSlice
+    final MetricSlice sliceData = MetricSlice
         .from(metricEntity.getId(), trainStart.getMillis(), window.getEndMillis(),
             metricEntity.getFilters());
-    DataFrame dfInput = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
+    final DataFrame dfInput = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
         datasetConfig);
 
     // Kernel smoothing
     if (smoothing && !TimeUnit.DAYS.equals(datasetConfig.bucketTimeGranularity().getUnit())) {
-      int kernelSize = (int) (KERNEL_PERIOD / datasetConfig.bucketTimeGranularity().toMillis());
+      final int kernelSize = (int) (KERNEL_PERIOD / datasetConfig.bucketTimeGranularity()
+          .toMillis());
       if (kernelSize > 1) {
-        int kernelOffset = kernelSize / 2;
-        double[] values = dfInput.getDoubles(DataFrame.COL_VALUE).values();
+        final int kernelOffset = kernelSize / 2;
+        final double[] values = dfInput.getDoubles(DataFrame.COL_VALUE).values();
         for (int i = 0; i <= values.length - kernelSize; i++) {
           values[i + kernelOffset] = AlgorithmUtils.robustMean(dfInput.getDoubles(
               DataFrame.COL_VALUE)
@@ -296,10 +296,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       }
     }
 
-    DataFrame dfCurr = new DataFrame(dfInput).renameSeries(DataFrame.COL_VALUE, COL_CURR);
+    final DataFrame dfCurr = new DataFrame(dfInput).renameSeries(DataFrame.COL_VALUE, COL_CURR);
     DataFrame dfBase = computePredictionInterval(dfInput, windowStart.getMillis(),
         datasetConfig.getTimezone());
-    DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, DataFrame.COL_VALUE, COL_ERROR);
+    final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, DataFrame.COL_VALUE, COL_ERROR);
     df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(DataFrame.COL_VALUE)));
     df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
 
@@ -314,10 +314,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     // Anomalies
-    List<MergedAnomalyResultDTO> anomalyResults =
+    final List<MergedAnomalyResultDTO> anomalyResults =
         DetectionUtils.makeAnomalies(sliceData, df, COL_ANOMALY,
             DetectionUtils
-                .getMonitoringGranularityPeriod(this.monitoringGranularity, datasetConfig),
+                .getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig),
             datasetConfig);
     dfBase = dfBase.joinRight(df.retainSeries(DataFrame.COL_TIME, COL_CURR), DataFrame.COL_TIME);
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(dfBase));
@@ -332,25 +332,25 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param datasetConfig the dataset config
    * @return Data Frame that has data from start to end
    */
-  private DataFrame fetchData(MetricEntity metricEntity, long start, long end,
-      DatasetConfigDTO datasetConfig) {
+  private DataFrame fetchData(final MetricEntity metricEntity, final long start, final long end,
+      final DatasetConfigDTO datasetConfig) {
 
-    List<MetricSlice> slices = new ArrayList<>();
-    MetricSlice sliceData = MetricSlice.from(metricEntity.getId(), start, end,
+    final List<MetricSlice> slices = new ArrayList<>();
+    final MetricSlice sliceData = MetricSlice.from(metricEntity.getId(), start, end,
         metricEntity.getFilters(), timeGranularity);
     slices.add(sliceData);
-    LOG.info("Getting data for" + sliceData.toString());
-    InputData data = this.dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices)
+    LOG.info("Getting data for" + sliceData);
+    final InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices)
         .withMetricIdsForDataset(Collections.singletonList(metricEntity.getId()))
         .withMetricIds(Collections.singletonList(metricEntity.getId())));
-    MetricConfigDTO metricConfig = data.getMetrics().get(metricEntity.getId());
+    final MetricConfigDTO metricConfig = data.getMetrics().get(metricEntity.getId());
     DataFrame df = data.getTimeseries().get(sliceData);
 
     // aggregate data to specified weekly granularity
-    if (this.monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      Period monitoringGranularityPeriod =
-          DetectionUtils.getMonitoringGranularityPeriod(this.monitoringGranularity, datasetConfig);
-      long latestDataTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
+    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
+      final Period monitoringGranularityPeriod =
+          DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig);
+      final long latestDataTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
       df = DetectionUtils.aggregateByPeriod(df,
           new DateTime(start, DateTimeZone.forID(datasetConfig.getTimezone())),
           monitoringGranularityPeriod, metricConfig.getDefaultAggFunction());
@@ -368,13 +368,13 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param time the prediction time, in unix timestamp
    * @return DataFrame containing lookback number of data
    */
-  private DataFrame getLookbackDF(DataFrame originalDF, Long time) {
-    LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
-    int indexFinish = longSeries.find(time);
+  private DataFrame getLookbackDF(final DataFrame originalDF, final Long time) {
+    final LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
+    final int indexFinish = longSeries.find(time);
     DataFrame df = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build();
 
     if (indexFinish != -1) {
-      int indexStart = Math.max(0, indexFinish - LOOKBACK);
+      final int indexStart = Math.max(0, indexFinish - LOOKBACK);
       df = df.append(originalDF.slice(indexStart, indexFinish));
     }
     return df;
@@ -387,15 +387,15 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param time the prediction time, in unix timestamp
    * @return DataFrame containing same time of daily data for LOOKBACK number of days
    */
-  private DataFrame getDailyDF(DataFrame originalDF, Long time, String timezone) {
-    LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
-    long start = longSeries.getLong(0);
+  private DataFrame getDailyDF(final DataFrame originalDF, final Long time, final String timezone) {
+    final LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
+    final long start = longSeries.getLong(0);
     DateTime dt = new DateTime(time).withZone(DateTimeZone.forID(timezone));
     DataFrame df = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build();
 
     for (int i = 0; i < LOOKBACK; i++) {
       DateTime subDt = dt.minusDays(1);
-      long t = subDt.getMillis();
+      final long t = subDt.getMillis();
       if (t < start) {
         break;
       }
@@ -407,7 +407,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         // If the 1 day look back data doesn't exist, use the data one period before till backtrackCounter greater than 4
         while (index == -1 && backtrackCounter <= 4) {
           subDt = subDt.minusDays(period);
-          long timestamp = subDt.getMillis();
+          final long timestamp = subDt.getMillis();
           index = longSeries.find(timestamp);
           backtrackCounter++;
         }
@@ -416,10 +416,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
           df = df.append(originalDF.slice(index, index + 1));
         } else {
           // If not found value up to 4 weeks, insert the last value
-          double lastVal = (originalDF.get(DataFrame.COL_VALUE))
+          final double lastVal = (originalDF.get(DataFrame.COL_VALUE))
               .getDouble(longSeries.find(dt.getMillis()));
-          DateTime nextDt = dt.minusDays(1);
-          DataFrame appendDf = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE)
+          final DateTime nextDt = dt.minusDays(1);
+          final DataFrame appendDf = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE)
               .append(nextDt, lastVal).build();
           df = df.append(appendDf);
         }
@@ -439,19 +439,20 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param gamma seasonality smoothing factor
    * @return ForecastResults containing predicted value, SSE(sum of squared error) and error bound
    */
-  private ForecastResults forecast(double[] y, double alpha, double beta, double gamma) {
-    double[] seasonal = new double[y.length + 1];
-    double[] forecast = new double[y.length + 1];
+  private ForecastResults forecast(
+      final double[] y, final double alpha, final double beta, final double gamma) {
+    final double[] seasonal = new double[y.length + 1];
+    final double[] forecast = new double[y.length + 1];
 
-    double a0 = calculateInitialLevel(y);
-    double b0 = calculateInitialTrend(y, period);
+    final double a0 = calculateInitialLevel(y);
+    final double b0 = calculateInitialTrend(y, period);
 
-    int seasons = y.length / period;
-    double[] initialSeasonalIndices = calculateSeasonalIndices(y, period,
+    final int seasons = y.length / period;
+    final double[] initialSeasonalIndices = calculateSeasonalIndices(y, period,
         seasons);
 
-    for (int i = 0; i < period; i++) {
-      seasonal[i] = initialSeasonalIndices[i];
+    if (period >= 0) {
+      System.arraycopy(initialSeasonalIndices, 0, seasonal, 0, period);
     }
 
     // s is level and t is trend
@@ -460,8 +461,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double predictedValue = 0;
 
     for (int i = 0; i < y.length; i++) {
-      double sNew;
-      double tNew;
+      final double sNew;
+      final double tNew;
       forecast[i] = (s + t) * seasonal[i];
       sNew = alpha * (y[i] / seasonal[i]) + (1 - alpha) * (s + t);
       tNew = beta * (sNew - s) + (1 - beta) * t;
@@ -475,7 +476,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       }
     }
 
-    List<Double> diff = new ArrayList<>();
+    final List<Double> diff = new ArrayList<>();
     double sse = 0;
     for (int i = 0; i < y.length; i++) {
       if (forecast[i] != 0) {
@@ -484,7 +485,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       }
     }
 
-    double error = calculateErrorBound(diff, sensitivityToZscore(sensitivity));
+    final double error = calculateErrorBound(diff, sensitivityToZscore(sensitivity));
     return new ForecastResults(predictedValue, sse, error);
   }
 
@@ -495,33 +496,30 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param windowStartTime prediction start time
    * @return DataFrame with timestamp, baseline, error bound
    */
-  private DataFrame computePredictionInterval(DataFrame inputDF, long windowStartTime,
-      String timezone) {
+  private DataFrame computePredictionInterval(final DataFrame inputDF, final long windowStartTime,
+      final String timezone) {
 
-    DataFrame resultDF = new DataFrame();
-    DataFrame forecastDF = inputDF.filter(new Series.LongConditional() {
-      @Override
-      public boolean apply(long... values) {
-        return values[0] >= windowStartTime;
-      }
-    }, DataFrame.COL_TIME).dropNull();
+    final DataFrame resultDF = new DataFrame();
+    final DataFrame forecastDF = inputDF
+        .filter((LongConditional) values -> values[0] >= windowStartTime, DataFrame.COL_TIME)
+        .dropNull();
 
-    int size = forecastDF.size();
-    double[] baselineArray = new double[size];
-    double[] upperBoundArray = new double[size];
-    double[] lowerBoundArray = new double[size];
-    long[] resultTimeArray = new long[size];
-    double[] errorArray = new double[size];
+    final int size = forecastDF.size();
+    final double[] baselineArray = new double[size];
+    final double[] upperBoundArray = new double[size];
+    final double[] lowerBoundArray = new double[size];
+    final long[] resultTimeArray = new long[size];
+    final double[] errorArray = new double[size];
 
     double lastAlpha = alpha;
     double lastBeta = beta;
     double lastGamma = gamma;
 
     for (int k = 0; k < size; k++) {
-      DataFrame trainingDF;
-      if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY) && !this.monitoringGranularity
+      final DataFrame trainingDF;
+      if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY) && !monitoringGranularity
           .endsWith(
-              TimeGranularity.MONTHS) && !this.monitoringGranularity
+              TimeGranularity.MONTHS) && !monitoringGranularity
           .endsWith(TimeGranularity.WEEKS)) {
         trainingDF = getDailyDF(inputDF, forecastDF.getLong(DataFrame.COL_TIME, k), timezone);
       } else {
@@ -535,8 +533,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
       resultTimeArray[k] = forecastDF.getLong(DataFrame.COL_TIME, k);
 
-      double[] y = trainingDF.getDoubles(DataFrame.COL_VALUE).values();
-      HoltWintersParams params;
+      final double[] y = trainingDF.getDoubles(DataFrame.COL_VALUE).values();
+      final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
       } else {
@@ -547,9 +545,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       lastBeta = params.getBeta();
       lastGamma = params.getGamma();
 
-      ForecastResults result = forecast(y, params.getAlpha(), params.getBeta(), params.getGamma());
-      double predicted = result.getPredictedValue();
-      double error = result.getErrorBound();
+      final ForecastResults result = forecast(y,
+          params.getAlpha(),
+          params.getBeta(),
+          params.getGamma());
+      final double predicted = result.getPredictedValue();
+      final double error = result.getErrorBound();
 
       baselineArray[k] = predicted;
       errorArray[k] = error;
@@ -577,9 +578,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param lastGamma last gamma value
    * @return double array containing fitted alpha, beta and gamma
    */
-  private HoltWintersParams fitModelWithBOBYQA(double[] y, double lastAlpha, double lastBeta,
+  private HoltWintersParams fitModelWithBOBYQA(final double[] y, double lastAlpha, double lastBeta,
       double lastGamma) {
-    BOBYQAOptimizer optimizer = new BOBYQAOptimizer(7);
+    final BOBYQAOptimizer optimizer = new BOBYQAOptimizer(7);
     if (lastAlpha < 0) {
       lastAlpha = 0.1;
     }
@@ -589,25 +590,24 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     if (lastGamma < 0) {
       lastGamma = 0.001;
     }
-    InitialGuess initGuess = new InitialGuess(new double[]{lastAlpha, lastBeta, lastGamma});
-    MaxIter maxIter = new MaxIter(30000);
-    MaxEval maxEval = new MaxEval(30000);
-    GoalType goal = GoalType.MINIMIZE;
-    ObjectiveFunction objectiveFunction = new ObjectiveFunction(new MultivariateFunction() {
-      public double value(double[] params) {
-        return forecast(y, params[0], params[1], params[2]).getSSE();
-      }
-    });
-    SimpleBounds bounds = new SimpleBounds(new double[]{0.001, 0.001, 0.001},
+    final InitialGuess initGuess = new InitialGuess(new double[]{lastAlpha, lastBeta, lastGamma});
+    final MaxIter maxIter = new MaxIter(30000);
+    final MaxEval maxEval = new MaxEval(30000);
+    final GoalType goal = GoalType.MINIMIZE;
+    final ObjectiveFunction objectiveFunction = new ObjectiveFunction(params -> forecast(y,
+        params[0],
+        params[1],
+        params[2]).getSse());
+    final SimpleBounds bounds = new SimpleBounds(new double[]{0.001, 0.001, 0.001},
         new double[]{0.999, 0.999, 0.999});
 
     HoltWintersParams params;
     try {
-      PointValuePair optimal = optimizer
+      final PointValuePair optimal = optimizer
           .optimize(objectiveFunction, goal, bounds, initGuess, maxIter, maxEval);
       params = new HoltWintersParams(optimal.getPoint()[0], optimal.getPoint()[1],
           optimal.getPoint()[2]);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOG.error(e.toString());
       params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma);
     }
@@ -629,7 +629,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     private final double beta;
     private final double gamma;
 
-    HoltWintersParams(double alpha, double beta, double gamma) {
+    HoltWintersParams(final double alpha, final double beta, final double gamma) {
       this.alpha = alpha;
       this.beta = beta;
       this.gamma = gamma;
@@ -654,12 +654,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   final static class ForecastResults {
 
     private final double predictedValue;
-    private final double SSE;
+    private final double sse;
     private final double errorBound;
 
-    ForecastResults(double predictedValue, double SSE, double errorBound) {
+    ForecastResults(final double predictedValue, final double sse, final double errorBound) {
       this.predictedValue = predictedValue;
-      this.SSE = SSE;
+      this.sse = sse;
       this.errorBound = errorBound;
     }
 
@@ -667,8 +667,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       return predictedValue;
     }
 
-    double getSSE() {
-      return SSE;
+    double getSse() {
+      return sse;
     }
 
     double getErrorBound() {

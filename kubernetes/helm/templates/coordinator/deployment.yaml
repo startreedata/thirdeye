@@ -80,32 +80,8 @@ spec:
             protocol: TCP
         volumeMounts:
           - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/data-sources/data-sources-config.yml"
-            subPath: "data-sources-config.yml"
-            readOnly: true
-          - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/data-sources/cache-config.yml"
-            subPath: "cache-config.yml"
-            readOnly: true
-          - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/detector.yml"
-            subPath: "detector.yml"
-            readOnly: true
-          - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/persistence.yml"
-            subPath: "persistence.yml"
-            readOnly: true
-          - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/coordinator.yaml"
             subPath: "coordinator.yaml"
-            readOnly: true
-          - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/scheduler.yaml"
-            subPath: "scheduler.yaml"
-            readOnly: true
-          - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/rca.yml"
-            subPath: "rca.yml"
             readOnly: true
           {{- if .Values.config.holidayLoaderKey }}
           - name: thirdeye-config

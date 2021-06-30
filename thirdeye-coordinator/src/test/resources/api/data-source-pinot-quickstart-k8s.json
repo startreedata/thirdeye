@@ -1,6 +1,6 @@
 [
   {
-    "name": "pinot1",
+    "name": "pinotQuickStartK8s",
     "type": "pinot",
     "properties": {
       "zookeeperUrl": "pinot-zookeeper:2181",

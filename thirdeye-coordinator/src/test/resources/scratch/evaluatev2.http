@@ -46,7 +46,7 @@ Content-Type: application/json
       "type": "DataFetcher",
       "params": {
         "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-        "component.pinot.dataSource": "pinot1",
+        "component.pinot.dataSource": "pinotQuickStartLocal",
         "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
         "component.pinot.tableName": "pageviews",
         "startTime": "20200202",
@@ -65,7 +65,7 @@ Content-Type: application/json
       "type": "DataFetcher",
       "params": {
         "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-        "component.pinot.dataSource": "pinot1",
+        "component.pinot.dataSource": "pinotQuickStartLocal",
         "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
         "component.pinot.tableName": "pageviews",
         "startTime": "20200209",

@@ -72,6 +72,11 @@ public class DetectionComponentsPlugin implements Plugin {
             "THRESHOLD_RULE",
             ThresholdRuleDetectorSpec.class,
             ThresholdRuleDetector.class
+        ),
+        new GenericAnomalyDetectorV2Factory<>(
+            "MEAN_VARIANCE",
+            MeanVarianceRuleDetectorSpec.class,
+            MeanVarianceRuleDetector.class
         )
     );
   }

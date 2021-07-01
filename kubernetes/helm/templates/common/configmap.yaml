@@ -145,11 +145,6 @@ data:
       detectionPipeline: true
       detectionAlert: true
 
-      # Enable autoloading data sources with a default frequency of 5 min
-      autoOnboard:
-        enabled: true
-        frequency: PT3m # 3 min
-
       holidayEvents:
         enabled: {{ not .Values.config.holidayLoaderKey | ternary "false" "true" }}
         calendars:

@@ -30,9 +30,7 @@ public class AlertExceptionHandler {
 
   private static void populateStatusListApi(final Throwable e, StatusListApi statusListApi) {
     final List<StatusApi> l = statusListApi.getList();
-    if (e instanceof InterruptedException) {
-      l.add(statusApi(ERR_UNKNOWN, e.getMessage()));
-    } else if (e instanceof TimeoutException) {
+    if (e instanceof TimeoutException) {
       l.add(statusApi(ERR_TIMEOUT));
     } else if (e instanceof DataProviderException) {
       l.add(statusApi(ERR_DATA_UNAVAILABLE, e.getMessage()));
@@ -41,6 +39,8 @@ public class AlertExceptionHandler {
       l.add(new StatusApi()
           .setCode(thirdEyeException.getStatus())
           .setMsg(thirdEyeException.getMessage()));
+    } else  {
+      l.add(statusApi(ERR_UNKNOWN, e.getMessage()));
     }
     if (e.getCause() != null) {
       populateStatusListApi(e.getCause(), statusListApi);

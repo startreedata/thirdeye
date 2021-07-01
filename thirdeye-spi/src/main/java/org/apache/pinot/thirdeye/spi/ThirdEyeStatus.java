@@ -18,7 +18,7 @@ public enum ThirdEyeStatus {
   ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
   ERR_CONFIG("Configuration Error! %s"),
   ERR_TIMEOUT("Operation timed out!"),
-  ERR_UNKNOWN("Untagged Error! %s");
+  ERR_UNKNOWN("%s");
 
   final String message;
 

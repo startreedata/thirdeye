@@ -62,7 +62,7 @@ export const AnomalyList: FunctionComponent<AnomalyListProps> = (
                 type: "string",
                 sortable: true,
                 headerName: t("label.name"),
-                width: 150,
+                flex: 1,
                 renderCell: (params) =>
                     linkCellRenderer(
                         params,
@@ -89,7 +89,21 @@ export const AnomalyList: FunctionComponent<AnomalyListProps> = (
                 field: "duration",
                 type: "string",
                 headerName: t("label.duration"),
-                width: 100,
+                width: 180,
+            },
+            // Start
+            {
+                field: "startTime",
+                type: "string",
+                headerName: t("label.start"),
+                width: 200,
+            },
+            // End
+            {
+                field: "endTime",
+                type: "string",
+                headerName: t("label.end"),
+                width: 200,
             },
             // Current
             {

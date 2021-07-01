@@ -97,7 +97,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents centered hideAppBreadcrumbs title={t("label.anomalies")}>
+        <PageContents hideAppBreadcrumbs title={t("label.anomalies")}>
             {/* Anomaly list */}
             <AnomalyList
                 anomalies={uiAnomalies}

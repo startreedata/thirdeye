@@ -184,7 +184,9 @@ public class DetectionRegistry {
       String factoryName,
       AnomalyDetectorFactoryContext context) {
     checkArgument(anomalyDetectorV2FactoryMap.containsKey(factoryName),
-        "Detector type not registered: " + factoryName);
+        String.format("Detector type not registered: %s. Available detectors: %s",
+            factoryName,
+            anomalyDetectorV2FactoryMap.keySet()));
     return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
   }
 

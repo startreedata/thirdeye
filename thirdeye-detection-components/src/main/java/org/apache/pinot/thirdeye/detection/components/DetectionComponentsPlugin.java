@@ -64,6 +64,11 @@ public class DetectionComponentsPlugin implements Plugin {
             PercentageChangeRuleDetector.class
         ),
         new GenericAnomalyDetectorV2Factory<>(
+            "HOLT_WINTERS",
+            HoltWintersDetectorSpec.class,
+            HoltWintersDetector.class
+        ),
+        new GenericAnomalyDetectorV2Factory<>(
             "ABSOLUTE_CHANGE",
             AbsoluteChangeRuleDetectorSpec.class,
             AbsoluteChangeRuleDetector.class

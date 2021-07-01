@@ -9,7 +9,7 @@
       "planNodeName": "root",
       "type": "AnomalyDetector",
       "params": {
-        "component.detector.type": "PERCENTAGE_RULE",
+        "component.detector.type": "PERCENTAGE_CHANGE",
         "component.detector.timezone": "US/Pacific",
         "component.detector.monitoringGranularity": "1_DAYS",
         "component.detector.percentageChange": "0.1",

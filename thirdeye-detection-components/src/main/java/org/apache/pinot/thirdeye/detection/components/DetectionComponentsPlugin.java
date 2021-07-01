@@ -59,7 +59,7 @@ public class DetectionComponentsPlugin implements Plugin {
   public Iterable<AnomalyDetectorV2Factory> getAnomalyDetectorV2Factories() {
     return ImmutableList.of(
         new GenericAnomalyDetectorV2Factory<>(
-            "PERCENTAGE_RULE",
+            "PERCENTAGE_CHANGE",
             PercentageChangeRuleDetectorSpec.class,
             PercentageChangeRuleDetector.class
         ),
@@ -69,7 +69,7 @@ public class DetectionComponentsPlugin implements Plugin {
             AbsoluteChangeRuleDetector.class
         ),
         new GenericAnomalyDetectorV2Factory<>(
-            "THRESHOLD_RULE",
+            "THRESHOLD",
             ThresholdRuleDetectorSpec.class,
             ThresholdRuleDetector.class
         ),

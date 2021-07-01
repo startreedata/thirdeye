@@ -9,7 +9,7 @@
       "planNodeName": "root",
       "type": "AnomalyDetector",
       "params": {
-        "component.detector.type": "THRESHOLD_RULE",
+        "component.detector.type": "THRESHOLD",
         "component.detector.timezone": "US/Pacific",
         "component.detector.monitoringGranularity": "1_DAYS",
         "component.detector.max": "10000",

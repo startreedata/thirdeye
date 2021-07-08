@@ -22,10 +22,10 @@ package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 
-public class AlertDTO extends DetectionConfigBean {
+public class AlertDTO extends AlertBean {
 
   private Map<String, BaseComponent> components = new HashMap<>();
 

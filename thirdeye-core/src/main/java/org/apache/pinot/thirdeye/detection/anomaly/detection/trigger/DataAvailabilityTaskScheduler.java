@@ -48,7 +48,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
@@ -182,7 +182,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       Map<String, DatasetConfigDTO> datasetConfigMap) {
     Map<Long, Set<String>> metricCache = new HashMap<>();
     List<AlertDTO> detectionConfigs = alertManager.findAllActive()
-        .stream().filter(DetectionConfigBean::isDataAvailabilitySchedule)
+        .stream().filter(AlertBean::isDataAvailabilitySchedule)
         .collect(Collectors.toList());
     for (AlertDTO detectionConfig : detectionConfigs) {
       Set<String> metricUrns = DetectionConfigFormatter

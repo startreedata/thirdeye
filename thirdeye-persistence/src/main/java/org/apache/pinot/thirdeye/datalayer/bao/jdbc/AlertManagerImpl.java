@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -35,7 +35,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
 
   @Inject
   public AlertManagerImpl(GenericPojoDao genericPojoDao) {
-    super(AlertDTO.class, DetectionConfigBean.class, genericPojoDao);
+    super(AlertDTO.class, AlertBean.class, genericPojoDao);
   }
 
   @Override
@@ -48,8 +48,8 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
         return 0;
       }
     } else {
-      DetectionConfigBean detectionConfigBean = convertDetectionConfigDTO2Bean(alertDTO);
-      return genericPojoDao.update(detectionConfigBean);
+      AlertBean alertBean = convertDetectionConfigDTO2Bean(alertDTO);
+      return genericPojoDao.update(alertBean);
     }
   }
 
@@ -61,22 +61,22 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
       return alertDTO.getId();
     }
 
-    DetectionConfigBean detectionConfigBean = convertDetectionConfigDTO2Bean(alertDTO);
-    Long id = genericPojoDao.put(detectionConfigBean);
+    AlertBean alertBean = convertDetectionConfigDTO2Bean(alertDTO);
+    Long id = genericPojoDao.put(alertBean);
     alertDTO.setId(id);
     return id;
   }
 
-  DetectionConfigBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO) {
+  AlertBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO) {
     alertDTO.setComponents(Collections.emptyMap());
-    DetectionConfigBean bean = convertDTO2Bean(alertDTO, DetectionConfigBean.class);
+    AlertBean bean = convertDTO2Bean(alertDTO, AlertBean.class);
     return bean;
   }
 
   @Override
   public List<AlertDTO> findAllActive() {
     List<AlertDTO> detectionConfigs = findAll();
-    return detectionConfigs.stream().filter(DetectionConfigBean::isActive)
+    return detectionConfigs.stream().filter(AlertBean::isActive)
         .collect(Collectors.toList());
   }
 }

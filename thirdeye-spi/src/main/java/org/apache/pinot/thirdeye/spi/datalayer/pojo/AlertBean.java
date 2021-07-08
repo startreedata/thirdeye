@@ -59,6 +59,9 @@ public class AlertBean extends AbstractDTO {
   // The execution dag
   Map<String, AlertNode> nodes;
 
+  // The alert template
+  AlertTemplateBean template;
+
   public List<String> getOwners() {
     return owners;
   }
@@ -187,6 +190,16 @@ public class AlertBean extends AbstractDTO {
   public AlertBean setNodes(
       final Map<String, AlertNode> nodes) {
     this.nodes = nodes;
+    return this;
+  }
+
+  public AlertTemplateBean getTemplate() {
+    return template;
+  }
+
+  public AlertBean setTemplate(
+      final AlertTemplateBean template) {
+    this.template = template;
     return this;
   }
 

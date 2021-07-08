@@ -28,15 +28,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DetectionPlanApi is self-described detection plan node.
+ * PlanNodeApi is self-described detection plan node.
  */
 @JsonInclude(Include.NON_NULL)
-public class DetectionPlanApi {
+public class PlanNodeApi {
 
   /**
    * Unique planNodeName been referred across the entire AlertEvaluation plan
    */
-  private String planNodeName;
+  private String name;
   /**
    * PlanNode type, which is registered by the implementation of
    * 'org.apache.pinot.thirdeye.detection.v2.spi.PlanNode'.
@@ -55,12 +55,12 @@ public class DetectionPlanApi {
    */
   private List<OutputApi> outputs;
 
-  public String getPlanNodeName() {
-    return planNodeName;
+  public String getName() {
+    return name;
   }
 
-  public DetectionPlanApi setPlanNodeName(final String planNodeName) {
-    this.planNodeName = planNodeName;
+  public PlanNodeApi setName(final String name) {
+    this.name = name;
     return this;
   }
 
@@ -68,7 +68,7 @@ public class DetectionPlanApi {
     return type;
   }
 
-  public DetectionPlanApi setType(final String type) {
+  public PlanNodeApi setType(final String type) {
     this.type = type;
     return this;
   }
@@ -77,7 +77,7 @@ public class DetectionPlanApi {
     return params;
   }
 
-  public DetectionPlanApi setParams(final Map<String, Object> params) {
+  public PlanNodeApi setParams(final Map<String, Object> params) {
     this.params = params;
     return this;
   }
@@ -86,7 +86,7 @@ public class DetectionPlanApi {
     return inputs;
   }
 
-  public DetectionPlanApi setInputs(
+  public PlanNodeApi setInputs(
       final List<InputApi> inputs) {
     this.inputs = inputs;
     return this;
@@ -96,7 +96,7 @@ public class DetectionPlanApi {
     return outputs;
   }
 
-  public DetectionPlanApi setOutputs(
+  public PlanNodeApi setOutputs(
       final List<OutputApi> outputs) {
     this.outputs = outputs;
     return this;

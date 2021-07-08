@@ -6,7 +6,7 @@
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "ChildKeepingMerge",
           "inputs": [
             {
@@ -17,7 +17,7 @@
           ]
         },
         {
-          "planNodeName": "percentageChangeDetector",
+          "name": "percentageChangeDetector",
           "type": "AnomalyDetector",
           "params": {
             "detectorName": "PERCENTAGE_CHANGE",
@@ -41,7 +41,7 @@
           ]
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher",
@@ -60,7 +60,7 @@
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher",
@@ -79,7 +79,7 @@
           ]
         },
         {
-          "planNodeName": "sqlJoin",
+          "name": "sqlJoin",
           "type": "SqlQueryExecutor",
           "inputs": [
             {

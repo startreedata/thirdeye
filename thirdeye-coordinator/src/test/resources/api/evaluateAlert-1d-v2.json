@@ -6,7 +6,7 @@
   },
   "nodes": [
     {
-      "planNodeName": "root",
+      "name": "root",
       "type": "AnomalyDetector",
       "params": {
         "component.detector.type": "PERCENTAGE_CHANGE",
@@ -36,7 +36,7 @@
       "outputs": []
     },
     {
-      "planNodeName": "baselineDataFetcher",
+      "name": "baselineDataFetcher",
       "type": "DataFetcher",
       "params": {
         "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -55,7 +55,7 @@
       ]
     },
     {
-      "planNodeName": "currentDataFetcher",
+      "name": "currentDataFetcher",
       "type": "DataFetcher",
       "params": {
         "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",

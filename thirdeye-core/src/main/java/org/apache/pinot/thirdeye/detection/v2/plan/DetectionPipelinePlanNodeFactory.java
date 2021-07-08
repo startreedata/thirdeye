@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
 import org.reflections.Reflections;
@@ -80,8 +80,8 @@ public class DetectionPipelinePlanNodeFactory {
 
   public PlanNode get(String name,
       Map<String, PlanNode> pipelinePlanNodes,
-      DetectionPlanApi detectionPlanApi, long startTime, long endTime) {
-    String typeKey = detectionPlanApi.getType();
+      PlanNodeApi planNodeApi, long startTime, long endTime) {
+    String typeKey = planNodeApi.getType();
     Class<? extends PlanNode> planNodeClass = planNodeTypeToClassMap.get(typeKey);
     if (planNodeClass == null) {
       throw new UnsupportedOperationException("Not supported type - " + typeKey);
@@ -92,7 +92,7 @@ public class DetectionPipelinePlanNodeFactory {
       planNode.init(new PlanNodeContext()
           .setName(name)
           .setPipelinePlanNodes(pipelinePlanNodes)
-          .setDetectionPlanApi(detectionPlanApi)
+          .setDetectionPlanApi(planNodeApi)
           .setStartTime(startTime)
           .setEndTime(endTime)
           .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)));

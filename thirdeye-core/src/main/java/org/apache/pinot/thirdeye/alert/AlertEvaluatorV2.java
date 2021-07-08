@@ -17,7 +17,7 @@ import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFact
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
@@ -68,8 +68,8 @@ public class AlertEvaluatorV2 {
     ensureExists(template, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
 
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (final DetectionPlanApi operator : template.getNodes()) {
-      final String operatorName = operator.getPlanNodeName();
+    for (final PlanNodeApi operator : template.getNodes()) {
+      final String operatorName = operator.getName();
       final PlanNode planNode = detectionPipelinePlanNodeFactory.get(
           operatorName,
           pipelinePlanNodes,

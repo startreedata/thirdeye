@@ -8,15 +8,15 @@ import java.nio.charset.StandardCharsets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class DetectionPlanApiTest {
+public class PlanNodeApiTest {
 
   @Test
   public void testInputNode() throws IOException {
-    URL resource = DetectionPlanApiTest.class.getClassLoader().getResource("inputNode.json");
-    final DetectionPlanApi inputNode = new ObjectMapper().readValue(
+    URL resource = PlanNodeApiTest.class.getClassLoader().getResource("inputNode.json");
+    final PlanNodeApi inputNode = new ObjectMapper().readValue(
         Resources.toString(resource, StandardCharsets.UTF_8),
-        DetectionPlanApi.class);
-    Assert.assertEquals(inputNode.getPlanNodeName(), "baselineDataFetcher");
+        PlanNodeApi.class);
+    Assert.assertEquals(inputNode.getName(), "baselineDataFetcher");
     Assert.assertEquals(inputNode.getType(), "DataFetcher");
     Assert.assertEquals(inputNode.getParams().size(), 5);
     Assert.assertEquals(inputNode.getOutputs().size(), 1);
@@ -26,11 +26,11 @@ public class DetectionPlanApiTest {
 
   @Test
   public void testDetectionNode() throws IOException {
-    URL resource = DetectionPlanApiTest.class.getClassLoader().getResource("detectionNode.json");
-    final DetectionPlanApi inputNode = new ObjectMapper().readValue(Resources.toString(resource,
+    URL resource = PlanNodeApiTest.class.getClassLoader().getResource("detectionNode.json");
+    final PlanNodeApi inputNode = new ObjectMapper().readValue(Resources.toString(resource,
         StandardCharsets.UTF_8),
-        DetectionPlanApi.class);
-    Assert.assertEquals(inputNode.getPlanNodeName(), "percentageChangeDetector");
+        PlanNodeApi.class);
+    Assert.assertEquals(inputNode.getName(), "percentageChangeDetector");
     Assert.assertEquals(inputNode.getType(), "AnomalyDetector");
     Assert.assertEquals(inputNode.getParams().size(), 6);
     Assert.assertEquals(inputNode.getInputs().size(), 2);

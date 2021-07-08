@@ -42,7 +42,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Map<String, Object> getParams() {
-    return detectionPlanApi.getParams();
+    return planNodeApi.getParams();
   }
 
   @Override
@@ -63,7 +63,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
     dataFetcherOperator.init(new OperatorContext()
         .setStartTime(startTime)
         .setEndTime(endTime)
-        .setDetectionPlanApi(detectionPlanApi)
+        .setDetectionPlanApi(planNodeApi)
         .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
     );
     return dataFetcherOperator;

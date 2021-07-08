@@ -28,8 +28,8 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi.OutputApi;
+import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
+import org.apache.pinot.thirdeye.spi.api.PlanNodeApi.OutputApi;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
@@ -52,7 +52,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   private static final String PROP_CLASS_NAME = "className";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
 
-  protected DetectionPlanApi config;
+  protected PlanNodeApi config;
   protected long startTime;
   protected long endTime;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
@@ -176,7 +176,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
         .setProperties(componentSpec));
   }
 
-  public DetectionPlanApi getConfig() {
+  public PlanNodeApi getConfig() {
     return config;
   }
 

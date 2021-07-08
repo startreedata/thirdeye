@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.alert.v2;
+package org.apache.pinot.thirdeye.alert;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,13 +11,13 @@ public class PlanExecutor {
 
   private static final String CONTEXT_KEY_SPLIT = "\t\t\t\t";
 
-  public static void executePlanNode(Map<String, PlanNode> pipelinePlanNodes,
-      Map<String, DetectionPipelineResult> context, final PlanNode node)
+  public static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
+      final Map<String, DetectionPipelineResult> context, final PlanNode node)
       throws Exception {
-    for (InputApi input : node.getPlanNodeInputs()) {
+    for (final InputApi input : node.getPlanNodeInputs()) {
       final String contextKey = getContextKey(input.getSourcePlanNode(), input.getSourceProperty());
       if (!context.containsKey(contextKey)) {
-        PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
+        final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
         executePlanNode(pipelinePlanNodes, context, inputPlanNode);
       }
       if (!context.containsKey(contextKey)) {
@@ -25,10 +25,10 @@ public class PlanExecutor {
       }
       node.setInput(input.getTargetProperty(), context.get(contextKey));
     }
-    Operator operator = node.run();
+    final Operator operator = node.run();
     operator.execute();
-    Map<String, DetectionPipelineResult> outputs = operator.getOutputs();
-    for (Entry<String, DetectionPipelineResult> output : outputs.entrySet()) {
+    final Map<String, DetectionPipelineResult> outputs = operator.getOutputs();
+    for (final Entry<String, DetectionPipelineResult> output : outputs.entrySet()) {
       context.put(getContextKey(node.getName(), output.getKey()), output.getValue());
     }
   }

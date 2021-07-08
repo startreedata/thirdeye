@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.alert.v2.PlanExecutor;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
+import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
@@ -27,8 +27,10 @@ public class AlertEvaluatorV2 {
 
   public static final String ROOT_OPERATOR_KEY = "root";
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
+
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
+
   // max time allowed for a preview task
   private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 
@@ -39,20 +41,20 @@ public class AlertEvaluatorV2 {
   public AlertEvaluatorV2(
       final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
     this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
-    this.executorService = Executors.newFixedThreadPool(PARALLELISM);
+    executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
   private void stop() {
-    this.executorService.shutdownNow();
+    executorService.shutdownNow();
   }
 
-  public Map<String, Map<String, DetectionEvaluationApi>> evaluate(
+  public AlertEvaluationApi evaluate(
       final AlertEvaluationPlanApi request)
       throws ExecutionException {
     try {
-      Map<String, DetectionPipelineResult> result = runPipeline(request);
+      final Map<String, DetectionPipelineResult> result = runPipeline(request);
       return toApi(result);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       handleAlertEvaluationException(e);
     }
     return null;
@@ -60,8 +62,8 @@ public class AlertEvaluatorV2 {
 
   private Map<String, DetectionPipelineResult> runPipeline(final AlertEvaluationPlanApi request)
       throws Exception {
-    Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (DetectionPlanApi operator : request.getNodes()) {
+    final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
+    for (final DetectionPlanApi operator : request.getNodes()) {
       final String operatorName = operator.getPlanNodeName();
       pipelinePlanNodes.put(operatorName, detectionPipelinePlanNodeFactory
           .get(operatorName,
@@ -71,8 +73,8 @@ public class AlertEvaluatorV2 {
               request.getEnd().getTime()));
     }
     return executorService.submit(() -> {
-      PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
-      Map<String, DetectionPipelineResult> context = new HashMap<>();
+      final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
+      final Map<String, DetectionPipelineResult> context = new HashMap<>();
       PlanExecutor.executePlanNode(pipelinePlanNodes, context, rootNode);
       final Map<String, DetectionPipelineResult> output = getOutput(context, rootNode);
       return output;
@@ -82,8 +84,8 @@ public class AlertEvaluatorV2 {
   private Map<String, DetectionPipelineResult> getOutput(
       final Map<String, DetectionPipelineResult> context,
       final PlanNode rootNode) {
-    Map<String, DetectionPipelineResult> results = new HashMap<>();
-    for (String contextKey : context.keySet()) {
+    final Map<String, DetectionPipelineResult> results = new HashMap<>();
+    for (final String contextKey : context.keySet()) {
       if (PlanExecutor.getNodeFromContextKey(contextKey).equals(rootNode.getName())) {
         results.put(PlanExecutor.getOutputKeyFromContextKey(contextKey), context.get(contextKey));
       }
@@ -91,15 +93,15 @@ public class AlertEvaluatorV2 {
     return results;
   }
 
-  private Map<String, Map<String, DetectionEvaluationApi>> toApi(
+  private AlertEvaluationApi toApi(
       final Map<String, DetectionPipelineResult> outputMap) {
 
     final Map<String, Map<String, DetectionEvaluationApi>> resultMap = new HashMap<>();
-    for (String key : outputMap.keySet()) {
+    for (final String key : outputMap.keySet()) {
       final DetectionPipelineResult result = outputMap.get(key);
       resultMap.put(key, detectionPipelineResultToApi(result));
     }
-    return resultMap;
+    return new AlertEvaluationApi().setEvaluations(resultMap);
   }
 
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
@@ -107,7 +109,7 @@ public class AlertEvaluatorV2 {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     final List<DetectionResult> detectionResults = result.getDetectionResults();
     for (int i = 0; i < detectionResults.size(); i++) {
-      DetectionEvaluationApi detectionEvaluationApi = detectionResults.get(i).toApi();
+      final DetectionEvaluationApi detectionEvaluationApi = detectionResults.get(i).toApi();
       map.put(String.valueOf(i), detectionEvaluationApi);
     }
     return map;

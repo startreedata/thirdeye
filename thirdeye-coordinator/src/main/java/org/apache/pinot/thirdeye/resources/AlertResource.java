@@ -150,10 +150,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response runTask(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @PathParam("id") Long id,
-      @FormParam("start") Long startTime,
-      @FormParam("end") Long endTime
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @PathParam("id") final Long id,
+      @FormParam("start") final Long startTime,
+      @FormParam("end") final Long endTime
   ) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
@@ -173,7 +173,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   public Response evaluateV2(
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
-      @HeaderParam("UseV1Format") final boolean useV1Format,
+      @FormParam("UseV1Format") final boolean useV1Format,
       final AlertEvaluationPlanApi request
   ) throws ExecutionException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
@@ -185,9 +185,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    Map<String, Map<String, DetectionEvaluationApi>> evaluation = alertEvaluatorV2.evaluate(request);
+    final AlertEvaluationApi evaluation = alertEvaluatorV2.evaluate(request);
     if (useV1Format) {
-      return Response.ok(convertEvaluationResultV2ToV1(evaluation)).build();
+      return Response.ok(convertEvaluationResultV2ToV1(evaluation.getEvaluations())).build();
     }
     return Response.ok(evaluation).build();
   }
@@ -195,9 +195,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private AlertEvaluationApi convertEvaluationResultV2ToV1(
       final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    for (String key : v2Result.keySet()) {
+    for (final String key : v2Result.keySet()) {
       final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
-      for (String apiKey : detectionEvaluationApiMap.keySet()) {
+      for (final String apiKey : detectionEvaluationApiMap.keySet()) {
         map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey));
       }
     }
@@ -232,8 +232,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   @Override
   public Response delete(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @PathParam("id") Long id) {
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @PathParam("id") final Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final AlertDTO dto = alertManager.findById(id);
     if (dto != null) {

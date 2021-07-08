@@ -30,6 +30,7 @@ public class AlertEvaluationApi {
 
   private AlertApi alert;
   private Map<String, DetectionEvaluationApi> detectionEvaluations;
+  private Map<String, Map<String, DetectionEvaluationApi>> evaluations;
   private Date start;
   private Date end;
   private Date lastTimestamp;
@@ -77,6 +78,16 @@ public class AlertEvaluationApi {
 
   public AlertEvaluationApi setLastTimestamp(final Date lastTimestamp) {
     this.lastTimestamp = lastTimestamp;
+    return this;
+  }
+
+  public Map<String, Map<String, DetectionEvaluationApi>> getEvaluations() {
+    return evaluations;
+  }
+
+  public AlertEvaluationApi setEvaluations(
+      final Map<String, Map<String, DetectionEvaluationApi>> evaluations) {
+    this.evaluations = evaluations;
     return this;
   }
 }

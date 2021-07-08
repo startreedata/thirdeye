@@ -1,6 +1,8 @@
 package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
+import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -13,9 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
+import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
-import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
@@ -38,8 +40,7 @@ public class AlertEvaluatorV2 {
   private final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory;
 
   @Inject
-  public AlertEvaluatorV2(
-      final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
+  public AlertEvaluatorV2(final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
     this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -48,8 +49,7 @@ public class AlertEvaluatorV2 {
     executorService.shutdownNow();
   }
 
-  public AlertEvaluationApi evaluate(
-      final AlertEvaluationPlanApi request)
+  public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
       final Map<String, DetectionPipelineResult> result = runPipeline(request);
@@ -60,24 +60,34 @@ public class AlertEvaluatorV2 {
     return null;
   }
 
-  private Map<String, DetectionPipelineResult> runPipeline(final AlertEvaluationPlanApi request)
+  private Map<String, DetectionPipelineResult> runPipeline(final AlertEvaluationApi request)
       throws Exception {
+    ensureExists(request.getAlert(), ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
+
+    final AlertTemplateApi template = request.getAlert().getTemplate();
+    ensureExists(template, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
+
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (final DetectionPlanApi operator : request.getNodes()) {
+    for (final DetectionPlanApi operator : template.getNodes()) {
       final String operatorName = operator.getPlanNodeName();
-      pipelinePlanNodes.put(operatorName, detectionPipelinePlanNodeFactory
-          .get(operatorName,
-              pipelinePlanNodes,
-              operator,
-              request.getStart().getTime(),
-              request.getEnd().getTime()));
+      final PlanNode planNode = detectionPipelinePlanNodeFactory.get(
+          operatorName,
+          pipelinePlanNodes,
+          operator,
+          request.getStart().getTime(),
+          request.getEnd().getTime());
+
+      pipelinePlanNodes.put(operatorName, planNode);
     }
     return executorService.submit(() -> {
-      final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
       final Map<String, DetectionPipelineResult> context = new HashMap<>();
+
+      /* Execute the DAG */
+      final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
       PlanExecutor.executePlanNode(pipelinePlanNodes, context, rootNode);
-      final Map<String, DetectionPipelineResult> output = getOutput(context, rootNode);
-      return output;
+
+      /* Return the output */
+      return getOutput(context, rootNode);
     }).get(TIMEOUT, TimeUnit.MILLISECONDS);
   }
 
@@ -93,9 +103,7 @@ public class AlertEvaluatorV2 {
     return results;
   }
 
-  private AlertEvaluationApi toApi(
-      final Map<String, DetectionPipelineResult> outputMap) {
-
+  private AlertEvaluationApi toApi(final Map<String, DetectionPipelineResult> outputMap) {
     final Map<String, Map<String, DetectionEvaluationApi>> resultMap = new HashMap<>();
     for (final String key : outputMap.keySet()) {
       final DetectionPipelineResult result = outputMap.get(key);

@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi;
 
 public class OperatorContext {
 

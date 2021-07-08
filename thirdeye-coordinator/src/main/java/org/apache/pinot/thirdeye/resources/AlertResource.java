@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
-import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -86,6 +85,18 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.authService = authService;
     this.alertEvaluator = alertEvaluator;
     this.alertEvaluatorV2 = alertEvaluatorV2;
+  }
+
+  private static AlertEvaluationApi convertEvaluationResultV2ToV1(
+      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
+    for (final String key : v2Result.keySet()) {
+      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
+      for (final String apiKey : detectionEvaluationApiMap.keySet()) {
+        map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey));
+      }
+    }
+    return new AlertEvaluationApi().setDetectionEvaluations(map);
   }
 
   @Override
@@ -173,8 +184,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   public Response evaluateV2(
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
-      @FormParam("UseV1Format") final boolean useV1Format,
-      final AlertEvaluationPlanApi request
+      @HeaderParam("UseV1Format") final boolean useV1Format,
+      final AlertEvaluationApi request
   ) throws ExecutionException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
@@ -190,18 +201,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       return Response.ok(convertEvaluationResultV2ToV1(evaluation.getEvaluations())).build();
     }
     return Response.ok(evaluation).build();
-  }
-
-  private AlertEvaluationApi convertEvaluationResultV2ToV1(
-      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
-    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    for (final String key : v2Result.keySet()) {
-      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
-      for (final String apiKey : detectionEvaluationApiMap.keySet()) {
-        map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey));
-      }
-    }
-    return new AlertEvaluationApi().setDetectionEvaluations(map);
   }
 
   @Path("evaluate")

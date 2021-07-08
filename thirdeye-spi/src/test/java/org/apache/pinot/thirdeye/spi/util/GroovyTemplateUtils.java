@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.pinot.thirdeye.spi.api.v2.AlertEvaluationPlanApi;
+import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 
 public class GroovyTemplateUtils {
 
@@ -66,16 +66,10 @@ public class GroovyTemplateUtils {
 
   /**
    * TODO move this method to thirdeye-core along with the groovy dependency
-   *
-   * @param template
-   * @param context
-   * @return
-   * @throws IOException
-   * @throws ClassNotFoundException
    */
-  public static AlertEvaluationPlanApi applyContextToTemplate(String template,
+  public static AlertEvaluationApi applyContextToTemplate(String template,
       Map<String, Object> context) throws IOException, ClassNotFoundException {
     return new ObjectMapper().readValue(
-        renderTemplate(template, context), AlertEvaluationPlanApi.class);
+        renderTemplate(template, context), AlertEvaluationApi.class);
   }
 }

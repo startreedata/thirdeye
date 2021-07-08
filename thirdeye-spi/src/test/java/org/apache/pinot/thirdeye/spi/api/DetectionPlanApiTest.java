@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.spi.api.v2;
+package org.apache.pinot.thirdeye.spi.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;

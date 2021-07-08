@@ -102,7 +102,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Override
   protected AlertDTO createDto(final ThirdEyePrincipal principal, final AlertApi api) {
     ensureExists(api.getName(), "Name must be present");
-    ensureExists(api.getNodes(), "Exactly 1 detection must be present");
 
     if (api.getCron() == null) {
       api.setCron(CRON_EVERY_1MIN);

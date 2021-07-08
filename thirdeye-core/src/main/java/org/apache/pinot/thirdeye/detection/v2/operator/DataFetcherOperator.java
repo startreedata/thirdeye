@@ -5,7 +5,7 @@ import static org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanN
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
-import org.apache.pinot.thirdeye.spi.api.PlanNodeApi.OutputApi;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
@@ -34,8 +34,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
     this.dataSourceCache = (DataSourceCache) context.getProperties()
         .get(DATA_SOURCE_CACHE_REF_KEY);
     super.init(context);
-    for (OutputApi outputApi : context.getDetectionPlanApi().getOutputs()) {
-      outputKeyMap.put(outputApi.getOutputKey(), outputApi.getOutputName());
+    for (OutputBean outputBean : context.getDetectionPlanApi().getOutputs()) {
+      outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
   }
 

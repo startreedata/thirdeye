@@ -42,15 +42,21 @@ public class AlertApiBeanMapper {
         .map(ApiBeanMapper::toAlertNodeMap)
         .ifPresent(dto::setNodes);
 
+    optional(api.getTemplate())
+        .map(ApiBeanMapper::toAlertTemplateBean)
+        .ifPresent(dto::setTemplate);
+
     // May not get updated while edits
     optional(api.getOwner())
         .map(UserApi::getPrincipal)
         .ifPresent(dto::setCreatedBy);
 
-    final AlertExecutionPlanBuilder builder = new AlertExecutionPlanBuilder(dataProvider)
-        .process(api);
-    dto.setProperties(builder.getProperties());
-    dto.setComponentSpecs(builder.getComponentSpecs());
+    if (api.getNodes() != null) {
+      final AlertExecutionPlanBuilder builder = new AlertExecutionPlanBuilder(dataProvider)
+          .process(api);
+      dto.setProperties(builder.getProperties());
+      dto.setComponentSpecs(builder.getComponentSpecs());
+    }
 
     return dto;
   }

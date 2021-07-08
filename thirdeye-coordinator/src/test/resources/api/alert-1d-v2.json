@@ -1,12 +1,12 @@
 [
   {
-    "name": "percentage-change-template",
-    "description": "Percentage drop template",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "name": "newAlert",
+    "description": "This is the detection used by online service",
+    "cron": "0 0/1 * 1/1 * ? * ",
     "template": {
       "nodes": [
         {
-          "name": "root",
+          "planNodeName": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.type": "PERCENTAGE_CHANGE",
@@ -36,7 +36,7 @@
           "outputs": []
         },
         {
-          "name": "baselineDataFetcher",
+          "planNodeName": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -55,7 +55,7 @@
           ]
         },
         {
-          "name": "currentDataFetcher",
+          "planNodeName": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -74,6 +74,7 @@
           ]
         }
       ]
-    }
+    },
+    "lastTimestamp": 0
   }
 ]

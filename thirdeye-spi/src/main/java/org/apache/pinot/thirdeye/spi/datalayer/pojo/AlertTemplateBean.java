@@ -2,8 +2,6 @@ package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
-import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 public class AlertTemplateBean extends AbstractDTO {
@@ -13,8 +11,8 @@ public class AlertTemplateBean extends AbstractDTO {
   private String cron;
   private Date created;
   private Date updated;
-  private UserApi owner;
-  private List<PlanNodeApi> nodes;
+  private UserBean owner;
+  private List<PlanNodeBean> nodes;
 
   public String getName() {
     return name;
@@ -61,21 +59,21 @@ public class AlertTemplateBean extends AbstractDTO {
     return this;
   }
 
-  public UserApi getOwner() {
+  public UserBean getOwner() {
     return owner;
   }
 
-  public AlertTemplateBean setOwner(final UserApi owner) {
+  public AlertTemplateBean setOwner(final UserBean owner) {
     this.owner = owner;
     return this;
   }
 
-  public List<PlanNodeApi> getNodes() {
+  public List<PlanNodeBean> getNodes() {
     return nodes;
   }
 
   public AlertTemplateBean setNodes(
-      final List<PlanNodeApi> nodes) {
+      final List<PlanNodeBean> nodes) {
     this.nodes = nodes;
     return this;
   }

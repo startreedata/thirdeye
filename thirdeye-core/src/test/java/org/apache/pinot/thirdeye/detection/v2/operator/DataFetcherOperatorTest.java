@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
-import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.testng.Assert;
@@ -22,13 +22,13 @@ public class DataFetcherOperatorTest {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final long startTime = System.currentTimeMillis();
     final long endTime = startTime + 1000L;
-    final PlanNodeApi planNodeApi = new PlanNodeApi().setOutputs(ImmutableList.of());
+    final PlanNodeBean planNodeBean = new PlanNodeBean().setOutputs(ImmutableList.of());
     final DataSourceCache mockDataSourceCache = mock(DataSourceCache.class);
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         mockDataSourceCache);
     final OperatorContext context = new OperatorContext().setStartTime(startTime)
         .setEndTime(endTime)
-        .setDetectionPlanApi(planNodeApi)
+        .setDetectionPlanApi(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
     Assert.assertEquals(dataFetcherOperator.getStartTime(), startTime);
@@ -48,7 +48,7 @@ public class DataFetcherOperatorTest {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final long startTime = System.currentTimeMillis();
     final long endTime = startTime + 1000L;
-    final PlanNodeApi planNodeApi = new PlanNodeApi()
+    final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setOutputs(ImmutableList.of())
         .setInputs(ImmutableList.of())
         .setParams(params);
@@ -58,7 +58,7 @@ public class DataFetcherOperatorTest {
         mockDataSourceCache);
     final OperatorContext context = new OperatorContext().setStartTime(startTime)
         .setEndTime(endTime)
-        .setDetectionPlanApi(planNodeApi)
+        .setDetectionPlanApi(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
     Assert.assertEquals(dataFetcherOperator.getStartTime(), startTime);

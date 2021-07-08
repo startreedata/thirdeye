@@ -17,10 +17,12 @@ import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFact
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
-import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,11 +66,13 @@ public class AlertEvaluatorV2 {
       throws Exception {
     ensureExists(request.getAlert(), ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
-    final AlertTemplateApi template = request.getAlert().getTemplate();
-    ensureExists(template, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
+    final AlertTemplateApi templateApi = request.getAlert().getTemplate();
+    ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
+
+    final AlertTemplateBean template = ApiBeanMapper.toAlertTemplateBean(templateApi);
 
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (final PlanNodeApi operator : template.getNodes()) {
+    for (final PlanNodeBean operator : template.getNodes()) {
       final String operatorName = operator.getName();
       final PlanNode planNode = detectionPipelinePlanNodeFactory.get(
           operatorName,

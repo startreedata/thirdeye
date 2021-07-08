@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
+import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
 import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
@@ -38,11 +39,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 public abstract class ApiBeanMapper {
 
@@ -157,10 +161,19 @@ public abstract class ApiBeanMapper {
         .setNodes(optional(dto.getNodes())
             .map(ApiBeanMapper::toAlertNodeApiMap)
             .orElse(null))
+        .setTemplate(optional(dto.getTemplate())
+            .map(ApiBeanMapper::toAlertTemplateApi)
+            .orElse(null))
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
         ;
+  }
+
+  private static AlertTemplateApi toAlertTemplateApi(final AlertTemplateBean alertTemplateBean) {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    return modelMapper.map(alertTemplateBean, AlertTemplateApi.class);
   }
 
   private static Map<String, AlertNodeApi> toAlertNodeApiMap(
@@ -453,5 +466,11 @@ public abstract class ApiBeanMapper {
     return new AnomalyFeedbackApi()
         .setComment(feedbackDto.getComment())
         .setType(feedbackDto.getFeedbackType());
+  }
+
+  public static AlertTemplateBean toAlertTemplateBean(final AlertTemplateApi api) {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    return modelMapper.map(api, AlertTemplateBean.class);
   }
 }

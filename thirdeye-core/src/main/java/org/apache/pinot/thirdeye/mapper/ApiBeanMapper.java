@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.spi.util;
+package org.apache.pinot.thirdeye.mapper;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
@@ -45,6 +45,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 

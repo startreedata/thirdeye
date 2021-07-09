@@ -6,6 +6,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +15,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
+import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
-import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +50,31 @@ public class AlertEvaluatorV2 {
   public AlertEvaluatorV2(final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
     this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
     executorService = Executors.newFixedThreadPool(PARALLELISM);
+  }
+
+  public static DetectionDataApi getData(TimeSeries timeSeries) {
+    final DetectionDataApi detectionDataApi = new DetectionDataApi();
+    detectionDataApi.setCurrent(timeSeries.getCurrent().toList());
+    detectionDataApi.setExpected(timeSeries.getPredictedBaseline().toList());
+    detectionDataApi.setTimestamp(timeSeries.getTime().toList());
+    if (timeSeries.hasLowerBound()) {
+      detectionDataApi.setLowerBound(timeSeries.getPredictedLowerBound().toList());
+    }
+    if (timeSeries.hasUpperBound()) {
+      detectionDataApi.setUpperBound(timeSeries.getPredictedUpperBound().toList());
+    }
+    return detectionDataApi;
+  }
+
+  public static DetectionEvaluationApi toApi(DetectionResult detectionResult) {
+    DetectionEvaluationApi api = new DetectionEvaluationApi();
+    final List<AnomalyApi> anomalyApis = new ArrayList<>();
+    for (MergedAnomalyResultDTO anomalyDto : detectionResult.getAnomalies()) {
+      anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
+    }
+    api.setAnomalies(anomalyApis);
+    api.setData(getData(detectionResult.getTimeseries()));
+    return api;
   }
 
   private void stop() {
@@ -121,7 +151,7 @@ public class AlertEvaluatorV2 {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     final List<DetectionResult> detectionResults = result.getDetectionResults();
     for (int i = 0; i < detectionResults.size(); i++) {
-      final DetectionEvaluationApi detectionEvaluationApi = detectionResults.get(i).toApi();
+      final DetectionEvaluationApi detectionEvaluationApi = toApi(detectionResults.get(i));
       map.put(String.valueOf(i), detectionEvaluationApi);
     }
     return map;

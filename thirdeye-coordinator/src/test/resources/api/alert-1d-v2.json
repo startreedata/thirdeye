@@ -3,10 +3,11 @@
     "name": "newAlert",
     "description": "This is the detection used by online service",
     "cron": "0 0/1 * 1/1 * ? * ",
+    "v1Format": true,
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.type": "PERCENTAGE_CHANGE",
@@ -36,11 +37,11 @@
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinot1",
+            "component.pinot.dataSource": "pinotQuickStartLocal",
             "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" < 20200214 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
             "component.pinot.tableName": "pageviews",
             "startTime": "20200202",
@@ -55,11 +56,11 @@
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinot1",
+            "component.pinot.dataSource": "pinotQuickStartLocal",
             "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200302 AND \"date\" < 20200314 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
             "component.pinot.tableName": "pageviews",
             "startTime": "20200202",

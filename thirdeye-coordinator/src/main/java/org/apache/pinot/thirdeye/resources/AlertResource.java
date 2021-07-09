@@ -191,7 +191,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   public Response evaluate(
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
-      @HeaderParam("UseV1Format") final boolean useV1Format,
       final AlertEvaluationApi request
   ) throws ExecutionException {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
@@ -199,14 +198,15 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
 
-    ensureExists(request.getAlert())
+    final AlertApi alert = request.getAlert();
+    ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
     AlertEvaluationApi evaluation;
-    if (isV2Evaluation(request.getAlert())) {
+    if (isV2Evaluation(alert)) {
       evaluation = alertEvaluatorV2.evaluate(request);
-      if (useV1Format) {
+      if (alert.isV1Format()) {
         evaluation = toV1Format(evaluation.getEvaluations());
       }
     } else {

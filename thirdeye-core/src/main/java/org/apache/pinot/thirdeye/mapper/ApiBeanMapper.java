@@ -46,8 +46,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 
 public abstract class ApiBeanMapper {
 
@@ -172,9 +170,7 @@ public abstract class ApiBeanMapper {
   }
 
   private static AlertTemplateApi toAlertTemplateApi(final AlertTemplateBean alertTemplateBean) {
-    ModelMapper modelMapper = new ModelMapper();
-    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    return modelMapper.map(alertTemplateBean, AlertTemplateApi.class);
+    return AlertTemplateMapper.INSTANCE.toApi(alertTemplateBean);
   }
 
   private static Map<String, AlertNodeApi> toAlertNodeApiMap(

@@ -11,4 +11,6 @@ public interface AlertTemplateMapper {
   AlertTemplateMapper INSTANCE = Mappers.getMapper(AlertTemplateMapper.class);
 
   AlertTemplateBean toBean(AlertTemplateApi api);
+
+  AlertTemplateApi toApi(AlertTemplateBean bean);
 }

@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
+import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
@@ -87,7 +88,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertEvaluatorV2 = alertEvaluatorV2;
   }
 
-  private static AlertEvaluationApi convertEvaluationResultV2ToV1(
+  private static AlertEvaluationApi toV1Format(
       final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     for (final String key : v2Result.keySet()) {
@@ -97,6 +98,13 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       }
     }
     return new AlertEvaluationApi().setDetectionEvaluations(map);
+  }
+
+  private static boolean isV2Evaluation(final AlertApi alert) {
+    return optional(alert)
+        .map(AlertApi::getTemplate)
+        .map(AlertTemplateApi::getNodes)
+        .isPresent();
   }
 
   @Override
@@ -178,10 +186,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok().build();
   }
 
-  @Path("evaluateV2")
+  @Path("evaluate")
   @POST
   @Timed
-  public Response evaluateV2(
+  public Response evaluate(
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
       @HeaderParam("UseV1Format") final boolean useV1Format,
       final AlertEvaluationApi request
@@ -195,33 +203,17 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    final AlertEvaluationApi evaluation = alertEvaluatorV2.evaluate(request);
-    if (useV1Format) {
-      return Response.ok(convertEvaluationResultV2ToV1(evaluation.getEvaluations())).build();
+    AlertEvaluationApi evaluation;
+    if (isV2Evaluation(request.getAlert())) {
+      evaluation = alertEvaluatorV2.evaluate(request);
+      if (useV1Format) {
+        evaluation = toV1Format(evaluation.getEvaluations());
+      }
+    } else {
+      // v1 Evaluation. Will be deprecated in the future
+      evaluation = alertEvaluator.evaluate(request);
     }
     return Response.ok(evaluation).build();
-  }
-
-  @Path("evaluate")
-  @POST
-  @Timed
-  public Response evaluate(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
-      final AlertEvaluationApi request
-  ) throws ExecutionException {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
-    ensureExists(request.getStart(), "start");
-    ensureExists(request.getEnd(), "end");
-
-    ensureExists(request.getAlert())
-        .setOwner(new UserApi()
-            .setPrincipal(principal.getName()));
-
-    final AlertEvaluationApi evaluation = alertEvaluator.evaluate(request);
-    return Response
-        .ok(evaluation)
-        .build();
   }
 
   @DELETE

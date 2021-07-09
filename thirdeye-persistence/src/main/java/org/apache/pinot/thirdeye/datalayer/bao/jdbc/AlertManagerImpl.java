@@ -69,8 +69,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
 
   AlertBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO) {
     alertDTO.setComponents(Collections.emptyMap());
-    AlertBean bean = convertDTO2Bean(alertDTO, AlertBean.class);
-    return bean;
+    return toBean(alertDTO);
   }
 
   @Override

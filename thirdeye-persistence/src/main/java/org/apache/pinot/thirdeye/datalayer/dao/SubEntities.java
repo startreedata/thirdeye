@@ -48,13 +48,13 @@ import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.SubEntityType;
 import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionStatusBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.EntityToEntityMappingBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
@@ -101,7 +101,7 @@ public class SubEntities {
         .put(RootcauseSessionBean.class, RootcauseSessionIndex.class)
         .put(SessionBean.class, SessionIndex.class)
         .put(AlertBean.class, DetectionConfigIndex.class)
-        .put(DetectionAlertConfigBean.class, DetectionAlertConfigIndex.class)
+        .put(SubscriptionGroupDTO.class, DetectionAlertConfigIndex.class)
         .put(EvaluationBean.class, EvaluationIndex.class)
         .put(RootcauseTemplateBean.class, RootcauseTemplateIndex.class)
         .put(OnlineDetectionDataBean.class, OnlineDetectionDataIndex.class)
@@ -128,7 +128,7 @@ public class SubEntities {
         .put(RootcauseSessionBean.class, ROOT_CAUSE_SESSION)
         .put(SessionBean.class, SESSION)
         .put(AlertBean.class, ALERT)
-        .put(DetectionAlertConfigBean.class, SUBSCRIPTION_GROUP)
+        .put(SubscriptionGroupDTO.class, SUBSCRIPTION_GROUP)
         .put(EvaluationBean.class, EVALUATION)
         .put(RootcauseTemplateBean.class, ROOT_CAUSE_TEMPLATE)
         .put(OnlineDetectionDataBean.class, ONLINE_DETECTION_DATA)

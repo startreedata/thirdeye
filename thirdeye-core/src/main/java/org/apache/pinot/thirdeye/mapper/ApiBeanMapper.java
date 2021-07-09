@@ -470,8 +470,6 @@ public abstract class ApiBeanMapper {
   }
 
   public static AlertTemplateBean toAlertTemplateBean(final AlertTemplateApi api) {
-    ModelMapper modelMapper = new ModelMapper();
-    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    return modelMapper.map(api, AlertTemplateBean.class);
+    return AlertTemplateMapper.INSTANCE.toBean(api);
   }
 }

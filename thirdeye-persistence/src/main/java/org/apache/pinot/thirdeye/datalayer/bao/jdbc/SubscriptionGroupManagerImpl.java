@@ -31,6 +31,6 @@ public class SubscriptionGroupManagerImpl extends
 
   @Inject
   public SubscriptionGroupManagerImpl(GenericPojoDao genericPojoDao) {
-    super(SubscriptionGroupDTO.class, SubscriptionGroupDTO.class, genericPojoDao);
+    super(SubscriptionGroupDTO.class, genericPojoDao);
   }
 }

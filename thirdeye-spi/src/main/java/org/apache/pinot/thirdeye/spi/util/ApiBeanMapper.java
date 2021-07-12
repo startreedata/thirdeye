@@ -26,6 +26,7 @@ import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
+import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
@@ -36,6 +37,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
@@ -453,5 +455,35 @@ public abstract class ApiBeanMapper {
     return new AnomalyFeedbackApi()
         .setComment(feedbackDto.getComment())
         .setType(feedbackDto.getFeedbackType());
+  }
+
+  public static TaskDTO toTaskDto(TaskApi api) {
+    TaskDTO dto = new TaskDTO();
+    dto.setTaskType(api.getTaskType());
+    dto.setWorkerId(api.getWorkerId());
+    dto.setJobId(api.getJobId());
+    dto.setJobName(api.getJobName());
+    dto.setStatus(api.getStatus());
+    dto.setStartTime(api.getStartTime());
+    dto.setEndTime(api.getEndTime());
+    dto.setTaskInfo(api.getTaskInfo());
+    dto.setMessage(api.getMessage());
+    dto.setLastModified(api.getLastModified());
+    return dto;
+  }
+
+  public static TaskApi toApi(TaskDTO dto) {
+    TaskApi api = new TaskApi();
+    api.setTaskType(dto.getTaskType());
+    api.setWorkerId(dto.getWorkerId());
+    api.setJobId(dto.getJobId());
+    api.setJobName(dto.getJobName());
+    api.setStatus(dto.getStatus());
+    api.setStartTime(dto.getStartTime());
+    api.setEndTime(dto.getEndTime());
+    api.setTaskInfo(dto.getTaskInfo());
+    api.setMessage(dto.getMessage());
+    api.setLastModified(dto.getLastModified());
+    return api;
   }
 }

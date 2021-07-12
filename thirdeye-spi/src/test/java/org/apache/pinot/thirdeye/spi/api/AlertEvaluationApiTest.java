@@ -40,16 +40,16 @@ public class AlertEvaluationApiTest {
     assertThat(api.getAlert()).isNotNull();
     assertThat(api.getAlert().getTemplate()).isNotNull();
 
-    final List<DetectionPlanApi> nodes = api.getAlert().getTemplate().getNodes();
+    final List<PlanNodeApi> nodes = api.getAlert().getTemplate().getNodes();
     Assert.assertEquals(nodes.size(), 5);
-    Assert.assertEquals(nodes.get(0).getPlanNodeName(), "root");
-    Assert.assertEquals(nodes.get(1).getPlanNodeName(),
+    Assert.assertEquals(nodes.get(0).getName(), "root");
+    Assert.assertEquals(nodes.get(1).getName(),
         "percentageChangeDetector");
-    Assert.assertEquals(nodes.get(2).getPlanNodeName(),
+    Assert.assertEquals(nodes.get(2).getName(),
         "baselineDataFetcher");
-    Assert.assertEquals(nodes.get(3).getPlanNodeName(),
+    Assert.assertEquals(nodes.get(3).getName(),
         "currentDataFetcher");
-    Assert.assertEquals(nodes.get(4).getPlanNodeName(), "sqlJoin");
+    Assert.assertEquals(nodes.get(4).getName(), "sqlJoin");
     Assert.assertEquals(nodes.get(0).getType(), "ChildKeepingMerge");
     Assert.assertEquals(nodes.get(1).getType(), "AnomalyDetector");
     Assert.assertEquals(nodes.get(2).getType(), "DataFetcher");

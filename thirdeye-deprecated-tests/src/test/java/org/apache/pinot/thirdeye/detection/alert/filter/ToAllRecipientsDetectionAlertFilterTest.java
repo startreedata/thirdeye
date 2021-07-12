@@ -274,7 +274,7 @@ public class ToAllRecipientsDetectionAlertFilterTest {
    * Test to ensure this filter doesn't pick up anomalies with feedback (we do not want to notify
    * them)
    */
-  @Test
+  @Test(enabled = false)
   public void testAlertFilterFeedback() throws Exception {
     this.alertConfig.getProperties()
         .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId3));

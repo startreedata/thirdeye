@@ -32,10 +32,12 @@ import org.apache.pinot.thirdeye.alert.AlertDeleter;
 import org.apache.pinot.thirdeye.alert.AlertEvaluator;
 import org.apache.pinot.thirdeye.alert.AlertEvaluatorV2;
 import org.apache.pinot.thirdeye.auth.AuthService;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
+import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
@@ -43,7 +45,6 @@ import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertEvaluatorV2 = alertEvaluatorV2;
   }
 
-  private static AlertEvaluationApi convertEvaluationResultV2ToV1(
+  private static AlertEvaluationApi toV1Format(
       final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     for (final String key : v2Result.keySet()) {
@@ -99,10 +100,16 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return new AlertEvaluationApi().setDetectionEvaluations(map);
   }
 
+  private static boolean isV2Evaluation(final AlertApi alert) {
+    return optional(alert)
+        .map(AlertApi::getTemplate)
+        .map(AlertTemplateApi::getNodes)
+        .isPresent();
+  }
+
   @Override
   protected AlertDTO createDto(final ThirdEyePrincipal principal, final AlertApi api) {
     ensureExists(api.getName(), "Name must be present");
-    ensureExists(api.getNodes(), "Exactly 1 detection must be present");
 
     if (api.getCron() == null) {
       api.setCron(CRON_EVERY_1MIN);
@@ -179,30 +186,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok().build();
   }
 
-  @Path("evaluateV2")
-  @POST
-  @Timed
-  public Response evaluateV2(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
-      @HeaderParam("UseV1Format") final boolean useV1Format,
-      final AlertEvaluationApi request
-  ) throws ExecutionException {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
-    ensureExists(request.getStart(), "start");
-    ensureExists(request.getEnd(), "end");
-
-    ensureExists(request.getAlert())
-        .setOwner(new UserApi()
-            .setPrincipal(principal.getName()));
-
-    final AlertEvaluationApi evaluation = alertEvaluatorV2.evaluate(request);
-    if (useV1Format) {
-      return Response.ok(convertEvaluationResultV2ToV1(evaluation.getEvaluations())).build();
-    }
-    return Response.ok(evaluation).build();
-  }
-
   @Path("evaluate")
   @POST
   @Timed
@@ -215,14 +198,22 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
 
-    ensureExists(request.getAlert())
+    final AlertApi alert = request.getAlert();
+    ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    final AlertEvaluationApi evaluation = alertEvaluator.evaluate(request);
-    return Response
-        .ok(evaluation)
-        .build();
+    AlertEvaluationApi evaluation;
+    if (isV2Evaluation(alert)) {
+      evaluation = alertEvaluatorV2.evaluate(request);
+      if (alert.isV1Format()) {
+        evaluation = toV1Format(evaluation.getEvaluations());
+      }
+    } else {
+      // v1 Evaluation. Will be deprecated in the future
+      evaluation = alertEvaluator.evaluate(request);
+    }
+    return Response.ok(evaluation).build();
   }
 
   @DELETE

@@ -124,7 +124,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
 
   protected GroupedAnomalyResultsBean convertGroupedAnomalyDTO2Bean(
       GroupedAnomalyResultsDTO entity) {
-    GroupedAnomalyResultsBean bean = convertDTO2Bean(entity, GroupedAnomalyResultsBean.class);
+    GroupedAnomalyResultsBean bean = toBean(entity);
     if (CollectionUtils.isNotEmpty(entity.getAnomalyResults())) {
       List<Long> mergedAnomalyId = new ArrayList<>();
       for (MergedAnomalyResultDTO mergedAnomalyResultDTO : entity.getAnomalyResults()) {

@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.spi.util;
+package org.apache.pinot.thirdeye.mapper;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
+import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
 import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
@@ -40,11 +41,13 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 public abstract class ApiBeanMapper {
 
@@ -159,10 +162,17 @@ public abstract class ApiBeanMapper {
         .setNodes(optional(dto.getNodes())
             .map(ApiBeanMapper::toAlertNodeApiMap)
             .orElse(null))
+        .setTemplate(optional(dto.getTemplate())
+            .map(ApiBeanMapper::toAlertTemplateApi)
+            .orElse(null))
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
         ;
+  }
+
+  private static AlertTemplateApi toAlertTemplateApi(final AlertTemplateBean alertTemplateBean) {
+    return AlertTemplateMapper.INSTANCE.toApi(alertTemplateBean);
   }
 
   private static Map<String, AlertNodeApi> toAlertNodeApiMap(
@@ -485,5 +495,8 @@ public abstract class ApiBeanMapper {
     api.setMessage(dto.getMessage());
     api.setLastModified(dto.getLastModified());
     return api;
+  }
+  public static AlertTemplateBean toAlertTemplateBean(final AlertTemplateApi api) {
+    return AlertTemplateMapper.INSTANCE.toBean(api);
   }
 }

@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
 
 @Singleton
 public class SubscriptionGroupManagerImpl extends
@@ -32,6 +31,6 @@ public class SubscriptionGroupManagerImpl extends
 
   @Inject
   public SubscriptionGroupManagerImpl(GenericPojoDao genericPojoDao) {
-    super(SubscriptionGroupDTO.class, DetectionAlertConfigBean.class, genericPojoDao);
+    super(SubscriptionGroupDTO.class, genericPojoDao);
   }
 }

@@ -82,7 +82,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       update(entity);
       return entity.getId();
     }
-    TaskBean bean = convertDTO2Bean(entity, TaskBean.class);
+    TaskBean bean = toBean(entity);
     Long id = genericPojoDao.put(bean);
     entity.setId(id);
     return id;

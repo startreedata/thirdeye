@@ -26,7 +26,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   @Override
   void setNestedProperties(final Map<String, Object> properties) {
     // inject detector to nested property if possible
-    String detectorComponentRefKey = MapUtils.getString(detectionPlanApi.getParams(),
+    String detectorComponentRefKey = MapUtils.getString(planNodeBean.getParams(),
         PROP_DETECTOR);
     if (detectorComponentRefKey != null) {
       String detectorComponentName = DetectionUtils.getComponentKey(detectorComponentRefKey);
@@ -34,7 +34,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
     }
 
     // inject metricUrn to nested property if possible
-    String nestedUrn = MapUtils.getString(detectionPlanApi.getParams(), PROP_METRIC_URN);
+    String nestedUrn = MapUtils.getString(planNodeBean.getParams(), PROP_METRIC_URN);
     if (nestedUrn != null) {
       properties.put(PROP_METRIC_URN, nestedUrn);
     }
@@ -52,7 +52,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Map<String, Object> getParams() {
-    return detectionPlanApi.getParams();
+    return planNodeBean.getParams();
   }
 
   @Override
@@ -74,7 +74,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
         .setStartTime(startTime)
         .setEndTime(endTime)
         .setInputsMap(inputsMap)
-        .setDetectionPlanApi(detectionPlanApi)
+        .setDetectionPlanApi(planNodeBean)
     );
     return anomalyDetectorOperator;
   }

@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.spi.detection.health.DetectionHealth;
  * to handle simple configuration tasks.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DetectionConfigBean extends AbstractDTO {
+public class AlertBean extends AbstractDTO {
 
   String name;
   String description;
@@ -59,6 +59,9 @@ public class DetectionConfigBean extends AbstractDTO {
   // The execution dag
   Map<String, AlertNode> nodes;
 
+  // The alert template
+  AlertTemplateBean template;
+
   public List<String> getOwners() {
     return owners;
   }
@@ -71,7 +74,7 @@ public class DetectionConfigBean extends AbstractDTO {
     return filters;
   }
 
-  public DetectionConfigBean setFilters(Map<String, Objects> filters) {
+  public AlertBean setFilters(Map<String, Objects> filters) {
     this.filters = filters;
     return this;
   }
@@ -184,9 +187,19 @@ public class DetectionConfigBean extends AbstractDTO {
     return nodes;
   }
 
-  public DetectionConfigBean setNodes(
+  public AlertBean setNodes(
       final Map<String, AlertNode> nodes) {
     this.nodes = nodes;
+    return this;
+  }
+
+  public AlertTemplateBean getTemplate() {
+    return template;
+  }
+
+  public AlertBean setTemplate(
+      final AlertTemplateBean template) {
+    this.template = template;
     return this;
   }
 
@@ -195,10 +208,10 @@ public class DetectionConfigBean extends AbstractDTO {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof DetectionConfigBean)) {
+    if (!(o instanceof AlertBean)) {
       return false;
     }
-    DetectionConfigBean that = (DetectionConfigBean) o;
+    AlertBean that = (AlertBean) o;
     return lastTimestamp == that.lastTimestamp
         && active == that.active
         && Objects.equals(cron, that.cron)

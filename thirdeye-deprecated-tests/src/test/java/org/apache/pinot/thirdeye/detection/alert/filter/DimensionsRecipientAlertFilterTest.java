@@ -302,7 +302,7 @@ public class DimensionsRecipientAlertFilterTest {
   /**
    * Test to ensure labeled anomalies are filtered out and not notified
    */
-  @Test
+  @Test(enabled = false)
   public void testAlertFilterFeedback() throws Exception {
     this.alertConfig.getProperties()
         .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId3));

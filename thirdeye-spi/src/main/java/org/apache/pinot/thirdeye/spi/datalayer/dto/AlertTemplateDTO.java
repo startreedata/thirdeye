@@ -15,28 +15,13 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.apache.pinot.thirdeye.datalayer.entity;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-public class ConfigIndex extends AbstractIndexEntity {
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
 
-  private String namespace;
-  private String name;
+public class AlertTemplateDTO extends AlertTemplateBean {
 
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public void setNamespace(String namespace) {
-    this.namespace = namespace;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
 }

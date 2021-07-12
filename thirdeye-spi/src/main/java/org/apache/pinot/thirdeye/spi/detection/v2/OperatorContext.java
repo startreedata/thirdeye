@@ -1,13 +1,13 @@
 package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean;
 
 public class OperatorContext {
 
   private long startTime;
   private long endTime;
-  private DetectionPlanApi detectionPlanApi;
+  private PlanNodeBean planNodeBean;
   private Map<String, Object> properties;
   private Map<String, DetectionPipelineResult> inputsMap;
 
@@ -29,12 +29,12 @@ public class OperatorContext {
     return this;
   }
 
-  public DetectionPlanApi getDetectionPlanApi() {
-    return detectionPlanApi;
+  public PlanNodeBean getDetectionPlanApi() {
+    return planNodeBean;
   }
 
-  public OperatorContext setDetectionPlanApi(final DetectionPlanApi detectionPlanApi) {
-    this.detectionPlanApi = detectionPlanApi;
+  public OperatorContext setDetectionPlanApi(final PlanNodeBean planNodeBean) {
+    this.planNodeBean = planNodeBean;
     return this;
   }
 

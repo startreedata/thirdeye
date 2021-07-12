@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi.InputApi;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean.InputBean;
 
 /**
  * The <code>PlanNode</code> is a single execution plan node inside the Plan tree.
@@ -40,7 +40,7 @@ public interface PlanNode {
    *
    * @return All Inputs set
    */
-  List<InputApi> getPlanNodeInputs();
+  List<InputBean> getPlanNodeInputs();
 
   /**
    *

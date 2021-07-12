@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.alert;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.pinot.thirdeye.spi.api.DetectionPlanApi.InputApi;
+import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean.InputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
@@ -14,7 +14,7 @@ public class PlanExecutor {
   public static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
       final Map<String, DetectionPipelineResult> context, final PlanNode node)
       throws Exception {
-    for (final InputApi input : node.getPlanNodeInputs()) {
+    for (final InputBean input : node.getPlanNodeInputs()) {
       final String contextKey = getContextKey(input.getSourcePlanNode(), input.getSourceProperty());
       if (!context.containsKey(contextKey)) {
         final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());

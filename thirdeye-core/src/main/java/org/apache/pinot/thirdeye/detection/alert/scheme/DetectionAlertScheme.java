@@ -72,9 +72,9 @@ public abstract class DetectionAlertScheme {
    */
   public BaseNotificationContent buildNotificationContent(
       Properties alertSchemeClientConfigs) {
-    AlertTemplate template = AlertTemplate.DEFAULT_EMAIL;
+    EmailTemplateType template = EmailTemplateType.DEFAULT_EMAIL;
     if (alertSchemeClientConfigs != null && alertSchemeClientConfigs.containsKey(PROP_TEMPLATE)) {
-      template = AlertTemplate.valueOf(alertSchemeClientConfigs.get(PROP_TEMPLATE).toString());
+      template = EmailTemplateType.valueOf(alertSchemeClientConfigs.get(PROP_TEMPLATE).toString());
     }
 
     BaseNotificationContent content;
@@ -117,7 +117,7 @@ public abstract class DetectionAlertScheme {
     return buildNotificationContent(alertSchemeClientConfigs);
   }
 
-  public enum AlertTemplate {
+  public enum EmailTemplateType {
     DEFAULT_EMAIL,
     ENTITY_GROUPBY_REPORT
   }

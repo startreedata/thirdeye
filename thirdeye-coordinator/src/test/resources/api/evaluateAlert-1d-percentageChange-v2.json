@@ -1,12 +1,12 @@
-{
-  "alert": {
+[
+  {
     "name": "percentage-change-template",
     "description": "Percentage drop template",
     "cron": "0 0/1 * 1/1 * ? *",
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.type": "PERCENTAGE_CHANGE",
@@ -36,7 +36,7 @@
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -55,7 +55,7 @@
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -75,7 +75,5 @@
         }
       ]
     }
-  },
-  "start": "1621300000000",
-  "end": "1621200000000"
-}
+  }
+]

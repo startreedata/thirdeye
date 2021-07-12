@@ -1,4 +1,4 @@
-POST http://localhost:8080/api/alerts/evaluateV2
+POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
 
@@ -10,7 +10,7 @@ Content-Type: application/json
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.timezone": "US/Pacific",
@@ -39,7 +39,7 @@ Content-Type: application/json
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -58,7 +58,7 @@ Content-Type: application/json
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -85,8 +85,7 @@ Content-Type: application/json
 
 ###
 
-# curl -X POST "http://localhost:8080/api/alerts/evaluateV2" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"alert\": { \"name\": \"percentage-change-template\", \"description\": \"Percentage drop template\", \"cron\": \"0 0/1 * 1/1 * ? *\" }, \"nodes\": [ { \"planNodeName\": \"root\", \"type\": \"AnomalyDetector\", \"params\": { \"component.detector.type\": \"ABSOLUTE_CHANGE_RULE\", \"component.detector.timezone\": \"US/Pacific\", \"component.detector.monitoringGranularity\": \"1_DAYS\", \"component.detector.absoluteChange\": \"100000\", \"component.detector.offset\": \"wo1w\", \"component.detector.pattern\": \"down\", \"component.detector.timestamp\": \"ts\", \"component.detector.metric\": \"met\", \"component.detector.dimensions\": [], \"startTime\": \"20200202\", \"endTime\": \"20200730\" }, \"inputs\": [ { \"targetProperty\": \"baseline\", \"sourcePlanNode\": \"baselineDataFetcher\", \"sourceProperty\": \"baselineOutput\" }, { \"targetProperty\": \"current\", \"sourcePlanNode\": \"currentDataFetcher\", \"sourceProperty\": \"currentOutput\" } ], \"outputs\": [] }, { \"planNodeName\": \"baselineDataFetcher\", \"type\": \"DataFetcher\", \"params\": { \"component.pinot.className\": \"org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher\", \"component.pinot.dataSource\": \"pinot1\", \"component.pinot.query\": \"SELECT \\\"date\\\" as ts, sum(views) as met FROM pageviews WHERE \\\"date\\\" >= 20200202 AND \\\"date\\\" <= 20200723 GROUP BY \\\"date\\\" ORDER BY \\\"date\\\" LIMIT 1000\", \"component.pinot.tableName\": \"pageviews\", \"startTime\": \"20200202\", \"endTime\": \"20200723\" }, \"inputs\": [], \"outputs\": [ { \"outputKey\": \"pinot\", \"outputName\": \"baselineOutput\" } ] }, { \"planNodeName\": \"currentDataFetcher\", \"type\": \"DataFetcher\", \"params\": { \"component.pinot.className\": \"org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher\", \"component.pinot.dataSource\": \"pinot1\", \"component.pinot.query\": \"SELECT \\\"date\\\" as ts, sum(views) as met FROM pageviews WHERE \\\"date\\\" >= 20200209 AND \\\"date\\\" <= 20200730 GROUP BY \\\"date\\\" ORDER BY \\\"date\\\" LIMIT 1000\", \"component.pinot.tableName\": \"pageviews\", \"startTime\": \"20200209\", \"endTime\": \"20200730\" }, \"inputs\": [], \"outputs\": [ { \"outputKey\": \"pinot\", \"outputName\": \"currentOutput\" } ] } ], \"start\": \"1577865600000\", \"end\": \"1590994800000\"}"
-POST http://localhost:8080/api/alerts/evaluateV2
+POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
 
@@ -98,7 +97,7 @@ Content-Type: application/json
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.type": "ABSOLUTE_CHANGE",
@@ -128,7 +127,7 @@ Content-Type: application/json
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -147,7 +146,7 @@ Content-Type: application/json
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -174,7 +173,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:8080/api/alerts/evaluateV2
+POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
 
@@ -186,7 +185,7 @@ Content-Type: application/json
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.timezone": "US/Pacific",
@@ -215,7 +214,7 @@ Content-Type: application/json
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -234,7 +233,7 @@ Content-Type: application/json
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -261,7 +260,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:8080/api/alerts/evaluateV2
+POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
 
@@ -273,7 +272,7 @@ Content-Type: application/json
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.timestamp": "ts",
@@ -303,7 +302,7 @@ Content-Type: application/json
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -322,7 +321,7 @@ Content-Type: application/json
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -349,7 +348,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:8080/api/alerts/evaluateV2
+POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
 
@@ -361,7 +360,7 @@ Content-Type: application/json
     "template": {
       "nodes": [
         {
-          "planNodeName": "root",
+          "name": "root",
           "type": "AnomalyDetector",
           "params": {
             "component.detector.timestamp": "ts",
@@ -391,7 +390,7 @@ Content-Type: application/json
           "outputs": []
         },
         {
-          "planNodeName": "baselineDataFetcher",
+          "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
@@ -410,7 +409,7 @@ Content-Type: application/json
           ]
         },
         {
-          "planNodeName": "currentDataFetcher",
+          "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",

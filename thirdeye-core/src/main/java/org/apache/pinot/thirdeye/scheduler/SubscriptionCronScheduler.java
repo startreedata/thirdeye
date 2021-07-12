@@ -33,7 +33,6 @@ import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -145,7 +144,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-        CronScheduleBuilder.cronSchedule(((DetectionAlertConfigBean) config).getCronExpression()))
+        CronScheduleBuilder.cronSchedule(((SubscriptionGroupDTO) config).getCronExpression()))
         .build();
     this.scheduler.scheduleJob(job, trigger);
     LOG.info(String.format("scheduled subscription pipeline job %s", job.getKey().getName()));

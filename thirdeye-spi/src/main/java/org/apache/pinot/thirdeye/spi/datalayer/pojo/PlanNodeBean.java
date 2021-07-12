@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.api;
+package org.apache.pinot.thirdeye.spi.datalayer.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -28,15 +28,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DetectionPlanApi is self-described detection plan node.
+ * PlanNodeApi is self-described detection plan node.
  */
 @JsonInclude(Include.NON_NULL)
-public class DetectionPlanApi {
+public class PlanNodeBean {
 
   /**
    * Unique planNodeName been referred across the entire AlertEvaluation plan
    */
-  private String planNodeName;
+  private String name;
   /**
    * PlanNode type, which is registered by the implementation of
    * 'org.apache.pinot.thirdeye.detection.v2.spi.PlanNode'.
@@ -49,18 +49,18 @@ public class DetectionPlanApi {
   /**
    * Defines the inputs of this PlanNode are set
    */
-  private List<InputApi> inputs;
+  private List<InputBean> inputs;
   /**
    * Defines the output mapping layout
    */
-  private List<OutputApi> outputs;
+  private List<OutputBean> outputs;
 
-  public String getPlanNodeName() {
-    return planNodeName;
+  public String getName() {
+    return name;
   }
 
-  public DetectionPlanApi setPlanNodeName(final String planNodeName) {
-    this.planNodeName = planNodeName;
+  public PlanNodeBean setName(final String name) {
+    this.name = name;
     return this;
   }
 
@@ -68,7 +68,7 @@ public class DetectionPlanApi {
     return type;
   }
 
-  public DetectionPlanApi setType(final String type) {
+  public PlanNodeBean setType(final String type) {
     this.type = type;
     return this;
   }
@@ -77,27 +77,27 @@ public class DetectionPlanApi {
     return params;
   }
 
-  public DetectionPlanApi setParams(final Map<String, Object> params) {
+  public PlanNodeBean setParams(final Map<String, Object> params) {
     this.params = params;
     return this;
   }
 
-  public List<InputApi> getInputs() {
+  public List<InputBean> getInputs() {
     return inputs;
   }
 
-  public DetectionPlanApi setInputs(
-      final List<InputApi> inputs) {
+  public PlanNodeBean setInputs(
+      final List<InputBean> inputs) {
     this.inputs = inputs;
     return this;
   }
 
-  public List<OutputApi> getOutputs() {
+  public List<OutputBean> getOutputs() {
     return outputs;
   }
 
-  public DetectionPlanApi setOutputs(
-      final List<OutputApi> outputs) {
+  public PlanNodeBean setOutputs(
+      final List<OutputBean> outputs) {
     this.outputs = outputs;
     return this;
   }
@@ -118,7 +118,7 @@ public class DetectionPlanApi {
    * 'sourceProperty' is the key of the output from 'sourcePlanNode'
    */
   @JsonInclude(Include.NON_NULL)
-  public static class InputApi {
+  public static class InputBean {
 
     private String targetProperty;
     private String sourcePlanNode;
@@ -128,7 +128,7 @@ public class DetectionPlanApi {
       return targetProperty;
     }
 
-    public InputApi setTargetProperty(final String targetProperty) {
+    public InputBean setTargetProperty(final String targetProperty) {
       this.targetProperty = targetProperty;
       return this;
     }
@@ -137,7 +137,7 @@ public class DetectionPlanApi {
       return sourcePlanNode;
     }
 
-    public InputApi setSourcePlanNode(final String sourcePlanNode) {
+    public InputBean setSourcePlanNode(final String sourcePlanNode) {
       this.sourcePlanNode = sourcePlanNode;
       return this;
     }
@@ -146,7 +146,7 @@ public class DetectionPlanApi {
       return sourceProperty;
     }
 
-    public InputApi setSourceProperty(final String sourceProperty) {
+    public InputBean setSourceProperty(final String sourceProperty) {
       this.sourceProperty = sourceProperty;
       return this;
     }
@@ -169,7 +169,7 @@ public class DetectionPlanApi {
    * { "outputKey": "output", "outputName": "baselineOutput" }
    */
   @JsonInclude(Include.NON_NULL)
-  public static class OutputApi {
+  public static class OutputBean {
 
     private String outputKey;
     private String outputName;
@@ -178,7 +178,7 @@ public class DetectionPlanApi {
       return outputKey;
     }
 
-    public OutputApi setOutputKey(final String outputKey) {
+    public OutputBean setOutputKey(final String outputKey) {
       this.outputKey = outputKey;
       return this;
     }
@@ -187,7 +187,7 @@ public class DetectionPlanApi {
       return outputName;
     }
 
-    public OutputApi setOutputName(final String outputName) {
+    public OutputBean setOutputName(final String outputName) {
       this.outputName = outputName;
       return this;
     }

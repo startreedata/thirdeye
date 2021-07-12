@@ -5,11 +5,11 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +42,21 @@ public class AlertApiBeanMapper {
         .map(ApiBeanMapper::toAlertNodeMap)
         .ifPresent(dto::setNodes);
 
+    optional(api.getTemplate())
+        .map(ApiBeanMapper::toAlertTemplateBean)
+        .ifPresent(dto::setTemplate);
+
     // May not get updated while edits
     optional(api.getOwner())
         .map(UserApi::getPrincipal)
         .ifPresent(dto::setCreatedBy);
 
-    final AlertExecutionPlanBuilder builder = new AlertExecutionPlanBuilder(dataProvider)
-        .process(api);
-    dto.setProperties(builder.getProperties());
-    dto.setComponentSpecs(builder.getComponentSpecs());
+    if (api.getNodes() != null) {
+      final AlertExecutionPlanBuilder builder = new AlertExecutionPlanBuilder(dataProvider)
+          .process(api);
+      dto.setProperties(builder.getProperties());
+      dto.setComponentSpecs(builder.getComponentSpecs());
+    }
 
     return dto;
   }

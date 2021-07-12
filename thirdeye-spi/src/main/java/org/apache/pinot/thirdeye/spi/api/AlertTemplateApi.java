@@ -12,7 +12,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   private Date created;
   private Date updated;
   private UserApi owner;
-  private List<DetectionPlanApi> nodes;
+  private List<PlanNodeApi> nodes;
 
   public Long getId() {
     return id;
@@ -77,12 +77,12 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
     return this;
   }
 
-  public List<DetectionPlanApi> getNodes() {
+  public List<PlanNodeApi> getNodes() {
     return nodes;
   }
 
   public AlertTemplateApi setNodes(
-      final List<DetectionPlanApi> nodes) {
+      final List<PlanNodeApi> nodes) {
     this.nodes = nodes;
     return this;
   }

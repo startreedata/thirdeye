@@ -24,6 +24,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
@@ -42,12 +43,17 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
     MODEL_MAPPER.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
   }
 
+  protected final GenericPojoDao genericPojoDao;
   private final Class<? extends AbstractDTO> dtoClass;
   private final Class<? extends AbstractDTO> beanClass;
-  protected final GenericPojoDao genericPojoDao;
 
-  protected AbstractManagerImpl(Class<? extends AbstractDTO> dtoClass,
-      Class<? extends AbstractDTO> beanClass,
+  protected AbstractManagerImpl(final Class<? extends AbstractDTO> dtoClass,
+      final GenericPojoDao genericPojoDao) {
+    this(dtoClass, dtoClass, genericPojoDao);
+  }
+
+  protected AbstractManagerImpl(final Class<? extends AbstractDTO> dtoClass,
+      final Class<? extends AbstractDTO> beanClass,
       final GenericPojoDao genericPojoDao) {
     this.dtoClass = dtoClass;
     this.beanClass = beanClass;
@@ -55,113 +61,114 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   @Override
-  public Long save(E entity) {
+  public Long save(final E entity) {
     if (entity.getId() != null) {
       //TODO: throw exception and force the caller to call update instead
       update(entity);
       return entity.getId();
     }
-    AbstractDTO bean = convertDTO2Bean(entity, beanClass);
-    Long id = genericPojoDao.put(bean);
+    final AbstractDTO bean = toBean(entity);
+    final Long id = genericPojoDao.put(bean);
     entity.setId(id);
     return id;
   }
 
   @Override
-  public int update(E entity, Predicate predicate) {
-    AbstractDTO bean = convertDTO2Bean(entity, beanClass);
+  public int update(final E entity, final Predicate predicate) {
+    final AbstractDTO bean = toBean(entity);
     return genericPojoDao.update(bean, predicate);
   }
 
   @Override
-  public int update(E entity) {
-    AbstractDTO bean = convertDTO2Bean(entity, beanClass);
+  public int update(final E entity) {
+    final AbstractDTO bean = toBean(entity);
     return genericPojoDao.update(bean);
   }
 
   // Test is located at TestAlertConfigManager.testBatchUpdate()
   @Override
   public int update(List<E> entities) {
-    ArrayList<AbstractDTO> beans = new ArrayList<>();
-    for (E entity : entities) {
-      beans.add(convertDTO2Bean(entity, beanClass));
-    }
+    List<AbstractDTO> beans = entities.stream()
+        .map(entity -> convertDTO2Bean(entity, beanClass))
+        .collect(Collectors.toList());
     return genericPojoDao.update(beans);
   }
 
-  public E findById(Long id) {
-    AbstractDTO abstractBean = genericPojoDao.get(id, beanClass);
-    if (abstractBean != null) {
-      AbstractDTO abstractDTO = MODEL_MAPPER.map(abstractBean, dtoClass);
-      return (E) abstractDTO;
-    } else {
-      return null;
+  @Override
+  public E findById(final Long id) {
+    final AbstractDTO abstractBean = genericPojoDao.get(id, beanClass);
+    return abstractBean != null ? toDto(abstractBean) : null;
+  }
+
+  private E toDto(final AbstractDTO o) {
+    if (o.getClass() != dtoClass) {
+      return (E) MODEL_MAPPER.map(o, dtoClass);
     }
+    return (E) o;
+  }
+
+  protected <T extends AbstractDTO> T toBean(final AbstractDTO o) {
+    return (T) convertDTO2Bean(o, beanClass);
   }
 
   @Override
-  public List<E> findByIds(List<Long> ids) {
-    List<? extends AbstractDTO> abstractBeans = genericPojoDao.get(ids, beanClass);
-    List<E> abstractDTOs = new ArrayList<>();
+  public List<E> findByIds(final List<Long> ids) {
+    final List<? extends AbstractDTO> abstractBeans = genericPojoDao.get(ids, beanClass);
+    final List<E> abstractDTOs = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(abstractBeans)) {
-      for (AbstractDTO abstractBean : abstractBeans) {
-        E abstractDTO = (E) MODEL_MAPPER.map(abstractBean, dtoClass);
-        abstractDTOs.add(abstractDTO);
+      for (final AbstractDTO abstractBean : abstractBeans) {
+        abstractDTOs.add(toDto(abstractBean));
       }
     }
     return abstractDTOs;
   }
 
   @Override
-  public int delete(E entity) {
+  public int delete(final E entity) {
     return genericPojoDao.delete(entity.getId(), beanClass);
   }
 
   // Test is located at TestAlertConfigManager.testBatchDeletion()
   @Override
-  public int deleteById(Long id) {
+  public int deleteById(final Long id) {
     return genericPojoDao.delete(id, beanClass);
   }
 
   @Override
-  public int deleteByIds(List<Long> ids) {
+  public int deleteByIds(final List<Long> ids) {
     return genericPojoDao.delete(ids, beanClass);
   }
 
   @Override
-  public int deleteByPredicate(Predicate predicate) {
+  public int deleteByPredicate(final Predicate predicate) {
     return genericPojoDao.deleteByPredicate(predicate, beanClass);
   }
 
   @Override
   @Transactional
-  public int deleteRecordsOlderThanDays(int days) {
-    DateTime expireDate = new DateTime().minusDays(days);
-    Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
-    Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
+  public int deleteRecordsOlderThanDays(final int days) {
+    final DateTime expireDate = new DateTime().minusDays(days);
+    final Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
+    final Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
     return deleteByPredicate(timestampPredicate);
   }
 
   @Override
   public List<E> findAll() {
-    List<? extends AbstractDTO> list = genericPojoDao.getAll(beanClass);
-    List<E> result = new ArrayList<>();
-    for (AbstractDTO bean : list) {
-      AbstractDTO dto = MODEL_MAPPER.map(bean, dtoClass);
-      result.add((E) dto);
-    }
-    return result;
+    return genericPojoDao.getAll(beanClass).stream()
+        .map(this::toDto)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public List<E> findByParams(Map<String, Object> filters) {
-    List<? extends AbstractDTO> list = genericPojoDao.get(filters, beanClass);
+  public List<E> findByParams(final Map<String, Object> filters) {
+    final List<? extends AbstractDTO> list = genericPojoDao.get(filters, beanClass);
     return convertBeanListToDTOList(list);
   }
 
   @Override
-  public List<E> findByPredicate(Predicate predicate) {
-    List<? extends AbstractDTO> list = genericPojoDao.get(predicate, beanClass);
+  public List<E> findByPredicate(final Predicate predicate) {
+    final List<? extends AbstractDTO> list = genericPojoDao.get(predicate, beanClass);
     return convertBeanListToDTOList(list);
   }
 
@@ -175,30 +182,22 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
     return genericPojoDao.count(beanClass);
   }
 
-  protected List<E> convertBeanListToDTOList(List<? extends AbstractDTO> beans) {
-    List<E> result = new ArrayList<>();
-    for (AbstractDTO bean : beans) {
-      result.add((E) convertBean2DTO(bean, dtoClass));
-    }
-    return result;
+  protected List<E> convertBeanListToDTOList(final List<? extends AbstractDTO> beans) {
+    return beans.stream()
+        .map(this::toDto)
+        .collect(Collectors.toList());
   }
 
-  protected <T extends AbstractDTO> T convertBean2DTO(AbstractDTO entity, Class<T> dtoClass) {
-    try {
-      AbstractDTO dto = dtoClass.newInstance();
-      MODEL_MAPPER.map(entity, dto);
-      return (T) dto;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+  protected <T extends AbstractDTO> T convertDTO2Bean(final AbstractDTO entity,
+      final Class<T> beanClass) {
+    if (entity.getClass() == beanClass) {
+      return (T) entity;
     }
-  }
-
-  protected <T extends AbstractDTO> T convertDTO2Bean(AbstractDTO entity, Class<T> beanClass) {
     try {
-      AbstractDTO bean = beanClass.newInstance();
+      final AbstractDTO bean = beanClass.newInstance();
       MODEL_MAPPER.map(entity, bean);
       return (T) bean;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }

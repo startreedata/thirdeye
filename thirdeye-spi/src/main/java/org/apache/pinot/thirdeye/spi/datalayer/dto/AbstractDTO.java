@@ -20,12 +20,15 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+@JsonInclude(Include.NON_NULL)
 public abstract class AbstractDTO implements Serializable {
 
   private Long id;
@@ -94,6 +97,13 @@ public abstract class AbstractDTO implements Serializable {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 
+  /**
+   * All db models should be equated on their id if present.
+   * Otherwise delegate to super.
+   *
+   * @param o other object
+   * @return equality of 2 objects.
+   */
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -103,11 +113,22 @@ public abstract class AbstractDTO implements Serializable {
       return false;
     }
     final AbstractDTO that = (AbstractDTO) o;
-    return Objects.equals(id, that.id);
+    if (id != null && that.id != null) {
+      return Objects.equals(id, that.id);
+    }
+    return super.equals(o);
   }
 
+  /**
+   * Return the hashcode on id if possible. Otherwise delegate to super.
+   *
+   * @return hashcode
+   */
   @Override
   public int hashCode() {
+    if (id == null) {
+      return super.hashCode();
+    }
     return Objects.hash(id);
   }
 }

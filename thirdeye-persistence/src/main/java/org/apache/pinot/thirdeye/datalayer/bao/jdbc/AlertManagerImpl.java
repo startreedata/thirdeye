@@ -21,13 +21,11 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -35,7 +33,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
 
   @Inject
   public AlertManagerImpl(GenericPojoDao genericPojoDao) {
-    super(AlertDTO.class, AlertBean.class, genericPojoDao);
+    super(AlertDTO.class, genericPojoDao);
   }
 
   @Override
@@ -48,8 +46,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
         return 0;
       }
     } else {
-      AlertBean alertBean = convertDetectionConfigDTO2Bean(alertDTO);
-      return genericPojoDao.update(alertBean);
+      return genericPojoDao.update(alertDTO);
     }
   }
 
@@ -61,21 +58,15 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
       return alertDTO.getId();
     }
 
-    AlertBean alertBean = convertDetectionConfigDTO2Bean(alertDTO);
-    Long id = genericPojoDao.put(alertBean);
+    Long id = genericPojoDao.put(alertDTO);
     alertDTO.setId(id);
     return id;
-  }
-
-  AlertBean convertDetectionConfigDTO2Bean(AlertDTO alertDTO) {
-    alertDTO.setComponents(Collections.emptyMap());
-    return toBean(alertDTO);
   }
 
   @Override
   public List<AlertDTO> findAllActive() {
     List<AlertDTO> detectionConfigs = findAll();
-    return detectionConfigs.stream().filter(AlertBean::isActive)
+    return detectionConfigs.stream().filter(AlertDTO::isActive)
         .collect(Collectors.toList());
   }
 }

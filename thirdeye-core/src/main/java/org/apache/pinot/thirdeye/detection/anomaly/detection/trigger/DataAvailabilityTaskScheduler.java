@@ -48,7 +48,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
@@ -182,7 +181,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       Map<String, DatasetConfigDTO> datasetConfigMap) {
     Map<Long, Set<String>> metricCache = new HashMap<>();
     List<AlertDTO> detectionConfigs = alertManager.findAllActive()
-        .stream().filter(AlertBean::isDataAvailabilitySchedule)
+        .stream().filter(AlertDTO::isDataAvailabilitySchedule)
         .collect(Collectors.toList());
     for (AlertDTO detectionConfig : detectionConfigs) {
       Set<String> metricUrns = DetectionConfigFormatter
@@ -234,7 +233,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private void loadLatestTaskCreateTime(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
     List<TaskDTO> tasks = taskManager
-        .findByNameOrderByCreateTime(TaskConstants.TaskType.DETECTION.toString() +
+        .findByNameOrderByCreateTime(TaskConstants.TaskType.DETECTION +
             "_" + detectionConfigId, 1, false);
     if (tasks.size() == 0) {
       detectionIdToLastTaskEndTimeMap.put(detectionConfigId, detectionConfig.getLastTimestamp());

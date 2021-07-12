@@ -38,6 +38,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     this.authService = authService;
   }
 
+<<<<<<< HEAD
   // Operation not supported to prevent create of tasks
   @Override
   protected TaskDTO createDto(final ThirdEyePrincipal principal, final TaskApi taskApi) {
@@ -72,5 +73,4 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
-
 }

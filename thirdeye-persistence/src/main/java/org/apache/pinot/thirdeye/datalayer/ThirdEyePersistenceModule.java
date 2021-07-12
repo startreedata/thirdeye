@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnlineDetectionDataManagerIm
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OverrideConfigManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
@@ -54,7 +53,6 @@ import org.apache.pinot.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.OverrideConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseSessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseTemplateIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.datalayer.util.EntityMappingHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -77,7 +75,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -103,7 +100,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       OnboardDatasetMetricIndex.class,
       ApplicationIndex.class,
       RootcauseSessionIndex.class,
-      SessionIndex.class,
       DetectionConfigIndex.class,
       DetectionAlertConfigIndex.class,
       EvaluationIndex.class,
@@ -149,7 +145,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(RootcauseSessionManager.class).to(RootcauseSessionManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
         .in(Scopes.SINGLETON);
-    bind(SessionManager.class).to(SessionManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
         Scopes.SINGLETON);

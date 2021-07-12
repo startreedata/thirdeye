@@ -19,7 +19,6 @@ import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.ONLINE_DE
 import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.OVERRIDE_CONFIG;
 import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.ROOT_CAUSE_SESSION;
 import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.ROOT_CAUSE_TEMPLATE;
-import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.SESSION;
 import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.SUBSCRIPTION_GROUP;
 import static org.apache.pinot.thirdeye.datalayer.entity.SubEntityType.TASK;
 
@@ -44,7 +43,6 @@ import org.apache.pinot.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.OverrideConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseSessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseTemplateIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.SubEntityType;
 import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -66,7 +64,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 
@@ -99,7 +96,6 @@ public class SubEntities {
         .put(OnboardDatasetMetricBean.class, OnboardDatasetMetricIndex.class)
         .put(ApplicationDTO.class, ApplicationIndex.class)
         .put(RootcauseSessionBean.class, RootcauseSessionIndex.class)
-        .put(SessionBean.class, SessionIndex.class)
         .put(AlertDTO.class, DetectionConfigIndex.class)
         .put(SubscriptionGroupDTO.class, DetectionAlertConfigIndex.class)
         .put(EvaluationBean.class, EvaluationIndex.class)
@@ -126,7 +122,6 @@ public class SubEntities {
         .put(OnboardDatasetMetricBean.class, ONBOARD_DATASET_METRIC)
         .put(ApplicationDTO.class, APPLICATION)
         .put(RootcauseSessionBean.class, ROOT_CAUSE_SESSION)
-        .put(SessionBean.class, SESSION)
         .put(AlertDTO.class, ALERT)
         .put(SubscriptionGroupDTO.class, SUBSCRIPTION_GROUP)
         .put(EvaluationBean.class, EVALUATION)

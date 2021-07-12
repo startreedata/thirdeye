@@ -21,7 +21,6 @@ DROP TABLE IF EXISTS online_detection_data_index;
 DROP TABLE IF EXISTS override_config_index;
 DROP TABLE IF EXISTS rootcause_session_index;
 DROP TABLE IF EXISTS rootcause_template_index;
-DROP TABLE IF EXISTS session_index;
 DROP TABLE IF EXISTS task_index;
 
 SET FOREIGN_KEY_CHECKS = 1;

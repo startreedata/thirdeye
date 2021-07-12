@@ -23,38 +23,41 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ThirdEyeAuthFilter extends AuthFilter<ThirdEyeCredentials, ThirdEyePrincipal> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthFilter.class);
   public static final String AUTH_TOKEN_NAME = "te_auth";
-
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthFilter.class);
   private static final ThreadLocal<ThirdEyePrincipal> principalAuthContextThreadLocal = new ThreadLocal<>();
 
   private final Set<String> allowedPaths;
-  private final SessionManager sessionDAO;
   private Set<String> administrators;
 
   public ThirdEyeAuthFilter(Authenticator<ThirdEyeCredentials, ThirdEyePrincipal> authenticator,
-      Set<String> allowedPaths, List<String> administrators, SessionManager sessionDAO) {
+      Set<String> allowedPaths, List<String> administrators) {
     this.authenticator = authenticator;
     this.allowedPaths = allowedPaths;
-    this.sessionDAO = sessionDAO;
     if (administrators != null) {
       this.administrators = new HashSet<>(administrators);
     }
+  }
+
+  public static ThirdEyePrincipal getCurrentPrincipal() {
+    // TODO refactor this, use injectors
+    return principalAuthContextThreadLocal.get();
+  }
+
+  private static void setCurrentPrincipal(ThirdEyePrincipal principal) {
+    // TODO refactor this, use injectors
+    principalAuthContextThreadLocal.set(principal);
   }
 
   @Override
@@ -114,35 +117,6 @@ public class ThirdEyeAuthFilter extends AuthFilter<ThirdEyeCredentials, ThirdEye
   }
 
   private ThirdEyePrincipal getPrincipal(ContainerRequestContext containerRequestContext) {
-    Map<String, Cookie> cookies = containerRequestContext.getCookies();
-
-    if (cookies != null && cookies.containsKey(AUTH_TOKEN_NAME)) {
-      String sessionKey = cookies.get(AUTH_TOKEN_NAME).getValue();
-      if (sessionKey.isEmpty()) {
-        LOG.error("Empty sessionKey. Skipping.");
-      } else {
-        SessionDTO sessionDTO = this.sessionDAO.findBySessionKey(sessionKey);
-        if (sessionDTO != null && System.currentTimeMillis() < sessionDTO.getExpirationTime()) {
-          // session exist in database and has not expired
-
-          final ThirdEyePrincipal principal = new ThirdEyePrincipal(sessionDTO.getPrincipal(),
-              sessionKey);
-          LOG.info("Found valid session {} for user {}", sessionDTO.getSessionKey(),
-              sessionDTO.getPrincipal());
-          return principal;
-        }
-      }
-    }
     return null;
-  }
-
-  private static void setCurrentPrincipal(ThirdEyePrincipal principal) {
-    // TODO refactor this, use injectors
-    principalAuthContextThreadLocal.set(principal);
-  }
-
-  public static ThirdEyePrincipal getCurrentPrincipal() {
-    // TODO refactor this, use injectors
-    return principalAuthContextThreadLocal.get();
   }
 }

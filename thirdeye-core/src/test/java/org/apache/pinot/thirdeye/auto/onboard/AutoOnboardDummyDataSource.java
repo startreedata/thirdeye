@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.auto.onboard;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.AutoOnboard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

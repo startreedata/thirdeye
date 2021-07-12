@@ -25,8 +25,8 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.OverrideConfigBean;
 
 @Singleton
 public class OverrideConfigManagerImpl extends AbstractManagerImpl<OverrideConfigDTO> implements

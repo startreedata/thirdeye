@@ -18,11 +18,10 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.sql.Timestamp;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
 

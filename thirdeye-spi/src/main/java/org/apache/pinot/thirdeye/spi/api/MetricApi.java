@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.LogicalView;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.LogicalView;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
 

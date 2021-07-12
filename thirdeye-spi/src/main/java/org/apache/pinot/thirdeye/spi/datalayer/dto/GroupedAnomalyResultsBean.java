@@ -18,11 +18,10 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
 public class GroupedAnomalyResultsBean extends AbstractDTO {

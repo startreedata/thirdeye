@@ -17,14 +17,13 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * This class defines the config of a single datasource used in thirdeye

@@ -20,8 +20,6 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.TaskBean;
-
 /**
  * This class corresponds to anomaly tasks. An execution of an anomaly function creates an anomaly
  * job, which in turn spawns into 1 or more anomaly tasks. The anomaly tasks are picked by the

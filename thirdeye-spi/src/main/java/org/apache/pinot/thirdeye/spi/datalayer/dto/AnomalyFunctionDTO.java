@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFunctionBean;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

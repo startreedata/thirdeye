@@ -20,8 +20,6 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseTemplateBean;
-
 public class RootcauseTemplateDTO extends RootcauseTemplateBean {
 
 }

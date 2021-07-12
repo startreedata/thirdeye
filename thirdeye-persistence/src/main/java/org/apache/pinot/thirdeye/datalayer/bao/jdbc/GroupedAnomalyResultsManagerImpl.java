@@ -30,10 +30,10 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.GroupedAnomalyResultsManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.GroupedAnomalyResultsBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
 import org.modelmapper.ModelMapper;
 
 @Singleton

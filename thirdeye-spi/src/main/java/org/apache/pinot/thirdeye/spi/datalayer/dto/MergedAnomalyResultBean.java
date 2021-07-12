@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyType;

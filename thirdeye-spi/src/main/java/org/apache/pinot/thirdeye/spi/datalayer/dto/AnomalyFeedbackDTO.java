@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedbackType;
 

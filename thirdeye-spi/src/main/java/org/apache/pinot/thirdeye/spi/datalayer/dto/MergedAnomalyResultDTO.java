@@ -27,7 +27,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;

@@ -31,8 +31,8 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseSessionBean;
 
 @Singleton
 public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSessionDTO> implements

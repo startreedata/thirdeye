@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.testng.Assert;

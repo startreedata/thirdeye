@@ -27,8 +27,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EntityToEntityMappingBean;
 
 @Singleton
 public class EntityToEntityMappingManagerImpl extends

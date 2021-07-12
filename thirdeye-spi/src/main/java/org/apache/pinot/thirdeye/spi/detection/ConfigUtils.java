@@ -34,8 +34,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 

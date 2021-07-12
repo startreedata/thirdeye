@@ -24,8 +24,8 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.SessionBean;
 
 public class SessionManagerImpl extends AbstractManagerImpl<SessionDTO> implements SessionManager {
 

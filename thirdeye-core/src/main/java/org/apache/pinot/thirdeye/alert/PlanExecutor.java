@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.alert;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean.InputBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;

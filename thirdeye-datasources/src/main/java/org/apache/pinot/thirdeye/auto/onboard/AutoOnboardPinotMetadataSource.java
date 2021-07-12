@@ -23,7 +23,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.AutoOnboard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

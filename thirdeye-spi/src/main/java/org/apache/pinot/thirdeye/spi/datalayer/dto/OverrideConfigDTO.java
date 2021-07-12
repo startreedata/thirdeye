@@ -21,7 +21,6 @@
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.OverrideConfigBean;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OverrideConfigDTO extends OverrideConfigBean {

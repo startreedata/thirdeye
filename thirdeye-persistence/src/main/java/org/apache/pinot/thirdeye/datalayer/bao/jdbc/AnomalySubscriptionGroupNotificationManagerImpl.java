@@ -23,8 +23,8 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 import com.google.inject.Inject;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
 
 public class AnomalySubscriptionGroupNotificationManagerImpl
     extends AbstractManagerImpl<AnomalySubscriptionGroupNotificationDTO>

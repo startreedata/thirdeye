@@ -18,11 +18,10 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.io.Serializable;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedbackType;
 
 public class AnomalyFeedbackBean extends AbstractDTO implements Serializable {

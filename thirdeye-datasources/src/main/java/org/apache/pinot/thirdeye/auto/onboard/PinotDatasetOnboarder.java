@@ -26,9 +26,9 @@ import org.apache.pinot.spi.data.Schema;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean.DimensionAsMetricProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

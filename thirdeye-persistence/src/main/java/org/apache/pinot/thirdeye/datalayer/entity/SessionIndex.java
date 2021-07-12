@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.SessionBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionBean;
 
 public class SessionIndex extends AbstractIndexEntity {
 

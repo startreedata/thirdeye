@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.OnlineDetectionDataBean;
 
 public class OnlineDetectionDataManagerImpl extends AbstractManagerImpl<OnlineDetectionDataDTO>
     implements OnlineDetectionDataManager {

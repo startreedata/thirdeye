@@ -27,8 +27,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionStatusBean;
 
 @Singleton
 public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionStatusDTO>

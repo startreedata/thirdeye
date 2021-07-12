@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.GroupedAnomalyResultsBean;
 
 /**
  * The grouped anomaly results for alerter. Each group of anomalies should be sent through the same

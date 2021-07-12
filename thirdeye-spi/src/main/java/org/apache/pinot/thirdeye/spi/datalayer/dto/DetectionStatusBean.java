@@ -18,10 +18,9 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * Bean to store the detection status

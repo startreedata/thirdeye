@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertSnapshotBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyNotifiedStatus;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;

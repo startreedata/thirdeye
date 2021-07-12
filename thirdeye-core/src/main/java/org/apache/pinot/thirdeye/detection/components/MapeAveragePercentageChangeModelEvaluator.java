@@ -31,8 +31,8 @@ import org.apache.pinot.thirdeye.detection.spec.MapeAveragePercentageChangeModel
 import org.apache.pinot.thirdeye.detection.spi.components.ModelEvaluator;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;

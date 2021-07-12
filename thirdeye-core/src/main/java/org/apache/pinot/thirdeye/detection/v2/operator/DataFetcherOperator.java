@@ -5,7 +5,7 @@ import static org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanN
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.PlanNodeBean.OutputBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DataFetcher;

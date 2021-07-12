@@ -18,11 +18,10 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * This class holds the mapping between entities

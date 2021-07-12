@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.TaskBean;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 
 /**

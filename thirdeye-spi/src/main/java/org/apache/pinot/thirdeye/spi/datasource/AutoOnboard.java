@@ -21,7 +21,7 @@ package org.apache.pinot.thirdeye.spi.datasource;
 
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 
 /**
  * This is the abstract parent class for all auto-onboard metadata services for various datasources

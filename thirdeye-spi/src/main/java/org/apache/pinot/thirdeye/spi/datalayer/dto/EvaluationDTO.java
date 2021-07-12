@@ -24,7 +24,6 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.detection.Evaluation;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 

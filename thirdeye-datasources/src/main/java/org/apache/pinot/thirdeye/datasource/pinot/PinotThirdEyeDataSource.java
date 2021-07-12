@@ -47,10 +47,10 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGro
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdeyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.LogicalView;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.LogicalView;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;

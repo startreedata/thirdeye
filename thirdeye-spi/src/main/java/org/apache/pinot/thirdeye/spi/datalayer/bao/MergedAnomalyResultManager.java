@@ -23,8 +23,8 @@ package org.apache.pinot.thirdeye.spi.datalayer.bao;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
 
 public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomalyResultDTO> {
 

@@ -34,8 +34,8 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.JobBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.JobBean;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.joda.time.DateTime;
 

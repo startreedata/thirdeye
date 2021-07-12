@@ -34,7 +34,7 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

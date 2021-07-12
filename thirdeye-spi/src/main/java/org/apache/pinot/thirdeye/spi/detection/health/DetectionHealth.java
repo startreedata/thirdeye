@@ -36,11 +36,11 @@ import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.joda.time.Interval;
 

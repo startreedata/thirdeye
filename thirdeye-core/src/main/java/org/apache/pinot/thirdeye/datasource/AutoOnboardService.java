@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datasource.AutoOnboard;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.slf4j.Logger;

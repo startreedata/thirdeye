@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.health.DetectionHealth;
 

@@ -18,13 +18,12 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 /**
  * RootcauseSessionBean holds information for stored rootcause investigation reports. Supports

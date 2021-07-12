@@ -1,8 +1,7 @@
-package org.apache.pinot.thirdeye.spi.datalayer.pojo;
+package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 public class AlertTemplateBean extends AbstractDTO {
 

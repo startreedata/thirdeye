@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 
@@ -103,9 +102,9 @@ public class DetectionTaskStatus {
 
   public static DetectionTaskStatus fromTasks(List<TaskDTO> tasks, long lastTaskExecutionTime) {
     // count the number of tasks by task status
-    tasks.sort(Comparator.comparingLong(TaskBean::getStartTime).reversed());
+    tasks.sort(Comparator.comparingLong(TaskDTO::getStartTime).reversed());
     Map<TaskConstants.TaskStatus, Long> counts =
-        tasks.stream().collect(Collectors.groupingBy(TaskBean::getStatus, Collectors.counting()));
+        tasks.stream().collect(Collectors.groupingBy(TaskDTO::getStatus, Collectors.counting()));
     double taskSuccessRate = getTaskSuccessRate(counts);
     long newTaskExecutionTime = getLastSuccessTaskExecutionTime(tasks);
     newTaskExecutionTime =
@@ -125,9 +124,9 @@ public class DetectionTaskStatus {
   public static DetectionTaskStatus fromTasks(List<TaskDTO> tasks, long lastTaskExecutionTime,
       long taskLimit) {
     // count the number of tasks by task status
-    tasks.sort(Comparator.comparingLong(TaskBean::getStartTime).reversed());
+    tasks.sort(Comparator.comparingLong(TaskDTO::getStartTime).reversed());
     Map<TaskConstants.TaskStatus, Long> counts =
-        tasks.stream().collect(Collectors.groupingBy(TaskBean::getStatus, Collectors.counting()));
+        tasks.stream().collect(Collectors.groupingBy(TaskDTO::getStatus, Collectors.counting()));
     double taskSuccessRate = getTaskSuccessRate(counts);
     long newTaskExecutionTime = getLastSuccessTaskExecutionTime(tasks);
     newTaskExecutionTime =
@@ -141,7 +140,7 @@ public class DetectionTaskStatus {
   private static Long getLastSuccessTaskExecutionTime(List<TaskDTO> tasks) {
     return tasks.stream()
         .filter(task -> task.getStatus().equals(TaskConstants.TaskStatus.COMPLETED))
-        .map(TaskBean::getEndTime)
+        .map(TaskDTO::getEndTime)
         .findFirst()
         .orElse(-1L);
   }

@@ -68,7 +68,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 
 /**
  * ThirdEye entities consists of GenericJsonEntity and the index tables of the sub entities.
@@ -87,7 +87,7 @@ public class SubEntities {
     return ImmutableMap.<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>builder()
         .put(AnomalyFeedbackBean.class, AnomalyFeedbackIndex.class)
         .put(JobBean.class, JobIndex.class)
-        .put(TaskBean.class, TaskIndex.class)
+        .put(TaskDTO.class, TaskIndex.class)
         .put(MergedAnomalyResultBean.class, MergedAnomalyResultIndex.class)
         .put(DataSourceBean.class, DataSourceIndex.class)
         .put(DatasetConfigBean.class, DatasetConfigIndex.class)
@@ -114,7 +114,7 @@ public class SubEntities {
     return ImmutableMap.<Class<? extends AbstractDTO>, SubEntityType>builder()
         .put(AnomalyFeedbackBean.class, ANOMALY_FEEDBACK)
         .put(JobBean.class, JOB)
-        .put(TaskBean.class, TASK)
+        .put(TaskDTO.class, TASK)
         .put(MergedAnomalyResultBean.class, ANOMALY)
         .put(DataSourceBean.class, DATA_SOURCE)
         .put(DatasetConfigBean.class, DATASET)

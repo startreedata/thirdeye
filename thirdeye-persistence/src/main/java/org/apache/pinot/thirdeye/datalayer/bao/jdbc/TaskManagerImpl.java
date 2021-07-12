@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
@@ -48,99 +46,75 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC =
       " WHERE status = :status order by startTime desc limit 10";
 
-  private static final String FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_ASC =
-      " WHERE status = :status and type = :type order by startTime asc limit 10";
-
-  private static final String FIND_BY_STATUS_AND_TYPE_ORDER_BY_CREATE_TIME_DESC =
-      " WHERE status = :status and type = :type order by startTime desc limit 10";
-
-  private static final String FIND_BY_STATUS_AND_TYPE_NOT_IN_ORDER_BY_CREATE_TIME_ASC =
-      " WHERE status = :status and type != :type order by startTime asc limit 10";
-
-  private static final String FIND_BY_STATUS_AND_TYPE_NOT_IN_ORDER_BY_CREATE_TIME_DESC =
-      " WHERE status = :status and type != :type order by startTime desc limit 10";
-
   private static final String FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC =
       " WHERE name = :name order by createTime asc limit ";
 
   private static final String FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC =
       " WHERE name = :name order by createTime desc limit ";
 
-  private static final String COUNT_WAITING_TASKS =
-      "SELECT COUNT(*) FROM task_index WHERE status = 'WAITING'";
-
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
   @Inject
-  public TaskManagerImpl(GenericPojoDao genericPojoDao) {
-    super(TaskDTO.class, TaskBean.class, genericPojoDao);
+  public TaskManagerImpl(final GenericPojoDao genericPojoDao) {
+    super(TaskDTO.class, genericPojoDao);
   }
 
-  public Long save(TaskDTO entity) {
+  @Override
+  public Long save(final TaskDTO entity) {
     if (entity.getId() != null) {
       //TODO: throw exception and force the caller to call update instead
       update(entity);
       return entity.getId();
     }
-    TaskBean bean = toBean(entity);
-    Long id = genericPojoDao.put(bean);
+    final Long id = genericPojoDao.put(entity);
     entity.setId(id);
     return id;
   }
 
   @Override
-  public List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status) {
-    Predicate jobIdPredicate = Predicate.EQ("jobId", jobId);
-    Predicate statusPredicate = Predicate.NEQ("status", status.toString());
-    Predicate predicate = Predicate.AND(statusPredicate, jobIdPredicate);
+  public List<TaskDTO> findByJobIdStatusNotIn(final Long jobId, final TaskStatus status) {
+    final Predicate jobIdPredicate = Predicate.EQ("jobId", jobId);
+    final Predicate statusPredicate = Predicate.NEQ("status", status.toString());
+    final Predicate predicate = Predicate.AND(statusPredicate, jobIdPredicate);
     return findByPredicate(predicate);
   }
 
   @Override
-  public List<TaskDTO> findByNameOrderByCreateTime(String name, int fetchSize, boolean asc) {
-    Map<String, Object> parameterMap = new HashMap<>();
+  public List<TaskDTO> findByNameOrderByCreateTime(
+      final String name, final int fetchSize, final boolean asc) {
+    final Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("name", name);
-    String queryClause = (asc) ? FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC + fetchSize
+    final String queryClause = (asc)
+        ? FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC + fetchSize
         : FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC + fetchSize;
-    List<TaskBean> list = genericPojoDao
-        .executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
-    List<TaskDTO> result = new ArrayList<>();
-    for (TaskBean bean : list) {
-      result.add(MODEL_MAPPER.map(bean, TaskDTO.class));
-    }
-    return result;
+    return genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskDTO.class);
   }
 
   @Override
-  public List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize,
-      boolean asc) {
-    Map<String, Object> parameterMap = new HashMap<>();
+  public List<TaskDTO> findByStatusOrderByCreateTime(final TaskStatus status, final int fetchSize,
+      final boolean asc) {
+    final Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("status", status.toString());
-    List<TaskBean> list;
-    String queryClause =
+    final String queryClause =
         (asc) ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC;
-    list = genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskBean.class);
-    List<TaskDTO> result = new ArrayList<>();
-    for (TaskBean bean : list) {
-      result.add(MODEL_MAPPER.map(bean, TaskDTO.class));
-    }
-    return result;
+    return genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskDTO.class);
   }
 
   @Override
-  public boolean updateStatusAndWorkerId(Long workerId, Long id, Set<TaskStatus> permittedOldStatus,
-      int expectedVersion) {
-    TaskDTO task = findById(id);
+  public boolean updateStatusAndWorkerId(final Long workerId, final Long id,
+      final Set<TaskStatus> permittedOldStatus,
+      final int expectedVersion) {
+    final TaskDTO task = findById(id);
     if (permittedOldStatus.contains(task.getStatus())) {
       task.setStatus(TaskStatus.RUNNING);
       task.setWorkerId(workerId);
       task.setStartTime(System.currentTimeMillis());
       //increment the version
       task.setVersion(expectedVersion + 1);
-      Predicate predicate = Predicate.AND(
+      final Predicate predicate = Predicate.AND(
           Predicate.EQ("id", id),
           Predicate.EQ("version", expectedVersion));
-      int update = update(task, predicate);
+      final int update = update(task, predicate);
       return update == 1;
     } else {
       return false;
@@ -148,9 +122,10 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public void updateStatusAndTaskEndTime(Long id, TaskStatus oldStatus, TaskStatus newStatus,
-      Long taskEndTime, String message) {
-    TaskDTO task = findById(id);
+  public void updateStatusAndTaskEndTime(final Long id, final TaskStatus oldStatus,
+      final TaskStatus newStatus,
+      final Long taskEndTime, final String message) {
+    final TaskDTO task = findById(id);
     if (task.getStatus().equals(oldStatus)) {
       task.setStatus(newStatus);
       task.setEndTime(taskEndTime);
@@ -160,68 +135,68 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public void updateTaskStartTime(Long id, Long taskStartTime) {
-    TaskDTO task = findById(id);
+  public void updateTaskStartTime(final Long id, final Long taskStartTime) {
+    final TaskDTO task = findById(id);
     task.setStartTime(taskStartTime);
     save(task);
   }
 
   @Override
   @Transactional
-  public int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status) {
-    DateTime expireDate = new DateTime().minusDays(days);
-    Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
+  public int deleteRecordsOlderThanDaysWithStatus(final int days, final TaskStatus status) {
+    final DateTime expireDate = new DateTime().minusDays(days);
+    final Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
 
-    Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
-    Predicate statusPredicate = Predicate.EQ("status", status.toString());
+    final Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
+    final Predicate statusPredicate = Predicate.EQ("status", status.toString());
     return deleteByPredicate(Predicate.AND(statusPredicate, timestampPredicate));
   }
 
   @Override
   @Transactional
-  public List<TaskDTO> findByStatusNotIn(TaskStatus status) {
-    Predicate statusPredicate = Predicate.NEQ("status", status.toString());
+  public List<TaskDTO> findByStatusNotIn(final TaskStatus status) {
+    final Predicate statusPredicate = Predicate.NEQ("status", status.toString());
     return findByPredicate(statusPredicate);
   }
 
   @Override
-  public List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days) {
-    DateTime activeDate = new DateTime().minusDays(days);
-    Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    Predicate statusPredicate = Predicate.EQ("status", status.toString());
-    Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
+  public List<TaskDTO> findByStatusWithinDays(final TaskStatus status, final int days) {
+    final DateTime activeDate = new DateTime().minusDays(days);
+    final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
+    final Predicate statusPredicate = Predicate.EQ("status", status.toString());
+    final Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
     return findByPredicate(Predicate.AND(statusPredicate, timestampPredicate));
   }
 
   @Override
-  public List<TaskDTO> findByStatusesAndTypeWithinDays(List<TaskStatus> statuses,
-      TaskConstants.TaskType type, int days) {
-    DateTime activeDate = new DateTime().minusDays(days);
-    Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    Predicate statusPredicate = Predicate
+  public List<TaskDTO> findByStatusesAndTypeWithinDays(final List<TaskStatus> statuses,
+      final TaskConstants.TaskType type, final int days) {
+    final DateTime activeDate = new DateTime().minusDays(days);
+    final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
+    final Predicate statusPredicate = Predicate
         .IN("status", statuses.stream().map(Enum::toString).toArray());
-    Predicate typePredicate = Predicate.EQ("type", type.toString());
-    Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
+    final Predicate typePredicate = Predicate.EQ("type", type.toString());
+    final Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
     return findByPredicate(Predicate.AND(statusPredicate, typePredicate, timestampPredicate));
   }
 
   @Override
-  public List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime) {
-    DateTime activeDate = new DateTime().minusDays(days);
-    Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    DateTime timeoutDate = new DateTime().minus(maxTaskTime);
-    Timestamp timeoutTimestamp = new Timestamp(timeoutDate.getMillis());
-    Predicate statusPredicate = Predicate.EQ("status", TaskStatus.RUNNING.toString());
-    Predicate daysTimestampPredicate = Predicate.GE("createTime", activeTimestamp);
-    Predicate timeoutTimestampPredicate = Predicate.LT("updateTime", timeoutTimestamp);
+  public List<TaskDTO> findTimeoutTasksWithinDays(final int days, final long maxTaskTime) {
+    final DateTime activeDate = new DateTime().minusDays(days);
+    final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
+    final DateTime timeoutDate = new DateTime().minus(maxTaskTime);
+    final Timestamp timeoutTimestamp = new Timestamp(timeoutDate.getMillis());
+    final Predicate statusPredicate = Predicate.EQ("status", TaskStatus.RUNNING.toString());
+    final Predicate daysTimestampPredicate = Predicate.GE("createTime", activeTimestamp);
+    final Predicate timeoutTimestampPredicate = Predicate.LT("updateTime", timeoutTimestamp);
     return findByPredicate(
         Predicate.AND(statusPredicate, daysTimestampPredicate, timeoutTimestampPredicate));
   }
 
   @Override
-  public List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status) {
-    Predicate statusPredicate = Predicate.EQ("status", status.toString());
-    Predicate workerIdPredicate = Predicate.EQ("workerId", workerId);
+  public List<TaskDTO> findByStatusAndWorkerId(final Long workerId, final TaskStatus status) {
+    final Predicate statusPredicate = Predicate.EQ("status", status.toString());
+    final Predicate workerIdPredicate = Predicate.EQ("workerId", workerId);
     return findByPredicate(Predicate.AND(statusPredicate, workerIdPredicate));
   }
 }

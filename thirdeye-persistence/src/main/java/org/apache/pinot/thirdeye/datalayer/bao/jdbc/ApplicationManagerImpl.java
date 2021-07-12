@@ -20,30 +20,22 @@
 package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 
 public class ApplicationManagerImpl extends AbstractManagerImpl<ApplicationDTO>
     implements ApplicationManager {
 
   @Inject
   public ApplicationManagerImpl(GenericPojoDao genericPojoDao) {
-    super(ApplicationDTO.class, ApplicationBean.class, genericPojoDao);
+    super(ApplicationDTO.class, genericPojoDao);
   }
 
   public List<ApplicationDTO> findByName(String name) {
     Predicate predicate = Predicate.EQ("application", name);
-    List<ApplicationBean> list = genericPojoDao.get(predicate, ApplicationBean.class);
-    List<ApplicationDTO> result = new ArrayList<>();
-    for (ApplicationBean abstractBean : list) {
-      ApplicationDTO dto = MODEL_MAPPER.map(abstractBean, ApplicationDTO.class);
-      result.add(dto);
-    }
-    return result;
+    return genericPojoDao.get(predicate, ApplicationDTO.class);
   }
 }

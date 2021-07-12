@@ -48,11 +48,11 @@ import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.SubEntityType;
 import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalySubscriptionGroupNotificationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionStatusBean;
@@ -97,7 +97,7 @@ public class SubEntities {
         .put(DetectionStatusBean.class, DetectionStatusIndex.class)
         .put(EntityToEntityMappingBean.class, EntityToEntityMappingIndex.class)
         .put(OnboardDatasetMetricBean.class, OnboardDatasetMetricIndex.class)
-        .put(ApplicationBean.class, ApplicationIndex.class)
+        .put(ApplicationDTO.class, ApplicationIndex.class)
         .put(RootcauseSessionBean.class, RootcauseSessionIndex.class)
         .put(SessionBean.class, SessionIndex.class)
         .put(AlertBean.class, DetectionConfigIndex.class)
@@ -124,7 +124,7 @@ public class SubEntities {
         .put(DetectionStatusBean.class, DETECTION_STATUS)
         .put(EntityToEntityMappingBean.class, ENTITY_TO_ENTITY_MAPPING)
         .put(OnboardDatasetMetricBean.class, ONBOARD_DATASET_METRIC)
-        .put(ApplicationBean.class, APPLICATION)
+        .put(ApplicationDTO.class, APPLICATION)
         .put(RootcauseSessionBean.class, ROOT_CAUSE_SESSION)
         .put(SessionBean.class, SESSION)
         .put(AlertBean.class, ALERT)

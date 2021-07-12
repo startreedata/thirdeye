@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertTemplateBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
@@ -59,7 +58,7 @@ public abstract class ApiBeanMapper {
     return value ? true : null;
   }
 
-  public static ApplicationApi toApi(final ApplicationBean o) {
+  public static ApplicationApi toApi(final ApplicationDTO o) {
     return new ApplicationApi()
         .setId(o.getId())
         .setName(o.getApplication())

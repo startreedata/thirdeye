@@ -21,7 +21,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
-import org.apache.pinot.thirdeye.datalayer.util.DatabaseHealthCheck;
+import org.apache.pinot.thirdeye.healthcheck.DatabaseHealthCheck;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;

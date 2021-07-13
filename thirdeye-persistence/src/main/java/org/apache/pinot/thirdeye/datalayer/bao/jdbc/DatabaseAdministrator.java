@@ -79,4 +79,8 @@ public class DatabaseAdministrator {
       scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
     }
   }
+
+  public boolean validate() throws SQLException {
+    return executeQuery("SELECT 1").next();
+  }
 }

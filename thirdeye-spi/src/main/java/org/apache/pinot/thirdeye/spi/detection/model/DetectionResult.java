@@ -22,8 +22,15 @@
 package org.apache.pinot.thirdeye.spi.detection.model;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
+import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 
@@ -35,10 +42,16 @@ public class DetectionResult implements DetectionPipelineResult {
 
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
+  private final Map<String, List> rawData;
 
   private DetectionResult(final List<MergedAnomalyResultDTO> anomalies, final TimeSeries timeseries) {
+    this(anomalies, timeseries, Collections.emptyMap());
+  }
+
+  private DetectionResult(final List<MergedAnomalyResultDTO> anomalies, final TimeSeries timeseries, final Map<String, List> rawData) {
     this.anomalies = anomalies;
     this.timeseries = timeseries;
+    this.rawData = rawData;
   }
 
   /**
@@ -73,6 +86,22 @@ public class DetectionResult implements DetectionPipelineResult {
     return new DetectionResult(anomalies, timeSeries);
   }
 
+  /**
+   * Create a detection result from the raw data table
+   *
+   * @param rawData the raw data map with column name and the values.
+   * @return the detection result contains the raw data table
+   */
+  public static DetectionResult from(Map<String, List> rawData) {
+    return new DetectionResult(Collections.emptyList(), TimeSeries.empty(), rawData);
+  }
+
+  public static DetectionResult from(final DataFrame dataFrame) {
+    Map<String, List> rawData = new HashMap<>();
+    dataFrame.getSeriesNames().forEach(name -> rawData.put(name, dataFrame.getSeries().get(name).getObjects().toListTyped()));
+    return from(rawData);
+  }
+
   public List<MergedAnomalyResultDTO> getAnomalies() {
     return anomalies;
   }
@@ -83,11 +112,15 @@ public class DetectionResult implements DetectionPipelineResult {
 
   @Override
   public String toString() {
-    return "DetectionResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + '}';
+    return "DetectionResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + ", rawdata=" + rawData + '}';
   }
 
   @Override
   public List<DetectionResult> getDetectionResults() {
     return ImmutableList.of(this);
+  }
+
+  public Map<String, List> getRawData() {
+    return rawData;
   }
 }

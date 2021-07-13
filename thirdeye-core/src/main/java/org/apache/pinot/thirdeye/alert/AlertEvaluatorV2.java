@@ -52,7 +52,12 @@ public class AlertEvaluatorV2 {
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
-  public static DetectionDataApi getData(TimeSeries timeSeries) {
+  public static DetectionDataApi getData(DetectionResult detectionResult) {
+    Map<String, List> rawData = detectionResult.getRawData();
+    if (!rawData.isEmpty()) {
+      return new DetectionDataApi().setRawData(rawData);
+    }
+    final TimeSeries timeSeries = detectionResult.getTimeseries();
     final DetectionDataApi detectionDataApi = new DetectionDataApi();
     detectionDataApi.setCurrent(timeSeries.getCurrent().toList());
     detectionDataApi.setExpected(timeSeries.getPredictedBaseline().toList());
@@ -73,7 +78,7 @@ public class AlertEvaluatorV2 {
       anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
     }
     api.setAnomalies(anomalyApis);
-    api.setData(getData(detectionResult.getTimeseries()));
+    api.setData(getData(detectionResult));
     return api;
   }
 

@@ -36,10 +36,10 @@ public class DataTableUtils {
           final String columnName = dataTableBuilder.getColumns().get(columnIdx);
           final int newColIdx = dataTable.getColumns().indexOf(columnName);
           switch (dataTableBuilder.getColumnTypes().get(columnIdx).getType()) {
-            case "LONG":
+            case LONG:
               objects[columnIdx] = dataTable.getLong(row, newColIdx);
               break;
-            case "DOUBLE":
+            case DOUBLE:
               objects[columnIdx] = dataTable.getDouble(row, newColIdx);
               break;
             default:

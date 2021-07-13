@@ -59,6 +59,7 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
@@ -521,9 +522,5 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
     return pinotDatasetOnboarder;
-  }
-
-  public enum ColumnDataType {
-    INT, LONG, FLOAT, DOUBLE, STRING, BYTES, OBJECT, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY;
   }
 }

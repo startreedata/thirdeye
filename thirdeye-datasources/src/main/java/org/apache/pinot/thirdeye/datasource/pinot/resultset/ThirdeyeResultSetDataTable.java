@@ -1,11 +1,13 @@
 package org.apache.pinot.thirdeye.datasource.pinot.resultset;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 public class ThirdeyeResultSetDataTable implements DataTable {
@@ -21,11 +23,11 @@ public class ThirdeyeResultSetDataTable implements DataTable {
     this.groupKeyLength = thirdEyeResultSet.getGroupKeyLength();
     for (int i = 0; i < thirdEyeResultSet.getGroupKeyLength(); i++) {
       columns.add(thirdEyeResultSet.getGroupKeyColumnName(i));
-      columnTypes.add(new ColumnType("STRING", false));
+      columnTypes.add(new ColumnType(ColumnDataType.STRING));
     }
     for (int i = 0; i < thirdEyeResultSet.getColumnCount(); i++) {
       columns.add(thirdEyeResultSet.getColumnName(i));
-      columnTypes.add(new ColumnType("DOUBLE", false));
+      columnTypes.add(new ColumnType(ColumnDataType.DOUBLE));
     }
   }
 
@@ -85,13 +87,17 @@ public class ThirdeyeResultSetDataTable implements DataTable {
     if (colIdx < groupKeyLength) {
       return thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx);
     }
-    switch (columnTypes.get(colIdx).getType()) {
-      case "LONG":
+    final ColumnDataType type = columnTypes.get(colIdx).getType();
+    switch (type) {
+      case LONG:
         return thirdEyeResultSet.getLong(rowIdx, colIdx - groupKeyLength);
-      case "DOUBLE":
+      case DOUBLE:
         return thirdEyeResultSet.getDouble(rowIdx, colIdx - groupKeyLength);
-      default:
+      case STRING:
         return thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength);
+      default:
+        throw new RuntimeException(
+            "Unrecognized column type - " + type + ", only supports LONG/DOUBLE/STRING.");
     }
   }
 
@@ -147,6 +153,6 @@ public class ThirdeyeResultSetDataTable implements DataTable {
 
   @Override
   public List<DetectionResult> getDetectionResults() {
-    throw new UnsupportedOperationException("Not supported");
+    return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 }

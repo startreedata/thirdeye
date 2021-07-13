@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 
 @Singleton
@@ -32,6 +31,6 @@ public class DataSourceManagerImpl extends AbstractManagerImpl<DataSourceDTO>
 
   @Inject
   public DataSourceManagerImpl(GenericPojoDao genericPojoDao) {
-    super(DataSourceDTO.class, DataSourceBean.class, genericPojoDao);
+    super(DataSourceDTO.class, genericPojoDao);
   }
 }

@@ -53,7 +53,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingBean;
@@ -91,7 +91,7 @@ public class SubEntities {
         .put(AnomalySubscriptionGroupNotificationBean.class,
             AnomalySubscriptionGroupNotificationIndex.class)
         .put(ApplicationDTO.class, ApplicationIndex.class)
-        .put(DataSourceBean.class, DataSourceIndex.class)
+        .put(DataSourceDTO.class, DataSourceIndex.class)
         .put(DatasetConfigBean.class, DatasetConfigIndex.class)
         .put(DetectionStatusBean.class, DetectionStatusIndex.class)
         .put(EntityToEntityMappingBean.class, EntityToEntityMappingIndex.class)
@@ -118,7 +118,7 @@ public class SubEntities {
         .put(AnomalySubscriptionGroupNotificationBean.class,
             ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
         .put(ApplicationDTO.class, APPLICATION)
-        .put(DataSourceBean.class, DATA_SOURCE)
+        .put(DataSourceDTO.class, DATA_SOURCE)
         .put(DatasetConfigBean.class, DATASET)
         .put(DetectionStatusBean.class, DETECTION_STATUS)
         .put(EntityToEntityMappingBean.class, ENTITY_TO_ENTITY_MAPPING)

@@ -52,6 +52,11 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
     this(dtoClass, dtoClass, genericPojoDao);
   }
 
+  /**
+   * Bean classes are deprecated.
+   * Use DTO directly for db mapping using the other constructor.
+   */
+  @Deprecated
   protected AbstractManagerImpl(final Class<? extends AbstractDTO> dtoClass,
       final Class<? extends AbstractDTO> beanClass,
       final GenericPojoDao genericPojoDao) {

@@ -16,11 +16,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
-<<<<<<< HEAD
 import org.apache.pinot.thirdeye.mapper.TaskMapper;
-=======
->>>>>>> 99839acab (Update TaskResource.java)
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
@@ -41,7 +37,6 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     this.authService = authService;
   }
 
-<<<<<<< HEAD
   // Operation not supported to prevent create of tasks
   @Override
   protected TaskDTO createDto(final ThirdEyePrincipal principal, final TaskApi taskApi) {

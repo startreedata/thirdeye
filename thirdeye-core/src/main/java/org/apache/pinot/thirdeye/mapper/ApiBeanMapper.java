@@ -24,9 +24,11 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
+import org.apache.pinot.thirdeye.spi.api.JobApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
+import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
@@ -42,6 +44,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
@@ -466,5 +469,13 @@ public abstract class ApiBeanMapper {
 
   public static AlertTemplateBean toAlertTemplateBean(final AlertTemplateApi api) {
     return AlertTemplateMapper.INSTANCE.toBean(api);
+  }
+
+  public static TaskDTO toTaskDto(TaskApi api) {
+    return TaskMapper.INSTANCE.toDto(api);
+  }
+
+  public static TaskApi toApi(TaskDTO dto) {
+    return TaskMapper.INSTANCE.toApi(dto);
   }
 }

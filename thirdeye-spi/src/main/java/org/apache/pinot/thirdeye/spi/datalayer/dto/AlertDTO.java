@@ -53,7 +53,7 @@ public class AlertDTO extends AbstractDTO {
   Map<String, AlertNode> nodes;
 
   // The alert template
-  AlertTemplateBean template;
+  AlertTemplateDTO template;
   @JsonIgnore
   private Map<String, BaseComponent> components = new HashMap<>();
 
@@ -188,12 +188,12 @@ public class AlertDTO extends AbstractDTO {
     return this;
   }
 
-  public AlertTemplateBean getTemplate() {
+  public AlertTemplateDTO getTemplate() {
     return template;
   }
 
   public AlertDTO setTemplate(
-      final AlertTemplateBean template) {
+      final AlertTemplateDTO template) {
     this.template = template;
     return this;
   }

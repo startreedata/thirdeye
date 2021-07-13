@@ -278,20 +278,16 @@ CREATE INDEX rootcause_session_created_idx ON rootcause_session_index (created);
 CREATE INDEX rootcause_session_updated_idx ON rootcause_session_index (updated);
 CREATE INDEX rootcause_session_base_id_idx ON rootcause_session_index (base_id);
 
-CREATE TABLE IF NOT EXISTS session_index
+CREATE TABLE IF NOT EXISTS alert_template_index
 (
-    base_id        bigint(20) NOT NULL,
-    session_key    CHAR(64)   NOT NULL,
-    principal_type VARCHAR(32),
-    create_time    timestamp,
-    update_time    timestamp DEFAULT CURRENT_TIMESTAMP,
-    version        int(10)
+    name        varchar(200) NOT NULL,
+    base_id     bigint(20)   NOT NULL,
+    create_time timestamp,
+    update_time timestamp DEFAULT CURRENT_TIMESTAMP,
+    version     int(10),
+    CONSTRAINT uc_alert_template UNIQUE (name)
 ) ENGINE = InnoDB;
-ALTER TABLE `session_index`
-    ADD UNIQUE `session_unique_index` (session_key);
-CREATE INDEX session_base_id_idx ON session_index (base_id);
-CREATE INDEX session_key_idx ON session_index (session_key);
-CREATE INDEX session_principal_type_idx ON session_index (principal_type);
+CREATE INDEX alert_template_index_name_idx ON alert_template_index (name);
 
 CREATE TABLE IF NOT EXISTS detection_config_index
 (

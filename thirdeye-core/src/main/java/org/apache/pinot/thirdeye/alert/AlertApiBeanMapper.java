@@ -43,7 +43,7 @@ public class AlertApiBeanMapper {
         .ifPresent(dto::setNodes);
 
     optional(api.getTemplate())
-        .map(ApiBeanMapper::toAlertTemplateBean)
+        .map(ApiBeanMapper::toAlertTemplateDto)
         .ifPresent(dto::setTemplate);
 
     // May not get updated while edits

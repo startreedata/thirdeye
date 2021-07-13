@@ -11,6 +11,7 @@ public class ApiResource {
   private final DatasetResource datasetResource;
   private final MetricResource metricResource;
   private final AlertResource alertResource;
+  private final AlertTemplateResource alertTemplateResource;
   private final SubscriptionGroupResource subscriptionGroupResource;
   private final AnomalyResource anomalyResource;
   private final EntityResource entityResource;
@@ -25,6 +26,7 @@ public class ApiResource {
       final DatasetResource datasetResource,
       final MetricResource metricResource,
       final AlertResource alertResource,
+      final AlertTemplateResource alertTemplateResource,
       final SubscriptionGroupResource subscriptionGroupResource,
       final AnomalyResource anomalyResource,
       final EntityResource entityResource,
@@ -37,6 +39,7 @@ public class ApiResource {
     this.datasetResource = datasetResource;
     this.metricResource = metricResource;
     this.alertResource = alertResource;
+    this.alertTemplateResource = alertTemplateResource;
     this.subscriptionGroupResource = subscriptionGroupResource;
     this.anomalyResource = anomalyResource;
     this.entityResource = entityResource;
@@ -73,6 +76,11 @@ public class ApiResource {
   @Path("alerts")
   public AlertResource getAlertResource() {
     return alertResource;
+  }
+
+  @Path("alert-templates")
+  public AlertTemplateResource getAlertTemplateResource() {
+    return alertTemplateResource;
   }
 
   @Path("subscription-groups")

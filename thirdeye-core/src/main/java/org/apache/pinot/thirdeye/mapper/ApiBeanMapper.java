@@ -24,7 +24,6 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
-import org.apache.pinot.thirdeye.spi.api.JobApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
@@ -35,7 +34,7 @@ import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
@@ -171,8 +170,8 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  private static AlertTemplateApi toAlertTemplateApi(final AlertTemplateBean alertTemplateBean) {
-    return AlertTemplateMapper.INSTANCE.toApi(alertTemplateBean);
+  public static AlertTemplateApi toAlertTemplateApi(final AlertTemplateDTO alertTemplateDTO) {
+    return AlertTemplateMapper.INSTANCE.toApi(alertTemplateDTO);
   }
 
   private static Map<String, AlertNodeApi> toAlertNodeApiMap(
@@ -467,7 +466,7 @@ public abstract class ApiBeanMapper {
         .setType(feedbackDto.getFeedbackType());
   }
 
-  public static AlertTemplateBean toAlertTemplateBean(final AlertTemplateApi api) {
+  public static AlertTemplateDTO toAlertTemplateDto(final AlertTemplateApi api) {
     return AlertTemplateMapper.INSTANCE.toBean(api);
   }
 

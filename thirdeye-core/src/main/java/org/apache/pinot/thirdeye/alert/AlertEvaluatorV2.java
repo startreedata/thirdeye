@@ -21,7 +21,7 @@ import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
@@ -99,7 +99,7 @@ public class AlertEvaluatorV2 {
     final AlertTemplateApi templateApi = request.getAlert().getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
 
-    final AlertTemplateBean template = ApiBeanMapper.toAlertTemplateBean(templateApi);
+    final AlertTemplateDTO template = ApiBeanMapper.toAlertTemplateDto(templateApi);
 
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean operator : template.getNodes()) {

@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.datalayer.entity;
 
 public enum SubEntityType {
   ALERT,
+  ALERT_TEMPLATE,
   ANOMALY_FEEDBACK,
   ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION,
   APPLICATION,

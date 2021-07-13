@@ -8,8 +8,7 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
   private Long id;
   private TaskConstants.TaskType taskType;
   private Long workerId;
-  private Long jobId;
-  private String jobName;
+  private JobApi job;
   private TaskConstants.TaskStatus status;
   private long startTime;
   private long endTime;
@@ -34,48 +33,45 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
     return workerId;
   }
 
-  public void setWorkerId(Long workerId) {
+  public TaskApi setWorkerId(Long workerId) {
     this.workerId = workerId;
-  }
-
-  public void setJobName(String jobName) {
-    this.jobName = jobName;
-  }
-
-  public String getJobName() {
-    return jobName;
+    return this;
   }
 
   public TaskConstants.TaskStatus getStatus() {
     return status;
   }
 
-  public void setStatus(TaskConstants.TaskStatus status) {
+  public TaskApi setStatus(TaskConstants.TaskStatus status) {
     this.status = status;
+    return this;
   }
 
   public long getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(long startTime) {
+  public TaskApi setStartTime(long startTime) {
     this.startTime = startTime;
+    return this;
   }
 
   public long getEndTime() {
     return endTime;
   }
 
-  public void setEndTime(long endTime) {
+  public TaskApi setEndTime(long endTime) {
     this.endTime = endTime;
+    return this;
   }
 
   public String getTaskInfo() {
     return taskInfo;
   }
 
-  public void setTaskInfo(String taskInfo) {
+  public TaskApi setTaskInfo(String taskInfo) {
     this.taskInfo = taskInfo;
+    return this;
   }
 
   public TaskConstants.TaskType getTaskType() {
@@ -86,27 +82,31 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
     return message;
   }
 
-  public void setMessage(String message) {
+  public TaskApi setMessage(String message) {
     this.message = message;
+    return this;
   }
 
-  public void setTaskType(TaskConstants.TaskType taskType) {
+  public TaskApi setTaskType(TaskConstants.TaskType taskType) {
     this.taskType = taskType;
+    return this;
   }
 
   public Timestamp getLastModified() {
     return lastModified;
   }
 
-  public void setLastModified(Timestamp lastModified) {
+  public TaskApi setLastModified(Timestamp lastModified) {
     this.lastModified = lastModified;
+    return this;
   }
 
-  public Long getJobId() {
-    return jobId;
+  public JobApi getJob() {
+    return job;
   }
 
-  public void setJobId(Long jobId) {
-    this.jobId = jobId;
+  public TaskApi setJob(JobApi job) {
+    this.job = job;
+    return this;
   }
 }

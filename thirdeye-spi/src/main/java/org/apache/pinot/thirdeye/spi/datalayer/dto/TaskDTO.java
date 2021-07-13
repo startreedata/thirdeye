@@ -49,12 +49,14 @@ public class TaskDTO extends AbstractDTO {
     return workerId;
   }
 
-  public void setWorkerId(Long workerId) {
+  public TaskDTO setWorkerId(Long workerId) {
     this.workerId = workerId;
+    return this;
   }
 
-  public void setJobName(String jobName) {
+  public TaskDTO setJobName(String jobName) {
     this.jobName = jobName;
+    return this;
   }
 
   public String getJobName() {
@@ -65,32 +67,36 @@ public class TaskDTO extends AbstractDTO {
     return status;
   }
 
-  public void setStatus(TaskStatus status) {
+  public TaskDTO setStatus(TaskStatus status) {
     this.status = status;
+    return this;
   }
 
   public long getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(long startTime) {
+  public TaskDTO setStartTime(long startTime) {
     this.startTime = startTime;
+    return this;
   }
 
   public long getEndTime() {
     return endTime;
   }
 
-  public void setEndTime(long endTime) {
+  public TaskDTO setEndTime(long endTime) {
     this.endTime = endTime;
+    return this;
   }
 
   public String getTaskInfo() {
     return taskInfo;
   }
 
-  public void setTaskInfo(String taskInfo) {
+  public TaskDTO setTaskInfo(String taskInfo) {
     this.taskInfo = taskInfo;
+    return this;
   }
 
   public TaskType getTaskType() {
@@ -101,28 +107,32 @@ public class TaskDTO extends AbstractDTO {
     return message;
   }
 
-  public void setMessage(String message) {
+  public TaskDTO setMessage(String message) {
     this.message = message;
+    return this;
   }
 
-  public void setTaskType(TaskType taskType) {
+  public TaskDTO setTaskType(TaskType taskType) {
     this.taskType = taskType;
+    return this;
   }
 
   public Timestamp getLastModified() {
     return lastModified;
   }
 
-  public void setLastModified(Timestamp lastModified) {
+  public TaskDTO setLastModified(Timestamp lastModified) {
     this.lastModified = lastModified;
+    return this;
   }
 
   public Long getJobId() {
     return jobId;
   }
 
-  public void setJobId(Long jobId) {
+  public TaskDTO setJobId(Long jobId) {
     this.jobId = jobId;
+    return this;
   }
 
   @Override

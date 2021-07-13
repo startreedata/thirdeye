@@ -24,6 +24,7 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
+import org.apache.pinot.thirdeye.spi.api.JobApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
@@ -471,32 +472,10 @@ public abstract class ApiBeanMapper {
   }
 
   public static TaskDTO toTaskDto(TaskApi api) {
-    TaskDTO dto = new TaskDTO();
-    dto.setTaskType(api.getTaskType());
-    dto.setWorkerId(api.getWorkerId());
-    dto.setJobId(api.getJobId());
-    dto.setJobName(api.getJobName());
-    dto.setStatus(api.getStatus());
-    dto.setStartTime(api.getStartTime());
-    dto.setEndTime(api.getEndTime());
-    dto.setTaskInfo(api.getTaskInfo());
-    dto.setMessage(api.getMessage());
-    dto.setLastModified(api.getLastModified());
-    return dto;
+    return TaskMapper.INSTANCE.toDto(api);
   }
 
   public static TaskApi toApi(TaskDTO dto) {
-    TaskApi api = new TaskApi();
-    api.setTaskType(dto.getTaskType());
-    api.setWorkerId(dto.getWorkerId());
-    api.setJobId(dto.getJobId());
-    api.setJobName(dto.getJobName());
-    api.setStatus(dto.getStatus());
-    api.setStartTime(dto.getStartTime());
-    api.setEndTime(dto.getEndTime());
-    api.setTaskInfo(dto.getTaskInfo());
-    api.setMessage(dto.getMessage());
-    api.setLastModified(dto.getLastModified());
-    return api;
+    return TaskMapper.INSTANCE.toApi(dto);
   }
 }

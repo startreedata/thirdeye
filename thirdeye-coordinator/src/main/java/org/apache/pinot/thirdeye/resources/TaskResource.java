@@ -72,5 +72,4 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
-
 }

@@ -21,6 +21,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
+import org.apache.pinot.thirdeye.datalayer.util.DatabaseHealthCheck;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.anomaly.events.MockEventsLoader;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
@@ -98,6 +99,9 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
         .initializeCaches();
 
     env.jersey().register(injector.getInstance(RootResource.class));
+
+    // Persistence layer connectivity health check registry
+    env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
 
     // Enable CORS. Opens up the API server to respond to requests from all external domains.
     addCorsFilter(env);

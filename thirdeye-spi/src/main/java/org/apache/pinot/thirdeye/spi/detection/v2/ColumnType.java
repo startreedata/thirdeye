@@ -2,19 +2,22 @@ package org.apache.pinot.thirdeye.spi.detection.v2;
 
 public class ColumnType {
 
-  private final String type;
-  private final boolean isArray;
+  private final ColumnDataType columnDataType;
+  private final String ARRAY_TYPE_SUFFIX = "_ARRAY";
 
-  public ColumnType(final String type, final boolean isArray) {
-    this.type = type;
-    this.isArray = isArray;
+  public ColumnType(final ColumnDataType columnDataType) {
+    this.columnDataType = columnDataType;
   }
 
-  public String getType() {
-    return type;
+  public ColumnDataType getType() {
+    return columnDataType;
   }
 
   public boolean isArray() {
-    return isArray;
+    return columnDataType.name().endsWith(ARRAY_TYPE_SUFFIX);
+  }
+
+  public enum ColumnDataType {
+    BOOLEAN, INT, LONG, FLOAT, DOUBLE, DATE, STRING, BYTES, OBJECT, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY;
   }
 }

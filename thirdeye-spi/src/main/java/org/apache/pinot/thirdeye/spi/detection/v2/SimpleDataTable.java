@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.spi.detection.v2;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -40,7 +41,52 @@ public class SimpleDataTable implements DataTable {
 
   @Override
   public DataFrame getDataFrame() {
-    return null;
+    final DataFrame df = new DataFrame();
+    for (int colIdx = 0; colIdx < getColumnCount(); colIdx++) {
+      switch (columnTypes.get(colIdx).getType()) {
+        case INT:
+        case LONG:
+          df.addSeries(columns.get(colIdx).toLowerCase(), getLongsForColumn(colIdx));
+          break;
+        case DOUBLE:
+          df.addSeries(columns.get(colIdx).toLowerCase(), getDoublesForColumn(colIdx));
+          break;
+        case BOOLEAN:
+        case DATE:
+        case STRING:
+          df.addSeries(columns.get(colIdx).toLowerCase(), getStringsForColumn(colIdx));
+          break;
+        default:
+          throw new RuntimeException(
+              "Unrecognized column type - " + columnTypes.get(colIdx).getType()
+                  + ", only support INT/LONG/DOUBLE/STRING.");
+      }
+    }
+    return df;
+  }
+
+  private String[] getStringsForColumn(final int colIdx) {
+    String[] strings = new String[getRowCount()];
+    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+      strings[rowId] = getString(rowId, colIdx);
+    }
+    return strings;
+  }
+
+  private double[] getDoublesForColumn(final int colIdx) {
+    double[] doubles = new double[getRowCount()];
+    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+      doubles[rowId] = getDouble(rowId, colIdx);
+    }
+    return doubles;
+  }
+
+  private long[] getLongsForColumn(final int colIdx) {
+    long[] longs = new long[getRowCount()];
+    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+      longs[rowId] = getLong(rowId, colIdx);
+    }
+    return longs;
   }
 
   @Override
@@ -55,12 +101,17 @@ public class SimpleDataTable implements DataTable {
 
   @Override
   public long getLong(final int rowIdx, final int colIdx) {
-    return Long.parseLong((dataCache.get(rowIdx))[colIdx].toString());
+    return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString()).longValue();
   }
 
   @Override
   public double getDouble(final int rowIdx, final int colIdx) {
-    return Double.parseDouble((dataCache.get(rowIdx))[colIdx].toString());
+    return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString());
+  }
+
+  @Override
+  public List<DetectionResult> getDetectionResults() {
+    return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 
   public static class SimpleDataTableBuilder {
@@ -91,10 +142,5 @@ public class SimpleDataTable implements DataTable {
     public List<String> getColumns() {
       return columns;
     }
-  }
-
-  @Override
-  public List<DetectionResult> getDetectionResults() {
-    throw new UnsupportedOperationException("Not supported");
   }
 }

@@ -22,3 +22,9 @@ examples/batch/
 pom.xml.releaseBackup
 dependency-reduced-pom.xml
 release.properties
+
+# hsqldb in-memory temp files
+**/mem.lck
+**/mem.properties
+**/mem.script
+

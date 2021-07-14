@@ -27,7 +27,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 
 @Singleton
@@ -36,7 +35,7 @@ public class EntityToEntityMappingManagerImpl extends
 
   @Inject
   public EntityToEntityMappingManagerImpl(GenericPojoDao genericPojoDao) {
-    super(EntityToEntityMappingDTO.class, EntityToEntityMappingBean.class, genericPojoDao);
+    super(EntityToEntityMappingDTO.class, genericPojoDao);
   }
 
   @Override

@@ -36,7 +36,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -219,8 +218,8 @@ public class DetectionHealth {
       // calculate average mapes for each detector
       Map<String, Double> detectorMapes = evaluations.stream()
           .filter(eval -> Objects.nonNull(eval.getMape()))
-          .collect(Collectors.groupingBy(EvaluationBean::getDetectorName,
-              Collectors.averagingDouble(EvaluationBean::getMape)));
+          .collect(Collectors.groupingBy(EvaluationDTO::getDetectorName,
+              Collectors.averagingDouble(EvaluationDTO::getMape)));
 
       // construct regression status
       return RegressionStatus.fromDetectorMapes(detectorMapes);

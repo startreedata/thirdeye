@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AbstractManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EventBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 
 /**
@@ -40,7 +39,7 @@ public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements 
    */
   @Inject
   MockEventsManager(Collection<EventDTO> entities, GenericPojoDao genericPojoDao) {
-    super(EventDTO.class, EventBean.class, genericPojoDao);
+    super(EventDTO.class, genericPojoDao);
     this.entities = entities;
   }
 

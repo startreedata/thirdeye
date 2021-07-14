@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EventBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 
 @Singleton
@@ -33,7 +32,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
 
   @Inject
   public EventManagerImpl(GenericPojoDao genericPojoDao) {
-    super(EventDTO.class, EventBean.class, genericPojoDao);
+    super(EventDTO.class, genericPojoDao);
   }
 
   public List<EventDTO> findByEventType(String eventType) {

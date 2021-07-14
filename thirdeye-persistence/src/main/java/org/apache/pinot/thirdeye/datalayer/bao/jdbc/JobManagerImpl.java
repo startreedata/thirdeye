@@ -34,7 +34,6 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.JobBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
 import org.joda.time.DateTime;
@@ -47,7 +46,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
 
   @Inject
   public JobManagerImpl(GenericPojoDao genericPojoDao) {
-    super(JobDTO.class, JobBean.class, genericPojoDao);
+    super(JobDTO.class, genericPojoDao);
   }
 
   @Override
@@ -93,8 +92,8 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   public List<JobDTO> findNRecentJobs(int n) {
     String parameterizedSQL = "order by scheduleStartTime desc limit " + n;
     HashMap<String, Object> parameterMap = new HashMap<>();
-    List<JobBean> list = genericPojoDao
-        .executeParameterizedSQL(parameterizedSQL, parameterMap, JobBean.class);
+    List<JobDTO> list = genericPojoDao
+        .executeParameterizedSQL(parameterizedSQL, parameterMap, JobDTO.class);
     return convertBeanListToDTOList(list);
   }
 
@@ -117,15 +116,15 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
     parameterMap.put("configId", configId);
     parameterMap.put("status", JobStatus.FAILED);
     parameterMap.put("scheduleStartTime", minScheduledTime);
-    List<JobBean> list = genericPojoDao
+    List<JobDTO> list = genericPojoDao
         .executeParameterizedSQL(FIND_RECENT_SCHEDULED_JOB_BY_TYPE_AND_CONFIG_ID, parameterMap,
-            JobBean.class);
+            JobDTO.class);
 
     if (CollectionUtils.isNotEmpty(list)) {
       // Sort by scheduleStartTime; most recent scheduled job at the beginning
-      Collections.sort(list, Collections.reverseOrder(new Comparator<JobBean>() {
+      Collections.sort(list, Collections.reverseOrder(new Comparator<JobDTO>() {
         @Override
-        public int compare(JobBean o1, JobBean o2) {
+        public int compare(JobDTO o1, JobDTO o2) {
           return Long.compare(o1.getScheduleStartTime(), o2.getScheduleStartTime());
         }
       }));

@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 
 @Singleton
@@ -34,7 +33,7 @@ public class OnboardDatasetMetricManagerImpl extends AbstractManagerImpl<Onboard
 
   @Inject
   public OnboardDatasetMetricManagerImpl(GenericPojoDao genericPojoDao) {
-    super(OnboardDatasetMetricDTO.class, OnboardDatasetMetricBean.class, genericPojoDao);
+    super(OnboardDatasetMetricDTO.class, genericPojoDao);
   }
 
   @Override

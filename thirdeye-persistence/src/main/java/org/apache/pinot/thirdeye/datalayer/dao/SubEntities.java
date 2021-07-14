@@ -51,22 +51,22 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EventBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.JobBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 
@@ -88,23 +88,23 @@ public class SubEntities {
         .put(AlertDTO.class, DetectionConfigIndex.class)
         .put(AlertTemplateDTO.class, AlertTemplateIndex.class)
         .put(AnomalyFeedbackDTO.class, AnomalyFeedbackIndex.class)
-        .put(AnomalySubscriptionGroupNotificationBean.class,
+        .put(AnomalySubscriptionGroupNotificationDTO.class,
             AnomalySubscriptionGroupNotificationIndex.class)
         .put(ApplicationDTO.class, ApplicationIndex.class)
         .put(DataSourceDTO.class, DataSourceIndex.class)
         .put(DatasetConfigBean.class, DatasetConfigIndex.class)
-        .put(DetectionStatusBean.class, DetectionStatusIndex.class)
-        .put(EntityToEntityMappingBean.class, EntityToEntityMappingIndex.class)
-        .put(EvaluationBean.class, EvaluationIndex.class)
-        .put(EventBean.class, EventIndex.class)
-        .put(JobBean.class, JobIndex.class)
+        .put(DetectionStatusDTO.class, DetectionStatusIndex.class)
+        .put(EntityToEntityMappingDTO.class, EntityToEntityMappingIndex.class)
+        .put(EvaluationDTO.class, EvaluationIndex.class)
+        .put(EventDTO.class, EventIndex.class)
+        .put(JobDTO.class, JobIndex.class)
         .put(MergedAnomalyResultBean.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigBean.class, MetricConfigIndex.class)
-        .put(OnboardDatasetMetricBean.class, OnboardDatasetMetricIndex.class)
-        .put(OnlineDetectionDataBean.class, OnlineDetectionDataIndex.class)
-        .put(OverrideConfigBean.class, OverrideConfigIndex.class)
-        .put(RootcauseSessionBean.class, RootcauseSessionIndex.class)
-        .put(RootcauseTemplateBean.class, RootcauseTemplateIndex.class)
+        .put(OnboardDatasetMetricDTO.class, OnboardDatasetMetricIndex.class)
+        .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
+        .put(OverrideConfigDTO.class, OverrideConfigIndex.class)
+        .put(RootcauseSessionDTO.class, RootcauseSessionIndex.class)
+        .put(RootcauseTemplateDTO.class, RootcauseTemplateIndex.class)
         .put(SubscriptionGroupDTO.class, DetectionAlertConfigIndex.class)
         .put(TaskDTO.class, TaskIndex.class)
         .build();
@@ -115,23 +115,23 @@ public class SubEntities {
         .put(AlertDTO.class, ALERT)
         .put(AlertTemplateDTO.class, ALERT_TEMPLATE)
         .put(AnomalyFeedbackDTO.class, ANOMALY_FEEDBACK)
-        .put(AnomalySubscriptionGroupNotificationBean.class,
+        .put(AnomalySubscriptionGroupNotificationDTO.class,
             ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
         .put(ApplicationDTO.class, APPLICATION)
         .put(DataSourceDTO.class, DATA_SOURCE)
         .put(DatasetConfigBean.class, DATASET)
-        .put(DetectionStatusBean.class, DETECTION_STATUS)
-        .put(EntityToEntityMappingBean.class, ENTITY_TO_ENTITY_MAPPING)
-        .put(EvaluationBean.class, EVALUATION)
-        .put(EventBean.class, EVENT)
-        .put(JobBean.class, JOB)
+        .put(DetectionStatusDTO.class, DETECTION_STATUS)
+        .put(EntityToEntityMappingDTO.class, ENTITY_TO_ENTITY_MAPPING)
+        .put(EvaluationDTO.class, EVALUATION)
+        .put(EventDTO.class, EVENT)
+        .put(JobDTO.class, JOB)
         .put(MergedAnomalyResultBean.class, ANOMALY)
         .put(MetricConfigBean.class, METRIC)
-        .put(OnboardDatasetMetricBean.class, ONBOARD_DATASET_METRIC)
-        .put(OnlineDetectionDataBean.class, ONLINE_DETECTION_DATA)
-        .put(OverrideConfigBean.class, OVERRIDE_CONFIG)
-        .put(RootcauseSessionBean.class, ROOT_CAUSE_SESSION)
-        .put(RootcauseTemplateBean.class, ROOT_CAUSE_TEMPLATE)
+        .put(OnboardDatasetMetricDTO.class, ONBOARD_DATASET_METRIC)
+        .put(OnlineDetectionDataDTO.class, ONLINE_DETECTION_DATA)
+        .put(OverrideConfigDTO.class, OVERRIDE_CONFIG)
+        .put(RootcauseSessionDTO.class, ROOT_CAUSE_SESSION)
+        .put(RootcauseTemplateDTO.class, ROOT_CAUSE_TEMPLATE)
         .put(SubscriptionGroupDTO.class, SUBSCRIPTION_GROUP)
         .put(TaskDTO.class, TASK)
         .build();

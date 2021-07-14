@@ -31,7 +31,6 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
 
 @Singleton
@@ -47,7 +46,7 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
 
   @Inject
   public RootcauseSessionManagerImpl(GenericPojoDao genericPojoDao) {
-    super(RootcauseSessionDTO.class, RootcauseSessionBean.class, genericPojoDao);
+    super(RootcauseSessionDTO.class, genericPojoDao);
   }
 
   @Override
@@ -95,7 +94,7 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
 
   private List<RootcauseSessionDTO> findByLike(Set<String> fragments, String template, String key) {
     return findByLike(fragments, template, key, RootcauseSessionDTO.class,
-        RootcauseSessionBean.class);
+        RootcauseSessionDTO.class);
   }
 
   private <B extends AbstractDTO, D> List<D> findByLike(Set<String> fragments, String template,

@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EventBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -202,7 +201,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
     }
     List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
-    holidays.sort(Comparator.comparingLong(EventBean::getStartTime));
+    holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
 
     // Insert anomaly snapshot image
     if (anomalyDetails.size() == 1) {

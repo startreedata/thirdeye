@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 
 @Singleton
@@ -34,7 +33,7 @@ public class OverrideConfigManagerImpl extends AbstractManagerImpl<OverrideConfi
 
   @Inject
   public OverrideConfigManagerImpl(GenericPojoDao genericPojoDao) {
-    super(OverrideConfigDTO.class, OverrideConfigBean.class, genericPojoDao);
+    super(OverrideConfigDTO.class, genericPojoDao);
   }
 
   @Override

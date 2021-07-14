@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 
 public class OnlineDetectionDataManagerImpl extends AbstractManagerImpl<OnlineDetectionDataDTO>
@@ -13,7 +12,7 @@ public class OnlineDetectionDataManagerImpl extends AbstractManagerImpl<OnlineDe
 
   @Inject
   public OnlineDetectionDataManagerImpl(GenericPojoDao genericPojoDao) {
-    super(OnlineDetectionDataDTO.class, OnlineDetectionDataBean.class, genericPojoDao);
+    super(OnlineDetectionDataDTO.class, genericPojoDao);
   }
 
   @Override

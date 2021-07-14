@@ -27,7 +27,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DetectionStatusManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 
 @Singleton
@@ -36,13 +35,13 @@ public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionSta
 
   @Inject
   public DetectionStatusManagerImpl(GenericPojoDao genericPojoDao) {
-    super(DetectionStatusDTO.class, DetectionStatusBean.class, genericPojoDao);
+    super(DetectionStatusDTO.class, genericPojoDao);
   }
 
   @Override
   public DetectionStatusDTO findLatestEntryForFunctionId(long functionId) {
     Predicate predicate = Predicate.EQ("functionId", functionId);
-    List<DetectionStatusBean> list = genericPojoDao.get(predicate, DetectionStatusBean.class);
+    List<DetectionStatusDTO> list = genericPojoDao.get(predicate, DetectionStatusDTO.class);
     DetectionStatusDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
       Collections.sort(list);

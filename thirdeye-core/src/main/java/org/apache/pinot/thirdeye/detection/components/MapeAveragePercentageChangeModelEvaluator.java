@@ -31,7 +31,6 @@ import org.apache.pinot.thirdeye.detection.spec.MapeAveragePercentageChangeModel
 import org.apache.pinot.thirdeye.detection.spi.components.ModelEvaluator;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
@@ -145,6 +144,6 @@ public class MapeAveragePercentageChangeModelEvaluator implements
         evaluations.stream().collect(
             Collectors
                 .groupingBy(e -> String.format("%s:%s", e.getMetricUrn(), e.getDetectorName()),
-                    Collectors.averagingDouble(EvaluationBean::getMape)));
+                    Collectors.averagingDouble(EvaluationDTO::getMape)));
   }
 }

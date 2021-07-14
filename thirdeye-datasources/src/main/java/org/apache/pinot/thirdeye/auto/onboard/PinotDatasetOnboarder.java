@@ -26,9 +26,8 @@ import org.apache.pinot.spi.data.Schema;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO.DimensionAsMetricProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -237,7 +236,7 @@ public class PinotDatasetOnboarder {
               .get(DimensionAsMetricProperties.METRIC_NAMES_COLUMNS.toString());
           if (StringUtils.isNotBlank(metricNames)) {
             dimensionsAsMetrics.addAll(Lists
-                .newArrayList(metricNames.split(MetricConfigBean.METRIC_PROPERTIES_SEPARATOR)));
+                .newArrayList(metricNames.split(MetricConfigDTO.METRIC_PROPERTIES_SEPARATOR)));
           }
         }
       }

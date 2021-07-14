@@ -44,9 +44,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.spi.utils.GroovyTemplateUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO.DimensionAsMetricProperties;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
@@ -213,9 +212,9 @@ public class SqlUtils {
           .toString(DimensionAsMetricProperties.values()));
     }
     List<String> metricNamesList =
-        Lists.newArrayList(metricNames.split(MetricConfigBean.METRIC_PROPERTIES_SEPARATOR));
+        Lists.newArrayList(metricNames.split(MetricConfigDTO.METRIC_PROPERTIES_SEPARATOR));
     List<String> metricNamesColumnsList =
-        Lists.newArrayList(metricNamesColumns.split(MetricConfigBean.METRIC_PROPERTIES_SEPARATOR));
+        Lists.newArrayList(metricNamesColumns.split(MetricConfigDTO.METRIC_PROPERTIES_SEPARATOR));
     if (metricNamesList.size() != metricNamesColumnsList.size()) {
       throw new RuntimeException("Must provide same number of metricNames in " + metricNames
           + " as metricNamesColumns in " + metricNamesColumns);

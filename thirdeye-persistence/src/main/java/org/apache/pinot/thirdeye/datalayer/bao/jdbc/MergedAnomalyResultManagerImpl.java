@@ -46,7 +46,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -463,9 +463,9 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       List<Long> metricIds, long start, long end) {
     Map<Long, List<MergedAnomalyResultDTO>> output = new HashMap<>();
 
-    List<MetricConfigBean> metricBeans = genericPojoDao.get(metricIds, MetricConfigBean.class);
+    List<MetricConfigDTO> metricBeans = genericPojoDao.get(metricIds, MetricConfigDTO.class);
 
-    for (MetricConfigBean mbean : metricBeans) {
+    for (MetricConfigDTO mbean : metricBeans) {
       output.put(mbean.getId(), getAnomaliesForMetricBeanAndTimeRange(mbean, start, end));
     }
 
@@ -486,7 +486,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   @Override
   public List<MergedAnomalyResultDTO> findAnomaliesByMetricIdAndTimeRange(Long metricId, long start,
       long end) {
-    MetricConfigBean mbean = genericPojoDao.get(metricId, MetricConfigBean.class);
+    MetricConfigDTO mbean = genericPojoDao.get(metricId, MetricConfigDTO.class);
     if (mbean == null) {
       throw new IllegalArgumentException(
           String.format("Could not resolve metric id '%d'", metricId));
@@ -514,7 +514,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     return null;
   }
 
-  private List<MergedAnomalyResultDTO> getAnomaliesForMetricBeanAndTimeRange(MetricConfigBean mbean,
+  private List<MergedAnomalyResultDTO> getAnomaliesForMetricBeanAndTimeRange(MetricConfigDTO mbean,
       long start, long end) {
 
     LOG.info("Fetching anomalies for metric '{}' and dataset '{}'", mbean.getName(),

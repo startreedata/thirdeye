@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -306,7 +305,7 @@ public class DimensionWrapper extends DetectionPipeline {
           this.provider.fetchMetrics(
               nestedMetrics.stream().map(MetricEntity::getId).collect(Collectors.toSet()));
       Map<String, DatasetConfigDTO> datasetToConfigMap = this.provider.fetchDatasets(
-          metricIdToConfigMap.values().stream().map(MetricConfigBean::getDataset)
+          metricIdToConfigMap.values().stream().map(MetricConfigDTO::getDataset)
               .collect(Collectors.toSet()));
       // group the metric entities by dataset
       Map<DatasetConfigDTO, List<MetricEntity>> nestedMetricsByDataset = nestedMetrics.stream()

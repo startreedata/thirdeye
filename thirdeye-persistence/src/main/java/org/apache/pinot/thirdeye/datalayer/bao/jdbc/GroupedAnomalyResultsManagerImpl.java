@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.GroupedAnomalyResultsManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -46,7 +45,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
   @Inject
   public GroupedAnomalyResultsManagerImpl(GenericPojoDao genericPojoDao,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(GroupedAnomalyResultsDTO.class, GroupedAnomalyResultsBean.class, genericPojoDao);
+    super(GroupedAnomalyResultsDTO.class, GroupedAnomalyResultsDTO.class, genericPojoDao);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
@@ -56,7 +55,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
       update(groupedAnomalyResultDTO);
       return groupedAnomalyResultDTO.getId();
     } else {
-      GroupedAnomalyResultsBean bean = convertGroupedAnomalyDTO2Bean(groupedAnomalyResultDTO);
+      GroupedAnomalyResultsDTO bean = convertGroupedAnomalyDTO2Bean(groupedAnomalyResultDTO);
       Long id = genericPojoDao.put(bean);
       groupedAnomalyResultDTO.setId(id);
       return id;
@@ -73,15 +72,15 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
         return 0;
       }
     } else {
-      GroupedAnomalyResultsBean groupedAnomalyResultsBean = convertGroupedAnomalyDTO2Bean(
+      GroupedAnomalyResultsDTO GroupedAnomalyResultsDTO = convertGroupedAnomalyDTO2Bean(
           groupedAnomalyResultDTO);
-      return genericPojoDao.update(groupedAnomalyResultsBean);
+      return genericPojoDao.update(GroupedAnomalyResultsDTO);
     }
   }
 
   @Override
   public GroupedAnomalyResultsDTO findById(Long id) {
-    GroupedAnomalyResultsBean bean = genericPojoDao.get(id, GroupedAnomalyResultsBean.class);
+    GroupedAnomalyResultsDTO bean = genericPojoDao.get(id, GroupedAnomalyResultsDTO.class);
     if (bean != null) {
       GroupedAnomalyResultsDTO groupedAnomalyResultsDTO = convertGroupedAnomalyBean2DTO(bean);
       return groupedAnomalyResultsDTO;
@@ -98,13 +97,13 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
         .AND(Predicate.EQ("alertConfigId", alertConfigId), Predicate.EQ("dimensions", dimensions),
             Predicate.GT("endTime", windowStart), Predicate.LE("endTime", windowEnd));
 
-    List<GroupedAnomalyResultsBean> groupedAnomalyResultsBeans =
-        genericPojoDao.get(predicate, GroupedAnomalyResultsBean.class);
-    if (CollectionUtils.isNotEmpty(groupedAnomalyResultsBeans)) {
+    List<GroupedAnomalyResultsDTO> GroupedAnomalyResultsDTOs =
+        genericPojoDao.get(predicate, GroupedAnomalyResultsDTO.class);
+    if (CollectionUtils.isNotEmpty(GroupedAnomalyResultsDTOs)) {
       // Sort grouped anomaly results bean in the natural order of their end time.
-      Collections.sort(groupedAnomalyResultsBeans, new Comparator<GroupedAnomalyResultsBean>() {
+      Collections.sort(GroupedAnomalyResultsDTOs, new Comparator<GroupedAnomalyResultsDTO>() {
         @Override
-        public int compare(GroupedAnomalyResultsBean o1, GroupedAnomalyResultsBean o2) {
+        public int compare(GroupedAnomalyResultsDTO o1, GroupedAnomalyResultsDTO o2) {
           int endTimeCompare = (int) (o1.getEndTime() - o2.getEndTime());
           if (endTimeCompare != 0) {
             return endTimeCompare;
@@ -115,16 +114,16 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
       });
       GroupedAnomalyResultsDTO groupedAnomalyResultsDTO =
           convertGroupedAnomalyBean2DTO(
-              groupedAnomalyResultsBeans.get(groupedAnomalyResultsBeans.size() - 1));
+              GroupedAnomalyResultsDTOs.get(GroupedAnomalyResultsDTOs.size() - 1));
       return groupedAnomalyResultsDTO;
     } else {
       return null;
     }
   }
 
-  protected GroupedAnomalyResultsBean convertGroupedAnomalyDTO2Bean(
+  protected GroupedAnomalyResultsDTO convertGroupedAnomalyDTO2Bean(
       GroupedAnomalyResultsDTO entity) {
-    GroupedAnomalyResultsBean bean = toBean(entity);
+    GroupedAnomalyResultsDTO bean = toBean(entity);
     if (CollectionUtils.isNotEmpty(entity.getAnomalyResults())) {
       List<Long> mergedAnomalyId = new ArrayList<>();
       for (MergedAnomalyResultDTO mergedAnomalyResultDTO : entity.getAnomalyResults()) {
@@ -140,19 +139,19 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
    * converted to their
    * corresponding DTO class; however, the raw anomalies of those merged results are not converted.
    *
-   * @param groupedAnomalyResultsBean the bean class to be converted
+   * @param GroupedAnomalyResultsDTO the bean class to be converted
    * @return the DTO class that consists of the DTO of merged anomalies whose raw anomalies are not
    *     converted from bean.
    */
   protected GroupedAnomalyResultsDTO convertGroupedAnomalyBean2DTO(
-      GroupedAnomalyResultsBean groupedAnomalyResultsBean) {
+      GroupedAnomalyResultsDTO GroupedAnomalyResultsDTO) {
     GroupedAnomalyResultsDTO groupedAnomalyResultsDTO =
-        MODEL_MAPPER.map(groupedAnomalyResultsBean, GroupedAnomalyResultsDTO.class);
+        MODEL_MAPPER.map(GroupedAnomalyResultsDTO, GroupedAnomalyResultsDTO.class);
 
-    if (CollectionUtils.isNotEmpty(groupedAnomalyResultsBean.getAnomalyResultsId())) {
+    if (CollectionUtils.isNotEmpty(GroupedAnomalyResultsDTO.getAnomalyResultsId())) {
       List<MergedAnomalyResultBean> list =
           genericPojoDao
-              .get(groupedAnomalyResultsBean.getAnomalyResultsId(), MergedAnomalyResultBean.class);
+              .get(GroupedAnomalyResultsDTO.getAnomalyResultsId(), MergedAnomalyResultBean.class);
       List<MergedAnomalyResultDTO> mergedAnomalyResults = mergedAnomalyResultManager
           .convertMergedAnomalyBean2DTO(list);
       groupedAnomalyResultsDTO.setAnomalyResults(mergedAnomalyResults);

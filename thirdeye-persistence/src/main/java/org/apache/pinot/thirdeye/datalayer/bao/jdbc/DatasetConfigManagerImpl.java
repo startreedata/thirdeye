@@ -26,7 +26,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 
 @Singleton
@@ -35,13 +34,13 @@ public class DatasetConfigManagerImpl extends AbstractManagerImpl<DatasetConfigD
 
   @Inject
   public DatasetConfigManagerImpl(GenericPojoDao genericPojoDao) {
-    super(DatasetConfigDTO.class, DatasetConfigBean.class, genericPojoDao);
+    super(DatasetConfigDTO.class, genericPojoDao);
   }
 
   @Override
   public DatasetConfigDTO findByDataset(String dataset) {
     Predicate predicate = Predicate.EQ("dataset", dataset);
-    List<DatasetConfigBean> list = genericPojoDao.get(predicate, DatasetConfigBean.class);
+    List<DatasetConfigDTO> list = genericPojoDao.get(predicate, DatasetConfigDTO.class);
     DatasetConfigDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
       result = MODEL_MAPPER.map(list.get(0), DatasetConfigDTO.class);

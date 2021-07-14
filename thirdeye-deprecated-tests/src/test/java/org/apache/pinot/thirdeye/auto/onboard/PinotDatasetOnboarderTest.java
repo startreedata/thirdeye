@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
 import org.testng.Assert;
@@ -113,11 +112,11 @@ public class PinotDatasetOnboarderTest {
       metricIds.add(metricConfig.getId());
       if (metricConfig.getName().equals("latency_tdigest")) {
         Assert.assertEquals(metricConfig.getDefaultAggFunction(),
-            MetricConfigBean.DEFAULT_TDIGEST_AGG_FUNCTION);
+            MetricConfigDTO.DEFAULT_TDIGEST_AGG_FUNCTION);
         Assert.assertEquals(metricConfig.getDatatype(), MetricType.DOUBLE);
       } else {
         Assert.assertEquals(metricConfig.getDefaultAggFunction(),
-            MetricConfigBean.DEFAULT_AGG_FUNCTION);
+            MetricConfigDTO.DEFAULT_AGG_FUNCTION);
       }
     }
   }

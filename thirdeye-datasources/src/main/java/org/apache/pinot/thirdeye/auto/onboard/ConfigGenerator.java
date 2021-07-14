@@ -28,9 +28,7 @@ import org.apache.pinot.spi.data.DateTimeFieldSpec.TimeFormat;
 import org.apache.pinot.spi.data.DateTimeFormatSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
@@ -98,11 +96,11 @@ public class ConfigGenerator {
       case MILLISECONDS:
       case MINUTES:
       case SECONDS:
-        expectedDelay = DatasetConfigBean.DEFAULT_HOURLY_EXPECTED_DELAY;
+        expectedDelay = DatasetConfigDTO.DEFAULT_HOURLY_EXPECTED_DELAY;
         break;
       case DAYS:
       default:
-        expectedDelay = DatasetConfigBean.DEFAULT_DAILY_EXPECTED_DELAY;
+        expectedDelay = DatasetConfigDTO.DEFAULT_DAILY_EXPECTED_DELAY;
         break;
     }
     return expectedDelay;
@@ -132,7 +130,7 @@ public class ConfigGenerator {
     String dataTypeStr = metricFieldSpec.getDataType().toString();
     if (BYTES_STRING.equals(dataTypeStr)) {
       // Assume if the column is BYTES type, use the default TDigest function and set the return data type to double
-      metricConfigDTO.setDefaultAggFunction(MetricConfigBean.DEFAULT_TDIGEST_AGG_FUNCTION);
+      metricConfigDTO.setDefaultAggFunction(MetricConfigDTO.DEFAULT_TDIGEST_AGG_FUNCTION);
       metricConfigDTO.setDatatype(MetricType.DOUBLE);
     } else {
       metricConfigDTO.setDatatype(MetricType.valueOf(dataTypeStr));

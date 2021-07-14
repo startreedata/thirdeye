@@ -15,7 +15,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
@@ -44,7 +43,7 @@ public class SpiUtils {
   }
 
   public static String constructMetricAlias(String datasetName, String metricName) {
-    return datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
+    return datasetName + MetricConfigDTO.ALIAS_JOINER + metricName;
   }
 
   public static String getTimeFormatString(DatasetConfigDTO datasetConfig) {

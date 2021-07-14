@@ -40,7 +40,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -132,7 +131,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
-  public static MetricApi toApi(final MetricConfigBean dto) {
+  public static MetricApi toApi(final MetricConfigDTO dto) {
     return new MetricApi()
         .setId(dto.getId())
         .setActive(boolApi(dto.isActive()))

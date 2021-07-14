@@ -30,7 +30,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 
 @Singleton
@@ -44,7 +43,7 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
 
   @Inject
   public MetricConfigManagerImpl(GenericPojoDao genericPojoDao) {
-    super(MetricConfigDTO.class, MetricConfigBean.class, genericPojoDao);
+    super(MetricConfigDTO.class, genericPojoDao);
   }
 
   @Override
@@ -65,9 +64,9 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
   public MetricConfigDTO findByMetricAndDataset(String metricName, String dataset) {
     Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
     Predicate metricNamePredicate = Predicate.EQ("name", metricName);
-    List<MetricConfigBean> list = genericPojoDao
+    List<MetricConfigDTO> list = genericPojoDao
         .get(Predicate.AND(datasetPredicate, metricNamePredicate),
-            MetricConfigBean.class);
+            MetricConfigDTO.class);
     MetricConfigDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
       result = MODEL_MAPPER.map(list.get(0), MetricConfigDTO.class);
@@ -85,11 +84,11 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("name", name);
     parameterMap.put("active", true);
-    List<MetricConfigBean> list =
+    List<MetricConfigDTO> list =
         genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_OR_ALIAS_LIKE, parameterMap,
-            MetricConfigBean.class);
+            MetricConfigDTO.class);
     List<MetricConfigDTO> result = new ArrayList<>();
-    for (MetricConfigBean bean : list) {
+    for (MetricConfigDTO bean : list) {
       result.add(MODEL_MAPPER.map(bean, MetricConfigDTO.class));
     }
     return result;
@@ -110,11 +109,11 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
       i++;
     }
 
-    List<MetricConfigBean> list =
+    List<MetricConfigDTO> list =
         genericPojoDao
-            .executeParameterizedSQL(query.toString(), parameterMap, MetricConfigBean.class);
+            .executeParameterizedSQL(query.toString(), parameterMap, MetricConfigDTO.class);
     List<MetricConfigDTO> result = new ArrayList<>();
-    for (MetricConfigBean bean : list) {
+    for (MetricConfigDTO bean : list) {
       result.add(MODEL_MAPPER.map(bean, MetricConfigDTO.class));
     }
     return result;

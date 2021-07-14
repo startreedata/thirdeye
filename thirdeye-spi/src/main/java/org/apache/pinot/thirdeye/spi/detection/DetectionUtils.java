@@ -38,7 +38,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -113,7 +112,7 @@ public class DetectionUtils {
     return buildAnomalies(slice,
         df,
         seriesName,
-        optional(dataset).map(DatasetConfigBean::getTimezone).orElse(null),
+        optional(dataset).map(DatasetConfigDTO::getTimezone).orElse(null),
         monitoringGranularityPeriod
     );
   }

@@ -11,7 +11,7 @@ public class AlertNode {
   private String name;
   private AlertNodeType type;
   private String subType;
-  private MetricConfigBean metric;
+  private MetricConfigDTO metric;
   private Map<String, Object> params;
   private List<String> dependsOn;
 
@@ -42,11 +42,11 @@ public class AlertNode {
     return this;
   }
 
-  public MetricConfigBean getMetric() {
+  public MetricConfigDTO getMetric() {
     return metric;
   }
 
-  public AlertNode setMetric(final MetricConfigBean metric) {
+  public AlertNode setMetric(final MetricConfigDTO metric) {
     this.metric = metric;
     return this;
   }

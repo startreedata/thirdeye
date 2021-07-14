@@ -20,6 +20,7 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -38,10 +39,13 @@ public class MergedAnomalyResultDTO extends MergedAnomalyResultBean implements A
   public static final String ISSUE_TYPE_KEY = "issue_type";
   public static final String TIME_SERIES_SNAPSHOT_KEY = "anomalyTimelinesView";
 
+  @JsonIgnore
   private AnomalyFeedbackDTO feedback;
 
+  @JsonIgnore
   private AnomalyFunctionDTO function;
 
+  @JsonIgnore
   private Set<MergedAnomalyResultDTO> children = new HashSet<>();
 
   // flag to be set when severity changes but not to be persisted

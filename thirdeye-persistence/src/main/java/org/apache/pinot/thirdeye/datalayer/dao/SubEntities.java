@@ -54,14 +54,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
@@ -92,14 +92,14 @@ public class SubEntities {
             AnomalySubscriptionGroupNotificationIndex.class)
         .put(ApplicationDTO.class, ApplicationIndex.class)
         .put(DataSourceDTO.class, DataSourceIndex.class)
-        .put(DatasetConfigBean.class, DatasetConfigIndex.class)
+        .put(DatasetConfigDTO.class, DatasetConfigIndex.class)
         .put(DetectionStatusDTO.class, DetectionStatusIndex.class)
         .put(EntityToEntityMappingDTO.class, EntityToEntityMappingIndex.class)
         .put(EvaluationDTO.class, EvaluationIndex.class)
         .put(EventDTO.class, EventIndex.class)
         .put(JobDTO.class, JobIndex.class)
         .put(MergedAnomalyResultBean.class, MergedAnomalyResultIndex.class)
-        .put(MetricConfigBean.class, MetricConfigIndex.class)
+        .put(MetricConfigDTO.class, MetricConfigIndex.class)
         .put(OnboardDatasetMetricDTO.class, OnboardDatasetMetricIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
         .put(OverrideConfigDTO.class, OverrideConfigIndex.class)
@@ -119,14 +119,14 @@ public class SubEntities {
             ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
         .put(ApplicationDTO.class, APPLICATION)
         .put(DataSourceDTO.class, DATA_SOURCE)
-        .put(DatasetConfigBean.class, DATASET)
+        .put(DatasetConfigDTO.class, DATASET)
         .put(DetectionStatusDTO.class, DETECTION_STATUS)
         .put(EntityToEntityMappingDTO.class, ENTITY_TO_ENTITY_MAPPING)
         .put(EvaluationDTO.class, EVALUATION)
         .put(EventDTO.class, EVENT)
         .put(JobDTO.class, JOB)
         .put(MergedAnomalyResultBean.class, ANOMALY)
-        .put(MetricConfigBean.class, METRIC)
+        .put(MetricConfigDTO.class, METRIC)
         .put(OnboardDatasetMetricDTO.class, ONBOARD_DATASET_METRIC)
         .put(OnlineDetectionDataDTO.class, ONLINE_DETECTION_DATA)
         .put(OverrideConfigDTO.class, OVERRIDE_CONFIG)

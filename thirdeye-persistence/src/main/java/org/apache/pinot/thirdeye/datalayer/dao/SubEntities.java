@@ -60,7 +60,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
@@ -98,7 +98,7 @@ public class SubEntities {
         .put(EvaluationDTO.class, EvaluationIndex.class)
         .put(EventDTO.class, EventIndex.class)
         .put(JobDTO.class, JobIndex.class)
-        .put(MergedAnomalyResultBean.class, MergedAnomalyResultIndex.class)
+        .put(MergedAnomalyResultDTO.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigDTO.class, MetricConfigIndex.class)
         .put(OnboardDatasetMetricDTO.class, OnboardDatasetMetricIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
@@ -125,7 +125,7 @@ public class SubEntities {
         .put(EvaluationDTO.class, EVALUATION)
         .put(EventDTO.class, EVENT)
         .put(JobDTO.class, JOB)
-        .put(MergedAnomalyResultBean.class, ANOMALY)
+        .put(MergedAnomalyResultDTO.class, ANOMALY)
         .put(MetricConfigDTO.class, METRIC)
         .put(OnboardDatasetMetricDTO.class, ONBOARD_DATASET_METRIC)
         .put(OnlineDetectionDataDTO.class, ONLINE_DETECTION_DATA)

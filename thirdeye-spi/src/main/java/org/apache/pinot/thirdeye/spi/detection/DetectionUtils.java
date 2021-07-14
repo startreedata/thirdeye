@@ -39,7 +39,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
@@ -241,7 +240,7 @@ public class DetectionUtils {
     }
 
     // Sort by increasing order of anomaly start time
-    anomalies.sort(Comparator.comparingLong(MergedAnomalyResultBean::getStartTime));
+    anomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
     return anomalies;
   }
 

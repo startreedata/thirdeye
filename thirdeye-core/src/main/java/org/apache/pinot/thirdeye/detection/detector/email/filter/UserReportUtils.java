@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.detection.detector.email.filter;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 
@@ -42,11 +41,11 @@ public class UserReportUtils {
       MergedAnomalyResultDTO userReportAnomaly,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     List<MergedAnomalyResultDTO> systemAnomalies = mergedAnomalyResultManager
-        .findByFunctionId(userReportAnomaly.getFunction().getId());
+        .findByFunctionId(userReportAnomaly.getAnomalyFunction().getId());
     long startTime = userReportAnomaly.getStartTime();
     long endTime = userReportAnomaly.getEndTime();
     long qualifiedRegion = 0;
-    systemAnomalies.sort(Comparator.comparingLong(MergedAnomalyResultBean::getStartTime));
+    systemAnomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
     for (MergedAnomalyResultDTO anomalyResult : systemAnomalies) {
       if (anomalyResult.getAnomalyResultSource()
           .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)

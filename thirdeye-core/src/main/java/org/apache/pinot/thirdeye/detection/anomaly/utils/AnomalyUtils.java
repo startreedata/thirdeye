@@ -170,7 +170,7 @@ public class AnomalyUtils {
       this.severity = anomaly.getWeight();
       this.startTimeISO = new Timestamp(anomaly.getStartTime()).toString();
       this.endTimeISO = new Timestamp(anomaly.getEndTime()).toString();
-      this.functionName = anomaly.getFunction().getFunctionName();
+      this.functionName = anomaly.getAnomalyFunction().getFunctionName();
       this.feedback = (anomaly.getFeedback() == null) ? "null"
           : String.valueOf(anomaly.getFeedback().getFeedbackType());
       this.anomalyId = anomaly.getId();
@@ -193,7 +193,7 @@ public class AnomalyUtils {
    */
   public static Multimap<String, String> generateFilterSetForTimeSeriesQuery(
       MergedAnomalyResultDTO mergedAnomaly) {
-    AnomalyFunctionDTO anomalyFunctionDTO = mergedAnomaly.getFunction();
+    AnomalyFunctionDTO anomalyFunctionDTO = mergedAnomaly.getAnomalyFunction();
     Multimap<String, String> filterSet = anomalyFunctionDTO.getFilterSet();
     Multimap<String, String> newFilterSet = generateFilterSetWithDimensionMap(
         mergedAnomaly.getDimensions(), filterSet);

@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
@@ -237,7 +236,7 @@ public class DetectionHealth {
       // the anomalies can come from different sub-dimensions, merge the anomaly range if possible
       List<Interval> intervals = new ArrayList<>();
       if (!anomalies.isEmpty()) {
-        anomalies.sort(Comparator.comparingLong(MergedAnomalyResultBean::getStartTime));
+        anomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
         long start = Math.max(anomalies.stream().findFirst().get().getStartTime(), this.startTime);
         long end = anomalies.stream().findFirst().get().getEndTime();
         for (MergedAnomalyResultDTO anomaly : anomalies) {

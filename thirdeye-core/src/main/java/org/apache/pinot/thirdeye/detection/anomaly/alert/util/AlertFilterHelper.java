@@ -50,7 +50,7 @@ public class AlertFilterHelper {
     List<MergedAnomalyResultDTO> qualifiedAnomalies = new ArrayList<>();
     for (MergedAnomalyResultDTO result : results) {
       // Lazy initiates alert filter for anomalies of the same anomaly function
-      AnomalyFunctionDTO anomalyFunctionSpec = result.getFunction();
+      AnomalyFunctionDTO anomalyFunctionSpec = result.getAnomalyFunction();
       long functionId = anomalyFunctionSpec.getId();
       AlertFilter alertFilter = functionAlertFilter.get(functionId);
       if (alertFilter == null) {

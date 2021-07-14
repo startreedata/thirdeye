@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.datalayer.bao;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -198,26 +200,21 @@ public class TestMergedAnomalyResultManager {
 
     MergedAnomalyResultDTO read = this.mergedAnomalyResultDAO.findById(parentId);
 
-    Assert.assertNotSame(read, parent);
+    assertThat(read).isNotSameAs(parent);
     Assert.assertEquals(read.getStartTime(), 1000);
     Assert.assertEquals(read.getEndTime(), 2000);
     Assert.assertFalse(read.isChild());
     Assert.assertFalse(read.getChildren().isEmpty());
 
     List<MergedAnomalyResultDTO> readChildren = new ArrayList<>(read.getChildren());
-    Collections.sort(readChildren, new Comparator<MergedAnomalyResultDTO>() {
-      @Override
-      public int compare(MergedAnomalyResultDTO o1, MergedAnomalyResultDTO o2) {
-        return Long.compare(o1.getStartTime(), o2.getStartTime());
-      }
-    });
+    readChildren.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
 
-    Assert.assertNotSame(readChildren.get(0), child1);
+    assertThat(readChildren.get(0)).isNotSameAs(child1);
     Assert.assertTrue(readChildren.get(0).isChild());
     Assert.assertEquals(readChildren.get(0).getStartTime(), 1000);
     Assert.assertEquals(readChildren.get(0).getEndTime(), 1500);
 
-    Assert.assertNotSame(readChildren.get(1), child2);
+    assertThat(readChildren.get(1)).isNotSameAs(child2);
     Assert.assertTrue(readChildren.get(1).isChild());
     Assert.assertEquals(readChildren.get(1).getStartTime(), 1500);
     Assert.assertEquals(readChildren.get(1).getEndTime(), 2000);

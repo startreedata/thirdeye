@@ -185,7 +185,7 @@ public class PrecisionRecallEvaluator {
       AlertFilter alertFilterOfAnomaly = this.alertFilter;
       if (useAlertFilterOnAnomaly) {
         alertFilterOfAnomaly = this.alertFilterFactory
-            .fromSpec(anomaly.getFunction().getAlertFilter());
+            .fromSpec(anomaly.getAnomalyFunction().getAlertFilter());
       }
       if (alertFilterOfAnomaly == null) {
         alertFilterOfAnomaly = new DummyAlertFilter();

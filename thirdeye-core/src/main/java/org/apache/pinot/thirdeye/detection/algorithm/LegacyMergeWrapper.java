@@ -248,7 +248,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
               MetricEntity.fromMetric(1.0, anomalyFunctionSpec.getMetricId(), filters).getUrn());
 
           mergedAnomalyResult.setFunctionId(null);
-          mergedAnomalyResult.setFunction(null);
+          mergedAnomalyResult.setAnomalyFunction(null);
           mergedAnomalyResult.setDetectionConfigId(this.config.getId());
 
           // global metric impact

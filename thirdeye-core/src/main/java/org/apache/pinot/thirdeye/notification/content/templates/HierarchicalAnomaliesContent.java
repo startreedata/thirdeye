@@ -176,7 +176,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
         getDimensionsList(anomaly.getDimensionMap()),
         getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
         feedbackVal,
-        anomaly.getFunction().getFunctionName(),
+        anomaly.getAnomalyFunction().getFunctionName(),
         "",
         anomaly.getMetric(),
         getDateString(anomaly.getStartTime(), dateTimeZone),
@@ -209,7 +209,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
       SortedMap<String, List<AnomalyReportEntity>> leafAnomalyDetail) {
     AnomalyReportEntity anomalyReport = generateAnomalyReportEntity(anomaly,
         thirdEyeAnomalyConfig.getDashboardHost());
-    AnomalyFunctionDTO anomalyFunction = anomaly.getFunction();
+    AnomalyFunctionDTO anomalyFunction = anomaly.getAnomalyFunction();
     String exploredDimensions = anomalyFunction.getExploreDimensions();
     // Add WoW number
     if (presentSeasonalValues) {
@@ -246,7 +246,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
    */
   private Double getAvgComparisonBaseline(MergedAnomalyResultDTO anomaly, CompareMode compareMode,
       long start, long end) throws Exception {
-    AnomalyFunctionDTO anomalyFunction = anomaly.getFunction();
+    AnomalyFunctionDTO anomalyFunction = anomaly.getAnomalyFunction();
     DatasetConfigDTO datasetConfigDTO = datasetConfigManager
         .findByDataset(anomalyFunction.getCollection());
     AnomalyDetectionInputContextBuilder contextBuilder = new AnomalyDetectionInputContextBuilder(

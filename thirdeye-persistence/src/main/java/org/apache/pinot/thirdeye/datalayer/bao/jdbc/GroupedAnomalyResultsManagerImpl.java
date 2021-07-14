@@ -31,7 +31,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.GroupedAnomalyResultsManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.modelmapper.ModelMapper;
 
@@ -149,9 +148,9 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
         MODEL_MAPPER.map(GroupedAnomalyResultsDTO, GroupedAnomalyResultsDTO.class);
 
     if (CollectionUtils.isNotEmpty(GroupedAnomalyResultsDTO.getAnomalyResultsId())) {
-      List<MergedAnomalyResultBean> list =
+      List<MergedAnomalyResultDTO> list =
           genericPojoDao
-              .get(GroupedAnomalyResultsDTO.getAnomalyResultsId(), MergedAnomalyResultBean.class);
+              .get(GroupedAnomalyResultsDTO.getAnomalyResultsId(), MergedAnomalyResultDTO.class);
       List<MergedAnomalyResultDTO> mergedAnomalyResults = mergedAnomalyResultManager
           .convertMergedAnomalyBean2DTO(list);
       groupedAnomalyResultsDTO.setAnomalyResults(mergedAnomalyResults);

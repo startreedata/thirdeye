@@ -16,10 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DatabaseAdministrator {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DatabaseAdministrator.class);
   private final DataSource dataSource;
 
   @Inject
@@ -78,5 +81,14 @@ public class DatabaseAdministrator {
       final ScriptRunner scriptRunner = new ScriptRunner(connection, true);
       scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
     }
+  }
+
+  public boolean validate() {
+    try {
+      return executeQuery("SELECT 1").next();
+    } catch (SQLException | RuntimeException e) {
+      LOG.error("Exception while performing database validation.", e);
+    }
+    return false;
   }
 }

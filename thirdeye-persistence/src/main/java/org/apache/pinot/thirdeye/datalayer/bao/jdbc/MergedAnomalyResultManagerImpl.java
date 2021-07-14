@@ -42,9 +42,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -430,12 +428,12 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null) {
       if (feedbackDTO.getId() == null) {
-        AnomalyFeedbackBean feedbackBean = convertDTO2Bean(feedbackDTO, AnomalyFeedbackBean.class);
+        AnomalyFeedbackDTO feedbackBean = convertDTO2Bean(feedbackDTO, AnomalyFeedbackDTO.class);
         Long feedbackId = genericPojoDao.put(feedbackBean);
         feedbackDTO.setId(feedbackId);
       } else {
-        AnomalyFeedbackBean feedbackBean = genericPojoDao
-            .get(feedbackDTO.getId(), AnomalyFeedbackBean.class);
+        AnomalyFeedbackDTO feedbackBean = genericPojoDao
+            .get(feedbackDTO.getId(), AnomalyFeedbackDTO.class);
         feedbackBean.setFeedbackType(feedbackDTO.getFeedbackType());
         feedbackBean.setComment(feedbackDTO.getComment());
         genericPojoDao.update(feedbackBean);
@@ -567,16 +565,16 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
         .map(mergedAnomalyResultBean, MergedAnomalyResultDTO.class);
 
     if (mergedAnomalyResultBean.getFunctionId() != null) {
-      AnomalyFunctionBean anomalyFunctionBean = genericPojoDao
-          .get(mergedAnomalyResultBean.getFunctionId(), AnomalyFunctionBean.class);
+      AnomalyFunctionDTO anomalyFunctionBean = genericPojoDao
+          .get(mergedAnomalyResultBean.getFunctionId(), AnomalyFunctionDTO.class);
       AnomalyFunctionDTO anomalyFunctionDTO = MODEL_MAPPER
           .map(anomalyFunctionBean, AnomalyFunctionDTO.class);
       mergedAnomalyResultDTO.setFunction(anomalyFunctionDTO);
     }
 
     if (mergedAnomalyResultBean.getAnomalyFeedbackId() != null) {
-      AnomalyFeedbackBean anomalyFeedbackBean = genericPojoDao
-          .get(mergedAnomalyResultBean.getAnomalyFeedbackId(), AnomalyFeedbackBean.class);
+      AnomalyFeedbackDTO anomalyFeedbackBean = genericPojoDao
+          .get(mergedAnomalyResultBean.getAnomalyFeedbackId(), AnomalyFeedbackDTO.class);
       AnomalyFeedbackDTO anomalyFeedbackDTO = MODEL_MAPPER
           .map(anomalyFeedbackBean, AnomalyFeedbackDTO.class);
       mergedAnomalyResultDTO.setFeedback(anomalyFeedbackDTO);

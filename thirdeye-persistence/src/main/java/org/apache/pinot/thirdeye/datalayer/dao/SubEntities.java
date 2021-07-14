@@ -50,7 +50,7 @@ import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
@@ -87,7 +87,7 @@ public class SubEntities {
     return ImmutableMap.<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>builder()
         .put(AlertDTO.class, DetectionConfigIndex.class)
         .put(AlertTemplateDTO.class, AlertTemplateIndex.class)
-        .put(AnomalyFeedbackBean.class, AnomalyFeedbackIndex.class)
+        .put(AnomalyFeedbackDTO.class, AnomalyFeedbackIndex.class)
         .put(AnomalySubscriptionGroupNotificationBean.class,
             AnomalySubscriptionGroupNotificationIndex.class)
         .put(ApplicationDTO.class, ApplicationIndex.class)
@@ -114,7 +114,7 @@ public class SubEntities {
     return ImmutableMap.<Class<? extends AbstractDTO>, SubEntityType>builder()
         .put(AlertDTO.class, ALERT)
         .put(AlertTemplateDTO.class, ALERT_TEMPLATE)
-        .put(AnomalyFeedbackBean.class, ANOMALY_FEEDBACK)
+        .put(AnomalyFeedbackDTO.class, ANOMALY_FEEDBACK)
         .put(AnomalySubscriptionGroupNotificationBean.class,
             ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
         .put(ApplicationDTO.class, APPLICATION)

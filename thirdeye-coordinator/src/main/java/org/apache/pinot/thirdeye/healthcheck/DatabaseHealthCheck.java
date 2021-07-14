@@ -17,13 +17,9 @@ public class DatabaseHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    try{
-      if(!databaseAdministrator.validate()){
-        throw new Exception("Unexpected results of validation query.");
-      }
-    } catch(Exception e){
-      return Result.unhealthy(e.getMessage());
+    if (databaseAdministrator.validate()) {
+      return Result.healthy();
     }
-    return Result.healthy();
+    return Result.unhealthy("Database health check failed.");
   }
 }

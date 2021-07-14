@@ -55,29 +55,12 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   private static final Logger LOG = LoggerFactory.getLogger(MergedAnomalyResultManagerImpl.class);
 
   // find a conflicting window
-  private static final String FIND_BY_COLLECTION_METRIC_DIMENSIONS_TIME =
-      " where collection=:collection and metric=:metric " + "and dimensions in (:dimensions) "
-          + "and (startTime < :endTime and endTime > :startTime) " + "order by endTime desc";
-
-  // find a conflicting window
-  private static final String FIND_BY_COLLECTION_METRIC_TIME =
-      "where collection=:collection and metric=:metric "
-          + "and (startTime < :endTime and endTime > :startTime) order by endTime desc";
-
-  // find a conflicting window
   private static final String FIND_BY_METRIC_TIME =
       "where metric=:metric and (startTime < :endTime and endTime > :startTime) order by endTime desc";
 
   private static final String FIND_BY_TIME =
       "where (startTime < :endTime and endTime > :startTime) "
           + "order by endTime desc";
-
-  private static final String FIND_BY_FUNCTION_ID = "where functionId=:functionId";
-
-  private static final String FIND_LATEST_CONFLICT_BY_FUNCTION_AND_DIMENSIONS =
-      "where functionId=:functionId " + "and dimensions=:dimensions "
-          + "and (startTime < :endTime and endTime > :startTime) "
-          + "order by endTime desc limit 1";
 
   // TODO inject as dependency
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
@@ -214,59 +197,6 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findOverlappingByFunctionIdDimensions(long functionId,
-      long searchWindowStart,
-      long searchWindowEnd, String dimensions) {
-    // LT and GT are used instead of LE and GE because ThirdEye uses end time exclusive.
-    Predicate predicate = Predicate
-        .AND(Predicate.LT("startTime", searchWindowEnd), Predicate.GT("endTime", searchWindowStart),
-            Predicate.EQ("functionId", functionId), Predicate.EQ("dimensions", dimensions));
-    List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findByFunctionId(Long functionId) {
-    Map<String, Object> filterParams = new HashMap<>();
-    filterParams.put("functionId", functionId);
-
-    List<MergedAnomalyResultDTO> list = genericPojoDao.executeParameterizedSQL(FIND_BY_FUNCTION_ID,
-        filterParams, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findByFunctionIdAndIdGreaterThan(Long functionId,
-      Long anomalyId) {
-    Predicate predicate = Predicate
-        .AND(Predicate.EQ("functionId", functionId), Predicate.GT("baseId", anomalyId));
-    List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findByDetectionConfigAndIdGreaterThan(Long detectionConfigId,
-      Long anomalyId) {
-    Predicate predicate = Predicate.AND(Predicate.EQ("detectionConfigId", detectionConfigId),
-        Predicate.GT("baseId", anomalyId));
-    List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findByStartTimeInRangeAndFunctionId(long startTime,
-      long endTime,
-      long functionId) {
-    Predicate predicate =
-        Predicate.AND(Predicate.LT("startTime", endTime), Predicate.GT("endTime", startTime),
-            Predicate.EQ("functionId", functionId));
-    return findByPredicate(predicate);
-  }
-
-  @Override
   public List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
       long endTime,
       long detectionConfigId) {
@@ -291,48 +221,6 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     return convertMergedAnomalyBean2DTO(list);
   }
 
-  @Override
-  public List<MergedAnomalyResultDTO> findAnomaliesWithinBoundary(long startTime, long endTime,
-      long detectionConfigId) {
-    Predicate predicate =
-        Predicate.AND(Predicate.LE("endTime", endTime), Predicate.GE("startTime", startTime),
-            Predicate.EQ("detectionConfigId", detectionConfigId));
-    List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findByCollectionMetricDimensionsTime(String collection,
-      String metric,
-      String dimensions, long startTime, long endTime) {
-    Map<String, Object> filterParams = new HashMap<>();
-    filterParams.put("collection", collection);
-    filterParams.put("metric", metric);
-    filterParams.put("dimensions", dimensions);
-    filterParams.put("startTime", startTime);
-    filterParams.put("endTime", endTime);
-
-    List<MergedAnomalyResultDTO> list = genericPojoDao.executeParameterizedSQL(
-        FIND_BY_COLLECTION_METRIC_DIMENSIONS_TIME, filterParams, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findByCollectionMetricTime(String collection, String metric,
-      long startTime,
-      long endTime) {
-    Map<String, Object> filterParams = new HashMap<>();
-    filterParams.put("collection", collection);
-    filterParams.put("metric", metric);
-    filterParams.put("startTime", startTime);
-    filterParams.put("endTime", endTime);
-
-    List<MergedAnomalyResultDTO> list = genericPojoDao.executeParameterizedSQL(
-        FIND_BY_COLLECTION_METRIC_TIME, filterParams, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
   public List<MergedAnomalyResultDTO> findByMetricTime(String metric, long startTime,
       long endTime) {
     Map<String, Object> filterParams = new HashMap<>();
@@ -346,18 +234,6 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findByCollectionTime(String collection, long startTime,
-      long endTime) {
-    Predicate predicate = Predicate
-        .AND(Predicate.EQ("collection", collection), Predicate.LT("startTime", endTime),
-            Predicate.GT("endTime", startTime));
-
-    List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
   public List<MergedAnomalyResultDTO> findByTime(long startTime, long endTime) {
     Map<String, Object> filterParams = new HashMap<>();
     filterParams.put("startTime", startTime);
@@ -367,51 +243,6 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
         genericPojoDao
             .executeParameterizedSQL(FIND_BY_TIME, filterParams, MergedAnomalyResultDTO.class);
     return convertMergedAnomalyBean2DTO(list);
-  }
-
-  public List<MergedAnomalyResultDTO> findUnNotifiedByFunctionIdAndIdLesserThanAndEndTimeGreaterThanLastOneDay(
-      long functionId, long anomalyId) {
-    Predicate predicate = Predicate
-        .AND(Predicate.EQ("functionId", functionId), Predicate.LT("baseId", anomalyId),
-            Predicate.EQ("notified", false),
-            Predicate.GT("endTime", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)));
-    List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findNotifiedByTime(long startTime, long endTime) {
-    List<MergedAnomalyResultDTO> anomaliesByTime = findByTime(startTime, endTime);
-    List<MergedAnomalyResultDTO> notifiedAnomalies = new ArrayList<>();
-    for (MergedAnomalyResultDTO anomaly : anomaliesByTime) {
-      if (anomaly.isNotified()) {
-        notifiedAnomalies.add(anomaly);
-      }
-    }
-    return notifiedAnomalies;
-  }
-
-  @Override
-  public MergedAnomalyResultDTO findLatestOverlapByFunctionIdDimensions(Long functionId,
-      String dimensions,
-      long conflictWindowStart, long conflictWindowEnd) {
-    Map<String, Object> filterParams = new HashMap<>();
-    filterParams.put("functionId", functionId);
-    filterParams.put("dimensions", dimensions);
-    filterParams.put("startTime", conflictWindowStart);
-    filterParams.put("endTime", conflictWindowEnd);
-
-    List<MergedAnomalyResultDTO> list = genericPojoDao.executeParameterizedSQL(
-        FIND_LATEST_CONFLICT_BY_FUNCTION_AND_DIMENSIONS, filterParams,
-        MergedAnomalyResultDTO.class);
-
-    if (CollectionUtils.isNotEmpty(list)) {
-      MergedAnomalyResultDTO mostRecentConflictMergedAnomalyResultDTO = list.get(0);
-      return convertMergedAnomalyBean2DTO(mostRecentConflictMergedAnomalyResultDTO,
-          new HashSet<>());
-    }
-    return null;
   }
 
   public void updateAnomalyFeedback(MergedAnomalyResultDTO entity) {
@@ -436,31 +267,6 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       this.updateAnomalyFeedback(child);
     }
     genericPojoDao.update(bean);
-  }
-
-  /**
-   * Returns a map (keyed by metric id) of lists of merged anomalies that fall (partially)
-   * within a given time range.
-   *
-   * <br/><b>NOTE:</b> this function implements a manual join between three tables. This is bad.
-   *
-   * @param metricIds metric ids to seek anomalies for
-   * @param start time range start (inclusive)
-   * @param end time range end (exclusive)
-   * @return Map (keyed by metric id) of lists of merged anomalies (sorted by start time)
-   */
-  @Override
-  public Map<Long, List<MergedAnomalyResultDTO>> findAnomaliesByMetricIdsAndTimeRange(
-      List<Long> metricIds, long start, long end) {
-    Map<Long, List<MergedAnomalyResultDTO>> output = new HashMap<>();
-
-    List<MetricConfigDTO> metricBeans = genericPojoDao.get(metricIds, MetricConfigDTO.class);
-
-    for (MetricConfigDTO mbean : metricBeans) {
-      output.put(mbean.getId(), getAnomaliesForMetricBeanAndTimeRange(mbean, start, end));
-    }
-
-    return output;
   }
 
   /**

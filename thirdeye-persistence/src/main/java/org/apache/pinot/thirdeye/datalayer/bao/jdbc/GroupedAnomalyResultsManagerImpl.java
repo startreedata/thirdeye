@@ -45,7 +45,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
   @Inject
   public GroupedAnomalyResultsManagerImpl(GenericPojoDao genericPojoDao,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(GroupedAnomalyResultsDTO.class, GroupedAnomalyResultsDTO.class, genericPojoDao);
+    super(GroupedAnomalyResultsDTO.class, genericPojoDao);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 

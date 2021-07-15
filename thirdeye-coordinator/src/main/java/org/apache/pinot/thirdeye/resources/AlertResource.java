@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
-import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
@@ -103,7 +102,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private static boolean isV2Evaluation(final AlertApi alert) {
     return optional(alert)
         .map(AlertApi::getTemplate)
-        .map(AlertTemplateApi::getNodes)
         .isPresent();
   }
 

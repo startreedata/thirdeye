@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.inject.Inject;
@@ -14,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.WebApplicationException;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
@@ -21,6 +23,7 @@ import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -43,11 +46,15 @@ public class AlertEvaluatorV2 {
   // max time allowed for a preview task
   private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 
+  private final AlertTemplateManager alertTemplateManager;
   private final ExecutorService executorService;
   private final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory;
 
   @Inject
-  public AlertEvaluatorV2(final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
+  public AlertEvaluatorV2(
+      final AlertTemplateManager alertTemplateManager,
+      final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
+    this.alertTemplateManager = alertTemplateManager;
     this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -91,6 +98,8 @@ public class AlertEvaluatorV2 {
     try {
       final Map<String, DetectionPipelineResult> result = runPipeline(request);
       return toApi(result);
+    } catch (final WebApplicationException e) {
+      throw e;
     } catch (final Exception e) {
       handleAlertEvaluationException(e);
     }
@@ -104,7 +113,7 @@ public class AlertEvaluatorV2 {
     final AlertTemplateApi templateApi = request.getAlert().getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
 
-    final AlertTemplateDTO template = ApiBeanMapper.toAlertTemplateDto(templateApi);
+    final AlertTemplateDTO template = getTemplate(templateApi);
 
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean operator : template.getNodes()) {
@@ -128,6 +137,22 @@ public class AlertEvaluatorV2 {
       /* Return the output */
       return getOutput(context, rootNode);
     }).get(TIMEOUT, TimeUnit.MILLISECONDS);
+  }
+
+  private AlertTemplateDTO getTemplate(final AlertTemplateApi templateApi) {
+    final Long id = templateApi.getId();
+    if (id != null) {
+      return alertTemplateManager.findById(id);
+    }
+
+    final String name = templateApi.getName();
+    if (name != null) {
+      final List<AlertTemplateDTO> byName = alertTemplateManager.findByName(name);
+      ensure(byName.size() == 1, ERR_OBJECT_DOES_NOT_EXIST, "template not found: " + name);
+      return byName.get(0);
+    }
+
+    return ApiBeanMapper.toAlertTemplateDto(templateApi);
   }
 
   private Map<String, DetectionPipelineResult> getOutput(

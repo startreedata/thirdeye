@@ -13,12 +13,13 @@ module.exports = {
     mode: "production",
 
     // Input configuration
-    entry: path.join(__dirname, "src/app/index.tsx"),
+    entry: {
+        "thirdeye-ui": path.join(__dirname, "src/app/index.tsx"),
+    },
 
     // Output configuration
     output: {
         path: outputPath,
-        filename: "thirdeye-ui.js",
         chunkFilename: "[name].js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
     },
@@ -66,6 +67,14 @@ module.exports = {
     resolve: {
         // File types to be handled
         extensions: [".ts", ".tsx", ".js", ".css", ".scss", ".svg", ".ttf"],
+    },
+
+    // Create separate chunks for commonly used libs
+    // Refer: https://webpack.js.org/guides/code-splitting/#splitchunksplugin
+    optimization: {
+        splitChunks: {
+            chunks: "all",
+        },
     },
 
     plugins: [

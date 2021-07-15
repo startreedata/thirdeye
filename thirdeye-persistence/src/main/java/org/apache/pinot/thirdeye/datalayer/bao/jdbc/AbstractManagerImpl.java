@@ -80,6 +80,11 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   @Override
+  public List<E> findByName(String name) {
+    return findByPredicate(Predicate.EQ("name", name));
+  }
+
+  @Override
   public int delete(final E entity) {
     return genericPojoDao.delete(entity.getId(), dtoClass);
   }

@@ -53,6 +53,11 @@ public class MockDatasetConfigManager extends AbstractMockManager<DatasetConfigD
   }
 
   @Override
+  public List<DatasetConfigDTO> findByName(String name) {
+    return findByPredicate(org.apache.pinot.thirdeye.spi.datalayer.Predicate.EQ("name", name));
+  }
+
+  @Override
   public int deleteRecordsOlderThanDays(int days) {
     return 0;
   }

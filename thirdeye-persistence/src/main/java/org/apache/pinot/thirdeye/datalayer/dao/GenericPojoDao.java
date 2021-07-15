@@ -27,6 +27,7 @@ import static org.apache.pinot.thirdeye.datalayer.dao.SubEntities.getType;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -150,7 +151,7 @@ public class GenericPojoDao {
         genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setVersion(1);
         genericJsonEntity.setType(getType(pojo.getClass()));
-        String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
+        String jsonVal = toJsonString(pojo);
         genericJsonEntity.setJsonVal(jsonVal);
         dbWriteByteCounter.inc(jsonVal.length());
 
@@ -189,6 +190,10 @@ public class GenericPojoDao {
       dbWriteCallCounter.inc();
       dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
+  }
+
+  private <E extends AbstractDTO> String toJsonString(final E pojo) throws JsonProcessingException {
+    return OBJECT_MAPPER.writeValueAsString(pojo);
   }
 
   /**
@@ -291,7 +296,7 @@ public class GenericPojoDao {
       Connection connection)
       throws Exception {
     //update base table
-    String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
+    String jsonVal = toJsonString(pojo);
 
     GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
     genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
@@ -344,7 +349,7 @@ public class GenericPojoDao {
           for (GenericJsonEntity entity : entities) {
             dbReadByteCounter.inc(entity.getJsonVal().length());
 
-            E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+            E e = getBean(entity, beanClass);
             e.setId(entity.getId());
             e.setUpdateTime(entity.getUpdateTime());
             ret.add(e);
@@ -356,6 +361,11 @@ public class GenericPojoDao {
       dbReadCallCounter.inc();
       dbReadDurationCounter.inc(System.nanoTime() - tStart);
     }
+  }
+
+  private <E> E getBean(final GenericJsonEntity entity, final Class<E> beanClass)
+      throws JsonProcessingException {
+    return OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
   }
 
   public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, long limit, long offset) {
@@ -378,7 +388,7 @@ public class GenericPojoDao {
         if (entities != null) {
           for (GenericJsonEntity entity : entities) {
             dbReadByteCounter.inc(entity.getJsonVal().length());
-            E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+            E e = getBean(entity, beanClass);
             e.setId(entity.getId());
             e.setUpdateTime(entity.getUpdateTime());
             result.add(e);
@@ -437,7 +447,7 @@ public class GenericPojoDao {
         }
         dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
-        final E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+        final E e = getBean(genericJsonEntity, pojoClass);
         e.setId(genericJsonEntity.getId());
         e.setVersion(genericJsonEntity.getVersion());
         e.setUpdateTime(genericJsonEntity.getUpdateTime());
@@ -465,7 +475,7 @@ public class GenericPojoDao {
         Object e = null;
         if (genericJsonEntity != null) {
           dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
-          e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), Object.class);
+          e = getBean(genericJsonEntity, Object.class);
         }
         return e;
       }, null);
@@ -492,7 +502,7 @@ public class GenericPojoDao {
           for (GenericJsonEntity genericJsonEntity : genericJsonEntities) {
             dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
-            E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+            E e = getBean(genericJsonEntity, pojoClass);
             e.setId(genericJsonEntity.getId());
             e.setVersion(genericJsonEntity.getVersion());
             e.setUpdateTime(genericJsonEntity.getUpdateTime());
@@ -537,7 +547,7 @@ public class GenericPojoDao {
               final String json = entity.getJsonVal();
               dbReadByteCounter.inc(json.length());
 
-              E bean = (E) OBJECT_MAPPER.readValue(json, beanClass);
+              E bean = (E) getBean(entity, beanClass);
               bean.setId(entity.getId())
                   .setVersion(entity.getVersion())
                   .setUpdateTime(entity.getUpdateTime());
@@ -592,7 +602,7 @@ public class GenericPojoDao {
             for (GenericJsonEntity entity : entities) {
               dbReadByteCounter.inc(entity.getJsonVal().length());
 
-              E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
+              E bean = getBean(entity, pojoClass);
               bean.setId(entity.getId());
               bean.setVersion(entity.getVersion());
               ret.add(bean);
@@ -638,7 +648,7 @@ public class GenericPojoDao {
               for (GenericJsonEntity entity : entities) {
                 dbReadByteCounter.inc(entity.getJsonVal().length());
 
-                E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
+                E bean = getBean(entity, pojoClass);
                 bean.setId(entity.getId());
                 bean.setVersion(entity.getVersion());
                 bean.setUpdateTime(entity.getUpdateTime());

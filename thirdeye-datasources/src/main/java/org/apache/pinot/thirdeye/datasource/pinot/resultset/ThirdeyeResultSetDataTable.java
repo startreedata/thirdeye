@@ -23,11 +23,11 @@ public class ThirdeyeResultSetDataTable implements DataTable {
     this.groupKeyLength = thirdEyeResultSet.getGroupKeyLength();
     for (int i = 0; i < thirdEyeResultSet.getGroupKeyLength(); i++) {
       columns.add(thirdEyeResultSet.getGroupKeyColumnName(i));
-      columnTypes.add(new ColumnType(ColumnDataType.STRING));
+      columnTypes.add(thirdEyeResultSet.getGroupKeyColumnType(i));
     }
     for (int i = 0; i < thirdEyeResultSet.getColumnCount(); i++) {
       columns.add(thirdEyeResultSet.getColumnName(i));
-      columnTypes.add(new ColumnType(ColumnDataType.DOUBLE));
+      columnTypes.add(thirdEyeResultSet.getColumnType(i));
     }
   }
 

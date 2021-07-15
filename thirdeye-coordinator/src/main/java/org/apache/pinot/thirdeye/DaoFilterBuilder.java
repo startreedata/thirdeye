@@ -31,6 +31,7 @@ public class DaoFilterBuilder {
       .put("lt", OPER.LT)
       .put("lte", OPER.LE)
       .put("neq", OPER.NEQ)
+      .put("in", OPER.IN)
       .build();
   private static final Pattern PATTERN = Pattern.compile("\\[(\\w+)\\](\\S+)");
   private final ImmutableMap<String, String> apiToBeanMap;

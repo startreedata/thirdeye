@@ -29,10 +29,14 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
   private final TaskManager taskManager;
   private final AuthService authService;
+  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+      .put("taskType", "type")
+      .put("status", "status")
+      .build();
 
   @Inject
   public TaskResource(final AuthService authService, final TaskManager taskManager) {
-    super(authService, taskManager, ImmutableMap.of());
+    super(authService, taskManager, API_TO_BEAN_MAP);
     this.taskManager = taskManager;
     this.authService = authService;
   }

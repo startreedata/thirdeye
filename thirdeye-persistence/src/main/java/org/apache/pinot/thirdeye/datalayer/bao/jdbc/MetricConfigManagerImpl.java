@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +66,10 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
     List<MetricConfigDTO> list = genericPojoDao
         .get(Predicate.AND(datasetPredicate, metricNamePredicate),
             MetricConfigDTO.class);
-    MetricConfigDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
-      result = MODEL_MAPPER.map(list.get(0), MetricConfigDTO.class);
+      return list.get(0);
     }
-    return result;
+    return null;
   }
 
   public List<MetricConfigDTO> findByMetricName(String metricName) {
@@ -84,14 +82,8 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
     Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("name", name);
     parameterMap.put("active", true);
-    List<MetricConfigDTO> list =
-        genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_OR_ALIAS_LIKE, parameterMap,
-            MetricConfigDTO.class);
-    List<MetricConfigDTO> result = new ArrayList<>();
-    for (MetricConfigDTO bean : list) {
-      result.add(MODEL_MAPPER.map(bean, MetricConfigDTO.class));
-    }
-    return result;
+    return genericPojoDao.executeParameterizedSQL(FIND_BY_NAME_OR_ALIAS_LIKE, parameterMap,
+        MetricConfigDTO.class);
   }
 
   @Override
@@ -109,13 +101,7 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
       i++;
     }
 
-    List<MetricConfigDTO> list =
-        genericPojoDao
-            .executeParameterizedSQL(query.toString(), parameterMap, MetricConfigDTO.class);
-    List<MetricConfigDTO> result = new ArrayList<>();
-    for (MetricConfigDTO bean : list) {
-      result.add(MODEL_MAPPER.map(bean, MetricConfigDTO.class));
-    }
-    return result;
+    return genericPojoDao
+        .executeParameterizedSQL(query.toString(), parameterMap, MetricConfigDTO.class);
   }
 }

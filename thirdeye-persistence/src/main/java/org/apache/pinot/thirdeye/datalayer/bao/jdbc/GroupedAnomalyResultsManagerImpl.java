@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
@@ -81,8 +80,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
   public GroupedAnomalyResultsDTO findById(Long id) {
     GroupedAnomalyResultsDTO bean = genericPojoDao.get(id, GroupedAnomalyResultsDTO.class);
     if (bean != null) {
-      GroupedAnomalyResultsDTO groupedAnomalyResultsDTO = convertGroupedAnomalyBean2DTO(bean);
-      return groupedAnomalyResultsDTO;
+      return convertGroupedAnomalyBean2DTO(bean);
     } else {
       return null;
     }
@@ -100,21 +98,16 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
         genericPojoDao.get(predicate, GroupedAnomalyResultsDTO.class);
     if (CollectionUtils.isNotEmpty(GroupedAnomalyResultsDTOs)) {
       // Sort grouped anomaly results bean in the natural order of their end time.
-      Collections.sort(GroupedAnomalyResultsDTOs, new Comparator<GroupedAnomalyResultsDTO>() {
-        @Override
-        public int compare(GroupedAnomalyResultsDTO o1, GroupedAnomalyResultsDTO o2) {
-          int endTimeCompare = (int) (o1.getEndTime() - o2.getEndTime());
-          if (endTimeCompare != 0) {
-            return endTimeCompare;
-          } else {
-            return (int) (o1.getId() - o2.getId());
-          }
+      Collections.sort(GroupedAnomalyResultsDTOs, (o1, o2) -> {
+        int endTimeCompare = (int) (o1.getEndTime() - o2.getEndTime());
+        if (endTimeCompare != 0) {
+          return endTimeCompare;
+        } else {
+          return (int) (o1.getId() - o2.getId());
         }
       });
-      GroupedAnomalyResultsDTO groupedAnomalyResultsDTO =
-          convertGroupedAnomalyBean2DTO(
-              GroupedAnomalyResultsDTOs.get(GroupedAnomalyResultsDTOs.size() - 1));
-      return groupedAnomalyResultsDTO;
+      return convertGroupedAnomalyBean2DTO(
+          GroupedAnomalyResultsDTOs.get(GroupedAnomalyResultsDTOs.size() - 1));
     } else {
       return null;
     }
@@ -122,7 +115,7 @@ public class GroupedAnomalyResultsManagerImpl extends AbstractManagerImpl<Groupe
 
   protected GroupedAnomalyResultsDTO convertGroupedAnomalyDTO2Bean(
       GroupedAnomalyResultsDTO entity) {
-    GroupedAnomalyResultsDTO bean = toBean(entity);
+    GroupedAnomalyResultsDTO bean = entity;
     if (CollectionUtils.isNotEmpty(entity.getAnomalyResults())) {
       List<Long> mergedAnomalyId = new ArrayList<>();
       for (MergedAnomalyResultDTO mergedAnomalyResultDTO : entity.getAnomalyResults()) {

@@ -42,12 +42,11 @@ public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionSta
   public DetectionStatusDTO findLatestEntryForFunctionId(long functionId) {
     Predicate predicate = Predicate.EQ("functionId", functionId);
     List<DetectionStatusDTO> list = genericPojoDao.get(predicate, DetectionStatusDTO.class);
-    DetectionStatusDTO result = null;
     if (CollectionUtils.isNotEmpty(list)) {
       Collections.sort(list);
-      result = MODEL_MAPPER.map(list.get(list.size() - 1), DetectionStatusDTO.class);
+      return list.get(list.size() - 1);
     }
-    return result;
+    return null;
   }
 
   @Override

@@ -92,9 +92,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   public List<JobDTO> findNRecentJobs(int n) {
     String parameterizedSQL = "order by scheduleStartTime desc limit " + n;
     HashMap<String, Object> parameterMap = new HashMap<>();
-    List<JobDTO> list = genericPojoDao
-        .executeParameterizedSQL(parameterizedSQL, parameterMap, JobDTO.class);
-    return convertBeanListToDTOList(list);
+    return genericPojoDao.executeParameterizedSQL(parameterizedSQL, parameterMap, JobDTO.class);
   }
 
   @Override
@@ -122,13 +120,9 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
 
     if (CollectionUtils.isNotEmpty(list)) {
       // Sort by scheduleStartTime; most recent scheduled job at the beginning
-      Collections.sort(list, Collections.reverseOrder(new Comparator<JobDTO>() {
-        @Override
-        public int compare(JobDTO o1, JobDTO o2) {
-          return Long.compare(o1.getScheduleStartTime(), o2.getScheduleStartTime());
-        }
-      }));
-      return convertBeanListToDTOList(list);
+      Collections.sort(list,
+          Collections.reverseOrder(Comparator.comparingLong(JobDTO::getScheduleStartTime)));
+      return list;
     } else {
       return Collections.emptyList();
     }

@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
@@ -40,12 +39,6 @@ public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunct
   @Override
   public List<AnomalyFunctionDTO> findAllByCollection(String collection) {
     Predicate predicate = Predicate.EQ("collection", collection);
-    List<AnomalyFunctionDTO> list = genericPojoDao.get(predicate, AnomalyFunctionDTO.class);
-    List<AnomalyFunctionDTO> result = new ArrayList<>();
-    for (AnomalyFunctionDTO abstractBean : list) {
-      AnomalyFunctionDTO dto = MODEL_MAPPER.map(abstractBean, AnomalyFunctionDTO.class);
-      result.add(dto);
-    }
-    return result;
+    return genericPojoDao.get(predicate, AnomalyFunctionDTO.class);
   }
 }

@@ -93,13 +93,12 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
   }
 
   private List<RootcauseSessionDTO> findByLike(Set<String> fragments, String template, String key) {
-    return findByLike(fragments, template, key, RootcauseSessionDTO.class,
-        RootcauseSessionDTO.class);
+    return findByLike(fragments, template, key, RootcauseSessionDTO.class);
   }
 
   private <B extends AbstractDTO, D> List<D> findByLike(Set<String> fragments, String template,
       String key,
-      Class<D> dtoClass, Class<B> beanClass) {
+      Class<B> beanClass) {
     List<String> conditions = new ArrayList<>();
     Map<String, Object> params = new HashMap<>();
 
@@ -113,13 +112,6 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
     String query = String
         .format(FIND_BY_LIKE_TEMPLATE, StringUtils.join(conditions, FIND_BY_LIKE_JOINER));
 
-    List<B> beans = genericPojoDao.executeParameterizedSQL(query, params, beanClass);
-
-    List<D> dtos = new ArrayList<>();
-    for (B bean : beans) {
-      dtos.add(MODEL_MAPPER.map(bean, dtoClass));
-    }
-
-    return dtos;
+    return (List<D>) genericPojoDao.executeParameterizedSQL(query, params, beanClass);
   }
 }

@@ -62,6 +62,8 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       "where (startTime < :endTime and endTime > :startTime) "
           + "order by endTime desc";
 
+  private static final String FIND_BY_FUNCTION_ID = "where functionId=:functionId";
+
   // TODO inject as dependency
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
 
@@ -175,9 +177,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     List<MergedAnomalyResultDTO> mergedAnomalyResultBeanList =
         genericPojoDao.get(idList, MergedAnomalyResultDTO.class);
     if (CollectionUtils.isNotEmpty(mergedAnomalyResultBeanList)) {
-      List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList =
-          convertMergedAnomalyBean2DTO(mergedAnomalyResultBeanList);
-      return mergedAnomalyResultDTOList;
+      return convertMergedAnomalyBean2DTO(mergedAnomalyResultBeanList);
     } else {
       return Collections.emptyList();
     }
@@ -234,6 +234,16 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
+  public List<MergedAnomalyResultDTO> findByFunctionId(Long functionId) {
+    Map<String, Object> filterParams = new HashMap<>();
+    filterParams.put("functionId", functionId);
+
+    List<MergedAnomalyResultDTO> list = genericPojoDao.executeParameterizedSQL(FIND_BY_FUNCTION_ID,
+        filterParams, MergedAnomalyResultDTO.class);
+    return convertMergedAnomalyBean2DTO(list);
+  }
+
+  @Override
   public List<MergedAnomalyResultDTO> findByTime(long startTime, long endTime) {
     Map<String, Object> filterParams = new HashMap<>();
     filterParams.put("startTime", startTime);
@@ -246,11 +256,11 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   public void updateAnomalyFeedback(MergedAnomalyResultDTO entity) {
-    MergedAnomalyResultDTO bean = toBean(entity);
+    MergedAnomalyResultDTO bean = entity;
     AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null) {
       if (feedbackDTO.getId() == null) {
-        AnomalyFeedbackDTO feedbackBean = convertDTO2Bean(feedbackDTO, AnomalyFeedbackDTO.class);
+        AnomalyFeedbackDTO feedbackBean = feedbackDTO;
         Long feedbackId = genericPojoDao.put(feedbackBean);
         feedbackDTO.setId(feedbackId);
       } else {
@@ -336,7 +346,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
 
   @Override
   public MergedAnomalyResultDTO convertMergeAnomalyDTO2Bean(MergedAnomalyResultDTO entity) {
-    MergedAnomalyResultDTO bean = toBean(entity);
+    MergedAnomalyResultDTO bean = (MergedAnomalyResultDTO) entity;
     AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null && feedbackDTO.getId() != null) {
       bean.setAnomalyFeedbackId(feedbackDTO.getId());
@@ -352,23 +362,17 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   @Override
   public MergedAnomalyResultDTO convertMergedAnomalyBean2DTO(
       MergedAnomalyResultDTO mergedAnomalyResultBean, Set<Long> visitedAnomalyIds) {
-    MergedAnomalyResultDTO mergedAnomalyResultDTO;
-    mergedAnomalyResultDTO = MODEL_MAPPER
-        .map(mergedAnomalyResultBean, MergedAnomalyResultDTO.class);
+    MergedAnomalyResultDTO mergedAnomalyResultDTO = mergedAnomalyResultBean;
 
     if (mergedAnomalyResultBean.getFunctionId() != null) {
-      AnomalyFunctionDTO anomalyFunctionBean = genericPojoDao
+      AnomalyFunctionDTO anomalyFunctionDTO = genericPojoDao
           .get(mergedAnomalyResultBean.getFunctionId(), AnomalyFunctionDTO.class);
-      AnomalyFunctionDTO anomalyFunctionDTO = MODEL_MAPPER
-          .map(anomalyFunctionBean, AnomalyFunctionDTO.class);
       mergedAnomalyResultDTO.setAnomalyFunction(anomalyFunctionDTO);
     }
 
     if (mergedAnomalyResultBean.getAnomalyFeedbackId() != null) {
-      AnomalyFeedbackDTO anomalyFeedbackBean = genericPojoDao
+      AnomalyFeedbackDTO anomalyFeedbackDTO = genericPojoDao
           .get(mergedAnomalyResultBean.getAnomalyFeedbackId(), AnomalyFeedbackDTO.class);
-      AnomalyFeedbackDTO anomalyFeedbackDTO = MODEL_MAPPER
-          .map(anomalyFeedbackBean, AnomalyFeedbackDTO.class);
       mergedAnomalyResultDTO.setFeedback(anomalyFeedbackDTO);
     }
 

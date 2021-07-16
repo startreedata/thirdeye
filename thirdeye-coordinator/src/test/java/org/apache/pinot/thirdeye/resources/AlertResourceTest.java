@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.spi.api;
+package org.apache.pinot.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -11,15 +11,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.util.GroovyTemplateUtils;
+import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
+import org.apache.pinot.thirdeye.spi.api.PlanNodeApi;
+import org.apache.pinot.thirdeye.util.GroovyTemplateUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class AlertEvaluationApiTest {
+public class AlertResourceTest {
 
   @Test
   public void testAlertEvaluationPlan() throws IOException, ClassNotFoundException {
-    final ClassLoader classLoader = AlertEvaluationApiTest.class.getClassLoader();
+    final ClassLoader classLoader = AlertResourceTest.class.getClassLoader();
     URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
     final String jsonString = Resources.toString(resource, StandardCharsets.UTF_8);
     resource = classLoader.getResource("alertEvaluation-context.json");
@@ -28,7 +30,7 @@ public class AlertEvaluationApiTest {
 
     final AlertEvaluationApi api = GroovyTemplateUtils.applyContextToTemplate(
         jsonString,
-        alertEvaluationPlanApiContext);
+        alertEvaluationPlanApiContext, AlertEvaluationApi.class);
 
     Assert.assertEquals(api.getAlert().getName(), "percentage-change-template");
     Assert.assertEquals(api.getAlert().getDescription(),

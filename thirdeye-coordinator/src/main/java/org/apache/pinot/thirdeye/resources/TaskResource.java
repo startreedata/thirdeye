@@ -10,7 +10,6 @@ import javax.inject.Singleton;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -27,18 +26,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
-  private final TaskManager taskManager;
-  private final AuthService authService;
   public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
-      .put("taskType", "type")
+      .put("type", "type")
       .put("status", "status")
       .build();
 
   @Inject
   public TaskResource(final AuthService authService, final TaskManager taskManager) {
     super(authService, taskManager, API_TO_BEAN_MAP);
-    this.taskManager = taskManager;
-    this.authService = authService;
   }
 
   // Operation not supported to prevent create of tasks

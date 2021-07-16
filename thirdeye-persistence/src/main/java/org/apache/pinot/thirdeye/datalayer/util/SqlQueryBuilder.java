@@ -388,7 +388,9 @@ public class SqlQueryBuilder {
         break;
       case IN:
         Object rhs = predicate.getRhs();
-        if (rhs != null && rhs.getClass().isArray()) {
+        if (rhs != null) {
+          if(!rhs.getClass().isArray())
+            rhs = rhs.toString().split(",");
           whereClause.append(columnName).append(" ").append(Predicate.OPER.IN.toString())
               .append("(");
           delim = "";

@@ -42,6 +42,10 @@ public class ResourceUtils {
     return Response.ok(api).build();
   }
 
+  public static Response respondOk(Map<String, Object> api) {
+    return Response.ok(api).build();
+  }
+
   public static void authenticate(boolean condition) {
     if (!condition) {
       throw unauthenticatedException();

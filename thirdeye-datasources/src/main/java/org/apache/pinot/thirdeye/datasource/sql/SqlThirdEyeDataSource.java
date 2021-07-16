@@ -160,4 +160,10 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
       throws Exception {
     return this.sqlResponseCacheLoader.getDimensionFilters(datasetConfig);
   }
+
+  @Override
+  public boolean validate() {
+    //TODO : implement proper validations
+    return true;
+  }
 }

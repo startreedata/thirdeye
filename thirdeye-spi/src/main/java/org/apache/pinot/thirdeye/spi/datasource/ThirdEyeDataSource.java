@@ -86,6 +86,13 @@ public interface ThirdEyeDataSource {
       throws Exception;
 
   /**
+   * Returns boolean value to validate the health of data source
+   *
+   * @return health validation boolean
+   */
+  boolean validate();
+
+  /**
    * Clear any cached values.
    */
   default void clear() throws Exception {

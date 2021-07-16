@@ -6,11 +6,13 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -98,5 +100,19 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     return respondOk(datasets.stream()
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList()));
+  }
+
+  @GET
+  @Path("health")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response health() {
+    List<ThirdEyeDataSource> dataSources = dataSourceCache.getDataSources();
+    ensureExists(dataSources, "Data sources were not found");
+    System.out.println(dataSources.get(0).getClass());
+    return respondOk(dataSources.stream()
+        .collect(Collectors.toMap(ds -> ds.getName(), ds -> new HashMap<String, Object>() {{
+          put("healthy", ds.validate());
+        }})));
   }
 }

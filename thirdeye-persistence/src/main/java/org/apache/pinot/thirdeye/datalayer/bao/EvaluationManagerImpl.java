@@ -20,7 +20,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

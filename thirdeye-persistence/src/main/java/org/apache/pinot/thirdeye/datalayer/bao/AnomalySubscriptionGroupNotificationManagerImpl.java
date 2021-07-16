@@ -15,30 +15,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 
-@Singleton
-public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunctionDTO>
-    implements AnomalyFunctionManager {
+public class AnomalySubscriptionGroupNotificationManagerImpl
+    extends AbstractManagerImpl<AnomalySubscriptionGroupNotificationDTO>
+    implements AnomalySubscriptionGroupNotificationManager {
 
   @Inject
-  public AnomalyFunctionManagerImpl(GenericPojoDao genericPojoDao) {
-    super(AnomalyFunctionDTO.class, genericPojoDao);
-  }
-
-  @Override
-  public List<AnomalyFunctionDTO> findAllByCollection(String collection) {
-    Predicate predicate = Predicate.EQ("collection", collection);
-    return genericPojoDao.get(predicate, AnomalyFunctionDTO.class);
+  public AnomalySubscriptionGroupNotificationManagerImpl(GenericPojoDao genericPojoDao) {
+    super(AnomalySubscriptionGroupNotificationDTO.class,
+        genericPojoDao);
   }
 }

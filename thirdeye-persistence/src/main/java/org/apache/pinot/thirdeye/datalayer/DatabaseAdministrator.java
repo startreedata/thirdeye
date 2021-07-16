@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -15,7 +15,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
-import org.apache.pinot.thirdeye.datalayer.ScriptRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

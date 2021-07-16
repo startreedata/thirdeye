@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.inject.persist.Transactional;
 import java.sql.Timestamp;

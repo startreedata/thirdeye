@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.inject.Inject;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;

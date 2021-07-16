@@ -3,7 +3,7 @@ package org.apache.pinot.thirdeye.healthcheck;
 import com.codahale.metrics.health.HealthCheck;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatabaseAdministrator;
+import org.apache.pinot.thirdeye.datalayer.DatabaseAdministrator;
 
 @Singleton
 public class DatabaseHealthCheck extends HealthCheck {

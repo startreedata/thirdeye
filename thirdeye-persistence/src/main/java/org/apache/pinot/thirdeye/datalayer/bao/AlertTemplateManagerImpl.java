@@ -17,20 +17,20 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 
 @Singleton
-public class SubscriptionGroupManagerImpl extends
-    AbstractManagerImpl<SubscriptionGroupDTO> implements SubscriptionGroupManager {
+public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateDTO>
+    implements AlertTemplateManager {
 
   @Inject
-  public SubscriptionGroupManagerImpl(GenericPojoDao genericPojoDao) {
-    super(SubscriptionGroupDTO.class, genericPojoDao);
+  public AlertTemplateManagerImpl(GenericPojoDao genericPojoDao) {
+    super(AlertTemplateDTO.class, genericPojoDao);
   }
 }

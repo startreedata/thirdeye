@@ -17,20 +17,28 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datalayer.bao.jdbc;
+package org.apache.pinot.thirdeye.datalayer.bao;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 
 @Singleton
-public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateDTO>
-    implements AlertTemplateManager {
+public class AnomalyFunctionManagerImpl extends AbstractManagerImpl<AnomalyFunctionDTO>
+    implements AnomalyFunctionManager {
 
   @Inject
-  public AlertTemplateManagerImpl(GenericPojoDao genericPojoDao) {
-    super(AlertTemplateDTO.class, genericPojoDao);
+  public AnomalyFunctionManagerImpl(GenericPojoDao genericPojoDao) {
+    super(AnomalyFunctionDTO.class, genericPojoDao);
+  }
+
+  @Override
+  public List<AnomalyFunctionDTO> findAllByCollection(String collection) {
+    Predicate predicate = Predicate.EQ("collection", collection);
+    return genericPojoDao.get(predicate, AnomalyFunctionDTO.class);
   }
 }

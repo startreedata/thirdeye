@@ -15,7 +15,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.mapper.TaskMapper;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
@@ -44,7 +44,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
   @Override
   protected TaskApi toApi(final TaskDTO dto) {
-    return TaskMapper.INSTANCE.toApi(dto);
+    return ApiBeanMapper.toApi(dto);
   }
 
   // Overridden to disable endpoint

@@ -109,7 +109,6 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   public Response health() {
     List<ThirdEyeDataSource> dataSources = dataSourceCache.getDataSources();
     ensureExists(dataSources, "Data sources were not found");
-    System.out.println(dataSources.get(0).getClass());
     return respondOk(dataSources.stream()
         .collect(Collectors.toMap(ds -> ds.getName(), ds -> new HashMap<String, Object>() {{
           put("healthy", ds.validate());

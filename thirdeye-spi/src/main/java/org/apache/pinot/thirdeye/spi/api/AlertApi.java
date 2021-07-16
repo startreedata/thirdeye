@@ -10,6 +10,7 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private String name;
   private String description;
   private AlertTemplateApi template;
+  private Map<String, Object> templateProperties;
   private String cron;
   private Date lastTimestamp;
   private Boolean active;
@@ -55,6 +56,16 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   public AlertApi setTemplate(final AlertTemplateApi template) {
     this.template = template;
+    return this;
+  }
+
+  public Map<String, Object> getTemplateProperties() {
+    return templateProperties;
+  }
+
+  public AlertApi setTemplateProperties(
+      final Map<String, Object> templateProperties) {
+    this.templateProperties = templateProperties;
     return this;
   }
 

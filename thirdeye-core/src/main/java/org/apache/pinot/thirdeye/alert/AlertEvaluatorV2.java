@@ -1,13 +1,17 @@
 package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
+import static org.apache.pinot.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +19,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.ws.rs.WebApplicationException;
 import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
@@ -31,6 +37,7 @@ import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.util.GroovyTemplateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +46,7 @@ public class AlertEvaluatorV2 {
 
   public static final String ROOT_OPERATOR_KEY = "root";
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
@@ -59,8 +67,8 @@ public class AlertEvaluatorV2 {
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
-  public static DetectionDataApi getData(DetectionResult detectionResult) {
-    Map<String, List> rawData = detectionResult.getRawData();
+  public static DetectionDataApi getData(final DetectionResult detectionResult) {
+    final Map<String, List> rawData = detectionResult.getRawData();
     if (!rawData.isEmpty()) {
       return new DetectionDataApi().setRawData(rawData);
     }
@@ -78,10 +86,10 @@ public class AlertEvaluatorV2 {
     return detectionDataApi;
   }
 
-  public static DetectionEvaluationApi toApi(DetectionResult detectionResult) {
-    DetectionEvaluationApi api = new DetectionEvaluationApi();
+  public static DetectionEvaluationApi toApi(final DetectionResult detectionResult) {
+    final DetectionEvaluationApi api = new DetectionEvaluationApi();
     final List<AnomalyApi> anomalyApis = new ArrayList<>();
-    for (MergedAnomalyResultDTO anomalyDto : detectionResult.getAnomalies()) {
+    for (final MergedAnomalyResultDTO anomalyDto : detectionResult.getAnomalies()) {
       anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
     }
     api.setAnomalies(anomalyApis);
@@ -95,8 +103,29 @@ public class AlertEvaluatorV2 {
 
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
+    final AlertApi alert = request.getAlert();
+    ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
+
+    final AlertTemplateApi templateApi = alert.getTemplate();
+    ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
+
     try {
-      final Map<String, DetectionPipelineResult> result = runPipeline(request);
+      final AlertTemplateDTO template = getTemplate(templateApi);
+      final Map<String, Object> templateProperties = alert.getTemplateProperties();
+      final AlertTemplateDTO templateWithProperties = applyContext(template, templateProperties);
+
+      if (request.isDryRun()) {
+        return new AlertEvaluationApi()
+            .setDryRun(true)
+            .setAlert(new AlertApi()
+                .setTemplate(toAlertTemplateApi(templateWithProperties)));
+      }
+
+      final Map<String, DetectionPipelineResult> result = runPipeline(
+          templateWithProperties.getNodes(),
+          request.getStart(),
+          request.getEnd()
+      );
       return toApi(result);
     } catch (final WebApplicationException e) {
       throw e;
@@ -106,37 +135,50 @@ public class AlertEvaluatorV2 {
     return null;
   }
 
-  private Map<String, DetectionPipelineResult> runPipeline(final AlertEvaluationApi request)
-      throws Exception {
-    ensureExists(request.getAlert(), ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
-
-    final AlertTemplateApi templateApi = request.getAlert().getTemplate();
-    ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
-
-    final AlertTemplateDTO template = getTemplate(templateApi);
-
+  private Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> nodes,
+      final Date start,
+      final Date end)
+      throws InterruptedException, ExecutionException, TimeoutException {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (final PlanNodeBean operator : template.getNodes()) {
+    for (final PlanNodeBean operator : nodes) {
       final String operatorName = operator.getName();
       final PlanNode planNode = detectionPipelinePlanNodeFactory.get(
           operatorName,
           pipelinePlanNodes,
           operator,
-          request.getStart().getTime(),
-          request.getEnd().getTime());
+          start.getTime(),
+          end.getTime());
 
       pipelinePlanNodes.put(operatorName, planNode);
     }
-    return executorService.submit(() -> {
-      final Map<String, DetectionPipelineResult> context = new HashMap<>();
+    return executorService
+        .submit(() -> runPipelineInternal(pipelinePlanNodes))
+        .get(TIMEOUT, TimeUnit.MILLISECONDS);
+  }
 
-      /* Execute the DAG */
-      final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
-      PlanExecutor.executePlanNode(pipelinePlanNodes, context, rootNode);
+  private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
+      final Map<String, Object> templateProperties) throws IOException, ClassNotFoundException {
+    if (templateProperties == null || templateProperties.size() == 0) {
+      /* Nothing to replace. Skip running the engine */
+      return template;
+    }
 
-      /* Return the output */
-      return getOutput(context, rootNode);
-    }).get(TIMEOUT, TimeUnit.MILLISECONDS);
+    final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
+    return GroovyTemplateUtils.applyContextToTemplate(jsonString,
+        templateProperties,
+        AlertTemplateDTO.class);
+  }
+
+  private Map<String, DetectionPipelineResult> runPipelineInternal(
+      final Map<String, PlanNode> pipelinePlanNodes) throws Exception {
+    final Map<String, DetectionPipelineResult> context = new HashMap<>();
+
+    /* Execute the DAG */
+    final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
+    PlanExecutor.executePlanNode(pipelinePlanNodes, context, rootNode);
+
+    /* Return the output */
+    return getOutput(context, rootNode);
   }
 
   private AlertTemplateDTO getTemplate(final AlertTemplateApi templateApi) {

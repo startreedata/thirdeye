@@ -34,6 +34,7 @@ public class AlertEvaluationApi {
   private Date start;
   private Date end;
   private Date lastTimestamp;
+  Boolean dryRun = false;
 
   public AlertApi getAlert() {
     return alert;
@@ -88,6 +89,15 @@ public class AlertEvaluationApi {
   public AlertEvaluationApi setEvaluations(
       final Map<String, Map<String, DetectionEvaluationApi>> evaluations) {
     this.evaluations = evaluations;
+    return this;
+  }
+
+  public Boolean isDryRun() {
+    return dryRun;
+  }
+
+  public AlertEvaluationApi setDryRun(final Boolean dryRun) {
+    this.dryRun = dryRun;
     return this;
   }
 }

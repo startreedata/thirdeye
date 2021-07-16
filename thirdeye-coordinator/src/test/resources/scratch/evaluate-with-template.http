@@ -50,3 +50,46 @@ Content-Type: application/json
   "start": "1577865600000",
   "end": "1590994800000"
 }
+
+### DRY RUN Feature
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "dryRun": true,
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "name": "newAlertTemplateWithProp"
+    },
+    "templateProperties": {
+      "percentageChangeValue": 0.123
+    }
+  },
+  "start": "1577865600000",
+  "end": "1590994800000"
+}
+
+###
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "name": "newAlertTemplateWithProp"
+    },
+    "templateProperties": {
+      "percentageChangeValue": 0.1
+    }
+  },
+  "start": "1577865600000",
+  "end": "1590994800000"
+}

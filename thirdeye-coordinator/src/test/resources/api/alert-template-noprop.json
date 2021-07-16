@@ -11,7 +11,7 @@
           "component.detector.type": "PERCENTAGE_CHANGE",
           "component.detector.timezone": "US/Pacific",
           "component.detector.monitoringGranularity": "1_DAYS",
-          "component.detector.percentageChange": "${percentageChangeValue}",
+          "component.detector.percentageChange": "0.1",
           "component.detector.offset": "mo1m",
           "component.detector.pattern": "down",
           "component.detector.timestamp": "ts",

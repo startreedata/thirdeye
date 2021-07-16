@@ -27,6 +27,8 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.ObjectSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -37,6 +39,9 @@ public class ThirdEyeDataFrameResultSetTest {
     List<String> columnArray = new ArrayList<>();
     columnArray.add("col1");
     columnArray.add("col2");
+    List<ColumnType> columnTypeArray = new ArrayList<>();
+    columnTypeArray.add(new ColumnType(ColumnDataType.STRING));
+    columnTypeArray.add(new ColumnType(ColumnDataType.STRING));
 
     List<String[]> resultArray = new ArrayList<>();
     String[] row1 = new String[columnArray.size()];
@@ -52,7 +57,9 @@ public class ThirdEyeDataFrameResultSetTest {
       }
     }
 
-    ResultSet selectResultSet = new MockedSelectResultSet(columnArray, resultArray);
+    ResultSet selectResultSet = new MockedSelectResultSet(columnArray,
+        columnTypeArray,
+        resultArray);
 
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(selectResultSet);
@@ -61,7 +68,7 @@ public class ThirdEyeDataFrameResultSetTest {
     dataFrame.addSeries("col1", 0, 10, 20);
     dataFrame.addSeries("col2", 1, 11, 21);
     ThirdEyeResultSetMetaData metaData = new ThirdEyeResultSetMetaData(
-        Collections.emptyList(), columnArray);
+        Collections.emptyList(), columnArray, Collections.emptyList(), columnTypeArray);
     ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData,
         dataFrame);
 
@@ -75,13 +82,14 @@ public class ThirdEyeDataFrameResultSetTest {
     final String functionName = "sum_metric_name";
 
     ResultSet singleAggregationResultSet = new MockedSingleAggregationResultSet(functionName,
-        "150.33576");
+        new ColumnType(ColumnDataType.DOUBLE), "150.33576");
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(singleAggregationResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(Collections.emptyList(),
-            Collections.singletonList(functionName));
+            Collections.singletonList(functionName), Collections.emptyList(),
+            Collections.singletonList(new ColumnType(ColumnDataType.DOUBLE)));
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(functionName, 150.33576);
     ThirdEyeDataFrameResultSet expectedDataFrameResultSet = new ThirdEyeDataFrameResultSet(metaData,
@@ -99,6 +107,9 @@ public class ThirdEyeDataFrameResultSetTest {
     List<String> groupByColumnNames = new ArrayList<>();
     groupByColumnNames.add("country");
     groupByColumnNames.add("pageName");
+    List<ColumnType> groupByColumnTypes = new ArrayList<>();
+    groupByColumnTypes.add(new ColumnType(ColumnDataType.STRING));
+    groupByColumnTypes.add(new ColumnType(ColumnDataType.STRING));
 
     List<MockedSingleGroupByResultSet.GroupByRowResult> resultArray = new ArrayList<>();
     resultArray.add(
@@ -110,13 +121,16 @@ public class ThirdEyeDataFrameResultSetTest {
     resultArray.add(
         new MockedSingleGroupByResultSet.GroupByRowResult(Arrays.asList("JP", "page2"), "44444.4"));
 
+    final List<ColumnType> columnTypes = new ArrayList<>();
+    columnTypes.add(new ColumnType(ColumnDataType.DOUBLE));
     ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
-        functionName, resultArray);
+        functionName, columnTypes, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(singleGroupByResultSet);
 
     ThirdEyeResultSetMetaData metaData =
-        new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName));
+        new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName),
+            groupByColumnTypes, Collections.singletonList(new ColumnType(ColumnDataType.DOUBLE)));
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries("country", "US", "US", "IN", "JP");
     dataFrame.addSeries("pageName", "page1", "page2", "page3", "page2");
@@ -136,16 +150,21 @@ public class ThirdEyeDataFrameResultSetTest {
     List<String> groupByColumnNames = new ArrayList<>();
     groupByColumnNames.add("country");
     groupByColumnNames.add("pageName");
+    List<ColumnType> groupByColumnTypes = new ArrayList<>();
+    groupByColumnTypes.add(new ColumnType(ColumnDataType.STRING));
+    groupByColumnTypes.add(new ColumnType(ColumnDataType.STRING));
 
     List<MockedSingleGroupByResultSet.GroupByRowResult> resultArray = new ArrayList<>();
 
+    final List<ColumnType> columnTypes = Collections.singletonList(new ColumnType(ColumnDataType.DOUBLE));
     ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
-        functionName, resultArray);
+        functionName, columnTypes, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
         ThirdEyeDataFrameResultSet.fromPinotResultSet(singleGroupByResultSet);
 
     ThirdEyeResultSetMetaData metaData =
-        new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName));
+        new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName),
+            groupByColumnTypes, columnTypes);
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries("country", StringSeries.builder().build());
     dataFrame.addSeries("pageName", StringSeries.builder().build());
@@ -158,19 +177,22 @@ public class ThirdEyeDataFrameResultSetTest {
 
   private static class MockedSingleGroupByResultSet extends MockedAbstractResultSet {
 
-    List<String> groupByColumnNames = Collections.emptyList();
-    String functionName;
-    List<GroupByRowResult> resultArray = Collections.emptyList();
+    private final List<String> groupByColumnNames;
+    private final String functionName;
+    private final List<GroupByRowResult> resultArray;
+    private final List<ColumnType> columnTypes;
 
     MockedSingleGroupByResultSet(List<String> groupByColumnNames, String functionName,
-        List<GroupByRowResult> resultArray) {
+        List<ColumnType> columnTypes, List<GroupByRowResult> resultArray) {
       Preconditions.checkNotNull(groupByColumnNames);
       Preconditions.checkNotNull(functionName);
+      Preconditions.checkNotNull(columnTypes);
       Preconditions.checkNotNull(resultArray);
 
       this.groupByColumnNames = groupByColumnNames;
       this.functionName = functionName;
       this.resultArray = resultArray;
+      this.columnTypes = columnTypes;
     }
 
     @Override
@@ -185,12 +207,15 @@ public class ThirdEyeDataFrameResultSetTest {
 
     @Override
     public String getColumnName(int i) {
-      return functionName;
+      if (i == 0) {
+        return functionName;
+      }
+      return groupByColumnNames.get(i - 1);
     }
 
     @Override
     public String getColumnDataType(final int columnIndex) {
-      return null;
+      return columnTypes.get(columnIndex).getType().name();
     }
 
     @Override
@@ -242,13 +267,16 @@ public class ThirdEyeDataFrameResultSetTest {
 
     String functionName;
     String result;
+    ColumnType columnType;
 
-    MockedSingleAggregationResultSet(String functionName, String result) {
+    MockedSingleAggregationResultSet(String functionName, ColumnType columnType, String result) {
       Preconditions.checkNotNull(functionName);
+      Preconditions.checkNotNull(columnType);
       Preconditions.checkNotNull(result);
 
       this.functionName = functionName;
       this.result = result;
+      this.columnType = columnType;
     }
 
     @Override
@@ -268,7 +296,7 @@ public class ThirdEyeDataFrameResultSetTest {
 
     @Override
     public String getColumnDataType(final int columnIndex) {
-      return null;
+      return columnType.getType().name();
     }
 
     @Override
@@ -300,8 +328,10 @@ public class ThirdEyeDataFrameResultSetTest {
 
     List<String> columnArray = Collections.emptyList();
     List<String[]> resultArray = Collections.emptyList();
+    List<ColumnType> columnTypeArray;
 
-    MockedSelectResultSet(List<String> columnArray, List<String[]> resultArray) {
+    MockedSelectResultSet(List<String> columnArray, List<ColumnType> columnTypeArray,
+        List<String[]> resultArray) {
       if (columnArray != null) {
         this.columnArray = columnArray;
       }
@@ -318,6 +348,7 @@ public class ThirdEyeDataFrameResultSetTest {
         }
         this.resultArray = resultArray;
       }
+      this.columnTypeArray = columnTypeArray;
     }
 
     @Override
@@ -337,7 +368,7 @@ public class ThirdEyeDataFrameResultSetTest {
 
     @Override
     public String getColumnDataType(final int columnIndex) {
-      return null;
+      return columnTypeArray.get(columnIndex).getType().name();
     }
 
     @Override

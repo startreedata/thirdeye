@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.pinot.resultset;
 
 import com.google.common.base.Preconditions;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,8 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 
 /**
  * An unified container that store Select, Aggregation, and Group-By {@link ResultSet} in a data
@@ -49,55 +52,6 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     this.dataFrame = dataFrame;
   }
 
-  private boolean isMetaDataAndDataHaveSameColumns(
-      ThirdEyeResultSetMetaData thirdEyeResultSetMetaData, DataFrame dataFrame) {
-    Set<String> metaDataAllColumns = new HashSet<>(thirdEyeResultSetMetaData.getAllColumnNames());
-    return metaDataAllColumns.equals(dataFrame.getSeries().keySet());
-  }
-
-  @Override
-  public int getRowCount() {
-    return dataFrame.size();
-  }
-
-  @Override
-  public int getColumnCount() {
-    return thirdEyeResultSetMetaData.getMetricColumnNames().size();
-  }
-
-  @Override
-  public String getColumnName(int columnIdx) {
-    Preconditions.checkPositionIndexes(0, columnIdx,
-        thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
-    return thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx);
-  }
-
-  @Override
-  public String getString(int rowIdx, int columnIdx) {
-    Preconditions.checkPositionIndexes(0, columnIdx,
-        thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
-    return dataFrame.get(thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx))
-        .getString(rowIdx);
-  }
-
-  @Override
-  public int getGroupKeyLength() {
-    return thirdEyeResultSetMetaData.getGroupKeyColumnNames().size();
-  }
-
-  @Override
-  public String getGroupKeyColumnName(int columnIdx) {
-    Preconditions.checkPositionIndexes(0, columnIdx, getGroupKeyLength() - 1);
-    return thirdEyeResultSetMetaData.getGroupKeyColumnNames().get(columnIdx);
-  }
-
-  @Override
-  public String getGroupKeyColumnValue(int rowIdx, int columnIdx) {
-    Preconditions.checkPositionIndexes(0, columnIdx, getGroupKeyLength() - 1);
-    return dataFrame.get(thirdEyeResultSetMetaData.getGroupKeyColumnNames().get(columnIdx))
-        .getString(rowIdx);
-  }
-
   /**
    * Constructs a {@link ThirdEyeDataFrameResultSet} from any SQL's {@link java.sql.ResultSet}.
    *
@@ -114,18 +68,26 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
       throws Exception {
 
     List<String> groupKeyColumnNames = new ArrayList<>();
+    List<ColumnType> groupKeyColumnTypes = new ArrayList<>();
     if (aggGranularity != null && !groupByKeys.contains(timeSpec.getColumnName())) {
       groupKeyColumnNames.add(0, DataFrame.COL_TIME);
+      groupKeyColumnTypes.add(0, new ColumnType(ColumnDataType.LONG));
     }
 
     for (String groupByKey : groupByKeys) {
       groupKeyColumnNames.add(groupByKey);
+      groupKeyColumnTypes.add(getColumnTypeFromJdbcResultSet(resultSet, groupByKey));
     }
 
     List<String> metrics = new ArrayList<>();
     metrics.add(metric);
+    List<ColumnType> metricTypes = new ArrayList<>();
+    metricTypes.add(getColumnTypeFromJdbcResultSet(resultSet, metric));
     ThirdEyeResultSetMetaData thirdEyeResultSetMetaData =
-        new ThirdEyeResultSetMetaData(groupKeyColumnNames, metrics);
+        new ThirdEyeResultSetMetaData(groupKeyColumnNames,
+            metrics,
+            groupKeyColumnTypes,
+            metricTypes);
     // Build the DataFrame
     List<String> columnNameWithDataType = new ArrayList<>();
     //   Always cast dimension values to STRING type
@@ -178,6 +140,36 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     return thirdEyeDataFrameResultSet;
   }
 
+  public static ColumnType getColumnTypeFromJdbcResultSet(java.sql.ResultSet resultSet,
+      String columnName) {
+    try {
+      for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+        if (columnName.equalsIgnoreCase(resultSet.getMetaData().getColumnLabel(i))) {
+          return ColumnType.jdbcTypeToColumnType(resultSet.getMetaData().getColumnType(i));
+        }
+      }
+    } catch (SQLException e) {
+      return null;
+    }
+    return null;
+  }
+
+  private static ColumnType getColumnTypeFromPinotResultSet(final ResultSet resultSet,
+      final String columnName) {
+    for (int i = 0; i < resultSet.getColumnCount(); i++) {
+      if (columnName.equalsIgnoreCase(resultSet.getColumnName(i))) {
+        try {
+          return ColumnType.pinotTypeToColumnType(resultSet.getColumnDataType(i));
+        } catch (Throwable e) {
+          // Pinot client doesn't provide type for pql, so default to DOUBLE type for metric column.
+          return new ColumnType(ColumnDataType.DOUBLE);
+        }
+      }
+    }
+    // Pinot client doesn't provide type for groupKeys, so default to String type.
+    return new ColumnType(ColumnDataType.STRING);
+  }
+
   /**
    * Constructs a {@link ThirdEyeDataFrameResultSet} from any Pinot's {@link ResultSet}.
    *
@@ -187,6 +179,7 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
   public static ThirdEyeDataFrameResultSet fromPinotResultSet(ResultSet resultSet) {
     // Build the meta data of this result set
     List<String> groupKeyColumnNames = new ArrayList<>();
+    List<ColumnType> groupKeyColumnTypes = new ArrayList<>();
     int groupByColumnCount = 0;
     try {
       groupByColumnCount = resultSet.getGroupKeyLength();
@@ -203,14 +196,23 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
       }
     }
     for (int groupKeyColumnIdx = 0; groupKeyColumnIdx < groupByColumnCount; groupKeyColumnIdx++) {
-      groupKeyColumnNames.add(resultSet.getGroupKeyColumnName(groupKeyColumnIdx));
+      final String columnName = resultSet.getGroupKeyColumnName(groupKeyColumnIdx);
+      groupKeyColumnNames.add(columnName);
+      // Default to String type for all groupKeys
+      groupKeyColumnTypes.add(new ColumnType(ColumnDataType.STRING));
     }
     List<String> metricColumnNames = new ArrayList<>();
+    List<ColumnType> metricColumnTypes = new ArrayList<>();
     for (int columnIdx = 0; columnIdx < resultSet.getColumnCount(); columnIdx++) {
-      metricColumnNames.add(resultSet.getColumnName(columnIdx));
+      String columnName = resultSet.getColumnName(columnIdx);
+      metricColumnNames.add(columnName);
+      metricColumnTypes.add(getColumnTypeFromPinotResultSet(resultSet, columnName));
     }
     ThirdEyeResultSetMetaData thirdEyeResultSetMetaData =
-        new ThirdEyeResultSetMetaData(groupKeyColumnNames, metricColumnNames);
+        new ThirdEyeResultSetMetaData(groupKeyColumnNames,
+            metricColumnNames,
+            groupKeyColumnTypes,
+            metricColumnTypes);
 
     // Build the DataFrame
     List<String> columnNameWithDataType = new ArrayList<>();
@@ -253,6 +255,68 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     ThirdEyeDataFrameResultSet thirdEyeDataFrameResultSet =
         new ThirdEyeDataFrameResultSet(thirdEyeResultSetMetaData, dataFrame);
     return thirdEyeDataFrameResultSet;
+  }
+
+  private boolean isMetaDataAndDataHaveSameColumns(
+      ThirdEyeResultSetMetaData thirdEyeResultSetMetaData, DataFrame dataFrame) {
+    Set<String> metaDataAllColumns = new HashSet<>(thirdEyeResultSetMetaData.getAllColumnNames());
+    return metaDataAllColumns.equals(dataFrame.getSeries().keySet());
+  }
+
+  @Override
+  public int getRowCount() {
+    return dataFrame.size();
+  }
+
+  @Override
+  public int getColumnCount() {
+    return thirdEyeResultSetMetaData.getMetricColumnNames().size();
+  }
+
+  @Override
+  public String getColumnName(int columnIdx) {
+    Preconditions.checkPositionIndexes(0, columnIdx,
+        thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
+    return thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx);
+  }
+
+  @Override
+  public ColumnType getColumnType(final int columnIdx) {
+    Preconditions.checkPositionIndexes(0, columnIdx,
+        thirdEyeResultSetMetaData.getMetricColumnTypes().size() - 1);
+    return thirdEyeResultSetMetaData.getMetricColumnTypes().get(columnIdx);
+  }
+
+  @Override
+  public String getString(int rowIdx, int columnIdx) {
+    Preconditions.checkPositionIndexes(0, columnIdx,
+        thirdEyeResultSetMetaData.getMetricColumnNames().size() - 1);
+    return dataFrame.get(thirdEyeResultSetMetaData.getMetricColumnNames().get(columnIdx))
+        .getString(rowIdx);
+  }
+
+  @Override
+  public int getGroupKeyLength() {
+    return thirdEyeResultSetMetaData.getGroupKeyColumnNames().size();
+  }
+
+  @Override
+  public String getGroupKeyColumnName(int columnIdx) {
+    Preconditions.checkPositionIndexes(0, columnIdx, getGroupKeyLength() - 1);
+    return thirdEyeResultSetMetaData.getGroupKeyColumnNames().get(columnIdx);
+  }
+
+  @Override
+  public ColumnType getGroupKeyColumnType(int columnIdx) {
+    Preconditions.checkPositionIndexes(0, columnIdx, getGroupKeyLength() - 1);
+    return thirdEyeResultSetMetaData.getGroupKeyColumnTypes().get(columnIdx);
+  }
+
+  @Override
+  public String getGroupKeyColumnValue(int rowIdx, int columnIdx) {
+    Preconditions.checkPositionIndexes(0, columnIdx, getGroupKeyLength() - 1);
+    return dataFrame.get(thirdEyeResultSetMetaData.getGroupKeyColumnNames().get(columnIdx))
+        .getString(rowIdx);
   }
 
   @Override

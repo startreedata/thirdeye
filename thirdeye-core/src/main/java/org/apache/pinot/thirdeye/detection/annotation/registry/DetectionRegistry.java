@@ -44,6 +44,9 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.EventTrigger;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Tune;
 import org.slf4j.Logger;
@@ -77,6 +80,7 @@ public class DetectionRegistry {
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
   private static final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
   private static final Map<String, AnomalyDetectorV2Factory> anomalyDetectorV2FactoryMap = new HashMap<>();
+  private static final Map<String, EventTriggerFactory> triggerFactoryMap = new HashMap<>();
 
   static {
     init();
@@ -171,6 +175,10 @@ public class DetectionRegistry {
     anomalyDetectorV2FactoryMap.put(f.name(), f);
   }
 
+  public void addEventTriggerFactory(final EventTriggerFactory f) {
+    triggerFactoryMap.put(f.name(), f);
+  }
+
   public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
       AnomalyDetectorFactoryContext context) {
@@ -188,6 +196,16 @@ public class DetectionRegistry {
             factoryName,
             anomalyDetectorV2FactoryMap.keySet()));
     return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
+  }
+
+  public EventTrigger<AbstractSpec> buildTrigger(
+      String factoryName,
+      EventTriggerFactoryContext context) {
+    checkArgument(triggerFactoryMap.containsKey(factoryName),
+        String.format("Trigger type not registered: %s. Available triggers: %s",
+            factoryName,
+            triggerFactoryMap.keySet()));
+    return triggerFactoryMap.get(factoryName).build(context);
   }
 
   /**

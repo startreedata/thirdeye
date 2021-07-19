@@ -486,8 +486,9 @@ Content-Type: application/json
           "type": "SqlExecution",
           "params": {
             "sql.queries": [
-              "SELECT ts as timestamp, met as value FROM baseline",
-              "SELECT ts as timestamp, met as value FROM current"
+              "SELECT ts as timestamp, met as value FROM baseline WHERE ts BETWEEN 20200715 AND 20200720",
+              "SELECT ts as timestamp, met as value FROM current WHERE ts BETWEEN 20200715 AND 20200720",
+              "SELECT ts, avg(met) as met FROM (SELECT ts, met FROM baseline UNION ALL SELECT ts, met FROM current) WHERE ts BETWEEN 20200715 AND 20200720 GROUP BY ts ORDER BY ts"
             ]
           },
           "inputs": [
@@ -505,11 +506,15 @@ Content-Type: application/json
           "outputs": [
             {
               "outputKey": "0",
-              "outputName": "sql0"
+              "outputName": "baseline"
             },
             {
               "outputKey": "1",
-              "outputName": "sql1"
+              "outputName": "current"
+            },
+            {
+              "outputKey": "2",
+              "outputName": "final"
             }
           ]
         },
@@ -550,6 +555,60 @@ Content-Type: application/json
               "outputName": "currentOutput"
             }
           ]
+        }
+      ]
+    }
+  },
+  "start": "1577865600000",
+  "end": "1590994800000"
+}
+
+###
+
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "sample-event-trigger",
+    "description": "Use dataFetcher to query data to trigger console output",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "EventTrigger",
+          "params": {
+            "component.detector.type": "CONSOLE_OUTPUT"
+          },
+          "inputs": [
+            {
+              "targetProperty": "input",
+              "sourcePlanNode": "dataFetcher",
+              "sourceProperty": "output"
+            }
+          ],
+          "outputs": [
+          ]
+        },
+        {
+          "name": "dataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.dataSource": "pinotQuickStartLocal",
+            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
+            "component.pinot.tableName": "pageviews",
+            "startTime": "20200209",
+            "endTime": "20200730"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "output"
+            }]
         }
       ]
     }

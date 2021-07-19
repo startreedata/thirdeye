@@ -5,6 +5,15 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 
 public interface DataTable extends DetectionPipelineResult {
 
+  static Object[] getRow(final DataTable dataTable, final int rowIdx) {
+    int columnCount = dataTable.getColumnCount();
+    Object[] row = new Object[columnCount];
+    for (int colIdx = 0; colIdx < columnCount; colIdx++) {
+      row[colIdx] = dataTable.getObject(rowIdx, colIdx);
+    }
+    return row;
+  }
+
   int getRowCount();
 
   int getColumnCount();
@@ -23,3 +32,4 @@ public interface DataTable extends DetectionPipelineResult {
 
   double getDouble(int rowIdx, int colIdx);
 }
+

@@ -170,7 +170,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     }
   }
 
-  private BaseComponent createComponentUsingFactory(final String type,
+  protected BaseComponent createComponentUsingFactory(final String type,
       final Map<String, Object> componentSpec) {
     return new DetectionRegistry().buildDetectorV2(type, new AnomalyDetectorFactoryContext()
         .setProperties(componentSpec));

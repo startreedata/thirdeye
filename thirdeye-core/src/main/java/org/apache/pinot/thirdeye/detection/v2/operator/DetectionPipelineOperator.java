@@ -35,7 +35,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2FactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;

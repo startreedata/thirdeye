@@ -20,13 +20,13 @@
 package org.apache.pinot.thirdeye.detection.components.triggers;
 
 import java.util.Arrays;
+import org.apache.pinot.thirdeye.spi.detection.EventTrigger;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerException;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2;
 
 /**
  * Absolute change rule detection
  */
-public class ConsoleOutputTrigger implements EventTriggerV2<ConsoleOutputTriggerSpec> {
+public class ConsoleOutputTrigger implements EventTrigger<ConsoleOutputTriggerSpec> {
 
   private ConsoleOutputTriggerSpec spec;
 
@@ -37,6 +37,6 @@ public class ConsoleOutputTrigger implements EventTriggerV2<ConsoleOutputTrigger
 
   @Override
   public void trigger(final Object[] event) throws EventTriggerException {
-    System.out.println("Got one trigger event = " + Arrays.toString(event));
+    System.out.println(String.format(spec.getFormat(), Arrays.toString(event)));
   }
 }

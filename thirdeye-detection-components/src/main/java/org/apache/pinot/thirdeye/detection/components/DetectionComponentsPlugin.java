@@ -15,11 +15,11 @@ import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDet
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetectorSpec;
 import org.apache.pinot.thirdeye.detection.components.triggers.ConsoleOutputTrigger;
 import org.apache.pinot.thirdeye.detection.components.triggers.ConsoleOutputTriggerSpec;
-import org.apache.pinot.thirdeye.detection.components.triggers.GenericEventTriggerV2Factory;
+import org.apache.pinot.thirdeye.detection.components.triggers.GenericEventTriggerFactory;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2Factory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 
 public class DetectionComponentsPlugin implements Plugin {
 
@@ -91,9 +91,9 @@ public class DetectionComponentsPlugin implements Plugin {
   }
 
   @Override
-  public Iterable<EventTriggerV2Factory> getEventTriggerV2Factories() {
+  public Iterable<EventTriggerFactory> getEventTriggerFactories() {
     return ImmutableList.of(
-        new GenericEventTriggerV2Factory<>(
+        new GenericEventTriggerFactory<>(
             "CONSOLE_OUTPUT",
             ConsoleOutputTriggerSpec.class,
             ConsoleOutputTrigger.class

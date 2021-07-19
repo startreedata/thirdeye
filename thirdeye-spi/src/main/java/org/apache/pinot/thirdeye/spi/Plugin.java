@@ -4,7 +4,7 @@ import java.util.Collections;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2Factory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 
 public interface Plugin {
 
@@ -20,7 +20,7 @@ public interface Plugin {
     return Collections.emptyList();
   }
 
-  default Iterable<EventTriggerV2Factory> getEventTriggerV2Factories() {
+  default Iterable<EventTriggerFactory> getEventTriggerFactories() {
     return Collections.emptyList();
   }
 }

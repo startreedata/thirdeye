@@ -20,23 +20,23 @@
 package org.apache.pinot.thirdeye.detection.components.triggers;
 
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2Factory;
-import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2FactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.EventTrigger;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactoryContext;
 
 /**
  * Absolute change rule detection
  */
-public class GenericEventTriggerV2Factory<T extends AbstractSpec> implements
-    EventTriggerV2Factory {
+public class GenericEventTriggerFactory<T extends AbstractSpec> implements
+    EventTriggerFactory {
 
   private final String name;
   private final Class<T> specClazz;
-  private final Class<? extends EventTriggerV2<T>> clazz;
+  private final Class<? extends EventTrigger<T>> clazz;
 
-  public GenericEventTriggerV2Factory(final String name,
+  public GenericEventTriggerFactory(final String name,
       final Class<T> specClazz,
-      final Class<? extends EventTriggerV2<T>> clazz) {
+      final Class<? extends EventTrigger<T>> clazz) {
     this.clazz = clazz;
     this.specClazz = specClazz;
     this.name = name;
@@ -48,9 +48,9 @@ public class GenericEventTriggerV2Factory<T extends AbstractSpec> implements
   }
 
   @Override
-  public EventTriggerV2<T> build(final EventTriggerV2FactoryContext context) {
+  public EventTrigger<T> build(final EventTriggerFactoryContext context) {
     try {
-      final EventTriggerV2<T> detector = clazz.newInstance();
+      final EventTrigger<T> detector = clazz.newInstance();
       detector.init(buildSpec(context));
       return detector;
     } catch (Exception e) {
@@ -58,7 +58,7 @@ public class GenericEventTriggerV2Factory<T extends AbstractSpec> implements
     }
   }
 
-  private T buildSpec(final EventTriggerV2FactoryContext context) {
+  private T buildSpec(final EventTriggerFactoryContext context) {
     return AbstractSpec.fromProperties(context.getProperties(), specClazz);
   }
 }

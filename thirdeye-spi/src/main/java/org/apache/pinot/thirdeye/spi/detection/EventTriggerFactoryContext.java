@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.spi.detection;
 
 import java.util.Map;
 
-public class EventTriggerV2FactoryContext {
+public class EventTriggerFactoryContext {
 
   private Map<String, Object> properties;
 
@@ -10,7 +10,7 @@ public class EventTriggerV2FactoryContext {
     return properties;
   }
 
-  public EventTriggerV2FactoryContext setProperties(
+  public EventTriggerFactoryContext setProperties(
       final Map<String, Object> properties) {
     this.properties = properties;
     return this;

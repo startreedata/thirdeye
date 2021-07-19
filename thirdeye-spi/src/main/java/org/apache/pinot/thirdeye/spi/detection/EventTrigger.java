@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
-public interface EventTriggerV2<T extends AbstractSpec> extends BaseComponent<T> {
+public interface EventTrigger<T extends AbstractSpec> extends BaseComponent<T> {
 
   /**
    * Initialize Trigger

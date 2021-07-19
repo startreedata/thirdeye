@@ -571,8 +571,8 @@ Content-Type: application/json
 
 {
   "alert": {
-    "name": "sample-data-fetcher",
-    "description": "Sample description payload for testing",
+    "name": "sample-event-trigger",
+    "description": "Use dataFetcher to query data to trigger console output",
     "cron": "0 0/1 * 1/1 * ? *",
     "template": {
       "nodes": [

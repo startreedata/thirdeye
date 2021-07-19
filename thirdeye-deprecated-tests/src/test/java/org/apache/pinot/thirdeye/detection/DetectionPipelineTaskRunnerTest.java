@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import com.codahale.metrics.MetricRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -89,7 +90,8 @@ public class DetectionPipelineTaskRunnerTest {
         this.evaluationDAO,
         this.loader,
         new ModelRetuneFlow(this.provider, new DetectionRegistry()),
-        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager()
+        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager(),
+        new MetricRegistry()
     );
 
     this.info = new DetectionPipelineTaskInfo();

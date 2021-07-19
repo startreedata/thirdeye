@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.detection;
 
 import static java.util.Objects.requireNonNull;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
@@ -38,7 +40,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
-import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,11 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class DetectionPipelineTaskRunner implements TaskRunner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+  private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+
+  private final Counter detectionTaskExceptionCounter;
+  private final Counter detectionTaskSuccessCounter;
+  private final Counter detectionTaskCounter;
 
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
@@ -62,23 +67,29 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
    * @param detectionPipelineFactory pipeline loader
    */
   @Inject
-  public DetectionPipelineTaskRunner(AlertManager alertManager,
-      MergedAnomalyResultManager mergedAnomalyResultManager,
-      EvaluationManager evaluationManager,
-      DetectionPipelineFactory detectionPipelineFactory,
-      ModelRetuneFlow modelMaintenanceFlow,
-      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
+  public DetectionPipelineTaskRunner(final AlertManager alertManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final EvaluationManager evaluationManager,
+      final DetectionPipelineFactory detectionPipelineFactory,
+      final ModelRetuneFlow modelMaintenanceFlow,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
+      final MetricRegistry metricRegistry) {
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
     this.detectionPipelineFactory = detectionPipelineFactory;
     this.modelMaintenanceFlow = modelMaintenanceFlow;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
+
+    detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
+    detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
+    detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
   }
 
   @Override
-  public List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception {
-    ThirdeyeMetricsUtil.detectionTaskCounter.inc();
+  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
+      throws Exception {
+    detectionTaskCounter.inc();
 
     try {
       final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
@@ -107,14 +118,14 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       postExecution(config, result);
 
-      ThirdeyeMetricsUtil.detectionTaskSuccessCounter.inc();
+      detectionTaskSuccessCounter.inc();
       LOG.info("End detection for config {} between {} and {}. Detected {} anomalies.",
           config.getId(), info.getStart(),
           info.getEnd(), result.getAnomalies());
 
       return Collections.emptyList();
-    } catch (Exception e) {
-      ThirdeyeMetricsUtil.detectionTaskExceptionCounter.inc();
+    } catch (final Exception e) {
+      detectionTaskExceptionCounter.inc();
       throw e;
     }
   }
@@ -123,27 +134,27 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final DetectionPipelineResultV1 result) {
     config.setLastTimestamp(result.getLastTimestamp());
 
-    for (MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {
-      this.mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
+    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {
+      mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
       if (mergedAnomalyResultDTO.getId() == null) {
         LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
       }
     }
 
-    for (EvaluationDTO evaluationDTO : result.getEvaluations()) {
-      this.evaluationManager.save(evaluationDTO);
+    for (final EvaluationDTO evaluationDTO : result.getEvaluations()) {
+      evaluationManager.save(evaluationDTO);
     }
 
     try {
       // run maintenance flow to update model
       final AlertDTO updatedConfig = modelMaintenanceFlow.maintain(config, Instant.now());
-      this.alertManager.update(updatedConfig);
-    } catch (Exception e) {
+      alertManager.update(updatedConfig);
+    } catch (final Exception e) {
       LOG.warn("Re-tune pipeline {} failed", config.getId(), e);
     }
 
     // re-notify the anomalies if any
-    for (MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
+    for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {
         DetectionUtils.renotifyAnomaly(anomaly,

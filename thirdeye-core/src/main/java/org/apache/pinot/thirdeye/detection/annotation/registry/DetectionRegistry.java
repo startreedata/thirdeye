@@ -44,6 +44,9 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2Factory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2FactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Tune;
 import org.slf4j.Logger;
@@ -77,6 +80,7 @@ public class DetectionRegistry {
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
   private static final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
   private static final Map<String, AnomalyDetectorV2Factory> anomalyDetectorV2FactoryMap = new HashMap<>();
+  private static final Map<String, EventTriggerV2Factory> triggerV2FactoryMap = new HashMap<>();
 
   static {
     init();
@@ -171,6 +175,10 @@ public class DetectionRegistry {
     anomalyDetectorV2FactoryMap.put(f.name(), f);
   }
 
+  public void addEventTriggerV2Factory(final EventTriggerV2Factory f) {
+    triggerV2FactoryMap.put(f.name(), f);
+  }
+
   public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
       AnomalyDetectorFactoryContext context) {
@@ -188,6 +196,16 @@ public class DetectionRegistry {
             factoryName,
             anomalyDetectorV2FactoryMap.keySet()));
     return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
+  }
+
+  public EventTriggerV2<AbstractSpec> buildTriggerV2(
+      String factoryName,
+      EventTriggerV2FactoryContext context) {
+    checkArgument(triggerV2FactoryMap.containsKey(factoryName),
+        String.format("Trigger type not registered: %s. Available triggers: %s",
+            factoryName,
+            triggerV2FactoryMap.keySet()));
+    return triggerV2FactoryMap.get(factoryName).build(context);
   }
 
   /**

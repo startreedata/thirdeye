@@ -8,6 +8,7 @@ import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.DefaultDataSourcesPlugin;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.DetectionComponentsPlugin;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerV2Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,5 +57,9 @@ public class ThirdEyeCoordinatorDebug {
     detectionComponentsPlugin
         .getAnomalyDetectorV2Factories()
         .forEach(detectionRegistry::addAnomalyDetectorV2Factory);
+
+    detectionComponentsPlugin
+        .getEventTriggerV2Factories()
+        .forEach(detectionRegistry::addEventTriggerV2Factory);
   }
 }

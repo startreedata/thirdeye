@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
-import static org.apache.pinot.thirdeye.notification.commons.JiraConfiguration.JIRA_CONFIG_KEY;
-
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -94,8 +92,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
         detectionConfigManager, eventManager, mergedAnomalyResultManager);
     this.teConfig = thirdeyeConfig;
 
-    this.jiraAdminConfig = JiraConfiguration
-        .createFromProperties(this.teConfig.getAlerterConfigurations().get(JIRA_CONFIG_KEY));
+    this.jiraAdminConfig = this.teConfig.getAlerterConfigurations().getJiraConfiguration();
     this.jiraClient = jiraClient;
   }
 

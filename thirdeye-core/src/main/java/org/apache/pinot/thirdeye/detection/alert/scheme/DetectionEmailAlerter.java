@@ -19,9 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_USER_KEY;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -33,7 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -95,8 +91,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         eventManager,
         mergedAnomalyResultManager);
     this.teConfig = thirdeyeConfig;
-    this.smtpConfig = SmtpConfiguration
-        .createFromProperties(this.teConfig.getAlerterConfigurations().get(SMTP_CONFIG_KEY));
+    this.smtpConfig = this.teConfig.getAlerterConfigurations().getSmtpConfiguration();
   }
 
   private Set<String> retainWhitelisted(Set<String> recipients, Collection<String> emailWhitelist) {
@@ -118,13 +113,13 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
       recipients.setCc(new HashSet<>());
     }
     recipients.getCc().addAll(ConfigUtils.getList(this.teConfig.getAlerterConfigurations()
-        .get(SMTP_CONFIG_KEY).get(PROP_ADMIN_RECIPIENTS)));
+        .getSmtpConfiguration().getAdminRecipients()));
   }
 
   private void whitelistRecipients(DetectionAlertFilterRecipients recipients) {
     if (recipients != null) {
       List<String> emailWhitelist = ConfigUtils.getList(
-          this.teConfig.getAlerterConfigurations().get(SMTP_CONFIG_KEY).get(PROP_EMAIL_WHITELIST));
+          this.teConfig.getAlerterConfigurations().getSmtpConfiguration().getEmailWhitelist());
       if (!emailWhitelist.isEmpty()) {
         recipients.setTo(retainWhitelisted(recipients.getTo(), emailWhitelist));
         recipients.setCc(retainWhitelisted(recipients.getCc(), emailWhitelist));
@@ -169,9 +164,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
-      String fromAddress = MapUtils.getString(
-          teConfig.getAlerterConfigurations().get(SMTP_CONFIG_KEY),
-          SMTP_USER_KEY);
+      String fromAddress = teConfig.getAlerterConfigurations().getSmtpConfiguration().getSmtpUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }

@@ -178,7 +178,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
   private JiraEntity buildJiraEntity(String jiraTemplate, Map<String, Object> templateValues,
       Multimap<String, String> dimensionFilters) {
     String jiraProject = MapUtils.getString(alertClientConfig, PROP_PROJECT,
-        this.jiraAdminConfig.getJiraDefaultProjectKey());
+        this.jiraAdminConfig.getJiraDefaultProject());
     Long jiraIssueTypeId = MapUtils
         .getLong(alertClientConfig, PROP_ISSUE_TYPE, this.jiraAdminConfig.getJiraIssueTypeId());
 

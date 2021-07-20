@@ -116,10 +116,16 @@ public class TaskUtils {
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    final long delay = getDetectionExpectedDelay(configDTO,
-        thirdEyeCacheRegistry,
-        datasetConfigManager,
-        metricConfigManager);
+    long delay;
+    try {
+      delay = getDetectionExpectedDelay(configDTO,
+          thirdEyeCacheRegistry,
+          datasetConfigManager,
+          metricConfigManager);
+    } catch (Exception e) {
+      LOG.error("Failed to calc delay", e);
+      delay = 0;
+    }
     final long start = Math.max(configDTO.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);

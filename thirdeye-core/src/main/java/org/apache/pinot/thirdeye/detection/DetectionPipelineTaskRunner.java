@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
@@ -93,35 +94,37 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
     try {
       final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      final AlertDTO config = requireNonNull(alertManager.findById(info.getConfigId()),
+      final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
       LOG.info("Start detection for config {} between {} and {}",
-          config.getId(),
+          alert.getId(),
           info.getStart(),
           info.getEnd());
 
       final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
-          .setAlert(config)
+          .setAlert(alert)
           .setStart(info.getStart())
           .setEnd(info.getEnd())
       );
-      final DetectionPipelineResultV1 result = pipeline.run();
+      final DetectionPipelineResult result = pipeline.run();
 
       if (result.getLastTimestamp() < 0) {
         LOG.info("No detection ran for config {} between {} and {}",
-            config.getId(),
+            alert.getId(),
             info.getStart(),
             info.getEnd());
         return Collections.emptyList();
       }
 
-      postExecution(config, result);
+      postExecution(alert, result);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("End detection for config {} between {} and {}. Detected {} anomalies.",
-          config.getId(), info.getStart(),
-          info.getEnd(), result.getAnomalies());
+          alert.getId(),
+          info.getStart(),
+          info.getEnd(),
+          result.getAnomalies());
 
       return Collections.emptyList();
     } catch (final Exception e) {
@@ -130,8 +133,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private void postExecution(final AlertDTO config,
-      final DetectionPipelineResultV1 result) {
+  private void postExecution(final AlertDTO config, final DetectionPipelineResult result) {
     config.setLastTimestamp(result.getLastTimestamp());
 
     for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : result.getAnomalies()) {

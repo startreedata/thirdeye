@@ -495,13 +495,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public boolean validate() {
     try {
-      // due to lack of general query equivalent to "SELECT 1".
+      // Table name required to execute query against pinot broker.
       PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
       String table = onboard.getAllTables().get(0);
-      String query = String.format("select * from %s limit 1", table);
-      ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table));
+      String query = String.format("select 1 from %s", table);
+      ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table, true));
       return result.get(0).getRowCount() == 1;
-    } catch (ExecutionException | IOException e) {
+    } catch (ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
     }
     return false;

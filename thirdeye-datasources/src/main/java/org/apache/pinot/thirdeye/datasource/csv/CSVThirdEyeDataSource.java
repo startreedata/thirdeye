@@ -319,12 +319,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     return output;
   }
 
-  @Override
-  public boolean validate() {
-    //TODO : implement proper validations
-    return true;
-  }
-
   private URL makeUrlFromPath(String input) {
     try {
       return new URL(input);

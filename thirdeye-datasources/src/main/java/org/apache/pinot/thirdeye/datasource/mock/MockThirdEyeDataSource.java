@@ -477,12 +477,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     return this.delegate.getDimensionFilters(datasetConfig);
   }
 
-  @Override
-  public boolean validate() {
-    //TODO : implement proper validations
-    return true;
-  }
-
   /**
    * Container class for datasets and their generator configs
    */

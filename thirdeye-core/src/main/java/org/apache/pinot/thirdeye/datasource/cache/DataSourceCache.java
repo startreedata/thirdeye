@@ -32,7 +32,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
@@ -78,18 +77,6 @@ public class DataSourceCache {
       return dataSourcesLoader.loadDataSource(dataSource.get());
     }
     throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
-  }
-
-  public List<ThirdEyeDataSource> getDataSources() {
-    final List<DataSourceDTO> dataSources = findAll();
-    return dataSources.stream()
-        .map(ds -> dataSourcesLoader.loadDataSource(ds))
-        .collect(Collectors.toList());
-  }
-
-  private List<DataSourceDTO> findAll() {
-    final List<DataSourceDTO> results = dataSourceManager.findAll();
-    return results;
   }
 
   private Optional<DataSourceDTO> findByName(final String name) {

@@ -4,7 +4,7 @@ name: Pull Request Labels Workflow
 on: [pull_request]
 
 jobs:
-    pull-request-label:
+    pull-request-labels:
         name: Apply Labels
         runs-on: ubuntu-latest
         steps:

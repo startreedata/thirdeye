@@ -23,9 +23,12 @@ This is the UI project for StarTree ThirdEye.
     -   [`test-coverage`](#test-coverage)
     -   [`test-e2e`](#test-e2e)
     -   [`test-e2e-gui`](#test-e2e-gui)
-    -   [`eslint`](#eslint)
-    -   [`stylelint`](#stylelint)
-    -   [`pretty`](#pretty)
+    -   [`eslint-check`](#eslint-check)
+    -   [`eslint-fix`](#eslint-fix)
+    -   [`stylelint-check`](#stylelint-check)
+    -   [`stylelint-fix`](#stylelint-fix)
+    -   [`prettier-check`](#prettier-check)
+    -   [`prettier-fix`](#prettier-fix)
     -   [`lint`](#lint)
 
 ## Getting Started
@@ -161,33 +164,57 @@ Run all end to end tests using [Cypress Test Runner](https://docs.cypress.io/gui
 $ npm run test-e2e-gui
 ```
 
-### `eslint`
+### `eslint-check`
 
-Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](/.eslintignore)
-
-```
-$ npm run eslint
-```
-
-### `stylelint`
-
-Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](/.stylelintignore)
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](/.eslintignore) and check for issues
 
 ```
-$ npm run stylelint
+$ npm run eslint-check
 ```
 
-### `pretty`
+### `eslint-fix`
 
-Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](/.prettierignore)
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](/.eslintignore) and fix issues
 
 ```
-$ npm run pretty
+$ npm run eslint-fix
+```
+
+### `stylelint-check`
+
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](/.stylelintignore) and check for issues
+
+```
+$ npm run stylelint-check
+```
+
+### `stylelint-fix`
+
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](/.stylelintignore) and fix issues
+
+```
+$ npm run stylelint-fix
+```
+
+### `prettier-check`
+
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](/.prettierignore) and check for issues
+
+```
+$ npm run prettier-check
+```
+
+### `prettier-fix`
+
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](/.prettierignore) and fix issues
+
+```
+$ npm run prettier-fix
 ```
 
 ### `lint`
 
-Run [`eslint`](#eslint), [`stylelint`](#stylelint) and [`pretty`](#pretty) scripts
+Run [`eslint-fix`](#eslint-fix), [`stylelint-fix`](#stylelint-fix) and [`prettier-fix`](#prettier-fix) scripts
 
 ```
 $ npm run lint

@@ -19,9 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_USER_KEY;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -33,7 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -95,8 +91,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         eventManager,
         mergedAnomalyResultManager);
     this.teConfig = thirdeyeConfig;
-    this.smtpConfig = SmtpConfiguration
-        .createFromProperties(this.teConfig.getAlerterConfigurations().get(SMTP_CONFIG_KEY));
+    this.smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
   }
 
   private Set<String> retainWhitelisted(Set<String> recipients, Collection<String> emailWhitelist) {
@@ -117,14 +112,13 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     if (recipients.getCc() == null) {
       recipients.setCc(new HashSet<>());
     }
-    recipients.getCc().addAll(ConfigUtils.getList(this.teConfig.getAlerterConfigurations()
-        .get(SMTP_CONFIG_KEY).get(PROP_ADMIN_RECIPIENTS)));
+    recipients.getCc().addAll(ConfigUtils.getList(smtpConfig.getAdminRecipients()));
   }
 
   private void whitelistRecipients(DetectionAlertFilterRecipients recipients) {
     if (recipients != null) {
       List<String> emailWhitelist = ConfigUtils.getList(
-          this.teConfig.getAlerterConfigurations().get(SMTP_CONFIG_KEY).get(PROP_EMAIL_WHITELIST));
+          smtpConfig.getEmailWhitelist());
       if (!emailWhitelist.isEmpty()) {
         recipients.setTo(retainWhitelisted(recipients.getTo(), emailWhitelist));
         recipients.setCc(retainWhitelisted(recipients.getCc(), emailWhitelist));
@@ -169,9 +163,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
-      String fromAddress = MapUtils.getString(
-          teConfig.getAlerterConfigurations().get(SMTP_CONFIG_KEY),
-          SMTP_USER_KEY);
+      String fromAddress = smtpConfig.getSmtpUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }
@@ -200,19 +192,18 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
    * Sends email according to the provided config.
    */
   private void sendEmail(HtmlEmail email) throws EmailException {
-    SmtpConfiguration config = this.smtpConfig;
-    email.setHostName(config.getSmtpHost());
-    email.setSmtpPort(config.getSmtpPort());
-    if (config.getSmtpUser() != null && config.getSmtpPassword() != null) {
+    email.setHostName(smtpConfig.getSmtpHost());
+    email.setSmtpPort(smtpConfig.getSmtpPort());
+    if (smtpConfig.getSmtpUser() != null && smtpConfig.getSmtpPassword() != null) {
       email.setAuthenticator(
-          new DefaultAuthenticator(config.getSmtpUser(), config.getSmtpPassword()));
+          new DefaultAuthenticator(smtpConfig.getSmtpUser(), smtpConfig.getSmtpPassword()));
       email.setSSLOnConnect(true);
-      email.setSslSmtpPort(Integer.toString(config.getSmtpPort()));
+      email.setSslSmtpPort(Integer.toString(smtpConfig.getSmtpPort()));
     }
 
     // This needs to be done after the configuration phase since getMailSession() creates
     // a new mail session if required.
-    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", config.getSmtpHost());
+    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", smtpConfig.getSmtpHost());
 
     email.send();
 

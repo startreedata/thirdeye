@@ -10,13 +10,12 @@ import javax.inject.Singleton;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.AuthService;
-import org.apache.pinot.thirdeye.mapper.TaskMapper;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
@@ -27,14 +26,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
-  private final TaskManager taskManager;
-  private final AuthService authService;
+  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+      .put("type", "type")
+      .put("status", "status")
+      .build();
 
   @Inject
   public TaskResource(final AuthService authService, final TaskManager taskManager) {
-    super(authService, taskManager, ImmutableMap.of());
-    this.taskManager = taskManager;
-    this.authService = authService;
+    super(authService, taskManager, API_TO_BEAN_MAP);
   }
 
   // Operation not supported to prevent create of tasks
@@ -45,7 +44,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
   @Override
   protected TaskApi toApi(final TaskDTO dto) {
-    return TaskMapper.INSTANCE.toApi(dto);
+    return ApiBeanMapper.toApi(dto);
   }
 
   // Overridden to disable endpoint

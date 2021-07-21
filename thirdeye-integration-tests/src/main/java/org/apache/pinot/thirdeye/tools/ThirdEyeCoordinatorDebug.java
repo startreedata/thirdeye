@@ -56,5 +56,9 @@ public class ThirdEyeCoordinatorDebug {
     detectionComponentsPlugin
         .getAnomalyDetectorV2Factories()
         .forEach(detectionRegistry::addAnomalyDetectorV2Factory);
+
+    detectionComponentsPlugin
+        .getEventTriggerFactories()
+        .forEach(detectionRegistry::addEventTriggerFactory);
   }
 }

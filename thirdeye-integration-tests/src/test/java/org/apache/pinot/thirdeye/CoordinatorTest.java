@@ -133,7 +133,7 @@ public class CoordinatorTest {
         .isEqualTo(singletonList("mock1"));
 
     response = request("api/data-sources/onboard-all")
-        .post(Entity.form(new Form().param("dataSourceName", dataSourceApi.getName())));
+        .post(Entity.form(new Form().param("name", dataSourceApi.getName())));
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(columnValueList(db.executeSql("SELECT dataset From dataset_config_index")))

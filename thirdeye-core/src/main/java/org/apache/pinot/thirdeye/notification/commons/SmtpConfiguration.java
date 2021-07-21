@@ -20,22 +20,17 @@
 package org.apache.pinot.thirdeye.notification.commons;
 
 import com.google.common.base.MoreObjects;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.collections4.MapUtils;
+import java.util.Set;
 
 public class SmtpConfiguration {
-
-  public static final String SMTP_CONFIG_KEY = "smtpConfiguration";
-  public static final String SMTP_HOST_KEY = "smtpHost";
-  public static final String SMTP_PORT_KEY = "smtpPort";
-  public static final String SMTP_USER_KEY = "smtpUser";
-  public static final String SMTP_PASSWD_KEY = "smtpPassword";
 
   private String smtpHost;
   private int smtpPort = 25;
   private String smtpUser;
   private String smtpPassword;
+  private Set<String> adminRecipients;
+  private Set<String> emailWhitelist;
 
   public String getSmtpHost() {
     return smtpHost;
@@ -86,26 +81,32 @@ public class SmtpConfiguration {
     return Objects.hash(smtpHost, smtpPort, smtpUser, smtpPassword);
   }
 
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this).add(SMTP_HOST_KEY, smtpHost)
-        .add(SMTP_PORT_KEY, smtpPort)
-        .add(SMTP_USER_KEY, smtpUser).toString();
+  public Set<String> getAdminRecipients() {
+    return adminRecipients;
   }
 
-  public static SmtpConfiguration createFromProperties(Map<String, Object> smtpConfiguration) {
-    SmtpConfiguration conf = new SmtpConfiguration();
-    if (smtpConfiguration != null) {
-      try {
-        conf.setSmtpHost(MapUtils.getString(smtpConfiguration, SMTP_HOST_KEY));
-        conf.setSmtpPort(MapUtils.getIntValue(smtpConfiguration, SMTP_PORT_KEY));
-        conf.setSmtpUser(MapUtils.getString(smtpConfiguration, SMTP_USER_KEY));
-        conf.setSmtpPassword(MapUtils.getString(smtpConfiguration, SMTP_PASSWD_KEY));
-      } catch (Exception e) {
-        throw new RuntimeException("Error occurred while parsing smtp configuration into object.",
-            e);
-      }
-    }
-    return conf;
+  public SmtpConfiguration setAdminRecipients(final Set<String> adminRecipients) {
+    this.adminRecipients = adminRecipients;
+    return this;
+  }
+
+  public Set<String> getEmailWhitelist() {
+    return emailWhitelist;
+  }
+
+  public SmtpConfiguration setEmailWhitelist(final Set<String> emailWhitelist) {
+    this.emailWhitelist = emailWhitelist;
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("smtpHost", smtpHost)
+        .add("smtpPort", smtpPort)
+        .add("smtpUser", smtpUser)
+        .add("adminRecipients", adminRecipients)
+        .add("emailWhitelist", emailWhitelist)
+        .toString();
   }
 }

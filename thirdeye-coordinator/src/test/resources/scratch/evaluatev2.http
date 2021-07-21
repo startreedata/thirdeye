@@ -486,8 +486,9 @@ Content-Type: application/json
           "type": "SqlExecution",
           "params": {
             "sql.queries": [
-              "SELECT ts as timestamp, met as value FROM baseline",
-              "SELECT ts as timestamp, met as value FROM current"
+              "SELECT ts as timestamp, met as value FROM baseline WHERE ts BETWEEN 20200715 AND 20200720",
+              "SELECT ts as timestamp, met as value FROM current WHERE ts BETWEEN 20200715 AND 20200720",
+              "SELECT ts, avg(met) as met FROM (SELECT ts, met FROM baseline UNION ALL SELECT ts, met FROM current) WHERE ts BETWEEN 20200715 AND 20200720 GROUP BY ts ORDER BY ts"
             ]
           },
           "inputs": [
@@ -505,11 +506,15 @@ Content-Type: application/json
           "outputs": [
             {
               "outputKey": "0",
-              "outputName": "sql0"
+              "outputName": "baseline"
             },
             {
               "outputKey": "1",
-              "outputName": "sql1"
+              "outputName": "current"
+            },
+            {
+              "outputKey": "2",
+              "outputName": "final"
             }
           ]
         },

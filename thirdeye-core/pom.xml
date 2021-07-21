@@ -83,6 +83,12 @@
       <version>2.7.9</version>
     </dependency>
 
+    <!-- This is used to replace params in a string template -->
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+    </dependency>
+
     <!-- test dependencies -->
     <dependency>
       <groupId>org.mockito</groupId>

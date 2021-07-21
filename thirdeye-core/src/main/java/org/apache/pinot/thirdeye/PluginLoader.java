@@ -20,6 +20,7 @@ import org.apache.pinot.thirdeye.spi.PluginClassLoader;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +94,9 @@ public class PluginLoader {
     }
     for (AnomalyDetectorV2Factory f : plugin.getAnomalyDetectorV2Factories()) {
       detectionRegistry.addAnomalyDetectorV2Factory(f);
+    }
+    for (EventTriggerFactory f : plugin.getEventTriggerFactories()) {
+      detectionRegistry.addEventTriggerFactory(f);
     }
   }
 

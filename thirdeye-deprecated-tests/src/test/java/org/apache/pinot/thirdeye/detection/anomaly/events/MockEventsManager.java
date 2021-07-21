@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AbstractManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.AbstractManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;

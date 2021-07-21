@@ -6,14 +6,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
-import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
@@ -113,7 +111,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator<DataTable> {
     final int columnCount = resultSetMetaData.getColumnCount();
     for (int i = 0; i < columnCount; i++) {
       columns.add(resultSetMetaData.getColumnLabel(i + 1));
-      columnTypes.add(convertToColumnType(resultSetMetaData.getColumnType(i + 1)));
+      columnTypes.add(ColumnType.jdbcTypeToColumnType(resultSetMetaData.getColumnType(i + 1)));
     }
     final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
         columnTypes);
@@ -153,48 +151,6 @@ public class SqlExecutionOperator extends DetectionPipelineOperator<DataTable> {
       }
     }
     return simpleDataTableBuilder.build();
-  }
-
-  private ColumnType convertToColumnType(final int columnType) {
-    switch (columnType) {
-      case Types.DATE:
-      case Types.TIME:
-      case Types.TIMESTAMP:
-        return new ColumnType(ColumnDataType.DATE);
-      case Types.ARRAY:
-      case Types.BINARY:
-      case Types.DATALINK:
-      case Types.BLOB:
-      case Types.DISTINCT:
-      case Types.JAVA_OBJECT:
-      case Types.NULL:
-      case Types.OTHER:
-      case Types.REF:
-      case Types.STRUCT:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY:
-        return new ColumnType(ColumnDataType.BYTES);
-      case Types.BIT:
-      case Types.BOOLEAN:
-        return new ColumnType(ColumnDataType.BOOLEAN);
-      case Types.DECIMAL:
-      case Types.DOUBLE:
-      case Types.FLOAT:
-      case Types.NUMERIC:
-      case Types.REAL:
-        return new ColumnType(ColumnDataType.DOUBLE);
-      case Types.INTEGER:
-      case Types.SMALLINT:
-        return new ColumnType(ColumnDataType.INT);
-      case Types.BIGINT:
-        return new ColumnType(ColumnDataType.LONG);
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.CLOB:
-      case Types.LONGVARCHAR:
-        return new ColumnType(ColumnDataType.STRING);
-    }
-    throw new UnsupportedOperationException("Unknown JDBC data type - " + columnType);
   }
 
   private void destroyTable(final Connection c, final String tableName) throws SQLException {

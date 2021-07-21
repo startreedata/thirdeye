@@ -11,7 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.ws.rs.WebApplicationException;
-import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
@@ -32,11 +29,9 @@ import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.apache.pinot.thirdeye.util.GroovyTemplateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +39,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertEvaluatorV2 {
 
-  public static final String ROOT_OPERATOR_KEY = "root";
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -56,14 +50,15 @@ public class AlertEvaluatorV2 {
 
   private final AlertTemplateManager alertTemplateManager;
   private final ExecutorService executorService;
-  private final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory;
+  private final PlanExecutor planExecutor;
 
   @Inject
   public AlertEvaluatorV2(
       final AlertTemplateManager alertTemplateManager,
-      final DetectionPipelinePlanNodeFactory detectionPipelinePlanNodeFactory) {
+      final PlanExecutor planExecutor) {
     this.alertTemplateManager = alertTemplateManager;
-    this.detectionPipelinePlanNodeFactory = detectionPipelinePlanNodeFactory;
+    this.planExecutor = planExecutor;
+
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
@@ -73,17 +68,19 @@ public class AlertEvaluatorV2 {
       return new DetectionDataApi().setRawData(rawData);
     }
     final TimeSeries timeSeries = detectionResult.getTimeseries();
-    final DetectionDataApi detectionDataApi = new DetectionDataApi();
-    detectionDataApi.setCurrent(timeSeries.getCurrent().toList());
-    detectionDataApi.setExpected(timeSeries.getPredictedBaseline().toList());
-    detectionDataApi.setTimestamp(timeSeries.getTime().toList());
+    final DetectionDataApi api = new DetectionDataApi()
+        .setCurrent(timeSeries.getCurrent().toList())
+        .setExpected(timeSeries.getPredictedBaseline().toList())
+        .setTimestamp(timeSeries.getTime().toList());
+
     if (timeSeries.hasLowerBound()) {
-      detectionDataApi.setLowerBound(timeSeries.getPredictedLowerBound().toList());
+      api.setLowerBound(timeSeries.getPredictedLowerBound().toList());
     }
+
     if (timeSeries.hasUpperBound()) {
-      detectionDataApi.setUpperBound(timeSeries.getPredictedUpperBound().toList());
+      api.setUpperBound(timeSeries.getPredictedUpperBound().toList());
     }
-    return detectionDataApi;
+    return api;
   }
 
   public static DetectionEvaluationApi toApi(final DetectionResult detectionResult) {
@@ -121,11 +118,14 @@ public class AlertEvaluatorV2 {
                 .setTemplate(toAlertTemplateApi(templateWithProperties)));
       }
 
-      final Map<String, DetectionPipelineResult> result = runPipeline(
-          templateWithProperties.getNodes(),
-          request.getStart(),
-          request.getEnd()
-      );
+      final Map<String, DetectionPipelineResult> result = executorService
+          .submit(() -> planExecutor.runPipeline(
+              templateWithProperties.getNodes(),
+              request.getStart(),
+              request.getEnd()
+          ))
+          .get(TIMEOUT, TimeUnit.MILLISECONDS);
+
       return toApi(result);
     } catch (final WebApplicationException e) {
       throw e;
@@ -133,27 +133,6 @@ public class AlertEvaluatorV2 {
       handleAlertEvaluationException(e);
     }
     return null;
-  }
-
-  private Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> nodes,
-      final Date start,
-      final Date end)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (final PlanNodeBean operator : nodes) {
-      final String operatorName = operator.getName();
-      final PlanNode planNode = detectionPipelinePlanNodeFactory.get(
-          operatorName,
-          pipelinePlanNodes,
-          operator,
-          start.getTime(),
-          end.getTime());
-
-      pipelinePlanNodes.put(operatorName, planNode);
-    }
-    return executorService
-        .submit(() -> runPipelineInternal(pipelinePlanNodes))
-        .get(TIMEOUT, TimeUnit.MILLISECONDS);
   }
 
   private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
@@ -167,18 +146,6 @@ public class AlertEvaluatorV2 {
     return GroovyTemplateUtils.applyContextToTemplate(jsonString,
         templateProperties,
         AlertTemplateDTO.class);
-  }
-
-  private Map<String, DetectionPipelineResult> runPipelineInternal(
-      final Map<String, PlanNode> pipelinePlanNodes) throws Exception {
-    final Map<String, DetectionPipelineResult> context = new HashMap<>();
-
-    /* Execute the DAG */
-    final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
-    PlanExecutor.executePlanNode(pipelinePlanNodes, context, rootNode);
-
-    /* Return the output */
-    return getOutput(context, rootNode);
   }
 
   private AlertTemplateDTO getTemplate(final AlertTemplateApi templateApi) {
@@ -195,18 +162,6 @@ public class AlertEvaluatorV2 {
     }
 
     return ApiBeanMapper.toAlertTemplateDto(templateApi);
-  }
-
-  private Map<String, DetectionPipelineResult> getOutput(
-      final Map<String, DetectionPipelineResult> context,
-      final PlanNode rootNode) {
-    final Map<String, DetectionPipelineResult> results = new HashMap<>();
-    for (final String contextKey : context.keySet()) {
-      if (PlanExecutor.getNodeFromContextKey(contextKey).equals(rootNode.getName())) {
-        results.put(PlanExecutor.getOutputKeyFromContextKey(contextKey), context.get(contextKey));
-      }
-    }
-    return results;
   }
 
   private AlertEvaluationApi toApi(final Map<String, DetectionPipelineResult> outputMap) {

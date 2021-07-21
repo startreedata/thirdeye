@@ -41,7 +41,8 @@ public class DetectionPipelineRunner {
         alert.getTemplate().getNodes(),
         start,
         end);
-    throw new UnsupportedOperationException();
+    // TODO spyne bad implementation. temporary. to be fixed.
+    return detectionPipelineResultMap.values().iterator().next();
   }
 
   @Deprecated

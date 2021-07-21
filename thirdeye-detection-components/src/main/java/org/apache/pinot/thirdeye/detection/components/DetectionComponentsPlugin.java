@@ -16,6 +16,8 @@ import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDet
 import org.apache.pinot.thirdeye.detection.components.triggers.ConsoleOutputTrigger;
 import org.apache.pinot.thirdeye.detection.components.triggers.ConsoleOutputTriggerSpec;
 import org.apache.pinot.thirdeye.detection.components.triggers.GenericEventTriggerFactory;
+import org.apache.pinot.thirdeye.detection.components.triggers.KafkaProducerTrigger;
+import org.apache.pinot.thirdeye.detection.components.triggers.KafkaProducerTriggerSpec;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
@@ -97,6 +99,11 @@ public class DetectionComponentsPlugin implements Plugin {
             "CONSOLE_OUTPUT",
             ConsoleOutputTriggerSpec.class,
             ConsoleOutputTrigger.class
+        ),
+        new GenericEventTriggerFactory<>(
+            "KAFKA_PRODUCER",
+            KafkaProducerTriggerSpec.class,
+            KafkaProducerTrigger.class
         )
     );
   }

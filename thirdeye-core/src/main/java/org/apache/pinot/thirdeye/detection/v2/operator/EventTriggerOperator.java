@@ -25,14 +25,14 @@ public class EventTriggerOperator extends DetectionPipelineOperator<DataTable> {
     for (Object key : this.getComponents().keySet()) {
       final BaseComponent component = this.getComponents().get(key);
       if (component instanceof EventTrigger) {
-
         final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
         for (String inputKey : timeSeriesMap.keySet()) {
           final DataTable dataTable = timeSeriesMap.get(inputKey);
           for (int rowIdx = 0; rowIdx < dataTable.getRowCount(); rowIdx++) {
-            ((EventTrigger) component).trigger(DataTable.getRow(dataTable, rowIdx));
+            ((EventTrigger) component).trigger(dataTable.getColumns(), dataTable.getColumnTypes(), DataTable.getRow(dataTable, rowIdx));
           }
         }
+        ((EventTrigger) component).close();
       }
     }
   }

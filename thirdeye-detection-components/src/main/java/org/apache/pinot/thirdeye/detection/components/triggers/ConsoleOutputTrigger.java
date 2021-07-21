@@ -20,8 +20,11 @@
 package org.apache.pinot.thirdeye.detection.components.triggers;
 
 import java.util.Arrays;
+import java.util.List;
 import org.apache.pinot.thirdeye.spi.detection.EventTrigger;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerException;
+import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 /**
  * Absolute change rule detection
@@ -36,7 +39,11 @@ public class ConsoleOutputTrigger implements EventTrigger<ConsoleOutputTriggerSp
   }
 
   @Override
-  public void trigger(final Object[] event) throws EventTriggerException {
-    System.out.println(String.format(spec.getFormat(), Arrays.toString(event)));
+  public void trigger(final List<String> columnNames, final List<ColumnType> columnTypes, final Object[] event) throws EventTriggerException {
+    System.out.println(String.format(spec.getFormat(), DataTable.getRecord(columnNames, event)));
+  }
+
+  @Override
+  public void close() {
   }
 }

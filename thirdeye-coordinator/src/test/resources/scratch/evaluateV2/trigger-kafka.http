@@ -1,0 +1,60 @@
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "sample-kafka-trigger",
+    "description": "Use dataFetcher to query data to trigger kafka output",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "EventTrigger",
+          "params": {
+            "component.detector.type": "KAFKA_PRODUCER",
+            "component.detector.topic": "quickstart-events",
+            "component.detector.producerConfigs": {
+              "bootstrap.servers": "localhost:9092",
+              "acks": "1",
+              "key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+              "value.serializer": "org.apache.kafka.common.serialization.StringSerializer"
+            },
+            "component.detector.keyColumns": [],
+            "component.detector.valueColumns": []
+          },
+          "inputs": [
+            {
+              "targetProperty": "input",
+              "sourcePlanNode": "dataFetcher",
+              "sourceProperty": "output"
+            }
+          ],
+          "outputs": [
+          ]
+        },
+        {
+          "name": "dataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.dataSource": "pinotQuickStartLocal",
+            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
+            "component.pinot.tableName": "pageviews",
+            "startTime": "20200209",
+            "endTime": "20200730"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "output"
+            }]
+        }
+      ]
+    }
+  },
+  "start": "1577865600000",
+  "end": "1590994800000"
+}

@@ -20,8 +20,6 @@
 
 package org.apache.pinot.thirdeye.task;
 
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
-
 public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
 
   private long tuningWindowStart;

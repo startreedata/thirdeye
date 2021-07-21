@@ -29,7 +29,6 @@ import static org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType.YAML_DET
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.slf4j.Logger;

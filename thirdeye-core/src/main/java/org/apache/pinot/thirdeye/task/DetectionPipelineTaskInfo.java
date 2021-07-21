@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.detection;
+package org.apache.pinot.thirdeye.task;
 
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 

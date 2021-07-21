@@ -39,7 +39,6 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   @JsonProperty("rca")
   private RCAConfiguration rcaConfiguration = new RCAConfiguration();
 
-  @JsonProperty("alerterConfigurations")
   private AlerterConfigurations alerterConfigurations = new AlerterConfigurations();
 
   private String configPath = "config";

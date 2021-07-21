@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
+import org.apache.pinot.thirdeye.task.TaskDriverConfiguration;
 
 public class ThirdEyeCoordinatorConfiguration extends Configuration {
 

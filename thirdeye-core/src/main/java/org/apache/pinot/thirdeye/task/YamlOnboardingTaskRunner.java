@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.detection.onboard;
+package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
 
@@ -26,12 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskResult;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -56,15 +50,15 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
 
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DetectionPipelineFactory loader;
   private final DataProvider provider;
+  private final DetectionPipelineRunner detectionPipelineRunner;
 
   @Inject
   public YamlOnboardingTaskRunner(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final DetectionPipelineFactory loader) {
-    this.loader = loader;
+      final DetectionPipelineRunner detectionPipelineRunner) {
+    this.detectionPipelineRunner = detectionPipelineRunner;
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.provider = provider;
@@ -81,11 +75,9 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
     final AlertDTO alert = requireNonNull(alertManager.findById(alertId),
         String.format("Could not resolve config id %d", alertId));
 
-    final DetectionPipeline pipeline = loader.get(new DetectionPipelineContext()
-        .setAlert(alert)
-        .setStart(info.getStart())
-        .setEnd(info.getEnd()));
-    final DetectionPipelineResult result = pipeline.run();
+    final DetectionPipelineResult result = detectionPipelineRunner.run(alert,
+        info.getStart(),
+        info.getEnd());
 
     if (result.getLastTimestamp() < 0) {
       return Collections.emptyList();

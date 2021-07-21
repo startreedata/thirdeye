@@ -28,9 +28,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -51,13 +51,6 @@ public class TestAnomalyTaskManager {
   private Long anomalyJobId;
   private JobManager jobDAO;
   private TaskManager taskDAO;
-
-  static DetectionPipelineTaskInfo getTestDetectionTaskInfo() {
-    DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo();
-    taskInfo.setStart((new DateTime().minusHours(1)).getMillis());
-    taskInfo.setEnd((new DateTime().minusHours(1)).getMillis());
-    return taskInfo;
-  }
 
   @BeforeClass
   void beforeClass() {
@@ -183,8 +176,12 @@ public class TestAnomalyTaskManager {
     jobSpec.setTaskType(TaskType.DETECTION);
     jobSpec.setStartTime(new DateTime().minusDays(20).getMillis());
     jobSpec.setEndTime(new DateTime().minusDays(10).getMillis());
-    jobSpec.setTaskInfo(new ObjectMapper().writeValueAsString(getTestDetectionTaskInfo()));
+    jobSpec.setTaskInfo(new ObjectMapper().writeValueAsString(new MockTaskInfo()));
     jobSpec.setJobId(anomalyJobSpec.getId());
     return jobSpec;
+  }
+
+  public static class MockTaskInfo implements TaskInfo {
+    public int property = 10;
   }
 }

@@ -15,53 +15,31 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
-package org.apache.pinot.thirdeye.spi.detection;
+package org.apache.pinot.thirdeye.task;
 
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 
-public class DetectionPipelineTaskInfo implements TaskInfo {
+/**
+ * The Detection alert task info.
+ */
+public class DetectionAlertTaskInfo implements TaskInfo {
 
-  long configId;
-  long start;
-  long end;
+  private long detectionAlertConfigId;
 
-  public DetectionPipelineTaskInfo(long configId, long start, long end) {
-    this.configId = configId;
-    this.start = start;
-    this.end = end;
+  public DetectionAlertTaskInfo() {
   }
 
-  public DetectionPipelineTaskInfo() {
-    // dummy constructor for deserialization
+  public DetectionAlertTaskInfo(long detectionAlertConfigId) {
+    this.detectionAlertConfigId = detectionAlertConfigId;
   }
 
-  public long getConfigId() {
-    return configId;
+  public long getDetectionAlertConfigId() {
+    return detectionAlertConfigId;
   }
 
-  public DetectionPipelineTaskInfo setConfigId(final long configId) {
-    this.configId = configId;
-    return this;
-  }
-
-  public long getStart() {
-    return start;
-  }
-
-  public DetectionPipelineTaskInfo setStart(final long start) {
-    this.start = start;
-    return this;
-  }
-
-  public long getEnd() {
-    return end;
-  }
-
-  public DetectionPipelineTaskInfo setEnd(final long end) {
-    this.end = end;
-    return this;
+  public void setDetectionAlertConfigId(long detectionAlertConfigId) {
+    this.detectionAlertConfigId = detectionAlertConfigId;
   }
 }

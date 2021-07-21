@@ -15,33 +15,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
-package org.apache.pinot.thirdeye.detection.onboard;
+package org.apache.pinot.thirdeye.task;
 
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 
-public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
+public class TaskContext {
 
-  private long tuningWindowStart;
-  private long tuningWindowEnd;
+  private ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration;
 
-  public long getTuningWindowStart() {
-    return tuningWindowStart;
+  public ThirdEyeCoordinatorConfiguration getThirdEyeWorkerConfiguration() {
+    return thirdEyeCoordinatorConfiguration;
   }
 
-  public YamlOnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
-    this.tuningWindowStart = tuningWindowStart;
-    return this;
-  }
-
-  public long getTuningWindowEnd() {
-    return tuningWindowEnd;
-  }
-
-  public YamlOnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
-    this.tuningWindowEnd = tuningWindowEnd;
+  public TaskContext setThirdEyeWorkerConfiguration(
+      ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration) {
+    this.thirdEyeCoordinatorConfiguration = thirdEyeCoordinatorConfiguration;
     return this;
   }
 }

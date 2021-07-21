@@ -17,29 +17,15 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.alert;
+package org.apache.pinot.thirdeye.task;
 
+import java.util.List;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 
 /**
- * The Detection alert task info.
+ * Interface for task runner of various types of executors
  */
-public class DetectionAlertTaskInfo implements TaskInfo {
+public interface TaskRunner {
 
-  private long detectionAlertConfigId;
-
-  public DetectionAlertTaskInfo() {
-  }
-
-  public DetectionAlertTaskInfo(long detectionAlertConfigId) {
-    this.detectionAlertConfigId = detectionAlertConfigId;
-  }
-
-  public long getDetectionAlertConfigId() {
-    return detectionAlertConfigId;
-  }
-
-  public void setDetectionAlertConfigId(long detectionAlertConfigId) {
-    this.detectionAlertConfigId = detectionAlertConfigId;
-  }
+  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception;
 }

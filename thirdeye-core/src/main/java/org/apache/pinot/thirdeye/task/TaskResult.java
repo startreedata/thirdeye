@@ -17,21 +17,8 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.task;
+package org.apache.pinot.thirdeye.task;
 
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+public class TaskResult {
 
-public class TaskContext {
-
-  private ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration;
-
-  public ThirdEyeCoordinatorConfiguration getThirdEyeWorkerConfiguration() {
-    return thirdEyeCoordinatorConfiguration;
-  }
-
-  public TaskContext setThirdEyeWorkerConfiguration(
-      ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration) {
-    this.thirdEyeCoordinatorConfiguration = thirdEyeCoordinatorConfiguration;
-    return this;
-  }
 }

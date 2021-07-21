@@ -15,17 +15,31 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.task;
+package org.apache.pinot.thirdeye.task;
 
-import java.util.List;
-import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
 
-/**
- * Interface for task runner of various types of executors
- */
-public interface TaskRunner {
+  private long tuningWindowStart;
+  private long tuningWindowEnd;
 
-  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception;
+  public long getTuningWindowStart() {
+    return tuningWindowStart;
+  }
+
+  public YamlOnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
+    this.tuningWindowStart = tuningWindowStart;
+    return this;
+  }
+
+  public long getTuningWindowEnd() {
+    return tuningWindowEnd;
+  }
+
+  public YamlOnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
+    this.tuningWindowEnd = tuningWindowEnd;
+    return this;
+  }
 }

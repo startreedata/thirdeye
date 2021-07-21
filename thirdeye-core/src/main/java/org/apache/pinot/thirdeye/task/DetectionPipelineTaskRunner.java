@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection;
+package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
 
@@ -27,9 +27,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskResult;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskRunner;
+import org.apache.pinot.thirdeye.detection.ModelMaintenanceFlow;
+import org.apache.pinot.thirdeye.detection.ModelRetuneFlow;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
@@ -37,7 +36,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
@@ -57,30 +55,29 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final EvaluationManager evaluationManager;
-  private final DetectionPipelineFactory detectionPipelineFactory;
   private final ModelMaintenanceFlow modelMaintenanceFlow;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
+  private final DetectionPipelineRunner detectionPipelineRunner;
 
   /**
    * @param alertManager detection config DAO
    * @param mergedAnomalyResultManager merged anomaly DAO
    * @param evaluationManager the evaluation DAO
-   * @param detectionPipelineFactory pipeline loader
    */
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final EvaluationManager evaluationManager,
-      final DetectionPipelineFactory detectionPipelineFactory,
       final ModelRetuneFlow modelMaintenanceFlow,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
-      final MetricRegistry metricRegistry) {
+      final MetricRegistry metricRegistry,
+      final DetectionPipelineRunner detectionPipelineRunner) {
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
-    this.detectionPipelineFactory = detectionPipelineFactory;
     this.modelMaintenanceFlow = modelMaintenanceFlow;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
+    this.detectionPipelineRunner = detectionPipelineRunner;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
@@ -102,12 +99,10 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.getStart(),
           info.getEnd());
 
-      final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
-          .setAlert(alert)
-          .setStart(info.getStart())
-          .setEnd(info.getEnd())
-      );
-      final DetectionPipelineResult result = pipeline.run();
+      final DetectionPipelineResult result = detectionPipelineRunner.run(
+          alert,
+          info.getStart(),
+          info.getEnd());
 
       if (result.getLastTimestamp() < 0) {
         LOG.info("No detection ran for config {} between {} and {}",

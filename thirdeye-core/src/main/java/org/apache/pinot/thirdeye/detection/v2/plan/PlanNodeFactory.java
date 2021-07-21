@@ -36,16 +36,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DetectionPipelinePlanNodeFactory {
+public class PlanNodeFactory {
 
   public static final String V2_DETECTION_PLAN_PACKAGE_NAME = "org.apache.pinot.thirdeye.detection.v2.plan";
   public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
-  protected static final Logger LOG = LoggerFactory.getLogger(DetectionPipelinePlanNodeFactory.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
   private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap = new HashMap<>();
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public DetectionPipelinePlanNodeFactory(DataSourceCache dataSourceCache) {
+  public PlanNodeFactory(DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
     initPlanNodeTypeToClassMap();
   }

@@ -17,14 +17,13 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.task;
+package org.apache.pinot.thirdeye.task;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorJobContext;
-import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorTaskInfo;
 
 /**
  * Generates tasks for a job depending on the task type

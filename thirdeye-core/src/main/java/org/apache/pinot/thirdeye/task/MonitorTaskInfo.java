@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.monitor;
+package org.apache.pinot.thirdeye.task;
 
 import com.google.common.base.MoreObjects;
 import java.util.Objects;

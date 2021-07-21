@@ -17,21 +17,29 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.task;
+package org.apache.pinot.thirdeye.task;
 
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 
-public class TaskContext {
+/**
+ * The Detection alert task info.
+ */
+public class DetectionAlertTaskInfo implements TaskInfo {
 
-  private ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration;
+  private long detectionAlertConfigId;
 
-  public ThirdEyeCoordinatorConfiguration getThirdEyeWorkerConfiguration() {
-    return thirdEyeCoordinatorConfiguration;
+  public DetectionAlertTaskInfo() {
   }
 
-  public TaskContext setThirdEyeWorkerConfiguration(
-      ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration) {
-    this.thirdEyeCoordinatorConfiguration = thirdEyeCoordinatorConfiguration;
-    return this;
+  public DetectionAlertTaskInfo(long detectionAlertConfigId) {
+    this.detectionAlertConfigId = detectionAlertConfigId;
+  }
+
+  public long getDetectionAlertConfigId() {
+    return detectionAlertConfigId;
+  }
+
+  public void setDetectionAlertConfigId(long detectionAlertConfigId) {
+    this.detectionAlertConfigId = detectionAlertConfigId;
   }
 }

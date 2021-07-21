@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.dataquality;
+package org.apache.pinot.thirdeye.task;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,9 +28,6 @@ import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskResult;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;

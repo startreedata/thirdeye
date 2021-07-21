@@ -17,15 +17,8 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.task;
+package org.apache.pinot.thirdeye.task;
 
-import java.util.List;
-import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+public class TaskResult {
 
-/**
- * Interface for task runner of various types of executors
- */
-public interface TaskRunner {
-
-  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception;
 }

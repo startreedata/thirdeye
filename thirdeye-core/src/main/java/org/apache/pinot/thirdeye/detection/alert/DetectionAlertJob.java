@@ -34,6 +34,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection;
+package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.alert.PlanExecutor.isV2Alert;
@@ -28,9 +28,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskResult;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskRunner;
+import org.apache.pinot.thirdeye.detection.DetectionPipeline;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
+import org.apache.pinot.thirdeye.detection.ModelMaintenanceFlow;
+import org.apache.pinot.thirdeye.detection.ModelRetuneFlow;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;

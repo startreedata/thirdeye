@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.monitor;
+package org.apache.pinot.thirdeye.task;
 
 import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
 import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
@@ -38,9 +38,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.alert.util.EmailHelper;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskResult;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskRunner;
+import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorJobRunner;
 import org.apache.pinot.thirdeye.detection.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
@@ -215,7 +213,8 @@ public class MonitorTaskRunner implements TaskRunner {
     String textBody = String.format(
         "Your alert has failed for %d days and was disabled. Please fix your alert and enable it again. \n"
             + "Here is the link for your alert: https://thirdeye.corp.linkedin.com/app/#/manage/explore/%d",
-        MAX_FAILED_DISABLE_DAYS, config.getId());
+        MAX_FAILED_DISABLE_DAYS,
+        config.getId());
     Set<String> recipients = EmailUtils
         .getValidEmailAddresses(configuration.getFailureToAddress());
     if (config.getCreatedBy() != null && !config.getCreatedBy().equals(NO_AUTH_USER)) {

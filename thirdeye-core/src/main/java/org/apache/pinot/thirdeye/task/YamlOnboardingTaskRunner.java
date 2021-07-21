@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.detection.onboard;
+package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
 
@@ -30,9 +30,6 @@ import org.apache.pinot.thirdeye.alert.PlanExecutor;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskResult;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskRunner;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;

@@ -92,7 +92,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
         detectionConfigManager, eventManager, mergedAnomalyResultManager);
     this.teConfig = thirdeyeConfig;
 
-    this.jiraAdminConfig = this.teConfig.getAlerterConfigurations().getJiraConfiguration();
+    this.jiraAdminConfig = thirdeyeConfig.getAlerterConfigurations().getJiraConfiguration();
     this.jiraClient = jiraClient;
   }
 
@@ -151,7 +151,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
 
     BaseNotificationContent content = getNotificationContent(jiraClientConfig);
 
-    return new JiraContentFormatter(this.jiraAdminConfig, jiraClientConfig, content, this.teConfig,
+    return new JiraContentFormatter(jiraAdminConfig, jiraClientConfig, content, this.teConfig,
         subsetSubsConfig)
         .getJiraEntity(notification.getDimensionFilters(), anomalyResultListOfGroup);
   }
@@ -167,7 +167,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
         // Fetch the most recent reported issues within mergeGap by jira service account under the project
         List<Issue> issues = jiraClient
             .getIssues(jiraEntity.getJiraProject(), jiraEntity.getLabels(),
-                this.jiraAdminConfig.getJiraUser(), jiraEntity.getMergeGap());
+                jiraAdminConfig.getJiraUser(), jiraEntity.getMergeGap());
         Optional<Issue> latestJiraIssue = issues.stream().max(
             (o1, o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 

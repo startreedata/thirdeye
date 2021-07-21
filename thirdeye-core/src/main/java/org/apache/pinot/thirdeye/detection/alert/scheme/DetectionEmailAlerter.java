@@ -91,7 +91,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         eventManager,
         mergedAnomalyResultManager);
     this.teConfig = thirdeyeConfig;
-    this.smtpConfig = this.teConfig.getAlerterConfigurations().getSmtpConfiguration();
+    this.smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
   }
 
   private Set<String> retainWhitelisted(Set<String> recipients, Collection<String> emailWhitelist) {
@@ -112,14 +112,13 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     if (recipients.getCc() == null) {
       recipients.setCc(new HashSet<>());
     }
-    recipients.getCc().addAll(ConfigUtils.getList(this.teConfig.getAlerterConfigurations()
-        .getSmtpConfiguration().getAdminRecipients()));
+    recipients.getCc().addAll(ConfigUtils.getList(smtpConfig.getAdminRecipients()));
   }
 
   private void whitelistRecipients(DetectionAlertFilterRecipients recipients) {
     if (recipients != null) {
       List<String> emailWhitelist = ConfigUtils.getList(
-          this.teConfig.getAlerterConfigurations().getSmtpConfiguration().getEmailWhitelist());
+          smtpConfig.getEmailWhitelist());
       if (!emailWhitelist.isEmpty()) {
         recipients.setTo(retainWhitelisted(recipients.getTo(), emailWhitelist));
         recipients.setCc(retainWhitelisted(recipients.getCc(), emailWhitelist));
@@ -164,7 +163,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
-      String fromAddress = teConfig.getAlerterConfigurations().getSmtpConfiguration().getSmtpUser();
+      String fromAddress = smtpConfig.getSmtpUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }
@@ -193,19 +192,18 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
    * Sends email according to the provided config.
    */
   private void sendEmail(HtmlEmail email) throws EmailException {
-    SmtpConfiguration config = this.smtpConfig;
-    email.setHostName(config.getSmtpHost());
-    email.setSmtpPort(config.getSmtpPort());
-    if (config.getSmtpUser() != null && config.getSmtpPassword() != null) {
+    email.setHostName(smtpConfig.getSmtpHost());
+    email.setSmtpPort(smtpConfig.getSmtpPort());
+    if (smtpConfig.getSmtpUser() != null && smtpConfig.getSmtpPassword() != null) {
       email.setAuthenticator(
-          new DefaultAuthenticator(config.getSmtpUser(), config.getSmtpPassword()));
+          new DefaultAuthenticator(smtpConfig.getSmtpUser(), smtpConfig.getSmtpPassword()));
       email.setSSLOnConnect(true);
-      email.setSslSmtpPort(Integer.toString(config.getSmtpPort()));
+      email.setSslSmtpPort(Integer.toString(smtpConfig.getSmtpPort()));
     }
 
     // This needs to be done after the configuration phase since getMailSession() creates
     // a new mail session if required.
-    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", config.getSmtpHost());
+    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", smtpConfig.getSmtpHost());
 
     email.send();
 

@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.task;
 
-import static org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration.SMTP_CONFIG_KEY;
 import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
 import com.google.inject.Inject;
@@ -40,7 +39,6 @@ import org.apache.pinot.thirdeye.detection.anomaly.alert.util.EmailHelper;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorJobRunner;
 import org.apache.pinot.thirdeye.detection.anomaly.utils.EmailUtils;
-import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
@@ -224,9 +222,7 @@ public class MonitorTaskRunner implements TaskRunner {
       recipients.add(config.getUpdatedBy());
     }
     EmailHelper.sendEmailWithTextBody(email,
-        SmtpConfiguration
-            .createFromProperties(
-                configuration.getAlerterConfigurations().get(SMTP_CONFIG_KEY)),
+        configuration.getAlerterConfigurations().getSmtpConfiguration(),
         subject,
         textBody, configuration.getFailureFromAddress(),
         new DetectionAlertFilterRecipients(recipients));

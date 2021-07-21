@@ -39,7 +39,9 @@ import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
+import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
+import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.restclient.MockThirdEyeRcaRestClient;
@@ -123,11 +125,11 @@ public class DetectionEmailAlerterTest {
 
     thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
-    Map<String, Object> smtpProperties = new HashMap<>();
-    smtpProperties.put("smtpHost", "test");
-    smtpProperties.put("smtpPort", 25);
-    Map<String, Map<String, Object>> alerterProps = new HashMap<>();
-    alerterProps.put("smtpConfiguration", smtpProperties);
+    SmtpConfiguration smtpProperties = new SmtpConfiguration();
+    smtpProperties.setSmtpHost("test");
+    smtpProperties.setSmtpPort(25);
+    AlerterConfigurations alerterProps = new AlerterConfigurations();
+    alerterProps.setSmtpConfiguration(smtpProperties);
     thirdEyeConfig.setAlerterConfigurations(alerterProps);
   }
 

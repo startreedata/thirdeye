@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.apache.pinot.thirdeye.task.TaskDriverConfiguration;
@@ -38,10 +39,10 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   @JsonProperty("rca")
   private RCAConfiguration rcaConfiguration = new RCAConfiguration();
 
+  private AlerterConfigurations alerterConfigurations = new AlerterConfigurations();
+
   private String configPath = "config";
 
-  // TODO spyne refactor legacy configs.
-  private Map<String, Map<String, Object>> alerterConfigurations;
   private String phantomJsPath = "";
   private String failureFromAddress;
   private String failureToAddress;
@@ -110,12 +111,12 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return this;
   }
 
-  public Map<String, Map<String, Object>> getAlerterConfigurations() {
+  public AlerterConfigurations getAlerterConfigurations() {
     return alerterConfigurations;
   }
 
   public ThirdEyeCoordinatorConfiguration setAlerterConfigurations(
-      final Map<String, Map<String, Object>> alerterConfigurations) {
+      final AlerterConfigurations alerterConfigurations) {
     this.alerterConfigurations = alerterConfigurations;
     return this;
   }

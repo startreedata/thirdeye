@@ -22,6 +22,8 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
+import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -131,11 +133,11 @@ public class SendAlertTest {
     DetectionAlertTaskInfo alertTaskInfo = new DetectionAlertTaskInfo();
     alertTaskInfo.setDetectionAlertConfigId(alertConfigId);
 
-    Map<String, Object> smtpProperties = new HashMap<>();
-    smtpProperties.put("smtpHost", "test");
-    smtpProperties.put("smtpPort", 25);
-    Map<String, Map<String, Object>> alerterProps = new HashMap<>();
-    alerterProps.put("smtpConfiguration", smtpProperties);
+    SmtpConfiguration smtpProperties = new SmtpConfiguration();
+    smtpProperties.setSmtpHost("test");
+    smtpProperties.setSmtpPort(25);
+    AlerterConfigurations alerterProps = new AlerterConfigurations();
+    alerterProps.setSmtpConfiguration(smtpProperties);
 
     ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);

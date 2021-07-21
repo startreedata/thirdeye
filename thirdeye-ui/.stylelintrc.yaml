@@ -10,7 +10,7 @@ rules:
 
     # Require whitespace padding in comments
     comment-whitespace-inside: always
-    
+
     # Require an empty line before rules except first nested rule or rules that follow comments
     rule-empty-line-before:
         - always

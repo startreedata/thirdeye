@@ -33,15 +33,15 @@ jobs:
 
             - name: ESLint
               working-directory: thirdeye-ui
-              run: npm run eslint
+              run: npm run eslint-check
 
             - name: Stylelint
               working-directory: thirdeye-ui
-              run: npm run stylelint
+              run: npm run stylelint-check
 
             - name: Prettier
               working-directory: thirdeye-ui
-              run: npm run pretty
+              run: npm run prettier-check
 
     thirdeye-ui-test:
         name: Test

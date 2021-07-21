@@ -38,10 +38,13 @@
         "test-coverage": "jest --passWithNoTests --coverage",
         "test-e2e": "node_modules/.bin/cypress run --headless --config-file cypress.config.json",
         "test-e2e-gui": "node_modules/.bin/cypress open --config-file cypress.config.json",
-        "eslint": "eslint '**/*.{ts,tsx,js}' --no-error-on-unmatched-pattern --fix",
-        "stylelint": "stylelint '**/*.{css,scss}' --allow-empty-input --fix",
-        "pretty": "prettier . --write",
-        "lint": "npm run eslint && npm run stylelint && npm run pretty"
+        "eslint-check": "eslint '**/*.{ts,tsx,js}' --no-error-on-unmatched-pattern",
+        "eslint-fix": "eslint '**/*.{ts,tsx,js}' --no-error-on-unmatched-pattern --fix",
+        "stylelint-check": "stylelint '**/*.{css,scss}' --allow-empty-input",
+        "stylelint-fix": "stylelint '**/*.{css,scss}' --allow-empty-input --fix",
+        "prettier-check": "prettier . --check",
+        "prettier-fix": "prettier . --write",
+        "lint": "npm run eslint-fix && npm run stylelint-fix && npm run prettier-fix"
     },
     "dependencies": {
         "@date-io/luxon": "^1.3.13",

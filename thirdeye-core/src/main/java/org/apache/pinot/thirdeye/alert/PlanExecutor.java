@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.alert;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,14 +99,13 @@ public class PlanExecutor {
    * Main interface for running the pipeline.
    *
    * @param nodes The pipeline DAG as a list of nodes
-   * @param start start time
-   * @param end end time
+   * @param startTime
+   * @param endTime
    * @return The result map
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
   public Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> nodes,
-      final Date start,
-      final Date end)
+      final long startTime, final long endTime)
       throws Exception {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean operator : nodes) {
@@ -116,8 +114,8 @@ public class PlanExecutor {
           operatorName,
           pipelinePlanNodes,
           operator,
-          start.getTime(),
-          end.getTime());
+          startTime,
+          endTime);
 
       pipelinePlanNodes.put(operatorName, planNode);
     }

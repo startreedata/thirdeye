@@ -121,8 +121,8 @@ public class AlertEvaluatorV2 {
       final Map<String, DetectionPipelineResult> result = executorService
           .submit(() -> planExecutor.runPipeline(
               templateWithProperties.getNodes(),
-              request.getStart(),
-              request.getEnd()
+              request.getStart().getTime(),
+              request.getEnd().getTime()
           ))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 

@@ -20,20 +20,24 @@
 package org.apache.pinot.thirdeye.detection;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.alert.PlanExecutor;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.task.DetectionPipelineRunner;
 import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.task.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.task.TaskContext;
@@ -52,10 +56,7 @@ public class DetectionPipelineTaskRunnerTest {
   private TaskContext context;
 
   private TestDbEnv testDAOProvider;
-  private AlertManager detectionDAO;
   private MergedAnomalyResultManager anomalyDAO;
-  private EvaluationManager evaluationDAO;
-  private DetectionPipelineFactory loader;
   private DataProvider provider;
   private Map<String, Object> properties;
 
@@ -63,79 +64,86 @@ public class DetectionPipelineTaskRunnerTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    this.runs = new ArrayList<>();
+    runs = new ArrayList<>();
 
-    this.outputs = new ArrayList<>();
+    outputs = new ArrayList<>();
 
-    this.testDAOProvider = new TestDbEnv();
-    this.detectionDAO = TestDbEnv.getInstance().getDetectionConfigManager();
-    this.anomalyDAO = TestDbEnv.getInstance().getMergedAnomalyResultDAO();
-    this.evaluationDAO = TestDbEnv.getInstance().getEvaluationManager();
-    this.provider = new MockDataProvider();
-    this.loader = new MockPipelineLoader(this.runs, this.outputs, provider);
+    testDAOProvider = new TestDbEnv();
+    final Injector injector = testDAOProvider.getInjector();
+    final AlertManager detectionDAO = injector.getInstance(AlertManager.class);
+    anomalyDAO = injector.getInstance(MergedAnomalyResultManager.class);
+    final EvaluationManager evaluationDAO = injector.getInstance(EvaluationManager.class);
+    provider = new MockDataProvider();
 
-    this.properties = new HashMap<>();
-    this.properties.put("metricUrn", "thirdeye:metric:1");
-    this.properties.put("className", "myClassName");
+    properties = new HashMap<>();
+    properties.put("metricUrn", "thirdeye:metric:1");
+    properties.put("className", "myClassName");
 
-    AlertDTO detector = new AlertDTO();
-    detector.setProperties(this.properties);
+    final AlertDTO detector = new AlertDTO();
+    detector.setProperties(properties);
     detector.setName("myName");
     detector.setDescription("myDescription");
     detector.setCron("myCron");
-    this.detectorId = this.detectionDAO.save(detector);
+    detectorId = detectionDAO.save(detector);
 
-    this.runner = new DetectionPipelineTaskRunner(
-        this.detectionDAO,
-        this.anomalyDAO,
-        this.evaluationDAO,
-        this.loader,
-        new ModelRetuneFlow(this.provider, new DetectionRegistry()),
-        TestDbEnv.getInstance().getAnomalySubscriptionGroupNotificationManager(),
-        new MetricRegistry()
-    );
+    final DetectionPipelineFactory detectionPipelineFactory = new MockPipelineLoader(runs,
+        outputs,
+        provider);
+    final PlanExecutor planExecutor = injector.getInstance(PlanExecutor.class);
+    final DetectionPipelineRunner detectionPipelineRunner = new DetectionPipelineRunner(
+        detectionPipelineFactory,
+        planExecutor);
 
-    this.info = new DetectionPipelineTaskInfo();
-    this.info.setConfigId(this.detectorId);
-    this.info.setStart(1250);
-    this.info.setEnd(1500);
+    runner = new DetectionPipelineTaskRunner(
+        detectionDAO,
+        anomalyDAO,
+        evaluationDAO,
+        new ModelRetuneFlow(provider, new DetectionRegistry()),
+        injector.getInstance(AnomalySubscriptionGroupNotificationManager.class),
+        new MetricRegistry(),
+        detectionPipelineRunner);
 
-    this.context = new TaskContext();
+    info = new DetectionPipelineTaskInfo();
+    info.setConfigId(detectorId);
+    info.setStart(1250);
+    info.setEnd(1500);
+
+    context = new TaskContext();
   }
 
   @AfterMethod(alwaysRun = true)
   public void afterMethod() {
-    this.testDAOProvider.cleanup();
+    testDAOProvider.cleanup();
   }
 
   @Test
   public void testTaskRunnerLoading() throws Exception {
-    this.runner.execute(this.info, this.context);
+    runner.execute(info, context);
 
-    Assert.assertEquals(this.runs.size(), 1);
-    Assert.assertEquals(this.runs.get(0).getStartTime(), 1250);
-    Assert.assertEquals(this.runs.get(0).getEndTime(), 1500);
-    Assert.assertEquals(this.runs.get(0).getConfig().getName(), "myName");
-    Assert.assertEquals(this.runs.get(0).getConfig().getDescription(), "myDescription");
+    Assert.assertEquals(runs.size(), 1);
+    Assert.assertEquals(runs.get(0).getStartTime(), 1250);
+    Assert.assertEquals(runs.get(0).getEndTime(), 1500);
+    Assert.assertEquals(runs.get(0).getConfig().getName(), "myName");
+    Assert.assertEquals(runs.get(0).getConfig().getDescription(), "myDescription");
     Assert
-        .assertEquals(this.runs.get(0).getConfig().getProperties().get("className"), "myClassName");
-    Assert.assertEquals(this.runs.get(0).getConfig().getCron(), "myCron");
+        .assertEquals(runs.get(0).getConfig().getProperties().get("className"), "myClassName");
+    Assert.assertEquals(runs.get(0).getConfig().getCron(), "myCron");
   }
 
   @Test
   public void testTaskRunnerPersistence() throws Exception {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils
-        .makeAnomaly(this.detectorId, 1300, 1400, null, null,
+    final MergedAnomalyResultDTO anomaly = DetectionTestUtils
+        .makeAnomaly(detectorId, 1300, 1400, null, null,
             Collections.singletonMap("myKey", "myValue"));
 
-    this.outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), 1400));
+    outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), 1400));
 
-    this.runner.execute(this.info, this.context);
+    runner.execute(info, context);
 
     Assert.assertNotNull(anomaly.getId());
 
-    MergedAnomalyResultDTO readAnomaly = this.anomalyDAO.findById(anomaly.getId());
-    Assert.assertEquals(readAnomaly.getDetectionConfigId(), Long.valueOf(this.detectorId));
+    final MergedAnomalyResultDTO readAnomaly = anomalyDAO.findById(anomaly.getId());
+    Assert.assertEquals(readAnomaly.getDetectionConfigId(), Long.valueOf(detectorId));
     Assert.assertEquals(readAnomaly.getStartTime(), 1300);
     Assert.assertEquals(readAnomaly.getEndTime(), 1400);
     Assert.assertEquals(readAnomaly.getDimensions(), new DimensionMap("{\"myKey\":\"myValue\"}"));
@@ -143,13 +151,13 @@ public class DetectionPipelineTaskRunnerTest {
 
   @Test
   public void testTaskRunnerPersistenceFailTimestamp() throws Exception {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils
-        .makeAnomaly(this.detectorId, 1300, 1400, null, null,
+    final MergedAnomalyResultDTO anomaly = DetectionTestUtils
+        .makeAnomaly(detectorId, 1300, 1400, null, null,
             Collections.singletonMap("myKey", "myValue"));
 
-    this.outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), -1));
+    outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), -1));
 
-    this.runner.execute(this.info, this.context);
+    runner.execute(info, context);
 
     Assert.assertNull(anomaly.getId());
   }

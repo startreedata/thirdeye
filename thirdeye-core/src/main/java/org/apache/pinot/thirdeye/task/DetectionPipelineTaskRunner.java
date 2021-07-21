@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.alert.PlanExecutor.isV2Alert;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -28,9 +27,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.ModelMaintenanceFlow;
 import org.apache.pinot.thirdeye.detection.ModelRetuneFlow;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -59,30 +55,29 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final EvaluationManager evaluationManager;
-  private final DetectionPipelineFactory detectionPipelineFactory;
   private final ModelMaintenanceFlow modelMaintenanceFlow;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
+  private final DetectionPipelineRunner detectionPipelineRunner;
 
   /**
    * @param alertManager detection config DAO
    * @param mergedAnomalyResultManager merged anomaly DAO
    * @param evaluationManager the evaluation DAO
-   * @param detectionPipelineFactory pipeline loader
    */
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final EvaluationManager evaluationManager,
-      final DetectionPipelineFactory detectionPipelineFactory,
       final ModelRetuneFlow modelMaintenanceFlow,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
-      final MetricRegistry metricRegistry) {
+      final MetricRegistry metricRegistry,
+      final DetectionPipelineRunner detectionPipelineRunner) {
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.evaluationManager = evaluationManager;
-    this.detectionPipelineFactory = detectionPipelineFactory;
     this.modelMaintenanceFlow = modelMaintenanceFlow;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
+    this.detectionPipelineRunner = detectionPipelineRunner;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
@@ -104,9 +99,10 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.getStart(),
           info.getEnd());
 
-      final DetectionPipelineResult result = runDetectionPipeline(
-          info,
-          alert);
+      final DetectionPipelineResult result = detectionPipelineRunner.run(
+          alert,
+          info.getStart(),
+          info.getEnd());
 
       if (result.getLastTimestamp() < 0) {
         LOG.info("No detection ran for config {} between {} and {}",
@@ -129,21 +125,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     } catch (final Exception e) {
       detectionTaskExceptionCounter.inc();
       throw e;
-    }
-  }
-
-  private DetectionPipelineResult runDetectionPipeline(final DetectionPipelineTaskInfo info,
-      final AlertDTO alert) throws Exception {
-    if (isV2Alert(alert)) {
-      throw new UnsupportedOperationException();
-    } else {
-
-      final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
-          .setAlert(alert)
-          .setStart(info.getStart())
-          .setEnd(info.getEnd())
-      );
-      return pipeline.run();
     }
   }
 

@@ -26,10 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.alert.PlanExecutor;
-import org.apache.pinot.thirdeye.detection.DetectionPipeline;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -54,15 +50,15 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
 
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DetectionPipelineFactory loader;
   private final DataProvider provider;
+  private final DetectionPipelineRunner detectionPipelineRunner;
 
   @Inject
   public YamlOnboardingTaskRunner(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final DetectionPipelineFactory loader) {
-    this.loader = loader;
+      final DetectionPipelineRunner detectionPipelineRunner) {
+    this.detectionPipelineRunner = detectionPipelineRunner;
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.provider = provider;
@@ -79,7 +75,7 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
     final AlertDTO alert = requireNonNull(alertManager.findById(alertId),
         String.format("Could not resolve config id %d", alertId));
 
-    final DetectionPipelineResult result = runDetectionPipeline(alert,
+    final DetectionPipelineResult result = detectionPipelineRunner.run(alert,
         info.getStart(),
         info.getEnd());
 
@@ -106,18 +102,5 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
 
     LOG.info("Yaml detection onboarding task for id {} completed", alertId);
     return Collections.emptyList();
-  }
-
-  private DetectionPipelineResult runDetectionPipeline(final AlertDTO alert, final long start,
-      final long end) throws Exception {
-    if (PlanExecutor.isV2Alert(alert)) {
-      throw new UnsupportedOperationException();
-    } else {
-      final DetectionPipeline pipeline = loader.get(new DetectionPipelineContext()
-          .setAlert(alert)
-          .setStart(start)
-          .setEnd(end));
-      return pipeline.run();
-    }
   }
 }

@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.alert;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
@@ -43,5 +44,9 @@ public class PlanExecutor {
 
   public static String getNodeFromContextKey(final String contextKey) {
     return contextKey.split(CONTEXT_KEY_SPLIT)[0];
+  }
+
+  public static boolean isV2Alert(final AlertDTO alert) {
+    return alert.getTemplate() != null;
   }
 }

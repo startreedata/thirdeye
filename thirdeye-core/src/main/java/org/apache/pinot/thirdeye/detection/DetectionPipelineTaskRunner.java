@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.alert.PlanExecutor.isV2Alert;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -102,12 +103,9 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.getStart(),
           info.getEnd());
 
-      final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
-          .setAlert(alert)
-          .setStart(info.getStart())
-          .setEnd(info.getEnd())
-      );
-      final DetectionPipelineResult result = pipeline.run();
+      final DetectionPipelineResult result = runDetectionPipeline(
+          info,
+          alert);
 
       if (result.getLastTimestamp() < 0) {
         LOG.info("No detection ran for config {} between {} and {}",
@@ -130,6 +128,21 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     } catch (final Exception e) {
       detectionTaskExceptionCounter.inc();
       throw e;
+    }
+  }
+
+  private DetectionPipelineResult runDetectionPipeline(final DetectionPipelineTaskInfo info,
+      final AlertDTO alert) throws Exception {
+    if (isV2Alert(alert)) {
+      throw new UnsupportedOperationException();
+    } else {
+
+      final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
+          .setAlert(alert)
+          .setStart(info.getStart())
+          .setEnd(info.getEnd())
+      );
+      return pipeline.run();
     }
   }
 

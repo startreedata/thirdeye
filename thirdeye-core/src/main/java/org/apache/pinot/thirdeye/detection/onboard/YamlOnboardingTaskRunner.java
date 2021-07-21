@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import org.apache.pinot.thirdeye.alert.PlanExecutor;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
@@ -81,11 +82,9 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
     final AlertDTO alert = requireNonNull(alertManager.findById(alertId),
         String.format("Could not resolve config id %d", alertId));
 
-    final DetectionPipeline pipeline = loader.get(new DetectionPipelineContext()
-        .setAlert(alert)
-        .setStart(info.getStart())
-        .setEnd(info.getEnd()));
-    final DetectionPipelineResult result = pipeline.run();
+    final DetectionPipelineResult result = runDetectionPipeline(alert,
+        info.getStart(),
+        info.getEnd());
 
     if (result.getLastTimestamp() < 0) {
       return Collections.emptyList();
@@ -110,5 +109,18 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
 
     LOG.info("Yaml detection onboarding task for id {} completed", alertId);
     return Collections.emptyList();
+  }
+
+  private DetectionPipelineResult runDetectionPipeline(final AlertDTO alert, final long start,
+      final long end) throws Exception {
+    if (PlanExecutor.isV2Alert(alert)) {
+      throw new UnsupportedOperationException();
+    } else {
+      final DetectionPipeline pipeline = loader.get(new DetectionPipelineContext()
+          .setAlert(alert)
+          .setStart(start)
+          .setEnd(end));
+      return pipeline.run();
+    }
   }
 }

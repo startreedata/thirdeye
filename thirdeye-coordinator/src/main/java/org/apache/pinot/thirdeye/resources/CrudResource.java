@@ -203,4 +203,15 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
     return respondOk(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id));
   }
+
+  @DELETE
+  @Path("/all")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response deleteAll(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+    dtoManager.findAll().forEach(dtoManager::delete);
+    return Response.ok().build();
+  }
 }

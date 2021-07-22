@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.anomaly.events;
+package org.apache.pinot.thirdeye.events;
 
 import java.util.Objects;
 

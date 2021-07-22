@@ -10,8 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.detection.anomaly.events.HolidayEventsLoader;
+import org.apache.pinot.thirdeye.events.HolidayEventsLoader;
+import org.apache.pinot.thirdeye.events.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 
 @Singleton

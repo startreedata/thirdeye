@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.events;
+package org.apache.pinot.thirdeye.events;
 
 import java.util.ArrayList;
 import java.util.HashSet;

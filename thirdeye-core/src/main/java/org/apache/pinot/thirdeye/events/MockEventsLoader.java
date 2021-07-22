@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.events;
+package org.apache.pinot.thirdeye.events;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,7 +35,6 @@ import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.random.Well19937c;
-import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.slf4j.Logger;

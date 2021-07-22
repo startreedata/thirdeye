@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.config;
+package org.apache.pinot.thirdeye.auth;
 
 import java.time.Duration;
 import javax.validation.constraints.NotNull;

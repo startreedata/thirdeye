@@ -9,7 +9,6 @@ import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 import javax.ws.rs.NotAuthorizedException;
-import org.apache.pinot.thirdeye.config.AuthConfiguration;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.util.ResourceUtils;
 

@@ -1,10 +1,11 @@
-package org.apache.pinot.thirdeye.config;
+package org.apache.pinot.thirdeye.scheduler;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import org.apache.pinot.thirdeye.datasource.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.detection.download.ModelDownloaderConfiguration;
+import org.apache.pinot.thirdeye.events.HolidayEventsLoaderConfiguration;
 
 public class ThirdEyeSchedulerConfiguration {
 

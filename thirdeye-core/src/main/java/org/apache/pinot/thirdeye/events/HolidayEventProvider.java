@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.detection.anomaly.events;
+package org.apache.pinot.thirdeye.events;
 
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;

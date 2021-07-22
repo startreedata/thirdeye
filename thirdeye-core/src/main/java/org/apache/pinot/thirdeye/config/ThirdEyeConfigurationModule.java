@@ -7,7 +7,9 @@ import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.datasource.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.events.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
+import org.apache.pinot.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import org.apache.pinot.thirdeye.task.TaskDriverConfiguration;
 
 public class ThirdEyeConfigurationModule extends AbstractModule {

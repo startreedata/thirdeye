@@ -3,15 +3,14 @@ package org.apache.pinot.thirdeye.scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
-import org.apache.pinot.thirdeye.config.HolidayEventsLoaderConfiguration;
-import org.apache.pinot.thirdeye.config.ThirdEyeSchedulerConfiguration;
 import org.apache.pinot.thirdeye.datasource.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.datasource.AutoOnboardService;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
-import org.apache.pinot.thirdeye.detection.anomaly.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorJobScheduler;
 import org.apache.pinot.thirdeye.detection.download.ModelDownloaderManager;
+import org.apache.pinot.thirdeye.events.HolidayEventsLoader;
+import org.apache.pinot.thirdeye.events.HolidayEventsLoaderConfiguration;
 
 @Singleton
 public class SchedulerService implements Managed {

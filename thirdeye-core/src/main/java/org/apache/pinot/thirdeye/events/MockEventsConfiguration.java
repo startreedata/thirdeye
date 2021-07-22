@@ -17,11 +17,10 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.config;
+package org.apache.pinot.thirdeye.events;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.detection.anomaly.events.MockEventsLoader;
 
 /**
  * Configuration container for generating series of mock events

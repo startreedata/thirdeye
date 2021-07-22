@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.config;
+package org.apache.pinot.thirdeye.events;
 
 import java.util.Collections;
 import java.util.List;

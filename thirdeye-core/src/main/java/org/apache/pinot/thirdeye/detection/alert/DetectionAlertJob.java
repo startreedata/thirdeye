@@ -33,7 +33,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -70,12 +71,12 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     // check if a task for this detection alerter is already scheduled
     String jobName = String
-        .format("%s_%d", TaskConstants.TaskType.DETECTION_ALERT, detectionAlertConfigId);
+        .format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
     List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
         Predicate.EQ("name", jobName),
         Predicate.OR(
-            Predicate.EQ("status", TaskConstants.TaskStatus.RUNNING.toString()),
-            Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString())
+            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+            Predicate.EQ("status", TaskStatus.WAITING.toString())
         ))
     );
     if (!scheduledTasks.isEmpty()) {
@@ -98,9 +99,9 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     }
 
     TaskDTO taskDTO = TaskUtils
-        .buildTask(detectionAlertConfigId, taskInfoJson, TaskConstants.TaskType.DETECTION_ALERT);
+        .buildTask(detectionAlertConfigId, taskInfoJson, TaskType.NOTIFICATION);
     long taskId = taskDAO.save(taskDTO);
-    LOG.info("Created {} task {} with settings {}", TaskConstants.TaskType.DETECTION_ALERT, taskId,
+    LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskId,
         taskDTO);
   }
 

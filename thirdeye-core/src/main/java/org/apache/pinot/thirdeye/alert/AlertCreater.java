@@ -17,7 +17,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.task.YamlOnboardingTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,9 +104,9 @@ public class AlertCreater {
     }
 
     final TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,
-        TaskConstants.TaskType.YAML_DETECTION_ONBOARD);
+        TaskType.ONBOARDING);
     final long taskId = taskManager.save(taskDTO);
-    LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.YAML_DETECTION_ONBOARD,
+    LOG.info("Created {} task {} with taskId {}", TaskType.ONBOARDING,
         taskDTO, taskId);
   }
 }

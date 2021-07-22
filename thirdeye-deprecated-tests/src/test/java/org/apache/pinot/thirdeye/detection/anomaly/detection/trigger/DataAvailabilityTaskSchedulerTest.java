@@ -41,7 +41,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,9 +112,9 @@ public class DataAvailabilityTaskSchedulerTest {
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 1);
     TaskDTO task = tasks.get(0);
-    Assert.assertEquals(task.getStatus(), TaskConstants.TaskStatus.WAITING);
+    Assert.assertEquals(task.getStatus(), TaskStatus.WAITING);
     Assert.assertEquals(task.getJobName(),
-        TaskConstants.TaskType.DETECTION.toString() + "_" + detectionId);
+        TaskType.DETECTION.toString() + "_" + detectionId);
   }
 
   @Test
@@ -131,12 +132,12 @@ public class DataAvailabilityTaskSchedulerTest {
     TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 3);
-    Assert.assertEquals(tasks.get(0).getStatus(), TaskConstants.TaskStatus.WAITING);
-    Assert.assertEquals(tasks.get(1).getStatus(), TaskConstants.TaskStatus.WAITING);
-    Assert.assertEquals(tasks.get(2).getStatus(), TaskConstants.TaskStatus.WAITING);
+    Assert.assertEquals(tasks.get(0).getStatus(), TaskStatus.WAITING);
+    Assert.assertEquals(tasks.get(1).getStatus(), TaskStatus.WAITING);
+    Assert.assertEquals(tasks.get(2).getStatus(), TaskStatus.WAITING);
     Assert.assertEquals(
         Stream.of(detection1, detection2, detection3)
-            .map(x -> TaskConstants.TaskType.DETECTION.toString() + "_" + x)
+            .map(x -> TaskType.DETECTION.toString() + "_" + x)
             .collect(Collectors.toSet()),
         new HashSet<>(Arrays.asList(tasks.get(0).getJobName(), tasks.get(1).getJobName(),
             tasks.get(2).getJobName())));
@@ -149,8 +150,8 @@ public class DataAvailabilityTaskSchedulerTest {
     long detection2 = createDetection(2, Collections.singletonList(metricId2), TEST_TIME, 0);
     createDataset(1, TEST_TIME + TimeUnit.HOURS.toMillis(1), TEST_TIME); // updated dataset
     createDataset(2, TEST_TIME - TimeUnit.HOURS.toMillis(1), TEST_TIME); // not updated dataset
-    createDetectionTask(detection1, TEST_TIME - 60_000, TaskConstants.TaskStatus.COMPLETED);
-    createDetectionTask(detection2, TEST_TIME - 60_000, TaskConstants.TaskStatus.COMPLETED);
+    createDetectionTask(detection1, TEST_TIME - 60_000, TaskStatus.COMPLETED);
+    createDetectionTask(detection2, TEST_TIME - 60_000, TaskStatus.COMPLETED);
     List<AlertDTO> detectionConfigs = detectionConfigDAO.findAll();
     Assert.assertEquals(detectionConfigs.size(), 2);
     dataAvailabilityTaskScheduler.run();
@@ -169,17 +170,17 @@ public class DataAvailabilityTaskSchedulerTest {
         2 * 24 * 60 * 60);
     createDataset(1, oneDayAgo - 60_000, TEST_TIME); // not updated dataset
     createDataset(2, oneDayAgo - 60_000, TEST_TIME); // not updated dataset
-    createDetectionTask(detection1, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
-    createDetectionTask(detection2, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
-    createDetectionTask(detection3, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
+    createDetectionTask(detection1, oneDayAgo - 60_000, TaskStatus.COMPLETED);
+    createDetectionTask(detection2, oneDayAgo - 60_000, TaskStatus.COMPLETED);
+    createDetectionTask(detection3, oneDayAgo - 60_000, TaskStatus.COMPLETED);
     dataAvailabilityTaskScheduler.run();
     TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 5);
     Assert.assertEquals(
-        tasks.stream().filter(t -> t.getStatus() == TaskConstants.TaskStatus.COMPLETED).count(), 3);
+        tasks.stream().filter(t -> t.getStatus() == TaskStatus.COMPLETED).count(), 3);
     Assert.assertEquals(
-        tasks.stream().filter(t -> t.getStatus() == TaskConstants.TaskStatus.WAITING).count(), 2);
+        tasks.stream().filter(t -> t.getStatus() == TaskStatus.WAITING).count(), 2);
   }
 
   @Test
@@ -193,20 +194,20 @@ public class DataAvailabilityTaskSchedulerTest {
     long tenMinAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(10);
     createDataset(1, TEST_TIME, tenMinAgo);
     createDataset(2, TEST_TIME, tenMinAgo);
-    createDetectionTask(detection1, oneDayAgo, TaskConstants.TaskStatus.RUNNING);
+    createDetectionTask(detection1, oneDayAgo, TaskStatus.RUNNING);
     dataAvailabilityTaskScheduler.run();
     TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 3);
     List<TaskDTO> waitingTasks = tasks.stream()
-        .filter(t -> t.getStatus() == TaskConstants.TaskStatus.WAITING).collect(
+        .filter(t -> t.getStatus() == TaskStatus.WAITING).collect(
             Collectors.toList());
     Assert.assertEquals(
-        tasks.stream().filter(t -> t.getStatus() == TaskConstants.TaskStatus.RUNNING).count(), 1);
+        tasks.stream().filter(t -> t.getStatus() == TaskStatus.RUNNING).count(), 1);
     Assert.assertEquals(waitingTasks.size(), 2);
     Assert.assertEquals(
         Stream.of(detection2, detection3)
-            .map(x -> TaskConstants.TaskType.DETECTION.toString() + "_" + x)
+            .map(x -> TaskType.DETECTION.toString() + "_" + x)
             .collect(Collectors.toSet()),
         new HashSet<>(
             Arrays.asList(waitingTasks.get(0).getJobName(), waitingTasks.get(1).getJobName())));
@@ -228,7 +229,7 @@ public class DataAvailabilityTaskSchedulerTest {
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
     Assert.assertEquals(tasks.size(), 1);
-    Assert.assertEquals(TaskConstants.TaskType.DETECTION.toString() + "_" + detection2,
+    Assert.assertEquals(TaskType.DETECTION.toString() + "_" + detection2,
         tasks.get(0).getJobName());
   }
 
@@ -239,15 +240,15 @@ public class DataAvailabilityTaskSchedulerTest {
     long detection1 = createDetection(1, metrics1, oneDayAgo, 0);
     long halfHourAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(30);
     createDataset(1, TEST_TIME, halfHourAgo);
-    createDetectionTask(detection1, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
+    createDetectionTask(detection1, oneDayAgo - 60_000, TaskStatus.COMPLETED);
     TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
     List<TaskDTO> waitingTasks = tasks.stream()
-        .filter(t -> t.getStatus() == TaskConstants.TaskStatus.WAITING).collect(
+        .filter(t -> t.getStatus() == TaskStatus.WAITING).collect(
             Collectors.toList());
     Assert.assertEquals(waitingTasks.size(), 1);
-    Assert.assertEquals(TaskConstants.TaskType.DETECTION.toString() + "_" + detection1,
+    Assert.assertEquals(TaskType.DETECTION.toString() + "_" + detection1,
         waitingTasks.get(0).getJobName());
   }
 
@@ -263,12 +264,12 @@ public class DataAvailabilityTaskSchedulerTest {
     long detection1 = detectionConfigDAO.save(detection);
     long halfHourAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(30);
     createDataset(1, TEST_TIME, halfHourAgo);
-    createDetectionTask(detection1, oneDayAgo - 60_000, TaskConstants.TaskStatus.COMPLETED);
+    createDetectionTask(detection1, oneDayAgo - 60_000, TaskStatus.COMPLETED);
     TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     dataAvailabilityTaskScheduler.run();
     List<TaskDTO> tasks = taskManager.findAll();
     List<TaskDTO> waitingTasks = tasks.stream()
-        .filter(t -> t.getStatus() == TaskConstants.TaskStatus.WAITING).collect(
+        .filter(t -> t.getStatus() == TaskStatus.WAITING).collect(
             Collectors.toList());
 
     // 2 tasks should be created (detection & availability)
@@ -277,9 +278,9 @@ public class DataAvailabilityTaskSchedulerTest {
     jobNames.add(waitingTasks.get(0).getJobName());
     jobNames.add(waitingTasks.get(1).getJobName());
     Assert.assertTrue(
-        jobNames.contains(TaskConstants.TaskType.DETECTION.toString() + "_" + detection1));
+        jobNames.contains(TaskType.DETECTION.toString() + "_" + detection1));
     Assert.assertTrue(
-        jobNames.contains(TaskConstants.TaskType.DATA_QUALITY.toString() + "_" + detection1));
+        jobNames.contains(TaskType.DATA_QUALITY.toString() + "_" + detection1));
   }
 
   @Test
@@ -330,7 +331,7 @@ public class DataAvailabilityTaskSchedulerTest {
   }
 
   private long createDetectionTask(long detectionId, long createTime,
-      TaskConstants.TaskStatus status) {
+      TaskStatus status) {
     TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
     TaskDTO task = new TaskDTO();
     DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(detectionId, createTime - 1,
@@ -342,8 +343,8 @@ public class DataAvailabilityTaskSchedulerTest {
       LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString", taskInfo,
           e);
     }
-    task.setTaskType(TaskConstants.TaskType.DETECTION);
-    task.setJobName(TaskConstants.TaskType.DETECTION.toString() + "_" + detectionId);
+    task.setTaskType(TaskType.DETECTION);
+    task.setJobName(TaskType.DETECTION.toString() + "_" + detectionId);
     task.setStatus(status);
     task.setTaskInfo(taskInfoJson);
     return taskManager.save(task);

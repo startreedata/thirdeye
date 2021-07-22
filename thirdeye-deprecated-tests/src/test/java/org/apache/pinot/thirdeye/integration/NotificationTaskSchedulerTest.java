@@ -49,7 +49,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.quartz.SchedulerException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -173,7 +173,7 @@ public class NotificationTaskSchedulerTest {
     Assert.assertTrue(tasks.size() > 0);
     //Assert.assertTrue(tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION));
     Assert.assertTrue(
-        tasks.stream().noneMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
+        tasks.stream().noneMatch(x -> x.getTaskType() == TaskType.NOTIFICATION));
 
     // generate an anomaly
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
@@ -187,6 +187,6 @@ public class NotificationTaskSchedulerTest {
     tasks = taskDAO.findAll();
     Assert.assertTrue(tasks.size() > 0);
     Assert.assertTrue(
-        tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
+        tasks.stream().anyMatch(x -> x.getTaskType() == TaskType.NOTIFICATION));
   }
 }

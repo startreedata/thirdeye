@@ -22,8 +22,8 @@ package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.sql.Timestamp;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 
 /**
  * This class corresponds to anomaly tasks. An execution of an anomaly function creates an anomaly

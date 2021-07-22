@@ -1,15 +1,16 @@
 package org.apache.pinot.thirdeye.spi.api;
 
 import java.sql.Timestamp;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 
 public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
 
   private Long id;
-  private TaskConstants.TaskType taskType;
+  private TaskType taskType;
   private Long workerId;
   private JobApi job;
-  private TaskConstants.TaskStatus status;
+  private TaskStatus status;
   private long startTime;
   private long endTime;
   // A JSON string of the task info such as anomaly function, monitoring windows, etc.
@@ -38,11 +39,11 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
     return this;
   }
 
-  public TaskConstants.TaskStatus getStatus() {
+  public TaskStatus getStatus() {
     return status;
   }
 
-  public TaskApi setStatus(TaskConstants.TaskStatus status) {
+  public TaskApi setStatus(TaskStatus status) {
     this.status = status;
     return this;
   }
@@ -74,7 +75,7 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
     return this;
   }
 
-  public TaskConstants.TaskType getTaskType() {
+  public TaskType getTaskType() {
     return taskType;
   }
 
@@ -87,7 +88,7 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
     return this;
   }
 
-  public TaskApi setTaskType(TaskConstants.TaskType taskType) {
+  public TaskApi setTaskType(TaskType taskType) {
     this.taskType = taskType;
     return this;
   }

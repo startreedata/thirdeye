@@ -35,7 +35,7 @@ import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.JobManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.joda.time.DateTime;
 
 @Singleton
@@ -106,7 +106,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   }
 
   @Override
-  public List<JobDTO> findRecentScheduledJobByTypeAndConfigId(TaskConstants.TaskType taskType,
+  public List<JobDTO> findRecentScheduledJobByTypeAndConfigId(TaskType taskType,
       long configId,
       long minScheduledTime) {
     HashMap<String, Object> parameterMap = new HashMap<>();

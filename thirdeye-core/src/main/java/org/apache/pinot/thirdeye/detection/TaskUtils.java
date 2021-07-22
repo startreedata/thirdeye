@@ -36,7 +36,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -54,11 +55,11 @@ public class TaskUtils {
   /**
    * Build a task with the specified type and properties
    */
-  public static TaskDTO buildTask(long id, String taskInfoJson, TaskConstants.TaskType taskType) {
+  public static TaskDTO buildTask(long id, String taskInfoJson, TaskType taskType) {
     TaskDTO taskDTO = new TaskDTO();
     taskDTO.setTaskType(taskType);
     taskDTO.setJobName(taskType.toString() + "_" + id);
-    taskDTO.setStatus(TaskConstants.TaskStatus.WAITING);
+    taskDTO.setStatus(TaskStatus.WAITING);
     taskDTO.setTaskInfo(taskInfoJson);
     return taskDTO;
   }
@@ -70,8 +71,8 @@ public class TaskUtils {
         .findByPredicate(Predicate.AND(
             Predicate.EQ("name", jobName),
             Predicate.OR(
-                Predicate.EQ("status", TaskConstants.TaskStatus.RUNNING.toString()),
-                Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString()))
+                Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+                Predicate.EQ("status", TaskStatus.WAITING.toString()))
             )
         );
 
@@ -133,20 +134,20 @@ public class TaskUtils {
 
   public static long createDetectionTask(DetectionPipelineTaskInfo taskInfo,
       final TaskManager taskManager) {
-    return TaskUtils.createTask(TaskConstants.TaskType.DETECTION, taskInfo,
+    return TaskUtils.createTask(TaskType.DETECTION, taskInfo,
         taskManager);
   }
 
   public static long createDataQualityTask(DetectionPipelineTaskInfo taskInfo,
       final TaskManager taskManager) {
-    return TaskUtils.createTask(TaskConstants.TaskType.DATA_QUALITY, taskInfo,
+    return TaskUtils.createTask(TaskType.DATA_QUALITY, taskInfo,
         taskManager);
   }
 
   /**
    * Creates a generic task and saves it.
    */
-  public static long createTask(TaskConstants.TaskType taskType,
+  public static long createTask(TaskType taskType,
       DetectionPipelineTaskInfo taskInfo, final TaskManager taskManager) {
     String taskInfoJson = null;
     try {

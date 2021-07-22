@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.task;
+package org.apache.pinot.thirdeye.task.runner;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -12,6 +12,7 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.task.DetectionPipelineResultWrapper;
 
 @Singleton
 public class DetectionPipelineRunner {

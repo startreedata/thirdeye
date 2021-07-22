@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.task;
+package org.apache.pinot.thirdeye.task.runner;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,6 +33,10 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.task.TaskContext;
+import org.apache.pinot.thirdeye.task.TaskResult;
+import org.apache.pinot.thirdeye.task.TaskRunner;
 import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

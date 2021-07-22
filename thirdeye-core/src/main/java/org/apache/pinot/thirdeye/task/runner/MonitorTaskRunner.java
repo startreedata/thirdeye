@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.task;
+package org.apache.pinot.thirdeye.task.runner;
 
 import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
@@ -51,8 +51,12 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.task.MonitorTaskInfo;
+import org.apache.pinot.thirdeye.task.TaskContext;
+import org.apache.pinot.thirdeye.task.TaskResult;
+import org.apache.pinot.thirdeye.task.TaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

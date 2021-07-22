@@ -33,7 +33,7 @@ import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -61,7 +61,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
 
   private static final int DEFAULT_ALERT_DELAY = 1;
   private static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
-  public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskConstants.TaskType.DETECTION_ALERT
+  public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskType.NOTIFICATION
       .toString();
 
   private final Scheduler scheduler;
@@ -161,7 +161,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public String getJobKey(Long id, TaskConstants.TaskType taskType) {
+  public String getJobKey(Long id, TaskType taskType) {
     return String.format("%s_%d", taskType, id);
   }
 
@@ -180,7 +180,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
     Long id = subscriptionGroupDTO.getId();
     boolean isActive = subscriptionGroupDTO.isActive();
 
-    JobKey key = new JobKey(getJobKey(id, TaskConstants.TaskType.DETECTION_ALERT),
+    JobKey key = new JobKey(getJobKey(id, TaskType.NOTIFICATION),
         QUARTZ_SUBSCRIPTION_GROUPER);
     JobDetail job = JobBuilder.newJob(DetectionAlertJob.class).withIdentity(key).build();
     boolean isScheduled = scheduledJobs.contains(key);

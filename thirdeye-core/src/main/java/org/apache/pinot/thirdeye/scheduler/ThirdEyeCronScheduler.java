@@ -24,7 +24,7 @@ package org.apache.pinot.thirdeye.scheduler;
 
 import java.util.Set;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
@@ -52,5 +52,5 @@ public interface ThirdEyeCronScheduler extends Runnable {
   Set<JobKey> getScheduledJobs() throws SchedulerException;
 
   // Get the key for the scheduling job
-  String getJobKey(Long id, TaskConstants.TaskType taskType);
+  String getJobKey(Long id, TaskType taskType);
 }

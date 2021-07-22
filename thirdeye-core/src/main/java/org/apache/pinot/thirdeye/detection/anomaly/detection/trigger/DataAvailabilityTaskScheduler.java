@@ -49,7 +49,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskInfoFactory;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
@@ -217,11 +218,11 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   }
 
   private Map<Long, TaskDTO> retrieveRunningDetectionTasks() {
-    List<TaskConstants.TaskStatus> statusList = new ArrayList<>();
-    statusList.add(TaskConstants.TaskStatus.WAITING);
-    statusList.add(TaskConstants.TaskStatus.RUNNING);
+    List<TaskStatus> statusList = new ArrayList<>();
+    statusList.add(TaskStatus.WAITING);
+    statusList.add(TaskStatus.RUNNING);
     List<TaskDTO> tasks = taskManager
-        .findByStatusesAndTypeWithinDays(statusList, TaskConstants.TaskType.DETECTION,
+        .findByStatusesAndTypeWithinDays(statusList, TaskType.DETECTION,
             (int) TimeUnit.MILLISECONDS.toDays(CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
     Map<Long, TaskDTO> res = new HashMap<>(tasks.size());
     for (TaskDTO task : tasks) {
@@ -233,14 +234,14 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private void loadLatestTaskCreateTime(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
     List<TaskDTO> tasks = taskManager
-        .findByNameOrderByCreateTime(TaskConstants.TaskType.DETECTION +
+        .findByNameOrderByCreateTime(TaskType.DETECTION +
             "_" + detectionConfigId, 1, false);
     if (tasks.size() == 0) {
       detectionIdToLastTaskEndTimeMap.put(detectionConfigId, detectionConfig.getLastTimestamp());
     } else {
       // Load the watermark
       DetectionPipelineTaskInfo taskInfo = (DetectionPipelineTaskInfo) TaskInfoFactory
-          .get(TaskConstants.TaskType.DETECTION, tasks.get(0).getTaskInfo());
+          .get(TaskType.DETECTION, tasks.get(0).getTaskInfo());
       detectionIdToLastTaskEndTimeMap.put(detectionConfigId, taskInfo.getEnd());
     }
   }

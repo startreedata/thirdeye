@@ -21,7 +21,12 @@ package org.apache.pinot.thirdeye.task;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
+import org.apache.pinot.thirdeye.task.runner.DataQualityPipelineTaskRunner;
+import org.apache.pinot.thirdeye.task.runner.DetectionAlertTaskRunner;
+import org.apache.pinot.thirdeye.task.runner.DetectionPipelineTaskRunner;
+import org.apache.pinot.thirdeye.task.runner.MonitorTaskRunner;
+import org.apache.pinot.thirdeye.task.runner.OnboardingTaskRunner;
 
 @Singleton
 public class TaskRunnerFactory {
@@ -29,7 +34,7 @@ public class TaskRunnerFactory {
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
   private final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner;
   private final DetectionAlertTaskRunner detectionAlertTaskRunner;
-  private final YamlOnboardingTaskRunner yamlOnboardingTaskRunner;
+  private final OnboardingTaskRunner onboardingTaskRunner;
   private final MonitorTaskRunner monitorTaskRunner;
 
   @Inject
@@ -37,12 +42,12 @@ public class TaskRunnerFactory {
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
       final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner,
       final DetectionAlertTaskRunner detectionAlertTaskRunner,
-      final YamlOnboardingTaskRunner yamlOnboardingTaskRunner,
+      final OnboardingTaskRunner onboardingTaskRunner,
       final MonitorTaskRunner monitorTaskRunner) {
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
     this.dataQualityPipelineTaskRunner = dataQualityPipelineTaskRunner;
     this.detectionAlertTaskRunner = detectionAlertTaskRunner;
-    this.yamlOnboardingTaskRunner = yamlOnboardingTaskRunner;
+    this.onboardingTaskRunner = onboardingTaskRunner;
     this.monitorTaskRunner = monitorTaskRunner;
   }
 
@@ -52,10 +57,10 @@ public class TaskRunnerFactory {
         return dataQualityPipelineTaskRunner;
       case DETECTION:
         return detectionPipelineTaskRunner;
-      case DETECTION_ALERT:
+      case NOTIFICATION:
         return detectionAlertTaskRunner;
-      case YAML_DETECTION_ONBOARD:
-        return yamlOnboardingTaskRunner;
+      case ONBOARDING:
+        return onboardingTaskRunner;
       case MONITOR:
         return monitorTaskRunner;
       default:

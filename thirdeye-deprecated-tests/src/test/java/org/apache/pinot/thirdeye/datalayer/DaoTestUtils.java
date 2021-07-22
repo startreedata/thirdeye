@@ -63,7 +63,7 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalySource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 
@@ -166,7 +166,7 @@ public class DaoTestUtils {
     JobDTO jobSpec = new JobDTO();
     jobSpec.setJobName("Test_Anomaly_Job");
     jobSpec.setStatus(Constants.JobStatus.SCHEDULED);
-    jobSpec.setTaskType(TaskConstants.TaskType.DETECTION);
+    jobSpec.setTaskType(TaskType.DETECTION);
     jobSpec.setScheduleStartTime(System.currentTimeMillis());
     jobSpec.setWindowStartTime(new DateTime().minusHours(20).getMillis());
     jobSpec.setWindowEndTime(new DateTime().minusHours(10).getMillis());

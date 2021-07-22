@@ -18,7 +18,7 @@
  *
  */
 
-package org.apache.pinot.thirdeye.task;
+package org.apache.pinot.thirdeye.task.runner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,18 +35,22 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+import org.apache.pinot.thirdeye.task.TaskContext;
+import org.apache.pinot.thirdeye.task.TaskResult;
+import org.apache.pinot.thirdeye.task.TaskRunner;
+import org.apache.pinot.thirdeye.task.YamlOnboardingTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The task runner to run yaml onboarding task after a new detection is set up
+ * The task runner to run onboarding task after a new detection is set up
  * It will replay the detection pipeline and the re-tune the pipeline.
  * Because for some pipeline component, tuning is depend on replay result
  */
 @Singleton
-public class YamlOnboardingTaskRunner implements TaskRunner {
+public class OnboardingTaskRunner implements TaskRunner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(YamlOnboardingTaskRunner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OnboardingTaskRunner.class);
 
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
@@ -54,7 +58,7 @@ public class YamlOnboardingTaskRunner implements TaskRunner {
   private final DetectionPipelineRunner detectionPipelineRunner;
 
   @Inject
-  public YamlOnboardingTaskRunner(final DataProvider provider,
+  public OnboardingTaskRunner(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
       final DetectionPipelineRunner detectionPipelineRunner) {

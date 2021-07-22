@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.spi.api;
 
 import java.sql.Timestamp;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 
 public class JobApi implements ThirdEyeCrudApi<JobApi>{
   private Long id;

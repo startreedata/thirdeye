@@ -39,7 +39,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.joda.time.Interval;
 
 /**
@@ -265,12 +266,12 @@ public class DetectionHealth {
           Predicate.AND(Predicate.EQ(COL_NAME_TASK_NAME, "DETECTION_" + this.detectionConfigId),
               Predicate.LT(COL_NAME_START_TIME, endTime),
               Predicate.GT(COL_NAME_END_TIME, startTime),
-              Predicate.EQ(COL_NAME_TASK_TYPE, TaskConstants.TaskType.DETECTION.toString()),
+              Predicate.EQ(COL_NAME_TASK_TYPE, TaskType.DETECTION.toString()),
               Predicate.IN(COL_NAME_TASK_STATUS,
-                  new String[]{TaskConstants.TaskStatus.COMPLETED.toString(),
-                      TaskConstants.TaskStatus.FAILED.toString(),
-                      TaskConstants.TaskStatus.TIMEOUT.toString(),
-                      TaskConstants.TaskStatus.WAITING.toString()})));
+                  new String[]{TaskStatus.COMPLETED.toString(),
+                      TaskStatus.FAILED.toString(),
+                      TaskStatus.TIMEOUT.toString(),
+                      TaskStatus.WAITING.toString()})));
       long lastTaskExecutionTime = -1L;
       if (lastDetectionHealth != null && lastDetectionHealth.getDetectionTaskStatus() != null) {
         lastTaskExecutionTime = lastDetectionHealth.getDetectionTaskStatus()

@@ -31,8 +31,8 @@ import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,7 +170,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
 
   @Override
   public List<TaskDTO> findByStatusesAndTypeWithinDays(final List<TaskStatus> statuses,
-      final TaskConstants.TaskType type, final int days) {
+      final TaskType type, final int days) {
     final DateTime activeDate = new DateTime().minusDays(days);
     final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
     final Predicate statusPredicate = Predicate

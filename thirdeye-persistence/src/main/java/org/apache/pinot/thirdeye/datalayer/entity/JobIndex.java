@@ -19,13 +19,13 @@
 
 package org.apache.pinot.thirdeye.datalayer.entity;
 
-import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 
 public class JobIndex extends AbstractIndexEntity {
 
   String name;
   String status;
-  TaskConstants.TaskType type;
+  TaskType type;
   long configId;
   long scheduleStartTime;
   long scheduleEndTime;
@@ -46,11 +46,11 @@ public class JobIndex extends AbstractIndexEntity {
     this.scheduleEndTime = scheduleEndTime;
   }
 
-  public TaskConstants.TaskType getType() {
+  public TaskType getType() {
     return type;
   }
 
-  public void setType(TaskConstants.TaskType type) {
+  public void setType(TaskType type) {
     this.type = type;
   }
 

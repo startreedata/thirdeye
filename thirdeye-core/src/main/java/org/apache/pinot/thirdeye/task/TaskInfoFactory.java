@@ -20,17 +20,17 @@
 package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType.DATA_QUALITY;
-import static org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType.DETECTION;
-import static org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType.DETECTION_ALERT;
-import static org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType.MONITOR;
-import static org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType.YAML_DETECTION_ONBOARD;
+import static org.apache.pinot.thirdeye.spi.task.TaskType.DATA_QUALITY;
+import static org.apache.pinot.thirdeye.spi.task.TaskType.DETECTION;
+import static org.apache.pinot.thirdeye.spi.task.TaskType.MONITOR;
+import static org.apache.pinot.thirdeye.spi.task.TaskType.NOTIFICATION;
+import static org.apache.pinot.thirdeye.spi.task.TaskType.ONBOARDING;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.apache.pinot.thirdeye.spi.task.TaskConstants.TaskType;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +47,8 @@ public class TaskInfoFactory {
       ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
           .put(DATA_QUALITY, DetectionPipelineTaskInfo.class)
           .put(DETECTION, DetectionPipelineTaskInfo.class)
-          .put(DETECTION_ALERT, DetectionAlertTaskInfo.class)
-          .put(YAML_DETECTION_ONBOARD, YamlOnboardingTaskInfo.class)
+          .put(NOTIFICATION, DetectionAlertTaskInfo.class)
+          .put(ONBOARDING, YamlOnboardingTaskInfo.class)
           .put(MONITOR, MonitorTaskInfo.class)
           .build();
 

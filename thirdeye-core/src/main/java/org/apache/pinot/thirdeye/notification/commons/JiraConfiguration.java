@@ -26,18 +26,11 @@ import org.apache.commons.collections4.MapUtils;
 
 public class JiraConfiguration {
 
-  public static final String JIRA_CONFIG_KEY = "jiraConfiguration";
-  public static final String JIRA_URL_KEY = "jiraUrl";
-  public static final String JIRA_USER_KEY = "jiraUser";
-  public static final String JIRA_PASSWD_KEY = "jiraPassword";
-  public static final String JIRA_DEFAULT_PROJECT_KEY = "jiraDefaultProject";
-  public static final String JIRA_ISSUE_TYPE_KEY = "jiraIssueTypeId";
-
   private String jiraUrl;
   private String jiraUser;
   private String jiraPassword;
-  private String jiraDefaultProject;
-  private Long jiraIssueTypeId;
+  private String jiraDefaultProject = "THIRDEYE";
+  private Long jiraIssueTypeId = 19L;
 
   public String getJiraHost() {
     return jiraUrl;
@@ -63,11 +56,11 @@ public class JiraConfiguration {
     this.jiraPassword = jiraPassword;
   }
 
-  public void setJiraDefaultProjectKey(String jiraDefaultProject) {
+  public void setJiraDefaultProject(String jiraDefaultProject) {
     this.jiraDefaultProject = jiraDefaultProject;
   }
 
-  public String getJiraDefaultProjectKey() {
+  public String getJiraDefaultProject() {
     return jiraDefaultProject;
   }
 
@@ -88,7 +81,7 @@ public class JiraConfiguration {
     return Objects.equals(jiraUrl, at.getJiraHost())
         && Objects.equals(jiraUser, at.getJiraUser())
         && Objects.equals(jiraPassword, at.getJiraPassword())
-        && Objects.equals(jiraDefaultProject, at.getJiraDefaultProjectKey())
+        && Objects.equals(jiraDefaultProject, at.getJiraDefaultProject())
         && Objects.equals(jiraIssueTypeId, at.getJiraIssueTypeId());
   }
 
@@ -99,22 +92,12 @@ public class JiraConfiguration {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add(JIRA_URL_KEY, jiraUrl).add(JIRA_USER_KEY, jiraUser)
+    return MoreObjects.toStringHelper(this)
+        .add("jiraUrl", jiraUrl)
+        .add("jiraUser", jiraUser)
+        .add("jiraPassword", jiraPassword)
+        .add("jiraDefaultProject", jiraDefaultProject)
+        .add("jiraIssueTypeId", jiraIssueTypeId)
         .toString();
-  }
-
-  public static JiraConfiguration createFromProperties(Map<String, Object> jiraConfiguration) {
-    JiraConfiguration conf = new JiraConfiguration();
-    try {
-      conf.setJiraHost(MapUtils.getString(jiraConfiguration, JIRA_URL_KEY));
-      conf.setJiraUser(MapUtils.getString(jiraConfiguration, JIRA_USER_KEY));
-      conf.setJiraPassword(MapUtils.getString(jiraConfiguration, JIRA_PASSWD_KEY));
-      conf.setJiraDefaultProjectKey(
-          MapUtils.getString(jiraConfiguration, JIRA_DEFAULT_PROJECT_KEY, "THIRDEYE"));
-      conf.setJiraIssueTypeId(MapUtils.getLong(jiraConfiguration, JIRA_ISSUE_TYPE_KEY, 19L));
-    } catch (Exception e) {
-      throw new RuntimeException("Error occurred while parsing jira configuration into object.", e);
-    }
-    return conf;
   }
 }

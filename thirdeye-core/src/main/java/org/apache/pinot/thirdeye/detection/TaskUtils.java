@@ -36,8 +36,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.spi.task.TaskConstants;
+import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
@@ -116,10 +116,16 @@ public class TaskUtils {
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    final long delay = getDetectionExpectedDelay(configDTO,
-        thirdEyeCacheRegistry,
-        datasetConfigManager,
-        metricConfigManager);
+    long delay;
+    try {
+      delay = getDetectionExpectedDelay(configDTO,
+          thirdEyeCacheRegistry,
+          datasetConfigManager,
+          metricConfigManager);
+    } catch (Exception e) {
+      LOG.error("Failed to calc delay", e);
+      delay = 0;
+    }
     final long start = Math.max(configDTO.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
     return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);

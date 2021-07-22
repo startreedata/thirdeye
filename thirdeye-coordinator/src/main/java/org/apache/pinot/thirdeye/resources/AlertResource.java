@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
@@ -11,6 +12,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -204,7 +206,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     AlertEvaluationApi evaluation;
     if (isV2Evaluation(alert)) {
       evaluation = alertEvaluatorV2.evaluate(request);
-      if (alert.isV1Format()) {
+      if (bool(alert.isV1Format())) {
         evaluation = toV1Format(evaluation.getEvaluations());
       }
     } else {
@@ -212,6 +214,22 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       evaluation = alertEvaluator.evaluate(request);
     }
     return Response.ok(evaluation).build();
+  }
+
+  @ApiOperation(value = "Delete associated Anomalies")
+  @DELETE
+  @Path("{id}/reset")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response reset(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @PathParam("id") final Long id) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+    final AlertDTO dto = get(id);
+    alertDeleter.deleteAssociatedAnomalies(dto.getId());
+    log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal));
+
+    return respondOk(toApi(dto));
   }
 
   @DELETE

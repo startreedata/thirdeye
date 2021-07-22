@@ -1,8 +1,6 @@
 ---
 # Organize imports and run ESLint
-"*.{ts,tsx,js}":
-    - organize-imports-cli
-    - eslint --fix
+"*.{ts,tsx,js}": eslint --fix
 
 # Run stylelint
 "*.{css,scss}": stylelint --fix

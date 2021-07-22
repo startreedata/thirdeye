@@ -13,9 +13,15 @@ import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChange
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorSpec;
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetectorSpec;
+import org.apache.pinot.thirdeye.detection.components.triggers.ConsoleOutputTrigger;
+import org.apache.pinot.thirdeye.detection.components.triggers.ConsoleOutputTriggerSpec;
+import org.apache.pinot.thirdeye.detection.components.triggers.GenericEventTriggerFactory;
+import org.apache.pinot.thirdeye.detection.components.triggers.KafkaProducerTrigger;
+import org.apache.pinot.thirdeye.detection.components.triggers.KafkaProducerTriggerSpec;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 
 public class DetectionComponentsPlugin implements Plugin {
 
@@ -82,6 +88,22 @@ public class DetectionComponentsPlugin implements Plugin {
             "MEAN_VARIANCE",
             MeanVarianceRuleDetectorSpec.class,
             MeanVarianceRuleDetector.class
+        )
+    );
+  }
+
+  @Override
+  public Iterable<EventTriggerFactory> getEventTriggerFactories() {
+    return ImmutableList.of(
+        new GenericEventTriggerFactory<>(
+            "CONSOLE_OUTPUT",
+            ConsoleOutputTriggerSpec.class,
+            ConsoleOutputTrigger.class
+        ),
+        new GenericEventTriggerFactory<>(
+            "KAFKA_PRODUCER",
+            KafkaProducerTriggerSpec.class,
+            KafkaProducerTrigger.class
         )
     );
   }

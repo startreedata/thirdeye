@@ -92,12 +92,12 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardAll(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @FormParam("dataSourceName") String dataSourceName) {
+      @FormParam("name") String name) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
-    ensureExists(dataSourceName, "dataSourceName is a required field");
+    ensureExists(name, "name is a required field");
 
-    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
     final List<DatasetConfigDTO> datasets = dataSource.onboardAll();
 
     return respondOk(datasets.stream()

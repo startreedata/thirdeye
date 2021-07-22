@@ -10,6 +10,7 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private String name;
   private String description;
   private AlertTemplateApi template;
+  private Map<String, Object> templateProperties;
   private String cron;
   private Date lastTimestamp;
   private Boolean active;
@@ -19,7 +20,7 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private Map<String, List<String>> filters;
   private Map<String, AlertNodeApi> nodes;
   private List<SubscriptionGroupApi> subscriptionGroups;
-  private boolean v1Format;
+  private Boolean v1Format;
 
 
   public Long getId() {
@@ -55,6 +56,16 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   public AlertApi setTemplate(final AlertTemplateApi template) {
     this.template = template;
+    return this;
+  }
+
+  public Map<String, Object> getTemplateProperties() {
+    return templateProperties;
+  }
+
+  public AlertApi setTemplateProperties(
+      final Map<String, Object> templateProperties) {
+    this.templateProperties = templateProperties;
     return this;
   }
 
@@ -142,11 +153,11 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
     return this;
   }
 
-  public boolean isV1Format() {
+  public Boolean isV1Format() {
     return v1Format;
   }
 
-  public AlertApi setV1Format(final boolean v1Format) {
+  public AlertApi setV1Format(final Boolean v1Format) {
     this.v1Format = v1Format;
     return this;
   }

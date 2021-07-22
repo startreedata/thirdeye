@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -411,5 +414,18 @@ public class DetectionUtils {
     List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
     InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
     return baseline.gather(slice, data.getTimeseries());
+  }
+
+
+  public static  Map<String, DataTable> getTimeSeriesMap(
+      final Map<String, DetectionPipelineResult> inputMap) {
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    for (String key : inputMap.keySet()) {
+      DetectionPipelineResult input = inputMap.get(key);
+      if (input instanceof DataTable) {
+        timeSeriesMap.put(key, (DataTable) input);
+      }
+    }
+    return timeSeriesMap;
   }
 }

@@ -31,8 +31,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.detection.anomaly.task.TaskDriverConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;

@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
+import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;

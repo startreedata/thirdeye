@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.datalayer;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatabaseAdministrator;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;

@@ -1,51 +1,92 @@
-# Workflow to triage pull requests and build ThirdEye UI project
+# Workflow to triage pull requests and test/build ThirdEye UI project
 name: ThirdEye UI Workflow
 
 on:
     push:
         branches: [master]
         paths: thirdeye-ui/**
+
     pull_request:
         branches: [master]
         paths: thirdeye-ui/**
 
 jobs:
-    thirdeye-ui-build:
+    thirdeye-ui-lint:
+        name: Lint
         runs-on: ubuntu-latest
-
         steps:
             - name: Checkout
               uses: actions/checkout@v2
 
-            - name: Read .nvmrc
+            - name: Read Node Version
               run: echo ::set-output name=NVMRC::$(cat thirdeye-ui/.nvmrc)
-              id: nvm
+              id: nvmrc
 
             - name: Setup Node
               uses: actions/setup-node@v1
               with:
-                  node-version: "${{ steps.nvm.outputs.NVMRC }}"
+                  node-version: "${{ steps.nvmrc.outputs.NVMRC }}"
 
-            - name: thirdeye-ui > npm install
+            - name: Install Packages
               working-directory: thirdeye-ui
               run: npm ci
 
-            - name: thirdeye-ui > eslint
+            - name: ESLint
               working-directory: thirdeye-ui
-              run: npm run eslint
+              run: npm run eslint-check
 
-            - name: thirdeye-ui > stylelint
+            - name: Stylelint
               working-directory: thirdeye-ui
-              run: npm run stylelint
+              run: npm run stylelint-check
 
-            - name: thirdeye-ui > pretty
+            - name: Prettier
               working-directory: thirdeye-ui
-              run: npm run pretty
+              run: npm run prettier-check
 
-            - name: thirdeye-ui > test
+    thirdeye-ui-test:
+        name: Test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Read Node Version
+              run: echo ::set-output name=NVMRC::$(cat thirdeye-ui/.nvmrc)
+              id: nvmrc
+
+            - name: Setup Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: "${{ steps.nvmrc.outputs.NVMRC }}"
+
+            - name: Install Packages
+              working-directory: thirdeye-ui
+              run: npm ci
+
+            - name: Test
               working-directory: thirdeye-ui
               run: npm run test
 
-            - name: thirdeye-ui > build
+    thirdeye-ui-build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Read Node Version
+              run: echo ::set-output name=NVMRC::$(cat thirdeye-ui/.nvmrc)
+              id: nvmrc
+
+            - name: Setup Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: "${{ steps.nvmrc.outputs.NVMRC }}"
+
+            - name: Install Packages
+              working-directory: thirdeye-ui
+              run: npm ci
+
+            - name: Build
               working-directory: thirdeye-ui
               run: npm run build

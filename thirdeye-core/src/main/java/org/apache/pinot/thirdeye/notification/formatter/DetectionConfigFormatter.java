@@ -153,6 +153,9 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
    */
   public static Set<String> extractMetricUrnsFromProperties(Map<String, Object> properties) {
     Set<String> metricUrns = new HashSet<>();
+    if (properties == null) {
+      return metricUrns;
+    }
     if (properties.containsKey(PROP_METRIC_URNS_KEY)) {
       metricUrns.add((String) properties.get(PROP_METRIC_URNS_KEY));
     }

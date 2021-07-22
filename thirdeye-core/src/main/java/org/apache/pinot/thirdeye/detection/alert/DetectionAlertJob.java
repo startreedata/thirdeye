@@ -81,7 +81,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     );
     if (!scheduledTasks.isEmpty()) {
       // if a task is pending and not time out yet, don't schedule more
-      LOG.info("Skip scheduling subscription task {}. Already queued.", jobName);
+      LOG.trace("Skip scheduling subscription task {}. Already queued.", jobName);
       return;
     }
 

@@ -39,7 +39,7 @@ public class AlertDeleter {
     alertManager.delete(dto);
   }
 
-  private void deleteAssociatedAnomalies(final Long alertId) {
+  public void deleteAssociatedAnomalies(final Long alertId) {
     final List<MergedAnomalyResultDTO> anomalies = mergedAnomalyResultManager.findByPredicate(
         Predicate.EQ("detectionConfigId", alertId));
     anomalies.forEach(mergedAnomalyResultManager::delete);

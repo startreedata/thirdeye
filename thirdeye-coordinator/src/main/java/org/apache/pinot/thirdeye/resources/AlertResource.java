@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
@@ -205,7 +206,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     AlertEvaluationApi evaluation;
     if (isV2Evaluation(alert)) {
       evaluation = alertEvaluatorV2.evaluate(request);
-      if (alert.isV1Format()) {
+      if (bool(alert.isV1Format())) {
         evaluation = toV1Format(evaluation.getEvaluations());
       }
     } else {

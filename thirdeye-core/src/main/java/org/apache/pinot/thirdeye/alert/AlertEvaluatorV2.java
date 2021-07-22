@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.alert;
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static org.apache.pinot.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -111,7 +112,7 @@ public class AlertEvaluatorV2 {
       final Map<String, Object> templateProperties = alert.getTemplateProperties();
       final AlertTemplateDTO templateWithProperties = applyContext(template, templateProperties);
 
-      if (request.isDryRun()) {
+      if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()
             .setDryRun(true)
             .setAlert(new AlertApi()

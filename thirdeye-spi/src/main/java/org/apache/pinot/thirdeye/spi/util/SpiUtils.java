@@ -42,6 +42,10 @@ public class SpiUtils {
     return Optional.ofNullable(o);
   }
 
+  public static boolean bool(Boolean value) {
+    return value != null && value;
+  }
+
   public static String constructMetricAlias(String datasetName, String metricName) {
     return datasetName + MetricConfigDTO.ALIAS_JOINER + metricName;
   }

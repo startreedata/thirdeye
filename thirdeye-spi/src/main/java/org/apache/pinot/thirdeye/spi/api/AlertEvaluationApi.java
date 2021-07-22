@@ -34,7 +34,7 @@ public class AlertEvaluationApi {
   private Date start;
   private Date end;
   private Date lastTimestamp;
-  Boolean dryRun = false;
+  Boolean dryRun;
 
   public AlertApi getAlert() {
     return alert;

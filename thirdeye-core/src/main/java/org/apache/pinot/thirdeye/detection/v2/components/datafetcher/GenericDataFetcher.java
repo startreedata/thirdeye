@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.components.datafetcher;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -43,13 +45,16 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     this.query = dataFetcherSpec.getQuery();
     this.tableName = dataFetcherSpec.getTableName();
     if (dataFetcherSpec.getDataSourceCache() != null) {
-      this.thirdEyeDataSource = dataFetcherSpec.getDataSourceCache()
-          .getDataSource(dataFetcherSpec.getDataSource());
+      this.thirdEyeDataSource = requireNonNull(dataFetcherSpec
+          .getDataSourceCache()
+          .getDataSource(dataFetcherSpec.getDataSource()), "data source is unavailable");
     }
   }
 
   @Override
   public DataTable getDataTable() throws Exception {
-    return thirdEyeDataSource.fetchDataTable(new ThirdEyeRequestV2(tableName, query, ImmutableMap.of()));
+    return thirdEyeDataSource.fetchDataTable(new ThirdEyeRequestV2(tableName,
+        query,
+        ImmutableMap.of()));
   }
 }

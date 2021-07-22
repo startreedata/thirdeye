@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 
 @JsonInclude(Include.NON_NULL)
-public class StatusApi {
+public class StatusApi implements ThirdEyeApi {
 
   private ThirdEyeStatus code;
   private String msg;

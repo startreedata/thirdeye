@@ -3,7 +3,7 @@ package org.apache.pinot.thirdeye.spi;
 public enum ThirdEyeStatus {
 
   ERR_DATASOURCE_NOT_FOUND("Data Source not found! %s"),
-  ERR_DATASOURCE_INVALID("Data source validation failed!"),
+  ERR_DATASOURCE_UNREACHABLE("Data source validation failed!"),
   ERR_DATASET_NOT_FOUND("Dataset not found! %s"),
   ERR_MULTIPLE_DATASETS_FOUND(
       "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
@@ -19,7 +19,9 @@ public enum ThirdEyeStatus {
   ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
   ERR_CONFIG("Configuration Error! %s"),
   ERR_TIMEOUT("Operation timed out!"),
-  ERR_UNKNOWN("%s");
+  ERR_UNKNOWN("%s"),
+  HEALTHY("Healthy"),
+  UNHEALTHY("Unhealthy %s : %s");
 
   final String message;
 

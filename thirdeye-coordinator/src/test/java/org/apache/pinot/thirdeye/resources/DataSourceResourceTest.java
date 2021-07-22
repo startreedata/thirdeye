@@ -3,76 +3,61 @@ package org.apache.pinot.thirdeye.resources;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
-import org.apache.pinot.thirdeye.spi.api.HealthCheckApi;
+import org.apache.pinot.thirdeye.spi.api.StatusApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DataSourceResourceTest {
 
   private String dataSourceName = "test";
+  private ThirdEyeDataSource dataSource;
+  private DataSourceCache dataSourceCache;
+  private DataSourceResource dataSourceResource;
+
+  @BeforeMethod
+  void setup() {
+    this.dataSource = mock(ThirdEyeDataSource.class);
+    this.dataSourceCache = mock(DataSourceCache.class);
+    this.dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
+        DataSourceManager.class), dataSourceCache);
+  }
 
   @Test
   public void statusHealthyTest() {
-    ThirdEyeDataSource dataSource = mock(ThirdEyeDataSource.class);
     when(dataSource.validate()).thenReturn(true);
-    DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(dataSource);
-    DataSourceResource dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
-        DataSourceManager.class), dataSourceCache);
-    Response response = dataSourceResource.status(null, dataSourceName);
-    Assert.assertNotNull(response.getEntity());
-    Assert.assertTrue(((HealthCheckApi) response.getEntity()).isHealthy());
+    StatusApi response = (StatusApi) dataSourceResource.status(null, dataSourceName)
+        .getEntity();
+    Assert.assertNotNull(response);
+    Assert.assertEquals(response.getCode(), ThirdEyeStatus.HEALTHY);
   }
 
   @Test
   public void validationFailureTest() {
-    ThirdEyeDataSource dataSource = mock(ThirdEyeDataSource.class);
     when(dataSource.validate()).thenReturn(false);
-    DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(dataSource);
-    DataSourceResource dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
-        DataSourceManager.class), dataSourceCache);
-    Response response = dataSourceResource.status(null, dataSourceName);
-    HealthCheckApi respEntity = (HealthCheckApi) response.getEntity();
-    Assert.assertNotNull(respEntity);
-    Assert.assertFalse(respEntity.isHealthy());
-    Assert.assertEquals(respEntity.getMessage(),
-        ThirdEyeStatus.ERR_DATASOURCE_INVALID.getMessage());
+    Assert.expectThrows(InternalServerErrorException.class, () -> dataSourceResource.status(null, dataSourceName));
   }
 
   @Test
   public void dataSourceNotFoundTest() {
-    DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(null);
-    DataSourceResource dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
-        DataSourceManager.class), dataSourceCache);
-    Response response = dataSourceResource.status(null, dataSourceName);
-    HealthCheckApi respEntity = (HealthCheckApi) response.getEntity();
-    Assert.assertNotNull(respEntity);
-    Assert.assertFalse(respEntity.isHealthy());
-    Assert.assertEquals(respEntity.getMessage(),
-        String.format(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND.getMessage(), dataSourceName));
+    Assert.expectThrows(InternalServerErrorException.class, () -> dataSourceResource.status(null, dataSourceName));
   }
 
   @Test
   public void dataSourceExceptionTest() {
-    DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     when(dataSourceCache.getDataSource(dataSourceName)).thenThrow(new ThirdEyeException(
         ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, dataSourceName));
-    DataSourceResource dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
-        DataSourceManager.class), dataSourceCache);
-    Response response = dataSourceResource.status(null, dataSourceName);
-    HealthCheckApi respEntity = (HealthCheckApi) response.getEntity();
-    Assert.assertNotNull(respEntity);
-    Assert.assertFalse(respEntity.isHealthy());
-    Assert.assertEquals(respEntity.getMessage(),
-        String.format(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND.getMessage(), dataSourceName));
+    Assert.expectThrows(BadRequestException.class, () -> dataSourceResource.status(null, dataSourceName));
   }
 }

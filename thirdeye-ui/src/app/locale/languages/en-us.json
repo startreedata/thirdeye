@@ -120,6 +120,7 @@
         "email": "Email",
         "emails": "Emails",
         "name": "Name",
+        "cron": "Schedule",
         "detection-configuration": "Detection Configuration",
         "preview-alert": "Preview Alert",
         "reset-configuration": "Reset Configuration",

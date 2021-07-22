@@ -45,8 +45,7 @@ public class DetectionPipelineRunner {
         start,
         end);
     checkState(detectionPipelineResultMap.size() == 1,
-        "Only a single output from the pipeline is supported.");
-    // TODO spyne bad implementation. temporary. to be fixed.
+        "Only a single output from the pipeline is supported at the moment.");
     final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();
     return new DetectionPipelineResultWrapper(alert, result);
   }

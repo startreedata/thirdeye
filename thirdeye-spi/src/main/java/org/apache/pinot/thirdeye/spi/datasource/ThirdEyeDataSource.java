@@ -86,6 +86,15 @@ public interface ThirdEyeDataSource {
       throws Exception;
 
   /**
+   * Returns boolean value to validate the health of data source
+   *
+   * @return health validation boolean
+   */
+  default boolean validate() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Clear any cached values.
    */
   default void clear() throws Exception {

@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.task;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -119,7 +120,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getId(),
           info.getStart(),
           info.getEnd(),
-          result.getAnomalies());
+          optional(result.getAnomalies()).map(List::size).orElse(0));
 
       return Collections.emptyList();
     } catch (final Exception e) {

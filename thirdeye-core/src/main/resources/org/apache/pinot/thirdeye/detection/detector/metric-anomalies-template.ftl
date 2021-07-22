@@ -14,7 +14,7 @@
   </tr>
 
   <tr>
-    <td style="font-size: 16px; padding: 12px; background-color: #0073B1; color: #FFF; text-align: center;">
+    <td style="font-size: 16px; padding: 12px; background-color: #0B263F; color: #FFF; text-align: center;">
       <#if anomalyCount == 1>
         <p>
           We have detected <strong>an anomaly</strong> on the metric

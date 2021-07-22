@@ -134,6 +134,12 @@ public class DetectionConfigTuner {
 
     // Tune each tunable component in the detection componentSpecs
     Map<String, Object> allComponentSpecs = this.detectionConfig.getComponentSpecs();
+
+    // Keep it idempotent
+    if (allComponentSpecs == null) {
+      return detectionConfig;
+    }
+
     for (Map.Entry<String, Object> componentSpec : allComponentSpecs.entrySet()) {
       Map<String, Object> tunedComponentProps = new HashMap<>();
 

@@ -22,14 +22,14 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil.detectionRetuneCounter;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MapeAveragePercentageChangeModelEvaluator;
@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
 import org.apache.pinot.thirdeye.detection.yaml.DetectionConfigTuner;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
@@ -65,9 +66,11 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
   }
 
   public AlertDTO maintain(AlertDTO config, Instant timestamp) {
-    Preconditions
-        .checkArgument(!Objects.isNull(config.getComponents()) && !config.getComponents().isEmpty(),
-            "Components not initialized");
+    final Map<String, BaseComponent> components = config.getComponents();
+    if (components == null) {
+      return config;
+    }
+    checkArgument(!components.isEmpty(), "Components not initialized");
     if (isTunable(config)) {
       // if the pipeline is tunable, get the model evaluators
       Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = getModelEvaluators(

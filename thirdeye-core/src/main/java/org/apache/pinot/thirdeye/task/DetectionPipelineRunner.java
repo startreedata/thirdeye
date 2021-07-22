@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.task;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
@@ -35,19 +37,24 @@ public class DetectionPipelineRunner {
     }
   }
 
-  private DetectionPipelineResult executeV2Plan(final AlertDTO alert, final long start,
+  private DetectionPipelineResult executeV2Plan(final AlertDTO alert,
+      final long start,
       final long end) throws Exception {
     final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
         alert.getTemplate().getNodes(),
         start,
         end);
+    checkState(detectionPipelineResultMap.size() == 1,
+        "Only a single output from the pipeline is supported.");
     // TODO spyne bad implementation. temporary. to be fixed.
-    return detectionPipelineResultMap.values().iterator().next();
+    final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();
+    return new DetectionPipelineResultWrapper(alert, result);
   }
 
   @Deprecated
   private DetectionPipelineResultV1 executeV1Plan(final AlertDTO alert,
-      final long start, final long end) throws Exception {
+      final long start,
+      final long end) throws Exception {
     final DetectionPipeline pipeline = detectionPipelineFactory.get(new DetectionPipelineContext()
         .setAlert(alert)
         .setStart(start)

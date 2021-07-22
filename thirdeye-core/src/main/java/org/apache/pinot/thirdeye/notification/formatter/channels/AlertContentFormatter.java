@@ -18,11 +18,13 @@ public abstract class AlertContentFormatter {
   protected ThirdEyeCoordinatorConfiguration teConfig;
   protected BaseNotificationContent notificationContent;
 
-  public AlertContentFormatter(Properties alertClientConfig, BaseNotificationContent content,
-      ThirdEyeCoordinatorConfiguration teConfig, SubscriptionGroupDTO subsConfig) {
+  public AlertContentFormatter(final Properties alertClientConfig,
+      final BaseNotificationContent content,
+      final ThirdEyeCoordinatorConfiguration teConfig,
+      final SubscriptionGroupDTO subsConfig) {
     this.alertClientConfig = alertClientConfig;
     this.teConfig = teConfig;
-    this.notificationContent = content;
+    notificationContent = content;
     this.subsConfig = subsConfig;
 
     notificationContent.init(alertClientConfig, teConfig);
@@ -31,15 +33,15 @@ public abstract class AlertContentFormatter {
   /**
    * Plug the appropriate subject style based on configuration
    */
-  SubjectType getSubjectType(Properties alertSchemeClientConfigs) {
-    SubjectType subjectType;
+  SubjectType getSubjectType(final Properties alertSchemeClientConfigs) {
+    final SubjectType subjectType;
     if (alertSchemeClientConfigs != null && alertSchemeClientConfigs
         .containsKey(PROP_SUBJECT_STYLE)) {
       subjectType = SubjectType
           .valueOf(alertSchemeClientConfigs.get(PROP_SUBJECT_STYLE).toString());
     } else {
       // To support the legacy email subject configuration
-      subjectType = this.subsConfig.getSubjectType();
+      subjectType = subsConfig.getSubjectType();
     }
 
     return subjectType;

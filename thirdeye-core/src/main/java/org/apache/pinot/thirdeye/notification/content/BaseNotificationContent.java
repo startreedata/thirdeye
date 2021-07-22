@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.notification.content;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Multimap;
 import java.io.File;
@@ -370,13 +372,17 @@ public abstract class BaseNotificationContent implements NotificationContent {
     for (AnomalyResult anomalyResult : anomalies) {
       if (anomalyResult instanceof MergedAnomalyResultDTO) {
         MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
-        datasets.add(mergedAnomaly.getCollection());
-        metrics.add(mergedAnomaly.getMetric());
 
-        MetricConfigDTO metric = this.metricConfigManager
-            .findByMetricAndDataset(mergedAnomaly.getMetric(), mergedAnomaly.getCollection());
-        if (metric != null) {
-          metricsMap.put(metric.getId().toString(), metric);
+        optional(mergedAnomaly.getCollection()).ifPresent(datasets::add);
+
+        final String metricName = mergedAnomaly.getMetric();
+        if (metricName != null) {
+          metrics.add(metricName);
+          MetricConfigDTO metric = this.metricConfigManager
+              .findByMetricAndDataset(metricName, mergedAnomaly.getCollection());
+          if (metric != null) {
+            metricsMap.put(metric.getId().toString(), metric);
+          }
         }
       }
     }

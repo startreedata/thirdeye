@@ -22,7 +22,6 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil.detectionRetuneCounter;
 
 import com.google.inject.Inject;
@@ -67,10 +66,10 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
 
   public AlertDTO maintain(AlertDTO config, Instant timestamp) {
     final Map<String, BaseComponent> components = config.getComponents();
-    if (components == null) {
+    if (components == null || components.isEmpty()) {
       return config;
     }
-    checkArgument(!components.isEmpty(), "Components not initialized");
+
     if (isTunable(config)) {
       // if the pipeline is tunable, get the model evaluators
       Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = getModelEvaluators(

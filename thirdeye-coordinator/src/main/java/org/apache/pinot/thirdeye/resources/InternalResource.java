@@ -17,12 +17,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -34,29 +30,20 @@ public class InternalResource {
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final EventManager eventManager;
-  private final AlertManager detectionConfigManager;
-  private final MetricConfigManager metricConfigManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration;
   private final DatabaseAdminResource databaseAdminResource;
+  private final DetectionEmailAlerter detectionEmailAlerter;
 
   @Inject
   public InternalResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final EventManager eventManager,
-      final AlertManager detectionConfigManager,
-      final MetricConfigManager metricConfigManager,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration,
-      final DatabaseAdminResource databaseAdminResource) {
+      final DatabaseAdminResource databaseAdminResource,
+      final DetectionEmailAlerter detectionEmailAlerter) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.eventManager = eventManager;
-    this.detectionConfigManager = detectionConfigManager;
-    this.metricConfigManager = metricConfigManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.thirdEyeCoordinatorConfiguration = thirdEyeCoordinatorConfiguration;
     this.databaseAdminResource = databaseAdminResource;
+    this.detectionEmailAlerter = detectionEmailAlerter;
   }
 
   @Path("db-admin")
@@ -85,14 +72,8 @@ public class InternalResource {
     final SubscriptionGroupDTO sg = ensureExists(subscriptionGroupManager.findById(
         subscriptionGroupId));
     final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findAll());
-    DetectionEmailAlerter instance = new DetectionEmailAlerter(
-        thirdEyeCoordinatorConfiguration,
-        metricConfigManager,
-        detectionConfigManager,
-        eventManager,
-        mergedAnomalyResultManager);
 
-    instance.buildAndSendEmail(sg, new ArrayList<>(all));
+    detectionEmailAlerter.buildAndSendEmail(sg, new ArrayList<>(all));
     return Response.ok().build();
   }
 
@@ -103,13 +84,7 @@ public class InternalResource {
     ensureExists(alertId, "Query parameter required: alertId !");
     final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findByDetectionConfigId(
         alertId));
-    DetectionEmailAlerter instance = new DetectionEmailAlerter(
-        thirdEyeCoordinatorConfiguration,
-        metricConfigManager,
-        detectionConfigManager,
-        eventManager,
-        mergedAnomalyResultManager);
-    return Response.ok(instance.getEmailContent(new ArrayList<>(all))).build();
+    return Response.ok(detectionEmailAlerter.getEmailContent(new ArrayList<>(all))).build();
   }
 
   @GET

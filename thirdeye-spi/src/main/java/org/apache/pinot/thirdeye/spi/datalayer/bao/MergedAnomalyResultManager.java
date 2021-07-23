@@ -36,6 +36,8 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
 
   List<MergedAnomalyResultDTO> findByFunctionId(Long functionId);
 
+  List<MergedAnomalyResultDTO> findByDetectionConfigId(long detectionConfigId);
+
   List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
       long endTime, long detectionConfigId);
 

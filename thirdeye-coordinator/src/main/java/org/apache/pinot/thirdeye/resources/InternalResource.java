@@ -14,6 +14,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
@@ -93,6 +94,22 @@ public class InternalResource {
 
     instance.buildAndSendEmail(sg, new ArrayList<>(all));
     return Response.ok().build();
+  }
+
+  @GET
+  @Path("anomaly-report")
+  @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
+  public Response generateAnomalyReport(@QueryParam("alertId") Long alertId) {
+    ensureExists(alertId, "Query parameter required: alertId !");
+    final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findByDetectionConfigId(
+        alertId));
+    DetectionEmailAlerter instance = new DetectionEmailAlerter(
+        thirdEyeCoordinatorConfiguration,
+        metricConfigManager,
+        detectionConfigManager,
+        eventManager,
+        mergedAnomalyResultManager);
+    return Response.ok(instance.getEmailContent(new ArrayList<>(all))).build();
   }
 
   @GET

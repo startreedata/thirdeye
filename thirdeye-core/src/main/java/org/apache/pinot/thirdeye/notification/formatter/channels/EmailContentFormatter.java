@@ -74,6 +74,13 @@ public class EmailContentFormatter extends AlertContentFormatter {
         templateData);
   }
 
+  public String getEmailHtml(final Collection<AnomalyResult> anomalies) {
+    final Map<String, Object> templateData = notificationContent.format(anomalies, subsConfig);
+    templateData.put("dashboardHost", teConfig.getDashboardHost());
+    return buildHtml(TEMPLATE_MAP.get(notificationContent.getTemplate()),
+        templateData);
+  }
+
   /**
    * Apply the parameter map to given email template, and format it as EmailEntity
    */

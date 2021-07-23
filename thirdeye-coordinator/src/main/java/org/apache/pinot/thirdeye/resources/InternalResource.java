@@ -4,7 +4,6 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
@@ -18,8 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
@@ -87,13 +84,8 @@ public class InternalResource {
     final SubscriptionGroupDTO sg = ensureExists(subscriptionGroupManager.findById(
         subscriptionGroupId));
     final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findAll());
-    final DetectionAlertFilterResult result = new DetectionAlertFilterResult(
-        ImmutableMap.of(new DetectionAlertFilterNotification(sg), all)
-    );
     DetectionEmailAlerter instance = new DetectionEmailAlerter(
-        sg,
         thirdEyeCoordinatorConfiguration,
-        result,
         metricConfigManager,
         detectionConfigManager,
         eventManager,

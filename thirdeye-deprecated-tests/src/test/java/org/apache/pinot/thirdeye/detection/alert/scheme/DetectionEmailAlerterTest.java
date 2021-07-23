@@ -83,30 +83,30 @@ public class DetectionEmailAlerterTest {
     alertDTO.setId(1L);
     when(detectionConfigManager.findById(alertDTO.getId())).thenReturn(alertDTO);
 
-    this.subscriptionGroupDTO = new SubscriptionGroupDTO();
-    Map<String, Object> properties = new HashMap<>();
+    subscriptionGroupDTO = new SubscriptionGroupDTO();
+    final Map<String, Object> properties = new HashMap<>();
     properties.put(PROP_CLASS_NAME,
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(alertDTO.getId()));
 
-    Map<String, Set<String>> recipients = new HashMap<>();
+    final Map<String, Set<String>> recipients = new HashMap<>();
     recipients.put(PROP_TO, PROP_TO_VALUE);
     recipients.put(PROP_CC, PROP_CC_VALUE);
     recipients.put(PROP_BCC, PROP_BCC_VALUE);
 
-    Map<String, Object> emailScheme = new HashMap<>();
+    final Map<String, Object> emailScheme = new HashMap<>();
     emailScheme.put("className", "org.apache.pinot.thirdeye.detection.alert.scheme.RandomAlerter");
     emailScheme.put(PROP_RECIPIENTS, recipients);
-    this.subscriptionGroupDTO.setAlertSchemes(Collections.singletonMap("emailScheme", emailScheme));
-    this.subscriptionGroupDTO.setProperties(properties);
-    this.subscriptionGroupDTO.setFrom(FROM_ADDRESS_VALUE);
-    this.subscriptionGroupDTO.setName(ALERT_NAME_VALUE);
-    Map<Long, Long> vectorClocks = new HashMap<>();
-    this.subscriptionGroupDTO.setVectorClocks(vectorClocks);
-    this.subscriptionGroupDTO.setId((long) 2);
+    subscriptionGroupDTO.setAlertSchemes(Collections.singletonMap("emailScheme", emailScheme));
+    subscriptionGroupDTO.setProperties(properties);
+    subscriptionGroupDTO.setFrom(FROM_ADDRESS_VALUE);
+    subscriptionGroupDTO.setName(ALERT_NAME_VALUE);
+    final Map<Long, Long> vectorClocks = new HashMap<>();
+    subscriptionGroupDTO.setVectorClocks(vectorClocks);
+    subscriptionGroupDTO.setId((long) 2);
 
     anomalyDAO = mock(MergedAnomalyResultManager.class);
-    MergedAnomalyResultDTO anomalyResultDTO = new MergedAnomalyResultDTO();
+    final MergedAnomalyResultDTO anomalyResultDTO = new MergedAnomalyResultDTO();
     anomalyResultDTO.setStartTime(1000L);
     anomalyResultDTO.setEndTime(2000L);
     anomalyResultDTO.setDetectionConfigId(alertDTO.getId());
@@ -114,7 +114,7 @@ public class DetectionEmailAlerterTest {
     anomalyResultDTO.setMetric(METRIC_VALUE);
     anomalyResultDTO.setId(11L);
 
-    MergedAnomalyResultDTO anomalyResultDTO2 = new MergedAnomalyResultDTO();
+    final MergedAnomalyResultDTO anomalyResultDTO2 = new MergedAnomalyResultDTO();
     anomalyResultDTO2.setStartTime(3000L);
     anomalyResultDTO2.setEndTime(4000L);
     anomalyResultDTO2.setDetectionConfigId(alertDTO.getId());
@@ -125,10 +125,10 @@ public class DetectionEmailAlerterTest {
 
     thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
-    SmtpConfiguration smtpProperties = new SmtpConfiguration();
+    final SmtpConfiguration smtpProperties = new SmtpConfiguration();
     smtpProperties.setSmtpHost("test");
     smtpProperties.setSmtpPort(25);
-    AlerterConfigurations alerterProps = new AlerterConfigurations();
+    final AlerterConfigurations alerterProps = new AlerterConfigurations();
     alerterProps.setSmtpConfiguration(smtpProperties);
     thirdEyeConfig.setAlerterConfigurations(alerterProps);
   }
@@ -140,59 +140,57 @@ public class DetectionEmailAlerterTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
-    DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(this.subscriptionGroupDTO,
-        this.thirdEyeConfig,
-        null,
+    final DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(
+        thirdEyeConfig,
         mock(MetricConfigManager.class),
         mock(AlertManager.class),
         mock(EventManager.class),
         mock(MergedAnomalyResultManager.class));
-    alertTaskInfo.run();
+    alertTaskInfo.run(subscriptionGroupDTO, null);
   }
 
   @Test
   public void testSendEmailSuccessful() throws Exception {
-    Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
-    SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
-        this.subscriptionGroupDTO,
-        ConfigUtils.getMap(this.subscriptionGroupDTO.getAlertSchemes()),
+    final Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
+    final SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
+        subscriptionGroupDTO,
+        ConfigUtils.getMap(subscriptionGroupDTO.getAlertSchemes()),
         new HashMap<>());
     result.put(
         new DetectionAlertFilterNotification(subsConfig),
-        new HashSet<>(this.anomalyDAO.findAll()));
-    DetectionAlertFilterResult notificationResults = new DetectionAlertFilterResult(result);
+        new HashSet<>(anomalyDAO.findAll()));
+    final DetectionAlertFilterResult notificationResults = new DetectionAlertFilterResult(result);
 
     final HtmlEmail htmlEmail = mock(HtmlEmail.class);
     when(htmlEmail.getMailSession()).thenReturn(Session.getInstance(new Properties()));
     when(htmlEmail.send()).thenReturn("sent");
 
-    Map<String, Object> expectedResponse = new HashMap<>();
-    ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
+    final Map<String, Object> expectedResponse = new HashMap<>();
+    final ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
 
-    MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
+    final MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
         mock(MetricConfigManager.class),
         mock(EventManager.class),
         detectionConfigManager,
         mock(MergedAnomalyResultManager.class));
 
-    DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(subscriptionGroupDTO,
+    final DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(
         thirdEyeConfig,
-        notificationResults,
         mock(MetricConfigManager.class),
         detectionConfigManager,
         mock(EventManager.class),
         mock(MergedAnomalyResultManager.class)) {
       @Override
-      protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
+      protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
         return htmlEmail;
       }
 
       @Override
-      protected BaseNotificationContent getNotificationContent(Properties emailClientConfigs) {
+      protected BaseNotificationContent getNotificationContent(final Properties emailClientConfigs) {
         return metricAnomaliesContent;
       }
     };
     // Executes successfully without errors
-    emailAlerter.run();
+    emailAlerter.run(subscriptionGroupDTO, mock(DetectionAlertFilterResult.class));
   }
 }

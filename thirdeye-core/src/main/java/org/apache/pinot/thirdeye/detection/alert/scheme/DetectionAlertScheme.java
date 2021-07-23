@@ -40,28 +40,25 @@ public abstract class DetectionAlertScheme {
   protected static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
-  protected final SubscriptionGroupDTO subsConfig;
-  protected final DetectionAlertFilterResult result;
+
   private final MetricConfigManager metricConfigManager;
   private final AlertManager detectionConfigManager;
   private final EventManager eventManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
-  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig,
-      DetectionAlertFilterResult result,
-      final MetricConfigManager metricConfigManager,
+  public DetectionAlertScheme(final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this.subsConfig = subsConfig;
-    this.result = result;
     this.metricConfigManager = metricConfigManager;
     this.detectionConfigManager = detectionConfigManager;
     this.eventManager = eventManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
-  public abstract void run() throws Exception;
+  public abstract void run(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult result) throws Exception;
 
   public void destroy() {
     // do nothing
@@ -102,15 +99,8 @@ public abstract class DetectionAlertScheme {
    * alerter,
    * do not fail the alert if a subset of recipients are invalid.
    */
-  void handleAlertFailure(int numOfAnomalies, Exception e) throws Exception {
-    // Dimension recipients not enabled
-    if (this.result.getResult().size() == 1) {
-      throw e;
-    } else {
-      LOG.warn("Skipping! Found illegal arguments while sending {} anomalies for alert {}."
-              + " Exception message: ",
-          numOfAnomalies, this.subsConfig.getId(), e);
-    }
+  void handleAlertFailure(Exception e) {
+    LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
   }
 
   protected BaseNotificationContent getNotificationContent(Properties alertSchemeClientConfigs) {

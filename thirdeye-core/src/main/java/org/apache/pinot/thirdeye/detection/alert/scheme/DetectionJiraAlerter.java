@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
+import static java.util.Objects.requireNonNull;
+
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -70,33 +72,30 @@ import org.slf4j.LoggerFactory;
 @AlertScheme(type = "JIRA")
 public class DetectionJiraAlerter extends DetectionAlertScheme {
 
+  public static final String PROP_JIRA_SCHEME = "jiraScheme";
+  public static final int JIRA_DESCRIPTION_MAX_LENGTH = 100000;
+  public static final int JIRA_ONE_LINE_COMMENT_LENGTH = 250;
   private static final Logger LOG = LoggerFactory.getLogger(DetectionJiraAlerter.class);
 
   private final ThirdEyeCoordinatorConfiguration teConfig;
   private final ThirdEyeJiraClient jiraClient;
   private final JiraConfiguration jiraAdminConfig;
 
-  public static final String PROP_JIRA_SCHEME = "jiraScheme";
-  public static final int JIRA_DESCRIPTION_MAX_LENGTH = 100000;
-  public static final int JIRA_ONE_LINE_COMMENT_LENGTH = 250;
-
-  public DetectionJiraAlerter(SubscriptionGroupDTO subsConfig,
-      ThirdEyeCoordinatorConfiguration thirdeyeConfig,
-      DetectionAlertFilterResult result,
-      ThirdEyeJiraClient jiraClient,
+  public DetectionJiraAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
+      final ThirdEyeJiraClient jiraClient,
       final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(subsConfig, result, metricConfigManager,
+    super(metricConfigManager,
         detectionConfigManager, eventManager, mergedAnomalyResultManager);
-    this.teConfig = thirdeyeConfig;
+    teConfig = thirdeyeConfig;
 
-    this.jiraAdminConfig = thirdeyeConfig.getAlerterConfigurations().getJiraConfiguration();
+    jiraAdminConfig = thirdeyeConfig.getAlerterConfigurations().getJiraConfiguration();
     this.jiraClient = jiraClient;
   }
 
-  private void updateJiraAlert(Issue issue, JiraEntity jiraEntity) {
+  private void updateJiraAlert(final Issue issue, final JiraEntity jiraEntity) {
     // Append labels - do not remove existing labels
     jiraEntity.getLabels().addAll(issue.getLabels());
     jiraEntity.setLabels(jiraEntity.getLabels().stream().distinct().collect(Collectors.toList()));
@@ -112,17 +111,17 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
       }
 
       jiraClient.addComment(issue, jiraEntity.getDescription());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Jira has a upper limit on the number of characters in description. In such cases we will only
       // share a link in the comment.
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       sb.append(
           "*<Truncating details due to jira limit! Please use the below link to view all the anomalies.>*");
       sb.append(System.getProperty("line.separator"));
 
       // Print only the first line with the redirection link to ThirdEye
-      String desc = jiraEntity.getDescription();
-      int newLineIndex = desc.indexOf("\n");
+      final String desc = jiraEntity.getDescription();
+      final int newLineIndex = desc.indexOf("\n");
       if (newLineIndex < 0 || newLineIndex > JIRA_ONE_LINE_COMMENT_LENGTH) {
         sb.append(desc, 0, JIRA_ONE_LINE_COMMENT_LENGTH);
         sb.append("...");
@@ -134,46 +133,53 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
     }
   }
 
-  private JiraEntity buildJiraEntity(DetectionAlertFilterNotification notification,
-      Set<MergedAnomalyResultDTO> anomalies) {
-    SubscriptionGroupDTO subsetSubsConfig = notification.getSubscriptionConfig();
+  private JiraEntity buildJiraEntity(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterNotification notification,
+      final Set<MergedAnomalyResultDTO> anomalies) {
+    final SubscriptionGroupDTO subsetSubsConfig = notification.getSubscriptionConfig();
     if (subsetSubsConfig.getAlertSchemes().get(PROP_JIRA_SCHEME) == null) {
       throw new IllegalArgumentException(
-          "Jira not configured in subscription group " + this.subsConfig.getId());
+          "Jira not configured in subscription group " + subscriptionGroup.getId());
     }
 
-    Properties jiraClientConfig = new Properties();
+    final Properties jiraClientConfig = new Properties();
     jiraClientConfig
         .putAll(ConfigUtils.getMap(subsetSubsConfig.getAlertSchemes().get(PROP_JIRA_SCHEME)));
 
-    List<AnomalyResult> anomalyResultListOfGroup = new ArrayList<>(anomalies);
+    final List<AnomalyResult> anomalyResultListOfGroup = new ArrayList<>(anomalies);
     anomalyResultListOfGroup.sort(COMPARATOR_DESC);
 
-    BaseNotificationContent content = getNotificationContent(jiraClientConfig);
+    final BaseNotificationContent content = getNotificationContent(jiraClientConfig);
 
-    return new JiraContentFormatter(jiraAdminConfig, jiraClientConfig, content, this.teConfig,
+    return new JiraContentFormatter(jiraAdminConfig, jiraClientConfig, content, teConfig,
         subsetSubsConfig)
         .getJiraEntity(notification.getDimensionFilters(), anomalyResultListOfGroup);
   }
 
-  private void createJiraTickets(DetectionAlertFilterResult results) throws Exception {
-    LOG.info("Preparing a jira alert for subscription group id {}", this.subsConfig.getId());
+  private void createJiraTickets(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult results) {
+    LOG.info("Preparing a jira alert for subscription group id {}", subscriptionGroup.getId());
     Preconditions.checkNotNull(results.getResult());
-    for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
+    for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
         .getResult().entrySet()) {
       try {
-        JiraEntity jiraEntity = buildJiraEntity(result.getKey(), result.getValue());
+        final JiraEntity jiraEntity = buildJiraEntity(subscriptionGroup,
+            result.getKey(),
+            result.getValue());
 
         // Fetch the most recent reported issues within mergeGap by jira service account under the project
-        List<Issue> issues = jiraClient
-            .getIssues(jiraEntity.getJiraProject(), jiraEntity.getLabels(),
-                jiraAdminConfig.getJiraUser(), jiraEntity.getMergeGap());
-        Optional<Issue> latestJiraIssue = issues.stream().max(
+        final List<Issue> issues = jiraClient.getIssues(jiraEntity.getJiraProject(),
+            jiraEntity.getLabels(),
+            jiraAdminConfig.getJiraUser(),
+            jiraEntity.getMergeGap());
+        final Optional<Issue> latestJiraIssue = issues.stream().max(
             (o1, o2) -> o2.getCreationDate().compareTo(o1.getCreationDate()));
 
         if (!latestJiraIssue.isPresent()) {
           // No existing ticket found. Create a new jira ticket
-          String issueKey = jiraClient.createIssue(jiraEntity);
+          final String issueKey = jiraClient.createIssue(jiraEntity);
           ThirdeyeMetricsUtil.jiraAlertsSuccessCounter.inc();
           ThirdeyeMetricsUtil.jiraAlertsNumTicketsCounter.inc();
           LOG.info("Jira created {}, anomalies reported {}", issueKey, result.getValue().size());
@@ -185,27 +191,28 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
           LOG.info("Jira updated {}, anomalies reported = {}", latestJiraIssue.get().getKey(),
               result.getValue().size());
         }
-      } catch (Exception e) {
+      } catch (final Exception e) {
         ThirdeyeMetricsUtil.jiraAlertsFailedCounter.inc();
-        super.handleAlertFailure(result.getValue().size(), e);
+        super.handleAlertFailure(e);
       }
     }
   }
 
   @Override
   public void destroy() {
-    this.jiraClient.close();
+    jiraClient.close();
   }
 
   @Override
-  public void run() throws Exception {
-    Preconditions.checkNotNull(result);
+  public void run(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult result) throws Exception {
+    requireNonNull(result);
     if (result.getAllAnomalies().size() == 0) {
-      LOG.info("Zero anomalies found, skipping creation of jira alert for {}",
-          this.subsConfig.getId());
+      LOG.info("Zero anomalies found, skipping jira alert for {}", subscriptionGroup.getId());
       return;
     }
 
-    createJiraTickets(result);
+    createJiraTickets(subscriptionGroup, result);
   }
 }

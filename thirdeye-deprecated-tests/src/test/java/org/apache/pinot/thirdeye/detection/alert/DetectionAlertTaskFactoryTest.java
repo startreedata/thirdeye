@@ -2,18 +2,12 @@ package org.apache.pinot.thirdeye.detection.alert;
 
 import static org.mockito.Mockito.mock;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
-import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
+import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -53,10 +47,11 @@ public class DetectionAlertTaskFactoryTest {
     this.alertConfigDTO = new SubscriptionGroupDTO();
 
     detectionAlertTaskFactory = new DetectionAlertTaskFactory(mock(DataProvider.class),
-            mock(MergedAnomalyResultManager.class),
-            mock(AlertManager.class),
-            mock(MetricConfigManager.class),
-            mock(EventManager.class));
+        mock(MergedAnomalyResultManager.class),
+        mock(AlertManager.class),
+        mock(MetricConfigManager.class),
+        mock(EventManager.class),
+        mock(DetectionEmailAlerter.class));
   }
 
   @AfterClass(alwaysRun = true)
@@ -94,57 +89,5 @@ public class DetectionAlertTaskFactoryTest {
     Assert.assertEquals(detectionAlertFilter.endTime, endTime);
     Assert.assertEquals(detectionAlertFilter.getClass().getSimpleName(),
         "ToAllRecipientsDetectionAlertFilter");
-  }
-
-  @Test
-  public void testLoadAlertSchemes() throws Exception {
-    SubscriptionGroupDTO alertConfig = createAlertConfig(alerters,
-        "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
-    Set<DetectionAlertScheme> detectionAlertSchemes = detectionAlertTaskFactory
-        .loadAlertSchemes(alertConfig,
-            new ThirdEyeCoordinatorConfiguration(), null);
-
-    Assert.assertEquals(detectionAlertSchemes.size(), 2);
-    Iterator<DetectionAlertScheme> alertSchemeIterator = detectionAlertSchemes.iterator();
-    Assert.assertTrue(
-        getAlerterSet().contains(alertSchemeIterator.next().getClass().getSimpleName()));
-    Assert.assertTrue(
-        getAlerterSet().contains(alertSchemeIterator.next().getClass().getSimpleName()));
-  }
-
-  /**
-   * Check if an exception is thrown when the detection config id cannot be found
-   */
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testDefaultAlertSchemes() throws Exception {
-
-    ThirdEyeCoordinatorConfiguration teConfig = new ThirdEyeCoordinatorConfiguration();
-    teConfig.setAlerterConfigurations(new AlerterConfigurations());
-
-    detectionAlertTaskFactory.loadAlertSchemes(null, teConfig, null);
-  }
-
-  /**
-   * Load the default thirdeye email alerter if no scheme is not configured
-   */
-  @Test(enabled = false)
-  public void testLoadDefaultAlertSchemes() throws Exception {
-    SubscriptionGroupDTO alertConfig = createAlertConfig(Collections.emptyMap(),
-        "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
-
-    ThirdEyeCoordinatorConfiguration teConfig = new ThirdEyeCoordinatorConfiguration();
-    teConfig.setAlerterConfigurations(new AlerterConfigurations());
-
-    Set<DetectionAlertScheme> detectionAlertSchemes = detectionAlertTaskFactory
-        .loadAlertSchemes(alertConfig,
-            teConfig, null);
-
-    Assert.assertEquals(detectionAlertSchemes.size(), 1);
-    Assert.assertEquals(detectionAlertSchemes.iterator().next().getClass().getSimpleName(),
-        "DetectionEmailAlerter");
-  }
-
-  private Set<String> getAlerterSet() {
-    return new HashSet<>(Arrays.asList("RandomAlerter", "AnotherRandomAlerter"));
   }
 }

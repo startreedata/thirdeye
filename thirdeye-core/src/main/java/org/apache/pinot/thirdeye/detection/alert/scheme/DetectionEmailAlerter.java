@@ -19,8 +19,12 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,6 +63,7 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for sending the email alerts
  */
 @AlertScheme(type = "EMAIL")
+@Singleton
 public class DetectionEmailAlerter extends DetectionAlertScheme {
 
   public static final String PROP_RECIPIENTS = "recipients";
@@ -69,55 +74,52 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private static final String PROP_TO = "to";
   private static final String PROP_CC = "cc";
   private static final String PROP_BCC = "bcc";
-  private static final String PROP_EMAIL_WHITELIST = "emailWhitelist";
-  private static final String PROP_ADMIN_RECIPIENTS = "adminRecipients";
-  private static final String PROP_FROM_ADDRESS = "fromAddress";
-  private final List<String> emailBlacklist = new ArrayList<>(
-      Arrays.asList("me@company.com", "cc_email@company.com"));
+
+  private final List<String> emailBlacklist = Arrays.asList(
+      "me@company.com",
+      "cc_email@company.com");
   private final ThirdEyeCoordinatorConfiguration teConfig;
   private final SmtpConfiguration smtpConfig;
 
-  public DetectionEmailAlerter(final SubscriptionGroupDTO subsConfig,
-      final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
-      final DetectionAlertFilterResult result,
+  @Inject
+  public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(subsConfig,
-        result,
+    super(
         metricConfigManager,
         detectionConfigManager,
         eventManager,
         mergedAnomalyResultManager);
-    this.teConfig = thirdeyeConfig;
-    this.smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
+    teConfig = thirdeyeConfig;
+    smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
   }
 
-  private Set<String> retainWhitelisted(Set<String> recipients, Collection<String> emailWhitelist) {
+  private Set<String> retainWhitelisted(final Set<String> recipients, final Collection<String> emailWhitelist) {
     if (recipients != null) {
       recipients.retainAll(emailWhitelist);
     }
     return recipients;
   }
 
-  private Set<String> removeBlacklisted(Set<String> recipients, Collection<String> emailBlacklist) {
+  private Set<String> removeBlacklisted(final Set<String> recipients, final Collection<String> emailBlacklist) {
     if (recipients != null) {
       recipients.removeAll(emailBlacklist);
     }
     return recipients;
   }
 
-  private void configureAdminRecipients(DetectionAlertFilterRecipients recipients) {
+  private void configureAdminRecipients(final DetectionAlertFilterRecipients recipients) {
     if (recipients.getCc() == null) {
       recipients.setCc(new HashSet<>());
     }
     recipients.getCc().addAll(ConfigUtils.getList(smtpConfig.getAdminRecipients()));
   }
 
-  private void whitelistRecipients(DetectionAlertFilterRecipients recipients) {
+  private void whitelistRecipients(final DetectionAlertFilterRecipients recipients) {
     if (recipients != null) {
-      List<String> emailWhitelist = ConfigUtils.getList(
+      final List<String> emailWhitelist = ConfigUtils.getList(
           smtpConfig.getEmailWhitelist());
       if (!emailWhitelist.isEmpty()) {
         recipients.setTo(retainWhitelisted(recipients.getTo(), emailWhitelist));
@@ -127,7 +129,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     }
   }
 
-  private void blacklistRecipients(DetectionAlertFilterRecipients recipients) {
+  private void blacklistRecipients(final DetectionAlertFilterRecipients recipients) {
     if (recipients != null && !emailBlacklist.isEmpty()) {
       recipients.setTo(removeBlacklisted(recipients.getTo(), emailBlacklist));
       recipients.setCc(removeBlacklisted(recipients.getCc(), emailBlacklist));
@@ -135,8 +137,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     }
   }
 
-  private void validateAlert(DetectionAlertFilterRecipients recipients,
-      List<AnomalyResult> anomalies) {
+  private void validateAlert(final DetectionAlertFilterRecipients recipients,
+      final List<AnomalyResult> anomalies) {
     Preconditions.checkNotNull(recipients);
     Preconditions.checkNotNull(anomalies);
     if (recipients.getTo() == null || recipients.getTo().isEmpty()) {
@@ -147,15 +149,15 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     }
   }
 
-  private HtmlEmail prepareEmailContent(SubscriptionGroupDTO subsConfig,
-      Properties emailClientConfigs,
-      List<AnomalyResult> anomalies, DetectionAlertFilterRecipients recipients) throws Exception {
+  private HtmlEmail prepareEmailContent(final SubscriptionGroupDTO subsConfig,
+      final Properties emailClientConfigs,
+      final List<AnomalyResult> anomalies, final DetectionAlertFilterRecipients recipients) throws Exception {
     configureAdminRecipients(recipients);
     whitelistRecipients(recipients);
     blacklistRecipients(recipients);
     validateAlert(recipients, anomalies);
 
-    BaseNotificationContent content = getNotificationContent(emailClientConfigs);
+    final BaseNotificationContent content = getNotificationContent(emailClientConfigs);
     final EmailContentFormatter emailContentFormatter = new EmailContentFormatter(emailClientConfigs,
         content,
         teConfig,
@@ -163,14 +165,14 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
-      String fromAddress = smtpConfig.getSmtpUser();
+      final String fromAddress = smtpConfig.getSmtpUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }
       subsConfig.setFrom(fromAddress);
     }
 
-    HtmlEmail email = emailEntity.getContent();
+    final HtmlEmail email = emailEntity.getContent();
     email.setSubject(emailEntity.getSubject());
     email.setFrom(subsConfig.getFrom());
     email.setTo(AlertUtils.toAddress(recipients.getTo()));
@@ -184,14 +186,14 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     return getHtmlContent(emailEntity);
   }
 
-  protected HtmlEmail getHtmlContent(EmailEntity emailEntity) {
+  protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
     return emailEntity.getContent();
   }
 
   /**
    * Sends email according to the provided config.
    */
-  private void sendEmail(HtmlEmail email) throws EmailException {
+  private void sendEmail(final HtmlEmail email) throws EmailException {
     email.setHostName(smtpConfig.getSmtpHost());
     email.setSmtpPort(smtpConfig.getSmtpPort());
     if (smtpConfig.getSmtpUser() != null && smtpConfig.getSmtpPassword() != null) {
@@ -207,31 +209,33 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
     email.send();
 
-    int recipientCount =
+    final int recipientCount =
         email.getToAddresses().size() + email.getCcAddresses().size() + email.getBccAddresses()
             .size();
     LOG.info("Email sent with subject '{}' to {} recipients", email.getSubject(), recipientCount);
   }
 
-  private void buildAndSendEmails(DetectionAlertFilterResult results) throws Exception {
-    LOG.info("Preparing an email alert for subscription group id {}", this.subsConfig.getId());
+  private void buildAndSendEmails(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult results) {
+    LOG.info("Preparing an email alert for subscription group id {}", subscriptionGroup.getId());
     Preconditions.checkNotNull(results.getResult());
-    for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
+    for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
         .getResult().entrySet()) {
       try {
         final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
         if (subscriptionGroupDTO.getAlertSchemes().get(PROP_EMAIL_SCHEME) == null) {
           throw new IllegalArgumentException(
-              "Invalid email settings in subscription group " + this.subsConfig.getId());
+              "Invalid email settings in subscription group " + subscriptionGroup.getId());
         }
 
         final List<AnomalyResult> anomalyResults = new ArrayList<>(result.getValue());
         anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
         buildAndSendEmail(subscriptionGroupDTO, anomalyResults);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         ThirdeyeMetricsUtil.emailAlertsFailedCounter.inc();
-        super.handleAlertFailure(result.getValue().size(), e);
+        super.handleAlertFailure(e);
       }
     }
   }
@@ -240,21 +244,21 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
       final SubscriptionGroupDTO sg,
       final List<AnomalyResult> anomalyResults) throws Exception {
 
-    Properties emailConfig = new Properties();
+    final Properties emailConfig = new Properties();
     emailConfig.putAll(ConfigUtils.getMap(sg.getAlertSchemes().get(PROP_EMAIL_SCHEME)));
 
     if (emailConfig.get(PROP_RECIPIENTS) == null) {
       return;
     }
 
-    Map<String, Object> emailRecipients = ConfigUtils.getMap(emailConfig.get(PROP_RECIPIENTS));
+    final Map<String, Object> emailRecipients = ConfigUtils.getMap(emailConfig.get(PROP_RECIPIENTS));
     if (emailRecipients.get(PROP_TO) == null || ConfigUtils
         .getList(emailRecipients.get(PROP_TO)).isEmpty()) {
       throw new IllegalArgumentException(
-          "No email recipients found in subscription group " + this.subsConfig.getId());
+          "No email recipients found in subscription group " + sg.getId());
     }
 
-    DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
+    final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
         new HashSet<>(ConfigUtils.getList(emailRecipients.get(PROP_TO))),
         new HashSet<>(ConfigUtils.getList(emailRecipients.get(PROP_CC))),
         new HashSet<>(ConfigUtils.getList(emailRecipients.get(PROP_BCC))));
@@ -268,13 +272,15 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   }
 
   @Override
-  public void run() throws Exception {
-    Preconditions.checkNotNull(result);
+  public void run(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult result) throws Exception {
+    requireNonNull(result);
     if (result.getAllAnomalies().size() == 0) {
-      LOG.info("Zero anomalies found, skipping email alert for {}", this.subsConfig.getId());
+      LOG.info("Zero anomalies found, skipping email alert for {}", subscriptionGroup.getId());
       return;
     }
 
-    buildAndSendEmails(result);
+    buildAndSendEmails(subscriptionGroup, result);
   }
 }

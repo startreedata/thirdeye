@@ -16,14 +16,16 @@ public class RandomAlerter extends DetectionAlertScheme {
                        final MetricConfigManager metricConfigManager, final AlertManager detectionConfigManager,
                        final EventManager eventManager,
                        final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(subsConfig, result, TestDbEnv.getInstance().getMetricConfigDAO(),
+    super(TestDbEnv.getInstance().getMetricConfigDAO(),
         TestDbEnv.getInstance().getDetectionConfigManager(),
         TestDbEnv.getInstance().getEventDAO(),
         TestDbEnv.getInstance().getMergedAnomalyResultDAO());
   }
 
   @Override
-  public void run() {
+  public void run(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult result) {
 
   }
 }

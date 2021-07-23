@@ -78,8 +78,8 @@ public class ThirdEyeJiraClient {
   private JiraRestClient createJiraRestClient(JiraConfiguration jiraAdminConfig) {
     return new AsynchronousJiraRestClientFactory().createWithBasicHttpAuthentication(
         URI.create(jiraAdminConfig.getJiraHost()),
-        jiraAdminConfig.getJiraUser(),
-        jiraAdminConfig.getJiraPassword());
+        jiraAdminConfig.getUser(),
+        jiraAdminConfig.getPassword());
   }
 
   private String buildQueryOnCreatedBy(long lookBackMillis) {

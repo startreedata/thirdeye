@@ -75,6 +75,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private static final String PROP_CC = "cc";
   private static final String PROP_BCC = "bcc";
 
+  private List<String> adminRecipients;
+  private List<String> emailWhitelist;
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
@@ -94,6 +96,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         mergedAnomalyResultManager);
     teConfig = thirdeyeConfig;
     smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
+    adminRecipients = new ArrayList<>();
+    emailWhitelist = new ArrayList<>();
   }
 
   private Set<String> retainWhitelisted(final Set<String> recipients, final Collection<String> emailWhitelist) {
@@ -114,13 +118,11 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     if (recipients.getCc() == null) {
       recipients.setCc(new HashSet<>());
     }
-    recipients.getCc().addAll(ConfigUtils.getList(smtpConfig.getAdminRecipients()));
+    recipients.getCc().addAll(adminRecipients);
   }
 
   private void whitelistRecipients(final DetectionAlertFilterRecipients recipients) {
     if (recipients != null) {
-      final List<String> emailWhitelist = ConfigUtils.getList(
-          smtpConfig.getEmailWhitelist());
       if (!emailWhitelist.isEmpty()) {
         recipients.setTo(retainWhitelisted(recipients.getTo(), emailWhitelist));
         recipients.setCc(retainWhitelisted(recipients.getCc(), emailWhitelist));
@@ -165,7 +167,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
-      final String fromAddress = smtpConfig.getSmtpUser();
+      final String fromAddress = smtpConfig.getUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }
@@ -194,18 +196,18 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
    * Sends email according to the provided config.
    */
   private void sendEmail(final HtmlEmail email) throws EmailException {
-    email.setHostName(smtpConfig.getSmtpHost());
-    email.setSmtpPort(smtpConfig.getSmtpPort());
-    if (smtpConfig.getSmtpUser() != null && smtpConfig.getSmtpPassword() != null) {
+    email.setHostName(smtpConfig.getHost());
+    email.setSmtpPort(smtpConfig.getPort());
+    if (smtpConfig.getUser() != null && smtpConfig.getPassword() != null) {
       email.setAuthenticator(
-          new DefaultAuthenticator(smtpConfig.getSmtpUser(), smtpConfig.getSmtpPassword()));
+          new DefaultAuthenticator(smtpConfig.getUser(), smtpConfig.getPassword()));
       email.setSSLOnConnect(true);
-      email.setSslSmtpPort(Integer.toString(smtpConfig.getSmtpPort()));
+      email.setSslSmtpPort(Integer.toString(smtpConfig.getPort()));
     }
 
     // This needs to be done after the configuration phase since getMailSession() creates
     // a new mail session if required.
-    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", smtpConfig.getSmtpHost());
+    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", smtpConfig.getHost());
 
     email.send();
 

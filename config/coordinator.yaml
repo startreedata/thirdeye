@@ -95,18 +95,18 @@ mockEvents:
       nameSuffixes: [tuning, bugfix, rollout, test]
 
 dashboardHost: "http://localhost:8081"
-alerterConfigurations:
-  smtpConfiguration:
-    smtpHost: localhost
-    smtpPort: 25
-    smtpUser: no-reply@thirdeye.startree.ai
-    smtpPassword: my-password
-#  jiraConfiguration:
-#    jiraUser: <REPLACE_ME>
-#    jiraPassword: <REPLACE_ME>
-#    jiraUrl: <REPLACE_ME>
-#    jiraDefaultProject: <REPLACE_ME>
-#    jiraIssueTypeId: 19
+notifications:
+  smtp:
+    host: smtp.gmail.com
+    port: 465
+    user: thirdeye.startreeinc@gmail.com
+    password: pdbtxiwntylkhlfp
+#  jira:
+#    user: <REPLACE_ME>
+#    password: <REPLACE_ME>
+#    url: <REPLACE_ME>
+#    defaultProject: <REPLACE_ME>
+#    issueTypeId: 19
 failureFromAddress: "thirdeye@localhost"
 failureToAddress: "thirdeye@localhost"
 phantomJsPath: "/usr/local/bin/jstf"

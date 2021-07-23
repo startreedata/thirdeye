@@ -90,8 +90,8 @@ public class JiraContentFormatter extends AlertContentFormatter {
    * Make sure the base admin parameters are configured before proceeding
    */
   private void validateJiraConfigs(JiraConfiguration jiraAdminConfig) {
-    Preconditions.checkNotNull(jiraAdminConfig.getJiraUser());
-    Preconditions.checkNotNull(jiraAdminConfig.getJiraPassword());
+    Preconditions.checkNotNull(jiraAdminConfig.getUser());
+    Preconditions.checkNotNull(jiraAdminConfig.getPassword());
     Preconditions.checkNotNull(jiraAdminConfig.getJiraHost());
   }
 
@@ -178,7 +178,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
   private JiraEntity buildJiraEntity(String jiraTemplate, Map<String, Object> templateValues,
       Multimap<String, String> dimensionFilters) {
     String jiraProject = MapUtils.getString(alertClientConfig, PROP_PROJECT,
-        this.jiraAdminConfig.getJiraDefaultProject());
+        this.jiraAdminConfig.getDefaultProject());
     Long jiraIssueTypeId = MapUtils
         .getLong(alertClientConfig, PROP_ISSUE_TYPE, this.jiraAdminConfig.getJiraIssueTypeId());
 

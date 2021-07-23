@@ -20,48 +20,46 @@
 package org.apache.pinot.thirdeye.notification.commons;
 
 import com.google.common.base.MoreObjects;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.collections4.MapUtils;
 
 public class JiraConfiguration {
 
-  private String jiraUrl;
-  private String jiraUser;
-  private String jiraPassword;
-  private String jiraDefaultProject = "THIRDEYE";
+  private String url;
+  private String user;
+  private String password;
+  private String defaultProject = "THIRDEYE";
   private Long jiraIssueTypeId = 19L;
 
   public String getJiraHost() {
-    return jiraUrl;
+    return url;
   }
 
   public void setJiraHost(String jiraHost) {
-    this.jiraUrl = jiraHost;
+    this.url = jiraHost;
   }
 
-  public String getJiraUser() {
-    return jiraUser;
+  public String getUser() {
+    return user;
   }
 
-  public void setJiraUser(String jiraUser) {
-    this.jiraUser = jiraUser;
+  public void setUser(String user) {
+    this.user = user;
   }
 
-  public String getJiraPassword() {
-    return jiraPassword;
+  public String getPassword() {
+    return password;
   }
 
-  public void setJiraPassword(String jiraPassword) {
-    this.jiraPassword = jiraPassword;
+  public void setPassword(String password) {
+    this.password = password;
   }
 
-  public void setJiraDefaultProject(String jiraDefaultProject) {
-    this.jiraDefaultProject = jiraDefaultProject;
+  public void setDefaultProject(String defaultProject) {
+    this.defaultProject = defaultProject;
   }
 
-  public String getJiraDefaultProject() {
-    return jiraDefaultProject;
+  public String getDefaultProject() {
+    return defaultProject;
   }
 
   public void setJiraIssueTypeId(Long jiraIssueTypeId) {
@@ -78,25 +76,25 @@ public class JiraConfiguration {
       return false;
     }
     JiraConfiguration at = (JiraConfiguration) o;
-    return Objects.equals(jiraUrl, at.getJiraHost())
-        && Objects.equals(jiraUser, at.getJiraUser())
-        && Objects.equals(jiraPassword, at.getJiraPassword())
-        && Objects.equals(jiraDefaultProject, at.getJiraDefaultProject())
+    return Objects.equals(url, at.getJiraHost())
+        && Objects.equals(user, at.getUser())
+        && Objects.equals(password, at.getPassword())
+        && Objects.equals(defaultProject, at.getDefaultProject())
         && Objects.equals(jiraIssueTypeId, at.getJiraIssueTypeId());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jiraUrl, jiraUser, jiraPassword, jiraDefaultProject);
+    return Objects.hash(url, user, password, defaultProject);
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("jiraUrl", jiraUrl)
-        .add("jiraUser", jiraUser)
-        .add("jiraPassword", jiraPassword)
-        .add("jiraDefaultProject", jiraDefaultProject)
+        .add("jiraUrl", url)
+        .add("jiraUser", user)
+        .add("jiraPassword", password)
+        .add("jiraDefaultProject", defaultProject)
         .add("jiraIssueTypeId", jiraIssueTypeId)
         .toString();
   }

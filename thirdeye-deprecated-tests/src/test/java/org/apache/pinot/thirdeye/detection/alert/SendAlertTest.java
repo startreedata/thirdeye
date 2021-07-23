@@ -22,7 +22,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
+import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -135,9 +135,9 @@ public class SendAlertTest {
     alertTaskInfo.setDetectionAlertConfigId(alertConfigId);
 
     SmtpConfiguration smtpProperties = new SmtpConfiguration();
-    smtpProperties.setSmtpHost("test");
-    smtpProperties.setSmtpPort(25);
-    AlerterConfigurations alerterProps = new AlerterConfigurations();
+    smtpProperties.setHost("test");
+    smtpProperties.setPort(25);
+    NotificationConfiguration alerterProps = new NotificationConfiguration();
     alerterProps.setSmtpConfiguration(smtpProperties);
 
     ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();

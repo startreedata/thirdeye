@@ -1,17 +1,20 @@
 package org.apache.pinot.thirdeye.notification.commons;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public class AlerterConfigurations {
+public class NotificationConfiguration {
+  @JsonProperty("smtp")
   private SmtpConfiguration smtpConfiguration;
+  @JsonProperty("jira")
   private JiraConfiguration jiraConfiguration;
 
   public SmtpConfiguration getSmtpConfiguration() {
     return smtpConfiguration;
   }
 
-  public AlerterConfigurations setSmtpConfiguration(
+  public NotificationConfiguration setSmtpConfiguration(
       final SmtpConfiguration smtpConfiguration) {
     this.smtpConfiguration = smtpConfiguration;
     return this;
@@ -21,7 +24,7 @@ public class AlerterConfigurations {
     return jiraConfiguration;
   }
 
-  public AlerterConfigurations setJiraConfiguration(
+  public NotificationConfiguration setJiraConfiguration(
       final JiraConfiguration jiraConfiguration) {
     this.jiraConfiguration = jiraConfiguration;
     return this;
@@ -43,7 +46,7 @@ public class AlerterConfigurations {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final AlerterConfigurations that = (AlerterConfigurations) o;
+    final NotificationConfiguration that = (NotificationConfiguration) o;
     return Objects.equal(smtpConfiguration, that.smtpConfiguration)
         && Objects.equal(jiraConfiguration, that.jiraConfiguration);
   }

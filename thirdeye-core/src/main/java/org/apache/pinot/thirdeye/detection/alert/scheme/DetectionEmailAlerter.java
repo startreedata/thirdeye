@@ -96,14 +96,16 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
   }
 
-  private Set<String> retainWhitelisted(final Set<String> recipients, final Collection<String> emailWhitelist) {
+  private Set<String> retainWhitelisted(final Set<String> recipients,
+      final Collection<String> emailWhitelist) {
     if (recipients != null) {
       recipients.retainAll(emailWhitelist);
     }
     return recipients;
   }
 
-  private Set<String> removeBlacklisted(final Set<String> recipients, final Collection<String> emailBlacklist) {
+  private Set<String> removeBlacklisted(final Set<String> recipients,
+      final Collection<String> emailBlacklist) {
     if (recipients != null) {
       recipients.removeAll(emailBlacklist);
     }
@@ -151,7 +153,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
   private HtmlEmail prepareEmailContent(final SubscriptionGroupDTO subsConfig,
       final Properties emailClientConfigs,
-      final List<AnomalyResult> anomalies, final DetectionAlertFilterRecipients recipients) throws Exception {
+      final List<AnomalyResult> anomalies, final DetectionAlertFilterRecipients recipients)
+      throws Exception {
     configureAdminRecipients(recipients);
     whitelistRecipients(recipients);
     blacklistRecipients(recipients);
@@ -269,6 +272,15 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
     sendEmail(email);
     ThirdeyeMetricsUtil.emailAlertsSucesssCounter.inc();
+  }
+
+  public String getEmailContent(final List<AnomalyResult> anomalies) {
+    final BaseNotificationContent content = getNotificationContent(null);
+    final EmailContentFormatter emailContentFormatter = new EmailContentFormatter(new Properties(),
+        content,
+        teConfig,
+        new SubscriptionGroupDTO().setName("report-generation"));
+    return emailContentFormatter.getEmailHtml(anomalies);
   }
 
   @Override

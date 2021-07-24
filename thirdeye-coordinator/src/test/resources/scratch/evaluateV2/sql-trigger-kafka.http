@@ -1,0 +1,117 @@
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "percentage-change-template",
+    "description": "Percentage drop template",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "EventTrigger",
+          "params": {
+            "component.detector.type": "KAFKA_PRODUCER",
+            "component.detector.topic": "quickstart-events",
+            "component.detector.producerConfigs": {
+              "bootstrap.servers": "localhost:9092",
+              "acks": "1",
+              "key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+              "value.serializer": "org.apache.kafka.common.serialization.StringSerializer"
+            },
+            "component.detector.keyColumns": [],
+            "component.detector.valueColumns": []
+          },
+          "inputs": [
+            {
+              "targetProperty": "input",
+              "sourcePlanNode": "sql-join",
+              "sourceProperty": "final"
+            }
+          ],
+          "outputs": [
+          ]
+        },
+        {
+          "name": "sql-join",
+          "type": "SqlExecution",
+          "params": {
+            "sql.queries": [
+              "SELECT ts as timestamp, met as value FROM baseline WHERE ts BETWEEN 20200715 AND 20200720",
+              "SELECT ts as timestamp, met as value FROM current WHERE ts BETWEEN 20200715 AND 20200720",
+              "SELECT ts, avg(met) as met FROM (SELECT ts, met FROM baseline UNION ALL SELECT ts, met FROM current) WHERE ts BETWEEN 20200715 AND 20200720 GROUP BY ts ORDER BY ts"
+            ]
+          },
+          "inputs": [
+            {
+              "targetProperty": "baseline",
+              "sourcePlanNode": "baselineDataFetcher",
+              "sourceProperty": "baselineOutput"
+            },
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputKey": "0",
+              "outputName": "baseline"
+            },
+            {
+              "outputKey": "1",
+              "outputName": "current"
+            },
+            {
+              "outputKey": "2",
+              "outputName": "final"
+            }
+          ]
+        },
+        {
+          "name": "baselineDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.dataSource": "pinotQuickStartLocal",
+            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
+            "component.pinot.tableName": "pageviews",
+            "startTime": "20200202",
+            "endTime": "20200723"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "baselineOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.dataSource": "pinotQuickStartLocal",
+            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
+            "component.pinot.tableName": "pageviews",
+            "startTime": "20200209",
+            "endTime": "20200730"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "start": "1577865600000",
+  "end": "1590994800000"
+}

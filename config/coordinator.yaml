@@ -97,10 +97,10 @@ mockEvents:
 dashboardHost: "http://localhost:8081"
 notifications:
   smtp:
-    host: smtp.gmail.com
-    port: 465
-    user: thirdeye.startreeinc@gmail.com
-    password: pdbtxiwntylkhlfp
+    host: localhost
+    port: 25
+    user: no-reply@thirdeye.startree.ai
+    password: my-password
 #  jira:
 #    user: <REPLACE_ME>
 #    password: <REPLACE_ME>

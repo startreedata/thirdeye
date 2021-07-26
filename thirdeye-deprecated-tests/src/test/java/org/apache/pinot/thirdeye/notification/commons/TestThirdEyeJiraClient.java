@@ -33,8 +33,8 @@ public class TestThirdEyeJiraClient {
 
     JiraConfiguration jiraConfig = new JiraConfiguration();
     jiraConfig.setJiraHost("host");
-    jiraConfig.setJiraUser("user");
-    jiraConfig.setJiraPassword("passwd");
+    jiraConfig.setUser("user");
+    jiraConfig.setPassword("passwd");
 
     // construct mock metadata from sample api response in "jira_create_schema.json"
     String jsonString = IOUtils

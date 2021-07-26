@@ -9,7 +9,7 @@ import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.events.MockEventsConfiguration;
-import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
+import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.apache.pinot.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
@@ -41,7 +41,8 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   @JsonProperty("rca")
   private RCAConfiguration rcaConfiguration = new RCAConfiguration();
 
-  private AlerterConfigurations alerterConfigurations = new AlerterConfigurations();
+  @JsonProperty("notifications")
+  private NotificationConfiguration notificationConfiguration = new NotificationConfiguration();
 
   private String configPath = "config";
 
@@ -113,13 +114,13 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return this;
   }
 
-  public AlerterConfigurations getAlerterConfigurations() {
-    return alerterConfigurations;
+  public NotificationConfiguration getAlerterConfigurations() {
+    return notificationConfiguration;
   }
 
   public ThirdEyeCoordinatorConfiguration setAlerterConfigurations(
-      final AlerterConfigurations alerterConfigurations) {
-    this.alerterConfigurations = alerterConfigurations;
+      final NotificationConfiguration notificationConfiguration) {
+    this.notificationConfiguration = notificationConfiguration;
     return this;
   }
 

@@ -55,11 +55,11 @@ public abstract class EmailHelper {
     if (config != null) {
       email.setSubject(subject);
       LOG.info("Sending email to {}", recipients.toString());
-      email.setHostName(config.getSmtpHost());
-      email.setSmtpPort(config.getSmtpPort());
-      if (config.getSmtpUser() != null && config.getSmtpPassword() != null) {
+      email.setHostName(config.getHost());
+      email.setSmtpPort(config.getPort());
+      if (config.getUser() != null && config.getPassword() != null) {
         email.setAuthenticator(
-            new DefaultAuthenticator(config.getSmtpUser(), config.getSmtpPassword()));
+            new DefaultAuthenticator(config.getUser(), config.getPassword()));
         email.setSSLOnConnect(true);
       }
       email.setFrom(fromAddress);

@@ -39,7 +39,7 @@ import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
-import org.apache.pinot.thirdeye.notification.commons.AlerterConfigurations;
+import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -126,9 +126,9 @@ public class DetectionEmailAlerterTest {
     thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
     final SmtpConfiguration smtpProperties = new SmtpConfiguration();
-    smtpProperties.setSmtpHost("test");
-    smtpProperties.setSmtpPort(25);
-    final AlerterConfigurations alerterProps = new AlerterConfigurations();
+    smtpProperties.setHost("test");
+    smtpProperties.setPort(25);
+    final NotificationConfiguration alerterProps = new NotificationConfiguration();
     alerterProps.setSmtpConfiguration(smtpProperties);
     thirdEyeConfig.setAlerterConfigurations(alerterProps);
   }

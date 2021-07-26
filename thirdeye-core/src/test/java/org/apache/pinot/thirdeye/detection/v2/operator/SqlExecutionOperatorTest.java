@@ -18,8 +18,9 @@ public class SqlExecutionOperatorTest {
   @Test
   public void testSqlExecution() throws Exception {
     final SqlExecutionOperator sqlExecutionOperator = new SqlExecutionOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
+    final long currentTimeMillis = System.currentTimeMillis();
+    final String startTime = String.valueOf(currentTimeMillis);
+    final String endTime = String.valueOf(currentTimeMillis + 1000L);
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("SqlExecution")
@@ -57,8 +58,8 @@ public class SqlExecutionOperatorTest {
         )))
         .setProperties(properties);
     sqlExecutionOperator.init(context);
-    Assert.assertEquals(sqlExecutionOperator.getStartTime(), startTime);
-    Assert.assertEquals(sqlExecutionOperator.getEndTime(), endTime);
+    Assert.assertEquals(String.valueOf(sqlExecutionOperator.getStartTime()), startTime);
+    Assert.assertEquals(String.valueOf(sqlExecutionOperator.getEndTime()), endTime);
     sqlExecutionOperator.execute();
     Assert.assertEquals(sqlExecutionOperator.getOutputs().size(), 3);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()

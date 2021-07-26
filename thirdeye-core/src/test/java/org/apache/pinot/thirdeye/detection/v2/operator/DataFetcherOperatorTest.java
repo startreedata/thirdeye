@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
+import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
@@ -22,8 +23,9 @@ public class DataFetcherOperatorTest {
   @Test
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
+    final long currentTimeMillis = System.currentTimeMillis();
+    final String startTime = String.valueOf(currentTimeMillis);
+    final String endTime = String.valueOf(currentTimeMillis + 1000L);
     final PlanNodeBean planNodeBean = new PlanNodeBean().setOutputs(ImmutableList.of());
     final DataSourceCache mockDataSourceCache = mock(DataSourceCache.class);
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
@@ -33,8 +35,8 @@ public class DataFetcherOperatorTest {
         .setDetectionPlanApi(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
-    Assert.assertEquals(dataFetcherOperator.getStartTime(), startTime);
-    Assert.assertEquals(dataFetcherOperator.getEndTime(), endTime);
+    Assert.assertEquals(String.valueOf(dataFetcherOperator.getStartTime()), startTime);
+    Assert.assertEquals(String.valueOf(dataFetcherOperator.getEndTime()), endTime);
   }
 
   @Test
@@ -49,8 +51,9 @@ public class DataFetcherOperatorTest {
         "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher");
 
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
+    final long currentTimeMillis = System.currentTimeMillis();
+    final String startTime = String.valueOf(currentTimeMillis);
+    final String endTime = String.valueOf(currentTimeMillis + 1000L);
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setOutputs(ImmutableList.of())
         .setInputs(ImmutableList.of())
@@ -68,8 +71,8 @@ public class DataFetcherOperatorTest {
         .setProperties(properties);
     dataFetcherOperator.init(context);
 
-    Assert.assertEquals(dataFetcherOperator.getStartTime(), startTime);
-    Assert.assertEquals(dataFetcherOperator.getEndTime(), endTime);
+    Assert.assertEquals(String.valueOf(dataFetcherOperator.getStartTime()), startTime);
+    Assert.assertEquals(String.valueOf(dataFetcherOperator.getEndTime()), endTime);
     Assert.assertEquals(dataFetcherOperator.getComponents().size(), 1);
 
     final BaseComponent pinotDataFetcher = dataFetcherOperator.getComponents().get("pinot");

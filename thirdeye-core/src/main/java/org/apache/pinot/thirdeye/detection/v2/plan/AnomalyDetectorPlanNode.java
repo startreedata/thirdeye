@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.plan;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.v2.operator.AnomalyDetectorOperator;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -8,6 +9,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 
 public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
@@ -57,22 +59,11 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Operator<DataTable> run() throws Exception {
-    long startTime;
-    try {
-      startTime = Long.parseLong(getParams().get("startTime").toString());
-    } catch (Exception e) {
-      startTime = this.startTime;
-    }
-    long endTime;
-    try {
-      endTime = Long.parseLong(getParams().get("endTime").toString());
-    } catch (Exception e) {
-      endTime = this.endTime;
-    }
     final AnomalyDetectorOperator anomalyDetectorOperator = new AnomalyDetectorOperator();
     anomalyDetectorOperator.init(new OperatorContext()
-        .setStartTime(startTime)
-        .setEndTime(endTime)
+        .setStartTime(getParams().getOrDefault("startTime", String.valueOf(this.startTime)).toString())
+        .setEndTime(getParams().getOrDefault("endTime", String.valueOf(this.endTime)).toString())
+        .setTimeFormat(getParams().getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT).toString())
         .setInputsMap(inputsMap)
         .setDetectionPlanApi(planNodeBean)
     );

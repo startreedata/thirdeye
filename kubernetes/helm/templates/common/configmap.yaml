@@ -123,10 +123,10 @@ data:
     dashboardHost: {{ .Values.ui.publicUrl }}
     notifications:
       smtp:
-        host: localhost
-        port: 25
-        user: no-reply@thirdeye.startree.ai
-        password: my-password
+        host: ${SMTP_HOST}
+        port: ${SMTP_PORT}
+        user: ${SMTP_USER}
+        password: ${SMTP_PASSWORD}
     #  jira:
     #    user: <REPLACE_ME>
     #    password: <REPLACE_ME>

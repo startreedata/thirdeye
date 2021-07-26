@@ -91,11 +91,11 @@ public class JiraConfiguration {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("jiraUrl", url)
-        .add("jiraUser", user)
-        .add("jiraPassword", password)
-        .add("jiraDefaultProject", defaultProject)
-        .add("jiraIssueTypeId", jiraIssueTypeId)
+        .add("url", url)
+        .add("user", user)
+        .add("password", password)
+        .add("defaultProject", defaultProject)
+        .add("issueTypeId", jiraIssueTypeId)
         .toString();
   }
 }

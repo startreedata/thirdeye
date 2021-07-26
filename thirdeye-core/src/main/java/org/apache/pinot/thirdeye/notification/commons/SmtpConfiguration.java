@@ -81,9 +81,10 @@ public class SmtpConfiguration {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("smtpHost", host)
-        .add("smtpPort", port)
-        .add("smtpUser", user)
+        .add("host", host)
+        .add("port", port)
+        .add("user", user)
+        .add("password", password)
         .toString();
   }
 }

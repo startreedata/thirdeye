@@ -22,16 +22,13 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNode;
+import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
@@ -39,10 +36,10 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
-import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +57,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   protected PlanNodeBean config;
   protected long startTime;
   protected long endTime;
+  protected TimeConverter timeConverter;
   protected String timeFormat = OperatorContext.DEFAULT_TIME_FORMAT;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
   protected Map<String, BaseComponent> instancesMap = new HashMap<>();
@@ -73,8 +71,9 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   public void init(final OperatorContext context) {
     this.config = context.getDetectionPlanApi();
     this.timeFormat = context.getTimeFormat();
-    this.startTime = getMillis(timeFormat, context.getStartTime());
-    this.endTime = getMillis(timeFormat, context.getEndTime());
+    this.timeConverter = DefaultTimeConverter.get(timeFormat);
+    this.startTime = timeConverter.convert(context.getStartTime());
+    this.endTime = timeConverter.convert(context.getEndTime());
     this.resultMap = new HashMap<>();
     this.instancesMap = new HashMap<>();
     this.inputMap = context.getInputsMap();
@@ -86,23 +85,6 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     this.initComponents();
   }
 
-  private static long getMillis(String timeFormatString, String timeValue) {
-    final String[] tokens = timeFormatString.split(":", 2);
-    final TimeFormat timeFormat = TimeFormat.valueOf(tokens[0]);
-    switch (timeFormat) {
-      case SIMPLE_DATE_FORMAT:
-        SimpleDateFormat sdf = new SimpleDateFormat(tokens[1]);
-        try {
-          return sdf.parse(timeValue).getTime();
-        } catch (ParseException e) {
-          return -1L;
-        }
-      case EPOCH:
-        return TimeUnit.valueOf(tokens[1]).toMillis(Long.parseLong(timeValue));
-      default:
-        throw new RuntimeException("Unsupported timeFormat");
-    }
-  }
   /**
    * Returns a detection result for the time range between {@code startTime} and {@code endTime}.
    *

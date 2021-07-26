@@ -51,6 +51,7 @@ import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
@@ -91,6 +92,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private int lookback;
   private Period monitoringGranularityPeriod;
   private MeanVarianceRuleDetectorSpec spec;
+  private TimeConverter timeConverter;
 
   /**
    * Mapping of sensitivity to sigma on range of 0.5 - 1.5
@@ -206,7 +208,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
       currentDf
-          .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
+          .addSeries(COL_TIME, timeConverter.convertSeries(currentDf.get(spec.getTimestamp())))
           .setIndex(COL_TIME);
       currentDf.addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
 
@@ -368,5 +370,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private boolean isMultiDayGranularity() {
     return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
         && timeGranularity.getUnit() == TimeUnit.DAYS;
+  }
+
+  @Override
+  public void setTimeConverter(TimeConverter timeConverter) {
+    this.timeConverter = timeConverter;
   }
 }

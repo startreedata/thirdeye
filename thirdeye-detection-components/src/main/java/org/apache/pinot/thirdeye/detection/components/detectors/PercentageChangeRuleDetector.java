@@ -60,6 +60,7 @@ import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
@@ -96,6 +97,7 @@ public class PercentageChangeRuleDetector implements
   private DayOfWeek weekStart;
   private PercentageChangeRuleDetectorSpec spec;
   private Period monitoringGranularityPeriod;
+  private TimeConverter timeConverter;
 
   @Override
   public void init(final PercentageChangeRuleDetectorSpec spec) {
@@ -138,7 +140,7 @@ public class PercentageChangeRuleDetector implements
       final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
 
       final DataFrame df = new DataFrame();
-      df.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
+      df.addSeries(DataFrame.COL_TIME, timeConverter.convertSeries(currentDf.get(spec.getTimestamp())));
       df.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
       df.addSeries(DataFrame.COL_VALUE, baselineDf.get(spec.getMetric()));
 
@@ -314,5 +316,10 @@ public class PercentageChangeRuleDetector implements
     dfBase.addSeries(colBound,
         map((DoubleFunction) values -> values[0] * multiplier, dfBase.getDoubles(
             DataFrame.COL_VALUE)));
+  }
+
+  @Override
+  public void setTimeConverter(TimeConverter timeConverter) {
+    this.timeConverter = timeConverter;
   }
 }

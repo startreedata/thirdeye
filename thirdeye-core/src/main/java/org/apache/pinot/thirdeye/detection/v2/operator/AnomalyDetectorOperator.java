@@ -30,9 +30,11 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
     for (Object key : this.getComponents().keySet()) {
       final BaseComponent component = this.getComponents().get(key);
       if (component instanceof AnomalyDetectorV2) {
+        final AnomalyDetectorV2 anomalyDetectorV2 = (AnomalyDetectorV2) component;
+        anomalyDetectorV2.setTimeConverter(timeConverter);
         for (Interval interval : getMonitoringWindows()) {
           final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-          DetectionPipelineResult detectionResult = ((AnomalyDetectorV2) component)
+          DetectionPipelineResult detectionResult = anomalyDetectorV2
               .runDetection(interval, timeSeriesMap);
           String outputKey = key + "_" + DEFAULT_OUTPUT_KEY;
           setOutput(outputKey, detectionResult);

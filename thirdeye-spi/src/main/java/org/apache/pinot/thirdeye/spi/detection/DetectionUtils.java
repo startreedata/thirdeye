@@ -416,7 +416,6 @@ public class DetectionUtils {
     return baseline.gather(slice, data.getTimeseries());
   }
 
-
   public static  Map<String, DataTable> getTimeSeriesMap(
       final Map<String, DetectionPipelineResult> inputMap) {
     Map<String, DataTable> timeSeriesMap = new HashMap<>();

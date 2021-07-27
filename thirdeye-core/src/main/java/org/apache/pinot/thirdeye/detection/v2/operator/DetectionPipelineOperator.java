@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
@@ -35,6 +36,7 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
@@ -55,6 +57,8 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   protected PlanNodeBean config;
   protected long startTime;
   protected long endTime;
+  protected TimeConverter timeConverter;
+  protected String timeFormat = OperatorContext.DEFAULT_TIME_FORMAT;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
   protected Map<String, BaseComponent> instancesMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
@@ -66,8 +70,10 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   @Override
   public void init(final OperatorContext context) {
     this.config = context.getDetectionPlanApi();
-    this.startTime = context.getStartTime();
-    this.endTime = context.getEndTime();
+    this.timeFormat = context.getTimeFormat();
+    this.timeConverter = DefaultTimeConverter.get(timeFormat);
+    this.startTime = timeConverter.convert(context.getStartTime());
+    this.endTime = timeConverter.convert(context.getEndTime());
     this.resultMap = new HashMap<>();
     this.instancesMap = new HashMap<>();
     this.inputMap = context.getInputsMap();
@@ -186,6 +192,10 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
 
   public long getEndTime() {
     return endTime;
+  }
+
+  public String getTimeFormat() {
+    return timeFormat;
   }
 
   protected void setOutput(String key, DetectionPipelineResult output) {

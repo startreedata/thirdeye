@@ -40,7 +40,7 @@ public class AlertScreenshotHelper {
 
   public static String takeGraphScreenShot(final String anomalyId,
       final ThirdEyeCoordinatorConfiguration configuration) throws JobExecutionException {
-    return takeGraphScreenShot(anomalyId, configuration.getDashboardHost(),
+    return takeGraphScreenShot(anomalyId, configuration.getUiConfiguration().getExternalUrl(),
         configuration.getRootDir(),
         configuration.getPhantomJsPath());
   }

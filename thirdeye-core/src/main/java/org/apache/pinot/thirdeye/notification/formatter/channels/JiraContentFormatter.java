@@ -105,7 +105,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
   public JiraEntity getJiraEntity(Multimap<String, String> dimensionFilters,
       Collection<AnomalyResult> anomalies) {
     Map<String, Object> templateData = notificationContent.format(anomalies, this.subsConfig);
-    templateData.put("dashboardHost", teConfig.getDashboardHost());
+    templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
     return buildJiraEntity(alertContentToTemplateMap.get(notificationContent.getTemplate()),
         templateData,
         dimensionFilters);
@@ -123,7 +123,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
       dimensions.append(", ").append(dimFilter.getKey()).append("=")
           .append(String.join(",", dimFilter.getValue()));
     }
-    issueSummary = issueSummary + dimensions.toString();
+    issueSummary = issueSummary + dimensions;
 
     // Truncate summary due to jira character limit
     return StringUtils.abbreviate(issueSummary, MAX_JIRA_SUMMARY_LENGTH);

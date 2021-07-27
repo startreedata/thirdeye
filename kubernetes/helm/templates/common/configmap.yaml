@@ -120,7 +120,9 @@ data:
           namePrefixes: [System, Model, Campaign, Welcome, Pinot, ThirdEye]
           nameSuffixes: [tuning, bugfix, rollout, test]
 
-    dashboardHost: {{ .Values.ui.publicUrl }}
+    ui:
+      externalUrl: {{ .Values.ui.publicUrl }}
+
     notifications:
       smtp:
         host: ${SMTP_HOST}

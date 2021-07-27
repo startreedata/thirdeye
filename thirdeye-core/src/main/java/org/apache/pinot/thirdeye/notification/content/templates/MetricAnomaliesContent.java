@@ -88,7 +88,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           this.thirdEyeAnomalyConfig.getTeRestConfig().getSessionKey()
       );
       this.rcaClient = new ThirdEyeRcaRestClient(principal,
-          this.thirdEyeAnomalyConfig.getDashboardHost());
+          this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
     }
   }
 
@@ -156,7 +156,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       double lift = BaseNotificationContent
           .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
       AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-          getAnomalyURL(anomaly, this.thirdEyeAnomalyConfig.getDashboardHost()),
+          getAnomalyURL(anomaly, this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl()),
           getPredictedValue(anomaly),
           getCurrentValue(anomaly),
           getFormattedLiftValue(anomaly, lift),

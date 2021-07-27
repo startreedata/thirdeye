@@ -36,11 +36,12 @@ import java.util.Set;
 import javax.mail.Session;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
-import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
+import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
@@ -124,7 +125,7 @@ public class DetectionEmailAlerterTest {
     when(anomalyDAO.findAll()).thenReturn(Arrays.asList(anomalyResultDTO, anomalyResultDTO2));
 
     thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
-    thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
+    thirdEyeConfig.setUiConfiguration(new UiConfiguration().setExternalUrl(DASHBOARD_HOST_VALUE));
     final SmtpConfiguration smtpProperties = new SmtpConfiguration();
     smtpProperties.setHost("test");
     smtpProperties.setPort(25);

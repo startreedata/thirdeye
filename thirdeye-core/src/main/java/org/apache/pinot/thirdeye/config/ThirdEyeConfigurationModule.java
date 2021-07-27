@@ -38,6 +38,10 @@ public class ThirdEyeConfigurationModule extends AbstractModule {
     bind(TaskDriverConfiguration.class)
         .toProvider(configuration::getTaskDriverConfiguration)
         .in(Scopes.SINGLETON);
+
+    bind(UiConfiguration.class)
+        .toProvider(configuration::getUiConfiguration)
+        .in(Scopes.SINGLETON);
   }
 
   @Singleton

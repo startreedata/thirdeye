@@ -44,12 +44,14 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   @JsonProperty("notifications")
   private NotificationConfiguration notificationConfiguration = new NotificationConfiguration();
 
+  @JsonProperty("ui")
+  private UiConfiguration uiConfiguration = new UiConfiguration();
+
   private String configPath = "config";
 
   private String phantomJsPath = "";
   private String failureFromAddress;
   private String failureToAddress;
-  private String dashboardHost;
   private ThirdEyeRestClientConfiguration teRestConfig = new ThirdEyeRestClientConfiguration();
   private DataAvailabilitySchedulingConfiguration
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
@@ -151,15 +153,6 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return this;
   }
 
-  public String getDashboardHost() {
-    return dashboardHost;
-  }
-
-  public ThirdEyeCoordinatorConfiguration setDashboardHost(final String dashboardHost) {
-    this.dashboardHost = dashboardHost;
-    return this;
-  }
-
   public ThirdEyeRestClientConfiguration getTeRestConfig() {
     return teRestConfig;
   }
@@ -226,6 +219,16 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   public ThirdEyeCoordinatorConfiguration setRcaConfiguration(
       final RCAConfiguration rcaConfiguration) {
     this.rcaConfiguration = rcaConfiguration;
+    return this;
+  }
+
+  public UiConfiguration getUiConfiguration() {
+    return uiConfiguration;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setUiConfiguration(
+      final UiConfiguration uiConfiguration) {
+    this.uiConfiguration = uiConfiguration;
     return this;
   }
 }

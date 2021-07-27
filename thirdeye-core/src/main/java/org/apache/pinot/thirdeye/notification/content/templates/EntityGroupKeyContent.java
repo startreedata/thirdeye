@@ -170,7 +170,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
     double lift = BaseNotificationContent
         .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
     AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-        getAnomalyURL(anomaly, thirdEyeAnomalyConfig.getDashboardHost()),
+        getAnomalyURL(anomaly, thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl()),
         getPredictedValue(anomaly),
         getCurrentValue(anomaly),
         getFormattedLiftValue(anomaly, lift),

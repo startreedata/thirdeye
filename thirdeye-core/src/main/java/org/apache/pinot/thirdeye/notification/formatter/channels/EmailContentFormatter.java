@@ -69,14 +69,14 @@ public class EmailContentFormatter extends AlertContentFormatter {
 
   public EmailEntity getEmailEntity(final Collection<AnomalyResult> anomalies) {
     final Map<String, Object> templateData = notificationContent.format(anomalies, subsConfig);
-    templateData.put("dashboardHost", teConfig.getDashboardHost());
+    templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
     return buildEmailEntity(TEMPLATE_MAP.get(notificationContent.getTemplate()),
         templateData);
   }
 
   public String getEmailHtml(final Collection<AnomalyResult> anomalies) {
     final Map<String, Object> templateData = notificationContent.format(anomalies, subsConfig);
-    templateData.put("dashboardHost", teConfig.getDashboardHost());
+    templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
     return buildHtml(TEMPLATE_MAP.get(notificationContent.getTemplate()),
         templateData);
   }

@@ -127,7 +127,7 @@ rules:
         - fn: it
           withinDescribe: it
 
-    # Do not allow skipping tests
+    # Disallow skipped/disabled tests
     jest/no-disabled-tests: error
 
     # eslint-plugin-jest-formatting rules

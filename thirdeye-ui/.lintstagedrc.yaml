@@ -1,9 +1,9 @@
 ---
-# Organize imports and run ESLint
+# Run ESLint
 "*.{ts,tsx,js}": eslint --fix
 
 # Run stylelint
 "*.{css,scss}": stylelint --fix
 
-# Run prettier
+# Run Prettier
 "*": prettier --write

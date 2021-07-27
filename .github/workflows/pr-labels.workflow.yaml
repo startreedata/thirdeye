@@ -1,15 +1,16 @@
 # Workflow to triage pull requests and attach appropriate labels
-name: Pull Request Labels Workflow
+name: PR Labels Workflow
 
-on: [pull_request]
+on: pull_request
 
 jobs:
-    pull-request-labels:
-        name: Apply Labels
+    pr-labels-check:
+        name: Labels Check
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/labeler@v2
+            - name: Apply Labels
+              uses: actions/labeler@v2
               with:
                   repo-token: "${{ secrets.GITHUB_TOKEN }}"
-                  configuration-path: .github/pull-request-labels.yaml
+                  configuration-path: .github/pr-labels.yaml
                   sync-labels: true

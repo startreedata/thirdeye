@@ -2,9 +2,10 @@
 thirdeye-ui config:
     - "thirdeye-ui/*"
     - "thirdeye-ui/.*"
-    - ".github/pull-request-labels.yaml"
-    - ".github/workflows/pull-request-labels.workflow.yaml"
-    - ".github/workflows/thirdeye-ui.workflow.yaml"
+    - ".github/pr-labels.yaml"
+    - ".github/workflows/pr-labels.workflow.yaml"
+    - ".github/workflows/thirdeye-ui-merge.workflow.yaml"
+    - ".github/workflows/thirdeye-ui-pr.workflow.yaml"
     - "thirdeye-ui/.vscode/**/*"
 
 # Label when source files in ThirdEye UI project change

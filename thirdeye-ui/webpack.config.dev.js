@@ -105,7 +105,7 @@ module.exports = {
         }),
         // Build progress bar
         new WebpackBar({
-            name: "@startreedata/thirdeye-ui [dev]",
+            name: "@startree-ui/thirdeye-ui [dev]",
             color: "#54BAC9",
         }),
     ],

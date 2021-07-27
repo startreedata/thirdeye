@@ -36,7 +36,7 @@ rules:
     # Require a leading zero for fractional numbers less than 1
     number-leading-zero: always
 
-    # Disallow trailing zreos in numbers
+    # Disallow trailing zeros in numbers
     number-no-trailing-zeros: true
 
     # Require generic family in list of font family names

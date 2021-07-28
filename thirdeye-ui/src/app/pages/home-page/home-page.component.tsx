@@ -14,6 +14,7 @@ import {
     getAlertsPath,
     getAnomaliesPath,
     getConfigurationPath,
+    getDatasetsPath,
     getMetricsPath,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
@@ -44,6 +45,10 @@ export const HomePage: FunctionComponent = () => {
 
     const handleSubscriptionGroupsClick = (): void => {
         history.push(getSubscriptionGroupsPath());
+    };
+
+    const handleDataSetsClick = (): void => {
+        history.push(getDatasetsPath());
     };
 
     const handleMetricsClick = (): void => {
@@ -96,6 +101,16 @@ export const HomePage: FunctionComponent = () => {
                             iconColor={theme.palette.primary.main}
                             text={t("label.subscription-groups")}
                             onClick={handleSubscriptionGroupsClick}
+                        />
+                    </Grid>
+
+                    {/* Datasets */}
+                    <Grid item>
+                        <ButtonTile
+                            icon={SubscriptionGroupIcon}
+                            iconColor={theme.palette.primary.main}
+                            text={t("label.datasets")}
+                            onClick={handleDataSetsClick}
                         />
                     </Grid>
 

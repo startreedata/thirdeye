@@ -23,6 +23,7 @@ import {
     getAnomaliesAllPath,
     getBasePath,
     getConfigurationPath,
+    getDatasetsCreatePath,
     getHomePath,
     getMetricsCreatePath,
     getSignInPath,
@@ -106,6 +107,11 @@ export const AppBar: FunctionComponent = () => {
 
     const handleCreateMetric = (): void => {
         history.push(getMetricsCreatePath());
+        handleShortcutOptionsClose();
+    };
+
+    const handleCreateDataset = (): void => {
+        history.push(getDatasetsCreatePath());
         handleShortcutOptionsClose();
     };
 
@@ -277,6 +283,13 @@ export const AppBar: FunctionComponent = () => {
                             <MenuItem onClick={handleCreateMetric}>
                                 {t("label.create-entity", {
                                     entity: t("label.metric"),
+                                })}
+                            </MenuItem>
+
+                            {/* Create dataset */}
+                            <MenuItem onClick={handleCreateDataset}>
+                                {t("label.create-entity", {
+                                    entity: t("label.dataset"),
                                 })}
                             </MenuItem>
                         </Menu>

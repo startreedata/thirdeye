@@ -23,6 +23,12 @@ const SubscriptionGroupsRouter = lazy(() =>
     ).then((module) => ({ default: module.SubscriptionGroupsRouter }))
 );
 
+const DatasetsRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "datasets-router" */ "../datasets/datasets.router"
+    ).then((module) => ({ default: module.DatasetsRouter }))
+);
+
 const MetricsRouter = lazy(() =>
     import(
         /* webpackChunkName: "metrics-router" */ "../metrics/metrics.router"
@@ -70,6 +76,9 @@ export const ConfigurationRouter: FunctionComponent = () => {
                     component={SubscriptionGroupsRouter}
                     path={AppRoute.SUBSCRIPTION_GROUPS}
                 />
+
+                {/* Direct all datasets paths to datasets router */}
+                <Route component={DatasetsRouter} path={AppRoute.DATASETS} />
 
                 {/* Direct all metrics paths to metrics router */}
                 <Route component={MetricsRouter} path={AppRoute.METRICS} />

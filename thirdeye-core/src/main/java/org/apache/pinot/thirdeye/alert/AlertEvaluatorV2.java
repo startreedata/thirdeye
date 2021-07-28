@@ -27,7 +27,6 @@ import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
-import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -76,19 +75,11 @@ public class AlertEvaluatorV2 {
         .setTimestamp(timeSeries.getTime().toList());
 
     if (timeSeries.hasLowerBound()) {
-      final DoubleSeries lowerBound = timeSeries.getPredictedLowerBound();
-      final DoubleSeries uniqueLowerBound = lowerBound.unique();
-      if ((uniqueLowerBound.size() > 1) || (Double.isFinite(uniqueLowerBound.get(0)))) {
-        api.setLowerBound(lowerBound.toList());
-      }
+      api.setLowerBound(timeSeries.getPredictedLowerBound().toList());
     }
 
     if (timeSeries.hasUpperBound()) {
-      final DoubleSeries upperBound = timeSeries.getPredictedUpperBound();
-      final DoubleSeries uniqueUpperBound = upperBound.unique();
-      if ((uniqueUpperBound.size() > 1) || (Double.isFinite(uniqueUpperBound.get(0)))) {
-        api.setUpperBound(upperBound.toList());
-      }
+      api.setUpperBound(timeSeries.getPredictedUpperBound().toList());
     }
     return api;
   }

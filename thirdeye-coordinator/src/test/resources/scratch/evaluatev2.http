@@ -367,34 +367,12 @@ Content-Type: application/json
           },
           "inputs": [
             {
-              "targetProperty": "baseline",
-              "sourcePlanNode": "baselineDataFetcher",
-              "sourceProperty": "baselineOutput"
-            },
-            {
               "targetProperty": "current",
               "sourcePlanNode": "currentDataFetcher",
               "sourceProperty": "currentOutput"
             }
           ],
           "outputs": []
-        },
-        {
-          "name": "baselineDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "baselineOutput"
-            }
-          ]
         },
         {
           "name": "currentDataFetcher",

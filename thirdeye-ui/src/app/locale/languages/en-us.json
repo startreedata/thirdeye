@@ -125,7 +125,10 @@
         "reset-configuration": "Reset Configuration",
         "aggregation-column": "Aggregation Column",
         "aggregation-function": "Aggregation Function",
-        "views": "Views"
+        "views": "Views",
+        "associated-metrics": "Associated Metrics",
+        "dataset-properties": "Dataset Properties",
+        "associated-datasources": "Associated Datasources"
     },
     "message": {
         "error": "Error",
@@ -151,6 +154,8 @@
         "email-required": "Email is required",
         "invalid-email": "Invalid email",
         "json-input-required": "JSON input is required",
-        "invalid-json": "Invalid JSON"
+        "invalid-json": "Invalid JSON",
+
+        "dataset-name-required": "Dataset name is required"
     }
 }

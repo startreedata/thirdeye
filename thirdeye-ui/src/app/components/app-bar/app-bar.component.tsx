@@ -23,6 +23,7 @@ import {
     getAnomaliesAllPath,
     getBasePath,
     getConfigurationPath,
+    getDatasetsCreatePath,
     getHomePath,
     getSignInPath,
     getSignOutPath,
@@ -100,6 +101,11 @@ export const AppBar: FunctionComponent = () => {
 
     const handleCreateSubscriptionGroup = (): void => {
         history.push(getSubscriptionGroupsCreatePath());
+        handleShortcutOptionsClose();
+    };
+
+    const handleCreateDataset = (): void => {
+        history.push(getDatasetsCreatePath());
         handleShortcutOptionsClose();
     };
 
@@ -264,6 +270,13 @@ export const AppBar: FunctionComponent = () => {
                             <MenuItem onClick={handleCreateSubscriptionGroup}>
                                 {t("label.create-entity", {
                                     entity: t("label.subscription-group"),
+                                })}
+                            </MenuItem>
+
+                            {/* Create dataset */}
+                            <MenuItem onClick={handleCreateDataset}>
+                                {t("label.create-entity", {
+                                    entity: t("label.dataset"),
                                 })}
                             </MenuItem>
                         </Menu>

@@ -43,6 +43,20 @@ jest.mock(
     })
 );
 
+jest.mock(
+    "../../pages/metrics-create-page/metrics-create-page.component",
+    () => ({
+        MetricsCreatePage: jest.fn().mockReturnValue("testMetricsCreatePage"),
+    })
+);
+
+jest.mock(
+    "../../pages/metrics-update-page/metrics-update-page.component",
+    () => ({
+        MetricsUpdatePage: jest.fn().mockReturnValue("testMetricsUpdatePage"),
+    })
+);
+
 jest.mock("../../pages/metrics-all-page/metrics-all-page.component", () => ({
     MetricsAllPage: jest.fn().mockReturnValue("testMetricsAllPage"),
 }));
@@ -97,6 +111,32 @@ describe("Metrics Router", () => {
         expect(breadcrumbs[1].text).toEqual("label.metrics");
         expect(breadcrumbs[1].onClick).toBeDefined();
         expect(mockPush).toHaveBeenNthCalledWith(2, "testMetricsPath");
+    });
+
+    it("should render metrics create page at exact metrics create path", async () => {
+        render(
+            <MemoryRouter initialEntries={[AppRoute.METRICS_CREATE]}>
+                <MetricsRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testMetricsCreatePage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    it("should render page not found page at invalid metrics create path", async () => {
+        render(
+            <MemoryRouter
+                initialEntries={[`${AppRoute.METRICS_CREATE}/testPath`]}
+            >
+                <MetricsRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
     });
 
     it("should render metrics all page at exact metrics path", async () => {
@@ -163,6 +203,32 @@ describe("Metrics Router", () => {
         render(
             <MemoryRouter
                 initialEntries={[`${AppRoute.METRICS_VIEW}/testPath`]}
+            >
+                <MetricsRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    it("should render metrics update page at exact metrics update path", async () => {
+        render(
+            <MemoryRouter initialEntries={[AppRoute.METRICS_UPDATE]}>
+                <MetricsRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testMetricsUpdatePage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    it("should render page not found page at invalid metrics update path", async () => {
+        render(
+            <MemoryRouter
+                initialEntries={[`${AppRoute.METRICS_UPDATE}/testPath`]}
             >
                 <MetricsRouter />
             </MemoryRouter>

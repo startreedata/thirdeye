@@ -125,7 +125,9 @@
         "reset-configuration": "Reset Configuration",
         "aggregation-column": "Aggregation Column",
         "aggregation-function": "Aggregation Function",
-        "views": "Views"
+        "views": "Views",
+        "metric-properties": "Metric Properties",
+        "threshold": "Threshold"
     },
     "message": {
         "error": "Error",
@@ -147,6 +149,11 @@
         "validation-failed": "Validation failed",
 
         "subscription-group-name-required": "Subscription Group name is required",
+
+        "metrics-name-required": "Name is required",
+        "metrics-threshold-required": "Threshold is required",
+        "metrics-aggregation-function-required": "Aggregation function is required",
+        "metrics-dataset-required": "Dataset is required",
 
         "email-required": "Email is required",
         "invalid-email": "Invalid email",

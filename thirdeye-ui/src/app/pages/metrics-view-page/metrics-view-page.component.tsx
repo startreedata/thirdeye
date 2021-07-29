@@ -13,7 +13,10 @@ import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
 import { getUiMetric } from "../../utils/metrics/metrics.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getMetricsAllPath } from "../../utils/routes/routes.util";
+import {
+    getMetricsAllPath,
+    getMetricsUpdatePath,
+} from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -99,6 +102,10 @@ export const MetricsViewPage: FunctionComponent = () => {
             );
     };
 
+    const handleMetricEdit = (id: number): void => {
+        history.push(getMetricsUpdatePath(id));
+    };
+
     return (
         <PageContents
             centered
@@ -106,7 +113,11 @@ export const MetricsViewPage: FunctionComponent = () => {
             title={uiMetric ? uiMetric.name : ""}
         >
             {/* Metric */}
-            <MetricCard metric={uiMetric} onDelete={handleMetricDelete} />
+            <MetricCard
+                metric={uiMetric}
+                onDelete={handleMetricDelete}
+                onEdit={handleMetricEdit}
+            />
         </PageContents>
     );
 };

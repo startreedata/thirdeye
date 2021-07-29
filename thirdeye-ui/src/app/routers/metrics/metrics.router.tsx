@@ -34,6 +34,18 @@ const PageNotFoundPage = lazy(() =>
     ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
+const MetricsCreatePage = lazy(() =>
+    import(
+        /* webpackChunkName: "metrics-create-page" */ "../../pages/metrics-create-page/metrics-create-page.component"
+    ).then((module) => ({ default: module.MetricsCreatePage }))
+);
+
+const MetricsUpdatePage = lazy(() =>
+    import(
+        /* webpackChunkName: "metrics-update-page" */ "../../pages/metrics-update-page/metrics-update-page.component"
+    ).then((module) => ({ default: module.MetricsUpdatePage }))
+);
+
 export const MetricsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
@@ -79,6 +91,20 @@ export const MetricsRouter: FunctionComponent = () => {
                     exact
                     component={MetricsViewPage}
                     path={AppRoute.METRICS_VIEW}
+                />
+
+                {/* Metrics create path */}
+                <Route
+                    exact
+                    component={MetricsCreatePage}
+                    path={AppRoute.METRICS_CREATE}
+                />
+
+                {/* Metrics update path */}
+                <Route
+                    exact
+                    component={MetricsUpdatePage}
+                    path={AppRoute.METRICS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}

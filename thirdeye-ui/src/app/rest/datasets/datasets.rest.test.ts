@@ -17,16 +17,6 @@ describe("Datasets REST", () => {
         jest.restoreAllMocks();
     });
 
-    it("Datasets should invoke axios.get and return appropriate datasets", async () => {
-        jest.spyOn(axios, "get").mockResolvedValue({
-            data: mockMetric,
-        });
-
-        await expect(getAllDatasets()).resolves.toEqual(mockMetric);
-
-        expect(axios.get).toHaveBeenCalledWith("/api/datasets");
-    });
-
     it("getDataset should invoke axios.get with appropriate input and return appropriate dataset", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: mockDatasetResponse,
@@ -163,10 +153,6 @@ describe("Datasets REST", () => {
         await expect(deleteDataset(1)).rejects.toThrow("testError");
     });
 });
-
-const mockMetric = {
-    name: "testNameDatasetResponse",
-};
 
 const mockDatasetRequest = {
     name: "testNameDatasetRequest",

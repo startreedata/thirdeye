@@ -24,6 +24,11 @@ export const AppRoute = {
     DATASETS_VIEW: `/configuration/datasets/view/id/${PLACEHOLDER_ROUTE_ID}`,
     DATASETS_CREATE: "/configuration/datasets/create",
     DATASETS_UPDATE: `/configuration/datasets/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASOURCES: "/configuration/datasources",
+    DATASOURCES_ALL: "/configuration/datasources/all",
+    DATASOURCES_VIEW: `/configuration/datasources/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASOURCES_CREATE: "/configuration/datasources/create",
+    DATASOURCES_UPDATE: `/configuration/datasources/update/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS: "/configuration/metrics",
     METRICS_ALL: "/configuration/metrics/all",
     METRICS_VIEW: `/configuration/metrics/view/id/${PLACEHOLDER_ROUTE_ID}`,
@@ -137,6 +142,32 @@ export const getDatasetsCreatePath = (): string => {
 
 export const getDatasetsUpdatePath = (id: number): string => {
     let path: string = AppRoute.DATASETS_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getDatasourcesPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES);
+};
+
+export const getDatasourcesAllPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES_ALL);
+};
+
+export const getDatasourcesViewPath = (id: number): string => {
+    let path: string = AppRoute.DATASOURCES_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getDatasourcesCreatePath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES_CREATE);
+};
+
+export const getDatasourcesUpdatePath = (id: number): string => {
+    let path: string = AppRoute.DATASOURCES_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

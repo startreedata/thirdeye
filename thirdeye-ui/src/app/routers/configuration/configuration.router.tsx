@@ -29,6 +29,12 @@ const DatasetsRouter = lazy(() =>
     ).then((module) => ({ default: module.DatasetsRouter }))
 );
 
+const DatasourcesRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "datasources-router" */ "../datasources/datasources.router"
+    ).then((module) => ({ default: module.DatasourcesRouter }))
+);
+
 const MetricsRouter = lazy(() =>
     import(
         /* webpackChunkName: "metrics-router" */ "../metrics/metrics.router"
@@ -79,6 +85,12 @@ export const ConfigurationRouter: FunctionComponent = () => {
 
                 {/* Direct all datasets paths to datasets router */}
                 <Route component={DatasetsRouter} path={AppRoute.DATASETS} />
+
+                {/* Direct all datasource paths to datasources router */}
+                <Route
+                    component={DatasourcesRouter}
+                    path={AppRoute.DATASOURCES}
+                />
 
                 {/* Direct all metrics paths to metrics router */}
                 <Route component={MetricsRouter} path={AppRoute.METRICS} />

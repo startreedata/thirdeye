@@ -7,18 +7,25 @@ import {
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import {
     getUiDatasetDatasourceId,
     getUiDatasetDatasourceName,
 } from "../../utils/datasets/datasets.util";
+import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { DatasetDatasourcesAccordianProps } from "./dataset-datasources-accordian.interfaces";
 
 export const DatasetDatasourcesAccordian: FunctionComponent<DatasetDatasourcesAccordianProps> = (
     props: DatasetDatasourcesAccordianProps
 ) => {
+    const history = useHistory();
     const { t } = useTranslation();
+
+    const handleDatasourceClick = (datasource: Datasource): void => {
+        history.push(getDatasourcesViewPath(datasource.id));
+    };
 
     return (
         <Accordion defaultExpanded={props.defaultExpanded} variant="outlined">
@@ -45,6 +52,7 @@ export const DatasetDatasourcesAccordian: FunctionComponent<DatasetDatasourcesAc
                         []
                     }
                     onChange={props.onChange}
+                    onClick={handleDatasourceClick}
                 />
             </AccordionDetails>
         </Accordion>

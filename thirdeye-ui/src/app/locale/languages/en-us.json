@@ -131,7 +131,9 @@
 
         "associated-metrics": "Associated Metrics",
         "dataset-properties": "Dataset Properties",
-        "associated-datasources": "Associated Datasources"
+        "associated-datasources": "Associated Datasources",
+        "datasource-configuration": "Datasource Configuration",
+        "type": "Type"
     },
     "message": {
         "error": "Error",

@@ -1,7 +1,7 @@
 apiVersion: v2
 appVersion: 0.5.0-SNAPSHOT # Should be maintained automatically by a pipeline
 name: thirdeye
-description: One Stop Shop For Anomaly Detection. Built on Apache Pinot
+description: One Stop Shop For Anomaly Detection.
 version: 0.1.0
 keywords:
 - olap
@@ -9,14 +9,14 @@ keywords:
 - pinot
 - anomaly detection
 - rootcause analysis
-home: https://github.com/apache/incubator-pinot
+home: https://github.com/startreedata/thirdeye
 sources:
-- https://github.com/apache/incubator-pinot
+- https://github.com/startreedata/thirdeye
 maintainers:
 - name: Alexander Pucher
   email: alex@cortexdata.io
 - name: Suvodeep Pyne
-  email: pyne.suvodeep@gmail.com
+  email: suvodeep@startree.ai
 dependencies:
 - name: mysql
   version: 1.6.6

@@ -22,7 +22,7 @@ export const AppRoute = {
     DATASETS: "/configuration/datasets",
     DATASETS_ALL: "/configuration/datasets/all",
     DATASETS_VIEW: `/configuration/datasets/view/id/${PLACEHOLDER_ROUTE_ID}`,
-    DATASETS_CREATE: "/configuration/datasets/create",
+    DATASETS_ONBOARD: "/configuration/datasets/onboard",
     DATASETS_UPDATE: `/configuration/datasets/update/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS: "/configuration/metrics",
     METRICS_ALL: "/configuration/metrics/all",
@@ -131,8 +131,8 @@ export const getDatasetsViewPath = (id: number): string => {
     return createPathWithRecognizedQueryString(path);
 };
 
-export const getDatasetsCreatePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASETS_CREATE);
+export const getDatasetsOnboardPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ONBOARD);
 };
 
 export const getDatasetsUpdatePath = (id: number): string => {

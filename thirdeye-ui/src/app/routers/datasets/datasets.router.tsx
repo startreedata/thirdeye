@@ -28,10 +28,10 @@ const DatasetsViewPage = lazy(() =>
     ).then((module) => ({ default: module.DatasetsViewPage }))
 );
 
-const DatasetsCreatePage = lazy(() =>
+const DatasetsOnboardPage = lazy(() =>
     import(
-        /* webpackChunkName: "datasets-create-page" */ "../../pages/datasets-create-page/datasets-create-page.component"
-    ).then((module) => ({ default: module.DatasetsCreatePage }))
+        /* webpackChunkName: "datasets-onboard-page" */ "../../pages/datasets-onboard-page/datasets-onboard-page.component"
+    ).then((module) => ({ default: module.DatasetsOnboardPage }))
 );
 
 const DatasetsUpdatePage = lazy(() =>
@@ -93,11 +93,11 @@ export const DatasetsRouter: FunctionComponent = () => {
                     path={AppRoute.DATASETS_VIEW}
                 />
 
-                {/* Datasets create path */}
+                {/* Datasets onboard path */}
                 <Route
                     exact
-                    component={DatasetsCreatePage}
-                    path={AppRoute.DATASETS_CREATE}
+                    component={DatasetsOnboardPage}
+                    path={AppRoute.DATASETS_ONBOARD}
                 />
 
                 {/* Datasets update path */}

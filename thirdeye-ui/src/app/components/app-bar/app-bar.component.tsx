@@ -23,7 +23,7 @@ import {
     getAnomaliesAllPath,
     getBasePath,
     getConfigurationPath,
-    getDatasetsCreatePath,
+    getDatasetsOnboardPath,
     getHomePath,
     getMetricsCreatePath,
     getSignInPath,
@@ -110,8 +110,8 @@ export const AppBar: FunctionComponent = () => {
         handleShortcutOptionsClose();
     };
 
-    const handleCreateDataset = (): void => {
-        history.push(getDatasetsCreatePath());
+    const handleOnBoardDataset = (): void => {
+        history.push(getDatasetsOnboardPath());
         handleShortcutOptionsClose();
     };
 
@@ -287,8 +287,8 @@ export const AppBar: FunctionComponent = () => {
                             </MenuItem>
 
                             {/* Create dataset */}
-                            <MenuItem onClick={handleCreateDataset}>
-                                {t("label.create-entity", {
+                            <MenuItem onClick={handleOnBoardDataset}>
+                                {t("label.onboard-entity", {
                                     entity: t("label.dataset"),
                                 })}
                             </MenuItem>

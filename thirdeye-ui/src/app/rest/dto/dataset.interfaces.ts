@@ -8,7 +8,7 @@ export interface Dataset {
     dimensions: string[];
     timeColumn: TimeColumn;
     expectedDelay: Duration;
-    datasources: Datasource[];
+    dataSource: Datasource;
 }
 
 export interface TimeColumn {

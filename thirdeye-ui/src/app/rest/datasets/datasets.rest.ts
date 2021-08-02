@@ -2,6 +2,7 @@ import axios from "axios";
 import { Dataset } from "../dto/dataset.interfaces";
 
 const BASE_URL_DATASETS = "/api/datasets";
+const BASE_URL_DATASOURCE = "/api/data-sources";
 
 export const getDataset = async (id: number): Promise<Dataset> => {
     const response = await axios.get(`${BASE_URL_DATASETS}/${id}`);
@@ -25,6 +26,21 @@ export const createDatasets = async (
     datasets: Dataset[]
 ): Promise<Dataset[]> => {
     const response = await axios.post(BASE_URL_DATASETS, datasets);
+
+    return response.data;
+};
+
+export const onBoardDataset = async (
+    datasetName: string,
+    dataSourceName: string
+): Promise<Dataset> => {
+    const response = await axios.post(
+        `${BASE_URL_DATASOURCE}/onboard-dataset/`,
+        new URLSearchParams({
+            dataSourceName,
+            datasetName,
+        })
+    );
 
     return response.data;
 };

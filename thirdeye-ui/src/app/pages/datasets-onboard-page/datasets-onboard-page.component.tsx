@@ -6,7 +6,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { createDataset } from "../../rest/datasets/datasets.rest";
+import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
@@ -16,7 +16,7 @@ import {
     getSuccessSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
 
-export const DatasetsCreatePage: FunctionComponent = () => {
+export const DatasetsOnboardPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasources, setDatasources] = useState<Datasource[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
@@ -34,10 +34,10 @@ export const DatasetsCreatePage: FunctionComponent = () => {
             return;
         }
 
-        createDataset(dataset)
+        onBoardDataset(dataset.name, dataset.dataSource.name)
             .then((dataset: Dataset): void => {
                 enqueueSnackbar(
-                    t("message.create-success", {
+                    t("message.onboard-success", {
                         entity: t("label.dataset"),
                     }),
                     getSuccessSnackbarOption()
@@ -48,7 +48,7 @@ export const DatasetsCreatePage: FunctionComponent = () => {
             })
             .catch((): void => {
                 enqueueSnackbar(
-                    t("message.create-error", {
+                    t("message.onboard-error", {
                         entity: t("label.dataset"),
                     }),
                     getErrorSnackbarOption()
@@ -77,7 +77,7 @@ export const DatasetsCreatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered hideTimeRange title={t("label.create")}>
+        <PageContents centered hideTimeRange title={t("label.onboard")}>
             <DatasetWizard
                 datasources={datasources}
                 onFinish={onDatasetWizardFinish}

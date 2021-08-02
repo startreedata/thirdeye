@@ -11,20 +11,11 @@ import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
-import { Datasource } from "../../rest/dto/datasource.interfaces";
-import { UiDatasetDatasource } from "../../rest/dto/ui-dataset.interfaces";
-import {
-    createEmptyDataset,
-    getUiDataset,
-    getUiDatasetDatasourceId,
-    getUiDatasetDatasourceName,
-    getUiDatasetDatasources,
-} from "../../utils/datasets/datasets.util";
+import { createEmptyDataset } from "../../utils/datasets/datasets.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
-import { TransferList } from "../transfer-list/transfer-list.component";
-import { DatasetPropertiesForm } from "./dataset-properties-form/dataset-properties-form.component";
-import { DatasetRenderer } from "./dataset-renderer/dataset-renderer.component";
+import { DatasetPropertiesForm } from "../dataset-wizard/dataset-properties-form/dataset-properties-form.component";
+import { DatasetRenderer } from "../dataset-wizard/dataset-renderer/dataset-renderer.component";
 import {
     DatasetWizardProps,
     DatasetWizardStep,
@@ -47,17 +38,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
     const { t } = useTranslation();
 
     useEffect(() => {
-        // In case of input dataset, datasources need to be configured for included datasources
-        // don't carry name
-        if (props.dataset) {
-            newDataset.datasources = getUiDataset(
-                props.dataset,
-                props.datasources
-            ).datasources as Datasource[];
-        }
-    }, []);
-
-    useEffect(() => {
         // Notify
         props.onChange && props.onChange(currentWizardStep);
     }, [currentWizardStep]);
@@ -68,19 +48,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
 
         // Next step
         onNext();
-    };
-
-    const onUiDatasetDatasourcesChange = (
-        uiDatasetDatasources: UiDatasetDatasource[]
-    ): void => {
-        // Update dataset with associated datasources
-        setNewDataset(
-            (newDataset): Dataset => {
-                newDataset.datasources = uiDatasetDatasources as Datasource[];
-
-                return newDataset;
-            }
-        );
     };
 
     const onCancel = (): void => {
@@ -167,6 +134,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
                         <Grid item sm={12}>
                             <DatasetPropertiesForm
                                 dataset={newDataset}
+                                datasources={props.datasources}
                                 id={FORM_ID_DATASET_PROPERTIES}
                                 onSubmit={onSubmitDatasetPropertiesForm}
                             />
@@ -174,32 +142,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
 
                         {/* Spacer */}
                         <Grid item sm={12} />
-
-                        {/* Associated datasources */}
-                        <Grid item sm={12}>
-                            <Typography variant="h5">
-                                {t("label.associated-datasources")}
-                            </Typography>
-                        </Grid>
-
-                        <Grid item sm={12}>
-                            <TransferList<UiDatasetDatasource>
-                                fromLabel={t("label.all-entity", {
-                                    entity: t("label.datasources"),
-                                })}
-                                fromList={getUiDatasetDatasources(
-                                    props.datasources
-                                )}
-                                listItemKeyFn={getUiDatasetDatasourceId}
-                                listItemTextFn={getUiDatasetDatasourceName}
-                                toLabel={t("label.associated-datasources")}
-                                toList={
-                                    getUiDataset(newDataset, props.datasources)
-                                        .datasources
-                                }
-                                onChange={onUiDatasetDatasourcesChange}
-                            />
-                        </Grid>
                     </>
                 )}
 

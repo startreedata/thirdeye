@@ -5,4 +5,5 @@ export interface DatasetCardProps {
     searchWords?: string[];
     showViewDetails?: boolean;
     onDelete?: (uiDataset: UiDataset) => void;
+    onEdit?: (id: number) => void;
 }

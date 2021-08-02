@@ -41,6 +41,8 @@
         "deactivate-entity": "Deactivate {{entity}}",
         "investigate": "Investigate",
         "investigate-entity": "Investigate {{entity}}",
+        "onboard-entity": "Onboard {{entity}}",
+        "onboard": "Onboard",
         "all": "All",
         "all-entity": "All {{entity}}",
         "search": "Search",
@@ -131,7 +133,7 @@
 
         "associated-metrics": "Associated Metrics",
         "dataset-properties": "Dataset Properties",
-        "associated-datasources": "Associated Datasources"
+        "associated-datasource": "Associated Datasource"
     },
     "message": {
         "error": "Error",
@@ -149,6 +151,8 @@
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
         "delete-error": "Error deleting {{entity}}",
+        "onboard-success": "{{entity}} onboarded successfully",
+        "onboard-error": "Error onboarding {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "validation-failed": "Validation failed",
 
@@ -164,6 +168,7 @@
         "json-input-required": "JSON input is required",
         "invalid-json": "Invalid JSON",
 
-        "dataset-name-required": "Dataset name is required"
+        "dataset-name-required": "Dataset name is required",
+        "dataset-datasource-required": "Datasource is required"
     }
 }

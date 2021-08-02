@@ -1,7 +1,5 @@
 import { Grid } from "@material-ui/core";
 import {
-    GridCellParams,
-    GridCellValue,
     GridColDef,
     GridRowId,
     GridSelectionModelChangeParams,
@@ -71,16 +69,13 @@ export const DatasetList: FunctionComponent<DatasetListProps> = (
                         handleDatasetViewDetailsByNameAndId
                     ),
             },
-            // Datasource count
+            // Datasource Name
             {
-                field: "datasourceCount",
+                field: "datasourceName",
                 type: "string",
                 sortable: true,
-                headerName: t("label.associated-datasources"),
-                align: "right",
-                headerAlign: "right",
+                headerName: t("label.datasource"),
                 flex: 1,
-                sortComparator: datasetDatasourceCountComparator,
             },
             // Actions
             {
@@ -103,26 +98,6 @@ export const DatasetList: FunctionComponent<DatasetListProps> = (
             },
         ];
         setDataGridColumns(columns);
-    };
-
-    const datasetDatasourceCountComparator = (
-        _value1: GridCellValue,
-        _value2: GridCellValue,
-        params1: GridCellParams,
-        params2: GridCellParams
-    ): number => {
-        const uiDataset1 = getUiDataset(params1.row && params1.row.rowId);
-        const uiDataset2 = getUiDataset(params2.row && params2.row.rowId);
-
-        if (!uiDataset1 || !uiDataset1.datasources) {
-            return -1;
-        }
-
-        if (!uiDataset2 || !uiDataset2.datasources) {
-            return 1;
-        }
-
-        return uiDataset1.datasources.length - uiDataset2.datasources.length;
     };
 
     const handleDatasetViewDetailsByNameAndId = (

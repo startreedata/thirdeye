@@ -1,6 +1,8 @@
 import {
     Card,
+    CardContent,
     CardHeader,
+    Grid,
     IconButton,
     Link,
     Menu,
@@ -14,7 +16,9 @@ import {
     getDatasetsUpdatePath,
     getDatasetsViewPath,
 } from "../../../utils/routes/routes.util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
+import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { DatasetCardProps } from "./dataset-card.interfaces";
 
 export const DatasetCard: FunctionComponent<DatasetCardProps> = (
@@ -69,42 +73,44 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
             {props.uiDataset && (
                 <CardHeader
                     action={
-                        <>
-                            {/* Dataset options button */}
-                            <IconButton onClick={handleDatasetOptionsClick}>
-                                <MoreVertIcon />
-                            </IconButton>
+                        <Grid container alignItems="center" spacing={0}>
+                            <Grid item>
+                                {/* Dataset options button */}
+                                <IconButton onClick={handleDatasetOptionsClick}>
+                                    <MoreVertIcon />
+                                </IconButton>
 
-                            {/* Dataset options */}
-                            <Menu
-                                anchorEl={datasetOptionsAnchorElement}
-                                open={Boolean(datasetOptionsAnchorElement)}
-                                onClose={handleDatasetOptionsClose}
-                            >
-                                {/* View details */}
-                                {props.showViewDetails && (
-                                    <MenuItem
-                                        onClick={handleDatasetViewDetails}
-                                    >
-                                        {t("label.view-details")}
+                                {/* Dataset options */}
+                                <Menu
+                                    anchorEl={datasetOptionsAnchorElement}
+                                    open={Boolean(datasetOptionsAnchorElement)}
+                                    onClose={handleDatasetOptionsClose}
+                                >
+                                    {/* View details */}
+                                    {props.showViewDetails && (
+                                        <MenuItem
+                                            onClick={handleDatasetViewDetails}
+                                        >
+                                            {t("label.view-details")}
+                                        </MenuItem>
+                                    )}
+
+                                    {/* Edit dataset */}
+                                    <MenuItem onClick={handleDatasetEdit}>
+                                        {t("label.edit-entity", {
+                                            entity: t("label.dataset"),
+                                        })}
                                     </MenuItem>
-                                )}
 
-                                {/* Edit dataset */}
-                                <MenuItem onClick={handleDatasetEdit}>
-                                    {t("label.edit-entity", {
-                                        entity: t("label.dataset"),
-                                    })}
-                                </MenuItem>
-
-                                {/* Delete dataset */}
-                                <MenuItem onClick={handleDatasetDelete}>
-                                    {t("label.delete-entity", {
-                                        entity: t("label.dataset"),
-                                    })}
-                                </MenuItem>
-                            </Menu>
-                        </>
+                                    {/* Delete dataset */}
+                                    <MenuItem onClick={handleDatasetDelete}>
+                                        {t("label.delete-entity", {
+                                            entity: t("label.dataset"),
+                                        })}
+                                    </MenuItem>
+                                </Menu>
+                            </Grid>
+                        </Grid>
                     }
                     title={
                         <>
@@ -125,6 +131,24 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
                     titleTypographyProps={{ variant: "h6" }}
                 />
             )}
+
+            <CardContent>
+                {props.uiDataset && (
+                    <Grid container>
+                        {/* Datasource */}
+                        <Grid item md={4} xs={12}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.datasource")}
+                                searchWords={props.searchWords}
+                                values={[props.uiDataset.datasourceName]}
+                            />
+                        </Grid>
+                    </Grid>
+                )}
+
+                {/* No data available */}
+                {!props.uiDataset && <NoDataIndicator />}
+            </CardContent>
         </Card>
     );
 };

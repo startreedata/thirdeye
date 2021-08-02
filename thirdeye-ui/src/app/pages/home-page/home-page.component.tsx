@@ -48,7 +48,7 @@ export const HomePage: FunctionComponent = () => {
         history.push(getSubscriptionGroupsPath());
     };
 
-    const handleDataSetsClick = (): void => {
+    const handleDatasetsClick = (): void => {
         history.push(getDatasetsPath());
     };
 
@@ -115,7 +115,7 @@ export const HomePage: FunctionComponent = () => {
                             icon={SubscriptionGroupIcon}
                             iconColor={theme.palette.primary.main}
                             text={t("label.datasets")}
-                            onClick={handleDataSetsClick}
+                            onClick={handleDatasetsClick}
                         />
                     </Grid>
 

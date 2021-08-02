@@ -55,9 +55,11 @@ jest.mock(
 );
 
 jest.mock(
-    "../../pages/datasets-create-page/datasets-create-page.component",
+    "../../pages/datasets-onboard-page/datasets-onboard-page.component",
     () => ({
-        DatasetsCreatePage: jest.fn().mockReturnValue("testDatasetsCreatePage"),
+        DatasetsOnboardPage: jest
+            .fn()
+            .mockReturnValue("testDatasetsOnboardPage"),
     })
 );
 
@@ -192,22 +194,22 @@ describe("Datasets Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render datasets create page at exact datasets create path", async () => {
+    it("should render datasets onboard page at exact datasets onboard path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASETS_CREATE]}>
+            <MemoryRouter initialEntries={[AppRoute.DATASETS_ONBOARD]}>
                 <DatasetsRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testDatasetsCreatePage")
+            screen.findByText("testDatasetsOnboardPage")
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render page not found page at invalid datasets create path", async () => {
+    it("should render page not found page at invalid datasets onboard path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASETS_CREATE}/testPath`]}
+                initialEntries={[`${AppRoute.DATASETS_ONBOARD}/testPath`]}
             >
                 <DatasetsRouter />
             </MemoryRouter>

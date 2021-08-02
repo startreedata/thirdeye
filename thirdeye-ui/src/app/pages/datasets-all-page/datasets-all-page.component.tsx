@@ -11,9 +11,7 @@ import {
     deleteDataset,
     getAllDatasets,
 } from "../../rest/datasets/datasets.rest";
-import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
-import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
 import {
@@ -42,42 +40,23 @@ export const DatasetsAllPage: FunctionComponent = () => {
         setUiDatasets(null);
 
         let fetchedUiDatasets: UiDataset[] = [];
-        let fetchedDatasources: Datasource[] = [];
-        Promise.allSettled([getAllDatasets(), getAllDatasources()])
-            .then(([datasetsResponse, datasourcesResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    datasetsResponse.status === "rejected" ||
-                    datasourcesResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
-                // Attempt to gather data
-                if (datasourcesResponse.status === "fulfilled") {
-                    fetchedDatasources = datasourcesResponse.value;
-                }
-                if (datasetsResponse.status === "fulfilled") {
-                    fetchedUiDatasets = getUiDatasets(
-                        datasetsResponse.value,
-                        fetchedDatasources
-                    );
-                }
+        getAllDatasets()
+            .then((datasets) => {
+                fetchedUiDatasets = getUiDatasets(datasets);
             })
-            .finally(() => {
-                setUiDatasets(fetchedUiDatasets);
-            });
+            .catch(() =>
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                )
+            )
+            .finally(() => setUiDatasets(fetchedUiDatasets));
     };
 
     const handleDatasetDelete = (uiDataset: UiDataset): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: uiDataset.name,
-            }),
+            text: t("message.delete-confirmation", { name: uiDataset.name }),
             okButtonLabel: t("label.delete"),
             onOk: () => handleDatasetDeleteOk(uiDataset),
         });
@@ -87,9 +66,7 @@ export const DatasetsAllPage: FunctionComponent = () => {
         deleteDataset(uiDataset.id)
             .then((dataset) => {
                 enqueueSnackbar(
-                    t("message.delete-success", {
-                        entity: t("label.dataset"),
-                    }),
+                    t("message.delete-success", { entity: t("label.dataset") }),
                     getSuccessSnackbarOption()
                 );
 
@@ -98,9 +75,7 @@ export const DatasetsAllPage: FunctionComponent = () => {
             })
             .catch(() =>
                 enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.dataset"),
-                    }),
+                    t("message.delete-error", { entity: t("label.dataset") }),
                     getErrorSnackbarOption()
                 )
             );

@@ -31,7 +31,7 @@ export const createEmptyDatasource = (): Datasource => {
     return {
         id: -1,
         name: noDataMarker,
-    };
+    } as Datasource;
 };
 
 export const getUiDataset = (dataset: Dataset): UiDataset => {

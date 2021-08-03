@@ -15,6 +15,7 @@ import {
     getAnomaliesPath,
     getConfigurationPath,
     getDatasetsPath,
+    getDatasourcesPath,
     getMetricsPath,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
@@ -49,6 +50,10 @@ export const HomePage: FunctionComponent = () => {
 
     const handleDatasetsClick = (): void => {
         history.push(getDatasetsPath());
+    };
+
+    const handleDatasourcesClick = (): void => {
+        history.push(getDatasourcesPath());
     };
 
     const handleMetricsClick = (): void => {
@@ -111,6 +116,16 @@ export const HomePage: FunctionComponent = () => {
                             iconColor={theme.palette.primary.main}
                             text={t("label.datasets")}
                             onClick={handleDatasetsClick}
+                        />
+                    </Grid>
+
+                    {/* Datasources */}
+                    <Grid item>
+                        <ButtonTile
+                            icon={SubscriptionGroupIcon}
+                            iconColor={theme.palette.primary.main}
+                            text={t("label.datasources")}
+                            onClick={handleDatasourcesClick}
                         />
                     </Grid>
 

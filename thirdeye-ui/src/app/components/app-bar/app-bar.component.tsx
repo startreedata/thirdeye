@@ -24,6 +24,7 @@ import {
     getBasePath,
     getConfigurationPath,
     getDatasetsOnboardPath,
+    getDatasourcesCreatePath,
     getHomePath,
     getMetricsCreatePath,
     getSignInPath,
@@ -112,6 +113,11 @@ export const AppBar: FunctionComponent = () => {
 
     const handleOnBoardDataset = (): void => {
         history.push(getDatasetsOnboardPath());
+        handleShortcutOptionsClose();
+    };
+
+    const handleCreateDatasource = (): void => {
+        history.push(getDatasourcesCreatePath());
         handleShortcutOptionsClose();
     };
 
@@ -290,6 +296,13 @@ export const AppBar: FunctionComponent = () => {
                             <MenuItem onClick={handleOnBoardDataset}>
                                 {t("label.onboard-entity", {
                                     entity: t("label.dataset"),
+                                })}
+                            </MenuItem>
+
+                            {/* Create datasource */}
+                            <MenuItem onClick={handleCreateDatasource}>
+                                {t("label.create-entity", {
+                                    entity: t("label.datasource"),
                                 })}
                             </MenuItem>
                         </Menu>

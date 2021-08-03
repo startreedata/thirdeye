@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.alert;
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static org.apache.pinot.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext.DEFAULT_TIME_FORMAT;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
@@ -12,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.WebApplicationException;
+import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
@@ -30,6 +33,8 @@ import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -48,6 +53,7 @@ public class AlertEvaluatorV2 {
 
   // max time allowed for a preview task
   private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(5);
+  public static final String K_TIME_FORMAT = "timeFormat";
 
   private final AlertTemplateManager alertTemplateManager;
   private final ExecutorService executorService;
@@ -110,7 +116,10 @@ public class AlertEvaluatorV2 {
     try {
       final AlertTemplateDTO template = getTemplate(templateApi);
       final Map<String, Object> templateProperties = alert.getTemplateProperties();
-      final AlertTemplateDTO templateWithProperties = applyContext(template, templateProperties);
+      final AlertTemplateDTO templateWithProperties = applyContext(template,
+          templateProperties,
+          request.getStart(),
+          request.getEnd());
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()
@@ -137,16 +146,36 @@ public class AlertEvaluatorV2 {
   }
 
   private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
-      final Map<String, Object> templateProperties) throws IOException, ClassNotFoundException {
-    if (templateProperties == null || templateProperties.size() == 0) {
-      /* Nothing to replace. Skip running the engine */
-      return template;
+      final Map<String, Object> templateProperties,
+      final Date startTime,
+      final Date endTime) throws IOException, ClassNotFoundException {
+    final Map<String, Object> properties = new HashMap<>();
+    if (templateProperties != null) {
+      properties.putAll(templateProperties);
     }
+
+    final String timeFormat = findTimeFormat(template);
+    final TimeConverter timeConverter = DefaultTimeConverter.get(timeFormat);
+
+    properties.put("startTime", timeConverter.convertMillis(startTime.getTime()));
+    properties.put("endTime", timeConverter.convertMillis(endTime.getTime()));
 
     final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
     return GroovyTemplateUtils.applyContextToTemplate(jsonString,
-        templateProperties,
+        properties,
         AlertTemplateDTO.class);
+  }
+
+  private String findTimeFormat(final AlertTemplateDTO template) {
+    for (PlanNodeBean node : template.getNodes()) {
+      final Map<String, Object> params = node.getParams();
+      final Object value = params.get(K_TIME_FORMAT);
+      if (value != null) {
+        return value.toString();
+      }
+    }
+
+    return DEFAULT_TIME_FORMAT;
   }
 
   private AlertTemplateDTO getTemplate(final AlertTemplateApi templateApi) {

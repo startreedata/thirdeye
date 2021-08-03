@@ -14,4 +14,9 @@ public class EpochTimeConverter extends DefaultTimeConverter {
   public long convert(final String timeValue) {
     return timeUnit.toMillis(Long.parseLong(timeValue));
   }
+
+  @Override
+  public String convertMillis(final long time) {
+    return String.valueOf(timeUnit.convert(time, TimeUnit.MILLISECONDS));
+  }
 }

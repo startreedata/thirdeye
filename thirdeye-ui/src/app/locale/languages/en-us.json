@@ -41,6 +41,8 @@
         "deactivate-entity": "Deactivate {{entity}}",
         "investigate": "Investigate",
         "investigate-entity": "Investigate {{entity}}",
+        "onboard-entity": "Onboard {{entity}}",
+        "onboard": "Onboard",
         "all": "All",
         "all-entity": "All {{entity}}",
         "search": "Search",
@@ -127,7 +129,11 @@
         "aggregation-function": "Aggregation Function",
         "views": "Views",
         "metric-properties": "Metric Properties",
-        "threshold": "Threshold"
+        "threshold": "Threshold",
+
+        "associated-metrics": "Associated Metrics",
+        "dataset-properties": "Dataset Properties",
+        "associated-datasource": "Associated Datasource"
     },
     "message": {
         "error": "Error",
@@ -145,6 +151,8 @@
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
         "delete-error": "Error deleting {{entity}}",
+        "onboard-success": "{{entity}} onboarded successfully",
+        "onboard-error": "Error onboarding {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "validation-failed": "Validation failed",
 
@@ -158,6 +166,9 @@
         "email-required": "Email is required",
         "invalid-email": "Invalid email",
         "json-input-required": "JSON input is required",
-        "invalid-json": "Invalid JSON"
+        "invalid-json": "Invalid JSON",
+
+        "dataset-name-required": "Dataset name is required",
+        "dataset-datasource-required": "Datasource is required"
     }
 }

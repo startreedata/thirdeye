@@ -32,7 +32,7 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
    * Choose the max out of all the timestamps
    *
    * @return the last processed timestamp
-   *    NOTE! This is different from the legacy implementation which guesses the lastTimestamp.
+   *     NOTE! This is different from the legacy implementation which guesses the lastTimestamp.
    */
   @Override
   public long getLastTimestamp() {
@@ -46,7 +46,7 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
 
   private Long getLastTimestamp(final DetectionResult detectionResult) {
     final LongSeries timeSeries = detectionResult.getTimeseries().getTime();
-    return timeSeries.get(timeSeries.size() - 1);
+    return timeSeries.size() > 0 ? timeSeries.get(timeSeries.size() - 1) : null;
   }
 
   /**
@@ -67,6 +67,7 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
 
   /**
    * TODO spyne to be implemented later.
+   *
    * @return empty list.
    */
   @Override

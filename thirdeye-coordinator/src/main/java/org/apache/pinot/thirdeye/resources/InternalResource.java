@@ -78,7 +78,7 @@ public class InternalResource {
   }
 
   @GET
-  @Path("anomaly-report")
+  @Path("anomaly-email")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateAnomalyReport(@QueryParam("alertId") Long alertId) {
     ensureExists(alertId, "Query parameter required: alertId !");

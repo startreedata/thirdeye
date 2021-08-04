@@ -1,8 +1,8 @@
 [
   {
-    "name": "newAlert",
-    "description": "This is the detection used by online service",
-    "cron": "0 0/1 * 1/1 * ? * ",
+    "name": "sample-alert-v2",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
     "v1Format": true,
     "template": {
       "nodes": [
@@ -10,24 +10,18 @@
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
-            "component.detector.type": "PERCENTAGE_CHANGE",
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.percentageChange": "0.1",
-            "component.detector.offset": "mo1m",
-            "component.detector.pattern": "down",
             "component.detector.timestamp": "ts",
             "component.detector.metric": "met",
             "component.detector.dimensions": [],
-            "startTime": "20200202",
-            "endTime": "20200214"
+            "component.detector.timezone": "US/Pacific",
+            "component.detector.monitoringGranularity": "1_DAYS",
+            "component.detector.type": "THRESHOLD",
+            "component.detector.max": "850000",
+            "component.detector.min": "300000",
+            "component.detector.offset": "mo1m",
+            "component.detector.pattern": "down"
           },
           "inputs": [
-            {
-              "targetProperty": "baseline",
-              "sourcePlanNode": "baselineDataFetcher",
-              "sourceProperty": "baselineOutput"
-            },
             {
               "targetProperty": "current",
               "sourcePlanNode": "currentDataFetcher",
@@ -37,34 +31,13 @@
           "outputs": []
         },
         {
-          "name": "baselineDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" < 20200214 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
-            "component.pinot.tableName": "pageviews",
-            "startTime": "20200202",
-            "endTime": "20200214"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "baselineOutput"
-            }
-          ]
-        },
-        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
             "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200302 AND \"date\" < 20200314 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
-            "component.pinot.tableName": "pageviews",
-            "startTime": "20200202",
-            "endTime": "20200214"
+            "component.pinot.query": "SELECT DATETIMECONVERT(\"date\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '1:DAYS') as ts, sum(views) as met FROM pageviews WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000",
+            "component.pinot.tableName": "pageviews"
           },
           "inputs": [],
           "outputs": [

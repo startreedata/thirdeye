@@ -46,6 +46,9 @@ public class AlertApiBeanMapper {
         .map(ApiBeanMapper::toAlertTemplateDto)
         .ifPresent(dto::setTemplate);
 
+    optional(api.getTemplateProperties())
+        .ifPresent(dto::setTemplateProperties);
+
     // May not get updated while edits
     optional(api.getOwner())
         .map(UserApi::getPrincipal)

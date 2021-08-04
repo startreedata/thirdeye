@@ -163,6 +163,7 @@ public abstract class ApiBeanMapper {
         .setTemplate(optional(dto.getTemplate())
             .map(ApiBeanMapper::toAlertTemplateApi)
             .orElse(null))
+        .setTemplateProperties(dto.getTemplateProperties())
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))

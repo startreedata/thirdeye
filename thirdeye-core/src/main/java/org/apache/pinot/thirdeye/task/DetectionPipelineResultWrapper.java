@@ -3,12 +3,13 @@ package org.apache.pinot.thirdeye.task;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 
 public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
@@ -39,14 +40,15 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
     return delegate
         .getDetectionResults()
         .stream()
-        .map(this::getLastTimestamp)
+        .filter(Objects::nonNull)
+        .map(DetectionResult::getTimeseries)
+        .filter(Objects::nonNull)
+        .map(TimeSeries::getTime)
+        .filter(Objects::nonNull)
+        .filter(longSeries -> longSeries.size() > 0)
+        .map(longSeries -> longSeries.get(longSeries.size() - 1))
         .max(Long::compareTo)
         .orElse(-1L);
-  }
-
-  private Long getLastTimestamp(final DetectionResult detectionResult) {
-    final LongSeries timeSeries = detectionResult.getTimeseries().getTime();
-    return timeSeries.size() > 0 ? timeSeries.get(timeSeries.size() - 1) : null;
   }
 
   /**

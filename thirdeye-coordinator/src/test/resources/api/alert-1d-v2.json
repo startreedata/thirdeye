@@ -16,8 +16,8 @@
             "component.detector.timezone": "US/Pacific",
             "component.detector.monitoringGranularity": "1_DAYS",
             "component.detector.type": "THRESHOLD",
-            "component.detector.max": "850000",
-            "component.detector.min": "300000",
+            "component.detector.max": "${max}",
+            "component.detector.min": "${min}",
             "component.detector.offset": "mo1m",
             "component.detector.pattern": "down"
           },
@@ -48,6 +48,10 @@
           ]
         }
       ]
+    },
+    "templateProperties": {
+      "max": "850000",
+      "min": "300000"
     },
     "lastTimestamp": 0
   }

@@ -446,9 +446,6 @@ public abstract class ApiBeanMapper {
     }
     anomalyApi.setAlert(new AlertApi()
         .setId(dto.getDetectionConfigId())
-        .setName(optional(dto.getProperties())
-            .map(p -> p.get("subEntityName"))
-            .orElse(null))
     )
         .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))

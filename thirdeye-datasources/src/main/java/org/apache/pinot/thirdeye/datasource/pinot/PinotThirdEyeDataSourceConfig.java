@@ -36,6 +36,10 @@ public class PinotThirdEyeDataSourceConfig {
   private String tag;
   private String name;
 
+  public String connectionUrl(){
+    return String.format("jdbc:pinot://%s:%s",controllerHost,controllerPort);
+  }
+
   public String getZookeeperUrl() {
     return zookeeperUrl;
   }

@@ -19,9 +19,13 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -29,16 +33,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.helix.manager.zk.ZKHelixAdmin;
-import org.apache.helix.manager.zk.ZNRecordSerializer;
-import org.apache.helix.manager.zk.ZkClient;
-import org.apache.helix.model.InstanceConfig;
-import org.apache.pinot.client.Connection;
-import org.apache.pinot.client.ConnectionFactory;
-import org.apache.pinot.client.PinotClientException;
-import org.apache.pinot.client.Request;
-import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.sql.SqlQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +44,6 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       .getLogger(PinotControllerResponseCacheLoader.class);
 
   private static final long CONNECTION_TIMEOUT = 60000;
-  private static final String BROKER_PREFIX = "Broker_";
-  private static final String SQL_QUERY_FORMAT = "sql";
-  private static final String PQL_QUERY_FORMAT = "pql";
   private static int MAX_CONNECTIONS;
 
   static {
@@ -64,16 +57,9 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   private final AtomicInteger activeConnections = new AtomicInteger();
   private Connection[] connections;
 
-  private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers);
-    return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
-  }
-
-  private static Connection[] fromZookeeper(
+  private static Connection[] fromController(
       final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(
-        pinotThirdEyeDataSourceConfig.getZookeeperUrl()
-            + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
+    Callable<Connection> callable = () -> DriverManager.getConnection(pinotThirdEyeDataSourceConfig.connectionUrl());
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
@@ -116,28 +102,10 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    if (pinotThirdEyeDataSourceConfig.getBrokerUrl() != null
-        && pinotThirdEyeDataSourceConfig.getBrokerUrl().trim().length() > 0) {
-      ZkClient zkClient = new ZkClient(pinotThirdEyeDataSourceConfig.getZookeeperUrl());
-      zkClient.setZkSerializer(new ZNRecordSerializer());
-      zkClient.waitUntilConnected(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-      ZKHelixAdmin helixAdmin = new ZKHelixAdmin(zkClient);
-      List<String> thirdeyeBrokerList = helixAdmin.getInstancesInClusterWithTag(
-          pinotThirdEyeDataSourceConfig.getClusterName(), pinotThirdEyeDataSourceConfig.getTag());
-
-      String[] thirdeyeBrokers = new String[thirdeyeBrokerList.size()];
-      for (int i = 0; i < thirdeyeBrokerList.size(); i++) {
-        String instanceName = thirdeyeBrokerList.get(i);
-        InstanceConfig instanceConfig =
-            helixAdmin
-                .getInstanceConfig(pinotThirdEyeDataSourceConfig.getClusterName(), instanceName);
-        thirdeyeBrokers[i] = instanceConfig.getHostName().replaceAll(BROKER_PREFIX, "") + ":"
-            + instanceConfig.getPort();
-      }
-      this.connections = fromHostList(thirdeyeBrokers);
-      LOG.info("Created PinotControllerResponseCacheLoader with brokers {}", thirdeyeBrokers);
-    } else {
-      this.connections = fromZookeeper(pinotThirdEyeDataSourceConfig);
+    if (pinotThirdEyeDataSourceConfig.getControllerHost() != null
+        && pinotThirdEyeDataSourceConfig.getControllerPort()>0
+        && pinotThirdEyeDataSourceConfig.getControllerHost().trim().length() > 0) {
+      this.connections = fromController(pinotThirdEyeDataSourceConfig);
       LOG.info("Created PinotControllerResponseCacheLoader with controller {}:{}",
           pinotThirdEyeDataSourceConfig.getControllerHost(),
           pinotThirdEyeDataSourceConfig.getControllerPort());
@@ -145,28 +113,26 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   }
 
   @Override
-  public ThirdEyeResultSetGroup load(PinotQuery pinotQuery) throws Exception {
+  public ThirdEyeResultSetGroup load(SqlQuery query) throws Exception {
     try {
       Connection connection = getConnection();
       try {
         synchronized (connection) {
           int activeConnections = this.activeConnections.incrementAndGet();
           long start = System.currentTimeMillis();
-          final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
-          ResultSetGroup resultSetGroup = connection
-              .execute(pinotQuery.getTableName(), new Request(queryFormat, pinotQuery.getQuery()));
+          Statement statement = connection.createStatement();
+          ResultSet resultSet = statement.executeQuery(query.getQuery());
           long end = System.currentTimeMillis();
-          LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
+          LOG.info("Query:{}  took:{} ms  connections:{}", query.getQuery(), (end - start),
               activeConnections);
-
-          return ThirdEyeResultSetGroup.fromPinotResultSetGroup(resultSetGroup);
+          return ThirdEyeResultSetGroup.fromPinotResultSetGroup(resultSet, query);
         }
       } finally {
         this.activeConnections.decrementAndGet();
       }
-    } catch (PinotClientException cause) {
-      LOG.error("Error when running pql:" + pinotQuery.getQuery(), cause);
-      throw new PinotClientException("Error when running pql:" + pinotQuery.getQuery(), cause);
+    } catch (SQLException cause) {
+      LOG.error("Error when running sql:" + query.getQuery(), cause);
+      throw new SQLException("Error when running sql:" + query.getQuery(), cause);
     }
   }
 

@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.notification.content;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.Multimap;
 import java.io.File;
 import java.io.IOException;
@@ -515,6 +516,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
     return Collections.emptyList();
   }
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class AnomalyReportEntity {
 
@@ -779,7 +781,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
       this.properties = properties;
     }
 
-    public double getWeight() {
+    public Double getWeight() {
       return weight;
     }
 

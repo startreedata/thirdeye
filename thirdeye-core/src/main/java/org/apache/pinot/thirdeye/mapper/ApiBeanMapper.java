@@ -31,6 +31,7 @@ import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.spi.api.WebhookSchemeApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
@@ -52,6 +53,7 @@ public abstract class ApiBeanMapper {
   private static final String DEFAULT_ALERT_SUPPRESSOR = "org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor";
   private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
   private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
+  private static final String WEBHOOK_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionWebhookAlerter";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
   private static final String PROP_CLASS_NAME = "className";
 
@@ -333,6 +335,18 @@ public abstract class ApiBeanMapper {
             ))
         .orElse(null);
 
+    final WebhookSchemeApi webhookSchemeApi = optional(dto.getAlertSchemes())
+        .map(o -> o.get("webhookScheme"))
+        .map(m -> (Map) m)
+        .map(m -> new WebhookSchemeApi()
+            .setUrl(optional(m.get("url").toString())
+                .orElse("")
+            )
+            .setEnable(optional((boolean)m.get("enable"))
+                .orElse(false)
+            ))
+        .orElse(null);
+
     return new SubscriptionGroupApi()
         .setId(dto.getId())
         .setName(dto.getName())
@@ -341,7 +355,8 @@ public abstract class ApiBeanMapper {
             .setName(dto.getApplication()))
         .setAlerts(alertApis)
         .setNotificationSchemes(new NotificationSchemesApi()
-            .setEmail(emailSchemeApi))
+            .setEmail(emailSchemeApi)
+            .setWebhook(webhookSchemeApi))
         ;
   }
 
@@ -406,6 +421,15 @@ public abstract class ApiBeanMapper {
     emailNotificationInfo.put("recipients", recipientsInfo);
     emailNotificationInfo.put(PROP_CLASS_NAME, DEFAULT_ALERT_SCHEME_CLASS_NAME);
     alertSchemes.put("emailScheme", emailNotificationInfo);
+
+    final WebhookSchemeApi webhook = notificationSchemes.getWebhook();
+    Map<String, Object> webhookInfo = ImmutableMap.of(
+        "url", optional(webhook.getUrl()).orElse(""),
+        "enable", optional(webhook.isEnable()).orElse(false),
+        PROP_CLASS_NAME, WEBHOOK_ALERT_SCHEME_CLASS_NAME
+    );
+    alertSchemes.put("webhookScheme", webhookInfo);
+
     return alertSchemes;
   }
 

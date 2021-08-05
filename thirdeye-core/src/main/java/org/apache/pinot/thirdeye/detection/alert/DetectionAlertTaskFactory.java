@@ -25,11 +25,13 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
+import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionWebhookAlerter;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
@@ -56,6 +58,7 @@ public class DetectionAlertTaskFactory {
   private final MetricConfigManager metricConfigManager;
   private final EventManager eventManager;
   private final DetectionEmailAlerter detectionEmailAlerter;
+  private final DetectionWebhookAlerter detectionWebhookAlerter;
 
   @Inject
   public DetectionAlertTaskFactory(final DataProvider provider,
@@ -63,13 +66,15 @@ public class DetectionAlertTaskFactory {
       final AlertManager alertManager,
       final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
-      final DetectionEmailAlerter detectionEmailAlerter) {
+      final DetectionEmailAlerter detectionEmailAlerter,
+      final DetectionWebhookAlerter detectionWebhookAlerter) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
     this.eventManager = eventManager;
     this.detectionEmailAlerter = detectionEmailAlerter;
+    this.detectionWebhookAlerter = detectionWebhookAlerter;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)
@@ -92,7 +97,10 @@ public class DetectionAlertTaskFactory {
 
   public Set<DetectionAlertScheme> getAlertSchemes()
       throws Exception {
-    return singleton(detectionEmailAlerter);
+    Set<DetectionAlertScheme> alertSchemes = new HashSet<>();
+    alertSchemes.add(detectionEmailAlerter);
+    alertSchemes.add(detectionWebhookAlerter);
+    return Collections.unmodifiableSet(alertSchemes);
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)

@@ -7,6 +7,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class NotificationSchemesApi {
 
   private EmailSchemeApi email;
+  private WebhookSchemeApi webhook;
+
+  public WebhookSchemeApi getWebhook() {
+    return webhook;
+  }
+
+  public NotificationSchemesApi setWebhook(
+      final WebhookSchemeApi webhook) {
+    this.webhook = webhook;
+    return this;
+  }
 
   public EmailSchemeApi getEmail() {
     return email;

@@ -178,6 +178,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
     this.context = context;
+
     final DataSourceDTO dataSourceDTO = requireNonNull(context.getDataSourceDTO(),
         "data source dto is null");
 
@@ -259,7 +260,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         ThirdEyeResultSetGroup resultSetGroup;
         final long tStartFunction = System.nanoTime();
         try {
-          resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
+          resultSetGroup = this.executeSQL(new PinotQuery(sql,
+              dataset,
+              metricFunction.getMetricName(),
+              request.getGroupBy(),
+              request.getGroupByTimeGranularity(),
+              dataTimeSpec));
           if (metricConfig != null) {
 //            RequestStatisticsLogger.getRequestLog()
 //                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
@@ -442,7 +448,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     try {
       return this.pinotResponseCache.get(pinotQuery);
     } catch (ExecutionException e) {
-      LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
+      LOG.error("Failed to execute SQL: {}", pinotQuery.getQuery());
       throw e;
     }
   }

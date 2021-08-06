@@ -26,7 +26,7 @@ import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGro
 import org.apache.pinot.thirdeye.datasource.sql.SqlQuery;
 
 public abstract class PinotResponseCacheLoader extends
-    CacheLoader<SqlQuery, ThirdEyeResultSetGroup> {
+    CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
 
   /**
    * Initializes the cache loader using the given property map.

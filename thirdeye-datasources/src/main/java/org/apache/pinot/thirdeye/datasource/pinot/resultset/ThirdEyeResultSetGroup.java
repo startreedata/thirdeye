@@ -21,11 +21,9 @@ package org.apache.pinot.thirdeye.datasource.pinot.resultset;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.pinot.thirdeye.datasource.sql.SqlQuery;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 
 /**
@@ -59,30 +57,6 @@ public class ThirdEyeResultSetGroup {
 
   public List<ThirdEyeResultSet> getResultSets() {
     return resultSets;
-  }
-
-  /**
-   * Constructs a ThirdEyeResultSetGroup from Pinot's {@link ResultSetGroup}.
-   *
-   * @param resultSetGroup a {@link ResultSetGroup} from Pinot.
-   * @return a converted {@link ThirdEyeResultSetGroup}.
-   */
-  public static ThirdEyeResultSetGroup fromPinotResultSetGroup(ResultSet resultSet,
-      SqlQuery query) {
-    List<ResultSet> resultSets = new ArrayList<>();
-    resultSets.add(resultSet);
-    // Convert Pinot's ResultSet to ThirdEyeResultSet
-    List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
-    for (ResultSet rs : resultSets) {
-      ThirdEyeResultSet thirdEyeResultSet = ThirdEyeDataFrameResultSet.fromSQLResultSet(resultSet,
-          query.getMetric(),
-          query.getGroupByKeys(),
-          query.getGranularity(),
-          query.getTimeSpec());
-      thirdEyeResultSets.add(thirdEyeResultSet);
-    }
-
-    return new ThirdEyeResultSetGroup(thirdEyeResultSets);
   }
 
   @Override

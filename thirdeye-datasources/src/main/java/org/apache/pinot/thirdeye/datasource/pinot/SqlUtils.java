@@ -145,7 +145,6 @@ public class SqlUtils {
       sb.append(" ").append(groupByClause);
       sb.append(" LIMIT ").append(limit);
     }
-
     return sb.toString();
   }
 
@@ -153,6 +152,10 @@ public class SqlUtils {
     StringBuilder builder = new StringBuilder();
     if (!groupBy.isEmpty()) {
       for (String groupByDimension : groupBy) {
+        // Hack to allow date keyword as column name.
+        if(groupByDimension.equalsIgnoreCase("date")){
+          groupByDimension = "\""+groupByDimension+"\"";
+        }
         builder.append(groupByDimension).append(", ");
       }
     }
@@ -166,6 +169,7 @@ public class SqlUtils {
         //TODO: couldn't use metricConfig.getName() in the else because of tests.
         metricName = optional(metricConfig.getAggregationColumn()).orElse(metricFunction.getMetricName());
     }
+
     if (metricFunction.getFunctionName() == MetricAggFunction.COUNT_DISTINCT) {
       builder.append(MetricAggFunction.COUNT.name())
               .append("(")
@@ -324,6 +328,11 @@ public class SqlUtils {
     if (metricFunction.getMetricName().equals("*")) {
       metricName = "*";
     }
+
+    // Hack to allow date keyword as column name.
+    if(metricName.equalsIgnoreCase("date")){
+      metricName = "\""+metricName+"\"";
+    }
     builder.append(metricFunction.getFunctionName()).append("(").append(metricName).append(")");
     return builder.toString();
   }
@@ -335,6 +344,11 @@ public class SqlUtils {
 
     String timeField = timeSpec.getColumnName();
     String timeFormat = timeSpec.getFormat();
+
+    // Hack to allow date keyword as column name.
+    if(timeField.equalsIgnoreCase("date")){
+      timeField = "\"" + timeField + "\"";
+    }
 
     // epoch case
     if (timeFormat == null || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
@@ -456,6 +470,8 @@ public class SqlUtils {
     if (groups.isEmpty()) {
       return "";
     }
+    // Hack to allow date keyword as column name.
+    groups = groups.stream().map(m -> m.equalsIgnoreCase("date") ? "\""+m+"\"" : m).collect(Collectors.toList());
     return String.format("GROUP BY %s", COMMA.join(groups));
   }
 
@@ -468,6 +484,10 @@ public class SqlUtils {
               && !timeSpec.getDataGranularity().equals(aggregationGranularity)) {
         return convertEpochToMinuteAggGranularity(timeColumnName, timeSpec);
       }
+    }
+    // Hack to allow date keyword as column name.
+    if(timeColumnName.equalsIgnoreCase("date")){
+      timeColumnName = "\"" + timeColumnName + "\"";
     }
     return timeColumnName;
   }

@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -88,7 +89,12 @@ public class PinotDataSourceTimeQuery {
 
       String maxTimePql = String
           .format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);
-      PinotQuery maxTimePinotQuery = new PinotQuery(maxTimePql, dataset);
+      PinotQuery maxTimePinotQuery = new PinotQuery(maxTimePql,
+          dataset,
+          timeSpec.getColumnName(),
+          new ArrayList<>(),
+          timeSpec.getDataGranularity(),
+          timeSpec);
 
       ThirdEyeResultSetGroup resultSetGroup;
       final long tStart = System.nanoTime();

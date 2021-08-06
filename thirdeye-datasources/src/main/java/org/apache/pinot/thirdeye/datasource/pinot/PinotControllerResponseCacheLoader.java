@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -33,8 +34,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeDataFrameResultSet;
 import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.sql.SqlQuery;
+import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +115,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   }
 
   @Override
-  public ThirdEyeResultSetGroup load(SqlQuery query) throws Exception {
+  public ThirdEyeResultSetGroup load(PinotQuery query) throws Exception {
     try {
       Connection connection = getConnection();
       try {
@@ -125,7 +127,14 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
           long end = System.currentTimeMillis();
           LOG.info("Query:{}  took:{} ms  connections:{}", query.getQuery(), (end - start),
               activeConnections);
-          return ThirdEyeResultSetGroup.fromPinotResultSetGroup(resultSet, query);
+          ThirdEyeResultSet teResultSet = ThirdEyeDataFrameResultSet.fromSQLResultSet(resultSet,
+              query.getMetric(),
+              query.getGroupByKeys(),
+              query.getGranularity(),
+              query.getTimeSpec());
+          List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
+          thirdEyeResultSets.add(teResultSet);
+          return new ThirdEyeResultSetGroup(thirdEyeResultSets);
         }
       } finally {
         this.activeConnections.decrementAndGet();

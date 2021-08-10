@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 public class AlertEvaluatorV2 {
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
+  private static final boolean USE_V1_FORMAT = true;
 
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
@@ -128,7 +129,22 @@ public class AlertEvaluatorV2 {
       final DetectionPipelineResult result = outputMap.get(key);
       resultMap.put(key, detectionPipelineResultToApi(result));
     }
+    if (USE_V1_FORMAT) {
+      return toV1Format(resultMap);
+    }
     return new AlertEvaluationApi().setEvaluations(resultMap);
+  }
+
+  private AlertEvaluationApi toV1Format(
+      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
+    for (final String key : v2Result.keySet()) {
+      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
+      detectionEvaluationApiMap
+          .keySet()
+          .forEach(apiKey -> map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
+    }
+    return new AlertEvaluationApi().setDetectionEvaluations(map);
   }
 
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(

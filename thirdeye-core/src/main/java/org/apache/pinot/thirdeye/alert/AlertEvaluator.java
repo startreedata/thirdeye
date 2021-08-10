@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.alert;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.primitives.Doubles;
@@ -51,15 +52,18 @@ public class AlertEvaluator {
   private final AlertManager alertManager;
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final ExecutorService executorService;
+  private final AlertEvaluatorV2 alertEvaluatorV2;
 
   @Inject
   public AlertEvaluator(
       final DataProvider dataProvider,
       final AlertManager alertManager,
-      final AlertApiBeanMapper alertApiBeanMapper) {
+      final AlertApiBeanMapper alertApiBeanMapper,
+      final AlertEvaluatorV2 alertEvaluatorV2) {
     this.dataProvider = dataProvider;
     this.alertManager = alertManager;
     this.alertApiBeanMapper = alertApiBeanMapper;
+    this.alertEvaluatorV2 = alertEvaluatorV2;
 
     this.executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -70,8 +74,19 @@ public class AlertEvaluator {
     return split[0];
   }
 
+  public static boolean isV2Evaluation(final AlertApi alert) {
+    return optional(alert)
+        .map(AlertApi::getTemplate)
+        .isPresent();
+  }
+
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
+    if (isV2Evaluation(request.getAlert())) {
+      return alertEvaluatorV2.evaluate(request);
+    }
+
+    // v1 Evaluation. Will be deprecated in the future
     try {
       final DetectionPipelineResultV1 result = runPipeline(request);
       return toApi(result);

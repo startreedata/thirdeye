@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
@@ -58,6 +57,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
   private static final String CRON_EVERY_1MIN = "0 */1 * * * ?";
+  private static final boolean USE_V1_FORMAT = true;
 
   private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
@@ -206,7 +206,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     AlertEvaluationApi evaluation;
     if (isV2Evaluation(alert)) {
       evaluation = alertEvaluatorV2.evaluate(request);
-      if (bool(alert.isV1Format())) {
+      if (USE_V1_FORMAT) {
         evaluation = toV1Format(evaluation.getEvaluations());
       }
     } else {

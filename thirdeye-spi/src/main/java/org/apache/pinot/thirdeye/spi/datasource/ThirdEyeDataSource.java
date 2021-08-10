@@ -101,7 +101,5 @@ public interface ThirdEyeDataSource {
     throw new UnsupportedOperationException();
   }
 
-  default void close() throws Exception {
-    throw new UnsupportedOperationException();
-  }
+  void close() throws Exception;
 }

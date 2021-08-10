@@ -538,4 +538,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         context.getMetricConfigManager());
     return pinotDatasetOnboarder;
   }
+
+  @Override
+  public void close() throws Exception {
+    if (pinotResponseCacheLoader != null) {
+      pinotResponseCacheLoader.close();
+    }
+  }
 }

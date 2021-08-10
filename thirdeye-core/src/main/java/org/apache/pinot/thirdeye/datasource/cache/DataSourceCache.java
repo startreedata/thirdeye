@@ -25,6 +25,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,8 @@ public class DataSourceCache {
   private final DataSourcesLoader dataSourcesLoader;
   private final ExecutorService executorService;
 
+  private final Map<String, ThirdEyeDataSource> cache = new HashMap<>();
+
   private final Counter datasourceExceptionCounter;
   private final Counter datasourceDurationCounter;
   private final Counter datasourceCallCounter;
@@ -71,10 +74,17 @@ public class DataSourceCache {
     datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
-  public ThirdEyeDataSource getDataSource(String name) {
+  public synchronized ThirdEyeDataSource getDataSource(String name) {
+    final ThirdEyeDataSource cachedThirdEyeDataSource = cache.get(name);
+    if (cachedThirdEyeDataSource != null) {
+      return cachedThirdEyeDataSource;
+    }
+
     final Optional<DataSourceDTO> dataSource = findByName(name);
     if (dataSource.isPresent()) {
-      return dataSourcesLoader.loadDataSource(dataSource.get());
+      final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource.get());
+      cache.put(name, thirdEyeDataSource);
+      return thirdEyeDataSource;
     }
     throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
   }
@@ -113,5 +123,12 @@ public class DataSourceCache {
       responseFuturesMap.put(request, getQueryResultAsync(request));
     }
     return responseFuturesMap;
+  }
+
+  public void clear() throws Exception {
+    for (ThirdEyeDataSource thirdEyeDataSource : cache.values()) {
+      thirdEyeDataSource.close();
+    }
+    cache.clear();
   }
 }

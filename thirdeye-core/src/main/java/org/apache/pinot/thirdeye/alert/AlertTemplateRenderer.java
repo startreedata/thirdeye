@@ -17,6 +17,7 @@ import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -29,11 +30,15 @@ public class AlertTemplateRenderer {
 
   private static final String K_TIME_FORMAT = "timeFormat";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  private final AlertManager alertManager;
   private final AlertTemplateManager alertTemplateManager;
 
   @Inject
   public AlertTemplateRenderer(
+      final AlertManager alertManager,
       final AlertTemplateManager alertTemplateManager) {
+    this.alertManager = alertManager;
     this.alertTemplateManager = alertTemplateManager;
   }
 
@@ -48,6 +53,11 @@ public class AlertTemplateRenderer {
   public AlertTemplateDTO renderAlert(AlertApi alert, Date start, Date end)
       throws IOException, ClassNotFoundException {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
+
+    if (alert.getId() != null) {
+      final AlertDTO alertDto = ensureExists(alertManager.findById(alert.getId()));
+      return renderAlert(alertDto, start, end);
+    }
 
     final AlertTemplateApi templateApi = alert.getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");

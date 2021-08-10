@@ -74,12 +74,6 @@ public class AlertEvaluator {
     return split[0];
   }
 
-  public static boolean isV2Evaluation(final AlertApi alert) {
-    return optional(alert)
-        .map(AlertApi::getTemplate)
-        .isPresent();
-  }
-
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     if (isV2Evaluation(request.getAlert())) {
@@ -94,6 +88,16 @@ public class AlertEvaluator {
       handleAlertEvaluationException(e);
     }
     return null;
+  }
+
+  public boolean isV2Evaluation(final AlertApi alert) {
+    if (alert.getId() != null) {
+      AlertDTO dto = ensureExists(alertManager.findById(alert.getId()));
+      return dto.getTemplate() != null;
+    }
+    return optional(alert)
+        .map(AlertApi::getTemplate)
+        .isPresent();
   }
 
   private DetectionPipelineResultV1 runPipeline(final AlertEvaluationApi request)

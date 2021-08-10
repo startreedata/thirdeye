@@ -22,6 +22,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
@@ -61,7 +62,7 @@ public class DetectionWebhookAlerter extends DetectionAlertScheme {
     for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
         .getResult().entrySet()) {
       final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
-      final Map<String, Object> webhook = (Map<String, Object>) subscriptionGroupDTO.getAlertSchemes().get(PROP_WEBHOOK_SCHEME);
+      final WebhookSchemeDto webhook = subscriptionGroupDTO.getAlertSchemes().getWebhookScheme();
       if (webhook == null) {
         throw new IllegalArgumentException(
             "Invalid webhook settings in subscription group " + subscriptionGroupDTO.getId());
@@ -70,17 +71,17 @@ public class DetectionWebhookAlerter extends DetectionAlertScheme {
       final List<AnomalyResult> anomalyResults = new ArrayList<>(result.getValue());
       anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
       final WebhookEntity entity = processResults(subscriptionGroupDTO, anomalyResults);
-      if(DefaultWebhookClient.doPost(webhook.get("url").toString(), entity)<300){
-        LOG.info("Webhook trigger successful to url {}", webhook.get("url"));
+      if(DefaultWebhookClient.doPost(webhook.getUrl(), entity)<300){
+        LOG.info("Webhook trigger successful to url {}", webhook.getUrl());
       } else {
-        LOG.error("Webhook trigger failed to url {}", webhook.get("url"));
+        LOG.error("Webhook trigger failed to url {}", webhook.getUrl());
       }
     }
   }
   private WebhookEntity processResults(final SubscriptionGroupDTO subscriptionGroup, final List<AnomalyResult> anomalyResults){
     final Properties webhookConfig = new Properties();
     webhookConfig.putAll(ConfigUtils.getMap(subscriptionGroup.getAlertSchemes()
-        .get(PROP_WEBHOOK_SCHEME)));
+        .getWebhookScheme()));
     final BaseNotificationContent content = getNotificationContent(webhookConfig);
     final WebhookContentFormatter formatter = new WebhookContentFormatter(webhookConfig,
         content,

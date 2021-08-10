@@ -36,6 +36,8 @@ import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidato
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 
@@ -148,31 +150,26 @@ public class SubscriptionConfigTranslator extends
   }
 
   @SuppressWarnings("unchecked")
-  private Map<String, Object> buildAlertSchemes(Map<String, Object> yamlAlertConfig) {
+  private NotificationSchemesDto buildAlertSchemes(Map<String, Object> yamlAlertConfig) {
+    NotificationSchemesDto notificationSchemes = new NotificationSchemesDto();
     List<Map<String, Object>> alertSchemes = ConfigUtils
         .getList(yamlAlertConfig.get(PROP_ALERT_SCHEMES));
-    Map<String, Object> alertSchemesHolder = new HashMap<>();
     if (!alertSchemes.isEmpty()) {
       for (Map<String, Object> alertScheme : alertSchemes) {
-        Map<String, Object> alertSchemesParsed = new HashMap<>();
-
         Preconditions.checkNotNull(alertScheme.get(PROP_TYPE));
-        alertSchemesParsed.put(PROP_CLASS_NAME,
-            DETECTION_ALERT_REGISTRY.lookupAlertSchemes(alertScheme.get(PROP_TYPE).toString()));
-
-        if (alertScheme.get(PROP_PARAM) != null) {
-          for (Map.Entry<String, Object> params : ((Map<String, Object>) alertScheme
-              .get(PROP_PARAM)).entrySet()) {
-            alertSchemesParsed.put(params.getKey(), params.getValue());
+        if (alertScheme.get(PROP_TYPE).toString().equals("EMAIL")) {
+          if (alertScheme.get(PROP_PARAM) != null) {
+            Map<String, Object> schemeProps = (Map<String, Object>) ((Map<String, Object>) alertScheme
+                .get(PROP_PARAM)).get("recipients");
+            notificationSchemes.setEmailScheme(new EmailSchemeDto()
+                .setTo((List<String>) schemeProps.get("to"))
+                .setCc((List<String>) schemeProps.get("cc")));
           }
         }
-
-        alertSchemesHolder.put(alertScheme.get(PROP_TYPE).toString().toLowerCase() + "Scheme",
-            alertSchemesParsed);
       }
     }
 
-    return alertSchemesHolder;
+    return notificationSchemes;
   }
 
   /**

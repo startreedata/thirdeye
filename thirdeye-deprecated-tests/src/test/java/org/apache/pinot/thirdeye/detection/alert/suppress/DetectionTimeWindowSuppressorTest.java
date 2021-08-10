@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -120,14 +122,12 @@ public class DetectionTimeWindowSuppressorTest {
    */
   @Test
   public void testTimeWindowSuppressorWithThreshold() throws Exception {
-    Map<String, Object> recipients = new HashMap<>();
-    recipients.put("to", Collections.singleton("test@test"));
-
-    DetectionAlertFilterResult result = new DetectionAlertFilterResult();
-    Map<String, Object> alertProps = new HashMap<>();
-    alertProps.put("emailScheme", recipients);
+    NotificationSchemesDto alertProps = new NotificationSchemesDto()
+        .setEmailScheme(new EmailSchemeDto()
+                .setTo(Collections.singletonList("test@test.test")));
     SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
     subsConfig.setAlertSchemes(alertProps);
+    DetectionAlertFilterResult result = new DetectionAlertFilterResult();
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
     DetectionAlertTimeWindowSuppressor suppressor = new DetectionAlertTimeWindowSuppressor(config,
@@ -158,13 +158,13 @@ public class DetectionTimeWindowSuppressorTest {
     alertSuppressors.put(TIME_WINDOW_SUPPRESSOR_KEY, params);
     config.setAlertSuppressors(alertSuppressors);
 
-    Map<String, Object> recipients = new HashMap<>();
-    recipients.put("to", Collections.singleton("test@test"));
 
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
-    Map<String, Object> alertProps = new HashMap<>();
-    alertProps.put("emailScheme", recipients);
     SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
+    NotificationSchemesDto alertProps = new NotificationSchemesDto()
+        .setEmailScheme(new EmailSchemeDto()
+            .setTo(Collections.singletonList("test@test.test")));
+    subsConfig.setAlertSchemes(alertProps);
     subsConfig.setAlertSchemes(alertProps);
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 

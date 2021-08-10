@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
-
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -40,7 +38,9 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -112,17 +112,15 @@ public class PerUserDimensionAlertFilter extends StatefulDetectionAlertFilter {
 
     // Per user dimension alerter works only with email alerter
     if (!SubscriptionUtils.isEmptyEmailRecipients(this.config)) {
-      Map<String, Object> emailProps = ConfigUtils
-          .getMap(this.config.getAlertSchemes().get(PROP_EMAIL_SCHEME));
-      Map<String, Object> recipients = ConfigUtils.getMap(emailProps.get(PROP_RECIPIENTS));
+      EmailSchemeDto emailProps = this.config.getAlertSchemes().getEmailScheme();
 
       for (Map.Entry<String, List<MergedAnomalyResultDTO>> userAnomalyMapping : perUserAnomalies
           .entrySet()) {
-        Map<String, Object> generatedAlertSchemes = generateAlertSchemeProps(this.config,
-            this.makeGroupRecipients(ConfigUtils.getList(recipients.get(PROP_TO)),
+        NotificationSchemesDto generatedAlertSchemes = generateAlertSchemeProps(this.config,
+            this.makeGroupRecipients(emailProps.getTo(),
                 userAnomalyMapping.getKey()),
-            new HashSet<>(ConfigUtils.getList(recipients.get(PROP_CC))),
-            new HashSet<>(ConfigUtils.getList(recipients.get(PROP_BCC))));
+            emailProps.getCc(),
+            emailProps.getBcc());
 
         SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
             this.config, generatedAlertSchemes, this.config.getRefLinks());
@@ -143,8 +141,8 @@ public class PerUserDimensionAlertFilter extends StatefulDetectionAlertFilter {
     return recipients;
   }
 
-  private Set<String> makeGroupRecipients(List<String> toRecipients, String newUser) {
-    Set<String> recipients = new HashSet<>();
+  private List<String> makeGroupRecipients(List<String> toRecipients, String newUser) {
+    List<String> recipients = new ArrayList<>();
     if (!CollectionUtils.isEmpty(toRecipients)) {
       recipients.addAll(toRecipients);
     }

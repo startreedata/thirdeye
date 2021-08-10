@@ -16,12 +16,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_BCC;
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_BCC_VALUE;
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_CC;
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_CC_VALUE;
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_RECIPIENTS;
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_TO;
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_TO_VALUE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -52,9 +49,10 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -90,15 +88,12 @@ public class DetectionEmailAlerterTest {
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(alertDTO.getId()));
 
-    final Map<String, Set<String>> recipients = new HashMap<>();
-    recipients.put(PROP_TO, PROP_TO_VALUE);
-    recipients.put(PROP_CC, PROP_CC_VALUE);
-    recipients.put(PROP_BCC, PROP_BCC_VALUE);
+    final EmailSchemeDto recipients = new EmailSchemeDto()
+    .setTo(PROP_TO_VALUE)
+    .setCc(PROP_CC_VALUE)
+    .setBcc(PROP_BCC_VALUE);
 
-    final Map<String, Object> emailScheme = new HashMap<>();
-    emailScheme.put("className", "org.apache.pinot.thirdeye.detection.alert.scheme.RandomAlerter");
-    emailScheme.put(PROP_RECIPIENTS, recipients);
-    subscriptionGroupDTO.setAlertSchemes(Collections.singletonMap("emailScheme", emailScheme));
+    subscriptionGroupDTO.setAlertSchemes(new NotificationSchemesDto().setEmailScheme(recipients));
     subscriptionGroupDTO.setProperties(properties);
     subscriptionGroupDTO.setFrom(FROM_ADDRESS_VALUE);
     subscriptionGroupDTO.setName(ALERT_NAME_VALUE);
@@ -155,7 +150,7 @@ public class DetectionEmailAlerterTest {
     final Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
     final SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
         subscriptionGroupDTO,
-        ConfigUtils.getMap(subscriptionGroupDTO.getAlertSchemes()),
+        subscriptionGroupDTO.getAlertSchemes(),
         new HashMap<>());
     result.put(
         new DetectionAlertFilterNotification(subsConfig),

@@ -7,13 +7,7 @@
       "clusterName": "QuickStartCluster",
       "controllerConnectionScheme": "http",
       "controllerHost": "localhost",
-      "controllerPort": 9000,
-      "cacheLoaderClassName": "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader"
-    },
-    "metaList": [
-      {
-        "classRef": "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource"
-      }
-    ]
+      "controllerPort": 9000
+    }
   }
 ]

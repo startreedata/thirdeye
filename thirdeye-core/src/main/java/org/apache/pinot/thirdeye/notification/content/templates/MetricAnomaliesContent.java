@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
+import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;

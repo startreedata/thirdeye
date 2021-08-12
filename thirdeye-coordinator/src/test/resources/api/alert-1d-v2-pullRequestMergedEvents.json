@@ -35,7 +35,7 @@
           "params": {
             "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
             "component.pinot.dataSource": "${dataSource}",
-            "component.pinot.query": "SELECT DATETIMECONVERT(\"createdTimeMillis\", '1:MILLISECONDS:EPOCH', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM pullRequestMergedEvents WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000",
+            "component.pinot.query": "SELECT DATETIMECONVERT(\"createdTimeMillis\", '1:MILLISECONDS:EPOCH', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${table} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000",
             "component.pinot.tableName": "${table}"
           },
           "inputs": [],

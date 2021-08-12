@@ -23,6 +23,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -54,6 +56,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This email formatter lists the anomalies by their functions or metric.
  */
+@Singleton
 public class MetricAnomaliesContent extends BaseNotificationContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricAnomaliesContent.class);
@@ -61,6 +64,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   private AlertManager configDAO = null;
   private ThirdEyeRcaRestClient rcaClient;
 
+  @Inject
   public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,

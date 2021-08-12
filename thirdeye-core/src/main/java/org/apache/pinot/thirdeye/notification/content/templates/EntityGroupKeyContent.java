@@ -25,6 +25,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * This email formatter generates a report/alert from the anomalies having a groupKey
  * and optionally a whitelist metric which will be listed at the top of the alert report
  */
+@Singleton
 public class EntityGroupKeyContent extends BaseNotificationContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(EntityGroupKeyContent.class);
@@ -82,8 +85,10 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   private final Map<String, String> anomalyToChildIdsMap = new HashMap<>();
   private final List<String> entityWhitelist = new ArrayList<>();
 
+  @Inject
   public EntityGroupKeyContent(final MetricConfigManager metricConfigDAO,
-      final AlertManager detectionConfigManager, final EventManager eventManager,
+      final AlertManager detectionConfigManager,
+      final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     super(metricConfigDAO, eventManager, mergedAnomalyResultManager);
     this.alertManager = detectionConfigManager;

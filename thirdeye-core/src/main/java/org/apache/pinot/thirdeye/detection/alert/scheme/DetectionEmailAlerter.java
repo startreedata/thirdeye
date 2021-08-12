@@ -44,11 +44,9 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
@@ -86,16 +84,10 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
   @Inject
   public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
-      final MetricConfigManager metricConfigManager,
-      final AlertManager detectionConfigManager,
-      final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final EmailContentFormatter emailContentFormatter) {
-    super(
-        metricConfigManager,
-        detectionConfigManager,
-        eventManager,
-        mergedAnomalyResultManager);
+      final EmailContentFormatter emailContentFormatter,
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final EntityGroupKeyContent entityGroupKeyContent) {
+    super(metricAnomaliesContent, entityGroupKeyContent);
     teConfig = thirdeyeConfig;
     smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
     this.emailContentFormatter = emailContentFormatter;

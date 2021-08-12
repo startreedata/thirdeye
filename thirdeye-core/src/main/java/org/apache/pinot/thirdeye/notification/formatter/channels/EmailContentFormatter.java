@@ -97,11 +97,19 @@ public class EmailContentFormatter {
       final Collection<AnomalyResult> anomalies) {
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
-    return buildEmailEntity(TEMPLATE_MAP.get(content.getTemplate()),
-        templateData,
-        content,
-        emailClientConfigs,
-        subsConfig);
+    final HtmlEmail htmlEmail = new HtmlEmail();
+    String contentId = "";
+    try {
+      if (StringUtils.isNotBlank(content.getSnaphotPath())) {
+        contentId = htmlEmail.embed(new File(content.getSnaphotPath()));
+      }
+    } catch (final Exception e) {
+      LOG.error("Exception while embedding screenshot for anomaly", e);
+    }
+    templateData.put("cid", contentId);
+
+    final String htmlText = buildHtml(TEMPLATE_MAP.get(content.getTemplate()), templateData);
+    return buildEmailEntity(templateData, htmlEmail, htmlText, emailClientConfigs, subsConfig);
   }
 
   public String getEmailHtml(final Collection<AnomalyResult> anomalies,
@@ -109,30 +117,8 @@ public class EmailContentFormatter {
       final SubscriptionGroupDTO subsConfig) {
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
-    return buildHtml(TEMPLATE_MAP.get(content.getTemplate()),
-        templateData);
-  }
 
-  /**
-   * Apply the parameter map to given email template, and format it as EmailEntity
-   */
-  private EmailEntity buildEmailEntity(final String templateName,
-      final Map<String, Object> templateValues,
-      final BaseNotificationContent content, final Properties alertClientConfig,
-      final SubscriptionGroupDTO subsConfig) {
-    final HtmlEmail htmlEmail = new HtmlEmail();
-    String cid = "";
-    try {
-      if (StringUtils.isNotBlank(content.getSnaphotPath())) {
-        cid = htmlEmail.embed(new File(content.getSnaphotPath()));
-      }
-    } catch (final Exception e) {
-      LOG.error("Exception while embedding screenshot for anomaly", e);
-    }
-    templateValues.put("cid", cid);
-
-    final String htmlText = buildHtml(templateName, templateValues);
-    return buildEmailEntity(templateValues, htmlEmail, htmlText, alertClientConfig, subsConfig);
+    return buildHtml(TEMPLATE_MAP.get(content.getTemplate()), templateData);
   }
 
   private String buildHtml(final String templateName, final Map<String, Object> templateValues) {
@@ -153,7 +139,9 @@ public class EmailContentFormatter {
   }
 
   private EmailEntity buildEmailEntity(final Map<String, Object> templateValues,
-      final HtmlEmail email, final String htmlEmail, final Properties alertClientConfig,
+      final HtmlEmail email,
+      final String htmlEmail,
+      final Properties alertClientConfig,
       final SubscriptionGroupDTO subsConfig) {
     try {
       final EmailEntity emailEntity = new EmailEntity();

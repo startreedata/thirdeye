@@ -44,16 +44,11 @@ import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
-import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.restclient.MockThirdEyeRcaRestClient;
-import org.apache.pinot.thirdeye.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -169,15 +164,6 @@ public class DetectionEmailAlerterTest {
     when(htmlEmail.getMailSession()).thenReturn(Session.getInstance(new Properties()));
     when(htmlEmail.send()).thenReturn("sent");
 
-    final Map<String, Object> expectedResponse = new HashMap<>();
-    final ThirdEyeRcaRestClient rcaClient = MockThirdEyeRcaRestClient.setupMockClient(expectedResponse);
-
-    final MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
-        mock(MetricConfigManager.class),
-        mock(EventManager.class),
-        alertManager,
-        mock(MergedAnomalyResultManager.class));
-
     final DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
@@ -187,11 +173,6 @@ public class DetectionEmailAlerterTest {
       @Override
       protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
         return htmlEmail;
-      }
-
-      @Override
-      protected BaseNotificationContent getNotificationContent(final Properties emailClientConfigs) {
-        return metricAnomaliesContent;
       }
     };
     // Executes successfully without errors

@@ -54,32 +54,11 @@ public abstract class DetectionAlertScheme {
     // do nothing
   }
 
-  /**
-   * Plug the appropriate template based on configuration.
-   */
-  public BaseNotificationContent buildNotificationContent(
-      Properties alertSchemeClientConfigs) {
-    EmailTemplateType template = EmailTemplateType.DEFAULT_EMAIL;
-    if (alertSchemeClientConfigs != null && alertSchemeClientConfigs.containsKey(PROP_TEMPLATE)) {
-      template = EmailTemplateType.valueOf(alertSchemeClientConfigs.get(PROP_TEMPLATE).toString());
+  private EmailTemplateType getTemplate(final Properties properties) {
+    if (properties != null && properties.containsKey(PROP_TEMPLATE)) {
+      return EmailTemplateType.valueOf(properties.get(PROP_TEMPLATE).toString());
     }
-
-    BaseNotificationContent content;
-    switch (template) {
-      case DEFAULT_EMAIL:
-        content = metricAnomaliesContent;
-        break;
-
-      case ENTITY_GROUPBY_REPORT:
-        content = entityGroupKeyContent;
-        break;
-
-      default:
-        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
-    }
-
-    LOG.info("Using " + content.getClass().getSimpleName() + " to render the template.");
-    return content;
+    return EmailTemplateType.DEFAULT_EMAIL;
   }
 
   /**
@@ -87,12 +66,21 @@ public abstract class DetectionAlertScheme {
    * alerter,
    * do not fail the alert if a subset of recipients are invalid.
    */
-  void handleAlertFailure(Exception e) {
+  void handleAlertFailure(final Exception e) {
     LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
   }
 
-  protected BaseNotificationContent getNotificationContent(Properties alertSchemeClientConfigs) {
-    return buildNotificationContent(alertSchemeClientConfigs);
+  protected BaseNotificationContent getNotificationContent(
+      final Properties properties) {
+    final EmailTemplateType template = getTemplate(properties);
+    switch (template) {
+      case DEFAULT_EMAIL:
+        return metricAnomaliesContent;
+      case ENTITY_GROUPBY_REPORT:
+        return entityGroupKeyContent;
+      default:
+        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
+    }
   }
 
   public enum EmailTemplateType {

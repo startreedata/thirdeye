@@ -280,14 +280,6 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     emailAlertsSucesssCounter.inc();
   }
 
-  public String getEmailContent(final List<AnomalyResult> anomalies) {
-    final BaseNotificationContent content = getNotificationContent(null);
-    final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO().setName(
-        "report-generation");
-    content.init(new Properties(), teConfig);
-    return emailContentFormatter.getEmailHtml(anomalies, content, subscriptionGroup);
-  }
-
   @Override
   public void run(
       final SubscriptionGroupDTO subscriptionGroup,

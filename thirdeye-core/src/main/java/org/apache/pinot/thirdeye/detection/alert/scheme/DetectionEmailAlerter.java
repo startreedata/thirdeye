@@ -75,12 +75,13 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private static final String PROP_CC = "cc";
   private static final String PROP_BCC = "bcc";
 
-  private List<String> adminRecipients;
-  private List<String> emailWhitelist;
+  private final List<String> adminRecipients;
+  private final List<String> emailWhitelist;
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
   private final ThirdEyeCoordinatorConfiguration teConfig;
+  private final EmailContentFormatter emailContentFormatter;
   private final SmtpConfiguration smtpConfig;
 
   @Inject
@@ -88,7 +89,8 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
       final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
       final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final EmailContentFormatter emailContentFormatter) {
     super(
         metricConfigManager,
         detectionConfigManager,
@@ -96,6 +98,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         mergedAnomalyResultManager);
     teConfig = thirdeyeConfig;
     smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
+    this.emailContentFormatter = emailContentFormatter;
     adminRecipients = new ArrayList<>();
     emailWhitelist = new ArrayList<>();
   }
@@ -163,11 +166,12 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     validateAlert(recipients, anomalies);
 
     final BaseNotificationContent content = getNotificationContent(emailClientConfigs);
-    final EmailContentFormatter emailContentFormatter = new EmailContentFormatter(emailClientConfigs,
+    content.init(emailClientConfigs, teConfig);
+
+    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(emailClientConfigs,
         content,
-        teConfig,
-        subsConfig);
-    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
+        subsConfig,
+        anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
       final String fromAddress = smtpConfig.getUser();
@@ -278,11 +282,10 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
   public String getEmailContent(final List<AnomalyResult> anomalies) {
     final BaseNotificationContent content = getNotificationContent(null);
-    final EmailContentFormatter emailContentFormatter = new EmailContentFormatter(new Properties(),
-        content,
-        teConfig,
-        new SubscriptionGroupDTO().setName("report-generation"));
-    return emailContentFormatter.getEmailHtml(anomalies);
+    final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO().setName(
+        "report-generation");
+    content.init(new Properties(), teConfig);
+    return emailContentFormatter.getEmailHtml(anomalies, content, subscriptionGroup);
   }
 
   @Override

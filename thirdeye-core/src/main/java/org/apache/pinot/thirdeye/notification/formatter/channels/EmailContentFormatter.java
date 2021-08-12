@@ -20,6 +20,8 @@
 package org.apache.pinot.thirdeye.notification.formatter.channels;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
@@ -48,6 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class formats the content for email alerts.
  */
+@Singleton
 public class EmailContentFormatter {
 
   protected static final String PROP_SUBJECT_STYLE = "subject";
@@ -63,27 +66,18 @@ public class EmailContentFormatter {
           "hierarchical-anomalies-email-template.ftl")
       .build();
 
-  protected Properties alertClientConfig;
-  protected SubscriptionGroupDTO subsConfig;
   protected ThirdEyeCoordinatorConfiguration teConfig;
-  protected BaseNotificationContent notificationContent;
 
-  public EmailContentFormatter(final Properties emailClientConfig,
-      final BaseNotificationContent content,
-      final ThirdEyeCoordinatorConfiguration teConfig,
-      final SubscriptionGroupDTO subscriptionGroup) {
-    this.alertClientConfig = emailClientConfig;
+  @Inject
+  public EmailContentFormatter(final ThirdEyeCoordinatorConfiguration teConfig) {
     this.teConfig = teConfig;
-    notificationContent = content;
-    this.subsConfig = subscriptionGroup;
-
-    notificationContent.init(alertClientConfig, teConfig);
   }
 
   /**
    * Plug the appropriate subject style based on configuration
    */
-  SubjectType getSubjectType(final Properties alertSchemeClientConfigs) {
+  SubjectType getSubjectType(final Properties alertSchemeClientConfigs,
+      final SubscriptionGroupDTO subsConfig) {
     final SubjectType subjectType;
     if (alertSchemeClientConfigs != null && alertSchemeClientConfigs
         .containsKey(PROP_SUBJECT_STYLE)) {
@@ -97,17 +91,25 @@ public class EmailContentFormatter {
     return subjectType;
   }
 
-  public EmailEntity getEmailEntity(final Collection<AnomalyResult> anomalies) {
-    final Map<String, Object> templateData = notificationContent.format(anomalies, subsConfig);
+  public EmailEntity getEmailEntity(final Properties emailClientConfigs,
+      final BaseNotificationContent content,
+      final SubscriptionGroupDTO subsConfig,
+      final Collection<AnomalyResult> anomalies) {
+    final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
-    return buildEmailEntity(TEMPLATE_MAP.get(notificationContent.getTemplate()),
-        templateData);
+    return buildEmailEntity(TEMPLATE_MAP.get(content.getTemplate()),
+        templateData,
+        content,
+        emailClientConfigs,
+        subsConfig);
   }
 
-  public String getEmailHtml(final Collection<AnomalyResult> anomalies) {
-    final Map<String, Object> templateData = notificationContent.format(anomalies, subsConfig);
+  public String getEmailHtml(final Collection<AnomalyResult> anomalies,
+      final BaseNotificationContent content,
+      final SubscriptionGroupDTO subsConfig) {
+    final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
-    return buildHtml(TEMPLATE_MAP.get(notificationContent.getTemplate()),
+    return buildHtml(TEMPLATE_MAP.get(content.getTemplate()),
         templateData);
   }
 
@@ -115,12 +117,14 @@ public class EmailContentFormatter {
    * Apply the parameter map to given email template, and format it as EmailEntity
    */
   private EmailEntity buildEmailEntity(final String templateName,
-      final Map<String, Object> templateValues) {
+      final Map<String, Object> templateValues,
+      final BaseNotificationContent content, final Properties alertClientConfig,
+      final SubscriptionGroupDTO subsConfig) {
     final HtmlEmail htmlEmail = new HtmlEmail();
     String cid = "";
     try {
-      if (StringUtils.isNotBlank(notificationContent.getSnaphotPath())) {
-        cid = htmlEmail.embed(new File(notificationContent.getSnaphotPath()));
+      if (StringUtils.isNotBlank(content.getSnaphotPath())) {
+        cid = htmlEmail.embed(new File(content.getSnaphotPath()));
       }
     } catch (final Exception e) {
       LOG.error("Exception while embedding screenshot for anomaly", e);
@@ -128,7 +132,7 @@ public class EmailContentFormatter {
     templateValues.put("cid", cid);
 
     final String htmlText = buildHtml(templateName, templateValues);
-    return buildEmailEntity(templateValues, htmlEmail, htmlText);
+    return buildEmailEntity(templateValues, htmlEmail, htmlText, alertClientConfig, subsConfig);
   }
 
   private String buildHtml(final String templateName, final Map<String, Object> templateValues) {
@@ -149,11 +153,12 @@ public class EmailContentFormatter {
   }
 
   private EmailEntity buildEmailEntity(final Map<String, Object> templateValues,
-      final HtmlEmail email, final String htmlEmail) {
+      final HtmlEmail email, final String htmlEmail, final Properties alertClientConfig,
+      final SubscriptionGroupDTO subsConfig) {
     try {
       final EmailEntity emailEntity = new EmailEntity();
       final String subject = BaseNotificationContent
-          .makeSubject(getSubjectType(alertClientConfig), subsConfig, templateValues);
+          .makeSubject(getSubjectType(alertClientConfig, subsConfig), subsConfig, templateValues);
       emailEntity.setSubject(subject);
       email.setHtmlMsg(htmlEmail);
       emailEntity.setContent(email);

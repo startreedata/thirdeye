@@ -45,6 +45,7 @@ import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.restclient.MockThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -146,7 +147,8 @@ public class DetectionEmailAlerterTest {
         mock(MetricConfigManager.class),
         mock(AlertManager.class),
         mock(EventManager.class),
-        mock(MergedAnomalyResultManager.class));
+        mock(MergedAnomalyResultManager.class),
+        mock(EmailContentFormatter.class));
     alertTaskInfo.run(subscriptionGroupDTO, null);
   }
 
@@ -180,7 +182,8 @@ public class DetectionEmailAlerterTest {
         mock(MetricConfigManager.class),
         detectionConfigManager,
         mock(EventManager.class),
-        mock(MergedAnomalyResultManager.class)) {
+        mock(MergedAnomalyResultManager.class),
+        mock(EmailContentFormatter.class)) {
       @Override
       protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
         return htmlEmail;

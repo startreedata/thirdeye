@@ -39,6 +39,7 @@ import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.HierarchicalAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.slf4j.Logger;
@@ -47,7 +48,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This class formats the content for email alerts.
  */
-public class EmailContentFormatter extends AlertContentFormatter {
+public class EmailContentFormatter {
+
+  protected static final String PROP_SUBJECT_STYLE = "subject";
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailContentFormatter.class);
   private static final String BASE_PACKAGE_PATH = "/org/apache/pinot/thirdeye/detection/detector";
@@ -60,11 +63,38 @@ public class EmailContentFormatter extends AlertContentFormatter {
           "hierarchical-anomalies-email-template.ftl")
       .build();
 
+  protected Properties alertClientConfig;
+  protected SubscriptionGroupDTO subsConfig;
+  protected ThirdEyeCoordinatorConfiguration teConfig;
+  protected BaseNotificationContent notificationContent;
+
   public EmailContentFormatter(final Properties emailClientConfig,
       final BaseNotificationContent content,
       final ThirdEyeCoordinatorConfiguration teConfig,
       final SubscriptionGroupDTO subscriptionGroup) {
-    super(emailClientConfig, content, teConfig, subscriptionGroup);
+    this.alertClientConfig = emailClientConfig;
+    this.teConfig = teConfig;
+    notificationContent = content;
+    this.subsConfig = subscriptionGroup;
+
+    notificationContent.init(alertClientConfig, teConfig);
+  }
+
+  /**
+   * Plug the appropriate subject style based on configuration
+   */
+  SubjectType getSubjectType(final Properties alertSchemeClientConfigs) {
+    final SubjectType subjectType;
+    if (alertSchemeClientConfigs != null && alertSchemeClientConfigs
+        .containsKey(PROP_SUBJECT_STYLE)) {
+      subjectType = SubjectType
+          .valueOf(alertSchemeClientConfigs.get(PROP_SUBJECT_STYLE).toString());
+    } else {
+      // To support the legacy email subject configuration
+      subjectType = subsConfig.getSubjectType();
+    }
+
+    return subjectType;
   }
 
   public EmailEntity getEmailEntity(final Collection<AnomalyResult> anomalies) {
@@ -123,7 +153,7 @@ public class EmailContentFormatter extends AlertContentFormatter {
     try {
       final EmailEntity emailEntity = new EmailEntity();
       final String subject = BaseNotificationContent
-          .makeSubject(super.getSubjectType(alertClientConfig), subsConfig, templateValues);
+          .makeSubject(getSubjectType(alertClientConfig), subsConfig, templateValues);
       emailEntity.setSubject(subject);
       email.setHtmlMsg(htmlEmail);
       emailEntity.setContent(email);

@@ -26,6 +26,7 @@ import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.codahale.metrics.MetricRegistry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,16 +76,16 @@ public class DetectionEmailAlerterTest {
   private MergedAnomalyResultManager anomalyDAO;
   private SubscriptionGroupDTO subscriptionGroupDTO;
   private ThirdEyeCoordinatorConfiguration thirdEyeConfig;
-  private AlertManager detectionConfigManager;
+  private AlertManager alertManager;
 
   @BeforeMethod
   public void beforeMethod() {
-    detectionConfigManager = mock(AlertManager.class);
+    alertManager = mock(AlertManager.class);
 
     final AlertDTO alertDTO = new AlertDTO();
     alertDTO.setName(DETECTION_NAME_VALUE);
     alertDTO.setId(1L);
-    when(detectionConfigManager.findById(alertDTO.getId())).thenReturn(alertDTO);
+    when(alertManager.findById(alertDTO.getId())).thenReturn(alertDTO);
 
     subscriptionGroupDTO = new SubscriptionGroupDTO();
     final Map<String, Object> properties = new HashMap<>();
@@ -147,7 +148,8 @@ public class DetectionEmailAlerterTest {
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
         mock(MetricAnomaliesContent.class),
-        mock(EntityGroupKeyContent.class));
+        mock(EntityGroupKeyContent.class),
+        new MetricRegistry());
     alertTaskInfo.run(subscriptionGroupDTO, null);
   }
 
@@ -173,14 +175,15 @@ public class DetectionEmailAlerterTest {
     final MetricAnomaliesContent metricAnomaliesContent = new MetricAnomaliesContent(rcaClient,
         mock(MetricConfigManager.class),
         mock(EventManager.class),
-        detectionConfigManager,
+        alertManager,
         mock(MergedAnomalyResultManager.class));
 
     final DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
         mock(MetricAnomaliesContent.class),
-        mock(EntityGroupKeyContent.class)) {
+        mock(EntityGroupKeyContent.class),
+        new MetricRegistry()) {
       @Override
       protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
         return htmlEmail;

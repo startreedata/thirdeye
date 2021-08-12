@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static java.util.Objects.requireNonNull;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -53,7 +55,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
-import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,17 +83,24 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private final EmailContentFormatter emailContentFormatter;
   private final SmtpConfiguration smtpConfig;
 
+  private final Counter emailAlertsFailedCounter;
+  private final Counter emailAlertsSucesssCounter;
+
   @Inject
   public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       final EmailContentFormatter emailContentFormatter,
       final MetricAnomaliesContent metricAnomaliesContent,
-      final EntityGroupKeyContent entityGroupKeyContent) {
+      final EntityGroupKeyContent entityGroupKeyContent,
+      final MetricRegistry metricRegistry) {
     super(metricAnomaliesContent, entityGroupKeyContent);
     teConfig = thirdeyeConfig;
     smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
     this.emailContentFormatter = emailContentFormatter;
     adminRecipients = new ArrayList<>();
     emailWhitelist = new ArrayList<>();
+
+    emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
+    emailAlertsSucesssCounter = metricRegistry.counter("emailAlertsSucesssCounter");
   }
 
   private Set<String> retainWhitelisted(final Set<String> recipients,
@@ -235,7 +243,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
         buildAndSendEmail(subscriptionGroupDTO, anomalyResults);
       } catch (final Exception e) {
-        ThirdeyeMetricsUtil.emailAlertsFailedCounter.inc();
+        emailAlertsFailedCounter.inc();
         super.handleAlertFailure(e);
       }
     }
@@ -269,7 +277,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         recipients);
 
     sendEmail(email);
-    ThirdeyeMetricsUtil.emailAlertsSucesssCounter.inc();
+    emailAlertsSucesssCounter.inc();
   }
 
   public String getEmailContent(final List<AnomalyResult> anomalies) {

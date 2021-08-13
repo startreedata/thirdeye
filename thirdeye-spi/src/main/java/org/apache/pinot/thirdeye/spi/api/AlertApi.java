@@ -20,7 +20,6 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private Map<String, List<String>> filters;
   private Map<String, AlertNodeApi> nodes;
   private List<SubscriptionGroupApi> subscriptionGroups;
-  private Boolean v1Format;
 
 
   public Long getId() {
@@ -150,15 +149,6 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   public AlertApi setSubscriptionGroups(
       final List<SubscriptionGroupApi> subscriptionGroups) {
     this.subscriptionGroups = subscriptionGroups;
-    return this;
-  }
-
-  public Boolean isV1Format() {
-    return v1Format;
-  }
-
-  public AlertApi setV1Format(final Boolean v1Format) {
-    this.v1Format = v1Format;
     return this;
   }
 }

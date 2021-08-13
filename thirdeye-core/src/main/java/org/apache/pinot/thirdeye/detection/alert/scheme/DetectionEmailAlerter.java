@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static java.util.Objects.requireNonNull;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -44,18 +46,15 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
-import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,29 +74,33 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private static final String PROP_CC = "cc";
   private static final String PROP_BCC = "bcc";
 
-  private List<String> adminRecipients;
-  private List<String> emailWhitelist;
+  private final List<String> adminRecipients;
+  private final List<String> emailWhitelist;
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
   private final ThirdEyeCoordinatorConfiguration teConfig;
+  private final EmailContentFormatter emailContentFormatter;
   private final SmtpConfiguration smtpConfig;
+
+  private final Counter emailAlertsFailedCounter;
+  private final Counter emailAlertsSucesssCounter;
 
   @Inject
   public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
-      final MetricConfigManager metricConfigManager,
-      final AlertManager detectionConfigManager,
-      final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(
-        metricConfigManager,
-        detectionConfigManager,
-        eventManager,
-        mergedAnomalyResultManager);
+      final EmailContentFormatter emailContentFormatter,
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final EntityGroupKeyContent entityGroupKeyContent,
+      final MetricRegistry metricRegistry) {
+    super(metricAnomaliesContent, entityGroupKeyContent);
     teConfig = thirdeyeConfig;
     smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
+    this.emailContentFormatter = emailContentFormatter;
     adminRecipients = new ArrayList<>();
     emailWhitelist = new ArrayList<>();
+
+    emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
+    emailAlertsSucesssCounter = metricRegistry.counter("emailAlertsSucesssCounter");
   }
 
   private Set<String> retainWhitelisted(final Set<String> recipients,
@@ -163,11 +166,12 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
     validateAlert(recipients, anomalies);
 
     final BaseNotificationContent content = getNotificationContent(emailClientConfigs);
-    final EmailContentFormatter emailContentFormatter = new EmailContentFormatter(emailClientConfigs,
+    content.init(emailClientConfigs, teConfig);
+
+    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(emailClientConfigs,
         content,
-        teConfig,
-        subsConfig);
-    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(anomalies);
+        subsConfig,
+        anomalies);
 
     if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
       final String fromAddress = smtpConfig.getUser();
@@ -239,7 +243,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
 
         buildAndSendEmail(subscriptionGroupDTO, anomalyResults);
       } catch (final Exception e) {
-        ThirdeyeMetricsUtil.emailAlertsFailedCounter.inc();
+        emailAlertsFailedCounter.inc();
         super.handleAlertFailure(e);
       }
     }
@@ -273,16 +277,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         recipients);
 
     sendEmail(email);
-    ThirdeyeMetricsUtil.emailAlertsSucesssCounter.inc();
-  }
-
-  public String getEmailContent(final List<AnomalyResult> anomalies) {
-    final BaseNotificationContent content = getNotificationContent(null);
-    final EmailContentFormatter emailContentFormatter = new EmailContentFormatter(new Properties(),
-        content,
-        teConfig,
-        new SubscriptionGroupDTO().setName("report-generation"));
-    return emailContentFormatter.getEmailHtml(anomalies);
+    emailAlertsSucesssCounter.inc();
   }
 
   @Override

@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
@@ -74,6 +75,8 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     this.timeConverter = DefaultTimeConverter.get(timeFormat);
     this.startTime = timeConverter.convert(context.getStartTime());
     this.endTime = timeConverter.convert(context.getEndTime());
+    checkArgument(startTime <= endTime, "start time cannot be greater than end time");
+
     this.resultMap = new HashMap<>();
     this.instancesMap = new HashMap<>();
     this.inputMap = context.getInputsMap();

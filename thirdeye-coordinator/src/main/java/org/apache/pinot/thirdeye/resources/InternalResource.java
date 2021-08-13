@@ -9,6 +9,8 @@ import com.google.inject.Inject;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -18,7 +20,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -34,17 +39,26 @@ public class InternalResource {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final DatabaseAdminResource databaseAdminResource;
   private final DetectionEmailAlerter detectionEmailAlerter;
+  private final MetricAnomaliesContent metricAnomaliesContent;
+  private final ThirdEyeCoordinatorConfiguration configuration;
+  private final EmailContentFormatter emailContentFormatter;
 
   @Inject
   public InternalResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final DatabaseAdminResource databaseAdminResource,
-      final DetectionEmailAlerter detectionEmailAlerter) {
+      final DetectionEmailAlerter detectionEmailAlerter,
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final ThirdEyeCoordinatorConfiguration configuration,
+      final EmailContentFormatter emailContentFormatter) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.databaseAdminResource = databaseAdminResource;
     this.detectionEmailAlerter = detectionEmailAlerter;
+    this.metricAnomaliesContent = metricAnomaliesContent;
+    this.configuration = configuration;
+    this.emailContentFormatter = emailContentFormatter;
   }
 
   @Path("db-admin")
@@ -65,7 +79,7 @@ public class InternalResource {
   }
 
   @POST
-  @Path("email")
+  @Path("email/send")
   public Response sendEmail(
       @FormParam("subscriptionGroupId") Long subscriptionGroupId
   ) throws Exception {
@@ -79,13 +93,40 @@ public class InternalResource {
   }
 
   @GET
-  @Path("anomaly-report")
+  @Path("email/html")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
-  public Response generateAnomalyReport(@QueryParam("alertId") Long alertId) {
+  public Response generateHtmlEmail(@QueryParam("alertId") Long alertId) {
     ensureExists(alertId, "Query parameter required: alertId !");
-    final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findByDetectionConfigId(
-        alertId));
-    return Response.ok(detectionEmailAlerter.getEmailContent(new ArrayList<>(all))).build();
+    final Map<String, Object> templateData = buildTemplateData(alertId);
+    final String templateName = EmailContentFormatter.TEMPLATE_MAP.get(
+        metricAnomaliesContent.getTemplate());
+
+    final String emailHtml = emailContentFormatter.buildHtml(templateName, templateData);
+    return Response.ok(emailHtml).build();
+  }
+
+  @GET
+  @Path("email/entity")
+  @JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response generateEmailEntity(@QueryParam("alertId") Long alertId) {
+    ensureExists(alertId, "Query parameter required: alertId !");
+    return Response.ok(buildTemplateData(alertId)).build();
+  }
+
+  private Map<String, Object> buildTemplateData(final Long alertId) {
+    final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
+        mergedAnomalyResultManager.findByDetectionConfigId(alertId));
+
+    final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO()
+        .setName("report-generation");
+
+    metricAnomaliesContent.init(new Properties(), configuration);
+    final Map<String, Object> templateData = metricAnomaliesContent.format(
+        new ArrayList<>(anomalies),
+        subscriptionGroup);
+    templateData.put("dashboardHost", configuration.getUiConfiguration().getExternalUrl());
+    return templateData;
   }
 
   @GET

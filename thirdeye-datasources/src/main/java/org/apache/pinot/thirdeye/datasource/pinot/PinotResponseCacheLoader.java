@@ -37,4 +37,6 @@ public abstract class PinotResponseCacheLoader extends
   public abstract void init(Map<String, Object> properties) throws Exception;
 
   public abstract Connection getConnection();
+
+  public abstract void close();
 }

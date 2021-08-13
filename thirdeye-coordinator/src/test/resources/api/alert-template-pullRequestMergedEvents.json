@@ -1,0 +1,50 @@
+[
+  {
+    "name": "threshold-template",
+    "description": "Threshold Alert Template",
+    "cron": "0 0/1 * 1/1 * ? * ",
+    "nodes": [
+      {
+        "name": "root",
+        "type": "AnomalyDetector",
+        "params": {
+          "component.detector.timestamp": "ts",
+          "component.detector.metric": "met",
+          "component.detector.dimensions": [],
+          "component.detector.timezone": "US/Pacific",
+          "component.detector.monitoringGranularity": "2_HOURS",
+          "component.detector.type": "THRESHOLD",
+          "component.detector.max": "${max}",
+          "component.detector.min": "${min}",
+          "component.detector.offset": "mo1m",
+          "component.detector.pattern": "down"
+        },
+        "inputs": [
+          {
+            "targetProperty": "current",
+            "sourcePlanNode": "currentDataFetcher",
+            "sourceProperty": "currentOutput"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "currentDataFetcher",
+        "type": "DataFetcher",
+        "params": {
+          "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+          "component.pinot.dataSource": "${dataSource}",
+          "component.pinot.query": "SELECT DATETIMECONVERT(\"createdTimeMillis\", '1:MILLISECONDS:EPOCH', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM pullRequestMergedEvents WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000",
+          "component.pinot.tableName": "${table}"
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "outputKey": "pinot",
+            "outputName": "currentOutput"
+          }
+        ]
+      }
+    ]
+  }
+]

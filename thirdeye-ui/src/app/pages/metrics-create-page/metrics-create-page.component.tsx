@@ -7,7 +7,8 @@ import { LoadingIndicator } from "../../components/loading-indicator/loading-ind
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
-import { Dataset, LogicalMetric } from "../../rest/dto/metric.interfaces";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
+import { LogicalMetric } from "../../rest/dto/metric.interfaces";
 import { createMetric } from "../../rest/metrics/metrics.rest";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";
 import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";

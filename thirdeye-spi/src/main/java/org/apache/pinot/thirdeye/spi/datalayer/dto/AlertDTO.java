@@ -54,6 +54,12 @@ public class AlertDTO extends AbstractDTO {
 
   // The alert template
   AlertTemplateDTO template;
+
+  // Values to be plugged into the above template
+  private Map<String, Object> templateProperties;
+
+  private Boolean v1Format;
+
   @JsonIgnore
   private Map<String, BaseComponent> components = new HashMap<>();
 
@@ -195,6 +201,16 @@ public class AlertDTO extends AbstractDTO {
   public AlertDTO setTemplate(
       final AlertTemplateDTO template) {
     this.template = template;
+    return this;
+  }
+
+  public Map<String, Object> getTemplateProperties() {
+    return templateProperties;
+  }
+
+  public AlertDTO setTemplateProperties(
+      final Map<String, Object> templateProperties) {
+    this.templateProperties = templateProperties;
     return this;
   }
 

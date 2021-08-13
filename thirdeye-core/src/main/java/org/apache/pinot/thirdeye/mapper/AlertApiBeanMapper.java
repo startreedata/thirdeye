@@ -1,11 +1,11 @@
-package org.apache.pinot.thirdeye.alert;
+package org.apache.pinot.thirdeye.mapper;
 
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
-import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
+import org.apache.pinot.thirdeye.alert.AlertExecutionPlanBuilder;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -45,6 +45,9 @@ public class AlertApiBeanMapper {
     optional(api.getTemplate())
         .map(ApiBeanMapper::toAlertTemplateDto)
         .ifPresent(dto::setTemplate);
+
+    optional(api.getTemplateProperties())
+        .ifPresent(dto::setTemplateProperties);
 
     // May not get updated while edits
     optional(api.getOwner())

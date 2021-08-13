@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -107,6 +108,18 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
         .collect(Collectors.toList()));
   }
 
+  @DELETE
+  @Path("cache")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response clearDataSourceCache(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) throws Exception {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+
+    dataSourceCache.clear();
+    return Response.ok().build();
+  }
+
   @GET
   @Path("status")
   @Timed
@@ -117,7 +130,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     try {
       // throws ThirdEyeException on datasource not found in DB
       // returns null when not able to load datasource
-      if(dataSourceCache.getDataSource(name).validate()){
+      if (dataSourceCache.getDataSource(name).validate()) {
         return respondOk(new StatusApi().setCode(ThirdEyeStatus.HEALTHY));
       }
     } catch (ThirdEyeException e) {

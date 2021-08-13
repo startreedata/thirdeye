@@ -83,33 +83,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private ThirdEyeDataSourceContext context;
 
   /**
-   * Constructs a PinotResponseCacheLoader from the given property map and initialize the loader
-   * with that map.
-   *
-   * @param properties the property map of the cache loader, which contains the class path of
-   *     the cache loader.
-   * @return a constructed PinotResponseCacheLoader.
-   * @throws Exception when an error occurs connecting to the Pinot controller.
-   */
-  static PinotResponseCacheLoader getCacheLoaderInstance(Map<String, Object> properties)
-      throws Exception {
-    final String cacheLoaderClassName = properties.containsKey(CACHE_LOADER_CLASS_NAME_STRING)
-        ? properties.get(CACHE_LOADER_CLASS_NAME_STRING).toString()
-        : PinotControllerResponseCacheLoader.class.getName();
-
-    LOG.info("Constructing cache loader: {}", cacheLoaderClassName);
-    Class<?> aClass;
-    try {
-      aClass = Class.forName(cacheLoaderClassName);
-    } catch (Throwable throwable) {
-      LOG.error("Failed to initiate cache loader: {}; reason:", cacheLoaderClassName, throwable);
-      aClass = PinotControllerResponseCacheLoader.class;
-    }
-    LOG.info("Initiating cache loader: {}", aClass.getName());
-    return (PinotResponseCacheLoader) aClass.getConstructor().newInstance();
-  }
-
-  /**
    * Definition of Pre-Aggregated Data: the data that has been pre-aggregated or pre-calculated and
    * should not be
    * applied with any aggregation function during grouping by. Usually, this kind of data exists in
@@ -186,7 +159,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
 
     try {
-      pinotResponseCacheLoader = getCacheLoaderInstance(properties);
+      pinotResponseCacheLoader = new PinotControllerResponseCacheLoader();
       pinotResponseCacheLoader.init(properties);
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -537,5 +510,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
     return pinotDatasetOnboarder;
+  }
+
+  @Override
+  public void close() throws Exception {
+    if (pinotResponseCacheLoader != null) {
+      pinotResponseCacheLoader.close();
+    }
   }
 }

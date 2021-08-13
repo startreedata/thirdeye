@@ -11,7 +11,11 @@ export interface AlertWizardProps {
     onSubscriptionGroupWizardFinish: (
         sub: SubscriptionGroup
     ) => Promise<SubscriptionGroup>;
-    onFinish?: (alert: Alert, subscriptionGroups: SubscriptionGroup[]) => void;
+    onFinish?: (
+        alert: Alert,
+        subscriptionGroups: SubscriptionGroup[],
+        omittedSubscriptionGroups?: SubscriptionGroup[]
+    ) => void;
 }
 
 export enum AlertWizardStep {

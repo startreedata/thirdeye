@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.alert;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.primitives.Doubles;
@@ -20,6 +21,7 @@ import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineContext;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
+import org.apache.pinot.thirdeye.mapper.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
@@ -50,15 +52,18 @@ public class AlertEvaluator {
   private final AlertManager alertManager;
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final ExecutorService executorService;
+  private final AlertEvaluatorV2 alertEvaluatorV2;
 
   @Inject
   public AlertEvaluator(
       final DataProvider dataProvider,
       final AlertManager alertManager,
-      final AlertApiBeanMapper alertApiBeanMapper) {
+      final AlertApiBeanMapper alertApiBeanMapper,
+      final AlertEvaluatorV2 alertEvaluatorV2) {
     this.dataProvider = dataProvider;
     this.alertManager = alertManager;
     this.alertApiBeanMapper = alertApiBeanMapper;
+    this.alertEvaluatorV2 = alertEvaluatorV2;
 
     this.executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -71,6 +76,11 @@ public class AlertEvaluator {
 
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
+    if (isV2Evaluation(request.getAlert())) {
+      return alertEvaluatorV2.evaluate(request);
+    }
+
+    // v1 Evaluation. Will be deprecated in the future
     try {
       final DetectionPipelineResultV1 result = runPipeline(request);
       return toApi(result);
@@ -78,6 +88,16 @@ public class AlertEvaluator {
       handleAlertEvaluationException(e);
     }
     return null;
+  }
+
+  public boolean isV2Evaluation(final AlertApi alert) {
+    if (alert.getId() != null) {
+      AlertDTO dto = ensureExists(alertManager.findById(alert.getId()));
+      return dto.getTemplate() != null;
+    }
+    return optional(alert)
+        .map(AlertApi::getTemplate)
+        .isPresent();
   }
 
   private DetectionPipelineResultV1 runPipeline(final AlertEvaluationApi request)

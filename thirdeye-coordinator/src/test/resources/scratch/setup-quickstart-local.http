@@ -12,14 +12,8 @@ Content-Type: application/json
       "clusterName": "QuickStartCluster",
       "controllerConnectionScheme": "http",
       "controllerHost": "localhost",
-      "controllerPort": 9000,
-      "cacheLoaderClassName": "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader"
-    },
-    "metaList": [
-      {
-        "classRef": "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource"
-      }
-    ]
+      "controllerPort": 9000
+    }
   }
 ]
 
@@ -30,7 +24,7 @@ POST http://localhost:8080/api/data-sources/onboard-all
 accept: application/json
 Content-Type: application/x-www-form-urlencoded
 
-dataSourceName=pinotQuickStartLocal
+name=pinotQuickStartLocal
 
 ###
 

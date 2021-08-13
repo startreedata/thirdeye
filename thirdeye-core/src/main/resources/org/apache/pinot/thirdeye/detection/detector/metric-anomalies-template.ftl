@@ -63,14 +63,14 @@
           <@utils.addBlock title="" align="left">
             <p>
               <span style="color: #1D1D1D; font-size: 20px; font-weight: bold; display:inline-block; vertical-align: middle;">Metric:&nbsp;</span>
-              <span style="color: #606060; font-size: 20px; text-decoration: none; display:inline-block; vertical-align: middle; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${metric}</span>
+              <span style="color: #606060; font-size: 20px; text-decoration: none; display:inline-block; vertical-align: middle; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${metric!"Unknown"}</span>
             </p>
 
             <!-- List down all the alerts for the given metric -->
             <#list detectionToAnomalyDetailsMap?keys as detectionName>
               <#assign newTable = false>
               <#list detectionToAnomalyDetailsMap[detectionName] as anomaly>
-                <#if anomaly.metric==metric>
+                <#if anomaly.metric?? && anomaly.metric==metric>
                   <#assign newTable=true>
                   <#assign description=anomaly.funcDescription>
                 </#if>
@@ -90,7 +90,7 @@
               <!-- List all the anomalies under this detection -->
               <table border="0" width="100%" align="center" style="width:100%; padding:0; margin:0; border-collapse: collapse;text-align:left;">
                 <#list detectionToAnomalyDetailsMap[detectionName] as anomaly>
-                  <#if anomaly.metric==metric>
+                  <#if anomaly.metric?? && anomaly.metric==metric>
                     <#if newTable>
                       <tr style="text-align:center; background-color: #F6F8FA; border-top: 2px solid #C7D1D8; border-bottom: 2px solid #C7D1D8;">
                         <th style="text-align:left; padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Start / Duration</th>

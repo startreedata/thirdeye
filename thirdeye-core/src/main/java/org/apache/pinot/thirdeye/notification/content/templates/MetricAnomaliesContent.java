@@ -19,10 +19,14 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -32,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
+import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRcaRestClient;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
@@ -53,6 +58,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This email formatter lists the anomalies by their functions or metric.
  */
+@Singleton
 public class MetricAnomaliesContent extends BaseNotificationContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricAnomaliesContent.class);
@@ -60,22 +66,13 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   private AlertManager configDAO = null;
   private ThirdEyeRcaRestClient rcaClient;
 
+  @Inject
   public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
     super(metricConfigManager, eventManager, mergedAnomalyResultManager);
     this.configDAO = detectionConfigManager;
-  }
-
-  // For testing
-  public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient,
-      final MetricConfigManager metricConfigManager,
-      final EventManager eventManager,
-      final AlertManager detectionConfigManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this(metricConfigManager, eventManager, mergedAnomalyResultManager, detectionConfigManager);
-    this.rcaClient = rcaClient;
   }
 
   @Override
@@ -187,7 +184,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         anomalyDetails.add(anomalyReport);
         anomalyIds.add(anomalyReport.getAnomalyId());
         functionAnomalyReports.put(functionName, anomalyReport);
-        metricAnomalyReports.put(anomaly.getMetric(), anomalyReport);
+        metricAnomalyReports.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
         functionToId.put(functionName, id);
       }
     }

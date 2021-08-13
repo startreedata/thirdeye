@@ -163,7 +163,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     return componentSpecs;
   }
 
-  private BaseComponent createComponent(Map<String, Object> componentSpec) {
+  protected BaseComponent createComponent(Map<String, Object> componentSpec) {
     String type = MapUtils.getString(componentSpec, PROP_TYPE);
     if (type != null) {
       return createComponentUsingFactory(type, componentSpec);

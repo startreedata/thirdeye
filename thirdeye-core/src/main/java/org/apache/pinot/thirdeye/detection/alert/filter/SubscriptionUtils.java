@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
+import static org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme.PROP_EMAIL_SCHEME;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;

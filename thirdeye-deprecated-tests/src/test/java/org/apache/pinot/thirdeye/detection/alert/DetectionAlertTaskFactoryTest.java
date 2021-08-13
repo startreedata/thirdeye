@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -51,7 +51,7 @@ public class DetectionAlertTaskFactoryTest {
         mock(AlertManager.class),
         mock(MetricConfigManager.class),
         mock(EventManager.class),
-        mock(DetectionEmailAlerter.class));
+        mock(EmailAlertScheme.class));
   }
 
   @AfterClass(alwaysRun = true)

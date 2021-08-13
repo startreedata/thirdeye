@@ -63,12 +63,12 @@ import org.slf4j.LoggerFactory;
  */
 @AlertScheme(type = "EMAIL")
 @Singleton
-public class DetectionEmailAlerter extends DetectionAlertScheme {
+public class EmailAlertScheme extends DetectionAlertScheme {
 
   public static final String PROP_RECIPIENTS = "recipients";
   public static final String PROP_EMAIL_SCHEME = "emailScheme";
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionEmailAlerter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailAlertScheme.class);
 
   private static final String PROP_TO = "to";
   private static final String PROP_CC = "cc";
@@ -87,7 +87,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private final Counter emailAlertsSucesssCounter;
 
   @Inject
-  public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
+  public EmailAlertScheme(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       final EmailContentFormatter emailContentFormatter,
       final MetricAnomaliesContent metricAnomaliesContent,
       final EntityGroupKeyContent entityGroupKeyContent,

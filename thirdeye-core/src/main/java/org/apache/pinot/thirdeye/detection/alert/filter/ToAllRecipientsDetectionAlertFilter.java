@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +46,7 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
   public static final String PROP_BCC = "bcc";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
 
-  final SetMultimap<String, String> recipients;
+  final Map<String, List<String>> recipients;
   List<Long> detectionConfigIds;
 
   public ToAllRecipientsDetectionAlertFilter(DataProvider provider,
@@ -60,7 +58,7 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
         detectionConfigManager);
 
     final Map<String, Object> properties = this.config.getProperties();
-    this.recipients = HashMultimap.create(ConfigUtils.getMultimap(properties.get(PROP_RECIPIENTS)));
+    this.recipients = ConfigUtils.getMap(properties.get(PROP_RECIPIENTS));
     this.detectionConfigIds = ConfigUtils.getLongs(properties.get(PROP_DETECTION_CONFIG_IDS));
   }
 
@@ -76,7 +74,7 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
     if (SubscriptionUtils.isEmptyEmailRecipients(config) && CollectionUtils
         .isNotEmpty(recipients.get(PROP_TO))) {
       // recipients are configured using the older syntax
-      config.setAlertSchemes(generateAlertSchemeProps(
+      config.setNotificationSchemes(generateNotificationSchemeProps(
           config,
           recipients.get(PROP_TO),
           recipients.get(PROP_CC),

@@ -49,6 +49,7 @@ import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
@@ -63,19 +64,14 @@ import org.slf4j.LoggerFactory;
  */
 @AlertScheme(type = "EMAIL")
 @Singleton
-public class DetectionEmailAlerter extends DetectionAlertScheme {
+public class EmailAlertScheme extends DetectionAlertScheme {
 
   public static final String PROP_RECIPIENTS = "recipients";
-  public static final String PROP_EMAIL_SCHEME = "emailScheme";
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionEmailAlerter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailAlertScheme.class);
 
-  private static final String PROP_TO = "to";
-  private static final String PROP_CC = "cc";
-  private static final String PROP_BCC = "bcc";
-
-  private final List<String> adminRecipients;
-  private final List<String> emailWhitelist;
+  private List<String> adminRecipients;
+  private List<String> emailWhitelist;
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
@@ -87,7 +83,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private final Counter emailAlertsSucesssCounter;
 
   @Inject
-  public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
+  public EmailAlertScheme(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       final EmailContentFormatter emailContentFormatter,
       final MetricAnomaliesContent metricAnomaliesContent,
       final EntityGroupKeyContent entityGroupKeyContent,
@@ -233,7 +229,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         .getResult().entrySet()) {
       try {
         final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
-        if (subscriptionGroupDTO.getAlertSchemes().get(PROP_EMAIL_SCHEME) == null) {
+        if (subscriptionGroupDTO.getNotificationSchemes().getEmailScheme() == null) {
           throw new IllegalArgumentException(
               "Invalid email settings in subscription group " + subscriptionGroup.getId());
         }
@@ -254,23 +250,22 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
       final List<AnomalyResult> anomalyResults) throws Exception {
 
     final Properties emailConfig = new Properties();
-    emailConfig.putAll(ConfigUtils.getMap(sg.getAlertSchemes().get(PROP_EMAIL_SCHEME)));
-
+//    TODO accommodate all required properties in EmailSchemeDto
+//    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
+    final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
     if (emailConfig.get(PROP_RECIPIENTS) == null) {
       return;
     }
 
-    final Map<String, Object> emailRecipients = ConfigUtils.getMap(emailConfig.get(PROP_RECIPIENTS));
-    if (emailRecipients.get(PROP_TO) == null || ConfigUtils
-        .getList(emailRecipients.get(PROP_TO)).isEmpty()) {
+    if (emailScheme.getTo() == null || emailScheme.getTo().isEmpty()) {
       throw new IllegalArgumentException(
           "No email recipients found in subscription group " + sg.getId());
     }
 
     final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
-        new HashSet<>(ConfigUtils.getList(emailRecipients.get(PROP_TO))),
-        new HashSet<>(ConfigUtils.getList(emailRecipients.get(PROP_CC))),
-        new HashSet<>(ConfigUtils.getList(emailRecipients.get(PROP_BCC))));
+        emailScheme.getTo(),
+        emailScheme.getCc(),
+        emailScheme.getBcc());
     final HtmlEmail email = prepareEmailContent(sg,
         emailConfig,
         anomalyResults,

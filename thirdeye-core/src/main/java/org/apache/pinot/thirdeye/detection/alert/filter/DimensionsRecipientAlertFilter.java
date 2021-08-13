@@ -29,7 +29,9 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -110,8 +112,21 @@ public class DimensionsRecipientAlertFilter extends StatefulDetectionAlertFilter
       }
 
       if (!notifyAnomalies.isEmpty()) {
+        // TODO remove manual mapping when SubscriptionGroupDto->properties is refactored
+        System.out.println(ConfigUtils.getMap(dimensionRecipient.get(PROP_NOTIFY)));
+        Map<String, List<String>> emailMap = ConfigUtils.getMap(
+            ConfigUtils.getMap(
+              ConfigUtils.getMap(
+                dimensionRecipient.get(PROP_NOTIFY))
+              .get("emailScheme"))
+            .get("recipients"));
+        NotificationSchemesDto notificationSchemes = new NotificationSchemesDto()
+            .setEmailScheme(new EmailSchemeDto()
+            .setTo(emailMap.get("to"))
+            .setCc(emailMap.get("cc"))
+            .setBcc(emailMap.get("bcc")));
         SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
-            ConfigUtils.getMap(dimensionRecipient.get(PROP_NOTIFY)),
+            notificationSchemes,
             ConfigUtils.getMap(dimensionRecipient.get(PROP_REF_LINKS)));
         result.addMapping(
             new DetectionAlertFilterNotification(subsConfig, dimensionFilters),

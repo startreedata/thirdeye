@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.WebhookEntity;
 import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
@@ -20,7 +21,8 @@ public class WebhookContentFormatter {
     this.teConfig = teConfig;
   }
 
-  public WebhookEntity getWebhookEntity(final Collection<AnomalyResult> anomalies, final BaseNotificationContent content, SubscriptionGroupDTO subsConfig){
+  public WebhookEntity getWebhookEntity(final Collection<AnomalyResult> anomalies, final BaseNotificationContent content, SubscriptionGroupDTO subsConfig, Properties properties){
+    content.init(properties, teConfig);
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     return new WebhookEntity()
         .setSubscriptionGroup(subsConfig.getName())

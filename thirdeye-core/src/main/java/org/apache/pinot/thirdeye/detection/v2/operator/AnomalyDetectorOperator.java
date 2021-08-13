@@ -1,11 +1,15 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -27,6 +31,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
+  }
+
+  @Override
+  protected BaseComponent createComponent(final Map<String, Object> componentSpec) {
+    final String type = requireNonNull(MapUtils.getString(componentSpec, PROP_TYPE),
+        "Must have 'type' in detector config");
+    return new DetectionRegistry()
+        .buildDetectorV2(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 
   @SuppressWarnings({"SuspiciousMethodCalls", "rawtypes"})

@@ -117,8 +117,6 @@ public class InternalResource {
     final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
         mergedAnomalyResultManager.findByDetectionConfigId(alertId));
 
-    anomalies.forEach(anomaly -> anomaly.setMetric("views"));
-
     final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO()
         .setName("report-generation");
 

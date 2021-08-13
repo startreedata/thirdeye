@@ -280,7 +280,7 @@ below.
    # Configuring how you want to be alerted. You can receive the standard ThirdEye email alert (recommended)
    # or use Iris alerting to leverage the power of escalation paths. For details refer additional settings below.
 
-   notificationSchemes:
+   alertSchemes:
 
    - type: EMAIL
 
@@ -333,7 +333,7 @@ here. :ref:`templates-subscription`
 
    - thirdEyeTeam_thirdeyeWebapp_pinotExceptionCounter_UP # Mention the detectionName you defined in the detection configuration above
 
-   notificationSchemes:
+   alertSchemes:
 
    - type: EMAIL
 

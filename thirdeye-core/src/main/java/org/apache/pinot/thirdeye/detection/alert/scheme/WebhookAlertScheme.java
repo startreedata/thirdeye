@@ -20,7 +20,6 @@ import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesC
 import org.apache.pinot.thirdeye.notification.formatter.channels.WebhookContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
@@ -33,6 +32,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 @AlertScheme(type = "WEBHOOK")
 @Singleton
 public class WebhookAlertScheme extends DetectionAlertScheme {
+  public static final String PROP_WEBHOOK_SCHEME = "webhookScheme";
   private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
   private final WebhookContentFormatter formatter;
 
@@ -60,7 +60,7 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
         .getResult().entrySet()) {
       final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
-      final WebhookSchemeDto webhook = subscriptionGroupDTO.getNotificationSchemes().getWebhookScheme();
+      final Map<String, Object> webhook = (Map<String, Object>) subscriptionGroupDTO.getAlertSchemes().get(PROP_WEBHOOK_SCHEME);
       if (webhook == null) {
         throw new IllegalArgumentException(
             "Invalid webhook settings in subscription group " + subscriptionGroupDTO.getId());
@@ -69,10 +69,10 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
       final List<AnomalyResult> anomalyResults = new ArrayList<>(result.getValue());
       anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
       final WebhookEntity entity = processResults(subscriptionGroupDTO, anomalyResults);
-      if(sendWebhook(webhook.getUrl(), entity)){
-        LOG.info("Webhook trigger successful to url {}", webhook.getUrl());
+      if(sendWebhook(webhook.get("url").toString(), entity)){
+        LOG.info("Webhook trigger successful to url {}", webhook.get("url"));
       } else {
-        LOG.error("Webhook trigger failed to url {}", webhook.getUrl());
+        LOG.error("Webhook trigger failed to url {}", webhook.get("url"));
       }
     }
   }
@@ -87,7 +87,7 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
         .build();
     WebhookService service = retrofit.create(WebhookService.class);
     try {
-      Response<Void> response = service.sendWebhook(entity).execute();
+      Response<Object> response = service.sendWebhook(entity).execute();
       if(response.isSuccessful()){
         return true;
       }
@@ -98,7 +98,10 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
   }
 
   private WebhookEntity processResults(final SubscriptionGroupDTO subscriptionGroup, final List<AnomalyResult> anomalyResults){
-    final BaseNotificationContent content = getNotificationContent(null);
-    return formatter.getWebhookEntity(anomalyResults, content, subscriptionGroup, new Properties());
+    final Properties webhookConfig = new Properties();
+    webhookConfig.putAll(ConfigUtils.getMap(subscriptionGroup.getAlertSchemes()
+        .get(PROP_WEBHOOK_SCHEME)));
+    final BaseNotificationContent content = getNotificationContent(webhookConfig);
+    return formatter.getWebhookEntity(anomalyResults, content, subscriptionGroup);
   }
 }

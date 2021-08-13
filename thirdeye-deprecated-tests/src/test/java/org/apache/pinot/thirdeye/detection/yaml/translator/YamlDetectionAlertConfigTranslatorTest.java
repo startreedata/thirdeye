@@ -64,12 +64,6 @@ public class YamlDetectionAlertConfigTranslatorTest {
 
     Map<String, Object> alertSchemes = new HashMap<>();
     alertSchemes.put(PROP_TYPE, "EMAIL");
-    Map<String, List<String>> recipients = new HashMap<>();
-    recipients.put("to", new ArrayList<>(Collections.singleton("userTo@thirdeye.com")));
-    recipients.put("cc", new ArrayList<>(Collections.singleton("userCc@thirdeye.com")));
-    Map<String, Object> params = new HashMap<>();
-    params.put(PROP_RECIPIENTS, recipients);
-    alertSchemes.put(PROP_PARAM,params);
     List<Map<String, Object>> alertSchemesHolder = new ArrayList<>();
     alertSchemesHolder.add(alertSchemes);
     alertYamlConfigs.put(PROP_ALERT_SCHEMES, alertSchemesHolder);
@@ -83,6 +77,11 @@ public class YamlDetectionAlertConfigTranslatorTest {
     List<Map<String, Object>> alertSuppressorsHolder = new ArrayList<>();
     alertSuppressorsHolder.add(alertSuppressors);
     alertYamlConfigs.put(PROP_ALERT_SUPPRESSORS, alertSuppressorsHolder);
+
+    Map<String, List<String>> recipients = new HashMap<>();
+    recipients.put("to", new ArrayList<>(Collections.singleton("userTo@thirdeye.com")));
+    recipients.put("cc", new ArrayList<>(Collections.singleton("userCc@thirdeye.com")));
+    alertYamlConfigs.put(PROP_RECIPIENTS, recipients);
 
     SubscriptionConfigValidator validateMocker = mock(SubscriptionConfigValidator.class);
     doNothing().when(validateMocker).staticValidation(new Yaml().dump(alertYamlConfigs));
@@ -102,7 +101,11 @@ public class YamlDetectionAlertConfigTranslatorTest {
     Assert.assertEquals(alertConfig.getRefLinks().size(), 1);
     Assert.assertEquals(alertConfig.getRefLinks().get("Test Link"), "test_url");
 
-    Assert.assertNotNull(alertConfig.getNotificationSchemes().getEmailScheme());
+    Assert.assertEquals(alertConfig.getAlertSchemes().size(), 1);
+    Assert.assertNotNull(alertConfig.getAlertSchemes().get("emailScheme"));
+    Assert.assertEquals(
+        ConfigUtils.getMap(alertConfig.getAlertSchemes().get("emailScheme")).get(PROP_CLASS_NAME),
+        "EmailClass");
 
     Assert.assertEquals(alertConfig.getAlertSuppressors().size(), 1);
     Map<String, Object> timeWindowSuppressor = ConfigUtils
@@ -117,11 +120,11 @@ public class YamlDetectionAlertConfigTranslatorTest {
     Assert.assertEquals(
         ConfigUtils.getLongs(alertConfig.getProperties().get(PROP_DETECTION_CONFIG_IDS)).size(), 1);
 
-//    Map<String, Object> recipient = (Map<String, Object>) alertConfig.getProperties()
-//        .get(PROP_RECIPIENTS);
-//    Assert.assertEquals(recipient.size(), 2);
-//    Assert.assertEquals(((List<String>) recipient.get("to")).get(0), "userTo@thirdeye.com");
-//    Assert.assertEquals(((List<String>) recipient.get("cc")).get(0), "userCc@thirdeye.com");
+    Map<String, Object> recipient = (Map<String, Object>) alertConfig.getProperties()
+        .get(PROP_RECIPIENTS);
+    Assert.assertEquals(recipient.size(), 2);
+    Assert.assertEquals(((List<String>) recipient.get("to")).get(0), "userTo@thirdeye.com");
+    Assert.assertEquals(((List<String>) recipient.get("cc")).get(0), "userCc@thirdeye.com");
   }
 
   @BeforeMethod(alwaysRun = true)

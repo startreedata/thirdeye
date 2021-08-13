@@ -7,5 +7,5 @@ import retrofit2.http.POST;
 public interface WebhookService {
 
   @POST(".")
-  Call<Void> sendWebhook(@Body WebhookEntity entity);
+  Call<Object> sendWebhook(@Body WebhookEntity entity);
 }

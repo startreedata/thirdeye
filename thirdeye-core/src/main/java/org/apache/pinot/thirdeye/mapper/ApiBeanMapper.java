@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
+import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
 import org.apache.pinot.thirdeye.spi.api.EventApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
@@ -29,6 +32,7 @@ import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.spi.api.WebhookSchemeApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
@@ -40,7 +44,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
@@ -49,7 +52,10 @@ import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 public abstract class ApiBeanMapper {
 
+  private static final String DEFAULT_ALERT_SUPPRESSOR = "org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor";
   private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
+  private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
+  private static final String WEBHOOK_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
   private static final String PROP_CLASS_NAME = "className";
 
@@ -80,7 +86,8 @@ public abstract class ApiBeanMapper {
         .setMetaList(optional(dto.getMetaList())
             .map(l -> l.stream().map(ApiBeanMapper::toApi)
                 .collect(Collectors.toList()))
-            .orElse(null));
+            .orElse(null))
+        ;
   }
 
   private static DataSourceMetaApi toApi(final DataSourceMetaBean metaBean) {
@@ -311,6 +318,35 @@ public abstract class ApiBeanMapper {
             .collect(Collectors.toList()))
         .orElse(null);
 
+    // TODO spyne This entire bean to be refactored, current optimistic conversion is a hack.
+    final EmailSchemeApi emailSchemeApi = optional(dto.getAlertSchemes())
+        .map(o -> o.get("emailScheme"))
+        .map(o -> ((Map) o).get("recipients"))
+        .map(m -> (Map) m)
+        .map(m -> new EmailSchemeApi()
+            .setTo(optional(m.get("to"))
+                .map(l -> new ArrayList<>((List<String>) l))
+                .orElse(null)
+            )
+            .setCc(optional(m.get("cc"))
+                .map(l -> new ArrayList<>((List<String>) l))
+                .orElse(null)
+            )
+            .setBcc(optional(m.get("bcc"))
+                .map(l -> new ArrayList<>((List<String>) l))
+                .orElse(null)
+            ))
+        .orElse(null);
+
+    final WebhookSchemeApi webhookSchemeApi = optional(dto.getAlertSchemes())
+        .map(o -> o.get("webhookScheme"))
+        .map(m -> (Map) m)
+        .map(m -> new WebhookSchemeApi()
+            .setUrl(optional(m.get("url").toString())
+                .orElse("")
+            ))
+        .orElse(null);
+
     return new SubscriptionGroupApi()
         .setId(dto.getId())
         .setName(dto.getName())
@@ -318,7 +354,10 @@ public abstract class ApiBeanMapper {
         .setApplication(new ApplicationApi()
             .setName(dto.getApplication()))
         .setAlerts(alertApis)
-        .setNotificationSchemes(toApi(dto.getNotificationSchemes()));
+        .setNotificationSchemes(new NotificationSchemesApi()
+            .setEmail(emailSchemeApi)
+            .setWebhook(webhookSchemeApi))
+        ;
   }
 
   public static SubscriptionGroupDTO toSubscriptionGroupDTO(final SubscriptionGroupApi api) {
@@ -346,7 +385,7 @@ public abstract class ApiBeanMapper {
     dto.setCronExpression(api.getCron());
 
     if (api.getNotificationSchemes() != null) {
-      dto.setNotificationSchemes(toNotificationSchemeDto(api.getNotificationSchemes()));
+      dto.setAlertSchemes(toAlertSchemes(api.getNotificationSchemes()));
     }
 
     dto.setVectorClocks(toVectorClocks(alertIds));
@@ -369,14 +408,28 @@ public abstract class ApiBeanMapper {
     return vectorClocks;
   }
 
-  public static NotificationSchemesDto toNotificationSchemeDto(
-      final NotificationSchemesApi notificationSchemesApi) {
-    return NotificationSchemeMapper.INSTANCE.toDto(notificationSchemesApi);
-  }
+  public static Map<String, Object> toAlertSchemes(
+      final NotificationSchemesApi notificationSchemes) {
+    final EmailSchemeApi email = notificationSchemes.getEmail();
+    Map<String, Object> alertSchemes = new HashMap<>();
+    Map<String, Object> emailNotificationInfo = new HashMap<>();
+    Map<String, Object> recipientsInfo = ImmutableMap.of(
+        "to", optional(email.getTo()).orElse(Collections.emptyList()),
+        "cc", optional(email.getCc()).orElse(Collections.emptyList()),
+        "bcc", optional(email.getBcc()).orElse(Collections.emptyList())
+    );
+    emailNotificationInfo.put("recipients", recipientsInfo);
+    emailNotificationInfo.put(PROP_CLASS_NAME, DEFAULT_ALERT_SCHEME_CLASS_NAME);
+    alertSchemes.put("emailScheme", emailNotificationInfo);
 
-  public static NotificationSchemesApi toApi(
-      NotificationSchemesDto notificationSchemesDto) {
-    return NotificationSchemeMapper.INSTANCE.toApi(notificationSchemesDto);
+    final WebhookSchemeApi webhook = notificationSchemes.getWebhook();
+    Map<String, Object> webhookInfo = ImmutableMap.of(
+        "url", optional(webhook.getUrl()).orElse(""),
+        PROP_CLASS_NAME, WEBHOOK_ALERT_SCHEME_CLASS_NAME
+    );
+    alertSchemes.put("webhookScheme", webhookInfo);
+
+    return alertSchemes;
   }
 
   @SuppressWarnings("unchecked")

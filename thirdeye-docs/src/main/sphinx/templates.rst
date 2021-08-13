@@ -140,7 +140,7 @@ Example of a simple subscription group 
     subscribedDetections:
     - name_of_the_detection
      
-    notificationSchemes:
+    alertSchemes:
     - type: EMAIL
      
     fromAddress: thirdeye-dev@linkedin.com
@@ -179,7 +179,7 @@ Example of a Dimensional Alerting subscription group 
     subscribedDetections:
     - name_of_the_detection
      
-    notificationSchemes:
+    alertSchemes:
     - type: EMAIL
      
     fromAddress: thirdeye-dev@linkedin.com

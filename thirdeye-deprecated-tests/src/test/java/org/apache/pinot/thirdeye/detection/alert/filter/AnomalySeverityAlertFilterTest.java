@@ -20,9 +20,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_BCC_VALUE;
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_CC_VALUE;
-import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_TO_VALUE;
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.makeAnomaly;
 
 import com.google.common.collect.ImmutableMap;
@@ -42,9 +39,7 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.testng.Assert;
@@ -53,6 +48,11 @@ import org.testng.annotations.Test;
 
 public class AnomalySeverityAlertFilterTest {
 
+  private static final String PROP_RECIPIENTS = "recipients";
+  private static final String PROP_EMAIL_SCHEME = "emailScheme";
+  private static final String PROP_TO = "to";
+  private static final String PROP_CC = "cc";
+  private static final String PROP_BCC = "bcc";
   private static final Set<String> PROP_TO_FOR_VALUE =
       new HashSet<>(Arrays.asList("myTest@example.com", "myTest@example.org"));
   private static final Set<String> PROP_TO_FOR_ANOTHER_VALUE =
@@ -72,10 +72,7 @@ public class AnomalySeverityAlertFilterTest {
   private final MockDataProvider provider = new MockDataProvider();
   private final Map<String, Object> notify1 = new HashMap<>();
   private final Map<String, Object> notify2 = new HashMap<>();
-  private final NotificationSchemesDto defaultScheme = new NotificationSchemesDto().setEmailScheme(
-      new EmailSchemeDto().setTo(Arrays.asList("test@example.com", "test@example.org"))
-          .setCc(Arrays.asList("cctest@example.com", "cctest@example.org"))
-          .setBcc(Arrays.asList("bcctest@example.com", "bcctest@example.org")));
+  private final Map<String, Object> defaultScheme = new HashMap<>();
 
   @BeforeMethod
   public void beforeMethod() throws InterruptedException {
@@ -157,11 +154,14 @@ public class AnomalySeverityAlertFilterTest {
     properties.put(PROP_SEVERITY_TO, severityProperty);
     alertConfig.setProperties(properties);
 
-    alertConfig.setNotificationSchemes(new NotificationSchemesDto()
-        .setEmailScheme(new EmailSchemeDto()
-            .setTo(PROP_TO_VALUE)
-            .setCc(PROP_CC_VALUE)
-            .setBcc(PROP_BCC_VALUE)));
+    Map<String, Object> emailScheme = new HashMap<>();
+    Map<String, Set<String>> recipients = new HashMap<>();
+    recipients.put(PROP_TO, AlertFilterUtils.PROP_TO_VALUE);
+    recipients.put(PROP_CC, AlertFilterUtils.PROP_CC_VALUE);
+    recipients.put(PROP_BCC, AlertFilterUtils.PROP_BCC_VALUE);
+    emailScheme.put(PROP_RECIPIENTS, recipients);
+    defaultScheme.put(PROP_EMAIL_SCHEME, emailScheme);
+    alertConfig.setAlertSchemes(defaultScheme);
 
     Map<Long, Long> vectorClocks = new HashMap<>();
     vectorClocks.put(detectionConfigIds.get(0), this.baseTime);
@@ -179,27 +179,27 @@ public class AnomalySeverityAlertFilterTest {
         TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
-    Assert.assertEquals(result.getResult().size(), 2);
+    Assert.assertEquals(result.getResult().size(), 3);
 
     int verifiedResult = 0;
     for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> entry : result
         .getResult()
         .entrySet()) {
       if (entry.getValue().equals(makeSet(0, 1))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
             notify1.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(2))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
             notify2.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(3, 4, 5))) {
         Assert
-            .assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(), defaultScheme);
+            .assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
         verifiedResult++;
       }
     }
-    Assert.assertEquals(verifiedResult, 1);
+    Assert.assertEquals(verifiedResult, 3);
   }
 
   @Test
@@ -219,27 +219,27 @@ public class AnomalySeverityAlertFilterTest {
         TestDbEnv.getInstance().getDetectionConfigManager());
 
     DetectionAlertFilterResult result = this.alertFilter.run();
-    Assert.assertEquals(result.getResult().size(), 2);
+    Assert.assertEquals(result.getResult().size(), 3);
 
     int verifiedResult = 0;
     for (Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> entry : result
         .getResult()
         .entrySet()) {
       if (entry.getValue().equals(makeSet(renotifyAnomaly, 0, 1))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
             notify1.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(2))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
             notify2.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(3, 4, 5))) {
         Assert
-            .assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(), defaultScheme);
+            .assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
         verifiedResult++;
       }
     }
-    Assert.assertEquals(verifiedResult, 1);
+    Assert.assertEquals(verifiedResult, 3);
   }
 
   private Set<MergedAnomalyResultDTO> makeSet(MergedAnomalyResultDTO anomaly,

@@ -9,8 +9,8 @@
   "from": null,
   "cronExpression": "0 0/5 * * * ? *",
   "application": "myApp",
-  "yaml": "subscriptionGroupName: sgn\n\n# Specify your registered application name here. Contact admin/team to register a new one.\napplication: myApp\n\n# List all alerts (detectionName) you want to subscribe to.\nsubscribedDetections:\n- pc1\n- pc2\n\n# Setup Email, Jira or other notification channels\nnotificationSchemes:\n- type: EMAIL\n  params:\n    recipients:\n      to:\n      - me@company.com\n",
-  "notificationSchemes": {
+  "yaml": "subscriptionGroupName: sgn\n\n# Specify your registered application name here. Contact admin/team to register a new one.\napplication: myApp\n\n# List all alerts (detectionName) you want to subscribe to.\nsubscribedDetections:\n- pc1\n- pc2\n\n# Setup Email, Jira or other notification channels\nalertSchemes:\n- type: EMAIL\n  params:\n    recipients:\n      to:\n      - me@company.com\n",
+  "alertSchemes": {
     "emailScheme": {
       "recipients": {
         "to": [

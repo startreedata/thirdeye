@@ -36,8 +36,6 @@ import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidato
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 
@@ -111,6 +109,7 @@ public class SubscriptionConfigTranslator extends
         }
       }
     }
+
     return properties;
   }
 
@@ -149,26 +148,31 @@ public class SubscriptionConfigTranslator extends
   }
 
   @SuppressWarnings("unchecked")
-  private NotificationSchemesDto buildNotificationSchemes(Map<String, Object> yamlAlertConfig) {
-    NotificationSchemesDto notificationSchemesDto = new NotificationSchemesDto();
-    List<Map<String, Object>> notificationSchemes = ConfigUtils
+  private Map<String, Object> buildAlertSchemes(Map<String, Object> yamlAlertConfig) {
+    List<Map<String, Object>> alertSchemes = ConfigUtils
         .getList(yamlAlertConfig.get(PROP_ALERT_SCHEMES));
-    if (!notificationSchemes.isEmpty()) {
-      for (Map<String, Object> notificationScheme : notificationSchemes) {
-        Preconditions.checkNotNull(notificationScheme.get(PROP_TYPE));
-        if (notificationScheme.get(PROP_TYPE).toString().equals("EMAIL")) {
-          if (notificationScheme.get(PROP_PARAM) != null) {
-            Map<String, Object> schemeProps = (Map<String, Object>) ((Map<String, Object>) notificationScheme
-                .get(PROP_PARAM)).get("recipients");
-            notificationSchemesDto.setEmailScheme(new EmailSchemeDto()
-                .setTo((List<String>) schemeProps.get("to"))
-                .setCc((List<String>) schemeProps.get("cc")));
+    Map<String, Object> alertSchemesHolder = new HashMap<>();
+    if (!alertSchemes.isEmpty()) {
+      for (Map<String, Object> alertScheme : alertSchemes) {
+        Map<String, Object> alertSchemesParsed = new HashMap<>();
+
+        Preconditions.checkNotNull(alertScheme.get(PROP_TYPE));
+        alertSchemesParsed.put(PROP_CLASS_NAME,
+            DETECTION_ALERT_REGISTRY.lookupAlertSchemes(alertScheme.get(PROP_TYPE).toString()));
+
+        if (alertScheme.get(PROP_PARAM) != null) {
+          for (Map.Entry<String, Object> params : ((Map<String, Object>) alertScheme
+              .get(PROP_PARAM)).entrySet()) {
+            alertSchemesParsed.put(params.getKey(), params.getValue());
           }
         }
+
+        alertSchemesHolder.put(alertScheme.get(PROP_TYPE).toString().toLowerCase() + "Scheme",
+            alertSchemesParsed);
       }
     }
 
-    return notificationSchemesDto;
+    return alertSchemesHolder;
   }
 
   /**
@@ -204,7 +208,7 @@ public class SubscriptionConfigTranslator extends
     }
     alertConfigDTO.setRefLinks(ConfigUtils.getMap(yamlConfigMap.get(PROP_REFERENCE_LINKS)));
 
-    alertConfigDTO.setNotificationSchemes(buildNotificationSchemes(yamlConfigMap));
+    alertConfigDTO.setAlertSchemes(buildAlertSchemes(yamlConfigMap));
     alertConfigDTO.setAlertSuppressors(buildAlertSuppressors(yamlConfigMap));
 
     // NOTE: The below fields will/should be hidden from the YAML/UI. They will only be updated by the backend pipeline.

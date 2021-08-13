@@ -20,9 +20,9 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import com.google.common.base.Objects;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 
 /**
@@ -43,7 +43,7 @@ public class SubscriptionGroupDTO extends AbstractDTO {
   String yaml;
   String type;
 
-  NotificationSchemesDto notificationSchemes;
+  Map<String, Object> alertSchemes;
   Map<String, Object> alertSuppressors;
   SubjectType subjectType = SubjectType.ALERT;
 
@@ -117,6 +117,16 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     return this;
   }
 
+  public Map<String, Object> getAlertSchemes() {
+    return alertSchemes;
+  }
+
+  public SubscriptionGroupDTO setAlertSchemes(
+      final Map<String, Object> alertSchemes) {
+    this.alertSchemes = alertSchemes;
+    return this;
+  }
+
   public Map<String, Object> getAlertSuppressors() {
     return alertSuppressors;
   }
@@ -176,55 +186,49 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     return this;
   }
 
-  public NotificationSchemesDto getNotificationSchemes() {
-    return notificationSchemes;
-  }
-
-  public SubscriptionGroupDTO setNotificationSchemes(
-      final NotificationSchemesDto notificationSchemes) {
-    this.notificationSchemes = notificationSchemes;
-    return this;
-  }
-
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final SubscriptionGroupDTO that = (SubscriptionGroupDTO) o;
-    return active == that.active && Objects.equal(name, that.name)
-        && Objects.equal(from, that.from)
-        && Objects.equal(cronExpression, that.cronExpression)
-        && Objects.equal(application, that.application)
-        && Objects.equal(yaml, that.yaml)
-        && Objects.equal(type, that.type)
-        && Objects.equal(notificationSchemes, that.notificationSchemes)
-        && Objects.equal(alertSuppressors, that.alertSuppressors)
-        && subjectType == that.subjectType && Objects.equal(vectorClocks,
-        that.vectorClocks) && Objects.equal(properties, that.properties)
-        && Objects.equal(refLinks, that.refLinks)
-        && Objects.equal(owners, that.owners);
+    SubscriptionGroupDTO that = (SubscriptionGroupDTO) o;
+    if (getId() != null || that.getId() != null) {
+      return super.equals(that);
+    } else {
+      return active == that.active && Objects.equals(name, that.name)
+          && Objects.equals(from, that.from)
+          && Objects.equals(cronExpression, that.cronExpression)
+          && Objects.equals(application, that.application)
+          && subjectType == that.subjectType
+          && Objects.equals(vectorClocks, that.vectorClocks)
+          && Objects.equals(properties, that.properties)
+          && Objects.equals(alertSchemes, that.alertSchemes)
+          && Objects.equals(alertSuppressors, that.alertSuppressors)
+          && Objects.equals(refLinks, that.refLinks)
+          && Objects.equals(yaml, that.yaml);
+
+    }
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(
-        active,
+    if (getId() != null) {
+      return super.hashCode();
+    }
+    return Objects.hash(active,
         name,
         from,
         cronExpression,
         application,
-        yaml,
-        type,
-        notificationSchemes,
-        alertSuppressors,
         subjectType,
         vectorClocks,
         properties,
+        alertSchemes,
+        alertSuppressors,
         refLinks,
-        owners);
+        yaml);
   }
 }

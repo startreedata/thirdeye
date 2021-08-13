@@ -133,17 +133,15 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
       final DetectionAlertFilterNotification notification,
       final Set<MergedAnomalyResultDTO> anomalies) {
     final SubscriptionGroupDTO subsetSubsConfig = notification.getSubscriptionConfig();
-//    TODO refactor when jira notification is supported
-//    if (subsetSubsConfig.getAlertSchemes().get(PROP_JIRA_SCHEME) == null) {
-//      throw new IllegalArgumentException(
-//          "Jira not configured in subscription group " + subscriptionGroup.getId());
-//    }
-//
-//    final Properties jiraClientConfig = new Properties();
-//    jiraClientConfig
-//        .putAll(ConfigUtils.getMap(subsetSubsConfig.getAlertSchemes().get(PROP_JIRA_SCHEME)));
+    if (subsetSubsConfig.getAlertSchemes().get(PROP_JIRA_SCHEME) == null) {
+      throw new IllegalArgumentException(
+          "Jira not configured in subscription group " + subscriptionGroup.getId());
+    }
 
     final Properties jiraClientConfig = new Properties();
+    jiraClientConfig
+        .putAll(ConfigUtils.getMap(subsetSubsConfig.getAlertSchemes().get(PROP_JIRA_SCHEME)));
+
     final List<AnomalyResult> anomalyResultListOfGroup = new ArrayList<>(anomalies);
     anomalyResultListOfGroup.sort(COMPARATOR_DESC);
 

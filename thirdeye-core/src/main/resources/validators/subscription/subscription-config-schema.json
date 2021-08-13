@@ -4,7 +4,7 @@
 
   "type": "object",
   "description": "YAML representation of a subscription group config",
-  "required": [ "subscriptionGroupName", "subscribedDetections", "application", "notificationSchemes" ],
+  "required": [ "subscriptionGroupName", "subscribedDetections", "application", "alertSchemes" ],
 
   "properties": {
     "subscriptionGroupName": {
@@ -31,8 +31,8 @@
     "subscribedDetections": {
       "$ref": "#/definitions/subscribedDetections"
     },
-    "notificationSchemes": {
-      "$ref": "#/definitions/notificationSchemes"
+    "alertSchemes": {
+      "$ref": "#/definitions/alertSchemes"
     },
     "referenceLinks": {
       "$ref": "#/definitions/referenceLinks"
@@ -67,7 +67,7 @@
       },
       "minItems": 1
     },
-    "notificationSchemes": {
+    "alertSchemes": {
       "type": "array",
       "description": "list of alerting schemes",
       "items": {

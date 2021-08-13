@@ -19,9 +19,9 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
+
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 
@@ -37,7 +37,7 @@ public class SubscriptionUtils {
    */
   public static SubscriptionGroupDTO makeChildSubscriptionConfig(
       SubscriptionGroupDTO parentConfig,
-      NotificationSchemesDto notificationSchemes,
+      Map<String, Object> alertSchemes,
       Map<String, String> refLinks) {
     // TODO: clone object using serialization rather than manual copy
     SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
@@ -52,7 +52,7 @@ public class SubscriptionUtils {
     subsConfig.setProperties(parentConfig.getProperties());
     subsConfig.setVectorClocks(parentConfig.getVectorClocks());
 
-    subsConfig.setNotificationSchemes(notificationSchemes);
+    subsConfig.setAlertSchemes(alertSchemes);
     subsConfig.setRefLinks(refLinks);
 
     return subsConfig;
@@ -62,7 +62,9 @@ public class SubscriptionUtils {
    * Validates if the subscription config has email recipients configured or not.
    */
   public static boolean isEmptyEmailRecipients(SubscriptionGroupDTO subscriptionGroupDTO) {
-    EmailSchemeDto emailProps = subscriptionGroupDTO.getNotificationSchemes().getEmailScheme();
-    return emailProps==null || emailProps.getTo() == null || emailProps.getTo().isEmpty();
+    Map<String, Object> emailProps = ConfigUtils
+        .getMap(subscriptionGroupDTO.getAlertSchemes().get(PROP_EMAIL_SCHEME));
+    Map<String, Object> recipients = ConfigUtils.getMap(emailProps.get(PROP_RECIPIENTS));
+    return recipients.isEmpty() || ConfigUtils.getList(recipients.get(PROP_TO)).isEmpty();
   }
 }

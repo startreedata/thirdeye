@@ -8,12 +8,11 @@
     },
     "templateProperties": {
       "dataSource": "pinotQuickStartAzure",
-      "table": "pullRequestMergedEvents",
+      "dataset": "pullRequestMergedEvents",
       "metric": "sum(numCommits)",
       "monitoringGranularity": "2:HOURS",
       "max": "15000",
       "min": "1000"
-    },
-    "lastTimestamp": 0
+    }
   }
 ]

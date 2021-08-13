@@ -1,4 +1,5 @@
-import { Dataset, LogicalMetric } from "../../rest/dto/metric.interfaces";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
+import { LogicalMetric } from "../../rest/dto/metric.interfaces";
 
 export interface MetricsWizardProps {
     datasets: Dataset[];

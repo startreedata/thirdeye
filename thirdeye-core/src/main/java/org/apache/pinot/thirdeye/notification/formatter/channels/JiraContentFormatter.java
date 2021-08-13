@@ -49,6 +49,7 @@ import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
@@ -58,7 +59,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This class formats the content for jira alerts
  */
-public class JiraContentFormatter extends AlertContentFormatter {
+public class JiraContentFormatter {
+  protected static final String PROP_SUBJECT_STYLE = "subject";
+
 
   private static final Logger LOG = LoggerFactory.getLogger(JiraContentFormatter.class);
 
@@ -71,6 +74,11 @@ public class JiraContentFormatter extends AlertContentFormatter {
 
   private static final Map<String, String> alertContentToTemplateMap;
 
+  protected Properties alertClientConfig;
+  protected SubscriptionGroupDTO subsConfig;
+  protected ThirdEyeCoordinatorConfiguration teConfig;
+  protected BaseNotificationContent notificationContent;
+
   static {
     Map<String, String> aMap = new HashMap<>();
     aMap.put(MetricAnomaliesContent.class.getSimpleName(), "jira-metric-anomalies-template.ftl");
@@ -80,12 +88,33 @@ public class JiraContentFormatter extends AlertContentFormatter {
   public JiraContentFormatter(JiraConfiguration jiraAdminConfig, Properties jiraClientConfig,
       BaseNotificationContent content, ThirdEyeCoordinatorConfiguration teConfig,
       SubscriptionGroupDTO subsConfig) {
-    super(jiraClientConfig, content, teConfig, subsConfig);
+    this.alertClientConfig = jiraClientConfig;
+    this.teConfig = teConfig;
+    notificationContent = content;
+    this.subsConfig = subsConfig;
+    notificationContent.init(alertClientConfig, teConfig);
+
 
     this.jiraAdminConfig = jiraAdminConfig;
     validateJiraConfigs(jiraAdminConfig);
   }
 
+  /**
+   * Plug the appropriate subject style based on configuration
+   */
+  SubjectType getSubjectType(final Properties alertSchemeClientConfigs) {
+    final SubjectType subjectType;
+    if (alertSchemeClientConfigs != null && alertSchemeClientConfigs
+        .containsKey(PROP_SUBJECT_STYLE)) {
+      subjectType = SubjectType
+          .valueOf(alertSchemeClientConfigs.get(PROP_SUBJECT_STYLE).toString());
+    } else {
+      // To support the legacy email subject configuration
+      subjectType = subsConfig.getSubjectType();
+    }
+
+    return subjectType;
+  }
   /**
    * Make sure the base admin parameters are configured before proceeding
    */
@@ -115,7 +144,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
       Multimap<String, String> dimensionFilters) {
     String issueSummary =
         BaseNotificationContent
-            .makeSubject(super.getSubjectType(alertClientConfig), this.subsConfig, templateValues);
+            .makeSubject(getSubjectType(alertClientConfig), this.subsConfig, templateValues);
 
     // Append dimensional info to summary
     StringBuilder dimensions = new StringBuilder();

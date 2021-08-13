@@ -25,10 +25,6 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.slf4j.Logger;
@@ -41,19 +37,13 @@ public abstract class DetectionAlertScheme {
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
 
-  private final MetricConfigManager metricConfigManager;
-  private final AlertManager detectionConfigManager;
-  private final EventManager eventManager;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final MetricAnomaliesContent metricAnomaliesContent;
+  private final EntityGroupKeyContent entityGroupKeyContent;
 
-  public DetectionAlertScheme(final MetricConfigManager metricConfigManager,
-      final AlertManager detectionConfigManager,
-      final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this.metricConfigManager = metricConfigManager;
-    this.detectionConfigManager = detectionConfigManager;
-    this.eventManager = eventManager;
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+  public DetectionAlertScheme(final MetricAnomaliesContent metricAnomaliesContent,
+      final EntityGroupKeyContent entityGroupKeyContent) {
+    this.metricAnomaliesContent = metricAnomaliesContent;
+    this.entityGroupKeyContent = entityGroupKeyContent;
   }
 
   public abstract void run(
@@ -64,34 +54,11 @@ public abstract class DetectionAlertScheme {
     // do nothing
   }
 
-  /**
-   * Plug the appropriate template based on configuration.
-   */
-  public BaseNotificationContent buildNotificationContent(
-      Properties alertSchemeClientConfigs) {
-    EmailTemplateType template = EmailTemplateType.DEFAULT_EMAIL;
-    if (alertSchemeClientConfigs != null && alertSchemeClientConfigs.containsKey(PROP_TEMPLATE)) {
-      template = EmailTemplateType.valueOf(alertSchemeClientConfigs.get(PROP_TEMPLATE).toString());
+  private EmailTemplateType getTemplate(final Properties properties) {
+    if (properties != null && properties.containsKey(PROP_TEMPLATE)) {
+      return EmailTemplateType.valueOf(properties.get(PROP_TEMPLATE).toString());
     }
-
-    BaseNotificationContent content;
-    switch (template) {
-      case DEFAULT_EMAIL:
-        content = new MetricAnomaliesContent(metricConfigManager, eventManager,
-            mergedAnomalyResultManager, detectionConfigManager);
-        break;
-
-      case ENTITY_GROUPBY_REPORT:
-        content = new EntityGroupKeyContent(metricConfigManager, detectionConfigManager,
-            eventManager, mergedAnomalyResultManager);
-        break;
-
-      default:
-        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
-    }
-
-    LOG.info("Using " + content.getClass().getSimpleName() + " to render the template.");
-    return content;
+    return EmailTemplateType.DEFAULT_EMAIL;
   }
 
   /**
@@ -99,12 +66,21 @@ public abstract class DetectionAlertScheme {
    * alerter,
    * do not fail the alert if a subset of recipients are invalid.
    */
-  void handleAlertFailure(Exception e) {
+  void handleAlertFailure(final Exception e) {
     LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
   }
 
-  protected BaseNotificationContent getNotificationContent(Properties alertSchemeClientConfigs) {
-    return buildNotificationContent(alertSchemeClientConfigs);
+  protected BaseNotificationContent getNotificationContent(
+      final Properties properties) {
+    final EmailTemplateType template = getTemplate(properties);
+    switch (template) {
+      case DEFAULT_EMAIL:
+        return metricAnomaliesContent;
+      case ENTITY_GROUPBY_REPORT:
+        return entityGroupKeyContent;
+      default:
+        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
+    }
   }
 
   public enum EmailTemplateType {

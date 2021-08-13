@@ -137,16 +137,18 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return collection;
   }
 
-  public void setCollection(String collection) {
+  public MergedAnomalyResultDTO setCollection(final String collection) {
     this.collection = collection;
+    return this;
   }
 
   public String getMetric() {
     return metric;
   }
 
-  public void setMetric(String metric) {
+  public MergedAnomalyResultDTO setMetric(final String metric) {
     this.metric = metric;
+    return this;
   }
 
   public long getStartTime() {

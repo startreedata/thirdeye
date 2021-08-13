@@ -11,6 +11,11 @@ public class NoopTimeConverter implements TimeConverter {
   }
 
   @Override
+  public String convertMillis(final long time) {
+    return String.valueOf(time);
+  }
+
+  @Override
   public LongSeries convertSeries(final Series series) {
     return series.getLongs();
   }

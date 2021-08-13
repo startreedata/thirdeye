@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
 import {
-    Dataset,
     LogicalMetric,
     LogicalView,
     Metric,

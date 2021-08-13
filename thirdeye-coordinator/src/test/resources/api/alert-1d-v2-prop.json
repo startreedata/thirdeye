@@ -3,7 +3,6 @@
     "name": "newAlert",
     "description": "This is the detection used by online service",
     "cron": "0 0/1 * 1/1 * ? * ",
-    "v1Format": true,
     "template": {
       "name": "newAlertTemplateWithProp"
     },

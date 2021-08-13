@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory;
 
 @AlertScheme(type = "WEBHOOK")
 @Singleton
-public class DetectionWebhookAlerter extends DetectionAlertScheme {
+public class WebhookAlertScheme extends DetectionAlertScheme {
   public static final String PROP_WEBHOOK_SCHEME = "webhookScheme";
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionWebhookAlerter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
   private final ThirdEyeCoordinatorConfiguration teConfig;
 
   @Inject
-  public DetectionWebhookAlerter(
+  public WebhookAlertScheme(
       final ThirdEyeCoordinatorConfiguration teConfig,
       final MetricConfigManager metricConfigManager,
       final AlertManager detectionConfigManager,
@@ -52,7 +52,7 @@ public class DetectionWebhookAlerter extends DetectionAlertScheme {
       final DetectionAlertFilterResult results) throws Exception {
     requireNonNull(results);
     if (results.getAllAnomalies().size() == 0) {
-      LOG.info("Zero anomalies found, skipping webhook alert for {}", subscriptionGroup.getId());
+      LOG.debug("Zero anomalies found, skipping webhook alert for {}", subscriptionGroup.getId());
       return;
     }
     buildAndTriggerWebhook(results);

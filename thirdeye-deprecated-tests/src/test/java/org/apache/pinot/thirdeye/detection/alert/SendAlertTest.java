@@ -118,8 +118,6 @@ public class SendAlertTest {
         null,
         null,
         null,
-        null,
-        null,
         null),
         TestDbEnv.getInstance().getDetectionAlertConfigManager(),
         TestDbEnv.getInstance().getMergedAnomalyResultDAO());

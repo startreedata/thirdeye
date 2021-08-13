@@ -21,6 +21,8 @@ import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
+import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
+import org.apache.pinot.thirdeye.spi.api.EventApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
@@ -36,6 +38,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
@@ -50,7 +53,7 @@ public abstract class ApiBeanMapper {
   private static final String DEFAULT_ALERT_SUPPRESSOR = "org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor";
   private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
   private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
-  private static final String WEBHOOK_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionWebhookAlerter";
+  private static final String WEBHOOK_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
   private static final String PROP_CLASS_NAME = "className";
 
@@ -162,6 +165,7 @@ public abstract class ApiBeanMapper {
         .setTemplate(optional(dto.getTemplate())
             .map(ApiBeanMapper::toAlertTemplateApi)
             .orElse(null))
+        .setTemplateProperties(dto.getTemplateProperties())
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
@@ -312,7 +316,6 @@ public abstract class ApiBeanMapper {
             .collect(Collectors.toList()))
         .orElse(null);
 
-
     return new SubscriptionGroupApi()
         .setId(dto.getId())
         .setName(dto.getName())
@@ -379,6 +382,7 @@ public abstract class ApiBeanMapper {
   public static NotificationSchemesApi toApi(
       NotificationSchemesDto notificationSchemesDto) {
     return NotificationSchemeMapper.INSTANCE.toApi(notificationSchemesDto);
+
   }
 
   @SuppressWarnings("unchecked")
@@ -417,9 +421,6 @@ public abstract class ApiBeanMapper {
     }
     anomalyApi.setAlert(new AlertApi()
         .setId(dto.getDetectionConfigId())
-        .setName(optional(dto.getProperties())
-            .map(p -> p.get("subEntityName"))
-            .orElse(null))
     )
         .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
@@ -447,5 +448,13 @@ public abstract class ApiBeanMapper {
 
   public static TaskApi toApi(TaskDTO dto) {
     return TaskMapper.INSTANCE.toApi(dto);
+  }
+
+  public static EventApi toApi(final EventDTO dto) {
+    return EventMapper.INSTANCE.toApi(dto);
+  }
+
+  public static EventDTO toEventDto(final EventApi api) {
+    return EventMapper.INSTANCE.toDto(api);
   }
 }

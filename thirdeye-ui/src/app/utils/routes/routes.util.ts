@@ -19,6 +19,16 @@ export const AppRoute = {
     SUBSCRIPTION_GROUPS_VIEW: `/configuration/subscription-groups/view/id/${PLACEHOLDER_ROUTE_ID}`,
     SUBSCRIPTION_GROUPS_CREATE: "/configuration/subscription-groups/create",
     SUBSCRIPTION_GROUPS_UPDATE: `/configuration/subscription-groups/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASETS: "/configuration/datasets",
+    DATASETS_ALL: "/configuration/datasets/all",
+    DATASETS_VIEW: `/configuration/datasets/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASETS_ONBOARD: "/configuration/datasets/onboard",
+    DATASETS_UPDATE: `/configuration/datasets/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASOURCES: "/configuration/datasources",
+    DATASOURCES_ALL: "/configuration/datasources/all",
+    DATASOURCES_VIEW: `/configuration/datasources/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASOURCES_CREATE: "/configuration/datasources/create",
+    DATASOURCES_UPDATE: `/configuration/datasources/update/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS: "/configuration/metrics",
     METRICS_ALL: "/configuration/metrics/all",
     METRICS_VIEW: `/configuration/metrics/view/id/${PLACEHOLDER_ROUTE_ID}`,
@@ -106,6 +116,58 @@ export const getSubscriptionGroupsCreatePath = (): string => {
 
 export const getSubscriptionGroupsUpdatePath = (id: number): string => {
     let path: string = AppRoute.SUBSCRIPTION_GROUPS_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getDatasetsPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ALL);
+};
+
+export const getDatasetsAllPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ALL);
+};
+
+export const getDatasetsViewPath = (id: number): string => {
+    let path: string = AppRoute.DATASETS_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getDatasetsOnboardPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ONBOARD);
+};
+
+export const getDatasetsUpdatePath = (id: number): string => {
+    let path: string = AppRoute.DATASETS_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getDatasourcesPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES);
+};
+
+export const getDatasourcesAllPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES_ALL);
+};
+
+export const getDatasourcesViewPath = (id: number): string => {
+    let path: string = AppRoute.DATASOURCES_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getDatasourcesCreatePath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES_CREATE);
+};
+
+export const getDatasourcesUpdatePath = (id: number): string => {
+    let path: string = AppRoute.DATASOURCES_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

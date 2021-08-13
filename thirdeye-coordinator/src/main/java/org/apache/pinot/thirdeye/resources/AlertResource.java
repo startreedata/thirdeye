@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
@@ -13,7 +12,6 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
@@ -28,19 +26,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertDeleter;
 import org.apache.pinot.thirdeye.alert.AlertEvaluator;
-import org.apache.pinot.thirdeye.alert.AlertEvaluatorV2;
 import org.apache.pinot.thirdeye.auth.AuthService;
+import org.apache.pinot.thirdeye.mapper.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
-import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -66,7 +62,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AuthService authService;
   private final AlertEvaluator alertEvaluator;
-  private final AlertEvaluatorV2 alertEvaluatorV2;
 
   @Inject
   public AlertResource(
@@ -76,8 +71,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
       final AuthService authService,
-      final AlertEvaluator alertEvaluator,
-      final AlertEvaluatorV2 alertEvaluatorV2) {
+      final AlertEvaluator alertEvaluator) {
     super(authService, alertManager, ImmutableMap.of());
     this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
@@ -86,25 +80,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertApiBeanMapper = alertApiBeanMapper;
     this.authService = authService;
     this.alertEvaluator = alertEvaluator;
-    this.alertEvaluatorV2 = alertEvaluatorV2;
-  }
-
-  private static AlertEvaluationApi toV1Format(
-      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
-    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    for (final String key : v2Result.keySet()) {
-      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
-      for (final String apiKey : detectionEvaluationApiMap.keySet()) {
-        map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey));
-      }
-    }
-    return new AlertEvaluationApi().setDetectionEvaluations(map);
-  }
-
-  private static boolean isV2Evaluation(final AlertApi alert) {
-    return optional(alert)
-        .map(AlertApi::getTemplate)
-        .isPresent();
   }
 
   @Override
@@ -203,17 +178,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    AlertEvaluationApi evaluation;
-    if (isV2Evaluation(alert)) {
-      evaluation = alertEvaluatorV2.evaluate(request);
-      if (bool(alert.isV1Format())) {
-        evaluation = toV1Format(evaluation.getEvaluations());
-      }
-    } else {
-      // v1 Evaluation. Will be deprecated in the future
-      evaluation = alertEvaluator.evaluate(request);
-    }
-    return Response.ok(evaluation).build();
+    return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 
   @ApiOperation(value = "Delete associated Anomalies")

@@ -9,11 +9,8 @@ import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.co
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
-import {
-    Dataset,
-    LogicalMetric,
-    Metric,
-} from "../../rest/dto/metric.interfaces";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
+import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
 import { getMetric, updateMetric } from "../../rest/metrics/metrics.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";

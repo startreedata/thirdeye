@@ -87,7 +87,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     if (configDTO != null && !needNotification(configDTO, anomalyDAO,
         anomalySubscriptionGroupNotificationDAO)) {
-      LOG.info("Skip scheduling subscription task {}. No anomaly to notify.", jobName);
+      LOG.trace("Skip scheduling subscription task {}. No anomaly to notify.", jobName);
       return;
     }
 

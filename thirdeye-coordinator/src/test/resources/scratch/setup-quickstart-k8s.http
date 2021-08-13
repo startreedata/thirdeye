@@ -1,4 +1,3 @@
-# curl -X POST "http://localhost:8080/api/data-sources" -H "accept: application/json" -H "Content-Type: application/json" -d "[ { \"name\": \"pinot1\", \"type\": \"pinot\", \"properties\": { \"zookeeperUrl\": \"pinot-zookeeper:2181\", \"clusterName\": \"pinot-quickstart\", \"controllerConnectionScheme\": \"http\", \"controllerHost\": \"pinot-controller\", \"controllerPort\": 9000, \"cacheLoaderClassName\": \"org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader\" }, \"metaList\": [ { \"classRef\": \"org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource\" } ] }]"
 POST http://localhost:8080/api/data-sources
 accept: application/json
 Content-Type: application/json
@@ -12,14 +11,8 @@ Content-Type: application/json
       "clusterName": "pinot-quickstart",
       "controllerConnectionScheme": "http",
       "controllerHost": "pinot-controller",
-      "controllerPort": 9000,
-      "cacheLoaderClassName": "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader"
-    },
-    "metaList": [
-      {
-        "classRef": "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource"
-      }
-    ]
+      "controllerPort": 9000
+    }
   }
 ]
 
@@ -30,7 +23,7 @@ POST http://localhost:8080/api/data-sources/onboard-all
 accept: application/json
 Content-Type: application/x-www-form-urlencoded
 
-dataSourceName=pinotQuickStartK8s
+name=pinotQuickStartK8s
 
 ###
 

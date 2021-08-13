@@ -2,15 +2,10 @@ package org.apache.pinot.thirdeye.alert;
 
 import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static org.apache.pinot.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
-import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,17 +18,14 @@ import javax.ws.rs.WebApplicationException;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
-import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.util.GroovyTemplateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class AlertEvaluatorV2 {
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final boolean USE_V1_FORMAT = true;
 
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
@@ -49,15 +41,15 @@ public class AlertEvaluatorV2 {
   // max time allowed for a preview task
   private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 
-  private final AlertTemplateManager alertTemplateManager;
+  private final AlertTemplateRenderer alertTemplateRenderer;
   private final ExecutorService executorService;
   private final PlanExecutor planExecutor;
 
   @Inject
   public AlertEvaluatorV2(
-      final AlertTemplateManager alertTemplateManager,
+      final AlertTemplateRenderer alertTemplateRenderer,
       final PlanExecutor planExecutor) {
-    this.alertTemplateManager = alertTemplateManager;
+    this.alertTemplateRenderer = alertTemplateRenderer;
     this.planExecutor = planExecutor;
 
     executorService = Executors.newFixedThreadPool(PARALLELISM);
@@ -101,16 +93,11 @@ public class AlertEvaluatorV2 {
 
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
-    final AlertApi alert = request.getAlert();
-    ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
-
-    final AlertTemplateApi templateApi = alert.getTemplate();
-    ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
-
     try {
-      final AlertTemplateDTO template = getTemplate(templateApi);
-      final Map<String, Object> templateProperties = alert.getTemplateProperties();
-      final AlertTemplateDTO templateWithProperties = applyContext(template, templateProperties);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
+          request.getAlert(),
+          request.getStart(),
+          request.getEnd());
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()
@@ -136,42 +123,28 @@ public class AlertEvaluatorV2 {
     return null;
   }
 
-  private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
-      final Map<String, Object> templateProperties) throws IOException, ClassNotFoundException {
-    if (templateProperties == null || templateProperties.size() == 0) {
-      /* Nothing to replace. Skip running the engine */
-      return template;
-    }
-
-    final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
-    return GroovyTemplateUtils.applyContextToTemplate(jsonString,
-        templateProperties,
-        AlertTemplateDTO.class);
-  }
-
-  private AlertTemplateDTO getTemplate(final AlertTemplateApi templateApi) {
-    final Long id = templateApi.getId();
-    if (id != null) {
-      return alertTemplateManager.findById(id);
-    }
-
-    final String name = templateApi.getName();
-    if (name != null) {
-      final List<AlertTemplateDTO> byName = alertTemplateManager.findByName(name);
-      ensure(byName.size() == 1, ERR_OBJECT_DOES_NOT_EXIST, "template not found: " + name);
-      return byName.get(0);
-    }
-
-    return ApiBeanMapper.toAlertTemplateDto(templateApi);
-  }
-
   private AlertEvaluationApi toApi(final Map<String, DetectionPipelineResult> outputMap) {
     final Map<String, Map<String, DetectionEvaluationApi>> resultMap = new HashMap<>();
     for (final String key : outputMap.keySet()) {
       final DetectionPipelineResult result = outputMap.get(key);
       resultMap.put(key, detectionPipelineResultToApi(result));
     }
+    if (USE_V1_FORMAT) {
+      return toV1Format(resultMap);
+    }
     return new AlertEvaluationApi().setEvaluations(resultMap);
+  }
+
+  private AlertEvaluationApi toV1Format(
+      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
+    for (final String key : v2Result.keySet()) {
+      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
+      detectionEvaluationApiMap
+          .keySet()
+          .forEach(apiKey -> map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
+    }
+    return new AlertEvaluationApi().setDetectionEvaluations(map);
   }
 
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(

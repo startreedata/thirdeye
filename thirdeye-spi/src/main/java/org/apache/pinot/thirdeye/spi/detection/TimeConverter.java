@@ -13,6 +13,14 @@ public interface TimeConverter {
   long convert(String timeValue);
 
   /**
+   * Convert back millis to String
+   *
+   * @param time
+   * @return
+   */
+  String convertMillis(long time);
+
+  /**
    * Convert incoming time series value to milliseconds epoch long series.
    *
    * @return milliseconds epoch long series.

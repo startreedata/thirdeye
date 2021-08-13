@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static org.mockito.Mockito.mock;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
 import org.apache.pinot.thirdeye.alert.PlanExecutor;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
@@ -92,7 +95,8 @@ public class DetectionPipelineTaskRunnerTest {
     final PlanExecutor planExecutor = injector.getInstance(PlanExecutor.class);
     final DetectionPipelineRunner detectionPipelineRunner = new DetectionPipelineRunner(
         detectionPipelineFactory,
-        planExecutor);
+        planExecutor,
+        mock(AlertTemplateRenderer.class));
 
     runner = new DetectionPipelineTaskRunner(
         detectionDAO,

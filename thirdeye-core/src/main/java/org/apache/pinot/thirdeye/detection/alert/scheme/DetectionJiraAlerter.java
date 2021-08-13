@@ -37,11 +37,9 @@ import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.JiraContentFormatter;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
@@ -83,12 +81,9 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
 
   public DetectionJiraAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       final ThirdEyeJiraClient jiraClient,
-      final MetricConfigManager metricConfigManager,
-      final AlertManager detectionConfigManager,
-      final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(metricConfigManager,
-        detectionConfigManager, eventManager, mergedAnomalyResultManager);
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final EntityGroupKeyContent entityGroupKeyContent) {
+    super(metricAnomaliesContent, entityGroupKeyContent);
     teConfig = thirdeyeConfig;
 
     jiraAdminConfig = thirdeyeConfig.getAlerterConfigurations().getJiraConfiguration();

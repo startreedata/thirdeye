@@ -44,66 +44,80 @@ public class EventDTO extends AbstractDTO {
    */
   Map<String, List<String>> targetDimensionMap;
 
-  public String getMetric() {
-    return metric;
-  }
-
-  public Map<String, List<String>> getTargetDimensionMap() {
-    return targetDimensionMap;
-  }
-
-  public void setTargetDimensionMap(Map<String, List<String>> targetDimensionMap) {
-    this.targetDimensionMap = targetDimensionMap;
-  }
-
-  public String getEventType() {
-    return eventType;
-  }
-
-  public void setEventType(String eventType) {
-    this.eventType = eventType;
-  }
-
   public String getName() {
     return name;
   }
 
-  public void setName(String name) {
+  public EventDTO setName(final String name) {
     this.name = name;
+    return this;
   }
 
-  public void setMetric(String metric) {
+  public String getMetric() {
+    return metric;
+  }
+
+  public EventDTO setMetric(final String metric) {
     this.metric = metric;
+    return this;
   }
 
   public String getService() {
     return service;
   }
 
-  public void setService(String service) {
+  public EventDTO setService(final String service) {
     this.service = service;
+    return this;
   }
 
-  public long getEndTime() {
-    return endTime;
+  public String getEventType() {
+    return eventType;
   }
 
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
+  public EventDTO setEventType(final String eventType) {
+    this.eventType = eventType;
+    return this;
   }
 
   public long getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(long startTime) {
+  public EventDTO setStartTime(final long startTime) {
     this.startTime = startTime;
+    return this;
+  }
+
+  public long getEndTime() {
+    return endTime;
+  }
+
+  public EventDTO setEndTime(final long endTime) {
+    this.endTime = endTime;
+    return this;
+  }
+
+  public Map<String, List<String>> getTargetDimensionMap() {
+    return targetDimensionMap;
+  }
+
+  public EventDTO setTargetDimensionMap(
+      final Map<String, List<String>> targetDimensionMap) {
+    this.targetDimensionMap = targetDimensionMap;
+    return this;
   }
 
   @Override
   public int hashCode() {
-    return Objects
-        .hash(getId(), name, eventType, targetDimensionMap, service, metric, startTime, endTime);
+    return Objects.hash(getId(),
+        name,
+        eventType,
+        targetDimensionMap,
+        service,
+        metric,
+        startTime,
+        endTime);
   }
 
   @Override
@@ -112,12 +126,13 @@ public class EventDTO extends AbstractDTO {
       return false;
     }
     EventDTO eb = (EventDTO) obj;
-    return Objects.equals(getId(), eb.getId()) && Objects.equals(getName(), eb.getName()) &&
-        Objects.equals(getEventType(), eb.getEventType()) &&
-        Objects.equals(getTargetDimensionMap(), eb.getTargetDimensionMap()) &&
-        Objects.equals(getService(), eb.getService()) && Objects.equals(getMetric(), eb.getMetric())
-        &&
-        Objects.equals(getStartTime(), eb.getStartTime()) && Objects
-        .equals(getEndTime(), eb.getEndTime());
+    return Objects.equals(getId(), eb.getId())
+        && Objects.equals(getName(), eb.getName())
+        && Objects.equals(getEventType(), eb.getEventType())
+        && Objects.equals(getTargetDimensionMap(), eb.getTargetDimensionMap())
+        && Objects.equals(getService(), eb.getService())
+        && Objects.equals(getMetric(), eb.getMetric())
+        && Objects.equals(getStartTime(), eb.getStartTime())
+        && Objects.equals(getEndTime(), eb.getEndTime());
   }
 }

@@ -24,6 +24,7 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
+import org.apache.pinot.thirdeye.spi.api.EventApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
@@ -39,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -473,5 +475,13 @@ public abstract class ApiBeanMapper {
 
   public static TaskApi toApi(TaskDTO dto) {
     return TaskMapper.INSTANCE.toApi(dto);
+  }
+
+  public static EventApi toApi(final EventDTO dto) {
+    return EventMapper.INSTANCE.toApi(dto);
+  }
+
+  public static EventDTO toEventDto(final EventApi api) {
+    return EventMapper.INSTANCE.toDto(api);
   }
 }

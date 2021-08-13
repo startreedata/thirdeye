@@ -59,7 +59,7 @@ public class EmailContentFormatter {
   private static final String BASE_PACKAGE_PATH = "/org/apache/pinot/thirdeye/detection/detector";
   private static final String CHARSET = "UTF-8";
 
-  private static final Map<String, String> TEMPLATE_MAP = ImmutableMap.<String, String>builder()
+  public static final Map<String, String> TEMPLATE_MAP = ImmutableMap.<String, String>builder()
       .put(MetricAnomaliesContent.class.getSimpleName(), "metric-anomalies-template.ftl")
       .put(EntityGroupKeyContent.class.getSimpleName(), "entity-groupkey-anomaly-report.ftl")
       .put(HierarchicalAnomaliesContent.class.getSimpleName(),
@@ -112,16 +112,7 @@ public class EmailContentFormatter {
     return buildEmailEntity(templateData, htmlEmail, htmlText, emailClientConfigs, subsConfig);
   }
 
-  public String getEmailHtml(final Collection<AnomalyResult> anomalies,
-      final BaseNotificationContent content,
-      final SubscriptionGroupDTO subsConfig) {
-    final Map<String, Object> templateData = content.format(anomalies, subsConfig);
-    templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
-
-    return buildHtml(TEMPLATE_MAP.get(content.getTemplate()), templateData);
-  }
-
-  private String buildHtml(final String templateName, final Map<String, Object> templateValues) {
+  public String buildHtml(final String templateName, final Map<String, Object> templateValues) {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try (final Writer out = new OutputStreamWriter(baos, CHARSET)) {
       final Configuration freemarkerConfig = new Configuration(Configuration.VERSION_2_3_21);

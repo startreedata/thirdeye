@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -71,16 +73,6 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       final AlertManager detectionConfigManager) {
     super(metricConfigManager, eventManager, mergedAnomalyResultManager);
     this.configDAO = detectionConfigManager;
-  }
-
-  // For testing
-  public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient,
-      final MetricConfigManager metricConfigManager,
-      final EventManager eventManager,
-      final AlertManager detectionConfigManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this(metricConfigManager, eventManager, mergedAnomalyResultManager, detectionConfigManager);
-    this.rcaClient = rcaClient;
   }
 
   @Override
@@ -192,7 +184,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         anomalyDetails.add(anomalyReport);
         anomalyIds.add(anomalyReport.getAnomalyId());
         functionAnomalyReports.put(functionName, anomalyReport);
-        metricAnomalyReports.put(anomaly.getMetric(), anomalyReport);
+        metricAnomalyReports.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
         functionToId.put(functionName, id);
       }
     }

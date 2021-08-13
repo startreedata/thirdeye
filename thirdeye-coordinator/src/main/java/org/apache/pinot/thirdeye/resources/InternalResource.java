@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.FormParam;
@@ -95,17 +96,38 @@ public class InternalResource {
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(@QueryParam("alertId") Long alertId) {
     ensureExists(alertId, "Query parameter required: alertId !");
+    final Map<String, Object> templateData = buildTemplateData(alertId);
+    final String templateName = EmailContentFormatter.TEMPLATE_MAP.get(
+        metricAnomaliesContent.getTemplate());
+
+    final String emailHtml = emailContentFormatter.buildHtml(templateName, templateData);
+    return Response.ok(emailHtml).build();
+  }
+
+  @GET
+  @Path("email/entity")
+  @JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response generateEmailEntity(@QueryParam("alertId") Long alertId) {
+    ensureExists(alertId, "Query parameter required: alertId !");
+    return Response.ok(buildTemplateData(alertId)).build();
+  }
+
+  private Map<String, Object> buildTemplateData(final Long alertId) {
     final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
         mergedAnomalyResultManager.findByDetectionConfigId(alertId));
 
-    final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO().setName(
-        "report-generation");
-    metricAnomaliesContent.init(new Properties(), configuration);
-    final String emailHtml = emailContentFormatter.getEmailHtml(new ArrayList<>(anomalies),
-        metricAnomaliesContent,
-        subscriptionGroup);
+    anomalies.forEach(anomaly -> anomaly.setMetric("views"));
 
-    return Response.ok(emailHtml).build();
+    final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO()
+        .setName("report-generation");
+
+    metricAnomaliesContent.init(new Properties(), configuration);
+    final Map<String, Object> templateData = metricAnomaliesContent.format(
+        new ArrayList<>(anomalies),
+        subscriptionGroup);
+    templateData.put("dashboardHost", configuration.getUiConfiguration().getExternalUrl());
+    return templateData;
   }
 
   @GET

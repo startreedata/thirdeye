@@ -102,7 +102,7 @@ public class YamlDetectionAlertConfigTranslatorTest {
     Assert.assertEquals(alertConfig.getRefLinks().size(), 1);
     Assert.assertEquals(alertConfig.getRefLinks().get("Test Link"), "test_url");
 
-    Assert.assertNotNull(alertConfig.getAlertSchemes().getEmailScheme());
+    Assert.assertNotNull(alertConfig.getNotificationSchemes().getEmailScheme());
 
     Assert.assertEquals(alertConfig.getAlertSuppressors().size(), 1);
     Map<String, Object> timeWindowSuppressor = ConfigUtils

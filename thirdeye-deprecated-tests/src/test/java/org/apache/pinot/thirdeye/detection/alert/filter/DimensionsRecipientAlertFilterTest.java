@@ -187,7 +187,7 @@ public class DimensionsRecipientAlertFilterTest {
   private SubscriptionGroupDTO createDetectionAlertConfig() {
     SubscriptionGroupDTO alertConfig = new SubscriptionGroupDTO();
 
-    alertConfig.setAlertSchemes(new NotificationSchemesDto()
+    alertConfig.setNotificationSchemes(new NotificationSchemesDto()
     .setEmailScheme(new EmailSchemeDto()
     .setTo(PROP_TO_VALUE)
     .setCc(PROP_CC_VALUE)

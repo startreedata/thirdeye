@@ -37,7 +37,7 @@ public class SubscriptionUtils {
    */
   public static SubscriptionGroupDTO makeChildSubscriptionConfig(
       SubscriptionGroupDTO parentConfig,
-      NotificationSchemesDto alertSchemes,
+      NotificationSchemesDto notificationSchemes,
       Map<String, String> refLinks) {
     // TODO: clone object using serialization rather than manual copy
     SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
@@ -52,7 +52,7 @@ public class SubscriptionUtils {
     subsConfig.setProperties(parentConfig.getProperties());
     subsConfig.setVectorClocks(parentConfig.getVectorClocks());
 
-    subsConfig.setAlertSchemes(alertSchemes);
+    subsConfig.setNotificationSchemes(notificationSchemes);
     subsConfig.setRefLinks(refLinks);
 
     return subsConfig;
@@ -62,7 +62,7 @@ public class SubscriptionUtils {
    * Validates if the subscription config has email recipients configured or not.
    */
   public static boolean isEmptyEmailRecipients(SubscriptionGroupDTO subscriptionGroupDTO) {
-    EmailSchemeDto emailProps = subscriptionGroupDTO.getAlertSchemes().getEmailScheme();
+    EmailSchemeDto emailProps = subscriptionGroupDTO.getNotificationSchemes().getEmailScheme();
     return emailProps==null || emailProps.getTo() == null || emailProps.getTo().isEmpty();
   }
 }

@@ -49,6 +49,7 @@ import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
@@ -63,11 +64,11 @@ import org.slf4j.LoggerFactory;
  */
 @AlertScheme(type = "EMAIL")
 @Singleton
-public class DetectionEmailAlerter extends DetectionAlertScheme {
+public class EmailAlertScheme extends DetectionAlertScheme {
 
   public static final String PROP_RECIPIENTS = "recipients";
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionEmailAlerter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailAlertScheme.class);
 
   private List<String> adminRecipients;
   private List<String> emailWhitelist;
@@ -82,7 +83,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
   private final Counter emailAlertsSucesssCounter;
 
   @Inject
-  public DetectionEmailAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
+  public EmailAlertScheme(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
       final EmailContentFormatter emailContentFormatter,
       final MetricAnomaliesContent metricAnomaliesContent,
       final EntityGroupKeyContent entityGroupKeyContent,
@@ -228,7 +229,7 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
         .getResult().entrySet()) {
       try {
         final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
-        if (subscriptionGroupDTO.getAlertSchemes().getEmailScheme() == null) {
+        if (subscriptionGroupDTO.getNotificationSchemes().getEmailScheme() == null) {
           throw new IllegalArgumentException(
               "Invalid email settings in subscription group " + subscriptionGroup.getId());
         }
@@ -249,8 +250,9 @@ public class DetectionEmailAlerter extends DetectionAlertScheme {
       final List<AnomalyResult> anomalyResults) throws Exception {
 
     final Properties emailConfig = new Properties();
-    emailConfig.putAll(ConfigUtils.getMap(sg.getAlertSchemes().getEmailScheme()));
-    final EmailSchemeDto emailScheme = sg.getAlertSchemes().getEmailScheme();
+//    TODO accommodate all required properties in EmailSchemeDto
+//    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
+    final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
     if (emailConfig.get(PROP_RECIPIENTS) == null) {
       return;
     }

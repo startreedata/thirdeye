@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -55,7 +54,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DetectionEmailAlerterTest {
+public class EmailAlertSchemeTest {
 
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
@@ -91,7 +90,7 @@ public class DetectionEmailAlerterTest {
     .setCc(PROP_CC_VALUE)
     .setBcc(PROP_BCC_VALUE);
 
-    subscriptionGroupDTO.setAlertSchemes(new NotificationSchemesDto().setEmailScheme(recipients));
+    subscriptionGroupDTO.setNotificationSchemes(new NotificationSchemesDto().setEmailScheme(recipients));
     subscriptionGroupDTO.setProperties(properties);
     subscriptionGroupDTO.setFrom(FROM_ADDRESS_VALUE);
     subscriptionGroupDTO.setName(ALERT_NAME_VALUE);
@@ -134,7 +133,7 @@ public class DetectionEmailAlerterTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
-    final DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(
+    final EmailAlertScheme alertTaskInfo = new EmailAlertScheme(
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
         mock(MetricAnomaliesContent.class),
@@ -148,7 +147,7 @@ public class DetectionEmailAlerterTest {
     final Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
     final SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(
         subscriptionGroupDTO,
-        subscriptionGroupDTO.getAlertSchemes(),
+        subscriptionGroupDTO.getNotificationSchemes(),
         new HashMap<>());
     result.put(
         new DetectionAlertFilterNotification(subsConfig),
@@ -159,7 +158,7 @@ public class DetectionEmailAlerterTest {
     when(htmlEmail.getMailSession()).thenReturn(Session.getInstance(new Properties()));
     when(htmlEmail.send()).thenReturn("sent");
 
-    final DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(
+    final EmailAlertScheme emailAlerter = new EmailAlertScheme(
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
         mock(MetricAnomaliesContent.class),

@@ -111,7 +111,6 @@ public class SubscriptionConfigTranslator extends
         }
       }
     }
-
     return properties;
   }
 
@@ -150,18 +149,18 @@ public class SubscriptionConfigTranslator extends
   }
 
   @SuppressWarnings("unchecked")
-  private NotificationSchemesDto buildAlertSchemes(Map<String, Object> yamlAlertConfig) {
-    NotificationSchemesDto notificationSchemes = new NotificationSchemesDto();
-    List<Map<String, Object>> alertSchemes = ConfigUtils
+  private NotificationSchemesDto buildNotificationSchemes(Map<String, Object> yamlAlertConfig) {
+    NotificationSchemesDto notificationSchemesDto = new NotificationSchemesDto();
+    List<Map<String, Object>> notificationSchemes = ConfigUtils
         .getList(yamlAlertConfig.get(PROP_ALERT_SCHEMES));
-    if (!alertSchemes.isEmpty()) {
-      for (Map<String, Object> alertScheme : alertSchemes) {
-        Preconditions.checkNotNull(alertScheme.get(PROP_TYPE));
-        if (alertScheme.get(PROP_TYPE).toString().equals("EMAIL")) {
-          if (alertScheme.get(PROP_PARAM) != null) {
-            Map<String, Object> schemeProps = (Map<String, Object>) ((Map<String, Object>) alertScheme
+    if (!notificationSchemes.isEmpty()) {
+      for (Map<String, Object> notificationScheme : notificationSchemes) {
+        Preconditions.checkNotNull(notificationScheme.get(PROP_TYPE));
+        if (notificationScheme.get(PROP_TYPE).toString().equals("EMAIL")) {
+          if (notificationScheme.get(PROP_PARAM) != null) {
+            Map<String, Object> schemeProps = (Map<String, Object>) ((Map<String, Object>) notificationScheme
                 .get(PROP_PARAM)).get("recipients");
-            notificationSchemes.setEmailScheme(new EmailSchemeDto()
+            notificationSchemesDto.setEmailScheme(new EmailSchemeDto()
                 .setTo((List<String>) schemeProps.get("to"))
                 .setCc((List<String>) schemeProps.get("cc")));
           }
@@ -169,7 +168,7 @@ public class SubscriptionConfigTranslator extends
       }
     }
 
-    return notificationSchemes;
+    return notificationSchemesDto;
   }
 
   /**
@@ -205,7 +204,7 @@ public class SubscriptionConfigTranslator extends
     }
     alertConfigDTO.setRefLinks(ConfigUtils.getMap(yamlConfigMap.get(PROP_REFERENCE_LINKS)));
 
-    alertConfigDTO.setAlertSchemes(buildAlertSchemes(yamlConfigMap));
+    alertConfigDTO.setNotificationSchemes(buildNotificationSchemes(yamlConfigMap));
     alertConfigDTO.setAlertSuppressors(buildAlertSuppressors(yamlConfigMap));
 
     // NOTE: The below fields will/should be hidden from the YAML/UI. They will only be updated by the backend pipeline.

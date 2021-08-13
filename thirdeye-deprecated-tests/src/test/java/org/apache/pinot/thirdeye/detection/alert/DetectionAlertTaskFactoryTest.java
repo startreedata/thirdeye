@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -47,7 +47,7 @@ public class DetectionAlertTaskFactoryTest {
     detectionAlertTaskFactory = new DetectionAlertTaskFactory(mock(DataProvider.class),
         mock(MergedAnomalyResultManager.class),
         mock(AlertManager.class),
-        mock(DetectionEmailAlerter.class),
+        mock(EmailAlertScheme.class),
         mock(WebhookAlertScheme.class));
   }
 
@@ -63,7 +63,7 @@ public class DetectionAlertTaskFactoryTest {
     Map<Long, Long> vectorClocks = new HashMap<>();
 
     this.alertConfigDTO = new SubscriptionGroupDTO();
-    this.alertConfigDTO.setAlertSchemes(schemes);
+    this.alertConfigDTO.setNotificationSchemes(schemes);
     this.alertConfigDTO.setProperties(properties);
     this.alertConfigDTO.setFrom("te@linkedin.com");
     this.alertConfigDTO.setName("factory_alert");

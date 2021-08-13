@@ -128,7 +128,7 @@ public class PerUserDimensionAlertFilterTest {
     properties.put(PROP_DIMENSION_TO, PROP_DIMENSION_TO_VALUE);
     alertConfig.setProperties(properties);
 
-    alertConfig.setAlertSchemes(new NotificationSchemesDto()
+    alertConfig.setNotificationSchemes(new NotificationSchemesDto()
         .setEmailScheme(new EmailSchemeDto()
             .setTo(PROP_TO_VALUE)
             .setCc(PROP_CC_VALUE)

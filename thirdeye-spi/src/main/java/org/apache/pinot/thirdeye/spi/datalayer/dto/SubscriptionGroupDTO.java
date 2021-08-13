@@ -43,7 +43,7 @@ public class SubscriptionGroupDTO extends AbstractDTO {
   String yaml;
   String type;
 
-  NotificationSchemesDto alertSchemes;
+  NotificationSchemesDto notificationSchemes;
   Map<String, Object> alertSuppressors;
   SubjectType subjectType = SubjectType.ALERT;
 
@@ -176,13 +176,13 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     return this;
   }
 
-  public NotificationSchemesDto getAlertSchemes() {
-    return alertSchemes;
+  public NotificationSchemesDto getNotificationSchemes() {
+    return notificationSchemes;
   }
 
-  public SubscriptionGroupDTO setAlertSchemes(
-      final NotificationSchemesDto alertSchemes) {
-    this.alertSchemes = alertSchemes;
+  public SubscriptionGroupDTO setNotificationSchemes(
+      final NotificationSchemesDto notificationSchemes) {
+    this.notificationSchemes = notificationSchemes;
     return this;
   }
 
@@ -201,7 +201,7 @@ public class SubscriptionGroupDTO extends AbstractDTO {
         && Objects.equal(application, that.application)
         && Objects.equal(yaml, that.yaml)
         && Objects.equal(type, that.type)
-        && Objects.equal(alertSchemes, that.alertSchemes)
+        && Objects.equal(notificationSchemes, that.notificationSchemes)
         && Objects.equal(alertSuppressors, that.alertSuppressors)
         && subjectType == that.subjectType && Objects.equal(vectorClocks,
         that.vectorClocks) && Objects.equal(properties, that.properties)
@@ -219,7 +219,7 @@ public class SubscriptionGroupDTO extends AbstractDTO {
         application,
         yaml,
         type,
-        alertSchemes,
+        notificationSchemes,
         alertSuppressors,
         subjectType,
         vectorClocks,

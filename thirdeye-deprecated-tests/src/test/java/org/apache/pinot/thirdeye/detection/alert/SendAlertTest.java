@@ -93,7 +93,7 @@ public class SendAlertTest {
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(this.detectionConfigId));
 
-    this.alertConfigDTO.setAlertSchemes(new NotificationSchemesDto());
+    this.alertConfigDTO.setNotificationSchemes(new NotificationSchemesDto());
     this.alertConfigDTO.setProperties(properties);
     this.alertConfigDTO.setFrom(FROM_ADDRESS_VALUE);
     this.alertConfigDTO.setName(ALERT_NAME_VALUE);

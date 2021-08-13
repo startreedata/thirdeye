@@ -157,7 +157,7 @@ public class AnomalySeverityAlertFilterTest {
     properties.put(PROP_SEVERITY_TO, severityProperty);
     alertConfig.setProperties(properties);
 
-    alertConfig.setAlertSchemes(new NotificationSchemesDto()
+    alertConfig.setNotificationSchemes(new NotificationSchemesDto()
         .setEmailScheme(new EmailSchemeDto()
             .setTo(PROP_TO_VALUE)
             .setCc(PROP_CC_VALUE)
@@ -186,16 +186,16 @@ public class AnomalySeverityAlertFilterTest {
         .getResult()
         .entrySet()) {
       if (entry.getValue().equals(makeSet(0, 1))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
             notify1.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(2))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
             notify2.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(3, 4, 5))) {
         Assert
-            .assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
+            .assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(), defaultScheme);
         verifiedResult++;
       }
     }
@@ -226,16 +226,16 @@ public class AnomalySeverityAlertFilterTest {
         .getResult()
         .entrySet()) {
       if (entry.getValue().equals(makeSet(renotifyAnomaly, 0, 1))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
             notify1.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(2))) {
-        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(),
+        Assert.assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(),
             notify2.get("notify"));
         verifiedResult++;
       } else if (entry.getValue().equals(makeSet(3, 4, 5))) {
         Assert
-            .assertEquals(entry.getKey().getSubscriptionConfig().getAlertSchemes(), defaultScheme);
+            .assertEquals(entry.getKey().getSubscriptionConfig().getNotificationSchemes(), defaultScheme);
         verifiedResult++;
       }
     }

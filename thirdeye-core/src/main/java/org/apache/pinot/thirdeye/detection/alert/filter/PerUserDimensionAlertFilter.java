@@ -112,11 +112,11 @@ public class PerUserDimensionAlertFilter extends StatefulDetectionAlertFilter {
 
     // Per user dimension alerter works only with email alerter
     if (!SubscriptionUtils.isEmptyEmailRecipients(this.config)) {
-      EmailSchemeDto emailProps = this.config.getAlertSchemes().getEmailScheme();
+      EmailSchemeDto emailProps = this.config.getNotificationSchemes().getEmailScheme();
 
       for (Map.Entry<String, List<MergedAnomalyResultDTO>> userAnomalyMapping : perUserAnomalies
           .entrySet()) {
-        NotificationSchemesDto generatedAlertSchemes = generateAlertSchemeProps(this.config,
+        NotificationSchemesDto generatedAlertSchemes = generateNotificationSchemeProps(this.config,
             this.makeGroupRecipients(emailProps.getTo(),
                 userAnomalyMapping.getKey()),
             emailProps.getCc(),

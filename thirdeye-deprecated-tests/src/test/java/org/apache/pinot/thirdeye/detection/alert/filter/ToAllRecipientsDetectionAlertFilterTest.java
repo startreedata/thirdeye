@@ -132,7 +132,7 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     properties.put(PROP_DETECTION_CONFIG_IDS, PROP_ID_VALUE);
     alertConfig.setProperties(properties);
 
-    alertConfig.setAlertSchemes(new NotificationSchemesDto()
+    alertConfig.setNotificationSchemes(new NotificationSchemesDto()
         .setEmailScheme(new EmailSchemeDto()
             .setTo(PROP_TO_VALUE)
             .setCc(PROP_CC_VALUE)
@@ -158,7 +158,7 @@ public class ToAllRecipientsDetectionAlertFilterTest {
 //    Map<String, Object> jiraScheme = new HashMap<>();
 //    jiraScheme.put(PROP_ASSIGNEE, "test");
 //    alertSchemes.put(PROP_JIRA_SCHEME, jiraScheme);
-//    alertConfig.setAlertSchemes(alertSchemes);
+//    alertConfig.setNotificationSchemes(alertSchemes);
 //
 //    Map<Long, Long> vectorClocks = new HashMap<>();
 //    vectorClocks.put(detectionConfigId1, this.baseTime);
@@ -249,7 +249,7 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     Map<String, Object> properties = ConfigUtils
         .getMap(this.alertConfig.getProperties().get(PROP_RECIPIENTS));
     properties.put(PROP_TO, PROP_EMPTY_TO_VALUE);
-    this.alertConfig.setAlertSchemes(new NotificationSchemesDto()
+    this.alertConfig.setNotificationSchemes(new NotificationSchemesDto()
         .setEmailScheme(new EmailSchemeDto()
             .setTo(new ArrayList<>())
             .setCc(PROP_CC_VALUE)

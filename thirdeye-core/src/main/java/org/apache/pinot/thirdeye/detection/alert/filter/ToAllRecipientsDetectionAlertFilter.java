@@ -19,9 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.SetMultimap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +74,7 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
     if (SubscriptionUtils.isEmptyEmailRecipients(config) && CollectionUtils
         .isNotEmpty(recipients.get(PROP_TO))) {
       // recipients are configured using the older syntax
-      config.setAlertSchemes(generateAlertSchemeProps(
+      config.setNotificationSchemes(generateNotificationSchemeProps(
           config,
           recipients.get(PROP_TO),
           recipients.get(PROP_CC),

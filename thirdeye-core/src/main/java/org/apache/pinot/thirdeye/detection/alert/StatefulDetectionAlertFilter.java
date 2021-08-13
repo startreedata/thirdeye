@@ -123,10 +123,10 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
    * Extracts the alert schemes from config and also merges (overrides)
    * recipients explicitly defined outside the scope of alert schemes.
    */
-  protected NotificationSchemesDto generateAlertSchemeProps(SubscriptionGroupDTO config,
+  protected NotificationSchemesDto generateNotificationSchemeProps(SubscriptionGroupDTO config,
       List<String> to, List<String> cc, List<String> bcc) {
     NotificationSchemesDto notificationSchemeProps = new NotificationSchemesDto();
-    notificationSchemeProps.setWebhookScheme(config.getAlertSchemes().getWebhookScheme());
+    notificationSchemeProps.setWebhookScheme(config.getNotificationSchemes().getWebhookScheme());
     // Override the email alert scheme
     EmailSchemeDto emailScheme = new EmailSchemeDto()
         .setCc(cc)

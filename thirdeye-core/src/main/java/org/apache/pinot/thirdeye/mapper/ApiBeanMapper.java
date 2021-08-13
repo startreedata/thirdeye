@@ -21,7 +21,6 @@ import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
-import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
 import org.apache.pinot.thirdeye.spi.api.EventApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
@@ -50,10 +49,7 @@ import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 
 public abstract class ApiBeanMapper {
 
-  private static final String DEFAULT_ALERT_SUPPRESSOR = "org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertTimeWindowSuppressor";
   private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
-  private static final String DEFAULT_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
-  private static final String WEBHOOK_ALERT_SCHEME_CLASS_NAME = "org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
   private static final String PROP_CLASS_NAME = "className";
 
@@ -84,8 +80,7 @@ public abstract class ApiBeanMapper {
         .setMetaList(optional(dto.getMetaList())
             .map(l -> l.stream().map(ApiBeanMapper::toApi)
                 .collect(Collectors.toList()))
-            .orElse(null))
-        ;
+            .orElse(null));
   }
 
   private static DataSourceMetaApi toApi(final DataSourceMetaBean metaBean) {
@@ -323,7 +318,7 @@ public abstract class ApiBeanMapper {
         .setApplication(new ApplicationApi()
             .setName(dto.getApplication()))
         .setAlerts(alertApis)
-        .setNotificationSchemes(toApi(dto.getAlertSchemes()));
+        .setNotificationSchemes(toApi(dto.getNotificationSchemes()));
   }
 
   public static SubscriptionGroupDTO toSubscriptionGroupDTO(final SubscriptionGroupApi api) {
@@ -351,7 +346,7 @@ public abstract class ApiBeanMapper {
     dto.setCronExpression(api.getCron());
 
     if (api.getNotificationSchemes() != null) {
-      dto.setAlertSchemes(toNotificationSchemeDto(api.getNotificationSchemes()));
+      dto.setNotificationSchemes(toNotificationSchemeDto(api.getNotificationSchemes()));
     }
 
     dto.setVectorClocks(toVectorClocks(alertIds));
@@ -382,7 +377,6 @@ public abstract class ApiBeanMapper {
   public static NotificationSchemesApi toApi(
       NotificationSchemesDto notificationSchemesDto) {
     return NotificationSchemeMapper.INSTANCE.toApi(notificationSchemesDto);
-
   }
 
   @SuppressWarnings("unchecked")

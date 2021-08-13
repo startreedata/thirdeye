@@ -126,7 +126,7 @@ public class DetectionTimeWindowSuppressorTest {
         .setEmailScheme(new EmailSchemeDto()
                 .setTo(Collections.singletonList("test@test.test")));
     SubscriptionGroupDTO subsConfig = new SubscriptionGroupDTO();
-    subsConfig.setAlertSchemes(alertProps);
+    subsConfig.setNotificationSchemes(alertProps);
     DetectionAlertFilterResult result = new DetectionAlertFilterResult();
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
@@ -164,8 +164,8 @@ public class DetectionTimeWindowSuppressorTest {
     NotificationSchemesDto alertProps = new NotificationSchemesDto()
         .setEmailScheme(new EmailSchemeDto()
             .setTo(Collections.singletonList("test@test.test")));
-    subsConfig.setAlertSchemes(alertProps);
-    subsConfig.setAlertSchemes(alertProps);
+    subsConfig.setNotificationSchemes(alertProps);
+    subsConfig.setNotificationSchemes(alertProps);
     result.addMapping(new DetectionAlertFilterNotification(subsConfig), anomalies);
 
     DetectionAlertTimeWindowSuppressor suppressor = new DetectionAlertTimeWindowSuppressor(config,

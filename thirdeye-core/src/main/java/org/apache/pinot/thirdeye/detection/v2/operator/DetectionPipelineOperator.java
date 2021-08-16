@@ -71,8 +71,8 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     this.planNode = context.getPlanNode();
     this.timeFormat = context.getTimeFormat();
     this.timeConverter = DefaultTimeConverter.get(timeFormat);
-    this.startTime = timeConverter.convert(context.getStartTime());
-    this.endTime = timeConverter.convert(context.getEndTime());
+    this.startTime = optional(context.getStartTime()).map(timeConverter::convert).orElse(-1L);
+    this.endTime = optional(context.getEndTime()).map(timeConverter::convert).orElse(-1L);
     checkArgument(startTime <= endTime, "start time cannot be greater than end time");
 
     this.resultMap = new HashMap<>();

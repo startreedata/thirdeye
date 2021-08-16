@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.testng.Assert;
@@ -24,7 +25,7 @@ public class DetectionAlertTaskFactoryTest {
   private TestDbEnv testDAOProvider;
   private SubscriptionGroupDTO alertConfigDTO;
   private SubscriptionGroupManager alertConfigDAO;
-  private Map<String, Object> alerters;
+  private NotificationSchemesDto alerters;
   private DetectionAlertTaskFactory detectionAlertTaskFactory;
 
   @BeforeMethod
@@ -36,9 +37,7 @@ public class DetectionAlertTaskFactoryTest {
     anotherRandomAlerter
         .put("className", "org.apache.pinot.thirdeye.detection.alert.scheme.AnotherRandomAlerter");
 
-    alerters = new HashMap<>();
-    alerters.put("randomScheme", randomAlerter);
-    alerters.put("anotherRandomScheme", anotherRandomAlerter);
+    alerters = new NotificationSchemesDto();
 
     this.testDAOProvider = new TestDbEnv();
     DAORegistry daoRegistry = TestDbEnv.getInstance();
@@ -57,14 +56,14 @@ public class DetectionAlertTaskFactoryTest {
     testDAOProvider.cleanup();
   }
 
-  private SubscriptionGroupDTO createAlertConfig(Map<String, Object> schemes, String filter) {
+  private SubscriptionGroupDTO createAlertConfig(NotificationSchemesDto schemes, String filter) {
     Map<String, Object> properties = new HashMap<>();
     properties.put("className", filter);
     properties.put("detectionConfigIds", Collections.singletonList(1000));
     Map<Long, Long> vectorClocks = new HashMap<>();
 
     this.alertConfigDTO = new SubscriptionGroupDTO();
-    this.alertConfigDTO.setAlertSchemes(schemes);
+    this.alertConfigDTO.setNotificationSchemes(schemes);
     this.alertConfigDTO.setProperties(properties);
     this.alertConfigDTO.setFrom("te@linkedin.com");
     this.alertConfigDTO.setName("factory_alert");

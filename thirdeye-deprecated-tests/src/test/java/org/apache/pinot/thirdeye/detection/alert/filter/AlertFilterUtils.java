@@ -23,17 +23,21 @@ import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
@@ -42,57 +46,44 @@ import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 public class AlertFilterUtils {
 
-  public static final String PROP_RECIPIENTS = "recipients";
-  public static final String PROP_TO = "to";
-  public static final String PROP_CC = "cc";
-  public static final String PROP_BCC = "bcc";
-
-  public static final Set<String> PROP_TO_VALUE = new HashSet<>(
-      Arrays.asList("test@example.com", "test@example.org"));
-  public static final Set<String> PROP_CC_VALUE = new HashSet<>(
-      Arrays.asList("cctest@example.com", "cctest@example.org"));
-  public static final Set<String> PROP_BCC_VALUE = new HashSet<>(
-      Arrays.asList("bcctest@example.com", "bcctest@example.org"));
+  public static final List<String> PROP_TO_VALUE = Arrays.asList("test@example.com", "test@example.org");
+  public static final List<String> PROP_CC_VALUE = Arrays.asList("cctest@example.com", "cctest@example.org");
+  public static final List<String> PROP_BCC_VALUE = Arrays.asList("bcctest@example.com", "bcctest@example.org");
 
   static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config) {
-    return makeEmailNotifications(config, new HashSet<String>());
+    return makeEmailNotifications(config, new ArrayList<>());
   }
 
   static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config,
-      Set<String> toRecipients) {
-    Set<String> recipients = new HashSet<>(toRecipients);
+      List<String> toRecipients) {
+    List<String> recipients = new ArrayList<>();
     recipients.addAll(PROP_TO_VALUE);
+    recipients.addAll(toRecipients);
     return makeEmailNotifications(config, recipients, PROP_CC_VALUE, PROP_BCC_VALUE);
   }
 
-  static DetectionAlertFilterNotification makeJiraNotifications(SubscriptionGroupDTO config,
-      String assignee) {
-    Map<String, Object> alertProps = new HashMap<>();
-    Map<String, Object> jiraParams = new HashMap<>();
-    jiraParams.put(PROP_ASSIGNEE, assignee);
-    alertProps.put(PROP_JIRA_SCHEME, jiraParams);
-
-    SubscriptionGroupDTO subsConfig = SubscriptionUtils
-        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
-    return new DetectionAlertFilterNotification(subsConfig);
-  }
+  // TODO enable this test when jira notification is supported
+//  static DetectionAlertFilterNotification makeJiraNotifications(SubscriptionGroupDTO config,
+//      String assignee) {
+//    Map<String, Object> alertProps = new HashMap<>();
+//    Map<String, Object> jiraParams = new HashMap<>();
+//    jiraParams.put(PROP_ASSIGNEE, assignee);
+//    alertProps.put(PROP_JIRA_SCHEME, jiraParams);
+//
+//    SubscriptionGroupDTO subsConfig = SubscriptionUtils
+//        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
+//    return new DetectionAlertFilterNotification(subsConfig);
+//  }
 
   static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config,
-      Set<String> toRecipients, Set<String> ccRecipients, Set<String> bccRecipients) {
-    Map<String, Object> alertProps = new HashMap<>();
-
-    Map<String, Set<String>> recipients = new HashMap<>();
-    recipients.put(PROP_TO, new HashSet<>(toRecipients));
-    recipients.put(PROP_CC, new HashSet<>(ccRecipients));
-    recipients.put(PROP_BCC, new HashSet<>(bccRecipients));
-
-    Map<String, Object> emailRecipients = new HashMap<>();
-    emailRecipients.put(PROP_RECIPIENTS, recipients);
-
-    alertProps.put(PROP_EMAIL_SCHEME, emailRecipients);
-
+      List<String> toRecipients, List<String> ccRecipients, List<String> bccRecipients) {
+    NotificationSchemesDto notificationSchemes = new NotificationSchemesDto();
+    notificationSchemes.setEmailScheme(new EmailSchemeDto()
+      .setTo(toRecipients)
+      .setCc(ccRecipients)
+      .setBcc(bccRecipients));
     SubscriptionGroupDTO subsConfig = SubscriptionUtils
-        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
+        .makeChildSubscriptionConfig(config, notificationSchemes, config.getRefLinks());
 
     return new DetectionAlertFilterNotification(subsConfig);
   }

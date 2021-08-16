@@ -53,7 +53,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   private static final String PROP_CLASS_NAME = "className";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
 
-  protected PlanNodeBean config;
+  protected PlanNodeBean planNode;
   protected long startTime;
   protected long endTime;
   protected TimeConverter timeConverter;
@@ -68,7 +68,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
 
   @Override
   public void init(final OperatorContext context) {
-    this.config = context.getDetectionPlanApi();
+    this.planNode = context.getPlanNode();
     this.timeFormat = context.getTimeFormat();
     this.timeConverter = DefaultTimeConverter.get(timeFormat);
     this.startTime = timeConverter.convert(context.getStartTime());
@@ -78,8 +78,8 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     this.resultMap = new HashMap<>();
     this.instancesMap = new HashMap<>();
     this.inputMap = context.getInputsMap();
-    if (context.getDetectionPlanApi().getOutputs() != null) {
-      for (OutputBean outputBean : context.getDetectionPlanApi().getOutputs()) {
+    if (context.getPlanNode().getOutputs() != null) {
+      for (OutputBean outputBean : context.getPlanNode().getOutputs()) {
         outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
       }
     }
@@ -98,7 +98,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
    * Initialize all components in the pipeline
    */
   protected void initComponents() {
-    Map<String, Object> componentSpecs = getComponentSpecs(config.getParams());
+    Map<String, Object> componentSpecs = getComponentSpecs(planNode.getParams());
     if (componentSpecs != null) {
       for (String componentKey : componentSpecs.keySet()) {
         Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
@@ -176,8 +176,8 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     }
   }
 
-  public PlanNodeBean getConfig() {
-    return config;
+  public PlanNodeBean getPlanNode() {
+    return planNode;
   }
 
   public long getStartTime() {
@@ -201,7 +201,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
 
   @Override
   public void setProperty(String key, Object value) {
-    config.getParams().put(key, value);
+    planNode.getParams().put(key, value);
   }
 
   public Map<String, BaseComponent> getComponents() {

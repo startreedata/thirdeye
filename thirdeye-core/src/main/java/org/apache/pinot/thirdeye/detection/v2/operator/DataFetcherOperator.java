@@ -37,7 +37,7 @@ public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
     this.dataSourceCache = (DataSourceCache) context.getProperties()
         .get(DATA_SOURCE_CACHE_REF_KEY);
     super.init(context);
-    for (OutputBean outputBean : context.getDetectionPlanApi().getOutputs()) {
+    for (OutputBean outputBean : context.getPlanNode().getOutputs()) {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
   }

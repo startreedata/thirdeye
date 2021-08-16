@@ -31,6 +31,7 @@
     <module>thirdeye-coordinator</module>
 
     <!--  Build plugins -->
+    <module>thirdeye-plugins</module>
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-datasources</module>
     <module>thirdeye-detection-components</module>

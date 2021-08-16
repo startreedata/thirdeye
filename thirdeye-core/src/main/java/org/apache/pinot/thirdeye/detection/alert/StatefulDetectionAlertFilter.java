@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
+import static org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme.PROP_EMAIL_SCHEME;
 
 import com.google.common.collect.Collections2;
 import java.util.Collection;

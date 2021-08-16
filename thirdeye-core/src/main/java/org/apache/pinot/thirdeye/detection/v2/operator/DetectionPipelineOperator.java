@@ -28,12 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -51,7 +49,7 @@ import org.slf4j.LoggerFactory;
 public abstract class DetectionPipelineOperator<T extends DetectionPipelineResult> implements
     Operator {
 
-  private static final String PROP_TYPE = "type";
+  protected static final String PROP_TYPE = "type";
   private static final String PROP_CLASS_NAME = "className";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
 
@@ -163,12 +161,11 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     return componentSpecs;
   }
 
-  private BaseComponent createComponent(Map<String, Object> componentSpec) {
-    String type = MapUtils.getString(componentSpec, PROP_TYPE);
-    if (type != null) {
-      return createComponentUsingFactory(type, componentSpec);
-    }
-
+  protected BaseComponent createComponent(Map<String, Object> componentSpec) {
+    /*
+     * TODO spyne Remove Legacy logic. Detectors/Triggers and DataFetchers handle loading components
+     *      on their own.
+     */
     String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
     try {
       Class<BaseComponent> clazz = (Class<BaseComponent>) Class.forName(className);
@@ -177,12 +174,6 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
       throw new IllegalArgumentException("Failed to create component for " + className,
           e.getCause());
     }
-  }
-
-  protected BaseComponent createComponentUsingFactory(final String type,
-      final Map<String, Object> componentSpec) {
-    return new DetectionRegistry().buildDetectorV2(type, new AnomalyDetectorFactoryContext()
-        .setProperties(componentSpec));
   }
 
   public PlanNodeBean getConfig() {

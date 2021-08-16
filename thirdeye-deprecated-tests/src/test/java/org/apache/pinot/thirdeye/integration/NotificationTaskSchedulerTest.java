@@ -27,7 +27,7 @@ import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
@@ -115,7 +115,7 @@ public class NotificationTaskSchedulerTest {
   void initRegistries() {
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");
     DetectionAlertRegistry.getInstance()
-        .registerAlertScheme("EMAIL", DetectionEmailAlerter.class.getName());
+        .registerAlertScheme("EMAIL", EmailAlertScheme.class.getName());
     DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE",
         ToAllRecipientsDetectionAlertFilter.class.getName());
   }

@@ -57,7 +57,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DetectionEmailAlerterTest {
+public class EmailAlertSchemeTest {
 
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
@@ -139,7 +139,7 @@ public class DetectionEmailAlerterTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testFailAlertWithNullResult() throws Exception {
-    final DetectionEmailAlerter alertTaskInfo = new DetectionEmailAlerter(
+    final EmailAlertScheme alertTaskInfo = new EmailAlertScheme(
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
         mock(MetricAnomaliesContent.class),
@@ -164,7 +164,7 @@ public class DetectionEmailAlerterTest {
     when(htmlEmail.getMailSession()).thenReturn(Session.getInstance(new Properties()));
     when(htmlEmail.send()).thenReturn("sent");
 
-    final DetectionEmailAlerter emailAlerter = new DetectionEmailAlerter(
+    final EmailAlertScheme emailAlerter = new EmailAlertScheme(
         thirdEyeConfig,
         mock(EmailContentFormatter.class),
         mock(MetricAnomaliesContent.class),

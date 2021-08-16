@@ -78,7 +78,7 @@ data:
 
 
     mockEvents:
-      enabled: true
+      enabled: false
       generators:
         - type: HOLIDAY
           arrivalType: exponential

@@ -1,13 +1,16 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
@@ -22,11 +25,11 @@ public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
 
   @Override
   protected AbstractSpec getComponentSpec(Map<String, Object> componentSpecs, String componentKey) {
-    final AbstractSpec componentSpec = super.getComponentSpec(componentSpecs, componentKey);
-    if (componentSpec instanceof DataFetcherSpec) {
-      ((DataFetcherSpec) componentSpec).setDataSourceCache(dataSourceCache);
-    }
-    return componentSpec;
+    Map<String, Object> componentSpecMap = ConfigUtils.getMap(componentSpecs.get(componentKey));
+    final DataFetcherSpec componentSpec = requireNonNull(
+        AbstractSpec.fromProperties(componentSpecMap, DataFetcherSpec.class),
+        "Unable to construct DataFetcherSpec");
+    return componentSpec.setDataSourceCache(dataSourceCache);
   }
 
   @Override
@@ -37,6 +40,11 @@ public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
     for (OutputBean outputBean : context.getDetectionPlanApi().getOutputs()) {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
+  }
+
+  @Override
+  protected BaseComponent createComponent(final Map<String, Object> componentSpec) {
+    return new GenericDataFetcher();
   }
 
   @Override

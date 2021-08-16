@@ -1,6 +1,9 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -43,8 +46,9 @@ public class EventTriggerOperator extends DetectionPipelineOperator<DataTable> {
   }
 
   @Override
-  protected BaseComponent createComponentUsingFactory(final String type,
-      final Map<String, Object> componentSpec) {
+  protected BaseComponent createComponent(final Map<String, Object> componentSpec) {
+    final String type = requireNonNull(MapUtils.getString(componentSpec, PROP_TYPE),
+        "Must have 'type' in trigger config");
     return new DetectionRegistry().buildTrigger(type, new EventTriggerFactoryContext()
         .setProperties(componentSpec));
   }

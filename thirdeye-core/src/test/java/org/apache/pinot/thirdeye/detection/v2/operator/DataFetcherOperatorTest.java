@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
-import org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
@@ -32,7 +31,7 @@ public class DataFetcherOperatorTest {
         mockDataSourceCache);
     final OperatorContext context = new OperatorContext().setStartTime(startTime)
         .setEndTime(endTime)
-        .setDetectionPlanApi(planNodeBean)
+        .setPlanNode(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
     Assert.assertEquals(String.valueOf(dataFetcherOperator.getStartTime()), startTime);
@@ -67,7 +66,7 @@ public class DataFetcherOperatorTest {
         dataSourceCache);
     final OperatorContext context = new OperatorContext().setStartTime(startTime)
         .setEndTime(endTime)
-        .setDetectionPlanApi(planNodeBean)
+        .setPlanNode(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
 

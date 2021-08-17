@@ -8,9 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -37,29 +35,24 @@ public class SqlExecutionOperator extends DetectionPipelineOperator<DataTable> {
     super();
   }
 
-  @Override
-  protected AbstractSpec getComponentSpec(Map<String, Object> componentSpecs, String componentKey) {
-    final AbstractSpec componentSpec = super.getComponentSpec(componentSpecs, componentKey);
-    return componentSpec;
-  }
 
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    for (OutputBean outputBean : context.getDetectionPlanApi().getOutputs()) {
+    for (OutputBean outputBean : context.getPlanNode().getOutputs()) {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
-    if (config.getParams().containsKey(SQL_QUERIES)) {
-      queries = (List<String>) config.getParams().get(SQL_QUERIES);
+    if (planNode.getParams().containsKey(SQL_QUERIES)) {
+      queries = (List<String>) planNode.getParams().get(SQL_QUERIES);
     } else {
       throw new IllegalArgumentException(
           "Missing property '" + SQL_QUERIES + "' in SqlExecutionOperator");
     }
-    if (config.getParams().containsKey(JDBC_DRIVER_CLASSNAME)) {
-      jdbcDriverClassName = config.getParams().get(JDBC_DRIVER_CLASSNAME).toString();
+    if (planNode.getParams().containsKey(JDBC_DRIVER_CLASSNAME)) {
+      jdbcDriverClassName = planNode.getParams().get(JDBC_DRIVER_CLASSNAME).toString();
     }
-    if (config.getParams().containsKey(JDBC_CONNECTION)) {
-      jdbcConnection = config.getParams().get(JDBC_CONNECTION).toString();
+    if (planNode.getParams().containsKey(JDBC_CONNECTION)) {
+      jdbcConnection = planNode.getParams().get(JDBC_CONNECTION).toString();
     }
   }
 

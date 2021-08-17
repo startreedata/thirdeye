@@ -44,7 +44,7 @@ public class SqlExecutionOperatorTest {
     final Map<String, Object> properties = ImmutableMap.of();
     final OperatorContext context = new OperatorContext().setStartTime(startTime)
         .setEndTime(endTime)
-        .setDetectionPlanApi(planNodeBean)
+        .setPlanNode(planNodeBean)
         .setInputsMap(ImmutableMap.of("baseline", new SimpleDataTable(
             ImmutableList.of("ts", "met"),
             ImmutableList.of(new ColumnType(ColumnDataType.LONG),

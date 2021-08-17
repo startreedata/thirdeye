@@ -41,7 +41,7 @@ public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {
   public Operator<DataTable> run() throws Exception {
     final SqlExecutionOperator sqlExecutionOperator = new SqlExecutionOperator();
     sqlExecutionOperator.init(new OperatorContext()
-        .setDetectionPlanApi(planNodeBean)
+        .setPlanNode(planNodeBean)
         .setInputsMap(inputsMap)
     );
     return sqlExecutionOperator;

@@ -9,11 +9,11 @@
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
+            "component.detector.timezone": "US/Pacific",
+            "component.detector.monitoringGranularity": "1_DAYS",
             "component.detector.timestamp": "ts",
             "component.detector.metric": "met",
             "component.detector.dimensions": [],
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
             "component.detector.type": "THRESHOLD",
             "component.detector.max": "${max}",
             "component.detector.min": "${min}",
@@ -34,10 +34,8 @@
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
             "component.pinot.dataSource": "${dataSource}",
-            "component.pinot.query": "SELECT DATETIMECONVERT(\"date\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000",
-            "component.pinot.tableName": "${dataset}"
+            "component.pinot.query": "SELECT DATETIMECONVERT(\"date\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [

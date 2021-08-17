@@ -117,7 +117,6 @@ public class SendAlertTest {
     this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(null,
         null,
         null,
-        null,
         null),
         TestDbEnv.getInstance().getDetectionAlertConfigManager(),
         TestDbEnv.getInstance().getMergedAnomalyResultDAO());

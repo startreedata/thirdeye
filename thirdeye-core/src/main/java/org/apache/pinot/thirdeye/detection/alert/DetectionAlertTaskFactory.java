@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -50,19 +49,16 @@ public class DetectionAlertTaskFactory {
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
   private final EmailAlertScheme emailAlertScheme;
-  private final WebhookAlertScheme webhookAlertScheme;
 
   @Inject
   public DetectionAlertTaskFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final EmailAlertScheme emailAlertScheme,
-      final WebhookAlertScheme webhookAlertScheme) {
+      final EmailAlertScheme emailAlertScheme) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
     this.emailAlertScheme = emailAlertScheme;
-    this.webhookAlertScheme = webhookAlertScheme;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)
@@ -85,7 +81,7 @@ public class DetectionAlertTaskFactory {
 
   public Set<DetectionAlertScheme> getAlertSchemes()
       throws Exception {
-    return ImmutableSet.of(emailAlertScheme, webhookAlertScheme);
+    return ImmutableSet.of(emailAlertScheme);
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)

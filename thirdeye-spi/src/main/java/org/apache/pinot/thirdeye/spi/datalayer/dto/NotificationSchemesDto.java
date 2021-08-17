@@ -4,7 +4,6 @@ import com.google.common.base.Objects;
 
 public class NotificationSchemesDto {
 
-  WebhookSchemeDto webhookScheme;
   EmailSchemeDto emailScheme;
 
   @Override
@@ -16,13 +15,12 @@ public class NotificationSchemesDto {
       return false;
     }
     final NotificationSchemesDto that = (NotificationSchemesDto) o;
-    return Objects.equal(emailScheme, that.emailScheme)
-        && Objects.equal(webhookScheme, that.webhookScheme);
+    return Objects.equal(emailScheme, that.emailScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(emailScheme, webhookScheme);
+    return Objects.hashCode(emailScheme);
   }
 
   public EmailSchemeDto getEmailScheme() {
@@ -35,13 +33,4 @@ public class NotificationSchemesDto {
     return this;
   }
 
-  public WebhookSchemeDto getWebhookScheme() {
-    return webhookScheme;
-  }
-
-  public NotificationSchemesDto setWebhookScheme(
-      final WebhookSchemeDto webhookScheme) {
-    this.webhookScheme = webhookScheme;
-    return this;
-  }
 }

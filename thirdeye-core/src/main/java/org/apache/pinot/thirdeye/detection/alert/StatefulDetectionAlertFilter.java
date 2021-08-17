@@ -37,7 +37,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 
@@ -126,7 +125,6 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
   protected NotificationSchemesDto generateNotificationSchemeProps(SubscriptionGroupDTO config,
       List<String> to, List<String> cc, List<String> bcc) {
     NotificationSchemesDto notificationSchemeProps = new NotificationSchemesDto();
-    notificationSchemeProps.setWebhookScheme(config.getNotificationSchemes().getWebhookScheme());
     // Override the email alert scheme
     EmailSchemeDto emailScheme = new EmailSchemeDto()
         .setCc(cc)

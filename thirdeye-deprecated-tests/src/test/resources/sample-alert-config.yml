@@ -12,7 +12,7 @@ subscribedDetections:
 
 # Configure how you want to be alerted. You can receive the standard ThirdEye email alert (recommended)
 # or for advanced critical use-cases setup Iris alert by referring to the documentation
-alertSchemes:
+notificationSchemes:
   - type: EMAIL
     params:
       recipients:

@@ -134,4 +134,5 @@ public class InternalResource {
   public Response getPackageInfo() {
     return Response.ok(PACKAGE).build();
   }
+
 }

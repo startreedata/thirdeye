@@ -19,9 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import static java.util.Collections.singleton;
-
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
@@ -32,9 +31,7 @@ import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -47,28 +44,20 @@ public class DetectionAlertTaskFactory {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskFactory.class);
 
   private static final String PROP_CLASS_NAME = "className";
-  private static final String PROP_EMAIL_SCHEME = "emailScheme";
-  private static final String DEFAULT_ALERT_SCHEME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
 
   private final DataProvider provider;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
-  private final MetricConfigManager metricConfigManager;
-  private final EventManager eventManager;
   private final EmailAlertScheme emailAlertScheme;
 
   @Inject
   public DetectionAlertTaskFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final MetricConfigManager metricConfigManager,
-      final EventManager eventManager,
       final EmailAlertScheme emailAlertScheme) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
-    this.metricConfigManager = metricConfigManager;
-    this.eventManager = eventManager;
     this.emailAlertScheme = emailAlertScheme;
   }
 
@@ -92,7 +81,7 @@ public class DetectionAlertTaskFactory {
 
   public Set<DetectionAlertScheme> getAlertSchemes()
       throws Exception {
-    return singleton(emailAlertScheme);
+    return ImmutableSet.of(emailAlertScheme);
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)

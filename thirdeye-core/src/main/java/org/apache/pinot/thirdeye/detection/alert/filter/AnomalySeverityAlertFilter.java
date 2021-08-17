@@ -36,6 +36,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
@@ -126,10 +127,12 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
           notifyAnomalies.add(anomaly);
         }
       }
+      System.out.println(ConfigUtils.getMap(severityRecipient.get(PROP_NOTIFY)));
 
+      // TODO pass proper argument when SubscriptionGroupDto-> properties is refactored
       if (!notifyAnomalies.isEmpty()) {
         SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
-            ConfigUtils.getMap(severityRecipient.get(PROP_NOTIFY)),
+            new NotificationSchemesDto(),
             ConfigUtils.getMap(severityRecipient.get(PROP_REF_LINKS)));
         result.addMapping(new DetectionAlertFilterNotification(subsConfig), notifyAnomalies);
       }

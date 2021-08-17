@@ -20,21 +20,17 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
@@ -50,7 +46,6 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     Operator {
 
   protected static final String PROP_TYPE = "type";
-  private static final String PROP_CLASS_NAME = "className";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
 
   protected PlanNodeBean planNode;
@@ -106,38 +101,6 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
           instancesMap.put(componentKey, createComponent(componentSpec));
         }
       }
-
-      for (String componentKey : componentSpecs.keySet()) {
-        // Initialize the components if not loaded by factory
-        if (!optional(componentSpecs.get(componentKey))
-            .filter(o -> o instanceof Map)
-            .map(Map.class::cast)
-            .filter(o -> o.containsKey(PROP_TYPE))
-            .isPresent()) {
-          instancesMap.get(componentKey).init(getComponentSpec(componentSpecs, componentKey));
-        }
-      }
-    }
-  }
-
-  protected AbstractSpec getComponentSpec(Map<String, Object> componentSpecs, String componentKey) {
-    Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
-    for (Map.Entry<String, Object> entry : componentSpec.entrySet()) {
-      if (entry.getValue() != null && DetectionUtils.isReferenceName(entry.getValue()
-          .toString())) {
-        componentSpec
-            .put(entry.getKey(),
-                instancesMap.get(DetectionUtils.getComponentKey(entry.getValue().toString())));
-      }
-    }
-
-    String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
-    try {
-      Class clazz = Class.forName(className);
-      Class<AbstractSpec> specClazz = (Class<AbstractSpec>) Class.forName(getSpecClassName(clazz));
-      return AbstractSpec.fromProperties(componentSpec, specClazz);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to get component spec for " + className, e);
     }
   }
 
@@ -162,18 +125,8 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   }
 
   protected BaseComponent createComponent(Map<String, Object> componentSpec) {
-    /*
-     * TODO spyne Remove Legacy logic. Detectors/Triggers and DataFetchers handle loading components
-     *      on their own.
-     */
-    String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
-    try {
-      Class<BaseComponent> clazz = (Class<BaseComponent>) Class.forName(className);
-      return clazz.newInstance();
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to create component for " + className,
-          e.getCause());
-    }
+    throw new UnsupportedOperationException(
+        "Component Initialization is optional and should be provided by downstream implementations");
   }
 
   public PlanNodeBean getPlanNode() {

@@ -8,9 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -37,11 +35,6 @@ public class SqlExecutionOperator extends DetectionPipelineOperator<DataTable> {
     super();
   }
 
-  @Override
-  protected AbstractSpec getComponentSpec(Map<String, Object> componentSpecs, String componentKey) {
-    final AbstractSpec componentSpec = super.getComponentSpec(componentSpecs, componentKey);
-    return componentSpec;
-  }
 
   @Override
   public void init(final OperatorContext context) {

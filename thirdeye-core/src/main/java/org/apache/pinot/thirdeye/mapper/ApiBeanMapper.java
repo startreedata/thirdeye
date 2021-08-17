@@ -29,6 +29,7 @@ import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
+import org.apache.pinot.thirdeye.spi.api.WebhookApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
@@ -450,5 +451,12 @@ public abstract class ApiBeanMapper {
 
   public static EventDTO toEventDto(final EventApi api) {
     return EventMapper.INSTANCE.toDto(api);
+  }
+
+  public static WebhookApi toWebhookApi(final List<MergedAnomalyResultDTO> results,
+      final SubscriptionGroupDTO subscriptionGroup) {
+    return new WebhookApi()
+        .setSubscriptionGroup(toApi(subscriptionGroup))
+        .setResult(results.stream().map(dto -> toApi(dto)).collect(Collectors.toList()));
   }
 }

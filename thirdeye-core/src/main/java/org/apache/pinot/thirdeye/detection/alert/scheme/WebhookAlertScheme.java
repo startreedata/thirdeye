@@ -8,21 +8,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-import org.apache.pinot.thirdeye.notification.commons.WebhookEntity;
 import org.apache.pinot.thirdeye.notification.commons.WebhookService;
-import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.WebhookContentFormatter;
+import org.apache.pinot.thirdeye.spi.api.WebhookApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +62,9 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
             "Invalid webhook settings in subscription group " + subscriptionGroupDTO.getId());
       }
 
-      final List<AnomalyResult> anomalyResults = new ArrayList<>(result.getValue());
+      final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(result.getValue());
       anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
-      final WebhookEntity entity = processResults(subscriptionGroupDTO, anomalyResults);
+      final WebhookApi entity = processResults(subscriptionGroupDTO, anomalyResults);
       if(sendWebhook(webhook.getUrl(), entity)){
         LOG.info("Webhook trigger successful to url {}", webhook.getUrl());
       } else {
@@ -77,7 +73,7 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     }
   }
 
-  private boolean sendWebhook(String url, final WebhookEntity entity) {
+  private boolean sendWebhook(String url, final WebhookApi entity) {
     if(!url.matches(".*/")){
       url = url.concat("/");
     }
@@ -97,8 +93,7 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     return false;
   }
 
-  private WebhookEntity processResults(final SubscriptionGroupDTO subscriptionGroup, final List<AnomalyResult> anomalyResults){
-    final BaseNotificationContent content = getNotificationContent(null);
-    return formatter.getWebhookEntity(anomalyResults, content, subscriptionGroup, new Properties());
+  private WebhookApi processResults(final SubscriptionGroupDTO subscriptionGroup, final List<MergedAnomalyResultDTO> anomalyResults){
+    return formatter.getWebhookApi(anomalyResults, subscriptionGroup);
   }
 }

@@ -17,7 +17,6 @@
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
 import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionJiraAlerter.PROP_JIRA_SCHEME;
-import static org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme.PROP_EMAIL_SCHEME;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
 import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 

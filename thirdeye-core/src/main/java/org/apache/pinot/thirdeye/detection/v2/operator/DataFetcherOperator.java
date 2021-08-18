@@ -10,14 +10,13 @@ import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericData
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 
 public class DataFetcherOperator extends DetectionPipelineOperator {
 
-  private DataSourceCache dataSourceCache;
+  private DataFetcher<DataFetcherSpec> dataFetcher;
 
   public DataFetcherOperator() {
     super();
@@ -25,17 +24,21 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
   @Override
   public void init(final OperatorContext context) {
-    this.dataSourceCache = (DataSourceCache) context.getProperties()
-        .get(DATA_SOURCE_CACHE_REF_KEY);
     super.init(context);
-    for (OutputBean outputBean : context.getPlanNode().getOutputs()) {
+    for (final OutputBean outputBean : context.getPlanNode().getOutputs()) {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
+    checkArgument(outputKeyMap.size() <= 1,
+        "Max 1 output node is currently supported");
+
+    final DataSourceCache dataSourceCache = (DataSourceCache) context.getProperties()
+        .get(DATA_SOURCE_CACHE_REF_KEY);
+    dataFetcher = createDataFetcher(planNode.getParams(), dataSourceCache);
   }
 
-  @Override
-  protected BaseComponent createComponent() {
-    final Map<String, Object> componentSpec = getComponentSpec(planNode.getParams());
+  protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,
+      final DataSourceCache dataSourceCache) {
+    final Map<String, Object> componentSpec = getComponentSpec(params);
     final DataFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
@@ -49,18 +52,16 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    if (component instanceof DataFetcher) {
-      final DataFetcher fetcher = (DataFetcher) component;
-      final DataTable dataTable = fetcher.getDataTable();
-
-      checkArgument(outputKeyMap.size() == 1,
-          "Only 1 output node is currently supported");
-      resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
-    }
+    final DataTable dataTable = dataFetcher.getDataTable();
+    resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
   }
 
   @Override
   public String getOperatorName() {
     return "DataFetcherOperator";
+  }
+
+  public DataFetcher<DataFetcherSpec> getDataFetcher() {
+    return dataFetcher;
   }
 }

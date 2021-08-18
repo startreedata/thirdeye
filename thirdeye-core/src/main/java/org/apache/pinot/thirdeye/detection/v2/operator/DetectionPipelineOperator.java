@@ -27,7 +27,6 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
@@ -39,8 +38,7 @@ import org.slf4j.LoggerFactory;
  * DetectionPipeline forms the root of the detection class hierarchy. It represents a wireframe
  * for implementing (intermittently stateful) executable pipelines on top of it.
  */
-public abstract class DetectionPipelineOperator implements
-    Operator {
+public abstract class DetectionPipelineOperator implements Operator {
 
   protected static final String PROP_TYPE = "type";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
@@ -53,8 +51,6 @@ public abstract class DetectionPipelineOperator implements
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
   protected Map<String, String> outputKeyMap = new HashMap<>();
-
-  protected BaseComponent component;
 
   protected DetectionPipelineOperator() {
   }
@@ -89,7 +85,6 @@ public abstract class DetectionPipelineOperator implements
         outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
       }
     }
-    component = createComponent();
   }
 
   /**
@@ -100,15 +95,6 @@ public abstract class DetectionPipelineOperator implements
   @Override
   public abstract void execute()
       throws Exception;
-
-  protected BaseComponent createComponent() {
-    throw new UnsupportedOperationException(
-        "Component Initialization is optional and should be provided by downstream implementations");
-  }
-
-  public BaseComponent getComponent() {
-    return component;
-  }
 
   public PlanNodeBean getPlanNode() {
     return planNode;

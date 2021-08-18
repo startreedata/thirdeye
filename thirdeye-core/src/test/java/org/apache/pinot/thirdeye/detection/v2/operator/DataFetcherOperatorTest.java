@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
+import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
@@ -83,7 +84,7 @@ public class DataFetcherOperatorTest {
     Assert.assertEquals(String.valueOf(dataFetcherOperator.getStartTime()), startTime);
     Assert.assertEquals(String.valueOf(dataFetcherOperator.getEndTime()), endTime);
 
-    final BaseComponent pinotDataFetcher = dataFetcherOperator.getComponent();
+    final BaseComponent<DataFetcherSpec> pinotDataFetcher = dataFetcherOperator.getDataFetcher();
 
     Assert.assertTrue(pinotDataFetcher instanceof GenericDataFetcher);
     Assert.assertEquals(((GenericDataFetcher) pinotDataFetcher).getQuery(),

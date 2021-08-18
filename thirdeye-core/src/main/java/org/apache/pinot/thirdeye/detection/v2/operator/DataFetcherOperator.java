@@ -1,8 +1,8 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
@@ -34,9 +34,10 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
   }
 
   @Override
-  protected BaseComponent createComponent(final Map<String, Object> componentSpecMap) {
+  protected BaseComponent createComponent() {
+    final Map<String, Object> componentSpec = getComponentSpec(planNode.getParams());
     final DataFetcherSpec spec = requireNonNull(
-        AbstractSpec.fromProperties(componentSpecMap, DataFetcherSpec.class),
+        AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
 
@@ -48,13 +49,13 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    for (String key : this.getComponents().keySet()) {
-      final BaseComponent component = this.getComponents().get(key);
-      if (component instanceof DataFetcher) {
-        final DataFetcher fetcher = (DataFetcher) component;
-        final DataTable dataTable = fetcher.getDataTable();
-        resultMap.put(optional(outputKeyMap.get(key)).orElse(key), dataTable);
-      }
+    if (component instanceof DataFetcher) {
+      final DataFetcher fetcher = (DataFetcher) component;
+      final DataTable dataTable = fetcher.getDataTable();
+
+      checkArgument(outputKeyMap.size() == 1,
+          "Only 1 output node is currently supported");
+      resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
     }
   }
 

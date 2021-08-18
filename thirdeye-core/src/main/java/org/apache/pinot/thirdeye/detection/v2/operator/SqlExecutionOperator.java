@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -54,6 +55,11 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     if (planNode.getParams().containsKey(JDBC_CONNECTION)) {
       jdbcConnection = planNode.getParams().get(JDBC_CONNECTION).toString();
     }
+  }
+
+  @Override
+  protected BaseComponent createComponent() {
+    return null;
   }
 
   @Override

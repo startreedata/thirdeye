@@ -22,15 +22,12 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
@@ -54,31 +51,45 @@ public abstract class DetectionPipelineOperator implements
   protected TimeConverter timeConverter;
   protected String timeFormat = OperatorContext.DEFAULT_TIME_FORMAT;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
-  protected Map<String, BaseComponent> instancesMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
   protected Map<String, String> outputKeyMap = new HashMap<>();
+
+  protected BaseComponent component;
 
   protected DetectionPipelineOperator() {
   }
 
+  protected static Map<String, Object> getComponentSpec(final Map<String, Object> params) {
+    final Map<String, Object> componentSpec = new HashMap<>();
+    if (params == null || params.isEmpty()) {
+      return componentSpec;
+    }
+    final String prefix = "component.";
+    params.forEach((key, value) -> {
+      if (key.startsWith(prefix)) {
+        componentSpec.put(key.substring(prefix.length()), value);
+      }
+    });
+    return componentSpec;
+  }
+
   @Override
   public void init(final OperatorContext context) {
-    this.planNode = context.getPlanNode();
-    this.timeFormat = context.getTimeFormat();
-    this.timeConverter = DefaultTimeConverter.get(timeFormat);
-    this.startTime = optional(context.getStartTime()).map(timeConverter::convert).orElse(-1L);
-    this.endTime = optional(context.getEndTime()).map(timeConverter::convert).orElse(-1L);
+    planNode = context.getPlanNode();
+    timeFormat = context.getTimeFormat();
+    timeConverter = DefaultTimeConverter.get(timeFormat);
+    startTime = optional(context.getStartTime()).map(timeConverter::convert).orElse(-1L);
+    endTime = optional(context.getEndTime()).map(timeConverter::convert).orElse(-1L);
     checkArgument(startTime <= endTime, "start time cannot be greater than end time");
 
-    this.resultMap = new HashMap<>();
-    this.instancesMap = new HashMap<>();
-    this.inputMap = context.getInputsMap();
+    resultMap = new HashMap<>();
+    inputMap = context.getInputsMap();
     if (context.getPlanNode().getOutputs() != null) {
-      for (OutputBean outputBean : context.getPlanNode().getOutputs()) {
+      for (final OutputBean outputBean : context.getPlanNode().getOutputs()) {
         outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
       }
     }
-    this.initComponents();
+    component = createComponent();
   }
 
   /**
@@ -86,47 +97,17 @@ public abstract class DetectionPipelineOperator implements
    *
    * @return detection result
    */
+  @Override
   public abstract void execute()
       throws Exception;
 
-  /**
-   * Initialize all components in the pipeline
-   */
-  protected void initComponents() {
-    Map<String, Object> componentSpecs = getComponentSpecs(planNode.getParams());
-    if (componentSpecs != null) {
-      for (String componentKey : componentSpecs.keySet()) {
-        Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
-        if (!instancesMap.containsKey(componentKey)) {
-          instancesMap.put(componentKey, createComponent(componentSpec));
-        }
-      }
-    }
-  }
-
-  protected Map<String, Object> getComponentSpecs(Map<String, Object> params) {
-    Map<String, Object> componentSpecs = new HashMap<>();
-    if (params != null) {
-      for (String key : params.keySet()) {
-        final String[] splits = key.split("\\.");
-        if (splits.length > 2 && "component".equalsIgnoreCase(splits[0])) {
-          String componentKey = splits[1];
-          if (!componentSpecs.containsKey(componentKey)) {
-            componentSpecs.put(componentKey, new HashMap<>());
-          }
-          final Map<String, Object> componentSpec = (Map<String, Object>) componentSpecs.get(
-              componentKey);
-          componentSpec.put(StringUtils.join(Arrays.copyOfRange(splits, 2, splits.length), "."),
-              params.get(key));
-        }
-      }
-    }
-    return componentSpecs;
-  }
-
-  protected BaseComponent createComponent(Map<String, Object> componentSpec) {
+  protected BaseComponent createComponent() {
     throw new UnsupportedOperationException(
         "Component Initialization is optional and should be provided by downstream implementations");
+  }
+
+  public BaseComponent getComponent() {
+    return component;
   }
 
   public PlanNodeBean getPlanNode() {
@@ -145,7 +126,7 @@ public abstract class DetectionPipelineOperator implements
     return timeFormat;
   }
 
-  protected void setOutput(String key, DetectionPipelineResult output) {
+  protected void setOutput(String key, final DetectionPipelineResult output) {
     if (outputKeyMap.containsKey(key)) {
       key = outputKeyMap.get(key);
     }
@@ -153,16 +134,12 @@ public abstract class DetectionPipelineOperator implements
   }
 
   @Override
-  public void setProperty(String key, Object value) {
+  public void setProperty(final String key, final Object value) {
     planNode.getParams().put(key, value);
   }
 
-  public Map<String, BaseComponent> getComponents() {
-    return instancesMap;
-  }
-
   @Override
-  public DetectionPipelineResult getOutput(String key) {
+  public DetectionPipelineResult getOutput(final String key) {
     return resultMap.get(key);
   }
 
@@ -172,7 +149,7 @@ public abstract class DetectionPipelineOperator implements
   }
 
   @Override
-  public void setInput(String key, DetectionPipelineResult input) {
-    this.inputMap.put(key, input);
+  public void setInput(final String key, final DetectionPipelineResult input) {
+    inputMap.put(key, input);
   }
 }

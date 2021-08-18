@@ -22,7 +22,7 @@ import org.joda.time.Interval;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
-  private static final String DEFAULT_OUTPUT_KEY = "AnomalyDetectorResult";
+  private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
 
   public AnomalyDetectorOperator() {
     super();
@@ -34,27 +34,26 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   @Override
-  protected BaseComponent createComponent(final Map<String, Object> componentSpec) {
-    final String type = requireNonNull(MapUtils.getString(componentSpec, PROP_TYPE),
+  protected BaseComponent createComponent() {
+    final String type = requireNonNull(MapUtils.getString(planNode.getParams(), PROP_TYPE),
         "Must have 'type' in detector config");
+
+    final Map<String, Object> componentSpec = getComponentSpec(planNode.getParams());
     return new DetectionRegistry()
         .buildDetectorV2(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 
-  @SuppressWarnings({"SuspiciousMethodCalls", "rawtypes"})
+  @SuppressWarnings({"rawtypes"})
   @Override
   public void execute() throws Exception {
     // The last exception of the detection windows. It will be thrown out to upper level.
-    for (final Object key : getComponents().keySet()) {
-      final BaseComponent component = getComponents().get(key);
-      if (component instanceof AnomalyDetectorV2) {
-        runDetection(key, (AnomalyDetectorV2) component);
-      }
+    if (component instanceof AnomalyDetectorV2) {
+      runDetection((AnomalyDetectorV2) component);
     }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private void runDetection(final Object key, final AnomalyDetectorV2 anomalyDetectorV2)
+  private void runDetection(final AnomalyDetectorV2 anomalyDetectorV2)
       throws DetectorException {
     anomalyDetectorV2.setTimeConverter(timeConverter);
     for (final Interval interval : getMonitoringWindows()) {
@@ -70,8 +69,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
               .flatMap(Collection::stream)
               .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
 
-      final String outputKey = key + "_" + DEFAULT_OUTPUT_KEY;
-      setOutput(outputKey, detectionResult);
+      setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
     }
   }
 

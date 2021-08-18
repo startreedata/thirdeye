@@ -12,7 +12,7 @@ import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 
-public class EventTriggerOperator extends DetectionPipelineOperator<DataTable> {
+public class EventTriggerOperator extends DetectionPipelineOperator {
 
   public EventTriggerOperator() {
     super();

@@ -20,7 +20,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.joda.time.Interval;
 
-public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable> {
+public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private static final String DEFAULT_OUTPUT_KEY = "AnomalyDetectorResult";
 

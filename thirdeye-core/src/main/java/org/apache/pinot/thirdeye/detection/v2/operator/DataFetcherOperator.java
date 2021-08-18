@@ -15,7 +15,7 @@ import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 
-public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
+public class DataFetcherOperator extends DetectionPipelineOperator {
 
   private DataSourceCache dataSourceCache;
 

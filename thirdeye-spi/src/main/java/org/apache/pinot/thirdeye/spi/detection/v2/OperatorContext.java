@@ -11,7 +11,7 @@ public class OperatorContext {
   private String timeFormat = DEFAULT_TIME_FORMAT;
   private String startTime;
   private String endTime;
-  private PlanNodeBean planNodeBean;
+  private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, DetectionPipelineResult> inputsMap;
 
@@ -33,12 +33,12 @@ public class OperatorContext {
     return this;
   }
 
-  public PlanNodeBean getDetectionPlanApi() {
-    return planNodeBean;
+  public PlanNodeBean getPlanNode() {
+    return planNode;
   }
 
-  public OperatorContext setDetectionPlanApi(final PlanNodeBean planNodeBean) {
-    this.planNodeBean = planNodeBean;
+  public OperatorContext setPlanNode(final PlanNodeBean planNodeBean) {
+    this.planNode = planNodeBean;
     return this;
   }
 

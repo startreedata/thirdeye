@@ -146,5 +146,4 @@ public class InternalResource {
     System.out.println("========================================================================");
     return Response.ok().build();
   }
-
 }

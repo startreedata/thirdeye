@@ -53,7 +53,7 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
     final EventTriggerOperator eventTriggerOperator = new EventTriggerOperator();
     eventTriggerOperator.init(new OperatorContext()
         .setInputsMap(inputsMap)
-        .setDetectionPlanApi(planNodeBean)
+        .setPlanNode(planNodeBean)
     );
     return eventTriggerOperator;
   }

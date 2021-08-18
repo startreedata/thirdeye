@@ -9,11 +9,11 @@
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
+            "component.detector.timezone": "US/Pacific",
+            "component.detector.monitoringGranularity": "1_DAYS",
             "component.detector.timestamp": "ts",
             "component.detector.metric": "met",
             "component.detector.dimensions": [],
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
             "component.detector.type": "THRESHOLD",
             "component.detector.max": "${max}",
             "component.detector.min": "${min}",

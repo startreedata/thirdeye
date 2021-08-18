@@ -63,7 +63,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
           .runDetection(interval, timeSeriesMap);
 
       // Annotate each anomaly with a metric name
-      optional(config.getParams().get("anomaly.metric"))
+      optional(planNode.getParams().get("anomaly.metric"))
           .map(Object::toString)
           .ifPresent(anomalyMetric -> detectionResult.getDetectionResults().stream()
               .map(DetectionResult::getAnomalies)

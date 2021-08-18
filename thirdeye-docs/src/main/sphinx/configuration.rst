@@ -119,9 +119,6 @@ Please note ThirdEye support MySQL data source, and this configuration is differ
 	        controllerConnectionScheme: 'https'
 	        controllerHost: '<hostname>'
 	        controllerPort: <port>
-	        cacheLoaderClassName: org.apache.pinot.thirdeye.datasource.pinot.PinotD2ResponseCacheLoader
-	    metadataSourceConfigs:
-	      - className: org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource
 	  - className: org.apache.pinot.thirdeye.datasource.sql.SqlThirdEyeDataSource
 	    properties:
 	        MySQL:

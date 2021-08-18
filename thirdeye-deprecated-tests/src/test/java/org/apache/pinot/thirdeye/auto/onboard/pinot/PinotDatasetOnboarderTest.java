@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.pinot.thirdeye.auto.onboard;
+package org.apache.pinot.thirdeye.auto.onboard.pinot;
 
 import static org.mockito.Mockito.mock;
 

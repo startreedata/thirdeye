@@ -137,6 +137,45 @@ public class DataSourceUtils {
         .build(cacheLoader);
   }
 
+  public static LoadingCache<RelationalQuery, org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup> buildPinotSqlResponseCache(
+      CacheLoader cacheLoader) {
+    Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
+
+    // Initializes listener that prints expired entries in debuggin mode.
+    RemovalListener<RelationalQuery, ThirdEyeResultSet> listener;
+    if (LOG.isDebugEnabled()) {
+      listener = notification -> LOG.debug("Expired {}", notification.getKey().getQuery());
+    } else {
+      listener = notification -> {
+      };
+    }
+
+    // ResultSetGroup Cache. The size of this cache is limited by the total number of buckets in all ResultSetGroup.
+    // We estimate that 1 bucket (including overhead) consumes 1KB and this cache is allowed to use up to 50% of max
+    // heap space.
+    long maxBucketNumber = getApproximateMaxBucketNumber(
+        Constants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
+    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader.toString(),
+        maxBucketNumber);
+
+    return CacheBuilder.newBuilder()
+        .removalListener(listener)
+        .expireAfterWrite(15, TimeUnit.MINUTES)
+        .maximumWeight(maxBucketNumber)
+        .weigher(
+            (Weigher<RelationalQuery, org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
+              int resultSetCount = resultSetGroup.size();
+              int weight = 0;
+              for (int idx = 0; idx < resultSetCount; ++idx) {
+                ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
+                weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
+                    .getRowCount());
+              }
+              return weight;
+            })
+        .build(cacheLoader);
+  }
+
   private static long getApproximateMaxBucketNumber(int percentage) {
     long jvmMaxMemoryInBytes = Runtime.getRuntime().maxMemory();
     if (jvmMaxMemoryInBytes == Long.MAX_VALUE) { // Check upper bound

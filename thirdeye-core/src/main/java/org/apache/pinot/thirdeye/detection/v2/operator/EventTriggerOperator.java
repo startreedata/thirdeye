@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.EventTrigger;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactoryContext;
@@ -13,7 +14,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 
 public class EventTriggerOperator extends DetectionPipelineOperator {
 
-  private EventTrigger eventTrigger;
+  private EventTrigger<? extends AbstractSpec> eventTrigger;
 
   public EventTriggerOperator() {
     super();
@@ -44,7 +45,8 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
     return "EventTriggerOperator";
   }
 
-  protected EventTrigger createEventTrigger(final Map<String, Object> params) {
+  protected EventTrigger<? extends AbstractSpec> createEventTrigger(
+      final Map<String, Object> params) {
     final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
         "Must have 'type' in trigger config");
     final Map<String, Object> componentSpec = getComponentSpec(params);

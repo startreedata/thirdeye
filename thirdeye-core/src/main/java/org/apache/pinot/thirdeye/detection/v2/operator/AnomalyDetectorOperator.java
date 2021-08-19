@@ -1,14 +1,15 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -22,7 +23,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
 
-  private AnomalyDetectorV2 detector;
+  private AnomalyDetectorV2<? extends AbstractSpec> detector;
 
   public AnomalyDetectorOperator() {
     super();
@@ -34,7 +35,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     detector = createDetector(planNode.getParams());
   }
 
-  private AnomalyDetectorV2 createDetector(final Map<String, Object> params) {
+  private AnomalyDetectorV2<? extends AbstractSpec> createDetector(
+      final Map<String, Object> params) {
     final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
         "Must have 'type' in detector config");
 
@@ -64,7 +66,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   private List<Interval> getMonitoringWindows() {
-    return Collections.singletonList(new Interval(startTime, endTime));
+    return singletonList(new Interval(startTime, endTime));
   }
 
   @Override

@@ -6,9 +6,9 @@ import com.google.common.base.Objects;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class WebhookApi {
+public class WebhookApi implements ThirdEyeApi {
   private SubscriptionGroupApi subscriptionGroup;
-  private List<AnomalyApi> result;
+  private List<AnomalyWrapperApi> result;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
@@ -20,11 +20,11 @@ public class WebhookApi {
     return this;
   }
 
-  public List<AnomalyApi> getResult() {
+  public List<AnomalyWrapperApi> getResult() {
     return result;
   }
 
-  public WebhookApi setResult(final List<AnomalyApi> result) {
+  public WebhookApi setResult(final List<AnomalyWrapperApi> result) {
     this.result = result;
     return this;
   }

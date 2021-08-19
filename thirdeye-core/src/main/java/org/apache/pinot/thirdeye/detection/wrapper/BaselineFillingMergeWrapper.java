@@ -218,7 +218,7 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
   }
 
   // check if an anomaly is a existing anomaly and the duration is not modified
-  protected boolean isExistingAnomaly(Map<Long, MergedAnomalyResultDTO> existingAnomalies,
+  public static boolean isExistingAnomaly(Map<Long, MergedAnomalyResultDTO> existingAnomalies,
       MergedAnomalyResultDTO anomaly) {
     if (!existingAnomalies.containsKey(anomaly.getId())) {
       return false;

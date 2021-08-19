@@ -59,11 +59,11 @@ public class MergeWrapper extends DetectionPipeline {
   private static final String PROP_NESTED = "nested";
   private static final String PROP_CLASS_NAME = "className";
   private static final String PROP_MERGE_KEY = "mergeKey";
-  private static final String PROP_GROUP_KEY = "groupKey";
+  public static final String PROP_GROUP_KEY = "groupKey";
   private static final int NUMBER_OF_SPLITED_ANOMALIES_LIMIT = 1000;
   protected static final String PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
 
-  protected static final Comparator<MergedAnomalyResultDTO> COMPARATOR = new Comparator<MergedAnomalyResultDTO>() {
+  public static final Comparator<MergedAnomalyResultDTO> COMPARATOR = new Comparator<MergedAnomalyResultDTO>() {
     @Override
     public int compare(MergedAnomalyResultDTO o1, MergedAnomalyResultDTO o2) {
       // earlier for start time
@@ -369,7 +369,7 @@ public class MergeWrapper extends DetectionPipeline {
     return detCompNames;
   }
 
-  protected MergedAnomalyResultDTO copyAnomalyInfo(MergedAnomalyResultDTO from,
+  public static MergedAnomalyResultDTO copyAnomalyInfo(MergedAnomalyResultDTO from,
       MergedAnomalyResultDTO to) {
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
@@ -391,7 +391,7 @@ public class MergeWrapper extends DetectionPipeline {
     return to;
   }
 
-  protected static class AnomalyKey {
+  public static class AnomalyKey {
 
     final String metric;
     final String collection;

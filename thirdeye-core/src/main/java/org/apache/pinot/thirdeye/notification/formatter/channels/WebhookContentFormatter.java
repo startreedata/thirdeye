@@ -4,9 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
-import org.apache.pinot.thirdeye.spi.api.AnomalyWrapperApi;
+import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
 import org.apache.pinot.thirdeye.spi.api.WebhookApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -15,27 +15,27 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 public class WebhookContentFormatter {
 
   public static String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
-  private final ThirdEyeCoordinatorConfiguration teConfig;
+  private final UiConfiguration config;
 
   @Inject
   public WebhookContentFormatter(
-      final ThirdEyeCoordinatorConfiguration teConfig
+      final UiConfiguration config
   ) {
-    this.teConfig = teConfig;
+    this.config = config;
   }
 
   public WebhookApi getWebhookApi(final List<MergedAnomalyResultDTO> anomalies,
       SubscriptionGroupDTO subsConfig) {
     WebhookApi api = ApiBeanMapper.toWebhookApi(anomalies, subsConfig);
-    List<AnomalyWrapperApi> results = api.getResult();
-    return api.setResult(results.stream()
+    List<AnomalyReportApi> results = api.getAnomalyReports();
+    return api.setAnomalyReports(results.stream()
         .map(result -> result.setUrl(getDashboardUrl(result.getAnomaly().getId())))
         .collect(
             Collectors.toList()));
   }
 
   private String getDashboardUrl(final Long id) {
-    String extUrl =  teConfig.getUiConfiguration().getExternalUrl();
+    String extUrl =  config.getExternalUrl();
     if(!extUrl.matches(".*/")){
       extUrl += "/";
     }

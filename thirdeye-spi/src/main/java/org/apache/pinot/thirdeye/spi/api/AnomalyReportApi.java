@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.spi.api;
 
-public class AnomalyWrapperApi implements ThirdEyeApi {
+public class AnomalyReportApi implements ThirdEyeApi {
   private AnomalyApi anomaly;
   private String url;
 
@@ -8,7 +8,7 @@ public class AnomalyWrapperApi implements ThirdEyeApi {
     return anomaly;
   }
 
-  public AnomalyWrapperApi setAnomaly(final AnomalyApi anomaly) {
+  public AnomalyReportApi setAnomaly(final AnomalyApi anomaly) {
     this.anomaly = anomaly;
     return this;
   }
@@ -17,7 +17,7 @@ public class AnomalyWrapperApi implements ThirdEyeApi {
     return url;
   }
 
-  public AnomalyWrapperApi setUrl(final String url) {
+  public AnomalyReportApi setUrl(final String url) {
     this.url = url;
     return this;
   }

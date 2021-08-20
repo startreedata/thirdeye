@@ -52,7 +52,7 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     buildAndTriggerWebhook(results);
   }
 
-  private void buildAndTriggerWebhook(final DetectionAlertFilterResult results){
+  private void buildAndTriggerWebhook(final DetectionAlertFilterResult results) throws IOException {
     for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
         .getResult().entrySet()) {
       final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
@@ -65,15 +65,11 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
       final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(result.getValue());
       anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
       final WebhookApi entity = processResults(subscriptionGroupDTO, anomalyResults);
-      if(sendWebhook(webhook.getUrl(), entity)){
-        LOG.info("Webhook trigger successful to url {}", webhook.getUrl());
-      } else {
-        LOG.error("Webhook trigger failed to url {}", webhook.getUrl());
-      }
+      sendWebhook(webhook.getUrl(), entity);
     }
   }
 
-  private boolean sendWebhook(String url, final WebhookApi entity) {
+  private boolean sendWebhook(String url, final WebhookApi entity) throws IOException {
     if(!url.matches(".*/")){
       url = url.concat("/");
     }
@@ -85,12 +81,15 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     try {
       Response<Void> response = service.sendWebhook(entity).execute();
       if(response.isSuccessful()){
+        LOG.info("Webhook trigger successful to url {}", url);
         return true;
       }
+      LOG.warn("Webhook failed for url {} with code {} : {}", url, response.code(), response.message());
+      return false;
     } catch (IOException e) {
-      LOG.debug("Webhook failure cause : {}",e);
+      LOG.error("Webhook failure cause : {}",e);
+      throw e;
     }
-    return false;
   }
 
   private WebhookApi processResults(final SubscriptionGroupDTO subscriptionGroup, final List<MergedAnomalyResultDTO> anomalyResults){

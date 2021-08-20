@@ -17,7 +17,7 @@ import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
-import org.apache.pinot.thirdeye.spi.api.AnomalyWrapperApi;
+import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
 import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
@@ -458,8 +458,8 @@ public abstract class ApiBeanMapper {
       final SubscriptionGroupDTO subscriptionGroup) {
     return new WebhookApi()
         .setSubscriptionGroup(toApi(subscriptionGroup))
-        .setResult(results.stream()
-            .map(dto -> new AnomalyWrapperApi().setAnomaly(toApi(dto)))
+        .setAnomalyReports(results.stream()
+            .map(dto -> new AnomalyReportApi().setAnomaly(toApi(dto)))
             .collect(Collectors.toList()));
   }
 }

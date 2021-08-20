@@ -8,7 +8,7 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class WebhookApi implements ThirdEyeApi {
   private SubscriptionGroupApi subscriptionGroup;
-  private List<AnomalyWrapperApi> result;
+  private List<AnomalyReportApi> anomalyReports;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
@@ -20,12 +20,12 @@ public class WebhookApi implements ThirdEyeApi {
     return this;
   }
 
-  public List<AnomalyWrapperApi> getResult() {
-    return result;
+  public List<AnomalyReportApi> getAnomalyReports() {
+    return anomalyReports;
   }
 
-  public WebhookApi setResult(final List<AnomalyWrapperApi> result) {
-    this.result = result;
+  public WebhookApi setAnomalyReports(final List<AnomalyReportApi> anomalyReports) {
+    this.anomalyReports = anomalyReports;
     return this;
   }
 
@@ -39,12 +39,12 @@ public class WebhookApi implements ThirdEyeApi {
     }
     final WebhookApi that = (WebhookApi) o;
     return Objects.equal(subscriptionGroup, that.subscriptionGroup)
-        && Objects.equal(result, that.result);
+        && Objects.equal(anomalyReports, that.anomalyReports);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(subscriptionGroup, result);
+    return Objects.hashCode(subscriptionGroup, anomalyReports);
   }
 
 }

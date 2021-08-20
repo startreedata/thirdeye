@@ -34,13 +34,9 @@ public class PinotSqlDataSourceConfigFactory {
    */
   public static PinotSqlThirdEyeDataSourceConfig createFromProperties(
       Map<String, Object> properties) {
-    String dataSourceName = MapUtils
-        .getString(properties, PinotSqlDataSourceProperties.NAME.getValue(),
-            PinotSqlThirdEyeDataSource.class.getSimpleName());
 
     ImmutableMap<String, Object> processedProperties = processPropertyMap(properties);
-    checkNotNull(processedProperties, "Invalid properties for data source: %s, properties=%s",
-        dataSourceName, properties);
+    checkNotNull(processedProperties, "Invalid properties for data source. properties=%s", properties);
 
     String controllerHost = MapUtils.getString(processedProperties,
         PinotSqlDataSourceProperties.CONTROLLER_HOST.getValue());
@@ -48,35 +44,13 @@ public class PinotSqlDataSourceConfigFactory {
         PinotSqlDataSourceProperties.CONTROLLER_PORT.getValue());
     String controllerConnectionScheme = MapUtils.getString(processedProperties,
         PinotSqlDataSourceProperties.CONTROLLER_CONNECTION_SCHEME.getValue());
-    String clusterName = MapUtils
-        .getString(processedProperties,
-            PinotSqlDataSourceProperties.CLUSTER_NAME.getValue());
-
-    // brokerUrl, tag, and name are optional
-    String brokerUrl = MapUtils
-        .getString(processedProperties, PinotSqlDataSourceProperties.BROKER_URL.getValue());
-    String tag = MapUtils
-        .getString(processedProperties, PinotSqlDataSourceProperties.TAG.getValue());
-    String name = MapUtils
-        .getString(processedProperties, PinotSqlDataSourceProperties.NAME.getValue());
 
     Builder builder =
         builder().setControllerHost(controllerHost)
-            .setControllerPort(controllerPort)
-            .setClusterName(clusterName);
-    if (StringUtils.isNotBlank(brokerUrl)) {
-      builder.setBrokerUrl(brokerUrl);
-    }
-    if (StringUtils.isNotBlank(tag)) {
-      builder.setTag(tag);
-    }
-    if (StringUtils.isNotBlank(name)) {
-      builder.setName(name);
-    }
+            .setControllerPort(controllerPort);
     if (StringUtils.isNotBlank(controllerConnectionScheme)) {
       builder.setControllerConnectionScheme(controllerConnectionScheme);
     }
-
     return builder.build();
   }
 
@@ -92,18 +66,16 @@ public class PinotSqlDataSourceConfigFactory {
    */
   static ImmutableMap<String, Object> processPropertyMap(Map<String, Object> properties) {
     if (MapUtils.isEmpty(properties)) {
-      LOG.error("PinotThirdEyeDataSource is missing properties {}", properties);
+      LOG.error("PinotSqlThirdEyeDataSource is missing properties {}", properties);
       return null;
     }
 
     final List<PinotSqlDataSourceProperties> requiredProperties = Arrays
         .asList(PinotSqlDataSourceProperties.CONTROLLER_HOST,
-            PinotSqlDataSourceProperties.CONTROLLER_PORT,
-            PinotSqlDataSourceProperties.CLUSTER_NAME);
+            PinotSqlDataSourceProperties.CONTROLLER_PORT);
+
     final List<PinotSqlDataSourceProperties> optionalProperties = Arrays
-        .asList(PinotSqlDataSourceProperties.CONTROLLER_CONNECTION_SCHEME,
-            PinotSqlDataSourceProperties.BROKER_URL,
-            PinotSqlDataSourceProperties.TAG);
+        .asList(PinotSqlDataSourceProperties.CONTROLLER_CONNECTION_SCHEME);
 
     // Validates required properties
     final String className = PinotSqlControllerResponseCacheLoader.class.getSimpleName();
@@ -127,7 +99,6 @@ public class PinotSqlDataSourceConfigFactory {
           builder.put(optionalProperty.getValue(), propertyString);
         }
       }
-
       return builder.build();
     } else {
       return null;
@@ -145,11 +116,7 @@ public class PinotSqlDataSourceConfigFactory {
 
     private String controllerHost;
     private int controllerPort = -1;
-    private String controllerConnectionScheme = HTTP_SCHEME; // HTTP_SCHEME or HTTPS_SCHEME
-    private String clusterName;
-    private String brokerUrl;
-    private String tag;
-    private String name;
+    private String controllerConnectionScheme = HTTP_SCHEME;
 
     public Builder setControllerHost(String controllerHost) {
       this.controllerHost = controllerHost;
@@ -158,26 +125,6 @@ public class PinotSqlDataSourceConfigFactory {
 
     public Builder setControllerPort(int controllerPort) {
       this.controllerPort = controllerPort;
-      return this;
-    }
-
-    public Builder setClusterName(String clusterName) {
-      this.clusterName = clusterName;
-      return this;
-    }
-
-    public Builder setBrokerUrl(String brokerUrl) {
-      this.brokerUrl = brokerUrl;
-      return this;
-    }
-
-    public Builder setTag(String tag) {
-      this.tag = tag;
-      return this;
-    }
-
-    public Builder setName(String name) {
-      this.name = name;
       return this;
     }
 
@@ -191,7 +138,6 @@ public class PinotSqlDataSourceConfigFactory {
       checkNotNull(controllerHost, "{} is missing 'Controller Host' property", className);
       checkArgument(controllerPort >= 0, "{} is missing 'Controller Port' property",
           className);
-      checkNotNull(clusterName, "{} is missing 'Cluster Name' property", className);
       checkArgument(
           controllerConnectionScheme.equals(HTTP_SCHEME) || controllerConnectionScheme
               .equals(HTTPS_SCHEME),
@@ -200,10 +146,7 @@ public class PinotSqlDataSourceConfigFactory {
       return new PinotSqlThirdEyeDataSourceConfig()
           .setControllerHost(controllerHost)
           .setControllerPort(controllerPort)
-          .setClusterName(clusterName)
-          .setBrokerUrl(brokerUrl)
-          .setTag(tag)
-          .setControllerConnectionScheme(controllerConnectionScheme).setName(name);
+          .setControllerConnectionScheme(controllerConnectionScheme);
     }
   }
 }

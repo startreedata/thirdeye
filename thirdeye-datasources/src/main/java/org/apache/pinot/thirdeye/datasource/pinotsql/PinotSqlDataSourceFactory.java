@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 public class PinotSqlDataSourceFactory implements ThirdEyeDataSourceFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotSqlDataSourceFactory.class);
-  private final Map<String, ThirdEyeDataSource> urlToDatasource = new HashMap<>();
 
   @Override
   public String name() {
@@ -28,18 +27,8 @@ public class PinotSqlDataSourceFactory implements ThirdEyeDataSourceFactory {
     } catch (SQLException e) {
       LOG.error("Pinot Sql datasource driver registry failed!");
     }
-    final String dsUrl = String.format("%s:%s",
-        context.getDataSourceDTO().getProperties().get("controllerHost"),
-        context.getDataSourceDTO().getProperties().get("controllerPort"));
-    final ThirdEyeDataSource ds;
-    synchronized (urlToDatasource) {
-      if (!urlToDatasource.containsKey(dsUrl)) {
-        LOG.info("Datasource for {} created", dsUrl);
-        ds = new PinotSqlThirdEyeDataSource();
-        ds.init(context);
-        urlToDatasource.put(dsUrl, ds);
-      }
-    }
-    return urlToDatasource.get(dsUrl);
+    final ThirdEyeDataSource ds = new PinotSqlThirdEyeDataSource();
+    ds.init(context);
+    return ds;
   }
 }

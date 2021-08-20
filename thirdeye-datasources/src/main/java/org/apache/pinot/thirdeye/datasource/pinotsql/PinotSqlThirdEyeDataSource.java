@@ -69,17 +69,13 @@ import org.slf4j.LoggerFactory;
 
 public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
 
-  public static final String CACHE_LOADER_CLASS_NAME_STRING = "cacheLoaderClassName";
-
   private static final String EQUALS = "=";
   private static final Logger LOG = LoggerFactory.getLogger(PinotSqlThirdEyeDataSource.class);
-  private static final String PINOT = "Pinot";
+  private static final String PINOT_SQL = "PinotSQL";
 
   private String name;
   private PinotSqlResponseCacheLoader pinotSqlResponseCacheLoader;
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
-  private PinotSqlDataSourceTimeQuery pinotSqlDataSourceTimeQuery;
-  private PinotSqlDataSourceDimensionFilters pinotSqlDataSourceDimensionFilters;
   private ThirdEyeDataSourceContext context;
 
   /**
@@ -128,7 +124,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
     if (CollectionUtils.isNotEmpty(groupByDimensions)) {
       preAggregatedDimensionNames.removeAll(groupByDimensions);
     }
-    // Add pre-aggregated dimension value to the remaining dimension names
+    // Add pre-aggrexgated dimension value to the remaining dimension names
     // exclude pre-aggregated dimension for group by dimensions
     Multimap<String, String> decoratedFilterSet;
     if (filterSet != null) {
@@ -166,10 +162,6 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
       throw new RuntimeException(e);
     }
     pinotResponseCache = DataSourceUtils.buildPinotSqlResponseCache(pinotSqlResponseCacheLoader);
-
-    // TODO Refactor. remove inverse hierarchical dependency
-    pinotSqlDataSourceTimeQuery = new PinotSqlDataSourceTimeQuery(this);
-    pinotSqlDataSourceDimensionFilters = new PinotSqlDataSourceDimensionFilters(this);
   }
 
   @Override
@@ -183,7 +175,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
         "{} doesn't connect to Pinot or cache is not initialized.",
         getName());
 
-    long tStart = System.nanoTime();
+//    long tStart = System.nanoTime();
     try {
       LinkedHashMap<MetricFunction, List<ThirdEyeResultSet>> metricFunctionToResultSetList = new LinkedHashMap<>();
 
@@ -258,7 +250,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
 
       List<String[]> resultRows = ThirdEyeResultSetUtils
           .parseResultSets(request, metricFunctionToResultSetList,
-              PINOT);
+              PINOT_SQL);
       return new RelationalThirdEyeResponse(request, resultRows, timeSpec);
     } catch (Exception e) {
 //      ThirdeyeMetricsUtil.pinotExceptionCounter.inc();
@@ -466,19 +458,19 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotSqlDataSourceTimeQuery.getMaxDateTime(datasetConfig);
+  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) {
+    return PinotSqlDataSourceTimeQuery.getMaxDateTime(datasetConfig, this);
   }
 
   @Override
-  public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotSqlDataSourceTimeQuery.getMinDateTime(datasetConfig);
+  public long getMinDataTime(final DatasetConfigDTO datasetConfig) {
+    return PinotSqlDataSourceTimeQuery.getMinDateTime(datasetConfig, this);
   }
 
   @Override
   public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
       throws Exception {
-    return pinotSqlDataSourceDimensionFilters.getDimensionFilters(datasetConfig);
+    return PinotSqlDataSourceDimensionFilters.getDimensionFilters(datasetConfig, this);
   }
 
   @Override
@@ -528,10 +520,9 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
   private PinotSqlDatasetOnboarder createPinotDatasetOnboarder() {
     final ThirdEyePinotSqlClient thirdEyePinotSqlClient = new ThirdEyePinotSqlClient(new DataSourceMetaBean()
         .setProperties(context.getDataSourceDTO().getProperties()));
-    final PinotSqlDatasetOnboarder pinotSqlDatasetOnboarder = new PinotSqlDatasetOnboarder(
+    return new PinotSqlDatasetOnboarder(
         thirdEyePinotSqlClient,
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
-    return pinotSqlDatasetOnboarder;
   }
 }

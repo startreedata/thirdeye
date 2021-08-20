@@ -145,7 +145,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>../plugin-assembly.xml</descriptor>
+                <descriptor>../thirdeye-plugins/plugin-assembly.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

@@ -31,7 +31,7 @@
     <module>thirdeye-coordinator</module>
 
     <!--  Build plugins -->
-    <module>thirdeye-plugin-example</module>
+    <module>thirdeye-plugins</module>
     <module>thirdeye-datasources</module>
     <module>thirdeye-detection-components</module>
 
@@ -330,11 +330,6 @@
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
         <artifactId>thirdeye-dashboard</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-example-plugin</artifactId>
         <version>${project.version}</version>
       </dependency>
 

@@ -112,14 +112,14 @@ public class TaskUtils {
         metricConfigManager);
   }
 
-  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
+  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO alert,
       long end,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
     long delay;
     try {
-      delay = getDetectionExpectedDelay(configDTO,
+      delay = getDetectionExpectedDelay(alert,
           thirdEyeCacheRegistry,
           datasetConfigManager,
           metricConfigManager);
@@ -127,9 +127,9 @@ public class TaskUtils {
       LOG.error("Failed to calc delay", e);
       delay = 0;
     }
-    final long start = Math.max(configDTO.getLastTimestamp(),
+    final long start = Math.max(alert.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
-    return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);
+    return new DetectionPipelineTaskInfo(alert.getId(), start, end);
   }
 
   public static long createDetectionTask(DetectionPipelineTaskInfo taskInfo,

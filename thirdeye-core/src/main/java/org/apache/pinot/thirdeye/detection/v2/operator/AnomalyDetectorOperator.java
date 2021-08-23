@@ -1,28 +1,29 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.joda.time.Interval;
 
-public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable> {
+public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
-  private static final String DEFAULT_OUTPUT_KEY = "AnomalyDetectorResult";
+  private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
+
+  private AnomalyDetectorV2<? extends AbstractSpec> detector;
 
   public AnomalyDetectorOperator() {
     super();
@@ -31,35 +32,25 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
+    detector = createDetector(planNode.getParams());
   }
 
-  @Override
-  protected BaseComponent createComponent(final Map<String, Object> componentSpec) {
-    final String type = requireNonNull(MapUtils.getString(componentSpec, PROP_TYPE),
+  private AnomalyDetectorV2<? extends AbstractSpec> createDetector(
+      final Map<String, Object> params) {
+    final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
         "Must have 'type' in detector config");
+
+    final Map<String, Object> componentSpec = getComponentSpec(params);
     return new DetectionRegistry()
         .buildDetectorV2(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 
-  @SuppressWarnings({"SuspiciousMethodCalls", "rawtypes"})
   @Override
   public void execute() throws Exception {
-    // The last exception of the detection windows. It will be thrown out to upper level.
-    for (final Object key : getComponents().keySet()) {
-      final BaseComponent component = getComponents().get(key);
-      if (component instanceof AnomalyDetectorV2) {
-        runDetection(key, (AnomalyDetectorV2) component);
-      }
-    }
-  }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private void runDetection(final Object key, final AnomalyDetectorV2 anomalyDetectorV2)
-      throws DetectorException {
-    anomalyDetectorV2.setTimeConverter(timeConverter);
+    detector.setTimeConverter(timeConverter);
     for (final Interval interval : getMonitoringWindows()) {
       final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-      final DetectionPipelineResult detectionResult = anomalyDetectorV2
+      final DetectionPipelineResult detectionResult = detector
           .runDetection(interval, timeSeriesMap);
 
       // Annotate each anomaly with a metric name
@@ -70,13 +61,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator<DataTable
               .flatMap(Collection::stream)
               .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
 
-      final String outputKey = key + "_" + DEFAULT_OUTPUT_KEY;
-      setOutput(outputKey, detectionResult);
+      setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
     }
   }
 
   private List<Interval> getMonitoringWindows() {
-    return Collections.singletonList(new Interval(startTime, endTime));
+    return singletonList(new Interval(startTime, endTime));
   }
 
   @Override

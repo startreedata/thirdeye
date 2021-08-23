@@ -3,7 +3,8 @@ if [ -z "${PINOT_VERSION}" ]; then
 fi
 
 export PINOT_INSTALL_TMP_DIR="/tmp/pinot-bin"
-export PINOT_LAUNCH_SH="${PINOT_INSTALL_TMP_DIR}/apache-pinot-incubating-${PINOT_VERSION}-bin/bin/quick-start-batch.sh"
+export PINOT_DIR="${PINOT_INSTALL_TMP_DIR}/apache-pinot-incubating-${PINOT_VERSION}-bin"
+export PINOT_LAUNCH_SH="${PINOT_DIR}/bin/quick-start-batch.sh"
 
 # If pinot quick-start script cannot be found, then reinstall
 if [[ ! -f "${PINOT_LAUNCH_SH}" ]]; then
@@ -20,4 +21,4 @@ if [[ ! -f "${PINOT_LAUNCH_SH}" ]]; then
 fi
 
 # Launch pinot
-${PINOT_LAUNCH_SH}
+cd ${PINOT_DIR} && ${PINOT_LAUNCH_SH}

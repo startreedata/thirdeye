@@ -1,6 +1,6 @@
 [
   {
-    "name": "sample-alert-v2",
+    "name": "mockEvent/threshold",
     "description": "Sample description payload for testing",
     "cron": "0 0/1 * 1/1 * ? *",
     "template": {
@@ -49,13 +49,13 @@
     },
     "templateProperties": {
       "dataSource": "pinotQuickStartLocal",
-      "dataset": "pageviews",
-      "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
-      "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
-      "max": "850000",
-      "min": "300000"
+      "dataset": "mockEvent",
+      "metric": "sum(m1)",
+      "monitoringGranularity": "1:SECONDS",
+      "timeColumn": "mtime",
+      "timeColumnFormat": "1:MILLISECONDS:EPOCH",
+      "max": "500",
+      "min": "30"
     },
     "lastTimestamp": 0
   }

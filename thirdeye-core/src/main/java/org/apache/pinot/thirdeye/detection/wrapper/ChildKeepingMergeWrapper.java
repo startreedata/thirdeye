@@ -49,7 +49,7 @@ import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
 
   private static final String PROP_GROUP_KEY = "groupKey";
-  private static final String PROP_PATTERN_KEY = "pattern";
+  public static final String PROP_PATTERN_KEY = "pattern";
 
   public ChildKeepingMergeWrapper(DataProvider provider, AlertDTO config, long startTime,
       long endTime) {

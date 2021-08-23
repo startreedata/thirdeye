@@ -1,6 +1,6 @@
 [
   {
-    "name": "sample-alert-v2",
+    "name": "sample-alert-v2-covid19_confirmed_us",
     "description": "Sample description payload for testing",
     "cron": "0 0/1 * 1/1 * ? *",
     "template": {
@@ -48,12 +48,12 @@
       ]
     },
     "templateProperties": {
-      "dataSource": "pinotQuickStartLocal",
-      "dataset": "pageviews",
-      "metric": "sum(views)",
+      "dataSource": "pinotQuickStartAzure",
+      "dataset": "covid19_confirmed_us",
+      "metric": "sum(Value)",
       "monitoringGranularity": "1:DAYS",
-      "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "timeColumn": "SecondsSinceEpoch",
+      "timeColumnFormat": "1:SECONDS:EPOCH",
       "max": "850000",
       "min": "300000"
     },

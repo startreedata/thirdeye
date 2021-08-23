@@ -1,9 +1,13 @@
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
+import static org.apache.pinot.thirdeye.spi.Constants.WEBHOOK_SECRET_LENGTH;
+
 import com.google.common.base.Objects;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class WebhookSchemeDto {
   private String url;
+  private String secret;
 
   @Override
   public boolean equals(final Object o) {
@@ -14,12 +18,13 @@ public class WebhookSchemeDto {
       return false;
     }
     final WebhookSchemeDto that = (WebhookSchemeDto) o;
-    return Objects.equal(url, that.url);
+    return Objects.equal(url, that.url)
+        && Objects.equal(secret, that.secret);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(url);
+    return Objects.hashCode(url, secret);
   }
 
   public String getUrl() {
@@ -29,5 +34,13 @@ public class WebhookSchemeDto {
   public WebhookSchemeDto setUrl(final String url) {
     this.url = url;
     return this;
+  }
+
+  public String getSecret() {
+    return secret;
+  }
+
+  public void generateSecret(){
+    this.secret = RandomStringUtils.randomAlphanumeric(WEBHOOK_SECRET_LENGTH);
   }
 }

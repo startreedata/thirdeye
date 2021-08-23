@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -46,7 +47,9 @@ public class SubscriptionGroupResource extends
     if (api.getCron() == null) {
       api.setCron(CRON_EVERY_5MIN);
     }
-    return toDto(api);
+    SubscriptionGroupDTO dto = toDto(api);
+    dto.getNotificationSchemes().getWebhookScheme().generateSecret();
+    return dto;
   }
 
   @Override
@@ -60,6 +63,10 @@ public class SubscriptionGroupResource extends
       ensure(subscriptionGroupManager.findByPredicate(
           Predicate.EQ("name", api.getName())).size() == 0,
           ERR_DUPLICATE_NAME);
+    }
+
+    if(api.getNotificationSchemes() != null && api.getNotificationSchemes().getWebhook() !=null){
+      ensureNull(api.getNotificationSchemes().getWebhook().getSecret(), ThirdEyeStatus.ERR_OBJECT_UNEXPECTED, "secret");
     }
   }
 

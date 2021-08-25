@@ -68,15 +68,12 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
       final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
       final WebhookSchemeDto webhook = subscriptionGroupDTO.getNotificationSchemes()
           .getWebhookScheme();
-      if (webhook == null) {
-        throw new IllegalArgumentException(
-            "Invalid webhook settings in subscription group " + subscriptionGroupDTO.getId());
+      if (webhook != null) {
+        final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(result.getValue());
+        anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
+        final WebhookApi entity = processResults(subscriptionGroupDTO, anomalyResults);
+        sendWebhook(webhook.getUrl(), entity, webhook.getSecret());
       }
-
-      final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(result.getValue());
-      anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
-      final WebhookApi entity = processResults(subscriptionGroupDTO, anomalyResults);
-      sendWebhook(webhook.getUrl(), entity, webhook.getSecret());
     }
   }
 

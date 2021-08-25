@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.exampleplugin;
+package org.apache.pinot.thirdeye.plugin.exampleplugin;
 
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;

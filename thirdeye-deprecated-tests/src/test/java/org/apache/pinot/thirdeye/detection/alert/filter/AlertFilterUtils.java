@@ -16,8 +16,6 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionJiraAlerter.PROP_JIRA_SCHEME;
-import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
 import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 
 import com.google.common.collect.HashMultimap;
@@ -25,11 +23,8 @@ import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;

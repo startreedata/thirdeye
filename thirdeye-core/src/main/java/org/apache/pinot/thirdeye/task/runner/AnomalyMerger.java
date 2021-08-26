@@ -3,11 +3,9 @@ package org.apache.pinot.thirdeye.task.runner;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.PROP_GROUP_KEY;
 import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.copyAnomalyInfo;
-import static org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper.isExistingAnomaly;
 import static org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper.PROP_PATTERN_KEY;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,67 +100,69 @@ public class AnomalyMerger {
 
     final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
     for (final MergedAnomalyResultDTO anomaly : allAnomalies) {
+      // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {
         continue;
       }
 
       // Prevent merging of grouped anomalies
-      final String groupKey = anomaly.getProperties().getOrDefault(PROP_GROUP_KEY, "");
-      final String patternKey = getPatternKey(anomaly);
-      final AnomalyKey key =
-          new AnomalyKey(anomaly.getMetric(),
-              anomaly.getCollection(),
-              anomaly.getDimensions(),
-              StringUtils.join(Arrays.asList(groupKey, patternKey), ","),
-              "",
-              anomaly.getType());
+      final AnomalyKey key = createAnomalyKey(anomaly);
       final MergedAnomalyResultDTO parent = parents.get(key);
 
       if (shouldMerge(parent, anomaly, alert)) {
-        // fully merge into existing
-        if (parent.getChildren().isEmpty()) {
-          // if this parent has no children, then add itself as a child
-          parent.getChildren().add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
-        }
-        parent.setEndTime(Math.max(parent.getEndTime(), anomaly.getEndTime()));
-
-        // merge the anomaly's properties into parent
-        ThirdEyeUtils.mergeAnomalyProperties(parent.getProperties(), anomaly.getProperties());
-
-        // merge the anomaly severity
-        if (parent.getSeverityLabel().compareTo(anomaly.getSeverityLabel()) > 0) {
-          // set the highest severity
-          parent.setSeverityLabel(anomaly.getSeverityLabel());
-        }
-
-        // If anomaly is a child anomaly, add itself else add all its children
-        if (anomaly.getChildren().isEmpty()) {
-          parent.getChildren().add(anomaly);
-        } else {
-          parent.getChildren().addAll(anomaly.getChildren());
-        }
+        mergeIntoParent(parent, anomaly);
       } else {
         parents.put(key, anomaly);
         output.add(anomaly);
       }
     }
-
-    // Refill current and baseline values for qualified parent anomalies
-    // Ignore filling baselines for exiting parent anomalies and grouped anomalies
-    final Collection<MergedAnomalyResultDTO> parentAnomalies = Collections2.filter(output,
-        mergedAnomaly -> mergedAnomaly != null && !mergedAnomaly.getChildren().isEmpty()
-            && !isExistingAnomaly(
-            existingParentAnomalies, mergedAnomaly) && !StringUtils
-            .isBlank(mergedAnomaly.getMetricUrn()));
-//    super.fillCurrentAndBaselineValue(new ArrayList<>(parentAnomalies));
     return output;
+  }
+
+  private AnomalyKey createAnomalyKey(final MergedAnomalyResultDTO anomaly) {
+    final String groupKey = anomaly.getProperties().getOrDefault(PROP_GROUP_KEY, "");
+    final String patternKey = getPatternKey(anomaly);
+    return new AnomalyKey(anomaly.getMetric(),
+        anomaly.getCollection(),
+        anomaly.getDimensions(),
+        StringUtils.join(Arrays.asList(groupKey, patternKey), ","),
+        "",
+        anomaly.getType());
+  }
+
+  private void mergeIntoParent(final MergedAnomalyResultDTO parent,
+      final MergedAnomalyResultDTO child) {
+    // fully merge into existing
+    final Set<MergedAnomalyResultDTO> children = parent.getChildren();
+    if (children.isEmpty()) {
+      // if this parent has no children, then add itself as a child
+      children.add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
+    }
+    parent.setEndTime(Math.max(parent.getEndTime(), child.getEndTime()));
+
+    // merge the anomaly's properties into parent
+    ThirdEyeUtils.mergeAnomalyProperties(parent.getProperties(), child.getProperties());
+
+    // merge the anomaly severity
+    if (parent.getSeverityLabel().compareTo(child.getSeverityLabel()) > 0) {
+      // set the highest severity
+      parent.setSeverityLabel(child.getSeverityLabel());
+    }
+
+    // If anomaly is a child anomaly, add itself else add all its children
+    if (child.getChildren().isEmpty()) {
+      children.add(child);
+    } else {
+      children.addAll(child.getChildren());
+    }
   }
 
   /**
    * Merge anomalies if
-   *  - parent exists
-   *  - parent end time and child start time respects max allowed gap between anomalies
-   *  - parent anomaly post merge respects maxDuration
+   * - parent exists
+   * - parent end time and child start time respects max allowed gap between anomalies
+   * - parent anomaly post merge respects maxDuration
+   *
    * @param parent parent anomaly
    * @param child child anomaly
    * @param alert alert. both parent and child anomalies should be from the same alert

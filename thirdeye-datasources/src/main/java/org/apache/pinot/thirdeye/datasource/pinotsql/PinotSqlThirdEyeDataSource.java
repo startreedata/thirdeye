@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinot;
+package org.apache.pinot.thirdeye.datasource.pinotsql;
 
 import static java.util.Objects.requireNonNull;
 
@@ -27,6 +27,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -36,16 +40,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pinot.client.Request;
-import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.client.ResultSetGroup;
-import org.apache.pinot.thirdeye.auto.onboard.pinot.PinotDatasetOnboarder;
-import org.apache.pinot.thirdeye.auto.onboard.pinot.ThirdEyePinotClient;
+import org.apache.pinot.thirdeye.auto.onboard.pinotsql.PinotSqlDatasetOnboarder;
+import org.apache.pinot.thirdeye.auto.onboard.pinotsql.ThirdEyePinotSqlClient;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.datasource.RelationalQuery;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetUtils;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdeyeResultSetDataTable;
+import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdeyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -66,20 +67,19 @@ import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
+public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   public static final String CACHE_LOADER_CLASS_NAME_STRING = "cacheLoaderClassName";
 
   private static final String EQUALS = "=";
-  private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotSqlThirdEyeDataSource.class);
   private static final String PINOT = "Pinot";
-  private static final String PINOT_QUERY_FORMAT = "pql";
 
   private String name;
-  private PinotResponseCacheLoader pinotResponseCacheLoader;
+  private PinotSqlResponseCacheLoader pinotSqlResponseCacheLoader;
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
-  private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
-  private PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
+  private PinotSqlDataSourceTimeQuery pinotSqlDataSourceTimeQuery;
+  private PinotSqlDataSourceDimensionFilters pinotSqlDataSourceDimensionFilters;
   private ThirdEyeDataSourceContext context;
 
   /**
@@ -151,6 +151,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
     this.context = context;
+
     final DataSourceDTO dataSourceDTO = requireNonNull(context.getDataSourceDTO(),
         "data source dto is null");
 
@@ -159,16 +160,16 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
 
     try {
-      pinotResponseCacheLoader = new PinotControllerResponseCacheLoader();
-      pinotResponseCacheLoader.init(properties);
+      pinotSqlResponseCacheLoader = new PinotSqlControllerResponseCacheLoader();
+      pinotSqlResponseCacheLoader.init(properties);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
+    pinotResponseCache = DataSourceUtils.buildPinotSqlResponseCache(pinotSqlResponseCacheLoader);
 
     // TODO Refactor. remove inverse hierarchical dependency
-    pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
-    pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
+    pinotSqlDataSourceTimeQuery = new PinotSqlDataSourceTimeQuery(this);
+    pinotSqlDataSourceDimensionFilters = new PinotSqlDataSourceDimensionFilters(this);
   }
 
   @Override
@@ -200,7 +201,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
         if (metricConfig != null && metricConfig.getViews() != null
             && metricConfig.getViews().size() > 0) {
-          Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
+          Map<String, ResultSet> viewToTEResultSet = constructViews(metricConfig.getViews());
           filterContextMap = convertToContextMap(viewToTEResultSet);
           filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
         } else {
@@ -232,7 +233,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         ThirdEyeResultSetGroup resultSetGroup;
         final long tStartFunction = System.nanoTime();
         try {
-          resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
+          resultSetGroup = this.executeSQL(new PinotSqlQuery(sql,
+              dataset,
+              metricFunction.getMetricName(),
+              request.getGroupBy(),
+              request.getGroupByTimeGranularity(),
+              dataTimeSpec));
           if (metricConfig != null) {
 //            RequestStatisticsLogger.getRequestLog()
 //                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
@@ -263,24 +269,28 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     }
   }
 
-  private Map<String, ResultSetGroup> constructViews(List<LogicalView> views) {
-    Map<String, ResultSetGroup> viewToTEResultSet = new HashMap<>();
+  private Map<String, ResultSet> constructViews(List<LogicalView> views) {
+    Map<String, ResultSet> viewToTEResultSet = new HashMap<>();
     for (LogicalView view : views) {
-      ResultSetGroup thirdEyeResultSetGroup = this.pinotResponseCacheLoader
-          .getConnection()
-          .execute(new Request(PINOT_QUERY_FORMAT, view.getQuery()));
-      viewToTEResultSet.put(view.getName(), thirdEyeResultSetGroup);
+      try {
+        Statement statement = this.pinotSqlResponseCacheLoader
+            .getConnection().createStatement();
+        ResultSet thirdEyeResultSetGroup = statement
+            .executeQuery(view.getQuery());
+        viewToTEResultSet.put(view.getName(), thirdEyeResultSetGroup);
+      } catch (SQLException throwables) {
+        throwables.printStackTrace();
+      }
     }
     return viewToTEResultSet;
   }
 
   private Map<String, Map<String, Object[]>> convertToContextMap(
-      Map<String, ResultSetGroup> viewToResultSetGroup) {
+      Map<String, ResultSet> viewToResultSetGroup) {
     Map<String, Map<String, Object[]>> contextMap = new LinkedHashMap<>();
-    for (Map.Entry<String, ResultSetGroup> entry : viewToResultSetGroup.entrySet()) {
+    for (Map.Entry<String, ResultSet> entry : viewToResultSetGroup.entrySet()) {
       String viewName = entry.getKey();
-      ResultSetGroup resultSetGroup = entry.getValue();
-      ResultSet resultSet = resultSetGroup.getResultSet(0);
+      ResultSet resultSet = entry.getValue();
       Map<String, Object[]> columnValues = convertResultSetToMap(resultSet);
       contextMap.put(viewName, columnValues);
     }
@@ -288,60 +298,69 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private Map<String, Object[]> convertResultSetToMap(ResultSet resultSet) {
-    int numColumns = resultSet.getColumnCount();
-    Map<String, Object[]> columnValues = new LinkedHashMap<>();
-    for (int i = 0; i < numColumns; i++) {
-      String columnName = resultSet.getColumnName(i);
-      String columnType = resultSet.getColumnDataType(i);
-      Object[] values = getRowValues(resultSet, i, columnType);
-      columnValues.put(columnName, values);
+    try {
+      ResultSetMetaData metaData = resultSet.getMetaData();
+      int numColumns = metaData.getColumnCount();
+      Map<String, Object[]> columnValues = new LinkedHashMap<>();
+      for (int i = 0; i < numColumns; i++) {
+        String columnName = metaData.getColumnName(i);
+        String columnType = metaData.getColumnTypeName(i);
+        Object[] values = getRowValues(resultSet, i, columnType);
+        columnValues.put(columnName, values);
+      }
+      return columnValues;
+    } catch (SQLException throwables) {
+      return null;
     }
-    return columnValues;
   }
 
   private Object[] getRowValues(ResultSet resultSet, int columnIndex, String columnType) {
-    Object[] rowValues = new Object[resultSet.getRowCount()];
-    //TODO: This check needs to be removed once the resultset.getColumnType(i) returns not null
-    // The changes need to be made in pinot-java-client
-    if (columnType == null) {
-      for (int i = 0; i < rowValues.length; i++) {
-        rowValues[i] = "'" + resultSet.getString(i, columnIndex) + "'";
-      }
-    } else {
+    Object[] rowValues = null;
+    try {
+      resultSet.last();
+      rowValues = new Object[resultSet.getRow()];
+      resultSet.first();
       ColumnDataType columnDataType = ColumnDataType.valueOf(columnType);
       switch (columnDataType) {
         case INT:
           for (int i = 0; i < rowValues.length; i++) {
-            rowValues[i] = resultSet.getInt(i, columnIndex);
+            rowValues[i] = resultSet.getInt(columnIndex);
+            resultSet.next();
           }
           break;
         case LONG:
           for (int i = 0; i < rowValues.length; i++) {
-            rowValues[i] = resultSet.getLong(i, columnIndex);
+            rowValues[i] = resultSet.getLong(columnIndex);
+            resultSet.next();
           }
           break;
         case FLOAT:
           for (int i = 0; i < rowValues.length; i++) {
-            rowValues[i] = resultSet.getFloat(i, columnIndex);
+            rowValues[i] = resultSet.getFloat(columnIndex);
+            resultSet.next();
           }
           break;
         case DOUBLE:
           for (int i = 0; i < rowValues.length; i++) {
-            rowValues[i] = resultSet.getDouble(i, columnIndex);
+            rowValues[i] = resultSet.getDouble(columnIndex);
+            resultSet.next();
           }
           break;
         default:
           for (int i = 0; i < rowValues.length; i++) {
-            rowValues[i] = "'" + resultSet.getString(i, columnIndex) + "'";
+            rowValues[i] = "'" + resultSet.getString(columnIndex) + "'";
+            resultSet.next();
           }
           break;
       }
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
     }
     return rowValues;
   }
 
   private Multimap<String, String> resolveFilterSetFromView(
-      Map<String, ResultSetGroup> viewToTEResultSet, Multimap<String, String> unresolvedFilterSet) {
+      Map<String, ResultSet> viewToTEResultSet, Multimap<String, String> unresolvedFilterSet) {
     Multimap<String, String> resolvedFilterSet = ArrayListMultimap.create();
     for (Map.Entry<String, String> filterEntry : unresolvedFilterSet.entries()) {
       String value = filterEntry.getValue();
@@ -358,13 +377,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       String columnName = fullyQualifiedColumnNameTokens[1];
 
       if (viewToTEResultSet.containsKey(tableOrViewName)) {
-        ResultSet thirdEyeResultSet = viewToTEResultSet.get(tableOrViewName).getResultSet(0);
-        int columnIndex = getIndexOfColumnName(thirdEyeResultSet, columnName);
-
-        assert columnIndex >= 0;
-        for (int i = 0; i < thirdEyeResultSet.getRowCount(); i++) {
-          resolvedFilterSet
-              .put(filterPredicate.getKey(), thirdEyeResultSet.getString(i, columnIndex));
+        ResultSet thirdEyeResultSet = viewToTEResultSet.get(tableOrViewName);
+        try {
+          while (thirdEyeResultSet.next()) {
+            resolvedFilterSet
+                .put(filterPredicate.getKey(), thirdEyeResultSet.getString(columnName));
+          }
+        } catch (SQLException throwables) {
+          throwables.printStackTrace();
         }
       } else {
         resolvedFilterSet.put(filterPredicate.getKey(), value);
@@ -374,14 +394,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private int getIndexOfColumnName(ResultSet thirdEyeResultSet, String columnName) {
-    int count = 0;
-    while (count < thirdEyeResultSet.getColumnCount()) {
-      if (thirdEyeResultSet.getColumnName(count).equalsIgnoreCase(columnName)) {
-        return count;
-      }
-      count++;
+    try {
+      return thirdEyeResultSet.findColumn(columnName);
+    } catch (SQLException throwables) {
+      return -1;
     }
-    return -1;
   }
 
   private String[] extractView(String filterOrProjectExpression) {
@@ -391,20 +408,20 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   /**
    * Returns the cached ResultSetGroup corresponding to the given Pinot query.
    *
-   * @param pinotQuery the query that is specifically constructed for Pinot.
+   * @param pinotSqlQuery the query that is specifically constructed for Pinot.
    * @return the corresponding ResultSetGroup to the given Pinot query.
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup executeSQL(PinotQuery pinotQuery) throws ExecutionException {
+  public ThirdEyeResultSetGroup executeSQL(PinotSqlQuery pinotSqlQuery) throws ExecutionException {
     Preconditions
         .checkNotNull(this.pinotResponseCache,
             "{} doesn't connect to Pinot or cache is not initialized.", getName());
 
     try {
-      return this.pinotResponseCache.get(pinotQuery);
+      return this.pinotResponseCache.get(pinotSqlQuery);
     } catch (ExecutionException e) {
-      LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
+      LOG.error("Failed to execute SQL: {}", pinotSqlQuery.getQuery());
       throw e;
     }
   }
@@ -412,20 +429,20 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   /**
    * Refreshes and returns the cached ResultSetGroup corresponding to the given Pinot query.
    *
-   * @param pinotQuery the query that is specifically constructed for Pinot.
+   * @param pinotSqlQuery the query that is specifically constructed for Pinot.
    * @return the corresponding ResultSetGroup to the given Pinot query.
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup refreshSQL(PinotQuery pinotQuery) throws ExecutionException {
+  public ThirdEyeResultSetGroup refreshSQL(PinotSqlQuery pinotSqlQuery) throws ExecutionException {
     requireNonNull(this.pinotResponseCache,
         String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
 
     try {
-      pinotResponseCache.refresh(pinotQuery);
-      return pinotResponseCache.get(pinotQuery);
+      pinotResponseCache.refresh(pinotSqlQuery);
+      return pinotResponseCache.get(pinotSqlQuery);
     } catch (ExecutionException e) {
-      LOG.error("Failed to refresh PQL: {}", pinotQuery.getQuery());
+      LOG.error("Failed to refresh PQL: {}", pinotSqlQuery.getQuery());
       throw e;
     }
   }
@@ -439,10 +456,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
     try {
       // Use pinot SQL.
-      ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+      ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotSqlQuery(
           request.getQuery(),
-          request.getTable(),
-          true)).get(0);
+          request.getTable())).get(0);
       return new ThirdeyeResultSetDataTable(thirdEyeResultSet);
     } catch (ExecutionException e) {
       throw e;
@@ -451,28 +467,28 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotDataSourceTimeQuery.getMaxDateTime(datasetConfig);
+    return pinotSqlDataSourceTimeQuery.getMaxDateTime(datasetConfig);
   }
 
   @Override
   public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotDataSourceTimeQuery.getMinDateTime(datasetConfig);
+    return pinotSqlDataSourceTimeQuery.getMinDateTime(datasetConfig);
   }
 
   @Override
   public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
       throws Exception {
-    return pinotDataSourceDimensionFilters.getDimensionFilters(datasetConfig);
+    return pinotSqlDataSourceDimensionFilters.getDimensionFilters(datasetConfig);
   }
 
   @Override
   public boolean validate() {
     try {
       // Table name required to execute query against pinot broker.
-      PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
+      PinotSqlDatasetOnboarder onboard = createPinotDatasetOnboarder();
       String table = onboard.getAllTables().get(0);
       String query = String.format("select 1 from %s", table);
-      ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table, true));
+      ThirdEyeResultSetGroup result = executeSQL(new PinotSqlQuery(query, table));
       return result.get(0).getRowCount() == 1;
     } catch (ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
@@ -481,8 +497,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
+  public void close() throws Exception {
+    if (pinotSqlResponseCacheLoader != null) {
+      pinotSqlResponseCacheLoader.close();
+    }
+  }
+
+  @Override
   public List<DatasetConfigDTO> onboardAll() {
-    final PinotDatasetOnboarder pinotDatasetOnboarder = createPinotDatasetOnboarder();
+    final PinotSqlDatasetOnboarder pinotDatasetOnboarder = createPinotDatasetOnboarder();
 
     try {
       return pinotDatasetOnboarder.onboardAll(name);
@@ -493,7 +516,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DatasetConfigDTO onboardDataset(final String datasetName) {
-    final PinotDatasetOnboarder pinotDatasetOnboarder = createPinotDatasetOnboarder();
+    final PinotSqlDatasetOnboarder pinotDatasetOnboarder = createPinotDatasetOnboarder();
 
     try {
       return pinotDatasetOnboarder.onboardTable(datasetName, name);
@@ -502,20 +525,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     }
   }
 
-  private PinotDatasetOnboarder createPinotDatasetOnboarder() {
-    final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
+  private PinotSqlDatasetOnboarder createPinotDatasetOnboarder() {
+    final ThirdEyePinotSqlClient thirdEyePinotSqlClient = new ThirdEyePinotSqlClient(new DataSourceMetaBean()
         .setProperties(context.getDataSourceDTO().getProperties()));
-    final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
-        thirdEyePinotClient,
+    final PinotSqlDatasetOnboarder pinotSqlDatasetOnboarder = new PinotSqlDatasetOnboarder(
+        thirdEyePinotSqlClient,
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
-    return pinotDatasetOnboarder;
-  }
-
-  @Override
-  public void close() throws Exception {
-    if (pinotResponseCacheLoader != null) {
-      pinotResponseCacheLoader.close();
-    }
+    return pinotSqlDatasetOnboarder;
   }
 }

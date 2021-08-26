@@ -53,7 +53,7 @@
 
     <!-- Copy all plugins -->
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugin-example/target/thirdeye-plugin-example-${project.version}-dist</directory>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-plugin-example/target/thirdeye-plugin-example-${project.version}-dist</directory>
       <outputDirectory>plugins/example/</outputDirectory>
     </fileSet>
     <fileSet>

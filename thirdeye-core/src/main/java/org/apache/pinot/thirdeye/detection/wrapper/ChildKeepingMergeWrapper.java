@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.detection.algorithm.AnomalyKey;
 import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -88,7 +89,7 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
 
     List<MergedAnomalyResultDTO> output = new ArrayList<>();
 
-    Map<MergeWrapper.AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
+    Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
     for (MergedAnomalyResultDTO anomaly : input) {
       if (anomaly.isChild()) {
         continue;
@@ -106,8 +107,8 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
           .isNaN(anomaly.getAvgCurrentVal())) {
         patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
       }
-      MergeWrapper.AnomalyKey key =
-          new MergeWrapper.AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
+      AnomalyKey key =
+          new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
               anomaly.getDimensions(),
               StringUtils.join(Arrays.asList(groupKey, patternKey), ","), "", anomaly.getType());
       MergedAnomalyResultDTO parent = parents.get(key);

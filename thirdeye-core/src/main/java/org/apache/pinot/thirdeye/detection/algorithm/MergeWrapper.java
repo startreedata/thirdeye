@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
@@ -37,12 +36,10 @@ import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
-import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
@@ -58,7 +55,7 @@ public class MergeWrapper extends DetectionPipeline {
 
   private static final String PROP_NESTED = "nested";
   private static final String PROP_CLASS_NAME = "className";
-  private static final String PROP_MERGE_KEY = "mergeKey";
+  public static final String PROP_MERGE_KEY = "mergeKey";
   public static final String PROP_GROUP_KEY = "groupKey";
   private static final int NUMBER_OF_SPLITED_ANOMALIES_LIMIT = 1000;
   protected static final String PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
@@ -389,65 +386,5 @@ public class MergeWrapper extends DetectionPipeline {
     to.setType(from.getType());
     to.setSeverityLabel(from.getSeverityLabel());
     return to;
-  }
-
-  public static class AnomalyKey {
-
-    final String metric;
-    final String collection;
-    final DimensionMap dimensions;
-    final String mergeKey;
-    final String componentKey;
-    final AnomalyType type;
-
-    public AnomalyKey(String metric, String collection, DimensionMap dimensions, String mergeKey,
-        String componentKey,
-        AnomalyType type) {
-      this.metric = metric;
-      this.collection = collection;
-      this.dimensions = dimensions;
-      this.mergeKey = mergeKey;
-      this.componentKey = componentKey;
-      this.type = type;
-    }
-
-    public static AnomalyKey from(MergedAnomalyResultDTO anomaly) {
-      // Anomalies having the same mergeKey or groupKey should be merged
-      String mergeKey = "";
-      if (anomaly.getProperties().containsKey(PROP_MERGE_KEY)) {
-        mergeKey = anomaly.getProperties().get(PROP_MERGE_KEY);
-      } else if (anomaly.getProperties().containsKey(PROP_GROUP_KEY)) {
-        mergeKey = anomaly.getProperties().get(PROP_GROUP_KEY);
-      }
-
-      String componentKey = "";
-      if (anomaly.getProperties().containsKey(PROP_DETECTOR_COMPONENT_NAME)) {
-        componentKey = anomaly.getProperties().get(PROP_DETECTOR_COMPONENT_NAME);
-      }
-
-      return new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(), anomaly.getDimensions(),
-          mergeKey, componentKey, anomaly.getType());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof AnomalyKey)) {
-        return false;
-      }
-      AnomalyKey that = (AnomalyKey) o;
-      return Objects.equals(metric, that.metric) && Objects.equals(collection, that.collection)
-          && Objects.equals(
-          dimensions, that.dimensions) && Objects.equals(mergeKey, that.mergeKey) && Objects
-          .equals(componentKey,
-              that.componentKey) && Objects.equals(type, that.type);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(metric, collection, dimensions, mergeKey, componentKey, type);
-    }
   }
 }

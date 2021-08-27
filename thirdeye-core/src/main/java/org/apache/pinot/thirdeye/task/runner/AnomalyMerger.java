@@ -159,10 +159,12 @@ public class AnomalyMerger {
       final MergedAnomalyResultDTO child) {
     // fully merge into existing
     final Set<MergedAnomalyResultDTO> children = parent.getChildren();
+
+    // if this parent has no children, then add itself as a child
     if (children.isEmpty()) {
-      // if this parent has no children, then add itself as a child
       children.add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
     }
+    // Extend the end time to match the child anomaly end time.
     parent.setEndTime(Math.max(parent.getEndTime(), child.getEndTime()));
 
     // merge the anomaly's properties into parent

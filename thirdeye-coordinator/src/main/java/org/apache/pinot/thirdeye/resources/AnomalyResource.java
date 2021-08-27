@@ -37,6 +37,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .put("alert.id", "detectionConfigId")
       .put("startTime", "startTime")
       .put("endTime", "endTime")
+      .put("isChild", "child")
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;

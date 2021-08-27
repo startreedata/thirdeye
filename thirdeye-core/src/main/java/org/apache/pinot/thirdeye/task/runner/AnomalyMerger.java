@@ -121,7 +121,8 @@ public class AnomalyMerger {
    * @param anomalies list of generated anomalies
    * @return merged list of anomalies
    */
-  private Collection<MergedAnomalyResultDTO> merge(final AlertDTO alert,
+  @VisibleForTesting
+  Collection<MergedAnomalyResultDTO> merge(final AlertDTO alert,
       final Collection<MergedAnomalyResultDTO> anomalies) {
     final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
     for (final MergedAnomalyResultDTO anomaly : anomalies) {

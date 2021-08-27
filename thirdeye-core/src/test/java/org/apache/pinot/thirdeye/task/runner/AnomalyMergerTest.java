@@ -119,8 +119,43 @@ public class AnomalyMergerTest {
         newAlert(),
         Arrays.asList(
             newAnomaly(startDate, endDate),
-            newAnomaly(startDate, new Date(startDate.getTime() + Duration.ofMinutes(10).toMillis()))
+            newAnomaly(startDate, plusMin(startDate, 10))
         ));
     verify(mergedAnomalyResultManager, times(1)).save(any());
+  }
+
+  private Date plusMin(final Date startDate, final int minutes) {
+    return plusDuration(startDate, Duration.ofMinutes(minutes));
+  }
+
+  private Date plusDuration(final Date startDate, final Duration duration) {
+    return new Date(startDate.getTime() + duration.toMillis());
+  }
+
+  @Test
+  public void testPrepareSortedAnomalyList() {
+    assertThat(anomalyMerger.prepareSortedAnomalyList(emptyList(), emptyList()))
+        .isEqualTo(emptyList());
+
+    final MergedAnomalyResultDTO new1 = newAnomaly(startDate, endDate);
+    final MergedAnomalyResultDTO new2 = newAnomaly(startDate, plusMin(startDate, 10));
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(startDate, endDate);
+    final MergedAnomalyResultDTO existing2 = existingAnomaly(startDate, plusMin(startDate, 10));
+
+    assertThat(anomalyMerger.prepareSortedAnomalyList(emptyList(), singletonList(existing1)))
+        .isEqualTo(singletonList(existing1));
+
+    assertThat(anomalyMerger.prepareSortedAnomalyList(singletonList(new1), emptyList()))
+        .isEqualTo(singletonList(new1));
+
+    assertThat(anomalyMerger.prepareSortedAnomalyList(
+        singletonList(new1),
+        singletonList(existing1)))
+        .isEqualTo(Arrays.asList(existing1, new1));
+
+    assertThat(anomalyMerger.prepareSortedAnomalyList(
+        Arrays.asList(new1, new2),
+        Arrays.asList(existing1, existing2)))
+        .isEqualTo(Arrays.asList(existing1, new1, existing2, new2));
   }
 }

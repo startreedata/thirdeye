@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.task.runner.AnomalyMerger;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,34 +59,6 @@ public class MergeWrapper extends DetectionPipeline {
   public static final String PROP_GROUP_KEY = "groupKey";
   private static final int NUMBER_OF_SPLITED_ANOMALIES_LIMIT = 1000;
   protected static final String PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
-
-  public static final Comparator<MergedAnomalyResultDTO> COMPARATOR = new Comparator<MergedAnomalyResultDTO>() {
-    @Override
-    public int compare(MergedAnomalyResultDTO o1, MergedAnomalyResultDTO o2) {
-      // earlier for start time
-      int res = Long.compare(o1.getStartTime(), o2.getStartTime());
-      if (res != 0) {
-        return res;
-      }
-
-      // later for end time
-      res = Long.compare(o2.getEndTime(), o1.getEndTime());
-      if (res != 0) {
-        return res;
-      }
-
-      // pre-existing
-      if (o1.getId() == null && o2.getId() != null) {
-        return 1;
-      }
-      if (o1.getId() != null && o2.getId() == null) {
-        return -1;
-      }
-
-      // more children
-      return -1 * Integer.compare(o1.getChildren().size(), o2.getChildren().size());
-    }
-  };
 
   protected final List<Map<String, Object>> nestedProperties;
   protected final long maxGap; // max time gap for merge
@@ -170,7 +142,7 @@ public class MergeWrapper extends DetectionPipeline {
   // If it is existing anomaly and not updated then it is not returned.
   protected List<MergedAnomalyResultDTO> merge(Collection<MergedAnomalyResultDTO> anomalies) {
     List<MergedAnomalyResultDTO> inputs = new ArrayList<>(anomalies);
-    Collections.sort(inputs, COMPARATOR);
+    Collections.sort(inputs, AnomalyMerger.COMPARATOR);
 
     // stores all the existing anomalies that need to modified
     Set<MergedAnomalyResultDTO> modifiedExistingAnomalies = new HashSet<>();

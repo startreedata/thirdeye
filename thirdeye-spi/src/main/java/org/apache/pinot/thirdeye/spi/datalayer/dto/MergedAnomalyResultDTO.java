@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.Serializable;
@@ -410,5 +411,14 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   public void setRenotify(boolean renotify) {
     this.renotify = renotify;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("id", getId())
+        .add("startTime", startTime)
+        .add("endTime", endTime)
+        .toString();
   }
 }

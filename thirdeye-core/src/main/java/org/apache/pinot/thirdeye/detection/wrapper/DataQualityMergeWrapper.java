@@ -31,6 +31,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.task.runner.AnomalyMerger;
 
 /**
  * The Data Quality Merge Wrapper. This merge wrapper is specifically designed keeping the sla
@@ -66,7 +67,7 @@ public class DataQualityMergeWrapper extends MergeWrapper {
   @Override
   protected List<MergedAnomalyResultDTO> merge(Collection<MergedAnomalyResultDTO> anomalies) {
     List<MergedAnomalyResultDTO> input = new ArrayList<>(anomalies);
-    input.sort(MergeWrapper.COMPARATOR);
+    input.sort(AnomalyMerger.COMPARATOR);
 
     List<MergedAnomalyResultDTO> output = new ArrayList<>();
     Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();

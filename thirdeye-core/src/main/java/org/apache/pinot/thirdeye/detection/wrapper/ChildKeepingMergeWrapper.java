@@ -30,12 +30,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.algorithm.AnomalyKey;
-import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.task.runner.AnomalyMerger;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 
 /**
@@ -85,7 +85,7 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
       }
     }
 
-    Collections.sort(input, MergeWrapper.COMPARATOR);
+    Collections.sort(input, AnomalyMerger.COMPARATOR);
 
     List<MergedAnomalyResultDTO> output = new ArrayList<>();
 

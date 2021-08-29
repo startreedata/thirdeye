@@ -13,14 +13,14 @@
       "name": "slaRule1",
       "type": "DATA_SLA",
       "sla": "2_DAYS",
-      "className": "org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker",
+      "className": "org.apache.pinot.thirdeye.plugin.detection.detectors.DataSlaQualityChecker",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "rule1:THRESHOLD": {
       "name": "rule1",
       "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.plugin.detection.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     }
   }

@@ -41,7 +41,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-detection-components</artifactId>
+      <artifactId>thirdeye-plugin-detection</artifactId>
     </dependency>
 
     <!-- test dependencies -->

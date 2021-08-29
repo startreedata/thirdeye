@@ -32,7 +32,7 @@ import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertReg
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.plugin.detection.detectors.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;

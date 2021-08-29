@@ -7,7 +7,7 @@ import org.apache.pinot.thirdeye.ThirdEyeCoordinator;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.DefaultDataSourcesPlugin;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.components.DetectionComponentsPlugin;
+import org.apache.pinot.thirdeye.plugin.detection.DetectionComponentsPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

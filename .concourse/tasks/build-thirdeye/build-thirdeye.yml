@@ -7,9 +7,6 @@ image_resource:
     repository: openjdk
     tag: 8
 
-caches:
-- path: src/m2
-
 inputs:
 - name: ci-src
 - name: src

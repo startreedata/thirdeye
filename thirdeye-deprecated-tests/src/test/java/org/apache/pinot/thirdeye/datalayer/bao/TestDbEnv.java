@@ -82,8 +82,13 @@ public class TestDbEnv {
     System.out.println("Creating db with connection url : " + dataSource.getUrl());
     dataSource.setPassword(dbConfig.getPassword());
     dataSource.setUsername(dbConfig.getUser());
-    dataSource.setDriverClassName(dbConfig.getProperties()
-        .get("hibernate.connection.driver_class"));
+    if(dbConfig.getProperties()
+        .get("hibernate.connection.driver_class") != null) {
+      dataSource.setDriverClassName(dbConfig.getProperties()
+          .get("hibernate.connection.driver_class"));
+    } else {
+      dataSource.setDriverClassName(dbConfig.getDriver());
+    }
 
     // pool size configurations
     dataSource.setMaxActive(200);

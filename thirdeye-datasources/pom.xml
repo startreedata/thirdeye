@@ -50,6 +50,17 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.apache.pinot</groupId>
+      <artifactId>pinot-jdbc-client</artifactId>
+      <version>0.7.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-db</artifactId>
     </dependency>

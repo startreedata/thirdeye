@@ -1,24 +1,26 @@
 package org.apache.pinot.thirdeye.task.runner;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.PROP_GROUP_KEY;
 import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.copyAnomalyInfo;
-import static org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper.isExistingAnomaly;
 import static org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper.PROP_PATTERN_KEY;
 
-import com.google.common.collect.Collections2;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
+import org.apache.pinot.thirdeye.detection.algorithm.AnomalyKey;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -31,6 +33,31 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AnomalyMerger {
+
+  public static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
+    // earlier for start time
+    int res = Long.compare(o1.getStartTime(), o2.getStartTime());
+    if (res != 0) {
+      return res;
+    }
+
+    // later for end time
+    res = Long.compare(o2.getEndTime(), o1.getEndTime());
+    if (res != 0) {
+      return res;
+    }
+
+    // pre-existing
+    if (o1.getId() == null && o2.getId() != null) {
+      return 1;
+    }
+    if (o1.getId() != null && o2.getId() == null) {
+      return -1;
+    }
+
+    // more children
+    return -1 * Integer.compare(o1.getChildren().size(), o2.getChildren().size());
+  };
 
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
@@ -52,17 +79,18 @@ public class AnomalyMerger {
       return;
     }
 
-    final List<MergedAnomalyResultDTO> existingAnomalies = retrieveAnomaliesFromDatabase(
-        taskInfo,
+    final List<MergedAnomalyResultDTO> existingAnomalies = retrieveRelevantAnomaliesFromDatabase(
         alert,
-        anomalies);
+        anomalies,
+        taskInfo.getStart(),
+        taskInfo.getEnd());
 
-    final List<MergedAnomalyResultDTO> generatedAndExistingAnomalies = new ArrayList<>();
-    generatedAndExistingAnomalies.addAll(anomalies);
-    generatedAndExistingAnomalies.addAll(existingAnomalies);
+    final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = prepareSortedAnomalyList(
+        anomalies,
+        existingAnomalies);
 
-    final List<MergedAnomalyResultDTO> mergedAnomalies = merge(alert,
-        generatedAndExistingAnomalies);
+    final Collection<MergedAnomalyResultDTO> mergedAnomalies = merge(alert,
+        sortedRelevantAnomalies);
 
     for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
       mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
@@ -70,6 +98,19 @@ public class AnomalyMerger {
         LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
       }
     }
+  }
+
+  @VisibleForTesting
+  List<MergedAnomalyResultDTO> prepareSortedAnomalyList(
+      final List<MergedAnomalyResultDTO> anomalies,
+      final List<MergedAnomalyResultDTO> existingAnomalies) {
+    final List<MergedAnomalyResultDTO> generatedAndExistingAnomalies = new ArrayList<>();
+    generatedAndExistingAnomalies.addAll(anomalies);
+    generatedAndExistingAnomalies.addAll(existingAnomalies);
+
+    // prepare a sorted list for processing
+    generatedAndExistingAnomalies.sort(COMPARATOR);
+    return generatedAndExistingAnomalies;
   }
 
   /**
@@ -80,110 +121,128 @@ public class AnomalyMerger {
    * @param anomalies list of generated anomalies
    * @return merged list of anomalies
    */
-  private List<MergedAnomalyResultDTO> merge(final AlertDTO alert,
+  @VisibleForTesting
+  Collection<MergedAnomalyResultDTO> merge(final AlertDTO alert,
       final Collection<MergedAnomalyResultDTO> anomalies) {
-    final long maxGap = getMaxGap(alert);
-    final long maxDuration = MapUtils
-        .getLongValue(alert.getProperties(), "maxDuration", TimeUnit.DAYS.toMillis(7));
-
-    final List<MergedAnomalyResultDTO> input = new ArrayList<>(anomalies);
-    final Map<Long, MergedAnomalyResultDTO> existingParentAnomalies = new HashMap<>();
-    for (final MergedAnomalyResultDTO anomaly : input) {
-      if (anomaly.getId() != null && !anomaly.getChildren().isEmpty()) {
-        existingParentAnomalies
-            .put(anomaly.getId(), copyAnomalyInfo(anomaly, new MergedAnomalyResultDTO()));
-      }
-    }
-
-    input.sort(MergeWrapper.COMPARATOR);
-
-    final List<MergedAnomalyResultDTO> output = new ArrayList<>();
-
-    final Map<MergeWrapper.AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
-    for (final MergedAnomalyResultDTO anomaly : input) {
+    final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
+    for (final MergedAnomalyResultDTO anomaly : anomalies) {
+      // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {
         continue;
       }
 
       // Prevent merging of grouped anomalies
-      String groupKey = "";
-      if (anomaly.getProperties().containsKey(PROP_GROUP_KEY)) {
-        groupKey = anomaly.getProperties().get(PROP_GROUP_KEY);
-      }
-      String patternKey = "";
-      if (anomaly.getProperties().containsKey(PROP_PATTERN_KEY)) {
-        patternKey = anomaly.getProperties().get(PROP_PATTERN_KEY);
-      } else if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double
-          .isNaN(anomaly.getAvgCurrentVal())) {
-        patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
-      }
-      final MergeWrapper.AnomalyKey key =
-          new MergeWrapper.AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
-              anomaly.getDimensions(),
-              StringUtils.join(Arrays.asList(groupKey, patternKey), ","), "", anomaly.getType());
+      final AnomalyKey key = createAnomalyKey(anomaly);
       final MergedAnomalyResultDTO parent = parents.get(key);
 
-      if (parent == null || anomaly.getStartTime() - parent.getEndTime() > maxGap) {
-        // no parent, too far away
-        parents.put(key, anomaly);
-        output.add(anomaly);
-      } else if (anomaly.getEndTime() <= parent.getEndTime()
-          || anomaly.getEndTime() - parent.getStartTime() <= maxDuration) {
-        // fully merge into existing
-        if (parent.getChildren().isEmpty()) {
-          parent.getChildren().add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
-        }
-        parent.setEndTime(Math.max(parent.getEndTime(), anomaly.getEndTime()));
-
-        // merge the anomaly's properties into parent
-        ThirdEyeUtils.mergeAnomalyProperties(parent.getProperties(), anomaly.getProperties());
-        // merge the anomaly severity
-        if (parent.getSeverityLabel().compareTo(anomaly.getSeverityLabel()) > 0) {
-          // set the highest severity
-          parent.setSeverityLabel(anomaly.getSeverityLabel());
-        }
-        if (anomaly.getChildren().isEmpty()) {
-          parent.getChildren().add(anomaly);
-        } else {
-          parent.getChildren().addAll(anomaly.getChildren());
-        }
+      if (shouldMerge(parent, anomaly, alert)) {
+        mergeIntoParent(parent, anomaly);
       } else {
-        // partially overlap but potential merged anomaly is beyond max duration or merge not possible, do not merge
         parents.put(key, anomaly);
-        output.add(anomaly);
       }
     }
-
-    // Refill current and baseline values for qualified parent anomalies
-    // Ignore filling baselines for exiting parent anomalies and grouped anomalies
-    final Collection<MergedAnomalyResultDTO> parentAnomalies = Collections2.filter(output,
-        mergedAnomaly -> mergedAnomaly != null && !mergedAnomaly.getChildren().isEmpty()
-            && !isExistingAnomaly(
-            existingParentAnomalies, mergedAnomaly) && !StringUtils
-            .isBlank(mergedAnomaly.getMetricUrn()));
-//    super.fillCurrentAndBaselineValue(new ArrayList<>(parentAnomalies));
-    return output;
+    return parents.values();
   }
 
-  private long getMaxGap(final AlertDTO alert) {
+  private AnomalyKey createAnomalyKey(final MergedAnomalyResultDTO anomaly) {
+    final String groupKey = anomaly.getProperties().getOrDefault(PROP_GROUP_KEY, "");
+    final String patternKey = getPatternKey(anomaly);
+    return new AnomalyKey(anomaly.getMetric(),
+        anomaly.getCollection(),
+        anomaly.getDimensions(),
+        StringUtils.join(Arrays.asList(groupKey, patternKey), ","),
+        "",
+        anomaly.getType());
+  }
+
+  private void mergeIntoParent(final MergedAnomalyResultDTO parent,
+      final MergedAnomalyResultDTO child) {
+    // fully merge into existing
+    final Set<MergedAnomalyResultDTO> children = parent.getChildren();
+
+    // if this parent has no children, then add itself as a child
+    if (children.isEmpty()) {
+      children.add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
+    }
+    // Extend the end time to match the child anomaly end time.
+    parent.setEndTime(Math.max(parent.getEndTime(), child.getEndTime()));
+
+    // merge the anomaly's properties into parent
+    ThirdEyeUtils.mergeAnomalyProperties(parent.getProperties(), child.getProperties());
+
+    // merge the anomaly severity
+    if (parent.getSeverityLabel().compareTo(child.getSeverityLabel()) > 0) {
+      // set the highest severity
+      parent.setSeverityLabel(child.getSeverityLabel());
+    }
+
+    // If anomaly is a child anomaly, add itself else add all its children
+    if (child.getChildren().isEmpty()) {
+      children.add(child);
+    } else {
+      children.addAll(child.getChildren());
+    }
+  }
+
+  /**
+   * Merge anomalies if
+   * - parent exists
+   * - parent end time and child start time respects max allowed gap between anomalies
+   * - parent anomaly post merge respects maxDuration
+   *
+   * @param parent parent anomaly
+   * @param child child anomaly
+   * @param alert alert. both parent and child anomalies should be from the same alert
+   * @return whether they should be merged
+   */
+  private boolean shouldMerge(
+      final MergedAnomalyResultDTO parent,
+      final MergedAnomalyResultDTO child,
+      final AlertDTO alert
+  ) {
+    final long maxGap = getMaxGap(alert);
+    final long maxDurationMillis = MapUtils
+        .getLongValue(alert.getProperties(), "maxDuration", TimeUnit.DAYS.toMillis(7));
+
+    return parent != null
+        && child.getStartTime() - parent.getEndTime() <= maxGap
+        && (child.getEndTime() <= parent.getEndTime()
+        || child.getEndTime() - parent.getStartTime() <= maxDurationMillis);
+  }
+
+  private String getPatternKey(final MergedAnomalyResultDTO anomaly) {
+    String patternKey = "";
+    if (anomaly.getProperties().containsKey(PROP_PATTERN_KEY)) {
+      patternKey = anomaly.getProperties().get(PROP_PATTERN_KEY);
+    } else if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double
+        .isNaN(anomaly.getAvgCurrentVal())) {
+      patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
+    }
+    return patternKey;
+  }
+
+  @VisibleForTesting
+  long getMaxGap(final AlertDTO alert) {
     return MapUtils
         .getLongValue(alert.getProperties(), "maxGap", TimeUnit.HOURS.toMillis(2));
   }
 
-  protected List<MergedAnomalyResultDTO> retrieveAnomaliesFromDatabase(
-      final DetectionPipelineTaskInfo taskInfo,
-      final AlertDTO alert, final List<MergedAnomalyResultDTO> anomalies) {
+  protected List<MergedAnomalyResultDTO> retrieveRelevantAnomaliesFromDatabase(
+      final AlertDTO alert,
+      final List<MergedAnomalyResultDTO> anomalies, final long start, final long end) {
+    checkArgument(alert.getId() != null, "must be an existing alert");
+
     final long minTime = anomalies.stream()
         .map(MergedAnomalyResultDTO::getStartTime)
         .mapToLong(e -> e)
         .min()
-        .orElse(taskInfo.getStart());
+        .orElse(start);
 
     final long maxTime = anomalies.stream()
         .map(MergedAnomalyResultDTO::getEndTime)
         .mapToLong(e -> e)
         .max()
-        .orElse(taskInfo.getEnd());
+        .orElse(end);
 
     final long maxGap = getMaxGap(alert);
     final AnomalySlice effectiveSlice = new AnomalySlice()

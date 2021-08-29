@@ -76,7 +76,7 @@ public class SubscriptionGroupResource extends
     }
 
     if(api.getNotificationSchemes() != null && api.getNotificationSchemes().getWebhook() !=null){
-      ensureNull(api.getNotificationSchemes().getWebhook().getSecret(), ThirdEyeStatus.ERR_OBJECT_UNEXPECTED, "secret");
+      ensureNull(api.getNotificationSchemes().getWebhook().getHashKey(), ThirdEyeStatus.ERR_OBJECT_UNEXPECTED, "secret");
     }
   }
 

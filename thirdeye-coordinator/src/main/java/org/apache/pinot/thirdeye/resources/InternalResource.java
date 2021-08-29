@@ -2,23 +2,19 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.google.inject.Inject;
 import io.swagger.annotations.Api;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -26,6 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
@@ -42,7 +39,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 public class InternalResource {
 
   private static final Package PACKAGE = InternalResource.class.getPackage();
-  private static final String HMAC_SHA512 = "HmacSHA512";
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
@@ -149,25 +145,15 @@ public class InternalResource {
   @Path("webhook")
   public Response webhookDummy(
       Object payload,
-      @HeaderParam("Auth-Thirdeye") String signature
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String signature
   ) throws Exception {
     System.out.println("========================= Webhook request ==============================");
-    Mac sha512Hmac;
     //replace it with relevant secret key acquired during subscription group creation
     String secretKey = "secretKey";
-    final byte[] byteKey = secretKey.getBytes(StandardCharsets.UTF_8);
-    try {
-      sha512Hmac = Mac.getInstance(HMAC_SHA512);
-      SecretKeySpec keySpec = new SecretKeySpec(byteKey, HMAC_SHA512);
-      sha512Hmac.init(keySpec);
-      byte[] macData = sha512Hmac.doFinal(new ObjectMapper().writeValueAsBytes(payload));
-      String result = Base64.getEncoder().encodeToString(macData);
-      System.out.println("Header signature: "+signature);
-      System.out.println("Generated signature: "+result);
-      ensure(result.equals(signature), "Broken request!");
-    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-      e.printStackTrace();
-    }
+    String result = hmacSHA512(payload, secretKey);
+    System.out.println("Header signature: "+signature);
+    System.out.println("Generated signature: "+result);
+    ensure(result.equals(signature), "Broken request!");
     System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
     System.out.println("========================================================================");
     return Response.ok().build();

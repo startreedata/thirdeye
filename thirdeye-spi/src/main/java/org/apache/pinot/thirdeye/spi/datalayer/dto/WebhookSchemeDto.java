@@ -7,7 +7,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public class WebhookSchemeDto {
   private String url;
-  private String secret;
+  private String hashKey;
 
   @Override
   public boolean equals(final Object o) {
@@ -19,12 +19,12 @@ public class WebhookSchemeDto {
     }
     final WebhookSchemeDto that = (WebhookSchemeDto) o;
     return Objects.equal(url, that.url)
-        && Objects.equal(secret, that.secret);
+        && Objects.equal(hashKey, that.hashKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(url, secret);
+    return Objects.hashCode(url, hashKey);
   }
 
   public String getUrl() {
@@ -36,11 +36,11 @@ public class WebhookSchemeDto {
     return this;
   }
 
-  public String getSecret() {
-    return secret;
+  public String getHashKey() {
+    return hashKey;
   }
 
   public void generateSecret(){
-    this.secret = RandomStringUtils.randomAlphanumeric(WEBHOOK_SECRET_LENGTH);
+    this.hashKey = RandomStringUtils.randomAlphanumeric(WEBHOOK_SECRET_LENGTH);
   }
 }

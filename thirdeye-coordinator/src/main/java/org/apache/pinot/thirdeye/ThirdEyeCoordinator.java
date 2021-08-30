@@ -15,6 +15,9 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.exporter.MetricsServlet;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
@@ -99,6 +102,13 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
         .initializeCaches();
 
     env.jersey().register(injector.getInstance(RootResource.class));
+
+    // Expose dropwizard metrics in prometheus compatible format
+    CollectorRegistry collectorRegistry = new CollectorRegistry();
+    collectorRegistry.register(new DropwizardExports(env.metrics()));
+    env.admin()
+        .addServlet("prometheus", new MetricsServlet(collectorRegistry))
+        .addMapping(configuration.getPrometheusEndpoint());
 
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));

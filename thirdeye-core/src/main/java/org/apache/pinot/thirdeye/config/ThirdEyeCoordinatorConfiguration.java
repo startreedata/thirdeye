@@ -58,6 +58,17 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   private List<String> holidayCountriesWhitelist;
   private String rootDir = "";
 
+  private String prometheusEndpoint = "/prometheus";
+
+  public String getPrometheusEndpoint() {
+    return prometheusEndpoint.matches("/.*") ? prometheusEndpoint : String.format("/%s", prometheusEndpoint);
+  }
+
+  public ThirdEyeCoordinatorConfiguration setPrometheusEndpoint(final String prometheusEndpoint) {
+    this.prometheusEndpoint = prometheusEndpoint;
+    return this;
+  }
+
   public AuthConfiguration getAuthConfiguration() {
     return authConfiguration;
   }

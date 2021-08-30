@@ -113,6 +113,9 @@ failureFromAddress: "thirdeye@localhost"
 failureToAddress: "thirdeye@localhost"
 phantomJsPath: "/usr/local/bin/jstf"
 
+# endpoint to expose prometheus compatible metrics. Endpoint will be at /<adminContextPath>/<prometheusEndpoint>
+prometheusEndpoint: "prometheus"
+
 scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!

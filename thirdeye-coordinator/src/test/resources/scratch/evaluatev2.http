@@ -322,13 +322,14 @@ Content-Type: application/json
   "end": "1590994800000"
 }
 
-###
+### Percentage Change
 
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
 
 {
+  "dryRun": false,
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
@@ -339,18 +340,16 @@ Content-Type: application/json
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
-            "component.detector.timestamp": "ts",
-            "component.detector.metric": "met",
-            "component.detector.dimensions": [],
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.type": "PERCENTAGE_CHANGE",
-            "component.detector.percentageChange": "0.1",
-            "component.detector.offset": "mo1m",
-            "component.detector.pattern": "down",
-            "startTime": "20200301",
-            "endTime": "20200401",
-            "timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd"
+            "type": "PERCENTAGE_CHANGE",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.percentageChange": "${percentageChange}",
+            "component.offset": "${offset}",
+            "component.pattern": "${pattern}",
+            "anomaly.metric": "${metric}"
           },
           "inputs": [
             {
@@ -370,10 +369,8 @@ Content-Type: application/json
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -387,10 +384,8 @@ Content-Type: application/json
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -401,10 +396,22 @@ Content-Type: application/json
           ]
         }
       ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "percentageChange": "0.1",
+      "offset": "wo1w",
+      "offsetDays": "7",
+      "pattern": "down"
     }
   },
-  "start": "1577865600000",
-  "end": "1590994800000"
+  "start": "1581321600000",
+  "end": "1595228400000"
 }
 
 

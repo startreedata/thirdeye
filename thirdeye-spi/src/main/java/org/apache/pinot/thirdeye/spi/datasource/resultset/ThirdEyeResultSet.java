@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.spi.datasource.pinot.resultset;
+package org.apache.pinot.thirdeye.spi.datasource.resultset;
 
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;

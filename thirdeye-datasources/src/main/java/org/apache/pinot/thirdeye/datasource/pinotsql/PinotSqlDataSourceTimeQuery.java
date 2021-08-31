@@ -20,11 +20,10 @@
 package org.apache.pinot.thirdeye.datasource.pinotsql;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
@@ -91,20 +90,8 @@ public class PinotSqlDataSourceTimeQuery {
           timeSpec);
 
       ThirdEyeResultSetGroup resultSetGroup;
-      final long tStart = System.nanoTime();
-      try {
-        dataSource.refreshSQL(maxTimePinotQuery);
-        resultSetGroup = dataSource.executeSQL(maxTimePinotQuery);
-//        RequestStatisticsLogger
-//            .getRequestLog()
-//            .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
-//                tStart, System.nanoTime());
-      } catch (ExecutionException e) {
-//        RequestStatisticsLogger.getRequestLog()
-//            .failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
-//                tStart, System.nanoTime(), e);
-        throw e;
-      }
+      dataSource.refreshSQL(maxTimePinotQuery);
+      resultSetGroup = dataSource.executeSQL(maxTimePinotQuery);
 
       if (resultSetGroup.size() == 0 || resultSetGroup.get(0).getRowCount() == 0) {
         LOGGER.error("Failed to get latest max time for dataset {} with SQL: {}", dataset,

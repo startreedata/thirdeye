@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinot.resultset;
+package org.apache.pinot.thirdeye.datasource.resultset;
 
 import com.google.common.base.Preconditions;
 import java.sql.SQLException;
@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetMetaData;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;

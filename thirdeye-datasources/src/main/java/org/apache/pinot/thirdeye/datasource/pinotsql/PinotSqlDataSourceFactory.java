@@ -2,8 +2,6 @@ package org.apache.pinot.thirdeye.datasource.pinotsql;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.pinot.client.PinotDriver;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;

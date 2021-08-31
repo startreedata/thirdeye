@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinotsql.resultset;
+package org.apache.pinot.thirdeye.datasource.resultset;
 
-import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 
 public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 

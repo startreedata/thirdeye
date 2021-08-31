@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.datasource.pinotsql;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -39,7 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.spi.utils.GroovyTemplateUtils;
@@ -55,9 +53,6 @@ import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Util class for generated PQL queries (pinot).
@@ -81,7 +76,6 @@ public class SqlUtils {
   private static final String OPERATOR_GREATER_THAN = ">";
   private static final String OPERATOR_GREATER_THAN_EQUALS = ">=";
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SqlUtils.class);
   private static final int DEFAULT_TOP = 100000;
   private static final String PERCENTILE_TDIGEST_PREFIX = "percentileTDigest";
 
@@ -118,7 +112,11 @@ public class SqlUtils {
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();
-    String selectionClause = getSelectionClause(metricConfig, metricFunction, groupBy, timeGranularity, dataTimeSpec);
+    String selectionClause = getSelectionClause(metricConfig,
+        metricFunction,
+        groupBy,
+        timeGranularity,
+        dataTimeSpec);
 
     sb.append("SELECT ").append(selectionClause).append(" FROM ").append(dataset);
     String betweenClause = getBetweenClause(startTime, endTimeExclusive, dataTimeSpec,
@@ -148,13 +146,15 @@ public class SqlUtils {
     return sb.toString();
   }
 
-  private static String getSelectionClause(MetricConfigDTO metricConfig, MetricFunction metricFunction, List<String> groupBy, TimeGranularity aggregationGranularity, TimeSpec timeSpec) {
+  private static String getSelectionClause(MetricConfigDTO metricConfig,
+      MetricFunction metricFunction, List<String> groupBy, TimeGranularity aggregationGranularity,
+      TimeSpec timeSpec) {
     StringBuilder builder = new StringBuilder();
     if (!groupBy.isEmpty()) {
       for (String groupByDimension : groupBy) {
         // Hack to allow date keyword as column name.
-        if(groupByDimension.equalsIgnoreCase("date")){
-          groupByDimension = "\""+groupByDimension+"\"";
+        if (groupByDimension.equalsIgnoreCase("date")) {
+          groupByDimension = "\"" + groupByDimension + "\"";
         }
         builder.append(groupByDimension).append(", ");
       }
@@ -162,7 +162,7 @@ public class SqlUtils {
     if (aggregationGranularity != null) {
       builder.append(getTimeColumnQueryName(aggregationGranularity, timeSpec)).append(", ");
     }
-    String metricName = null;
+    String metricName;
     if (metricFunction.getMetricName().equals("*")) {
       metricName = "*";
     } else {
@@ -192,8 +192,8 @@ public class SqlUtils {
    * and the metric values are all in a single value column
    */
   public static String getDimensionAsMetricSql(ThirdEyeRequest request,
-      MetricFunction metricFunction,
-      Multimap<String, String> filterSet, Map<String, Map<String, Object[]>> filterContextMap, TimeSpec dataTimeSpec, DatasetConfigDTO datasetConfig)
+      MetricFunction metricFunction, Multimap<String, String> filterSet,
+      Map<String, Map<String, Object[]>> filterContextMap, TimeSpec dataTimeSpec)
       throws Exception {
 
     // select sum(metric_values_column) from collection
@@ -224,7 +224,7 @@ public class SqlUtils {
           + " as metricNamesColumns in " + metricNamesColumns);
     }
 
-    String dimensionAsMetricPql = getDimensionAsMetricSql(metricFunction,
+    return getDimensionAsMetricSql(metricFunction,
         request.getStartTimeInclusive(),
         request.getEndTimeExclusive(),
         filterSet,
@@ -236,8 +236,6 @@ public class SqlUtils {
         metricNamesColumnsList,
         metricValuesColumn,
         request.getLimit());
-
-    return dimensionAsMetricPql;
   }
 
   private static String getDimensionAsMetricSql(MetricFunction metricFunction,
@@ -265,7 +263,7 @@ public class SqlUtils {
         metricFunction.getDatasetConfig());
     sb.append(" WHERE ").append(betweenClause);
 
-    String metricWhereClause = getMetricWhereClause(metricConfig, metricFunction, metricNames,
+    String metricWhereClause = getMetricWhereClause(metricFunction, metricNames,
         metricNamesColumns);
     sb.append(metricWhereClause);
 
@@ -293,12 +291,14 @@ public class SqlUtils {
     return sb.toString();
   }
 
-  private static Map<String, Object> combineValuesAndBuildContextMap(Map<String, Map<String, Object[]>> filterContextMap) {
+  private static Map<String, Object> combineValuesAndBuildContextMap(
+      Map<String, Map<String, Object[]>> filterContextMap) {
     Map<String, Object> contextMap = new LinkedHashMap<>();
     filterContextMap.forEach((view, columnValuesMap) -> {
       Map<String, String> columnValueMap = new LinkedHashMap<>();
       columnValuesMap.forEach((column, values) -> {
-        String value = "(" + Arrays.asList(values).stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
+        String value =
+            "(" + Arrays.stream(values).map(String::valueOf).collect(Collectors.joining(",")) + ")";
         columnValueMap.put(column, value);
       });
       contextMap.put(view, columnValueMap);
@@ -306,8 +306,7 @@ public class SqlUtils {
     return contextMap;
   }
 
-  private static String getMetricWhereClause(MetricConfigDTO metricConfig,
-      MetricFunction metricFunction,
+  private static String getMetricWhereClause(MetricFunction metricFunction,
       List<String> metricNames, List<String> metricNamesColumns) {
     StringBuilder builder = new StringBuilder();
     if (!metricFunction.getMetricName().equals("*")) {
@@ -330,8 +329,8 @@ public class SqlUtils {
     }
 
     // Hack to allow date keyword as column name.
-    if(metricName.equalsIgnoreCase("date")){
-      metricName = "\""+metricName+"\"";
+    if (metricName.equalsIgnoreCase("date")) {
+      metricName = "\"" + metricName + "\"";
     }
     builder.append(metricFunction.getFunctionName()).append("(").append(metricName).append(")");
     return builder.toString();
@@ -346,7 +345,7 @@ public class SqlUtils {
     String timeFormat = timeSpec.getFormat();
 
     // Hack to allow date keyword as column name.
-    if(timeField.equalsIgnoreCase("date")){
+    if (timeField.equalsIgnoreCase("date")) {
       timeField = "\"" + timeField + "\"";
     }
 
@@ -449,13 +448,12 @@ public class SqlUtils {
 
   private static String convertEpochToMinuteAggGranularity(String timeColumnName,
       TimeSpec timeSpec) {
-    String groupByTimeColumnName = String
+    return String
         .format("dateTimeConvert(%s,'%d:%s:%s','%d:%s:%s','1:MINUTES')", timeColumnName,
             timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(),
             timeSpec.getFormat(),
             timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(),
             timeSpec.getFormat());
-    return groupByTimeColumnName;
   }
 
   private static String getDimensionGroupByClause(List<String> groupBy,
@@ -471,11 +469,14 @@ public class SqlUtils {
       return "";
     }
     // Hack to allow date keyword as column name.
-    groups = groups.stream().map(m -> m.equalsIgnoreCase("date") ? "\""+m+"\"" : m).collect(Collectors.toList());
+    groups = groups.stream()
+        .map(m -> m.equalsIgnoreCase("date") ? "\"" + m + "\"" : m)
+        .collect(Collectors.toList());
     return String.format("GROUP BY %s", COMMA.join(groups));
   }
 
-  private static String getTimeColumnQueryName(TimeGranularity aggregationGranularity, TimeSpec timeSpec) {
+  private static String getTimeColumnQueryName(TimeGranularity aggregationGranularity,
+      TimeSpec timeSpec) {
     String timeColumnName = timeSpec.getColumnName();
     if (aggregationGranularity != null) {
       // Convert the time column to 1 minute granularity if it is epoch.
@@ -486,7 +487,7 @@ public class SqlUtils {
       }
     }
     // Hack to allow date keyword as column name.
-    if(timeColumnName.equalsIgnoreCase("date")){
+    if (timeColumnName.equalsIgnoreCase("date")) {
       timeColumnName = "\"" + timeColumnName + "\"";
     }
     return timeColumnName;
@@ -619,11 +620,6 @@ public class SqlUtils {
    * @return set of string with prefix
    */
   private static Set<String> filter(Collection<String> values, final String prefix) {
-    return new HashSet<>(Collections2.filter(values, new Predicate<String>() {
-      @Override
-      public boolean apply(@Nullable String s) {
-        return (s != null) && s.startsWith(prefix);
-      }
-    }));
+    return new HashSet<>(Collections2.filter(values, s -> (s != null) && s.startsWith(prefix)));
   }
 }

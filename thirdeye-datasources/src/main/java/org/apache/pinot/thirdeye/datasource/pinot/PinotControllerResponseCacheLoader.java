@@ -38,7 +38,7 @@ import org.apache.pinot.client.ConnectionFactory;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

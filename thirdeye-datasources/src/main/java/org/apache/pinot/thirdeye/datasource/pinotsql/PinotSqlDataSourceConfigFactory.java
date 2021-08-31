@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
@@ -74,8 +75,8 @@ public class PinotSqlDataSourceConfigFactory {
         .asList(PinotSqlDataSourceProperties.CONTROLLER_HOST,
             PinotSqlDataSourceProperties.CONTROLLER_PORT);
 
-    final List<PinotSqlDataSourceProperties> optionalProperties = Arrays
-        .asList(PinotSqlDataSourceProperties.CONTROLLER_CONNECTION_SCHEME);
+    final List<PinotSqlDataSourceProperties> optionalProperties = Collections.singletonList(
+        PinotSqlDataSourceProperties.CONTROLLER_CONNECTION_SCHEME);
 
     // Validates required properties
     final String className = PinotSqlControllerResponseCacheLoader.class.getSimpleName();

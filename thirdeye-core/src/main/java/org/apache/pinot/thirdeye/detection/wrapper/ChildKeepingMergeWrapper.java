@@ -29,12 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
+import org.apache.pinot.thirdeye.detection.algorithm.AnomalyKey;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.task.runner.AnomalyMerger;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 
 /**
@@ -49,7 +50,7 @@ import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
 
   private static final String PROP_GROUP_KEY = "groupKey";
-  private static final String PROP_PATTERN_KEY = "pattern";
+  public static final String PROP_PATTERN_KEY = "pattern";
 
   public ChildKeepingMergeWrapper(DataProvider provider, AlertDTO config, long startTime,
       long endTime) {
@@ -84,11 +85,11 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
       }
     }
 
-    Collections.sort(input, MergeWrapper.COMPARATOR);
+    Collections.sort(input, AnomalyMerger.COMPARATOR);
 
     List<MergedAnomalyResultDTO> output = new ArrayList<>();
 
-    Map<MergeWrapper.AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
+    Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
     for (MergedAnomalyResultDTO anomaly : input) {
       if (anomaly.isChild()) {
         continue;
@@ -106,8 +107,8 @@ public class ChildKeepingMergeWrapper extends BaselineFillingMergeWrapper {
           .isNaN(anomaly.getAvgCurrentVal())) {
         patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
       }
-      MergeWrapper.AnomalyKey key =
-          new MergeWrapper.AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
+      AnomalyKey key =
+          new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(),
               anomaly.getDimensions(),
               StringUtils.join(Arrays.asList(groupKey, patternKey), ","), "", anomaly.getType());
       MergedAnomalyResultDTO parent = parents.get(key);

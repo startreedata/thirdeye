@@ -1,0 +1,62 @@
+[
+  {
+    "name": "mockEvent/threshold",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "THRESHOLD",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.max": "${max}",
+            "component.min": "${min}",
+            "component.offset": "mo1m",
+            "component.pattern": "down",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "mockEvent",
+      "metric": "sum(m1)",
+      "monitoringGranularity": "1:SECONDS",
+      "timeColumn": "mtime",
+      "timeColumnFormat": "1:MILLISECONDS:EPOCH",
+      "max": "500",
+      "min": "30"
+    },
+    "lastTimestamp": 0
+  }
+]

@@ -125,6 +125,7 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
   protected NotificationSchemesDto generateNotificationSchemeProps(SubscriptionGroupDTO config,
       List<String> to, List<String> cc, List<String> bcc) {
     NotificationSchemesDto notificationSchemeProps = new NotificationSchemesDto();
+    notificationSchemeProps.setWebhookScheme(config.getNotificationSchemes().getWebhookScheme());
     // Override the email alert scheme
     EmailSchemeDto emailScheme = new EmailSchemeDto()
         .setCc(cc)

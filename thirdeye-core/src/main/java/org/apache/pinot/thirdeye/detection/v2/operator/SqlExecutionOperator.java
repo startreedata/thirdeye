@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Connecting to a temporary SQL workspace with all the inputs data as tables and perform SQL
  * operations on top.
  */
-public class SqlExecutionOperator extends DetectionPipelineOperator<DataTable> {
+public class SqlExecutionOperator extends DetectionPipelineOperator {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionOperator.class);
   private static final String JDBC_DRIVER_CLASSNAME = "jdbc.driver.classname";

@@ -45,9 +45,11 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     this.query = dataFetcherSpec.getQuery();
     this.tableName = dataFetcherSpec.getTableName();
     if (dataFetcherSpec.getDataSourceCache() != null) {
+      final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
+          "DataFetcher: data source is not set.");
       this.thirdEyeDataSource = requireNonNull(dataFetcherSpec
           .getDataSourceCache()
-          .getDataSource(dataFetcherSpec.getDataSource()), "data source is unavailable");
+          .getDataSource(dataSource), "data source is unavailable");
     }
   }
 

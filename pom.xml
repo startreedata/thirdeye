@@ -31,7 +31,7 @@
     <module>thirdeye-coordinator</module>
 
     <!--  Build plugins -->
-    <module>thirdeye-plugin-example</module>
+    <module>thirdeye-plugins</module>
     <module>thirdeye-datasources</module>
     <module>thirdeye-detection-components</module>
 
@@ -91,6 +91,7 @@
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
     <swagger.version>1.3.17-1</swagger.version>
     <testcontainers.version>1.15.3</testcontainers.version>
+    <retrofit2.version>2.9.0</retrofit2.version>
   </properties>
 
   <licenses>
@@ -332,11 +333,6 @@
         <artifactId>thirdeye-dashboard</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-example-plugin</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
       <!-- project dependencies -->
       <dependency>
@@ -572,6 +568,16 @@
         <groupId>io.github.classgraph</groupId>
         <artifactId>classgraph</artifactId>
         <version>${classgraph.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup.retrofit2</groupId>
+        <artifactId>retrofit</artifactId>
+        <version>${retrofit2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup.retrofit2</groupId>
+        <artifactId>converter-jackson</artifactId>
+        <version>${retrofit2.version}</version>
       </dependency>
       <!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
       <dependency>

@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.google.inject.Inject;
@@ -135,4 +136,14 @@ public class InternalResource {
     return Response.ok(PACKAGE).build();
   }
 
+  @POST
+  @Path("webhook")
+  public Response webhookDummy(
+      Object payload
+  ) throws Exception {
+    System.out.println("========================= Webhook request ==============================");
+    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
+    System.out.println("========================================================================");
+    return Response.ok().build();
+  }
 }

@@ -35,13 +35,12 @@ import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskContext;
+import org.apache.pinot.thirdeye.task.runner.AnomalyMerger;
 import org.apache.pinot.thirdeye.task.runner.DetectionPipelineRunner;
 import org.apache.pinot.thirdeye.task.runner.DetectionPipelineTaskRunner;
 import org.testng.Assert;
@@ -59,7 +58,6 @@ public class DetectionPipelineTaskRunnerTest {
   private TaskContext context;
 
   private TestDbEnv testDAOProvider;
-  private MergedAnomalyResultManager anomalyDAO;
   private DataProvider provider;
   private Map<String, Object> properties;
 
@@ -74,7 +72,6 @@ public class DetectionPipelineTaskRunnerTest {
     testDAOProvider = new TestDbEnv();
     final Injector injector = testDAOProvider.getInjector();
     final AlertManager detectionDAO = injector.getInstance(AlertManager.class);
-    anomalyDAO = injector.getInstance(MergedAnomalyResultManager.class);
     final EvaluationManager evaluationDAO = injector.getInstance(EvaluationManager.class);
     provider = new MockDataProvider();
 
@@ -100,12 +97,12 @@ public class DetectionPipelineTaskRunnerTest {
 
     runner = new DetectionPipelineTaskRunner(
         detectionDAO,
-        anomalyDAO,
         evaluationDAO,
         new ModelRetuneFlow(provider, new DetectionRegistry()),
         injector.getInstance(AnomalySubscriptionGroupNotificationManager.class),
         new MetricRegistry(),
-        detectionPipelineRunner);
+        detectionPipelineRunner,
+        mock(AnomalyMerger.class));
 
     info = new DetectionPipelineTaskInfo();
     info.setConfigId(detectorId);
@@ -132,25 +129,6 @@ public class DetectionPipelineTaskRunnerTest {
     Assert
         .assertEquals(runs.get(0).getConfig().getProperties().get("className"), "myClassName");
     Assert.assertEquals(runs.get(0).getConfig().getCron(), "myCron");
-  }
-
-  @Test
-  public void testTaskRunnerPersistence() throws Exception {
-    final MergedAnomalyResultDTO anomaly = DetectionTestUtils
-        .makeAnomaly(detectorId, 1300, 1400, null, null,
-            Collections.singletonMap("myKey", "myValue"));
-
-    outputs.add(new MockPipelineOutput(Collections.singletonList(anomaly), 1400));
-
-    runner.execute(info, context);
-
-    Assert.assertNotNull(anomaly.getId());
-
-    final MergedAnomalyResultDTO readAnomaly = anomalyDAO.findById(anomaly.getId());
-    Assert.assertEquals(readAnomaly.getDetectionConfigId(), Long.valueOf(detectorId));
-    Assert.assertEquals(readAnomaly.getStartTime(), 1300);
-    Assert.assertEquals(readAnomaly.getEndTime(), 1400);
-    Assert.assertEquals(readAnomaly.getDimensions(), new DimensionMap("{\"myKey\":\"myValue\"}"));
   }
 
   @Test

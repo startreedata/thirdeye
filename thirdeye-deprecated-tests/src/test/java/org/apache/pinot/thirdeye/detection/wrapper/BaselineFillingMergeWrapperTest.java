@@ -31,7 +31,7 @@ import org.apache.pinot.thirdeye.detection.MockPipeline;
 import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
 import org.apache.pinot.thirdeye.detection.MockPipelineOutput;
 import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
-import org.apache.pinot.thirdeye.plugin.detection.MockBaselineProvider;
+import org.apache.pinot.thirdeye.detection.components.MockBaselineProvider;
 import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;

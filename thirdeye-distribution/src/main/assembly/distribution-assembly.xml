@@ -61,8 +61,8 @@
       <outputDirectory>plugins/datasources-default/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-plugin-detection/target/thirdeye-plugin-detection-${project.version}-dist</directory>
-      <outputDirectory>plugins/detection/</outputDirectory>
+      <directory>${thirdeye.root}/thirdeye-detection-components/target/thirdeye-detection-components-${project.version}-dist</directory>
+      <outputDirectory>plugins/detection-components/</outputDirectory>
     </fileSet>
 
   </fileSets>

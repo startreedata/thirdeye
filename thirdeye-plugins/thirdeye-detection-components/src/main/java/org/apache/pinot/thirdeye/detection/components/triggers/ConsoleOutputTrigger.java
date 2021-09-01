@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.components.triggers;
 
-import java.util.Arrays;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.detection.EventTrigger;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerException;

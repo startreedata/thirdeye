@@ -20,7 +20,7 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>thirdeye</artifactId>
+    <artifactId>thirdeye-plugins</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
     <version>1.17.0-SNAPSHOT</version>
   </parent>
@@ -33,11 +33,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-spi</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
@@ -85,7 +80,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>../thirdeye-plugins/plugin-assembly.xml</descriptor>
+                <descriptor>../plugin-assembly.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

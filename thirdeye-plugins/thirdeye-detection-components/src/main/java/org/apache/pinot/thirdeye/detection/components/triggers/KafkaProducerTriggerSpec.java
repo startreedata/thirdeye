@@ -1,7 +1,6 @@
 package org.apache.pinot.thirdeye.detection.components.triggers;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;

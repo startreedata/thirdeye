@@ -32,7 +32,6 @@
 
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
-    <module>thirdeye-detection-components</module>
 
     <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
     <module>thirdeye-deprecated-tests</module>

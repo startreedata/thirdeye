@@ -15,6 +15,7 @@
 
   <modules>
     <module>thirdeye-plugin-example</module>
+    <module>thirdeye-detection-components</module>
   </modules>
 
   <dependencies>

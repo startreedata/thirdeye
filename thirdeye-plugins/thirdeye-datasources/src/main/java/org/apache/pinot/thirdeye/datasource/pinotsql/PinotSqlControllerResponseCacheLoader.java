@@ -34,7 +34,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeDataFrameResultSet;
 import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;

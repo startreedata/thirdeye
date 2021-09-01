@@ -104,11 +104,13 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     env.jersey().register(injector.getInstance(RootResource.class));
 
     // Expose dropwizard metrics in prometheus compatible format
-    CollectorRegistry collectorRegistry = new CollectorRegistry();
-    collectorRegistry.register(new DropwizardExports(env.metrics()));
-    env.admin()
-        .addServlet("prometheus", new MetricsServlet(collectorRegistry))
-        .addMapping(configuration.getPrometheusEndpoint());
+    if(configuration.getPrometheusConfiguration().isEnabled()) {
+      CollectorRegistry collectorRegistry = new CollectorRegistry();
+      collectorRegistry.register(new DropwizardExports(env.metrics()));
+      env.admin()
+          .addServlet("prometheus", new MetricsServlet(collectorRegistry))
+          .addMapping("/prometheus");
+    }
 
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));

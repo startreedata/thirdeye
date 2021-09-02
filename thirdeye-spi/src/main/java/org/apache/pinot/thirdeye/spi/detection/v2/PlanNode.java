@@ -53,7 +53,7 @@ public interface PlanNode {
    *
    * @return execution operator.
    */
-  Operator<? extends DetectionPipelineResult> run()
+  Operator run()
       throws Exception;
 
 }

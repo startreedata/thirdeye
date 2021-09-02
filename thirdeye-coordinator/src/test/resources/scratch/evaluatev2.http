@@ -388,36 +388,3 @@ Content-Type: application/json
   "start": "1581321600000",
   "end": "1595228400000"
 }
-
-
-###
-
-POST http://localhost:8080/api/alerts/evaluate
-accept: application/json
-Content-Type: application/json
-
-{
-  "alert": {
-    "name": "sample-data-fetcher",
-    "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
-    "template": {
-      "nodes": [
-        {
-          "name": "root",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": []
-        }
-      ]
-    }
-  },
-  "start": "1577865600000",
-  "end": "1590994800000"
-}

@@ -59,35 +59,6 @@ resources:
     - pom.xml
     - thirdeye-ui
 
-- name: chart-src
-  type: git
-  icon: github
-  source:
-    uri: ((git-uri))
-    branch: ((git-branch))
-    private_key: ((ssh-private-key))
-    paths:
-    - .concourse
-    - kubernetes/helm
-
-- name: chart-version
-  type: semver
-  source:
-    driver: git
-    uri: ((git-uri))
-    branch: versions-((git-branch))
-    file: thirdeye-helm-version
-    private_key: |
-      ((ssh-private-key))
-
-- name: chart-distrib
-  type: azure-blobstore
-  source:
-    storage_account_name: ((azure-storage-account-name))
-    storage_account_key: ((azure-storage-access-key))
-    container: ((chart-azure-storage-container))
-    versioned_file: thirdeye-helm-chart-((git-branch)).tgz
-
 - name: slack
   type: slack
   icon: slack

@@ -7,9 +7,12 @@ image_resource:
     repository: daniellavoie/ci-java-8
     tag: latest
 
+caches:
+  - path: src/m2
+
 inputs:
-- name: ci-src
 - name: src
+- name: ci-src
 
 outputs:
 - name: src

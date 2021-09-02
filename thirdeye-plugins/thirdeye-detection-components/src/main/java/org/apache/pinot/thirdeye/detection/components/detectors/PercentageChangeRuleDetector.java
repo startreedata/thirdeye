@@ -84,7 +84,6 @@ public class PercentageChangeRuleDetector implements
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
 
   private static final String COL_CHANGE = "change";
-  private static final String COL_ANOMALY = "anomaly";
   private static final String COL_PATTERN = "pattern";
   private static final String COL_CHANGE_VIOLATION = "change_violation";
 

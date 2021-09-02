@@ -62,7 +62,6 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
 
   private static final String COL_TOO_HIGH = "tooHigh";
   private static final String COL_TOO_LOW = "tooLow";
-  private static final String COL_ANOMALY = "anomaly";
 
   private InputDataFetcher dataFetcher;
   private TimeGranularity timeGranularity;

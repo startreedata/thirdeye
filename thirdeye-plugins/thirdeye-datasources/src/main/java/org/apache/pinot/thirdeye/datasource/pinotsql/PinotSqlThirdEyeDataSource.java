@@ -124,7 +124,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
     if (CollectionUtils.isNotEmpty(groupByDimensions)) {
       preAggregatedDimensionNames.removeAll(groupByDimensions);
     }
-    // Add pre-aggrexgated dimension value to the remaining dimension names
+    // Add pre-aggregated dimension value to the remaining dimension names
     // exclude pre-aggregated dimension for group by dimensions
     Multimap<String, String> decoratedFilterSet;
     if (filterSet != null) {

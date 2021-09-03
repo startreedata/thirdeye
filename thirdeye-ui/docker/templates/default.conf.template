@@ -1,7 +1,12 @@
 server {
     listen  ${NGINX_PORT};
-    location ~/api(.*)$ {
-        proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
+    location ~/api(.*) {
+        if ($args != "") {
+            proxy_pass ${THIRDEYE_API_BASE_URL}/api$1?$args;
+        }
+        if ($args = "") {
+            proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
+        }
         resolver kube-dns.kube-system.svc.cluster.local valid=30s;
         proxy_ssl_server_name on;
         proxy_redirect off;

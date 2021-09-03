@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.operator.DataFetcherOperator;
-import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -46,7 +45,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator<DataTable> run() throws Exception {
+  public Operator run() throws Exception {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     dataFetcherOperator.init(new OperatorContext()
         .setStartTime(getParams().getOrDefault("startTime", String.valueOf(this.startTime)).toString())

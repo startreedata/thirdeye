@@ -77,7 +77,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
   private static final String COL_CURR = "current";
-  private static final String COL_ANOMALY = "anomaly";
   private static final String COL_PATTERN = "pattern";
   private static final String COL_DIFF = "diff";
   private static final String COL_DIFF_VIOLATION = "diff_violation";

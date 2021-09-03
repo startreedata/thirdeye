@@ -70,7 +70,6 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     AnomalyDetectorV2<AbsoluteChangeRuleDetectorSpec>,
     BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
 
-  private static final String COL_ANOMALY = "anomaly";
   private static final String COL_DIFF = "diff";
   private static final String COL_PATTERN = "pattern";
   private static final String COL_DIFF_VIOLATION = "diff_violation";

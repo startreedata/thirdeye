@@ -14,7 +14,9 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>thirdeye-datasources</module>
     <module>thirdeye-plugin-example</module>
+    <module>thirdeye-detection-components</module>
   </modules>
 
   <dependencies>

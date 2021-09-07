@@ -64,6 +64,10 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-detection-components/target/thirdeye-detection-components-${project.version}-dist</directory>
       <outputDirectory>plugins/detection-components/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-kafka/target/thirdeye-kafka-${project.version}-dist</directory>
+      <outputDirectory>plugins/kafka/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

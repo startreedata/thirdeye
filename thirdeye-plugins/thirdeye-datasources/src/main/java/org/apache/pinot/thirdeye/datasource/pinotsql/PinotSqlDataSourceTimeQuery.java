@@ -82,12 +82,7 @@ public class PinotSqlDataSourceTimeQuery {
 
       String maxTimePql = String
           .format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);
-      PinotSqlQuery maxTimePinotQuery = new PinotSqlQuery(maxTimePql,
-          dataset,
-          timeSpec.getColumnName(),
-          new ArrayList<>(),
-          timeSpec.getDataGranularity(),
-          timeSpec);
+      PinotSqlQuery maxTimePinotQuery = new PinotSqlQuery(maxTimePql, dataset);
 
       ThirdEyeResultSetGroup resultSetGroup;
       dataSource.refreshSQL(maxTimePinotQuery);

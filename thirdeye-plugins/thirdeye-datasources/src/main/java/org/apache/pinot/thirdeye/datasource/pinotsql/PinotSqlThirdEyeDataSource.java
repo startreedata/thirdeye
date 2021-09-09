@@ -223,12 +223,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
 
       ThirdEyeResultSetGroup resultSetGroup;
       try {
-        resultSetGroup = this.executeSQL(new PinotSqlQuery(sql,
-            dataset,
-            metricFunction.getMetricName(),
-            request.getGroupBy(),
-            request.getGroupByTimeGranularity(),
-            dataTimeSpec));
+        resultSetGroup = this.executeSQL(new PinotSqlQuery(sql, dataset));
       } catch (Exception e) {
         throw e;
       }
@@ -427,7 +422,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
-    // Use pinot SQL.
+
     ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotSqlQuery(
         request.getQuery(),
         request.getTable())).get(0);

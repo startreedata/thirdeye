@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.auto.onboard.pinot;
+package org.apache.pinot.thirdeye.datasource.pinot.auto.onboard;
 
 import com.google.common.base.Preconditions;
 import java.util.List;

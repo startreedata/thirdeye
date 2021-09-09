@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.auto.onboard.pinot;
+package org.apache.pinot.thirdeye.datasource.pinot.auto.onboard;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource;

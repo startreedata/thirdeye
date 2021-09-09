@@ -6,15 +6,22 @@
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
     <version>1.17.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-datasource-pinot</artifactId>
+  <artifactId>thirdeye-datasource-pinot-legacy</artifactId>
+
+  <properties>
+    <!--    Should match the helix version here -->
+    <!--    https://github.com/apache/incubator-pinot/blob/master/pom.xml#L120 -->
+    <helix.version>0.9.8</helix.version>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.pinot</groupId>
-      <artifactId>pinot-jdbc-client</artifactId>
+      <artifactId>pinot-java-client</artifactId>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
@@ -41,6 +48,29 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.apache.helix</groupId>
+      <artifactId>helix-core</artifactId>
+      <version>${helix.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.sgroschupf</groupId>
+          <artifactId>zkclient</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.netty</groupId>
+          <artifactId>netty</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-db</artifactId>
     </dependency>
@@ -52,6 +82,13 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
+    </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.auto.onboard.pinot;
+package org.apache.pinot.thirdeye.datasource.pinot.auto.onboard;
 
 import static java.util.Objects.requireNonNull;
 

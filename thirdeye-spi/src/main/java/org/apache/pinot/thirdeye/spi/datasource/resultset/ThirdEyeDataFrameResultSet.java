@@ -142,7 +142,14 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
       String columnName) {
     try {
       for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-        if (columnName.equalsIgnoreCase(resultSet.getMetaData().getColumnLabel(i))) {
+        String label = resultSet.getMetaData().getColumnLabel(i).replace("\"", "");
+        if (label.contains(" as")) {
+          label = label.split(" as")[1].trim().replace("\"", "");
+        }
+        if (label.contains("(")) {
+          label = label.substring(label.indexOf("(") + 1, label.indexOf(")")).trim().replace("\"", "");
+        }
+        if (columnName.equalsIgnoreCase(label)) {
           return ColumnType.jdbcTypeToColumnType(resultSet.getMetaData().getColumnType(i));
         }
       }

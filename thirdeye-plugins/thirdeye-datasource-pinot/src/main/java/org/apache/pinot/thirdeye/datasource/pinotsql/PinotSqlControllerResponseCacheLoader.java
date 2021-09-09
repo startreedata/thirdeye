@@ -128,10 +128,10 @@ public class PinotSqlControllerResponseCacheLoader extends PinotSqlResponseCache
           LOG.info("Query:{}  took:{} ms  connections:{}", query.getQuery(), (end - start),
               activeConnections);
           ThirdEyeResultSet teResultSet = ThirdEyeDataFrameResultSet.fromSQLResultSet(resultSet,
-              query.getMetric(),
-              query.getGroupByKeys(),
-              query.getGranularity(),
-              query.getTimeSpec());
+              SqlUtils.getMetricFromQuery(query.getQuery()),
+              SqlUtils.getGroupByKeysFromQuery(query.getQuery()),
+              null,
+              null);
           List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
           thirdEyeResultSets.add(teResultSet);
           return new ThirdEyeResultSetGroup(thirdEyeResultSets);

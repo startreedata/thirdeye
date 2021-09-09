@@ -34,9 +34,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeDataFrameResultSet;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeDataFrameResultSet;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,29 +17,33 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.resultset;
+package org.apache.pinot.thirdeye.spi.datasource;
 
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
+public abstract class RelationalQuery {
 
-public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
+  protected String query;
 
-  public long getLong(int rowIndex) {
-    return this.getLong(rowIndex, 0);
+  public RelationalQuery(String query) {
+    this.query = query;
   }
 
-  public double getDouble(int rowIndex) {
-    return this.getDouble(rowIndex, 0);
+  public String getQuery() {
+    return query;
   }
 
-  public String getString(int rowIndex) {
-    return this.getString(rowIndex, 0);
+  public void setQuery(String query) {
+    this.query = query;
   }
 
-  public long getLong(int rowIndex, int columnIndex) {
-    return Long.parseLong(this.getString(rowIndex, columnIndex));
+  @Override
+  public int hashCode() {
+    return query.hashCode();
   }
 
-  public double getDouble(int rowIndex, int columnIndex) {
-    return Double.parseDouble(this.getString(rowIndex, columnIndex));
+  @Override
+  public boolean equals(Object obj) {
+    RelationalQuery that = (RelationalQuery) obj;
+    return this.query.equals(that.query);
   }
 }
+

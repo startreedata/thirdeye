@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.auto.onboard.pinotsql;
+package org.apache.pinot.thirdeye.datasource.pinotsql.auto.onboard;
 
 import static org.apache.pinot.thirdeye.datasource.pinotsql.PinotSqlDataSourceConfigFactory.HTTPS_SCHEME;
 import static org.apache.pinot.thirdeye.datasource.pinotsql.PinotSqlDataSourceConfigFactory.createFromProperties;

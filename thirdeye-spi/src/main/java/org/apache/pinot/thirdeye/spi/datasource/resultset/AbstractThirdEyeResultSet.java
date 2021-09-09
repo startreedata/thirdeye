@@ -17,26 +17,27 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinotsql;
+package org.apache.pinot.thirdeye.spi.datasource.resultset;
 
-import com.google.common.cache.CacheLoader;
-import java.sql.Connection;
-import java.util.Map;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
+public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 
-public abstract class PinotSqlResponseCacheLoader extends
-    CacheLoader<PinotSqlQuery, ThirdEyeResultSetGroup> {
+  public long getLong(int rowIndex) {
+    return this.getLong(rowIndex, 0);
+  }
 
-  /**
-   * Initializes the cache loader using the given property map.
-   *
-   * @param properties the property map that provides the information to connect to the data
-   *     source.
-   * @throws Exception when an error occurs connecting to the Pinot controller.
-   */
-  public abstract void init(Map<String, Object> properties) throws Exception;
+  public double getDouble(int rowIndex) {
+    return this.getDouble(rowIndex, 0);
+  }
 
-  public abstract Connection getConnection();
+  public String getString(int rowIndex) {
+    return this.getString(rowIndex, 0);
+  }
 
-  public abstract void close();
+  public long getLong(int rowIndex, int columnIndex) {
+    return Long.parseLong(this.getString(rowIndex, columnIndex));
+  }
+
+  public double getDouble(int rowIndex, int columnIndex) {
+    return Double.parseDouble(this.getString(rowIndex, columnIndex));
+  }
 }

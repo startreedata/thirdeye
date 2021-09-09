@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetUtils;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -38,7 +38,7 @@ import org.apache.pinot.client.ConnectionFactory;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,7 +159,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
           LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
               activeConnections);
 
-          return ThirdEyeResultSetGroup.fromPinotResultSetGroup(resultSetGroup);
+          return ResultSetUtils.toThirdEyeResultSetGroup(resultSetGroup);
         }
       } finally {
         this.activeConnections.decrementAndGet();
@@ -189,4 +189,5 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       }
     }
   }
+
 }

@@ -1,16 +1,15 @@
-package org.apache.pinot.thirdeye.datasource.resultset;
+package org.apache.pinot.thirdeye.spi.datasource.resultset;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
-public class ThirdeyeResultSetDataTable implements DataTable {
+public class ThirdEyeResultSetDataTable implements DataTable {
 
   private final ThirdEyeResultSet thirdEyeResultSet;
   private List<String> columns = new ArrayList<>();
@@ -18,7 +17,7 @@ public class ThirdeyeResultSetDataTable implements DataTable {
   private int groupKeyLength;
   private DataFrame dataFrame;
 
-  public ThirdeyeResultSetDataTable(final ThirdEyeResultSet thirdEyeResultSet) {
+  public ThirdEyeResultSetDataTable(final ThirdEyeResultSet thirdEyeResultSet) {
     this.thirdEyeResultSet = thirdEyeResultSet;
     this.groupKeyLength = thirdEyeResultSet.getGroupKeyLength();
     for (int i = 0; i < thirdEyeResultSet.getGroupKeyLength(); i++) {

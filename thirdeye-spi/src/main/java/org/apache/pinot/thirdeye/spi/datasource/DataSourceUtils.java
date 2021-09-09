@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.datasource;
+package org.apache.pinot.thirdeye.spi.datasource;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -8,12 +8,12 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.Weigher;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
@@ -99,45 +99,6 @@ public class DataSourceUtils {
   }
 
   public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildResponseCache(
-      CacheLoader cacheLoader) {
-    Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
-
-    // Initializes listener that prints expired entries in debuggin mode.
-    RemovalListener<RelationalQuery, ThirdEyeResultSet> listener;
-    if (LOG.isDebugEnabled()) {
-      listener = notification -> LOG.debug("Expired {}", notification.getKey().getQuery());
-    } else {
-      listener = notification -> {
-      };
-    }
-
-    // ResultSetGroup Cache. The size of this cache is limited by the total number of buckets in all ResultSetGroup.
-    // We estimate that 1 bucket (including overhead) consumes 1KB and this cache is allowed to use up to 50% of max
-    // heap space.
-    long maxBucketNumber = getApproximateMaxBucketNumber(
-        Constants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
-    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader.toString(),
-        maxBucketNumber);
-
-    return CacheBuilder.newBuilder()
-        .removalListener(listener)
-        .expireAfterWrite(15, TimeUnit.MINUTES)
-        .maximumWeight(maxBucketNumber)
-        .weigher(
-            (Weigher<RelationalQuery, ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
-              int resultSetCount = resultSetGroup.size();
-              int weight = 0;
-              for (int idx = 0; idx < resultSetCount; ++idx) {
-                ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
-                weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
-                    .getRowCount());
-              }
-              return weight;
-            })
-        .build(cacheLoader);
-  }
-
-  public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildPinotSqlResponseCache(
       CacheLoader cacheLoader) {
     Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
 

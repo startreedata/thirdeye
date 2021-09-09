@@ -17,33 +17,26 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource;
+package org.apache.pinot.thirdeye.datasource.pinotsql;
 
-public abstract class RelationalQuery {
+import com.google.common.cache.CacheLoader;
+import java.sql.Connection;
+import java.util.Map;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 
-  protected String query;
+public abstract class PinotSqlResponseCacheLoader extends
+    CacheLoader<PinotSqlQuery, ThirdEyeResultSetGroup> {
 
-  public RelationalQuery(String query) {
-    this.query = query;
-  }
+  /**
+   * Initializes the cache loader using the given property map.
+   *
+   * @param properties the property map that provides the information to connect to the data
+   *     source.
+   * @throws Exception when an error occurs connecting to the Pinot controller.
+   */
+  public abstract void init(Map<String, Object> properties) throws Exception;
 
-  public String getQuery() {
-    return query;
-  }
+  public abstract Connection getConnection();
 
-  public void setQuery(String query) {
-    this.query = query;
-  }
-
-  @Override
-  public int hashCode() {
-    return query.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    RelationalQuery that = (RelationalQuery) obj;
-    return this.query.equals(that.query);
-  }
+  public abstract void close();
 }
-

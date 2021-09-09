@@ -19,7 +19,7 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
-import org.apache.pinot.thirdeye.datasource.RelationalQuery;
+import org.apache.pinot.thirdeye.spi.datasource.RelationalQuery;
 
 public class PinotQuery extends RelationalQuery {
 

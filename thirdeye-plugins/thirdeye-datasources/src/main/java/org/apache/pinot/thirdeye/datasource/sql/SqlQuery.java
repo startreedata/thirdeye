@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.sql;
 
 import java.util.List;
-import org.apache.pinot.thirdeye.datasource.RelationalQuery;
+import org.apache.pinot.thirdeye.spi.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 

@@ -41,23 +41,23 @@ import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.apache.pinot.thirdeye.auto.onboard.pinot.PinotDatasetOnboarder;
 import org.apache.pinot.thirdeye.auto.onboard.pinot.ThirdEyePinotClient;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.RelationalQuery;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetUtils;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdeyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.LogicalView;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetDataTable;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -67,8 +67,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
-
-  public static final String CACHE_LOADER_CLASS_NAME_STRING = "cacheLoaderClassName";
 
   private static final String EQUALS = "=";
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
@@ -443,7 +441,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
           request.getQuery(),
           request.getTable(),
           true)).get(0);
-      return new ThirdeyeResultSetDataTable(thirdEyeResultSet);
+      return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
     } catch (ExecutionException e) {
       throw e;
     }

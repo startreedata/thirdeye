@@ -1,20 +1,4 @@
-/**
- * Copyright (C) 2014-2018 LinkedIn Corp. (pinot-core@linkedin.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package org.apache.pinot.thirdeye.resultset;
+package org.apache.pinot.thirdeye.datasource.pinot;
 
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -23,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.ResultSet;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeDataFrameResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeDataFrameResultSet;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.ObjectSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
@@ -33,8 +17,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class ThirdEyeDataFrameResultSetTest {
-
+public class ResultSetUtilsTest {
   @Test
   public void testFromPinotSelectResultSet() throws Exception {
     List<String> columnArray = new ArrayList<>();
@@ -63,7 +46,7 @@ public class ThirdEyeDataFrameResultSetTest {
         resultArray);
 
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ThirdEyeDataFrameResultSet.fromPinotResultSet(selectResultSet);
+        ResultSetUtils.fromPinotResultSet(selectResultSet);
 
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries("col1", 0, 10, 20);
@@ -85,7 +68,7 @@ public class ThirdEyeDataFrameResultSetTest {
     ResultSet singleAggregationResultSet = new MockedSingleAggregationResultSet(functionName,
         new ColumnType(ColumnDataType.DOUBLE), "150.33576");
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ThirdEyeDataFrameResultSet.fromPinotResultSet(singleAggregationResultSet);
+        ResultSetUtils.fromPinotResultSet(singleAggregationResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(Collections.emptyList(),
@@ -127,7 +110,7 @@ public class ThirdEyeDataFrameResultSetTest {
     ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
         functionName, columnTypes, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ThirdEyeDataFrameResultSet.fromPinotResultSet(singleGroupByResultSet);
+        ResultSetUtils.fromPinotResultSet(singleGroupByResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName),
@@ -161,7 +144,7 @@ public class ThirdEyeDataFrameResultSetTest {
     ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
         functionName, columnTypes, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ThirdEyeDataFrameResultSet.fromPinotResultSet(singleGroupByResultSet);
+        ResultSetUtils.fromPinotResultSet(singleGroupByResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName),

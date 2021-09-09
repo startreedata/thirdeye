@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.resultset;
+package org.apache.pinot.thirdeye.spi.datasource.resultset;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,11 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
@@ -45,9 +44,6 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeResultSetUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetUtils.class);
-  private static final String MYSQL = "MySQL";
-  private static final String H2 = "H2";
-  private static final String PINOT = "Pinot";
 
   public static List<String[]> parseResultSets(ThirdEyeRequest request,
       Map<MetricFunction, List<ThirdEyeResultSet>> metricFunctionToResultSetList,

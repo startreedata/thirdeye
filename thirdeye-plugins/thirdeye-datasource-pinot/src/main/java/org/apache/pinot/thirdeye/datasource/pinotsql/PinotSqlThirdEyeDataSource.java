@@ -40,25 +40,25 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pinot.thirdeye.auto.onboard.pinotsql.PinotSqlDatasetOnboarder;
-import org.apache.pinot.thirdeye.auto.onboard.pinotsql.ThirdEyePinotSqlClient;
-import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.RelationalQuery;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetUtils;
-import org.apache.pinot.thirdeye.datasource.resultset.ThirdeyeResultSetDataTable;
+import org.apache.pinot.thirdeye.datasource.pinotsql.auto.onboard.PinotSqlDatasetOnboarder;
+import org.apache.pinot.thirdeye.datasource.pinotsql.auto.onboard.ThirdEyePinotSqlClient;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.LogicalView;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
+import org.apache.pinot.thirdeye.spi.datasource.RelationalQuery;
 import org.apache.pinot.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetDataTable;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -161,7 +161,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    pinotResponseCache = DataSourceUtils.buildPinotSqlResponseCache(pinotSqlResponseCacheLoader);
+    pinotResponseCache = DataSourceUtils.buildResponseCache(pinotSqlResponseCacheLoader);
   }
 
   @Override
@@ -431,7 +431,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
     ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotSqlQuery(
         request.getQuery(),
         request.getTable())).get(0);
-    return new ThirdeyeResultSetDataTable(thirdEyeResultSet);
+    return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
   }
 
   @Override

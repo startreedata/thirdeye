@@ -166,14 +166,15 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
         .from(-1, window.getStartMillis(), window.getEndMillis(), null,
             timeGranularity);
 
+    addBaselineAndBoundaries(df);
+
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
         df,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    final DataFrame baselineWithBoundaries = constructBaselineAndBoundaries(df);
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
   }
 
   @Override
@@ -181,13 +182,14 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     final InputData data = dataFetcher.fetchData(new InputDataSpec()
         .withTimeseriesSlices(singletonList(slice)));
     final DataFrame df = data.getTimeseries().get(slice);
-    return TimeSeries.fromDataFrame(constructBaselineAndBoundaries(df));
+    addBaselineAndBoundaries(df);
+    return TimeSeries.fromDataFrame(df);
   }
 
   /**
    * Populate the dataframe with upper/lower boundaries and baseline
    */
-  private DataFrame constructBaselineAndBoundaries(final DataFrame df) {
+  private void addBaselineAndBoundaries(final DataFrame df) {
     // Set default baseline as the actual value
     df.addSeries(DataFrame.COL_VALUE, df.get(DataFrame.COL_CURRENT));
     if (!Double.isNaN(spec.getMin())) {
@@ -202,7 +204,6 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
       df.mapInPlace(DoubleSeries.MIN, DataFrame.COL_VALUE, DataFrame.COL_UPPER_BOUND,
           DataFrame.COL_VALUE);
     }
-    return df;
   }
 
   @Override

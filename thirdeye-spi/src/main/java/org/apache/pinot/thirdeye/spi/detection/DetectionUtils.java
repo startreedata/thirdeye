@@ -139,11 +139,18 @@ public class DetectionUtils {
     final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     final LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
     final BooleanSeries isAnomalySeries = df.getBooleans(seriesName);
-    final DoubleSeries currentSeries = df.getDoubles(DataFrame.COL_CURRENT);
+    final DoubleSeries currentSeries = df.contains(DataFrame.COL_CURRENT)
+        ? df.getDoubles(DataFrame.COL_CURRENT)
+        : null;
+    final DoubleSeries baselineSeries = df.contains(DataFrame.COL_VALUE)
+        ? df.getDoubles(DataFrame.COL_VALUE)
+        : null;
 
     int lastStart = -1;
     double currSum = 0;
     int currCount = 0;
+    double baselineSum = 0;
+    int baselineCount = 0;
 
     for (int i = 0; i < df.size(); i++) {
       if (isAnomalySeries.isNull(i) || !BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
@@ -155,11 +162,16 @@ public class DetectionUtils {
           if (currCount > 0) {
             anomaly.setAvgCurrentVal(currSum / currCount);
           }
+          if (baselineCount > 0) {
+            anomaly.setAvgBaselineVal(baselineSum / baselineCount);
+          }
           anomalies.add(anomaly);
 
           // reset variables for next anomaly
           currSum = 0;
           currCount = 0;
+          baselineSum = 0;
+          baselineCount = 0;
         }
         lastStart = -1;
       } else {
@@ -168,10 +180,15 @@ public class DetectionUtils {
           lastStart = i;
         }
 
-        if (!currentSeries.isNull(i)) {
+        if (currentSeries != null && !currentSeries.isNull(i)) {
           final double currValue = currentSeries.getDouble(i);
           currSum += currValue;
           ++currCount;
+        }
+        if (baselineSeries != null && !baselineSeries.isNull(i)) {
+          final double baselineValue = baselineSeries.getDouble(i);
+          baselineSum += baselineValue;
+          ++baselineCount;
         }
       }
     }
@@ -193,6 +210,9 @@ public class DetectionUtils {
       final MergedAnomalyResultDTO anomaly = makeAnomaly(slice.withStart(start).withEnd(end));
       if (currCount > 0) {
         anomaly.setAvgCurrentVal(currSum / currCount);
+      }
+      if (baselineCount > 0) {
+        anomaly.setAvgBaselineVal(baselineSum / baselineCount);
       }
       anomalies.add(anomaly);
     }
@@ -218,7 +238,8 @@ public class DetectionUtils {
     return anomaly;
   }
 
-  public static MergedAnomalyResultDTO makeAnomaly(final long start, final long end, final long configId) {
+  public static MergedAnomalyResultDTO makeAnomaly(final long start, final long end,
+      final long configId) {
     final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(start);
     anomaly.setEndTime(end);
@@ -256,7 +277,8 @@ public class DetectionUtils {
   }
 
   public static List<MergedAnomalyResultDTO> mergeAndSortAnomalies(
-      final List<MergedAnomalyResultDTO> anomalyListA, final List<MergedAnomalyResultDTO> anomalyListB) {
+      final List<MergedAnomalyResultDTO> anomalyListA,
+      final List<MergedAnomalyResultDTO> anomalyListB) {
     final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     if (anomalyListA != null) {
       anomalies.addAll(anomalyListA);
@@ -328,7 +350,8 @@ public class DetectionUtils {
    * @param aggregationFunction the metric's aggregation function
    * @return the aggregated time series data frame
    */
-  public static DataFrame aggregateByPeriod(final DataFrame df, final DateTime origin, final Period granularityPeriod,
+  public static DataFrame aggregateByPeriod(final DataFrame df, final DateTime origin,
+      final Period granularityPeriod,
       final MetricAggFunction aggregationFunction) {
     switch (aggregationFunction) {
       case SUM:
@@ -439,7 +462,7 @@ public class DetectionUtils {
     return baseline.gather(slice, data.getTimeseries());
   }
 
-  public static  Map<String, DataTable> getTimeSeriesMap(
+  public static Map<String, DataTable> getTimeSeriesMap(
       final Map<String, DetectionPipelineResult> inputMap) {
     final Map<String, DataTable> timeSeriesMap = new HashMap<>();
     for (final String key : inputMap.keySet()) {

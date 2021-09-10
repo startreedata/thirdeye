@@ -207,23 +207,25 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
         ArrayListMultimap.create(),
         timeGranularity);
 
+    addAbsoluteChangeBoundaries(df);
+
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
         df,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    final DataFrame baselineWithBoundaries = constructAbsoluteChangeBoundaries(df);
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
   }
 
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
-    return TimeSeries.fromDataFrame(constructAbsoluteChangeBoundaries(df));
+    addAbsoluteChangeBoundaries(df);
+    return TimeSeries.fromDataFrame(df);
   }
 
-  private DataFrame constructAbsoluteChangeBoundaries(final DataFrame dfBase) {
+  private void addAbsoluteChangeBoundaries(final DataFrame dfBase) {
     if (!Double.isNaN(absoluteChange)) {
       switch (pattern) {
         case UP:
@@ -243,7 +245,6 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
           throw new IllegalArgumentException();
       }
     }
-    return dfBase;
   }
 
   private void fillAbsoluteChangeBound(final DataFrame dfBase, final String colBound,

@@ -101,24 +101,24 @@ public class PercentageChangeRuleDetector implements
   @Override
   public void init(final PercentageChangeRuleDetectorSpec spec) {
     this.spec = spec;
-    this.percentageChange = spec.getPercentageChange();
-    this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
-    this.pattern = valueOf(spec.getPattern().toUpperCase());
+    percentageChange = spec.getPercentageChange();
+    baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
+    pattern = valueOf(spec.getPattern().toUpperCase());
 
-    this.monitoringGranularity = spec.getMonitoringGranularity();
-    if (this.monitoringGranularity.endsWith(TimeGranularity.MONTHS) || this.monitoringGranularity
+    monitoringGranularity = spec.getMonitoringGranularity();
+    if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
         .endsWith(TimeGranularity.WEEKS)) {
-      this.timeGranularity = MetricSlice.NATIVE_GRANULARITY;
+      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
     } else {
-      this.timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
+      timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
     }
-    if (this.monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      this.weekStart = DayOfWeek.valueOf(spec.getWeekStart());
+    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
+      weekStart = DayOfWeek.valueOf(spec.getWeekStart());
     }
   }
 
   @Override
-  public void init(PercentageChangeRuleDetectorSpec spec, InputDataFetcher dataFetcher) {
+  public void init(final PercentageChangeRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
     init(spec);
     this.dataFetcher = dataFetcher;
   }
@@ -133,7 +133,7 @@ public class PercentageChangeRuleDetector implements
     final Map<DimensionInfo, DataTable> currentDataTableMap = splitDataTable(current);
 
     final List<DetectionResult> detectionResults = new ArrayList<>();
-    for (DimensionInfo dimensionInfo : baselineDataTableMap.keySet()) {
+    for (final DimensionInfo dimensionInfo : baselineDataTableMap.keySet()) {
 
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
       final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
@@ -160,11 +160,11 @@ public class PercentageChangeRuleDetector implements
   }
 
   @Override
-  public DetectionResult runDetection(Interval window, String metricUrn) {
+  public DetectionResult runDetection(final Interval window, final String metricUrn) {
     DateTime windowStart = window.getStart();
 
     // align start day to the user specified week start
-    if (Objects.nonNull(this.weekStart)) {
+    if (Objects.nonNull(weekStart)) {
       windowStart = window
           .getStart()
           .withTimeAtStartOfDay()
@@ -187,7 +187,7 @@ public class PercentageChangeRuleDetector implements
         .withMetricIdsForDataset(singletonList(slice.getMetricId()))
         .withMetricIds(singletonList(me.getId())));
 
-    DataFrame dfBase = this.baseline.gather(slice, data.getTimeseries());
+    DataFrame dfBase = baseline.gather(slice, data.getTimeseries());
     DataFrame dfCurr = data.getTimeseries().get(slice);
 
     final DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
@@ -241,17 +241,17 @@ public class PercentageChangeRuleDetector implements
     df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
 
     // relative change
-    if (!Double.isNaN(this.percentageChange)) {
+    if (!Double.isNaN(percentageChange)) {
       // consistent with pattern
       if (pattern.equals(UP_OR_DOWN)) {
         df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
       } else {
         df.addSeries(COL_PATTERN,
-            this.pattern.equals(UP) ? df.getDoubles(COL_CHANGE).gt(0)
+            pattern.equals(UP) ? df.getDoubles(COL_CHANGE).gt(0)
                 : df.getDoubles(COL_CHANGE).lt(0));
       }
       df.addSeries(COL_CHANGE_VIOLATION,
-          df.getDoubles(COL_CHANGE).abs().gte(this.percentageChange));
+          df.getDoubles(COL_CHANGE).abs().gte(percentageChange));
       df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
     }
 
@@ -261,14 +261,15 @@ public class PercentageChangeRuleDetector implements
             ArrayListMultimap.create() ,
             timeGranularity);
 
+    addPercentageChangeBoundaries(df);
+
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
         df,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    final DataFrame baselineWithBoundaries = constructPercentageChangeBoundaries(df);
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(baselineWithBoundaries));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
   }
 
   private double percentageChangeLambda(final double[] values) {
@@ -283,42 +284,42 @@ public class PercentageChangeRuleDetector implements
   }
 
   @Override
-  public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    DataFrame df = DetectionUtils.buildBaselines(slice, this.baseline, this.dataFetcher);
-    return TimeSeries.fromDataFrame(constructPercentageChangeBoundaries(df));
+  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
+    final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
+    addPercentageChangeBoundaries(df);
+    return TimeSeries.fromDataFrame(df);
   }
 
-  private DataFrame constructPercentageChangeBoundaries(DataFrame dfBase) {
-    if (!Double.isNaN(this.percentageChange)) {
-      switch (this.pattern) {
+  private void addPercentageChangeBoundaries(final DataFrame dfBase) {
+    if (!Double.isNaN(percentageChange)) {
+      switch (pattern) {
         case UP:
-          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + this.percentageChange);
+          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + percentageChange);
           dfBase.addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.zeros(dfBase.size()));
           break;
         case DOWN:
           dfBase.addSeries(
               DataFrame.COL_UPPER_BOUND, DoubleSeries.fillValues(dfBase.size(), POSITIVE_INFINITY));
-          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - this.percentageChange);
+          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - percentageChange);
           break;
         case UP_OR_DOWN:
-          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + this.percentageChange);
-          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - this.percentageChange);
+          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + percentageChange);
+          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - percentageChange);
           break;
         default:
           throw new IllegalArgumentException();
       }
     }
-    return dfBase;
   }
 
-  private void fillPercentageChangeBound(DataFrame dfBase, String colBound, double multiplier) {
+  private void fillPercentageChangeBound(final DataFrame dfBase, final String colBound, final double multiplier) {
     dfBase.addSeries(colBound,
         map((DoubleFunction) values -> values[0] * multiplier, dfBase.getDoubles(
             DataFrame.COL_VALUE)));
   }
 
   @Override
-  public void setTimeConverter(TimeConverter timeConverter) {
+  public void setTimeConverter(final TimeConverter timeConverter) {
     this.timeConverter = timeConverter;
   }
 }

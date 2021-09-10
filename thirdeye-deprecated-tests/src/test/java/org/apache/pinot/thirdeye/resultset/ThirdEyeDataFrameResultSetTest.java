@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinot.resultset;
+package org.apache.pinot.thirdeye.resultset;
 
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -23,10 +23,11 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.ResultSet;
+import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeDataFrameResultSet;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.ObjectSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
-import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetMetaData;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.testng.Assert;

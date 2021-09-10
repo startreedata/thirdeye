@@ -20,11 +20,10 @@
 package org.apache.pinot.thirdeye.datasource.pinotsql;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
@@ -45,19 +44,13 @@ public class PinotSqlDataSourceTimeQuery {
 
   private final static String TIME_QUERY_TEMPLATE = "SELECT %s(%s) FROM %s WHERE %s";
 
-  private final PinotSqlThirdEyeDataSource pinotSqlThirdEyeDataSource;
-
-  public PinotSqlDataSourceTimeQuery(PinotSqlThirdEyeDataSource pinotSqlThirdEyeDataSource) {
-    this.pinotSqlThirdEyeDataSource = pinotSqlThirdEyeDataSource;
-  }
-
   /**
    * Returns the max time in millis for dataset in pinot
    *
    * @return max date time in millis
    */
-  public long getMaxDateTime(final DatasetConfigDTO datasetConfig) {
-    long maxTime = queryTimeSpecFromPinot("max", datasetConfig);
+  public static long getMaxDateTime(final DatasetConfigDTO datasetConfig, PinotSqlThirdEyeDataSource dataSource) {
+    long maxTime = queryTimeSpecFromPinot("max", datasetConfig, dataSource);
     if (maxTime <= 0) {
       maxTime = System.currentTimeMillis();
     }
@@ -69,12 +62,12 @@ public class PinotSqlDataSourceTimeQuery {
    *
    * @return min (earliest) date time in millis. Returns 0 if dataset is not found
    */
-  public long getMinDateTime(final DatasetConfigDTO datasetConfig) {
-    return queryTimeSpecFromPinot("min", datasetConfig);
+  public static long getMinDateTime(final DatasetConfigDTO datasetConfig, PinotSqlThirdEyeDataSource dataSource) {
+    return queryTimeSpecFromPinot("min", datasetConfig, dataSource);
   }
 
-  private long queryTimeSpecFromPinot(final String functionName,
-      final DatasetConfigDTO datasetConfig) {
+  private static long queryTimeSpecFromPinot(final String functionName,
+      final DatasetConfigDTO datasetConfig, PinotSqlThirdEyeDataSource dataSource) {
     long maxTime = 0;
     String dataset = datasetConfig.getName();
     try {
@@ -89,28 +82,11 @@ public class PinotSqlDataSourceTimeQuery {
 
       String maxTimePql = String
           .format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);
-      PinotSqlQuery maxTimePinotQuery = new PinotSqlQuery(maxTimePql,
-          dataset,
-          timeSpec.getColumnName(),
-          new ArrayList<>(),
-          timeSpec.getDataGranularity(),
-          timeSpec);
+      PinotSqlQuery maxTimePinotQuery = new PinotSqlQuery(maxTimePql, dataset);
 
       ThirdEyeResultSetGroup resultSetGroup;
-      final long tStart = System.nanoTime();
-      try {
-        pinotSqlThirdEyeDataSource.refreshSQL(maxTimePinotQuery);
-        resultSetGroup = pinotSqlThirdEyeDataSource.executeSQL(maxTimePinotQuery);
-//        RequestStatisticsLogger
-//            .getRequestLog()
-//            .success(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
-//                tStart, System.nanoTime());
-      } catch (ExecutionException e) {
-//        RequestStatisticsLogger.getRequestLog()
-//            .failure(this.pinotThirdEyeDataSource.getName(), dataset, timeSpec.getColumnName(),
-//                tStart, System.nanoTime(), e);
-        throw e;
-      }
+      dataSource.refreshSQL(maxTimePinotQuery);
+      resultSetGroup = dataSource.executeSQL(maxTimePinotQuery);
 
       if (resultSetGroup.size() == 0 || resultSetGroup.get(0).getRowCount() == 0) {
         LOGGER.error("Failed to get latest max time for dataset {} with SQL: {}", dataset,

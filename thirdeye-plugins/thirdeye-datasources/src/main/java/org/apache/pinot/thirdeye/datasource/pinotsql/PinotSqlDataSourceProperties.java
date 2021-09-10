@@ -22,11 +22,7 @@ package org.apache.pinot.thirdeye.datasource.pinotsql;
 public enum PinotSqlDataSourceProperties {
   CONTROLLER_HOST("controllerHost"),
   CONTROLLER_PORT("controllerPort"),
-  CONTROLLER_CONNECTION_SCHEME("controllerConnectionScheme"),
-  CLUSTER_NAME("clusterName"),
-  TAG("tag"),
-  BROKER_URL("brokerUrl"),
-  NAME("name");
+  CONTROLLER_CONNECTION_SCHEME("controllerConnectionScheme");
 
   private final String value;
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinotsql.resultset;
+package org.apache.pinot.thirdeye.datasource.resultset;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
-import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;

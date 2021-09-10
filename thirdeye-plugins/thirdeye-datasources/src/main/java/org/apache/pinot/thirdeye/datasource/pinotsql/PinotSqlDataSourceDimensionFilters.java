@@ -49,11 +49,6 @@ public class PinotSqlDataSourceDimensionFilters {
   private static final ExecutorService executorService = Executors.newCachedThreadPool();
   private static final int TIME_OUT_SIZE = 60;
   private static final TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
-  private final PinotSqlThirdEyeDataSource pinotSqlThirdEyeDataSource;
-
-  public PinotSqlDataSourceDimensionFilters(PinotSqlThirdEyeDataSource pinotSqlThirdEyeDataSource) {
-    this.pinotSqlThirdEyeDataSource = pinotSqlThirdEyeDataSource;
-  }
 
   /**
    * This method gets the dimension filters for the given dataset from the pinot data source,
@@ -61,11 +56,12 @@ public class PinotSqlDataSourceDimensionFilters {
    *
    * @return dimension filters map
    */
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig) {
+  public static Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig,
+      PinotSqlThirdEyeDataSource dataSource) {
     long maxTime = System.currentTimeMillis();
     String dataset = datasetConfig.getName();
     try {
-      maxTime = this.pinotSqlThirdEyeDataSource.getMaxDataTime(datasetConfig);
+      maxTime = dataSource.getMaxDataTime(datasetConfig);
     } catch (Exception e) {
       // left blank
     }
@@ -80,7 +76,7 @@ public class PinotSqlDataSourceDimensionFilters {
       Collections.sort(dimensions);
 
       filters = getFilters(dimensions, startDateTime, endDateTime,
-          datasetConfig);
+          datasetConfig, dataSource);
     } catch (Exception e) {
       LOG.error("Error while fetching dimension values in filter drop down for collection: {}",
           dataset, e);
@@ -88,8 +84,8 @@ public class PinotSqlDataSourceDimensionFilters {
     return filters;
   }
 
-  private Map<String, List<String>> getFilters(List<String> dimensions,
-      DateTime start, DateTime end, final DatasetConfigDTO datasetConfig) {
+  private static Map<String, List<String>> getFilters(List<String> dimensions, DateTime start,
+      DateTime end, final DatasetConfigDTO datasetConfig, PinotSqlThirdEyeDataSource dataSource) {
 
     final String dataset = datasetConfig.getName();
     MetricFunction metricFunction = new MetricFunction(MetricAggFunction.COUNT,
@@ -108,7 +104,7 @@ public class PinotSqlDataSourceDimensionFilters {
     Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {
       Future<ThirdEyeResponse> responseFuture = executorService
-          .submit(() -> pinotSqlThirdEyeDataSource.execute(request));
+          .submit(() -> dataSource.execute(request));
       responseFuturesMap.put(request, responseFuture);
     }
 

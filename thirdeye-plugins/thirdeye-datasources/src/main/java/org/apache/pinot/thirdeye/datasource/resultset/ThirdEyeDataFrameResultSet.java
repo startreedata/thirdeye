@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.datasource.pinot.resultset;
+package org.apache.pinot.thirdeye.datasource.resultset;
 
 import com.google.common.base.Preconditions;
 import java.sql.SQLException;
@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetMetaData;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
@@ -144,7 +144,14 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
       String columnName) {
     try {
       for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-        if (columnName.equalsIgnoreCase(resultSet.getMetaData().getColumnLabel(i))) {
+        String label = resultSet.getMetaData().getColumnLabel(i).replace("\"", "");
+        if (label.contains(" as")) {
+          label = label.split(" as")[1].trim().replace("\"", "");
+        }
+        if (label.contains("(")) {
+          label = label.substring(label.indexOf("(") + 1, label.indexOf(")")).trim().replace("\"", "");
+        }
+        if (columnName.equalsIgnoreCase(label)) {
           return ColumnType.jdbcTypeToColumnType(resultSet.getMetaData().getColumnType(i));
         }
       }

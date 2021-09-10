@@ -31,13 +31,19 @@ public class PinotSqlThirdEyeDataSourceConfig {
   private String controllerHost;
   private int controllerPort;
   private String controllerConnectionScheme;
-  private String clusterName;
-  private String brokerUrl;
-  private String tag;
-  private String name;
 
   public String connectionUrl() {
     return String.format("jdbc:pinot://%s:%s", controllerHost, controllerPort);
+  }
+
+  public String getControllerConnectionScheme() {
+    return controllerConnectionScheme;
+  }
+
+  public PinotSqlThirdEyeDataSourceConfig setControllerConnectionScheme(
+      final String controllerConnectionScheme) {
+    this.controllerConnectionScheme = controllerConnectionScheme;
+    return this;
   }
 
   public String getControllerHost() {
@@ -58,52 +64,6 @@ public class PinotSqlThirdEyeDataSourceConfig {
     return this;
   }
 
-  public String getControllerConnectionScheme() {
-    return controllerConnectionScheme;
-  }
-
-  public PinotSqlThirdEyeDataSourceConfig setControllerConnectionScheme(
-      final String controllerConnectionScheme) {
-    this.controllerConnectionScheme = controllerConnectionScheme;
-    return this;
-  }
-
-  public String getClusterName() {
-    return clusterName;
-  }
-
-  public PinotSqlThirdEyeDataSourceConfig setClusterName(final String clusterName) {
-    this.clusterName = clusterName;
-    return this;
-  }
-
-  public String getBrokerUrl() {
-    return brokerUrl;
-  }
-
-  public PinotSqlThirdEyeDataSourceConfig setBrokerUrl(final String brokerUrl) {
-    this.brokerUrl = brokerUrl;
-    return this;
-  }
-
-  public String getTag() {
-    return tag;
-  }
-
-  public PinotSqlThirdEyeDataSourceConfig setTag(final String tag) {
-    this.tag = tag;
-    return this;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public PinotSqlThirdEyeDataSourceConfig setName(final String name) {
-    this.name = name;
-    return this;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -114,26 +74,19 @@ public class PinotSqlThirdEyeDataSourceConfig {
     }
     PinotSqlThirdEyeDataSourceConfig config = (PinotSqlThirdEyeDataSourceConfig) o;
     return getControllerPort() == config.getControllerPort() && Objects
-        .equals(getControllerHost(), config.getControllerHost()) && Objects
         .equals(getControllerConnectionScheme(), config.getControllerConnectionScheme()) && Objects
-        .equals(getClusterName(), config.getClusterName()) && Objects
-        .equals(getBrokerUrl(), config.getBrokerUrl())
-        && Objects.equals(getTag(), config.getTag());
+        .equals(getControllerHost(), config.getControllerHost());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getControllerHost(), getControllerPort(),
-        getControllerConnectionScheme(),
-        getClusterName(), getBrokerUrl(), getTag(), getName());
+    return Objects.hash(getControllerConnectionScheme(), getControllerHost(), getControllerPort());
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).add("controllerHost", controllerHost)
         .add("controllerPort", controllerPort)
-        .add("controllerConnectionScheme", controllerConnectionScheme)
-        .add("clusterName", clusterName).add("brokerUrl", brokerUrl).add("tag", tag)
-        .add("name", name).toString();
+        .add("controllerConnectionScheme", controllerConnectionScheme).toString();
   }
 }

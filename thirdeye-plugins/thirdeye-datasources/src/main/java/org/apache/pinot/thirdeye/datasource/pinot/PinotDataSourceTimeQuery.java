@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.datasource.DataSourceUtils;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;

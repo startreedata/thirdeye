@@ -8,12 +8,12 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.Weigher;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
-import org.apache.pinot.thirdeye.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import org.apache.pinot.thirdeye.datasource.resultset.ThirdEyeResultSetGroup;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datasource.pinot.resultset.ThirdEyeResultSet;
+import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
@@ -137,7 +137,7 @@ public class DataSourceUtils {
         .build(cacheLoader);
   }
 
-  public static LoadingCache<RelationalQuery, org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup> buildPinotSqlResponseCache(
+  public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildPinotSqlResponseCache(
       CacheLoader cacheLoader) {
     Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
 
@@ -163,7 +163,7 @@ public class DataSourceUtils {
         .expireAfterWrite(15, TimeUnit.MINUTES)
         .maximumWeight(maxBucketNumber)
         .weigher(
-            (Weigher<RelationalQuery, org.apache.pinot.thirdeye.datasource.pinotsql.resultset.ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
+            (Weigher<RelationalQuery, ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
               int resultSetCount = resultSetGroup.size();
               int weight = 0;
               for (int idx = 0; idx < resultSetCount; ++idx) {

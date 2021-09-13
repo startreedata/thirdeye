@@ -99,6 +99,10 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         uiAnomaly.duration = formatDuration(anomaly.startTime, anomaly.endTime);
     }
 
+    if (anomaly?.feedback?.type) {
+        uiAnomaly.feedback = anomaly.feedback.type;
+    }
+
     return uiAnomaly;
 };
 

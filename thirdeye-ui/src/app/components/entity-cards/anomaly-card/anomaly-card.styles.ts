@@ -4,4 +4,7 @@ export const useAnomalyCardStyles = makeStyles((theme) => ({
     deviation: {
         color: theme.palette.error.main,
     },
+    feedbackInput: {
+        minWidth: 120,
+    },
 }));

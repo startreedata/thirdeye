@@ -1,5 +1,9 @@
 import i18n from "i18next";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import {
+    Anomaly,
+    AnomalyFeedback,
+    AnomalyFeedbackType,
+} from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
@@ -228,6 +232,9 @@ const mockAnomaly1 = {
         id: 6,
         name: "testNameAlert6",
     },
+    feedback: {
+        type: AnomalyFeedbackType.ANOMALY,
+    } as AnomalyFeedback,
 } as Anomaly;
 
 const mockAnomaly2 = {
@@ -263,6 +270,7 @@ const mockUiAnomaly1 = {
     duration: "2 3",
     startTime: "2",
     endTime: "3",
+    feedback: AnomalyFeedbackType.ANOMALY,
 };
 
 const mockUiAnomaly2 = {

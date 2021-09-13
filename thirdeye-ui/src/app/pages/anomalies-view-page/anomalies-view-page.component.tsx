@@ -12,8 +12,16 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
-import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
+import {
+    deleteAnomaly,
+    getAnomaly,
+    updateAnomalyFeedback,
+} from "../../rest/anomalies/anomalies.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import {
+    AnomalyFeedback,
+    AnomalyFeedbackType,
+} from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
@@ -53,7 +61,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetched anomaly changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [uiAnomaly]);
+    }, [uiAnomaly?.id]);
 
     const fetchAnomaly = (): void => {
         setUiAnomaly(null);
@@ -144,6 +152,35 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             );
     };
 
+    const handleAnomalyFeedback = (
+        type: AnomalyFeedbackType,
+        uiAnomaly: UiAnomaly
+    ): void => {
+        const feedback = {
+            id: uiAnomaly.id,
+            type,
+        } as AnomalyFeedback;
+        setUiAnomaly({ ...uiAnomaly, feedback: type });
+        updateAnomalyFeedback(feedback)
+            .then(() => {
+                enqueueSnackbar(
+                    t("message.update-success", {
+                        entity: t("label.feedback"),
+                    }),
+                    getSuccessSnackbarOption()
+                );
+            })
+            .catch(() => {
+                setUiAnomaly(uiAnomaly);
+                enqueueSnackbar(
+                    t("message.update-error", {
+                        entity: t("label.feedback"),
+                    }),
+                    getErrorSnackbarOption()
+                );
+            });
+    };
+
     return (
         <PageContents centered title={uiAnomaly ? uiAnomaly.name : ""}>
             <Grid container>
@@ -152,6 +189,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     <AnomalyCard
                         uiAnomaly={uiAnomaly}
                         onDelete={handleAnomalyDelete}
+                        onFeedback={handleAnomalyFeedback}
                     />
                 </Grid>
 

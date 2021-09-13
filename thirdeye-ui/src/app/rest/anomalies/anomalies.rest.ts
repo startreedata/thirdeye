@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Anomaly } from "../dto/anomaly.interfaces";
+import { Anomaly, AnomalyFeedback } from "../dto/anomaly.interfaces";
 
 const BASE_URL_ANOMALIES = "/api/anomalies";
 
@@ -50,6 +50,17 @@ export const getAnomaliesByAlertIdAndTime = async (
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {
     const response = await axios.delete(`${BASE_URL_ANOMALIES}/${id}`);
+
+    return response.data;
+};
+
+export const updateAnomalyFeedback = async (
+    feedback: AnomalyFeedback
+): Promise<AnomalyFeedback> => {
+    const response = await axios.post(
+        `${BASE_URL_ANOMALIES}/${feedback.id}/feedback`,
+        feedback
+    );
 
     return response.data;
 };

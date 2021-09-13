@@ -135,7 +135,8 @@
         "dataset-properties": "Dataset Properties",
         "associated-datasource": "Associated Datasource",
         "datasource-configuration": "Datasource Configuration",
-        "type": "Type"
+        "type": "Type",
+        "feedback": "Feedback"
     },
     "message": {
         "error": "Error",

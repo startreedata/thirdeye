@@ -3,17 +3,22 @@ import {
     CardContent,
     CardHeader,
     Divider,
+    FormControl,
     Grid,
     IconButton,
+    InputLabel,
     Link,
     Menu,
     MenuItem,
+    Select,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import classnames from "classnames";
+import { startCase, toLower } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { AnomalyFeedbackType } from "../../../rest/dto/anomaly.interfaces";
 import {
     getAlertsViewPath,
     getAnomaliesViewPath,
@@ -75,12 +80,53 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         history.push(getAlertsViewPath(props.uiAnomaly.alertId));
     };
 
+    const handleAnomalyFeedback = (type: AnomalyFeedbackType): void => {
+        if (!props.uiAnomaly) {
+            return;
+        }
+
+        props.onFeedback && props.onFeedback(type, props.uiAnomaly);
+    };
+
     return (
         <Card variant="outlined">
             {props.uiAnomaly && (
                 <CardHeader
                     action={
                         <>
+                            {props.onFeedback && (
+                                <FormControl
+                                    className={anomalyCardClasses.feedbackInput}
+                                    size="small"
+                                    variant="outlined"
+                                >
+                                    <InputLabel id="feedback">
+                                        {t("label.feedback")}
+                                    </InputLabel>
+                                    <Select
+                                        label={t("label.feedback")}
+                                        labelId="feedback"
+                                        value={props.uiAnomaly.feedback || ""}
+                                        onChange={(e) =>
+                                            handleAnomalyFeedback(
+                                                e.target
+                                                    .value as AnomalyFeedbackType
+                                            )
+                                        }
+                                    >
+                                        {Object.keys(AnomalyFeedbackType).map(
+                                            (key, index) => (
+                                                <MenuItem
+                                                    key={index}
+                                                    value={key}
+                                                >
+                                                    {startCase(toLower(key))}
+                                                </MenuItem>
+                                            )
+                                        )}
+                                    </Select>
+                                </FormControl>
+                            )}
                             {/* Anomaly options button */}
                             <IconButton onClick={handleAnomalyOptionsClick}>
                                 <MoreVertIcon />

@@ -3,6 +3,8 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -34,14 +36,19 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
   private final WebhookContentFormatter formatter;
+  private final Counter webhookAlertsFailedCounter;
+  private final Counter webhookAlertsSuccessCounter;
 
   @Inject
   public WebhookAlertScheme(
       final WebhookContentFormatter formatter,
       final MetricAnomaliesContent metricAnomaliesContent,
-      final EntityGroupKeyContent entityGroupKeyContent) {
+      final EntityGroupKeyContent entityGroupKeyContent,
+      final MetricRegistry metricRegistry) {
     super(metricAnomaliesContent, entityGroupKeyContent);
     this.formatter = formatter;
+    webhookAlertsFailedCounter = metricRegistry.counter("webhookAlertsFailedCounter");
+    webhookAlertsSuccessCounter = metricRegistry.counter("webhookAlertsSuccessCounter");
   }
 
   @Override
@@ -55,7 +62,7 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     buildAndTriggerWebhook(results);
   }
 
-  private void buildAndTriggerWebhook(final DetectionAlertFilterResult results) throws Exception {
+  private void buildAndTriggerWebhook(final DetectionAlertFilterResult results) {
     for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
         .getResult().entrySet()) {
       final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
@@ -65,38 +72,39 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
         final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(result.getValue());
         anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
         final WebhookApi entity = processResults(subscriptionGroupDTO, anomalyResults);
-        sendWebhook(webhook.getUrl(), entity, webhook.getHashKey());
+        if (sendWebhook(webhook.getUrl(), entity, webhook.getHashKey())) {
+          webhookAlertsSuccessCounter.inc();
+        } else {
+          webhookAlertsFailedCounter.inc();
+        }
       }
     }
   }
 
-  private boolean sendWebhook(String url, final WebhookApi entity, final String key)
-      throws Exception {
+  private boolean sendWebhook(String url, final WebhookApi entity, final String key) {
     if (!url.matches(".*/")) {
       url = url.concat("/");
     }
-    Retrofit retrofit = new Retrofit.Builder()
+    final Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(url)
         .addConverterFactory(JacksonConverterFactory.create())
         .build();
-    String signature = hmacSHA512(entity, key);
-    WebhookService service = retrofit.create(WebhookService.class);
-    Call serviceCall = service.sendWebhook(signature, entity);
+    final String signature = hmacSHA512(entity, key);
+    final WebhookService service = retrofit.create(WebhookService.class);
+    final Call<Void> serviceCall = service.sendWebhook(signature, entity);
     try {
-      Response<Void> response = serviceCall.execute();
+      final Response<Void> response = serviceCall.execute();
       if (response.isSuccessful()) {
-        LOG.info("Webhook trigger successful to url {}", url);
         return true;
       }
       LOG.warn("Webhook failed for url {} with code {} : {}",
           url,
           response.code(),
           response.message());
-      return false;
     } catch (IOException e) {
       LOG.error("Webhook failure!");
-      throw e;
     }
+    return false;
   }
 
   private WebhookApi processResults(final SubscriptionGroupDTO subscriptionGroup,

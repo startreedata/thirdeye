@@ -56,9 +56,7 @@ public class SubscriptionGroupResource extends
       api.setCron(CRON_EVERY_5MIN);
     }
     SubscriptionGroupDTO dto = toDto(api);
-    if(dto.getNotificationSchemes().getWebhookScheme() != null) {
-      dto.getNotificationSchemes().getWebhookScheme().generateSecret();
-    }
+    optional(dto.getNotificationSchemes().getWebhookScheme()).ifPresent(WebhookSchemeDto::generateSecret);
     return dto;
   }
 
@@ -75,9 +73,9 @@ public class SubscriptionGroupResource extends
           ERR_DUPLICATE_NAME);
     }
 
-    if(api.getNotificationSchemes() != null && api.getNotificationSchemes().getWebhook() !=null){
-      ensureNull(api.getNotificationSchemes().getWebhook().getHashKey(), ThirdEyeStatus.ERR_OBJECT_UNEXPECTED, "secret");
-    }
+    optional(api.getNotificationSchemes().getWebhook()).ifPresent( w ->
+      ensureNull(w.getHashKey(), ThirdEyeStatus.ERR_OBJECT_UNEXPECTED, "secret")
+    );
   }
 
   @Override
@@ -123,8 +121,9 @@ public class SubscriptionGroupResource extends
     authService.authenticate(authHeader);
     ensureExists(id, "Invalid id!");
     SubscriptionGroupDTO dto = get(id);
-    ensureExists(dto.getNotificationSchemes().getWebhookScheme(), "webhook");
-    dto.getNotificationSchemes().getWebhookScheme().generateSecret();
+    WebhookSchemeDto webhook = dto.getNotificationSchemes().getWebhookScheme();
+    ensureExists(webhook, "webhook");
+    webhook.generateSecret();
     dtoManager.save(dto);
     return Response.ok(toApi(dto).getNotificationSchemes().getWebhook()).build();
   }

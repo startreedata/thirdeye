@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import javax.crypto.Mac;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -22,7 +21,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
@@ -33,11 +31,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = "zzz Internal zzz")
 public class InternalResource {
 
+  private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
@@ -145,17 +146,17 @@ public class InternalResource {
   @Path("webhook")
   public Response webhookDummy(
       Object payload,
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String signature
+      @HeaderParam("Signature") String signature
   ) throws Exception {
-    System.out.println("========================= Webhook request ==============================");
+    log.info("========================= Webhook request ==============================");
     //replace it with relevant secret key acquired during subscription group creation
     String secretKey = "secretKey";
     String result = hmacSHA512(payload, secretKey);
-    System.out.println("Header signature: "+signature);
-    System.out.println("Generated signature: "+result);
+    log.info("Header signature: {}", signature);
+    log.info("Generated signature: {}", result);
     ensure(result.equals(signature), "Broken request!");
-    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
-    System.out.println("========================================================================");
+    log.info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
+    log.info("========================================================================");
     return Response.ok().build();
   }
 }

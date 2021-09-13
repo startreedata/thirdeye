@@ -17,8 +17,7 @@ public class SecurityUtils {
   private static final String HMAC_SHA512 = "HmacSHA512";
   private static final String AUTH_TYPE = "Thirdeye-HMAC-SHA512";
 
-  public static String hmacSHA512(Object entity, String key)
-      throws Exception {
+  public static String hmacSHA512(Object entity, String key) {
     Mac sha512Hmac;
     final byte[] byteKey = key.getBytes(StandardCharsets.UTF_8);
     try {
@@ -28,8 +27,8 @@ public class SecurityUtils {
       byte[] macData = sha512Hmac.doFinal(new ObjectMapper().writeValueAsBytes(entity));
       return String.format("%s %s", AUTH_TYPE, Base64.getEncoder().encodeToString(macData));
     } catch (NoSuchAlgorithmException | InvalidKeyException | JsonProcessingException e) {
-      LOG.error("Signature generation failure!");
-      throw e;
+      LOG.error("Signature generation failure!", e);
+      return null;
     }
   }
 }

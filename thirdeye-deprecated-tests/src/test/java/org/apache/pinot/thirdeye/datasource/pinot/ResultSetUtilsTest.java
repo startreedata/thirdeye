@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 
 public class ResultSetUtilsTest {
   @Test
-  public void testFromPinotSelectResultSet() throws Exception {
+  public void testFromPinotSelectResultSet() {
     List<String> columnArray = new ArrayList<>();
     columnArray.add("col1");
     columnArray.add("col2");

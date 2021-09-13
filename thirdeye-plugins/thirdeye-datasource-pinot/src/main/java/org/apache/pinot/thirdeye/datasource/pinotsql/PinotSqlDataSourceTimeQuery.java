@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.datasource.pinotsql;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;

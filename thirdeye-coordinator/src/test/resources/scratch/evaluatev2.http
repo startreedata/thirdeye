@@ -1,5 +1,4 @@
 ### Threshold Alert
-
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -138,7 +137,6 @@ Content-Type: application/json
 }
 
 ### Absolute Change
-
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -230,7 +228,6 @@ Content-Type: application/json
 }
 
 ### Mean Variance
-
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -298,7 +295,6 @@ Content-Type: application/json
 }
 
 ### Percentage Change
-
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json

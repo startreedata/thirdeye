@@ -9,6 +9,7 @@ import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.events.MockEventsConfiguration;
+import org.apache.pinot.thirdeye.metric.PrometheusConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
@@ -46,6 +47,9 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
 
   @JsonProperty("ui")
   private UiConfiguration uiConfiguration = new UiConfiguration();
+
+  @JsonProperty("prometheus")
+  private PrometheusConfiguration prometheusConfiguration = new PrometheusConfiguration();
 
   private String configPath = "config";
 
@@ -229,6 +233,16 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
   public ThirdEyeCoordinatorConfiguration setUiConfiguration(
       final UiConfiguration uiConfiguration) {
     this.uiConfiguration = uiConfiguration;
+    return this;
+  }
+
+  public PrometheusConfiguration getPrometheusConfiguration() {
+    return prometheusConfiguration;
+  }
+
+  public ThirdEyeCoordinatorConfiguration setPrometheusConfiguration(
+      final PrometheusConfiguration prometheusConfiguration) {
+    this.prometheusConfiguration = prometheusConfiguration;
     return this;
   }
 }

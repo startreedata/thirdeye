@@ -18,7 +18,7 @@ Content-Type: application/json
 
 ###
 
-# curl -X POST "http://localhost:8080/api/data-sources/onboard-all" -H "accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -d "dataSourceName=pinot1"
+# curl -X POST "http://localhost:8080/api/data-sources/onboard-all" -H "accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -d "name=pinotQuickStartK8s"
 POST http://localhost:8080/api/data-sources/onboard-all
 accept: application/json
 Content-Type: application/x-www-form-urlencoded

@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
@@ -55,22 +56,22 @@ import org.joda.time.PeriodType;
 public class DetectionUtils {
 
   // TODO anomaly should support multimap
-  public static DimensionMap toFilterMap(Multimap<String, String> filters) {
-    DimensionMap map = new DimensionMap();
-    for (Map.Entry<String, Collection<String>> entry : filters.asMap().entrySet()) {
+  public static DimensionMap toFilterMap(final Multimap<String, String> filters) {
+    final DimensionMap map = new DimensionMap();
+    for (final Map.Entry<String, Collection<String>> entry : filters.asMap().entrySet()) {
       map.put(entry.getKey(), String.join(", ", entry.getValue()));
     }
     return map;
   }
 
   // Check if a string is a component reference
-  public static boolean isReferenceName(String key) {
+  public static boolean isReferenceName(final String key) {
     return key.startsWith("$");
   }
 
   // Extracts the component key from the reference key
   // e.g., "$myRule:ALGORITHM" -> "myRule:ALGORITHM"
-  public static String getComponentKey(String componentRefKey) {
+  public static String getComponentKey(final String componentRefKey) {
     if (isReferenceName(componentRefKey)) {
       return componentRefKey.substring(1);
     } else {
@@ -80,7 +81,7 @@ public class DetectionUtils {
 
   // Extracts the component type from the component key
   // e.g., "myRule:ALGORITHM" -> "ALGORITHM"
-  public static String getComponentType(String componentKey) {
+  public static String getComponentType(final String componentKey) {
     if (componentKey != null && componentKey.contains(":")) {
       return componentKey.substring(componentKey.lastIndexOf(":") + 1);
     }
@@ -89,8 +90,8 @@ public class DetectionUtils {
   }
 
   // get the spec class name for a component class
-  public static String getSpecClassName(Class<BaseComponent> componentClass) {
-    ParameterizedType genericSuperclass = (ParameterizedType) componentClass
+  public static String getSpecClassName(final Class<BaseComponent> componentClass) {
+    final ParameterizedType genericSuperclass = (ParameterizedType) componentClass
         .getGenericInterfaces()[0];
     return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
   }
@@ -106,11 +107,11 @@ public class DetectionUtils {
    * @return list of anomalies
    */
   @Deprecated
-  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice,
-      DataFrame df,
-      String seriesName,
-      Period monitoringGranularityPeriod,
-      DatasetConfigDTO dataset) {
+  public static List<MergedAnomalyResultDTO> makeAnomalies(final MetricSlice slice,
+      final DataFrame df,
+      final String seriesName,
+      final Period monitoringGranularityPeriod,
+      final DatasetConfigDTO dataset) {
     return buildAnomalies(slice,
         df,
         seriesName,
@@ -120,9 +121,9 @@ public class DetectionUtils {
   }
 
   @Deprecated
-  public static List<MergedAnomalyResultDTO> makeAnomalies(MetricSlice slice,
-      DataFrame df,
-      String seriesName) {
+  public static List<MergedAnomalyResultDTO> makeAnomalies(final MetricSlice slice,
+      final DataFrame df,
+      final String seriesName) {
     return makeAnomalies(slice, df, seriesName, null, null);
   }
 
@@ -135,24 +136,59 @@ public class DetectionUtils {
       return Collections.emptyList();
     }
 
-    List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
-    LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
-    BooleanSeries sVal = df.getBooleans(seriesName);
+    final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
+    final LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
+    final BooleanSeries isAnomalySeries = df.getBooleans(seriesName);
+    final DoubleSeries currentSeries = df.contains(DataFrame.COL_CURRENT)
+        ? df.getDoubles(DataFrame.COL_CURRENT)
+        : null;
+    final DoubleSeries baselineSeries = df.contains(DataFrame.COL_VALUE)
+        ? df.getDoubles(DataFrame.COL_VALUE)
+        : null;
 
     int lastStart = -1;
+    double currSum = 0;
+    int currCount = 0;
+    double baselineSum = 0;
+    int baselineCount = 0;
+
     for (int i = 0; i < df.size(); i++) {
-      if (sVal.isNull(i) || !BooleanSeries.booleanValueOf(sVal.get(i))) {
+      if (isAnomalySeries.isNull(i) || !BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
         // end of a run
         if (lastStart >= 0) {
           long start = sTime.get(lastStart);
           long end = sTime.get(i);
-          anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
+          final MergedAnomalyResultDTO anomaly = makeAnomaly(slice.withStart(start).withEnd(end));
+          if (currCount > 0) {
+            anomaly.setAvgCurrentVal(currSum / currCount);
+          }
+          if (baselineCount > 0) {
+            anomaly.setAvgBaselineVal(baselineSum / baselineCount);
+          }
+          anomalies.add(anomaly);
+
+          // reset variables for next anomaly
+          currSum = 0;
+          currCount = 0;
+          baselineSum = 0;
+          baselineCount = 0;
         }
         lastStart = -1;
       } else {
         // start of a run
         if (lastStart < 0) {
           lastStart = i;
+        }
+
+        if (currentSeries != null && !currentSeries.isNull(i)) {
+          final double currValue = currentSeries.getDouble(i);
+          currSum += currValue;
+          ++currCount;
+        }
+        if (baselineSeries != null && !baselineSeries.isNull(i)) {
+          final double baselineValue = baselineSeries.getDouble(i);
+          baselineSum += baselineValue;
+          ++baselineCount;
         }
       }
     }
@@ -171,7 +207,14 @@ public class DetectionUtils {
             .plus(monitoringGranularityPeriod)
             .getMillis();
       }
-      anomalies.add(makeAnomaly(slice.withStart(start).withEnd(end)));
+      final MergedAnomalyResultDTO anomaly = makeAnomaly(slice.withStart(start).withEnd(end));
+      if (currCount > 0) {
+        anomaly.setAvgCurrentVal(currSum / currCount);
+      }
+      if (baselineCount > 0) {
+        anomaly.setAvgBaselineVal(baselineSum / baselineCount);
+      }
+      anomalies.add(anomaly);
     }
 
     return anomalies;
@@ -184,19 +227,20 @@ public class DetectionUtils {
    * @param slice metric slice
    * @return anomaly template
    */
-  public static MergedAnomalyResultDTO makeAnomaly(MetricSlice slice) {
+  public static MergedAnomalyResultDTO makeAnomaly(final MetricSlice slice) {
     return makeAnomaly(slice.getStart(), slice.getEnd());
   }
 
-  public static MergedAnomalyResultDTO makeAnomaly(long start, long end) {
-    MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+  public static MergedAnomalyResultDTO makeAnomaly(final long start, final long end) {
+    final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(start);
     anomaly.setEndTime(end);
     return anomaly;
   }
 
-  public static MergedAnomalyResultDTO makeAnomaly(long start, long end, long configId) {
-    MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+  public static MergedAnomalyResultDTO makeAnomaly(final long start, final long end,
+      final long configId) {
+    final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setStartTime(start);
     anomaly.setEndTime(end);
     anomaly.setDetectionConfigId(configId);
@@ -204,8 +248,8 @@ public class DetectionUtils {
     return anomaly;
   }
 
-  public static void setEntityChildMapping(MergedAnomalyResultDTO parent,
-      MergedAnomalyResultDTO child1) {
+  public static void setEntityChildMapping(final MergedAnomalyResultDTO parent,
+      final MergedAnomalyResultDTO child1) {
     if (child1 != null) {
       parent.getChildren().add(child1);
       child1.setChild(true);
@@ -215,7 +259,7 @@ public class DetectionUtils {
   }
 
   public static MergedAnomalyResultDTO makeEntityAnomaly() {
-    MergedAnomalyResultDTO entityAnomaly = new MergedAnomalyResultDTO();
+    final MergedAnomalyResultDTO entityAnomaly = new MergedAnomalyResultDTO();
     // TODO: define anomaly type
     //entityAnomaly.setType();
     entityAnomaly.setChild(false);
@@ -224,8 +268,8 @@ public class DetectionUtils {
   }
 
   public static MergedAnomalyResultDTO makeParentEntityAnomaly(
-      MergedAnomalyResultDTO childAnomaly) {
-    MergedAnomalyResultDTO newEntityAnomaly = makeEntityAnomaly();
+      final MergedAnomalyResultDTO childAnomaly) {
+    final MergedAnomalyResultDTO newEntityAnomaly = makeEntityAnomaly();
     newEntityAnomaly.setStartTime(childAnomaly.getStartTime());
     newEntityAnomaly.setEndTime(childAnomaly.getEndTime());
     setEntityChildMapping(newEntityAnomaly, childAnomaly);
@@ -233,8 +277,9 @@ public class DetectionUtils {
   }
 
   public static List<MergedAnomalyResultDTO> mergeAndSortAnomalies(
-      List<MergedAnomalyResultDTO> anomalyListA, List<MergedAnomalyResultDTO> anomalyListB) {
-    List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
+      final List<MergedAnomalyResultDTO> anomalyListA,
+      final List<MergedAnomalyResultDTO> anomalyListB) {
+    final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     if (anomalyListA != null) {
       anomalies.addAll(anomalyListA);
     }
@@ -253,7 +298,7 @@ public class DetectionUtils {
    * @param nestedLastTimeStamps all nested last time stamps
    * @return the last time stamp
    */
-  public static long consolidateNestedLastTimeStamps(Collection<Long> nestedLastTimeStamps) {
+  public static long consolidateNestedLastTimeStamps(final Collection<Long> nestedLastTimeStamps) {
     if (nestedLastTimeStamps.isEmpty()) {
       return -1L;
     }
@@ -263,13 +308,13 @@ public class DetectionUtils {
   /**
    * Get the joda period for a monitoring granularity
    */
-  public static Period getMonitoringGranularityPeriod(String monitoringGranularity,
-      DatasetConfigDTO datasetConfigDTO) {
+  public static Period getMonitoringGranularityPeriod(final String monitoringGranularity,
+      final DatasetConfigDTO datasetConfigDTO) {
     if (monitoringGranularity
         .equals(MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString())) {
       return datasetConfigDTO.bucketTimeGranularity().toPeriod();
     }
-    String[] split = monitoringGranularity.split("_");
+    final String[] split = monitoringGranularity.split("_");
     if (split[1].equals("MONTHS")) {
       return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());
     }
@@ -279,7 +324,7 @@ public class DetectionUtils {
     return TimeGranularity.fromString(monitoringGranularity).toPeriod();
   }
 
-  public static Period periodFromTimeUnit(int size, TimeUnit unit) {
+  public static Period periodFromTimeUnit(final int size, final TimeUnit unit) {
     switch (unit) {
       case DAYS:
         return Period.days(size);
@@ -305,8 +350,9 @@ public class DetectionUtils {
    * @param aggregationFunction the metric's aggregation function
    * @return the aggregated time series data frame
    */
-  public static DataFrame aggregateByPeriod(DataFrame df, DateTime origin, Period granularityPeriod,
-      MetricAggFunction aggregationFunction) {
+  public static DataFrame aggregateByPeriod(final DataFrame df, final DateTime origin,
+      final Period granularityPeriod,
+      final MetricAggFunction aggregationFunction) {
     switch (aggregationFunction) {
       case SUM:
         return df.groupByPeriod(df.getLongs(DataFrame.COL_TIME), origin, granularityPeriod).sum(
@@ -341,10 +387,10 @@ public class DetectionUtils {
    * @return the filtered data frame
    */
   public static DataFrame filterIncompleteAggregation(DataFrame df,
-      long latestDataTimeStamp,
-      TimeGranularity bucketTimeGranularity,
-      Period aggregationGranularityPeriod) {
-    long latestAggregationStartTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
+      final long latestDataTimeStamp,
+      final TimeGranularity bucketTimeGranularity,
+      final Period aggregationGranularityPeriod) {
+    final long latestAggregationStartTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
     if (latestDataTimeStamp + bucketTimeGranularity.toMillis()
         < latestAggregationStartTimeStamp + aggregationGranularityPeriod.toStandardDuration()
         .getMillis()) {
@@ -357,22 +403,22 @@ public class DetectionUtils {
   /**
    * Verify if this detection has data quality checks enabled
    */
-  public static boolean isDataQualityCheckEnabled(AlertDTO detectionConfig) {
+  public static boolean isDataQualityCheckEnabled(final AlertDTO detectionConfig) {
     return detectionConfig.getDataQualityProperties() != null
         && !detectionConfig.getDataQualityProperties().isEmpty();
   }
 
-  public static long makeTimeout(long deadline) {
-    long diff = deadline - System.currentTimeMillis();
+  public static long makeTimeout(final long deadline) {
+    final long diff = deadline - System.currentTimeMillis();
     return diff > 0 ? diff : 0;
   }
 
-  public static Predicate AND(Collection<Predicate> predicates) {
+  public static Predicate AND(final Collection<Predicate> predicates) {
     return Predicate.AND(predicates.toArray(new Predicate[predicates.size()]));
   }
 
-  public static List<Predicate> buildPredicatesOnTime(long start, long end) {
-    List<Predicate> predicates = new ArrayList<>();
+  public static List<Predicate> buildPredicatesOnTime(final long start, final long end) {
+    final List<Predicate> predicates = new ArrayList<>();
     if (end >= 0) {
       predicates.add(Predicate.LT("startTime", end));
     }
@@ -389,12 +435,12 @@ public class DetectionUtils {
    *
    * @param anomaly the anomaly to be notified.
    */
-  public static void renotifyAnomaly(MergedAnomalyResultDTO anomaly,
+  public static void renotifyAnomaly(final MergedAnomalyResultDTO anomaly,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
-    List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
+    final List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
         anomalySubscriptionGroupNotificationManager
             .findByPredicate(Predicate.EQ("anomalyId", anomaly.getId()));
-    AnomalySubscriptionGroupNotificationDTO anomalyNotificationDTO;
+    final AnomalySubscriptionGroupNotificationDTO anomalyNotificationDTO;
     if (subscriptionGroupNotificationDTOs.isEmpty()) {
       // create a new record if it is not existed yet.
       anomalyNotificationDTO = new AnomalySubscriptionGroupNotificationDTO();
@@ -409,18 +455,18 @@ public class DetectionUtils {
     anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
   }
 
-  public static DataFrame buildBaselines(MetricSlice slice, Baseline baseline,
-      InputDataFetcher dataFetcher) {
-    List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
-    InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
+  public static DataFrame buildBaselines(final MetricSlice slice, final Baseline baseline,
+      final InputDataFetcher dataFetcher) {
+    final List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
+    final InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
     return baseline.gather(slice, data.getTimeseries());
   }
 
-  public static  Map<String, DataTable> getTimeSeriesMap(
+  public static Map<String, DataTable> getTimeSeriesMap(
       final Map<String, DetectionPipelineResult> inputMap) {
-    Map<String, DataTable> timeSeriesMap = new HashMap<>();
-    for (String key : inputMap.keySet()) {
-      DetectionPipelineResult input = inputMap.get(key);
+    final Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    for (final String key : inputMap.keySet()) {
+      final DetectionPipelineResult input = inputMap.get(key);
       if (input instanceof DataTable) {
         timeSeriesMap.put(key, (DataTable) input);
       }

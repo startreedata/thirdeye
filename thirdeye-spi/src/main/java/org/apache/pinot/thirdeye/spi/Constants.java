@@ -32,9 +32,6 @@ public interface Constants {
   int DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 100;
   int DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 8192;
 
-  // Subscription Group related Constants
-  int WEBHOOK_SECRET_LENGTH = 16;
-
   // timestamp field used to get timestamp in RelationalThirdEyeResponse
   String TIMESTAMP = "timestamp";
 

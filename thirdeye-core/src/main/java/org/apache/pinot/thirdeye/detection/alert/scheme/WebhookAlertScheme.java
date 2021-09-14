@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 
 import com.codahale.metrics.Counter;
@@ -59,7 +60,8 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
       LOG.debug("Zero anomalies found, skipping webhook alert for {}", subscriptionGroup.getId());
       return;
     }
-    buildAndTriggerWebhook(results);
+    optional(subscriptionGroup.getNotificationSchemes()
+        .getWebhookScheme()).ifPresent(w -> buildAndTriggerWebhook(results));
   }
 
   private void buildAndTriggerWebhook(final DetectionAlertFilterResult results) {
@@ -81,17 +83,18 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
     }
   }
 
-  private boolean sendWebhook(String url, final WebhookApi entity, final String key) {
-    if (!url.matches(".*/")) {
-      url = url.concat("/");
-    }
+  private boolean sendWebhook(final String url, final WebhookApi entity, final String key) {
     final Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(url)
+        .baseUrl(url.substring(0, url.lastIndexOf('/') + 1))
         .addConverterFactory(JacksonConverterFactory.create())
         .build();
-    final String signature = hmacSHA512(entity, key);
+    final Call<Void> serviceCall;
     final WebhookService service = retrofit.create(WebhookService.class);
-    final Call<Void> serviceCall = service.sendWebhook(signature, entity);
+    if (key == null || key.isEmpty()) {
+      serviceCall = service.sendWebhook(url, entity);
+    } else {
+      serviceCall = service.sendWebhook(url, hmacSHA512(entity, key), entity);
+    }
     try {
       final Response<Void> response = serviceCall.execute();
       if (response.isSuccessful()) {

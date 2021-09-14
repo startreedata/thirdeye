@@ -1,9 +1,6 @@
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import static org.apache.pinot.thirdeye.spi.Constants.WEBHOOK_SECRET_LENGTH;
-
 import com.google.common.base.Objects;
-import org.apache.commons.lang3.RandomStringUtils;
 
 public class WebhookSchemeDto {
   private String url;
@@ -40,7 +37,8 @@ public class WebhookSchemeDto {
     return hashKey;
   }
 
-  public void generateSecret(){
-    this.hashKey = RandomStringUtils.randomAlphanumeric(WEBHOOK_SECRET_LENGTH);
+  public WebhookSchemeDto setHashKey(final String hashKey) {
+    this.hashKey = hashKey;
+    return this;
   }
 }

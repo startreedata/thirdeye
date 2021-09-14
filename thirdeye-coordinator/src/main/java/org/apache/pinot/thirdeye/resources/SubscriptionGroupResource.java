@@ -5,30 +5,21 @@ import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
 import org.quartz.CronExpression;
 
 @Api(tags = "Subscription Group")
@@ -55,9 +46,7 @@ public class SubscriptionGroupResource extends
     if (api.getCron() == null) {
       api.setCron(CRON_EVERY_5MIN);
     }
-    SubscriptionGroupDTO dto = toDto(api);
-    optional(dto.getNotificationSchemes().getWebhookScheme()).ifPresent(WebhookSchemeDto::generateSecret);
-    return dto;
+    return toDto(api);
   }
 
   @Override
@@ -72,10 +61,6 @@ public class SubscriptionGroupResource extends
           Predicate.EQ("name", api.getName())).size() == 0,
           ERR_DUPLICATE_NAME);
     }
-
-    optional(api.getNotificationSchemes().getWebhook()).ifPresent( w ->
-      ensureNull(w.getHashKey(), ThirdEyeStatus.ERR_OBJECT_UNEXPECTED, "secret")
-    );
   }
 
   @Override
@@ -85,21 +70,6 @@ public class SubscriptionGroupResource extends
     // Always set a default cron if not present.
     if (updated.getCronExpression() == null) {
       updated.setCronExpression(CRON_EVERY_5MIN);
-    }
-    final WebhookSchemeDto existingWebhook = existing.getNotificationSchemes().getWebhookScheme();
-    final WebhookSchemeDto updatedWebhook = updated.getNotificationSchemes().getWebhookScheme();
-    if(existingWebhook == null ) {
-      // new webhook notification creation
-      if(updatedWebhook != null) {
-        updatedWebhook.generateSecret();
-      }
-    } else {
-      // update existing webhook notification
-      // webhook secret propagated to updated webhook notification
-      if(updatedWebhook != null) {
-        existingWebhook.setUrl(updatedWebhook.getUrl());
-        updated.getNotificationSchemes().setWebhookScheme(existingWebhook);
-      }
     }
   }
 
@@ -113,18 +83,4 @@ public class SubscriptionGroupResource extends
     return ApiBeanMapper.toApi(dto);
   }
 
-  @POST
-  @Path("webhook/refresh-secret")
-  public Response refreshWebhookSecret(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @FormParam("id") Long id ) {
-    authService.authenticate(authHeader);
-    ensureExists(id, "Invalid id!");
-    SubscriptionGroupDTO dto = get(id);
-    WebhookSchemeDto webhook = dto.getNotificationSchemes().getWebhookScheme();
-    ensureExists(webhook, "webhook");
-    webhook.generateSecret();
-    dtoManager.save(dto);
-    return Response.ok(toApi(dto).getNotificationSchemes().getWebhook()).build();
-  }
 }

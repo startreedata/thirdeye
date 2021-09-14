@@ -27,7 +27,6 @@ public interface NotificationSchemeMapper {
   })
   NotificationSchemesApi toApi(NotificationSchemesDto dto);
 
-  @Mapping(target = "hashKey", ignore = true)
   WebhookSchemeDto toDto(WebhookSchemeApi api);
   WebhookSchemeApi toApi(WebhookSchemeDto dto);
 

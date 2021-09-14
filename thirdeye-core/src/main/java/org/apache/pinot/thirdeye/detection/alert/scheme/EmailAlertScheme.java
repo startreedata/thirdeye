@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -284,6 +286,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
       return;
     }
 
-    buildAndSendEmails(subscriptionGroup, result);
+    optional(subscriptionGroup.getNotificationSchemes()
+        .getEmailScheme()).ifPresent(e -> buildAndSendEmails(subscriptionGroup, result));
   }
 }

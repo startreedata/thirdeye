@@ -146,7 +146,7 @@ public class InternalResource {
   @Path("webhook")
   public Response webhookDummy(
       Object payload,
-      @HeaderParam("Signature") String signature
+      @HeaderParam("X-Signature") String signature
   ) throws Exception {
     log.info("========================= Webhook request ==============================");
     //replace it with relevant secret key acquired during subscription group creation

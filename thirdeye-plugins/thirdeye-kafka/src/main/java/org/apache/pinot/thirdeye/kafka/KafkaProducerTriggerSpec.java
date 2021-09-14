@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.components.triggers;
+package org.apache.pinot.thirdeye.kafka;
 
 import java.util.Collections;
 import java.util.List;

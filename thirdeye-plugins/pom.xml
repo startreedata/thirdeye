@@ -19,6 +19,7 @@
     <module>thirdeye-detection-components</module>
     <module>thirdeye-datasource-pinot</module>
     <module>thirdeye-datasource-pinot-legacy</module>
+    <module>thirdeye-kafka</module>
   </modules>
 
   <dependencies>

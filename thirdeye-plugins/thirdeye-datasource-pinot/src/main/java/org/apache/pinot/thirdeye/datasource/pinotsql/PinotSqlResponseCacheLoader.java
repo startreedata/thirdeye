@@ -21,11 +21,11 @@ package org.apache.pinot.thirdeye.datasource.pinotsql;
 
 import com.google.common.cache.CacheLoader;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 
 public abstract class PinotSqlResponseCacheLoader extends
-    CacheLoader<PinotSqlQuery, ThirdEyeResultSetGroup> {
+    CacheLoader<PinotSqlQuery, ResultSet> {
 
   /**
    * Initializes the cache loader using the given property map.

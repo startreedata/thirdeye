@@ -82,4 +82,5 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }
+
 }

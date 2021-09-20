@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,7 +55,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
   private final SmtpConfiguration smtpConfig;
 
   private final Counter emailAlertsFailedCounter;
-  private final Counter emailAlertsSucesssCounter;
+  private final Counter emailAlertsSuccessCounter;
 
   @Inject
   public EmailAlertScheme(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
@@ -96,7 +97,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
     emailWhitelist = new ArrayList<>();
 
     emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
-    emailAlertsSucesssCounter = metricRegistry.counter("emailAlertsSucesssCounter");
+    emailAlertsSuccessCounter = metricRegistry.counter("emailAlertsSuccessCounter");
   }
 
   private Set<String> retainWhitelisted(final Set<String> recipients,
@@ -272,7 +273,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
         recipients);
 
     sendEmail(email);
-    emailAlertsSucesssCounter.inc();
+    emailAlertsSuccessCounter.inc();
   }
 
   @Override
@@ -285,6 +286,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
       return;
     }
 
-    buildAndSendEmails(subscriptionGroup, result);
+    optional(subscriptionGroup.getNotificationSchemes()
+        .getEmailScheme()).ifPresent(e -> buildAndSendEmails(subscriptionGroup, result));
   }
 }

@@ -3,7 +3,7 @@ package org.apache.pinot.thirdeye.spi.detection.v2;
 import java.util.Map;
 
 
-public interface Operator<T extends DetectionPipelineResult> {
+public interface Operator {
 
   void init(OperatorContext context);
 

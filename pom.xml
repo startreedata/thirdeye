@@ -32,8 +32,6 @@
 
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
-    <module>thirdeye-datasources</module>
-    <module>thirdeye-detection-components</module>
 
     <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
     <module>thirdeye-deprecated-tests</module>
@@ -316,6 +314,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
+        <artifactId>thirdeye-datasource-pinot-legacy</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.pinot.thirdeye</groupId>
         <artifactId>thirdeye-detection-components</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -344,6 +347,17 @@
           <exclusion>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.pinot</groupId>
+        <artifactId>pinot-jdbc-client</artifactId>
+        <version>${pinot.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
           </exclusion>
         </exclusions>
       </dependency>

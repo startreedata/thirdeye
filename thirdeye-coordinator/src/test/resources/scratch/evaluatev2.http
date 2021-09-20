@@ -1,5 +1,4 @@
 ### Threshold Alert
-
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -15,16 +14,16 @@ Content-Type: application/json
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.timestamp": "ts",
-            "component.detector.metric": "met",
-            "component.detector.dimensions": [],
-            "component.detector.type": "THRESHOLD",
-            "component.detector.max": "${max}",
-            "component.detector.min": "${min}",
-            "component.detector.offset": "mo1m",
-            "component.detector.pattern": "down",
+            "type": "THRESHOLD",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.max": "${max}",
+            "component.min": "${min}",
+            "component.offset": "mo1m",
+            "component.pattern": "down",
             "anomaly.metric": "${metric}"
           },
           "inputs": [
@@ -40,8 +39,8 @@ Content-Type: application/json
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.dataSource": "${dataSource}",
-            "component.pinot.query": "SELECT DATETIMECONVERT(\"date\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -58,6 +57,8 @@ Content-Type: application/json
       "dataset": "pageviews",
       "metric": "sum(views)",
       "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
       "max": "850000",
       "min": "300000"
     }
@@ -67,177 +68,7 @@ Content-Type: application/json
 }
 
 
-###
-POST http://localhost:8080/api/alerts/evaluate
-accept: application/json
-Content-Type: application/json
-
-{
-  "alert": {
-    "name": "sample-alert",
-    "description": "sample alert description",
-    "cron": "0 0/1 * 1/1 * ? *",
-    "template": {
-      "nodes": [
-        {
-          "name": "root",
-          "type": "AnomalyDetector",
-          "params": {
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.timestamp": "ts",
-            "component.detector.metric": "met",
-            "component.detector.dimensions": [],
-            "component.detector.type": "HOLT_WINTERS",
-            "component.detector.pattern": "DOWN",
-            "component.detector.sensitivity": "1",
-            "startTime": "20200202",
-            "endTime": "20200730",
-            "timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd"
-          },
-          "inputs": [
-            {
-              "targetProperty": "baseline",
-              "sourcePlanNode": "baselineDataFetcher",
-              "sourceProperty": "baselineOutput"
-            },
-            {
-              "targetProperty": "current",
-              "sourcePlanNode": "currentDataFetcher",
-              "sourceProperty": "currentOutput"
-            }
-          ],
-          "outputs": []
-        },
-        {
-          "name": "baselineDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "baselineOutput"
-            }
-          ]
-        },
-        {
-          "name": "currentDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "currentOutput"
-            }
-          ]
-        }
-      ]
-    }
-  },
-  "start": "1577865600000",
-  "end": "1590994800000"
-}
-
-###
-
-POST http://localhost:8080/api/alerts/evaluate
-accept: application/json
-Content-Type: application/json
-
-{
-  "alert": {
-    "name": "sample-alert",
-    "description": "sample alert description",
-    "cron": "0 0/1 * 1/1 * ? *",
-    "template": {
-      "nodes": [
-        {
-          "name": "root",
-          "type": "AnomalyDetector",
-          "params": {
-            "component.detector.type": "ABSOLUTE_CHANGE",
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.absoluteChange": "100000",
-            "component.detector.offset": "wo1w",
-            "component.detector.pattern": "down",
-            "component.detector.timestamp": "ts",
-            "component.detector.timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd",
-            "component.detector.metric": "met",
-            "component.detector.dimensions": [],
-            "startTime": "20200202",
-            "endTime": "20200730",
-            "timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd"
-          },
-          "inputs": [
-            {
-              "targetProperty": "baseline",
-              "sourcePlanNode": "baselineDataFetcher",
-              "sourceProperty": "baselineOutput"
-            },
-            {
-              "targetProperty": "current",
-              "sourcePlanNode": "currentDataFetcher",
-              "sourceProperty": "currentOutput"
-            }
-          ],
-          "outputs": []
-        },
-        {
-          "name": "baselineDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "baselineOutput"
-            }
-          ]
-        },
-        {
-          "name": "currentDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "currentOutput"
-            }
-          ]
-        }
-      ]
-    }
-  },
-  "start": "1577865600000",
-  "end": "1590994800000"
-}
-
-###
-
+### Holt Winters
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -253,17 +84,85 @@ Content-Type: application/json
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.timestamp": "ts",
-            "component.detector.metric": "met",
-            "component.detector.dimensions": [],
-            "startTime": "20200221",
-            "endTime": "20200730",
-            "timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd",
-            "component.detector.type": "MEAN_VARIANCE",
-            "component.detector.lookback": "12",
-            "component.detector.sensitivity": "8"
+            "type": "HOLT_WINTERS",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.pattern": "${pattern}",
+            "component.sensitivity": "${sensitivity}",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "lookback": "7",
+      "pattern": "DOWN",
+      "sensitivity": "1"
+    }
+  },
+  "start": "1582358400000",
+  "end": "1595228400000"
+}
+
+### Absolute Change
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "dryRun": false,
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "ABSOLUTE_CHANGE",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.absoluteChange": "${absoluteChange}",
+            "component.offset": "${offset}",
+            "component.pattern": "${pattern}",
+            "anomaly.metric": "${metric}"
           },
           "inputs": [
             {
@@ -283,10 +182,8 @@ Content-Type: application/json
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -300,10 +197,8 @@ Content-Type: application/json
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -314,14 +209,25 @@ Content-Type: application/json
           ]
         }
       ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "absoluteChange": "100000",
+      "offset": "wo1w",
+      "offsetDays": "7",
+      "pattern": "down"
     }
   },
-  "start": "1577865600000",
-  "end": "1590994800000"
+  "start": "1581321600000",
+  "end": "1595228400000"
 }
 
-###
-
+### Mean Variance
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -337,18 +243,84 @@ Content-Type: application/json
           "name": "root",
           "type": "AnomalyDetector",
           "params": {
-            "component.detector.timestamp": "ts",
-            "component.detector.metric": "met",
-            "component.detector.dimensions": [],
-            "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
-            "component.detector.type": "PERCENTAGE_CHANGE",
-            "component.detector.percentageChange": "0.1",
-            "component.detector.offset": "mo1m",
-            "component.detector.pattern": "down",
-            "startTime": "20200301",
-            "endTime": "20200401",
-            "timeFormat": "SIMPLE_DATE_FORMAT:yyyyMMdd"
+            "type": "MEAN_VARIANCE",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.lookback": "${lookback}",
+            "component.sensitivity": "${sensitivity}",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "lookback": "12",
+      "sensitivity": "1"
+    }
+  },
+  "start": "1582358400000",
+  "end": "1595228400000"
+}
+
+### Percentage Change
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "dryRun": false,
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "PERCENTAGE_CHANGE",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.percentageChange": "${percentageChange}",
+            "component.offset": "${offset}",
+            "component.pattern": "${pattern}",
+            "anomaly.metric": "${metric}"
           },
           "inputs": [
             {
@@ -368,10 +340,8 @@ Content-Type: application/json
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -385,10 +355,8 @@ Content-Type: application/json
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -399,41 +367,20 @@ Content-Type: application/json
           ]
         }
       ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "percentageChange": "0.1",
+      "offset": "wo1w",
+      "offsetDays": "7",
+      "pattern": "down"
     }
   },
-  "start": "1577865600000",
-  "end": "1590994800000"
-}
-
-
-###
-
-POST http://localhost:8080/api/alerts/evaluate
-accept: application/json
-Content-Type: application/json
-
-{
-  "alert": {
-    "name": "sample-data-fetcher",
-    "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
-    "template": {
-      "nodes": [
-        {
-          "name": "root",
-          "type": "DataFetcher",
-          "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
-            "component.pinot.tableName": "pageviews"
-          },
-          "inputs": [],
-          "outputs": []
-        }
-      ]
-    }
-  },
-  "start": "1577865600000",
-  "end": "1590994800000"
+  "start": "1581321600000",
+  "end": "1595228400000"
 }

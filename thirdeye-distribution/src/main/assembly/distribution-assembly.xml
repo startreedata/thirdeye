@@ -57,12 +57,24 @@
       <outputDirectory>plugins/example/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-datasources/target/thirdeye-datasources-${project.version}-dist</directory>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-datasources/target/thirdeye-datasources-${project.version}-dist</directory>
       <outputDirectory>plugins/datasources-default/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-detection-components/target/thirdeye-detection-components-${project.version}-dist</directory>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-datasource-pinot/target/thirdeye-datasource-pinot-${project.version}-dist</directory>
+      <outputDirectory>plugins/datasource-pinot/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-datasource-pinot-legacy/target/thirdeye-datasource-pinot-legacy-${project.version}-dist</directory>
+      <outputDirectory>plugins/datasource-pinot-legacy/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-detection-components/target/thirdeye-detection-components-${project.version}-dist</directory>
       <outputDirectory>plugins/detection-components/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-kafka/target/thirdeye-kafka-${project.version}-dist</directory>
+      <outputDirectory>plugins/kafka/</outputDirectory>
     </fileSet>
 
   </fileSets>

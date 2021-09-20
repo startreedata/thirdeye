@@ -7,6 +7,7 @@ import com.google.common.base.Objects;
 @JsonInclude(Include.NON_NULL)
 public class WebhookSchemeApi {
   private String url;
+  private String hashKey;
 
   public String getUrl() {
     return url;
@@ -14,6 +15,15 @@ public class WebhookSchemeApi {
 
   public WebhookSchemeApi setUrl(final String url) {
     this.url = url;
+    return this;
+  }
+
+  public String getHashKey() {
+    return hashKey;
+  }
+
+  public WebhookSchemeApi setHashKey(final String hashKey) {
+    this.hashKey = hashKey;
     return this;
   }
 

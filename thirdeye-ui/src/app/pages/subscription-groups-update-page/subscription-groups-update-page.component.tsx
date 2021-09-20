@@ -63,8 +63,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             return;
         }
 
-        updateSubscriptionGroup(subscriptionGroup)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
+        updateSubscriptionGroup(subscriptionGroup).then(
+            (subscriptionGroup: SubscriptionGroup): void => {
                 enqueueSnackbar(
                     t("message.update-success", {
                         entity: t("label.subscription-group"),
@@ -76,15 +76,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 history.push(
                     getSubscriptionGroupsViewPath(subscriptionGroup.id)
                 );
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.update-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
+            }
+        );
     };
 
     const fetchSubscriptionGroup = (): void => {
@@ -107,17 +100,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             getAllAlerts(),
         ])
             .then(([subscriptionGroupResponse, alertsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
                 // Attempt to gather data
                 if (subscriptionGroupResponse.status === "fulfilled") {
                     setSubscriptionGroup(subscriptionGroupResponse.value);

@@ -94,7 +94,10 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
         setAxiosResponseInterceptorId(
             axios.interceptors.response.use(
                 getFulfilledResponseInterceptor(),
-                getRejectedResponseInterceptor(handleUnauthenticatedAccess)
+                getRejectedResponseInterceptor(
+                    handleUnauthenticatedAccess,
+                    enqueueSnackbar
+                )
             )
         );
     };
@@ -125,11 +128,6 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
 
             setAccessToken(auth.accessToken);
         } catch (error) {
-            enqueueSnackbar(
-                t("message.sign-in-error"),
-                getErrorSnackbarOption()
-            );
-
             return false;
         }
 

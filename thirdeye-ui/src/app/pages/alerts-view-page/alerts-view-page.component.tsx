@@ -90,17 +90,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             getAllSubscriptionGroups(),
         ])
             .then(([alertResponse, subscriptionGroupsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    alertResponse.status === "rejected" ||
-                    subscriptionGroupsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
                 // Attempt to gather data
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =
@@ -139,12 +128,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             .then((alertEvaluation) => {
                 fetchedAlertEvaluation = alertEvaluation;
             })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
-            )
             .finally(() => setAlertEvaluation(fetchedAlertEvaluation));
     };
 
@@ -153,22 +136,15 @@ export const AlertsViewPage: FunctionComponent = () => {
             return;
         }
 
-        updateAlert(uiAlert.alert)
-            .then((alert) => {
-                enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Replace updated alert as fetched alert
-                setUiAlert(getUiAlert(alert, subscriptionGroups));
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                )
+        updateAlert(uiAlert.alert).then((alert) => {
+            enqueueSnackbar(
+                t("message.update-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
             );
+
+            // Replace updated alert as fetched alert
+            setUiAlert(getUiAlert(alert, subscriptionGroups));
+        });
     };
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
@@ -181,22 +157,15 @@ export const AlertsViewPage: FunctionComponent = () => {
     };
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
-        deleteAlert(uiAlert.id)
-            .then(() => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Redirect to alerts all path
-                history.push(getAlertsAllPath());
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                )
+        deleteAlert(uiAlert.id).then(() => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
             );
+
+            // Redirect to alerts all path
+            history.push(getAlertsAllPath());
+        });
     };
 
     return (

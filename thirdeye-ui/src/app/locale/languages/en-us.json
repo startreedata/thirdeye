@@ -139,18 +139,14 @@
         "type": "Type"
     },
     "message": {
-        "error": "Error",
         "page-not-found": "Requested page could not be found",
         "sign-in-error": "Unable to sign in",
         "signed-out": "You have been signed out",
         "no-data": "No data available",
         "no-search-results": "No search results available",
         "invalid-id": "Invalid {{entity}} id {{id}}",
-        "fetch-error": "Error fetching data",
         "create-success": "{{entity}} created successfully",
-        "create-error": "Error creating {{entity}}",
         "update-success": "{{entity}} updated successfully",
-        "update-error": "Error updating {{entity}}",
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
         "delete-error": "Error deleting {{entity}}",

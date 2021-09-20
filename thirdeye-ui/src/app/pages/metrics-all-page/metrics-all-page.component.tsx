@@ -11,10 +11,7 @@ import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
 import { getUiMetrics } from "../../utils/metrics/metrics.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
     const [uiMetrics, setUiMetrics] = useState<UiMetric[] | null>(null);
@@ -41,12 +38,6 @@ export const MetricsAllPage: FunctionComponent = () => {
             .then((metrics) => {
                 fetchedUiMetrics = getUiMetrics(metrics);
             })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
-            )
             .finally(() => setUiMetrics(fetchedUiMetrics));
     };
 
@@ -60,22 +51,15 @@ export const MetricsAllPage: FunctionComponent = () => {
     };
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
-        deleteMetric(uiMetric.id)
-            .then((metric) => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.metric") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted metric from fetched metrics
-                removeUiMetric(metric);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.metric") }),
-                    getErrorSnackbarOption()
-                )
+        deleteMetric(uiMetric.id).then((metric) => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.metric") }),
+                getSuccessSnackbarOption()
             );
+
+            // Remove deleted metric from fetched metrics
+            removeUiMetric(metric);
+        });
     };
 
     const removeUiMetric = (metric: Metric): void => {

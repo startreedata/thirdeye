@@ -14,10 +14,7 @@ import {
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
@@ -47,12 +44,6 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             .then((anomalies) => {
                 fetchedUiAnomalies = getUiAnomalies(anomalies);
             })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
-            )
             .finally(() => setUiAnomalies(fetchedUiAnomalies));
     };
 
@@ -66,22 +57,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
-        deleteAnomaly(uiAnomaly.id)
-            .then((anomaly): void => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.anomaly") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted anomaly from fetched anomalies
-                removeUiAnomaly(anomaly);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.anomaly") }),
-                    getErrorSnackbarOption()
-                )
+        deleteAnomaly(uiAnomaly.id).then((anomaly): void => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.anomaly") }),
+                getSuccessSnackbarOption()
             );
+
+            // Remove deleted anomaly from fetched anomalies
+            removeUiAnomaly(anomaly);
+        });
     };
 
     const removeUiAnomaly = (anomaly: Anomaly): void => {

@@ -21,10 +21,7 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
@@ -45,59 +42,44 @@ export const AlertsCreatePage: FunctionComponent = () => {
             return;
         }
 
-        createAlert(alert)
-            .then((alert: Alert): void => {
-                enqueueSnackbar(
-                    t("message.create-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
+        createAlert(alert).then((alert: Alert): void => {
+            enqueueSnackbar(
+                t("message.create-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
+            );
 
-                if (isEmpty(subscriptionGroups)) {
+            if (isEmpty(subscriptionGroups)) {
+                // Redirect to alerts detail path
+                history.push(getAlertsViewPath(alert.id));
+
+                return;
+            }
+
+            // Update subscription groups with new alert
+            for (const subscriptionGroup of subscriptionGroups) {
+                if (subscriptionGroup.alerts) {
+                    // Add to existing list
+                    subscriptionGroup.alerts.push(alert);
+                } else {
+                    // Create and add to list
+                    subscriptionGroup.alerts = [alert];
+                }
+            }
+
+            updateSubscriptionGroups(subscriptionGroups)
+                .then((): void => {
+                    enqueueSnackbar(
+                        t("message.update-success", {
+                            entity: t("label.subscription-groups"),
+                        }),
+                        getSuccessSnackbarOption()
+                    );
+                })
+                .finally((): void => {
                     // Redirect to alerts detail path
                     history.push(getAlertsViewPath(alert.id));
-
-                    return;
-                }
-
-                // Update subscription groups with new alert
-                for (const subscriptionGroup of subscriptionGroups) {
-                    if (subscriptionGroup.alerts) {
-                        // Add to existing list
-                        subscriptionGroup.alerts.push(alert);
-                    } else {
-                        // Create and add to list
-                        subscriptionGroup.alerts = [alert];
-                    }
-                }
-
-                updateSubscriptionGroups(subscriptionGroups)
-                    .then((): void => {
-                        enqueueSnackbar(
-                            t("message.update-success", {
-                                entity: t("label.subscription-groups"),
-                            }),
-                            getSuccessSnackbarOption()
-                        );
-                    })
-                    .catch((): void => {
-                        enqueueSnackbar(
-                            t("message.update-error", {
-                                entity: t("label.subscription-groups"),
-                            }),
-                            getErrorSnackbarOption()
-                        );
-                    })
-                    .finally((): void => {
-                        // Redirect to alerts detail path
-                        history.push(getAlertsViewPath(alert.id));
-                    });
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.create-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                );
-            });
+                });
+        });
     };
 
     const onSubscriptionGroupWizardFinish = async (
@@ -120,12 +102,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 getSuccessSnackbarOption()
             );
         } catch (error) {
-            enqueueSnackbar(
-                t("message.create-error", {
-                    entity: t("label.subscription-group"),
-                }),
-                getErrorSnackbarOption()
-            );
+            // Empty
         }
 
         return newSubscriptionGroup;
@@ -138,7 +115,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+            // Empty
         }
 
         return fetchedSubscriptionGroups;
@@ -149,7 +126,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+            // Empty
         }
 
         return fetchedAlerts;
@@ -168,7 +145,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 )
             );
         } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+            // Empty
         }
 
         return fetchedAlertEvaluation;

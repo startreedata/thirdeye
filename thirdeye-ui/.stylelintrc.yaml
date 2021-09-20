@@ -11,10 +11,12 @@ rules:
     # Require whitespace padding in comments
     comment-whitespace-inside: always
 
-    # Require an empty line before rules except rules that follow comments
+    # Require an empty line before rules except first nested rule or rules that follow comments
     rule-empty-line-before:
         - always
-        - ignore: after-comment
+        - ignore:
+              - first-nested
+              - after-comment
 
     # Require lowercase property/values
     property-case: lower
@@ -34,7 +36,7 @@ rules:
     # Require a leading zero for fractional numbers less than 1
     number-leading-zero: always
 
-    # Disallow trailing zreos in numbers
+    # Disallow trailing zeros in numbers
     number-no-trailing-zeros: true
 
     # Require generic family in list of font family names

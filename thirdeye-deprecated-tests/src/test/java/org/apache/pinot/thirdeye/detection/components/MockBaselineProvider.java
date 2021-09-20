@@ -16,20 +16,25 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 
 public class MockBaselineProvider implements BaselineProvider<MockBaselineProviderSpec> {
 
   private MockBaselineProviderSpec mockSpec;
 
   @Override
-  public void init(MockBaselineProviderSpec spec, InputDataFetcher dataFetcher) {
+  public void init(final MockBaselineProviderSpec spec) {
     this.mockSpec = spec;
+  }
+
+  @Override
+  public void init(MockBaselineProviderSpec spec, InputDataFetcher dataFetcher) {
+    init(spec);
   }
 
   @Override

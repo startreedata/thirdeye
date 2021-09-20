@@ -2,8 +2,8 @@ package org.apache.pinot.thirdeye.alert;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,14 +11,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
-import org.apache.pinot.thirdeye.detection.onboard.YamlOnboardingTaskInfo;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.mapper.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
+import org.apache.pinot.thirdeye.task.YamlOnboardingTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,9 +105,9 @@ public class AlertCreater {
     }
 
     final TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,
-        TaskConstants.TaskType.YAML_DETECTION_ONBOARD);
+        TaskType.ONBOARDING);
     final long taskId = taskManager.save(taskDTO);
-    LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.YAML_DETECTION_ONBOARD,
+    LOG.info("Created {} task {} with taskId {}", TaskType.ONBOARDING,
         taskDTO, taskId);
   }
 }

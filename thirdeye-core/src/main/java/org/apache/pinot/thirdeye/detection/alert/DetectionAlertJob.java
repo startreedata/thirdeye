@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.scheduler.ThirdEyeAbstractJob;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -34,6 +33,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
+import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -69,23 +71,23 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     // check if a task for this detection alerter is already scheduled
     String jobName = String
-        .format("%s_%d", TaskConstants.TaskType.DETECTION_ALERT, detectionAlertConfigId);
+        .format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
     List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
         Predicate.EQ("name", jobName),
         Predicate.OR(
-            Predicate.EQ("status", TaskConstants.TaskStatus.RUNNING.toString()),
-            Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString())
+            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+            Predicate.EQ("status", TaskStatus.WAITING.toString())
         ))
     );
     if (!scheduledTasks.isEmpty()) {
       // if a task is pending and not time out yet, don't schedule more
-      LOG.info("Skip scheduling subscription task {}. Already queued.", jobName);
+      LOG.trace("Skip scheduling subscription task {}. Already queued.", jobName);
       return;
     }
 
     if (configDTO != null && !needNotification(configDTO, anomalyDAO,
         anomalySubscriptionGroupNotificationDAO)) {
-      LOG.info("Skip scheduling subscription task {}. No anomaly to notify.", jobName);
+      LOG.trace("Skip scheduling subscription task {}. No anomaly to notify.", jobName);
       return;
     }
 
@@ -97,9 +99,9 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     }
 
     TaskDTO taskDTO = TaskUtils
-        .buildTask(detectionAlertConfigId, taskInfoJson, TaskConstants.TaskType.DETECTION_ALERT);
+        .buildTask(detectionAlertConfigId, taskInfoJson, TaskType.NOTIFICATION);
     long taskId = taskDAO.save(taskDTO);
-    LOG.info("Created {} task {} with settings {}", TaskConstants.TaskType.DETECTION_ALERT, taskId,
+    LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskId,
         taskDTO);
   }
 

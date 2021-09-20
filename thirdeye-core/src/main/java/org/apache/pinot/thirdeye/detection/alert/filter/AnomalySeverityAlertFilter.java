@@ -30,14 +30,15 @@ import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFilter;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertFilter;
@@ -126,10 +127,12 @@ public class AnomalySeverityAlertFilter extends StatefulDetectionAlertFilter {
           notifyAnomalies.add(anomaly);
         }
       }
+      System.out.println(ConfigUtils.getMap(severityRecipient.get(PROP_NOTIFY)));
 
+      // TODO pass proper argument when SubscriptionGroupDto-> properties is refactored
       if (!notifyAnomalies.isEmpty()) {
         SubscriptionGroupDTO subsConfig = SubscriptionUtils.makeChildSubscriptionConfig(config,
-            ConfigUtils.getMap(severityRecipient.get(PROP_NOTIFY)),
+            new NotificationSchemesDto(),
             ConfigUtils.getMap(severityRecipient.get(PROP_REF_LINKS)));
         result.addMapping(new DetectionAlertFilterNotification(subsConfig), notifyAnomalies);
       }

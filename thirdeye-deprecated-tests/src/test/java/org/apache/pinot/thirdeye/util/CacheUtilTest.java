@@ -19,9 +19,10 @@
 
 package org.apache.pinot.thirdeye.util;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import com.couchbase.client.java.document.json.JsonObject;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesDataPoint;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -58,16 +59,16 @@ public class CacheUtilTest {
 
   @Test
   public void testHashMetricUrn() {
-    Assert.assertEquals(metricUrnHash, CacheUtils.hashMetricUrn(metricUrn));
+    assertThat(metricUrnHash).isEqualTo(CacheUtils.hashMetricUrn(metricUrn));
   }
 
   @Test
   public void testBuildDocumentStructureShouldMapToJsonObject() {
     JsonObject mappedDataPoint = CacheUtils.buildDocumentStructure(dataPoint);
 
-    Assert.assertEquals(mappedDataPoint.getLong("timestamp").longValue(), 1234567);
-    Assert.assertEquals(mappedDataPoint.getLong("metricId").longValue(), 1);
-    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double) 100);
+    assertThat(mappedDataPoint.getLong("timestamp").longValue()).isEqualTo(1234567);
+    assertThat(mappedDataPoint.getLong("metricId").longValue()).isEqualTo(1);
+    assertThat(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash())).isEqualTo(100);
   }
 
   @Test
@@ -75,7 +76,7 @@ public class CacheUtilTest {
     dataPoint.setDataValue(null);
     JsonObject mappedDataPoint = CacheUtils.buildDocumentStructure(dataPoint);
 
-    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double) 0);
+    assertThat(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash())).isEqualTo(0);
   }
 
   @Test
@@ -83,7 +84,7 @@ public class CacheUtilTest {
     dataPoint.setDataValue("null");
     JsonObject mappedDataPoint = CacheUtils.buildDocumentStructure(dataPoint);
 
-    Assert.assertEquals(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash()), (double) 0);
+    assertThat(mappedDataPoint.getDouble(dataPoint.getMetricUrnHash())).isEqualTo(0);
   }
 
   @Test
@@ -97,6 +98,6 @@ public class CacheUtilTest {
     String query = CacheUtils.buildQuery(jsonObject);
     String expectedQuery = "SELECT timestamp, `624972944` FROM `TestBucket` WHERE metricId = 1 AND `624972944` IS NOT MISSING AND timestamp BETWEEN 100 AND 200 ORDER BY time ASC";
 
-    Assert.assertEquals(query, expectedQuery);
+    assertThat(query).isEqualTo(expectedQuery);
   }
 }

@@ -20,6 +20,7 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.io.IOException;
@@ -28,16 +29,52 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyNotifiedStatus;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertSnapshotBean;
+import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyNotifiedStatus;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AlertSnapshotDTO extends AlertSnapshotBean {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AlertSnapshotDTO extends AbstractDTO {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertSnapshotDTO.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  protected long lastNotifyTime;
+
+  // key: metric::dimension
+  protected Map<String, List<String>> snapshotString;
+
+  public long getLastNotifyTime() {
+    return lastNotifyTime;
+  }
+
+  public void setLastNotifyTime(long lastNotifyTime) {
+    this.lastNotifyTime = lastNotifyTime;
+  }
+
+  public Map<String, List<String>> getSnapshotString() {
+    return snapshotString;
+  }
+
+  public void setSnapshotString(Map<String, List<String>> snapshot) {
+    this.snapshotString = snapshot;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof AlertSnapshotDTO)) {
+      return false;
+    }
+    AlertSnapshotDTO as = (AlertSnapshotDTO) o;
+    return Objects.equals(snapshotString, as.getSnapshotString()) && Objects
+        .equals(lastNotifyTime, as.getLastNotifyTime());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(snapshotString, lastNotifyTime);
+  }
 
   public Multimap<String, AnomalyNotifiedStatus> getSnapshot() {
     Multimap<String, AnomalyNotifiedStatus> snapshot = HashMultimap.create();

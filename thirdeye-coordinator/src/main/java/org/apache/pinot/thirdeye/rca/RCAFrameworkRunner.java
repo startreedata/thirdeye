@@ -44,12 +44,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfiguration;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
-import org.apache.pinot.thirdeye.datalayer.util.PersistenceConfig;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
@@ -129,13 +127,12 @@ public class RCAFrameworkRunner {
     File config = new File(cmd.getOptionValue(CLI_THIRDEYE_CONFIG));
 
     File daoConfig = new File(config.getAbsolutePath() + "/persistence.yml");
-    final PersistenceConfig configuration = PersistenceConfig.readPersistenceConfig(daoConfig);
-    final DatabaseConfiguration dbConfig = configuration.getDatabaseConfiguration();
+    final DatabaseConfiguration dbConfig = new DatabaseConfiguration();
 
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
     Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
 
-    ThirdEyeConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
+    ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());
 
     injector.getInstance(ThirdEyeCacheRegistry.class)
@@ -144,7 +141,6 @@ public class RCAFrameworkRunner {
     // ************************************************************************
     // Framework setup
     // ************************************************************************
-    File rcaConfig = new File(cmd.getOptionValue(CLI_ROOTCAUSE_CONFIG));
     List<Pipeline> pipelines = injector.getInstance(RCAFrameworkLoader.class)
         .getPipelinesFromConfig(cmd.getOptionValue(CLI_FRAMEWORK));
 

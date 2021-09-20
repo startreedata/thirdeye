@@ -32,9 +32,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.SessionDTO;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +45,11 @@ public class ThirdEyeLdapAuthenticator implements
 
   private final List<String> domainSuffix;
   private final String ldapUrl;
-  private final SessionManager sessionDAO;
   private String ldapContextFactory;
 
-  public ThirdEyeLdapAuthenticator(List<String> domainSuffix, String ldapUrl,
-      SessionManager sessionDAO) {
+  public ThirdEyeLdapAuthenticator(List<String> domainSuffix, String ldapUrl) {
     this.domainSuffix = domainSuffix;
     this.ldapUrl = ldapUrl;
-    this.sessionDAO = sessionDAO;
     this.ldapContextFactory = LDAP_CONTEXT_FACTORY;
   }
 
@@ -116,14 +111,6 @@ public class ThirdEyeLdapAuthenticator implements
   public Optional<ThirdEyePrincipal> authenticate(ThirdEyeCredentials credentials)
       throws AuthenticationException {
     try {
-      if (StringUtils.isNotBlank(credentials.getToken())) {
-        SessionDTO sessionDTO = this.sessionDAO.findBySessionKey(credentials.getToken());
-        if (sessionDTO != null && System.currentTimeMillis() < sessionDTO.getExpirationTime()) {
-          return Optional
-              .of(new ThirdEyePrincipal(credentials.getPrincipal(), credentials.getToken()));
-        }
-      }
-
       String username = credentials.getPrincipal();
       String password = credentials.getPassword();
 
@@ -204,8 +191,8 @@ public class ThirdEyeLdapAuthenticator implements
    */
   private class AuthenticationResults {
 
-    private boolean isAuthenticated = false;
     private final List<String> messages = new ArrayList<>();
+    private boolean isAuthenticated = false;
 
     /**
      * Sets the authentication status to the given result and append the message to the message

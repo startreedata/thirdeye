@@ -162,11 +162,12 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
         setToListMap(newToListMap);
 
         // Update from-list map
-        setFromListMap(
-            produce((draft) => {
-                draft.delete(key);
-            })
-        );
+        setFromListMap((fromList) => {
+            const newFromListMap = new Map(fromList);
+            newFromListMap.delete(key);
+
+            return newFromListMap;
+        });
 
         props.onChange && props.onChange([...newToListMap.values()]);
     };

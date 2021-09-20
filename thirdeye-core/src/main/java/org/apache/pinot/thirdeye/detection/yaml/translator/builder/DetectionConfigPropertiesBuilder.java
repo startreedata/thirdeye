@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
@@ -37,6 +36,7 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttrib
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 /**
@@ -181,9 +181,16 @@ public abstract class DetectionConfigPropertiesBuilder {
 
   void buildComponentSpec(String metricUrn, Map<String, Object> yamlConfig,
       String componentRefKey) {
-    Map<String, Object> componentSpecs = new HashMap<>();
-    String componentKey = DetectionUtils.getComponentKey(componentRefKey);
-    String componentClassName = DETECTION_REGISTRY
+    final Map<String, Object> componentSpecs = new HashMap<>();
+
+    if (yamlConfig.containsKey(PROP_NAME)) {
+      componentSpecs.put(PROP_NAME, yamlConfig.get(PROP_NAME));
+    }
+    if (yamlConfig.containsKey(PROP_TYPE)) {
+      componentSpecs.put(PROP_TYPE, yamlConfig.get(PROP_TYPE));
+    }
+    final String componentKey = DetectionUtils.getComponentKey(componentRefKey);
+    final String componentClassName = DETECTION_REGISTRY
         .lookup(DetectionUtils.getComponentType(componentKey));
     componentSpecs.put(PROP_CLASS_NAME, componentClassName);
     if (metricUrn != null) {

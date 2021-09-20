@@ -10,30 +10,31 @@ import com.google.inject.Singleton;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AlertSnapshotManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalyFunctionManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.AnomalySubscriptionGroupNotificationManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.ApplicationManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DataSourceManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DatasetConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.DetectionStatusManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EntityToEntityMappingManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EvaluationManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.EventManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.GroupedAnomalyResultsManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.JobManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MergedAnomalyResultManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.MetricConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnboardDatasetMetricManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OnlineDetectionDataManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.OverrideConfigManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseSessionManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.RootcauseTemplateManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SessionManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.SubscriptionGroupManagerImpl;
-import org.apache.pinot.thirdeye.datalayer.bao.jdbc.TaskManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertSnapshotManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.AnomalyFunctionManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.ApplicationManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.DataSourceManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.DetectionStatusManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.EntityToEntityMappingManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.EvaluationManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.EventManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.GroupedAnomalyResultsManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.JobManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.MergedAnomalyResultManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.MetricConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.OnboardDatasetMetricManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.OverrideConfigManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.RootcauseSessionManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.RootcauseTemplateManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.SubscriptionGroupManagerImpl;
+import org.apache.pinot.thirdeye.datalayer.bao.TaskManagerImpl;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
+import org.apache.pinot.thirdeye.datalayer.entity.AlertTemplateIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.ApplicationIndex;
@@ -54,11 +55,11 @@ import org.apache.pinot.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.OverrideConfigIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseSessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.RootcauseTemplateIndex;
-import org.apache.pinot.thirdeye.datalayer.entity.SessionIndex;
 import org.apache.pinot.thirdeye.datalayer.entity.TaskIndex;
 import org.apache.pinot.thirdeye.datalayer.util.EntityMappingHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
@@ -77,7 +78,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.SessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -85,28 +85,31 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 public class ThirdEyePersistenceModule extends AbstractModule {
 
   private static final List<Class<? extends AbstractEntity>> ENTITY_CLASSES = Arrays.asList(
+      // Main data table
       GenericJsonEntity.class,
+
+      // All index tables
+      AlertTemplateIndex.class,
       AnomalyFeedbackIndex.class,
-      JobIndex.class,
-      MergedAnomalyResultIndex.class,
-      TaskIndex.class,
+      AnomalySubscriptionGroupNotificationIndex.class,
+      ApplicationIndex.class,
       DataSourceIndex.class,
       DatasetConfigIndex.class,
-      MetricConfigIndex.class,
-      OverrideConfigIndex.class,
-      EventIndex.class,
+      DetectionAlertConfigIndex.class,
+      DetectionConfigIndex.class,
       DetectionStatusIndex.class,
       EntityToEntityMappingIndex.class,
-      OnboardDatasetMetricIndex.class,
-      ApplicationIndex.class,
-      RootcauseSessionIndex.class,
-      SessionIndex.class,
-      DetectionConfigIndex.class,
-      DetectionAlertConfigIndex.class,
       EvaluationIndex.class,
-      RootcauseTemplateIndex.class,
+      EventIndex.class,
+      JobIndex.class,
+      MergedAnomalyResultIndex.class,
+      MetricConfigIndex.class,
+      OnboardDatasetMetricIndex.class,
       OnlineDetectionDataIndex.class,
-      AnomalySubscriptionGroupNotificationIndex.class
+      OverrideConfigIndex.class,
+      RootcauseSessionIndex.class,
+      RootcauseTemplateIndex.class,
+      TaskIndex.class
   );
 
   private final DataSource dataSource;
@@ -146,8 +149,8 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(RootcauseSessionManager.class).to(RootcauseSessionManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
         .in(Scopes.SINGLETON);
-    bind(SessionManager.class).to(SessionManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
+    bind(AlertTemplateManager.class).to(AlertTemplateManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(EvaluationManager.class).to(EvaluationManagerImpl.class).in(Scopes.SINGLETON);

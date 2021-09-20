@@ -127,6 +127,9 @@ rules:
         - fn: it
           withinDescribe: it
 
+    # Disallow skipped/disabled tests
+    jest/no-disabled-tests: error
+
     # eslint-plugin-jest-formatting rules
 
     # Require blank line before certain statements (ESLint rules don't work with Jest)

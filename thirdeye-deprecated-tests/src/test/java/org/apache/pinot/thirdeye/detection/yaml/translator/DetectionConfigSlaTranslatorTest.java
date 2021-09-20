@@ -11,9 +11,9 @@ import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockGrouper;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
-import org.apache.pinot.thirdeye.detection.dataquality.components.DataSlaQualityChecker;
+import org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -73,7 +73,8 @@ public class DetectionConfigSlaTranslatorTest {
   @Test
   public void testSlaTranslation() throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream("sla-config-1.yaml"), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream("sla-config-1.yaml"),
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER
@@ -86,7 +87,8 @@ public class DetectionConfigSlaTranslatorTest {
   @Test
   public void testDetectionAndSlaTranslation() throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream("sla-config-2.yaml"), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream("sla-config-2.yaml"),
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER
@@ -99,7 +101,8 @@ public class DetectionConfigSlaTranslatorTest {
   @Test
   public void testMultipleDetectionFilterAndSlaTranslation() throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream("sla-config-3.yaml"), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream("sla-config-3.yaml"),
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER
@@ -112,7 +115,8 @@ public class DetectionConfigSlaTranslatorTest {
   @Test
   public void testSlaTranslationWithSingleMetricEntityAlert() throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream("sla-config-4.yaml"), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream("sla-config-4.yaml"),
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER
@@ -125,7 +129,8 @@ public class DetectionConfigSlaTranslatorTest {
   @Test
   public void testSlaTranslationWithMultiMetricEntityAlert() throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream("sla-config-5.yaml"), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream("sla-config-5.yaml"),
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER

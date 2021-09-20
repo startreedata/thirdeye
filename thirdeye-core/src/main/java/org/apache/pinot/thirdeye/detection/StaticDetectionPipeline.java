@@ -30,10 +30,10 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.InputData;
+import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 
 /**
  * StaticDetectionPipeline serves as the foundation for custom detection algorithms.

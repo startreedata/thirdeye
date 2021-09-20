@@ -13,9 +13,9 @@ import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockGrouper;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.ThresholdSeverityLabeler;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -82,7 +82,7 @@ public class DetectionConfigTranslatorTest {
   public void testBuildPropertiesFull() throws Exception {
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("pipeline-config-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(
@@ -96,7 +96,7 @@ public class DetectionConfigTranslatorTest {
   public void testBuildDetectionPropertiesNoFilter() throws Exception {
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("pipeline-config-2.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(
@@ -122,7 +122,7 @@ public class DetectionConfigTranslatorTest {
   public void testMultipleGrouperLogic() throws Exception {
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("pipeline-config-3.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     translator.translate();
   }
@@ -131,7 +131,7 @@ public class DetectionConfigTranslatorTest {
   public void testBuildEntityTranslationWithOneMetric() throws Exception {
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("pipeline-config-4.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(
@@ -145,7 +145,7 @@ public class DetectionConfigTranslatorTest {
   public void testBuildEntityTranslationWithMultipleMetrics() throws Exception {
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("pipeline-config-5.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString().toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO result = translator.translate();
     YamlTranslationResult expected = OBJECT_MAPPER.readValue(

@@ -25,9 +25,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
 public class DetectionTestUtils {

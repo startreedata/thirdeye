@@ -1,0 +1,14 @@
+[
+  {
+    "name": "newAlert",
+    "description": "This is the detection used by online service",
+    "cron": "0 0/1 * 1/1 * ? * ",
+    "template": {
+      "name": "newAlertTemplateWithProp"
+    },
+    "templateProperties": {
+      "percentageChangeValue": 0.1
+    },
+    "lastTimestamp": 0
+  }
+]

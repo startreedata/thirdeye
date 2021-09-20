@@ -27,9 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.TaskBean;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
 
 /**
  * The detection task status for a detection config
@@ -54,11 +53,11 @@ public class DetectionTaskStatus {
 
   // the counting for detection task status
   @JsonProperty
-  private final Map<TaskConstants.TaskStatus, Long> taskCounts = new HashMap<TaskConstants.TaskStatus, Long>() {{
-    put(TaskConstants.TaskStatus.COMPLETED, 0L);
-    put(TaskConstants.TaskStatus.FAILED, 0L);
-    put(TaskConstants.TaskStatus.WAITING, 0L);
-    put(TaskConstants.TaskStatus.TIMEOUT, 0L);
+  private final Map<TaskStatus, Long> taskCounts = new HashMap<TaskStatus, Long>() {{
+    put(TaskStatus.COMPLETED, 0L);
+    put(TaskStatus.FAILED, 0L);
+    put(TaskStatus.WAITING, 0L);
+    put(TaskStatus.TIMEOUT, 0L);
   }};
 
   // the list of tasks for the detection config
@@ -69,7 +68,7 @@ public class DetectionTaskStatus {
   private static final double TASK_SUCCESS_RATE_MODERATE_THRESHOLD = 0.8;
 
   public DetectionTaskStatus(double taskSuccessRate, HealthStatus healthStatus,
-      Map<TaskConstants.TaskStatus, Long> counts, List<TaskDTO> tasks, long lastTaskExecutionTime) {
+      Map<TaskStatus, Long> counts, List<TaskDTO> tasks, long lastTaskExecutionTime) {
     this.taskSuccessRate = taskSuccessRate;
     this.healthStatus = healthStatus;
     this.tasks = tasks;
@@ -97,15 +96,15 @@ public class DetectionTaskStatus {
     return tasks;
   }
 
-  public Map<TaskConstants.TaskStatus, Long> getTaskCounts() {
+  public Map<TaskStatus, Long> getTaskCounts() {
     return taskCounts;
   }
 
   public static DetectionTaskStatus fromTasks(List<TaskDTO> tasks, long lastTaskExecutionTime) {
     // count the number of tasks by task status
-    tasks.sort(Comparator.comparingLong(TaskBean::getStartTime).reversed());
-    Map<TaskConstants.TaskStatus, Long> counts =
-        tasks.stream().collect(Collectors.groupingBy(TaskBean::getStatus, Collectors.counting()));
+    tasks.sort(Comparator.comparingLong(TaskDTO::getStartTime).reversed());
+    Map<TaskStatus, Long> counts =
+        tasks.stream().collect(Collectors.groupingBy(TaskDTO::getStatus, Collectors.counting()));
     double taskSuccessRate = getTaskSuccessRate(counts);
     long newTaskExecutionTime = getLastSuccessTaskExecutionTime(tasks);
     newTaskExecutionTime =
@@ -125,9 +124,9 @@ public class DetectionTaskStatus {
   public static DetectionTaskStatus fromTasks(List<TaskDTO> tasks, long lastTaskExecutionTime,
       long taskLimit) {
     // count the number of tasks by task status
-    tasks.sort(Comparator.comparingLong(TaskBean::getStartTime).reversed());
-    Map<TaskConstants.TaskStatus, Long> counts =
-        tasks.stream().collect(Collectors.groupingBy(TaskBean::getStatus, Collectors.counting()));
+    tasks.sort(Comparator.comparingLong(TaskDTO::getStartTime).reversed());
+    Map<TaskStatus, Long> counts =
+        tasks.stream().collect(Collectors.groupingBy(TaskDTO::getStatus, Collectors.counting()));
     double taskSuccessRate = getTaskSuccessRate(counts);
     long newTaskExecutionTime = getLastSuccessTaskExecutionTime(tasks);
     newTaskExecutionTime =
@@ -140,18 +139,18 @@ public class DetectionTaskStatus {
 
   private static Long getLastSuccessTaskExecutionTime(List<TaskDTO> tasks) {
     return tasks.stream()
-        .filter(task -> task.getStatus().equals(TaskConstants.TaskStatus.COMPLETED))
-        .map(TaskBean::getEndTime)
+        .filter(task -> task.getStatus().equals(TaskStatus.COMPLETED))
+        .map(TaskDTO::getEndTime)
         .findFirst()
         .orElse(-1L);
   }
 
-  private static double getTaskSuccessRate(Map<TaskConstants.TaskStatus, Long> counts) {
+  private static double getTaskSuccessRate(Map<TaskStatus, Long> counts) {
     if (counts.size() != 0) {
-      long completedTasks = counts.getOrDefault(TaskConstants.TaskStatus.COMPLETED, 0L);
-      long failedTasks = counts.getOrDefault(TaskConstants.TaskStatus.FAILED, 0L);
-      long timeoutTasks = counts.getOrDefault(TaskConstants.TaskStatus.TIMEOUT, 0L);
-      long waitingTasks = counts.getOrDefault(TaskConstants.TaskStatus.WAITING, 0L);
+      long completedTasks = counts.getOrDefault(TaskStatus.COMPLETED, 0L);
+      long failedTasks = counts.getOrDefault(TaskStatus.FAILED, 0L);
+      long timeoutTasks = counts.getOrDefault(TaskStatus.TIMEOUT, 0L);
+      long waitingTasks = counts.getOrDefault(TaskStatus.WAITING, 0L);
       return (double) completedTasks / (failedTasks + timeoutTasks + completedTasks + waitingTasks);
     }
     return Double.NaN;

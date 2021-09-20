@@ -19,10 +19,15 @@
 
 package org.apache.pinot.thirdeye.datalayer.dao;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.datalayer.dao.SubEntities.BEAN_INDEX_MAP;
+import static org.apache.pinot.thirdeye.datalayer.dao.SubEntities.BEAN_TYPE_MAP;
+import static org.apache.pinot.thirdeye.datalayer.dao.SubEntities.getType;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -43,10 +48,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pinot.thirdeye.datalayer.dao.EntityInfoBuilder.EntityInfo;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
-import org.apache.pinot.thirdeye.datalayer.entity.AbstractJsonEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.GenericJsonEntity;
 import org.apache.pinot.thirdeye.datalayer.util.GenericResultSetMapper;
 import org.apache.pinot.thirdeye.datalayer.util.SqlQueryBuilder;
@@ -78,8 +81,6 @@ public class GenericPojoDao {
   private final Counter dbExceptionCounter;
   private final Counter dbCallCounter;
 
-  private final Map<Class<? extends AbstractDTO>, EntityInfo> pojoInfoMap;
-
   private final DataSource dataSource;
   private final SqlQueryBuilder sqlQueryBuilder;
   private final GenericResultSetMapper genericResultSetMapper;
@@ -92,7 +93,6 @@ public class GenericPojoDao {
     this.dataSource = dataSource;
     this.sqlQueryBuilder = sqlQueryBuilder;
     this.genericResultSetMapper = genericResultSetMapper;
-    pojoInfoMap = new EntityInfoBuilder().getEntityInfoMap();
 
     dbReadCallCounter = metricRegistry.counter("dbReadCallCounter");
     dbWriteByteCounter = metricRegistry.counter("dbWriteByteCounter");
@@ -102,15 +102,18 @@ public class GenericPojoDao {
     dbReadByteCounter = metricRegistry.counter("dbReadByteCounter");
     dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
     dbCallCounter = metricRegistry.counter("dbCallCounter");
+
+    checkState(BEAN_INDEX_MAP.size() == BEAN_TYPE_MAP.size(),
+        "Entity Metadata is inconsistent!");
   }
 
   public Set<Class<? extends AbstractDTO>> getAllBeanClasses() {
-    return pojoInfoMap.keySet();
+    return BEAN_INDEX_MAP.keySet();
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public List<String> getIndexedColumns(Class beanClass) {
-    Class<? extends AbstractIndexEntity> indexEntityClass = pojoInfoMap.get(beanClass).indexEntityClass;
+    Class<? extends AbstractIndexEntity> indexEntityClass = BEAN_INDEX_MAP.get(beanClass);
     Set<Field> allFields = ReflectionUtils.getAllFields(indexEntityClass);
     List<String> indexedColumnNames = new ArrayList<>();
     for (Field field : allFields) {
@@ -142,13 +145,13 @@ public class GenericPojoDao {
       //get the generated id
       //update indexes
       return runTask(connection -> {
-        EntityInfo entityInfo = pojoInfoMap.get(pojo.getClass());
-        AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
+        Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojo.getClass());
+        GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
         genericJsonEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setVersion(1);
-        genericJsonEntity.setBeanClass(pojo.getClass().getName());
-        String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
+        genericJsonEntity.setType(getType(pojo.getClass()));
+        String jsonVal = toJsonString(pojo);
         genericJsonEntity.setJsonVal(jsonVal);
         dbWriteByteCounter.inc(jsonVal.length());
 
@@ -161,8 +164,8 @@ public class GenericPojoDao {
                 pojo.setId(generatedKeys.getLong(1));
               }
             }
-            if (entityInfo.indexEntityClass != null) {
-              AbstractIndexEntity abstractIndexEntity = entityInfo.indexEntityClass.newInstance();
+            if (indexClass != null) {
+              AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
               MODEL_MAPPER.map(pojo, abstractIndexEntity);
               abstractIndexEntity.setBaseId(pojo.getId());
               abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -187,6 +190,10 @@ public class GenericPojoDao {
       dbWriteCallCounter.inc();
       dbWriteDurationCounter.inc(System.nanoTime() - tStart);
     }
+  }
+
+  private <E extends AbstractDTO> String toJsonString(final E pojo) throws JsonProcessingException {
+    return OBJECT_MAPPER.writeValueAsString(pojo);
   }
 
   /**
@@ -289,13 +296,14 @@ public class GenericPojoDao {
       Connection connection)
       throws Exception {
     //update base table
-    String jsonVal = OBJECT_MAPPER.writeValueAsString(pojo);
-    AbstractJsonEntity genericJsonEntity = new GenericJsonEntity();
+    String jsonVal = toJsonString(pojo);
+
+    GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
     genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
     genericJsonEntity.setJsonVal(jsonVal);
     genericJsonEntity.setId(pojo.getId());
     genericJsonEntity.setVersion(pojo.getVersion());
-    EntityInfo entityInfo = pojoInfoMap.get(pojo.getClass());
+    Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojo.getClass());
     Set<String> fieldsToUpdate = Sets.newHashSet("jsonVal", "updateTime", "version");
     int affectedRows;
     try (PreparedStatement baseTableInsertStmt = sqlQueryBuilder
@@ -306,8 +314,8 @@ public class GenericPojoDao {
     //update indexes
     if (affectedRows == 1) {
       dbWriteByteCounter.inc(jsonVal.length());
-      if (entityInfo.indexEntityClass != null) {
-        AbstractIndexEntity abstractIndexEntity = entityInfo.indexEntityClass.newInstance();
+      if (indexClass != null) {
+        AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
         MODEL_MAPPER.map(pojo, abstractIndexEntity);
         abstractIndexEntity.setBaseId(pojo.getId());
         abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
@@ -328,7 +336,7 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        Predicate predicate = Predicate.EQ("beanClass", beanClass.getName());
+        Predicate predicate = Predicate.EQ("type", getType(beanClass));
         List<GenericJsonEntity> entities;
         try (PreparedStatement selectStatement = sqlQueryBuilder
             .createFindByParamsStatement(connection, GenericJsonEntity.class, predicate)) {
@@ -341,7 +349,7 @@ public class GenericPojoDao {
           for (GenericJsonEntity entity : entities) {
             dbReadByteCounter.inc(entity.getJsonVal().length());
 
-            E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+            E e = getBean(entity, beanClass);
             e.setId(entity.getId());
             e.setUpdateTime(entity.getUpdateTime());
             ret.add(e);
@@ -355,12 +363,17 @@ public class GenericPojoDao {
     }
   }
 
+  private <E> E getBean(final GenericJsonEntity entity, final Class<E> beanClass)
+      throws JsonProcessingException {
+    return OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+  }
+
   public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, long limit, long offset) {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
         List<GenericJsonEntity> entities;
-        Predicate predicate = Predicate.EQ("beanClass", beanClass.getName());
+        Predicate predicate = Predicate.EQ("type", getType(beanClass));
         try (PreparedStatement selectStatement = sqlQueryBuilder
             .createfindByParamsStatementWithLimit(connection,
                 GenericJsonEntity.class,
@@ -375,7 +388,7 @@ public class GenericPojoDao {
         if (entities != null) {
           for (GenericJsonEntity entity : entities) {
             dbReadByteCounter.inc(entity.getJsonVal().length());
-            E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+            E e = getBean(entity, beanClass);
             e.setId(entity.getId());
             e.setUpdateTime(entity.getUpdateTime());
             result.add(e);
@@ -393,9 +406,9 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        EntityInfo entityInfo = pojoInfoMap.get(beanClass);
+        Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(beanClass);
         try (PreparedStatement selectStatement = sqlQueryBuilder
-            .createCountStatement(connection, entityInfo.indexEntityClass)) {
+            .createCountStatement(connection, indexClass)) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
               return resultSet.getInt(1);
@@ -421,7 +434,7 @@ public class GenericPojoDao {
             GenericJsonEntity.class,
             Predicate.AND(
                 Predicate.EQ("id", id),
-                Predicate.EQ("beanClass", pojoClass.getCanonicalName()))
+                Predicate.EQ("type", getType(pojoClass)))
         )
         ) {
           try (ResultSet resultSet = selectStatement.executeQuery()) {
@@ -434,7 +447,7 @@ public class GenericPojoDao {
         }
         dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
-        final E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+        final E e = getBean(genericJsonEntity, pojoClass);
         e.setId(genericJsonEntity.getId());
         e.setVersion(genericJsonEntity.getVersion());
         e.setUpdateTime(genericJsonEntity.getUpdateTime());
@@ -462,7 +475,7 @@ public class GenericPojoDao {
         Object e = null;
         if (genericJsonEntity != null) {
           dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
-          e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), Object.class);
+          e = getBean(genericJsonEntity, Object.class);
         }
         return e;
       }, null);
@@ -489,7 +502,7 @@ public class GenericPojoDao {
           for (GenericJsonEntity genericJsonEntity : genericJsonEntities) {
             dbReadByteCounter.inc(genericJsonEntity.getJsonVal().length());
 
-            E e = OBJECT_MAPPER.readValue(genericJsonEntity.getJsonVal(), pojoClass);
+            E e = getBean(genericJsonEntity, pojoClass);
             e.setId(genericJsonEntity.getId());
             e.setVersion(genericJsonEntity.getVersion());
             e.setUpdateTime(genericJsonEntity.getUpdateTime());
@@ -534,7 +547,7 @@ public class GenericPojoDao {
               final String json = entity.getJsonVal();
               dbReadByteCounter.inc(json.length());
 
-              E bean = (E) OBJECT_MAPPER.readValue(json, beanClass);
+              E bean = (E) getBean(entity, beanClass);
               bean.setId(entity.getId())
                   .setVersion(entity.getVersion())
                   .setUpdateTime(entity.getUpdateTime());
@@ -558,15 +571,15 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        EntityInfo entityInfo = pojoInfoMap.get(pojoClass);
+        Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojoClass);
         List<? extends AbstractIndexEntity> indexEntities;
         try (PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
             .createStatementFromSQL(connection,
                 parameterizedSQL,
                 parameterMap,
-                entityInfo.indexEntityClass)) {
+                indexClass)) {
           try (ResultSet rs = findMatchingIdsStatement.executeQuery()) {
-            indexEntities = genericResultSetMapper.mapAll(rs, entityInfo.indexEntityClass);
+            indexEntities = genericResultSetMapper.mapAll(rs, indexClass);
           }
         }
         List<Long> idsToFind = new ArrayList<>();
@@ -589,7 +602,7 @@ public class GenericPojoDao {
             for (GenericJsonEntity entity : entities) {
               dbReadByteCounter.inc(entity.getJsonVal().length());
 
-              E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
+              E bean = getBean(entity, pojoClass);
               bean.setId(entity.getId());
               bean.setVersion(entity.getVersion());
               ret.add(bean);
@@ -635,7 +648,7 @@ public class GenericPojoDao {
               for (GenericJsonEntity entity : entities) {
                 dbReadByteCounter.inc(entity.getJsonVal().length());
 
-                E bean = OBJECT_MAPPER.readValue(entity.getJsonVal(), pojoClass);
+                E bean = getBean(entity, pojoClass);
                 bean.setId(entity.getId());
                 bean.setVersion(entity.getVersion());
                 bean.setUpdateTime(entity.getUpdateTime());
@@ -662,13 +675,13 @@ public class GenericPojoDao {
     try {
       //apply the predicates and fetch the primary key ids
       return runTask(connection -> {
-        EntityInfo entityInfo = pojoInfoMap.get(daoFilter.getBeanClass());
+        Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(daoFilter.getBeanClass());
         //find the matching ids
         List<? extends AbstractIndexEntity> indexEntities;
         try (PreparedStatement findByParamsStatement = sqlQueryBuilder
-            .createStatement(connection, daoFilter, entityInfo.indexEntityClass)) {
+            .createStatement(connection, daoFilter, indexClass)) {
           try (ResultSet rs = findByParamsStatement.executeQuery()) {
-            indexEntities = genericResultSetMapper.mapAll(rs, entityInfo.indexEntityClass);
+            indexEntities = genericResultSetMapper.mapAll(rs, indexClass);
           }
         }
         List<Long> idsToReturn = new ArrayList<>();
@@ -721,7 +734,7 @@ public class GenericPojoDao {
     long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        EntityInfo entityInfo = pojoInfoMap.get(pojoClass);
+        Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojoClass);
         Map<String, Object> filters = new HashMap<>();
         filters.put("id", id);
         try (PreparedStatement deleteStatement = sqlQueryBuilder
@@ -732,7 +745,7 @@ public class GenericPojoDao {
         filters.put("baseId", id);
 
         try (PreparedStatement deleteIndexStatement = sqlQueryBuilder
-            .createDeleteByIdStatement(connection, entityInfo.indexEntityClass, filters)) {
+            .createDeleteByIdStatement(connection, indexClass, filters)) {
           return deleteIndexStatement.executeUpdate();
         }
       }, 0);
@@ -754,7 +767,7 @@ public class GenericPojoDao {
         boolean isAutoCommit = connection.getAutoCommit();
         // Ensure that transaction mode is enabled
         connection.setAutoCommit(false);
-        Class<? extends AbstractIndexEntity> indexEntityClass = pojoInfoMap.get(pojoClass).indexEntityClass;
+        Class<? extends AbstractIndexEntity> indexEntityClass = BEAN_INDEX_MAP.get(pojoClass);
         int updateCounter = 0;
         int minIdx = 0;
         int maxIdx = MAX_BATCH_SIZE;

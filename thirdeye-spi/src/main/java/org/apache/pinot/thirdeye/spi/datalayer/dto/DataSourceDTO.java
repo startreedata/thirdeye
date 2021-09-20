@@ -15,13 +15,67 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DataSourceBean;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class DataSourceDTO extends DataSourceBean {
+/**
+ * This class defines the config of a single datasource used in thirdeye
+ * Eg: PinotThirdeyeDataSource
+ */
+public class DataSourceDTO extends AbstractDTO {
 
+  private String name;
+  private String type;
+  private Map<String, Object> properties = new HashMap<>();
+  private List<DataSourceMetaBean> metaList = new ArrayList<>();
+
+  public String getName() {
+    return name;
+  }
+
+  public DataSourceDTO setName(final String name) {
+    this.name = name;
+    return this;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public DataSourceDTO setType(final String type) {
+    this.type = type;
+    return this;
+  }
+
+  public Map<String, Object> getProperties() {
+    return properties;
+  }
+
+  public DataSourceDTO setProperties(
+      final Map<String, Object> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  public List<DataSourceMetaBean> getMetaList() {
+    return metaList;
+  }
+
+  public DataSourceDTO setMetaList(
+      final List<DataSourceMetaBean> metaList) {
+    this.metaList = metaList;
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
+  }
 }

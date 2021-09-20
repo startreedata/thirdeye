@@ -20,21 +20,19 @@
 package org.apache.pinot.thirdeye.detection.alert;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -47,26 +45,24 @@ public class DetectionAlertTaskFactory {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskFactory.class);
 
   private static final String PROP_CLASS_NAME = "className";
-  private static final String PROP_EMAIL_SCHEME = "emailScheme";
-  private static final String DEFAULT_ALERT_SCHEME = "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter";
 
   private final DataProvider provider;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
-  private final MetricConfigManager metricConfigManager;
-  private final EventManager eventManager;
+  private final WebhookAlertScheme webhookAlertScheme;
+  private final EmailAlertScheme emailAlertScheme;
 
   @Inject
   public DetectionAlertTaskFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final MetricConfigManager metricConfigManager,
-      final EventManager eventManager) {
+      final EmailAlertScheme emailAlertScheme,
+      final WebhookAlertScheme webhookAlertScheme) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
-    this.metricConfigManager = metricConfigManager;
-    this.eventManager = eventManager;
+    this.webhookAlertScheme = webhookAlertScheme;
+    this.emailAlertScheme = emailAlertScheme;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)
@@ -87,42 +83,9 @@ public class DetectionAlertTaskFactory {
         this.alertManager);
   }
 
-  public Set<DetectionAlertScheme> loadAlertSchemes(SubscriptionGroupDTO alertConfig,
-      ThirdEyeWorkerConfiguration thirdeyeConfig, DetectionAlertFilterResult result)
+  public Set<DetectionAlertScheme> getAlertSchemes()
       throws Exception {
-    Preconditions.checkNotNull(alertConfig);
-    Map<String, Object> alertSchemes = alertConfig.getAlertSchemes();
-    if (alertSchemes == null || alertSchemes.isEmpty()) {
-      Map<String, Object> emailScheme = new HashMap<>();
-      emailScheme.put(PROP_CLASS_NAME, DEFAULT_ALERT_SCHEME);
-      alertSchemes = Collections.singletonMap(PROP_EMAIL_SCHEME, emailScheme);
-    }
-    Set<DetectionAlertScheme> detectionAlertSchemeSet = new HashSet<>();
-    for (String alertSchemeType : alertSchemes.keySet()) {
-      LOG.debug("Loading Alert Scheme : {}", alertSchemeType);
-      Preconditions.checkNotNull(alertSchemes.get(alertSchemeType));
-      Preconditions
-          .checkNotNull(ConfigUtils.getMap(alertSchemes.get(alertSchemeType)).get(PROP_CLASS_NAME));
-      Constructor<?> constructor = Class.forName(ConfigUtils.getMap(alertSchemes.get(alertSchemeType))
-          .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(SubscriptionGroupDTO.class,
-              ThirdEyeWorkerConfiguration.class,
-              DetectionAlertFilterResult.class,
-              MetricConfigManager.class,
-              AlertManager.class,
-              EventManager.class,
-              MergedAnomalyResultManager.class);
-
-      detectionAlertSchemeSet
-          .add((DetectionAlertScheme) constructor.newInstance(alertConfig,
-              thirdeyeConfig,
-              result,
-              this.metricConfigManager,
-              this.alertManager,
-              this.eventManager,
-              this.mergedAnomalyResultManager));
-    }
-    return detectionAlertSchemeSet;
+    return ImmutableSet.of(emailAlertScheme, webhookAlertScheme);
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)

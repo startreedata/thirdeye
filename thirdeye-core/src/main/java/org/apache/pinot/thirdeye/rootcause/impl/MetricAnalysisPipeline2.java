@@ -31,15 +31,10 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.dataframe.util.DataFrameUtils;
-import org.apache.pinot.thirdeye.dataframe.util.TimeSeriesRequestContainer;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
 import org.apache.pinot.thirdeye.rootcause.PipelineResult;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregate;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
@@ -50,10 +45,15 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.PipelineContext;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
+import org.apache.pinot.thirdeye.util.DataFrameUtils;
+import org.apache.pinot.thirdeye.util.TimeSeriesRequestContainer;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
@@ -108,7 +108,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
-   * @param thirdEyeCacheRegistry
    */
   public MetricAnalysisPipeline2(String outputName,
       Set<String> inputNames,

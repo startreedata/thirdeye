@@ -25,6 +25,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,10 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
+import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -44,6 +46,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.slf4j.Logger;
@@ -53,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * This email formatter generates a report/alert from the anomalies having a groupKey
  * and optionally a whitelist metric which will be listed at the top of the alert report
  */
+@Singleton
 public class EntityGroupKeyContent extends BaseNotificationContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(EntityGroupKeyContent.class);
@@ -65,7 +69,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   static final String PROP_ANOMALY_SCORE = "groupScore";
   static final String PROP_GROUP_KEY = "groupKey";
 
-  private AlertManager configDAO = null;
+  private final AlertManager alertManager;
   private final Multimap<String, AnomalyReportEntity> entityToAnomaliesMap = ArrayListMultimap
       .create();
   private final Multimap<String, AnomalyReportEntity> entityToSortedAnomaliesMap = ArrayListMultimap
@@ -81,15 +85,17 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
   private final Map<String, String> anomalyToChildIdsMap = new HashMap<>();
   private final List<String> entityWhitelist = new ArrayList<>();
 
+  @Inject
   public EntityGroupKeyContent(final MetricConfigManager metricConfigDAO,
-      final AlertManager detectionConfigManager, final EventManager eventManager,
+      final AlertManager detectionConfigManager,
+      final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     super(metricConfigDAO, eventManager, mergedAnomalyResultManager);
-    this.configDAO = detectionConfigManager;
+    this.alertManager = detectionConfigManager;
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
+  public void init(Properties properties, ThirdEyeCoordinatorConfiguration config) {
     super.init(properties, config);
     if (properties.containsKey(PROP_ENTITY_WHITELIST)) {
       // Support only one whitelist entity. This can be extended in the future.
@@ -109,7 +115,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
 
     AlertDTO config = null;
     Preconditions
-        .checkArgument(anomalies != null && !anomalies.isEmpty(), "Report has empty anomalies");
+        .checkArgument(!anomalies.isEmpty(), "Report has empty anomalies");
 
     for (AnomalyResult anomalyResult : anomalies) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
@@ -120,7 +126,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
 
       MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
       if (config == null) {
-        config = this.configDAO.findById(anomaly.getDetectionConfigId());
+        config = this.alertManager.findById(anomaly.getDetectionConfigId());
         Preconditions.checkNotNull(config,
             String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
       }
@@ -170,7 +176,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
     double lift = BaseNotificationContent
         .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
     AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-        getAnomalyURL(anomaly, thirdEyeAnomalyConfig.getDashboardHost()),
+        getAnomalyURL(anomaly, thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl()),
         getPredictedValue(anomaly),
         getCurrentValue(anomaly),
         getFormattedLiftValue(anomaly, lift),

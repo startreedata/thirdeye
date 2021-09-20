@@ -1,40 +1,44 @@
 package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
+import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 
 public class OperatorContext {
+  public static final String DEFAULT_TIME_FORMAT = TimeFormat.EPOCH + ":" + TimeUnit.MILLISECONDS;
 
-  private long startTime;
-  private long endTime;
-  private DetectionPlanApi detectionPlanApi;
+  private String timeFormat = DEFAULT_TIME_FORMAT;
+  private String startTime;
+  private String endTime;
+  private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, DetectionPipelineResult> inputsMap;
 
-  public long getStartTime() {
+  public String getStartTime() {
     return startTime;
   }
 
-  public OperatorContext setStartTime(final long startTime) {
+  public OperatorContext setStartTime(final String startTime) {
     this.startTime = startTime;
     return this;
   }
 
-  public long getEndTime() {
+  public String getEndTime() {
     return endTime;
   }
 
-  public OperatorContext setEndTime(final long endTime) {
+  public OperatorContext setEndTime(final String endTime) {
     this.endTime = endTime;
     return this;
   }
 
-  public DetectionPlanApi getDetectionPlanApi() {
-    return detectionPlanApi;
+  public PlanNodeBean getPlanNode() {
+    return planNode;
   }
 
-  public OperatorContext setDetectionPlanApi(final DetectionPlanApi detectionPlanApi) {
-    this.detectionPlanApi = detectionPlanApi;
+  public OperatorContext setPlanNode(final PlanNodeBean planNodeBean) {
+    this.planNode = planNodeBean;
     return this;
   }
 
@@ -53,6 +57,15 @@ public class OperatorContext {
 
   public OperatorContext setInputsMap(final Map<String, DetectionPipelineResult> inputsMap) {
     this.inputsMap = inputsMap;
+    return this;
+  }
+
+  public String getTimeFormat() {
+    return timeFormat;
+  }
+
+  public OperatorContext setTimeFormat(final String timeFormat) {
+    this.timeFormat = timeFormat;
     return this;
   }
 }

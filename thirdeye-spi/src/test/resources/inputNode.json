@@ -1,5 +1,5 @@
 {
-  "planNodeName": "baselineDataFetcher",
+  "name": "baselineDataFetcher",
   "type": "DataFetcher",
   "params": {
     "dataSource": "${dataSourceName}",

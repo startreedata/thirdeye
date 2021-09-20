@@ -24,13 +24,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.scheduler.ThirdEyeAbstractJob;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
+import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     final TaskManager taskManager = getInstance(ctx, TaskManager.class);
 
     // if a task is pending and not time out yet, don't schedule more
-    String jobName = String.format("%s_%d", TaskConstants.TaskType.DETECTION,
+    String jobName = String.format("%s_%d", TaskType.DETECTION,
         taskInfo.getConfigId());
     if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DETECTION_TASK_TIMEOUT, taskManager)) {
       LOG.info(
@@ -72,9 +72,9 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     }
 
     TaskDTO taskDTO = TaskUtils
-        .buildTask(taskInfo.getConfigId(), taskInfoJson, TaskConstants.TaskType.DETECTION);
+        .buildTask(taskInfo.getConfigId(), taskInfoJson, TaskType.DETECTION);
     long taskId = taskManager.save(taskDTO);
-    LOG.info("Created {} task {} with taskId {}", TaskConstants.TaskType.DETECTION, taskDTO,
+    LOG.info("Created {} task {} with taskId {}", TaskType.DETECTION, taskDTO,
         taskId);
   }
 }

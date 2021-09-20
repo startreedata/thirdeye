@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { cloneDeep, isEmpty } from "lodash";
+import { cloneDeep, isEmpty, omit } from "lodash";
 import {
     Alert,
     AlertEvaluation,
@@ -161,6 +161,12 @@ export const filterAlerts = (
     }
 
     return filteredUiAlerts;
+};
+
+export const omitNonUpdatableData = (alert: Alert): Alert => {
+    const newAlert = omit(alert, "id");
+
+    return newAlert as Alert;
 };
 
 const getUiAlertInternal = (

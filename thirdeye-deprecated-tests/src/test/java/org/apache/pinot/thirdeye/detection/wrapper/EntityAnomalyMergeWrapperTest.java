@@ -17,7 +17,7 @@
 package org.apache.pinot.thirdeye.detection.wrapper;
 
 import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly;
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.setEntityChildMapping;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.setEntityChildMapping;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
@@ -27,15 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
 import org.apache.pinot.thirdeye.detection.DetectionTestUtils;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
 import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
 import org.apache.pinot.thirdeye.detection.MockPipelineOutput;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -110,7 +110,6 @@ public class EntityAnomalyMergeWrapperTest {
 
     this.outputs.add(new MockPipelineOutput(Arrays.asList(parentAnomaly1), 2900));
     this.outputs.add(new MockPipelineOutput(Arrays.asList(parentAnomaly2), 3000));
-
 
     this.provider = new MockDataProvider()
         .setAnomalies(Collections.emptyList());

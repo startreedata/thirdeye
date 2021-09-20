@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.spec;
 
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public class DataFetcherSpec extends AbstractSpec {
 

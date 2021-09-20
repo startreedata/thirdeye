@@ -30,9 +30,11 @@ public class AlertEvaluationApi {
 
   private AlertApi alert;
   private Map<String, DetectionEvaluationApi> detectionEvaluations;
+  private Map<String, Map<String, DetectionEvaluationApi>> evaluations;
   private Date start;
   private Date end;
   private Date lastTimestamp;
+  Boolean dryRun;
 
   public AlertApi getAlert() {
     return alert;
@@ -77,6 +79,25 @@ public class AlertEvaluationApi {
 
   public AlertEvaluationApi setLastTimestamp(final Date lastTimestamp) {
     this.lastTimestamp = lastTimestamp;
+    return this;
+  }
+
+  public Map<String, Map<String, DetectionEvaluationApi>> getEvaluations() {
+    return evaluations;
+  }
+
+  public AlertEvaluationApi setEvaluations(
+      final Map<String, Map<String, DetectionEvaluationApi>> evaluations) {
+    this.evaluations = evaluations;
+    return this;
+  }
+
+  public Boolean isDryRun() {
+    return dryRun;
+  }
+
+  public AlertEvaluationApi setDryRun(final Boolean dryRun) {
+    this.dryRun = dryRun;
     return this;
   }
 }

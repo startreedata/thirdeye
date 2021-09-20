@@ -1,62 +1,67 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
-import org.apache.pinot.thirdeye.spi.detection.v2.components.DataFetcher;
 
-public class DataFetcherOperator extends DetectionPipelineOperator<DataTable> {
+public class DataFetcherOperator extends DetectionPipelineOperator {
 
-  private DataSourceCache dataSourceCache;
+  private DataFetcher<DataFetcherSpec> dataFetcher;
 
   public DataFetcherOperator() {
     super();
   }
 
   @Override
-  protected AbstractSpec getComponentSpec(Map<String, Object> componentSpecs, String componentKey) {
-    final AbstractSpec componentSpec = super.getComponentSpec(componentSpecs, componentKey);
-    if (componentSpec instanceof DataFetcherSpec) {
-      ((DataFetcherSpec) componentSpec).setDataSourceCache(dataSourceCache);
+  public void init(final OperatorContext context) {
+    super.init(context);
+    for (final OutputBean outputBean : context.getPlanNode().getOutputs()) {
+      outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
-    return componentSpec;
+    checkArgument(outputKeyMap.size() <= 1,
+        "Max 1 output node is currently supported");
+
+    final DataSourceCache dataSourceCache = (DataSourceCache) context.getProperties()
+        .get(DATA_SOURCE_CACHE_REF_KEY);
+    dataFetcher = createDataFetcher(planNode.getParams(), dataSourceCache);
   }
 
-  @Override
-  public void init(final OperatorContext context) {
-    this.dataSourceCache = (DataSourceCache) context.getProperties()
-        .get(DATA_SOURCE_CACHE_REF_KEY);
-    super.init(context);
-    for (OutputApi outputApi : context.getDetectionPlanApi().getOutputs()) {
-      outputKeyMap.put(outputApi.getOutputKey(), outputApi.getOutputName());
-    }
+  protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,
+      final DataSourceCache dataSourceCache) {
+    final Map<String, Object> componentSpec = getComponentSpec(params);
+    final DataFetcherSpec spec = requireNonNull(
+        AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
+        "Unable to construct DataFetcherSpec");
+    spec.setDataSourceCache(dataSourceCache);
+
+    final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();
+    genericDataFetcher.init(spec);
+
+    return genericDataFetcher;
   }
 
   @Override
   public void execute() throws Exception {
-    for (Object key : this.getComponents().keySet()) {
-      final BaseComponent component = this.getComponents().get(key);
-      if (component instanceof DataFetcher) {
-        final DataFetcher fetcher = (DataFetcher) component;
-        final DataTable dataTable = fetcher.getDataTable();
-        if (outputKeyMap.containsKey(key)) {
-          resultMap.put(outputKeyMap.get(key), dataTable);
-        } else {
-          resultMap.put(key.toString(), dataTable);
-        }
-      }
-    }
+    final DataTable dataTable = dataFetcher.getDataTable();
+    resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
   }
 
   @Override
   public String getOperatorName() {
     return "DataFetcherOperator";
+  }
+
+  public DataFetcher<DataFetcherSpec> getDataFetcher() {
+    return dataFetcher;
   }
 }

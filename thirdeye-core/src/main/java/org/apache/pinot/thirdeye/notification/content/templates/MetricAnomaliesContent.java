@@ -19,10 +19,14 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -30,13 +34,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.anomaly.alert.util.AlertScreenshotHelper;
-import org.apache.pinot.thirdeye.common.restclient.ThirdEyeRcaRestClient;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
+import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.restclient.ThirdEyeRcaRestClient;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -45,7 +48,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EventBean;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -54,6 +58,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This email formatter lists the anomalies by their functions or metric.
  */
+@Singleton
 public class MetricAnomaliesContent extends BaseNotificationContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricAnomaliesContent.class);
@@ -61,6 +66,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   private AlertManager configDAO = null;
   private ThirdEyeRcaRestClient rcaClient;
 
+  @Inject
   public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
@@ -69,18 +75,8 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     this.configDAO = detectionConfigManager;
   }
 
-  // For testing
-  public MetricAnomaliesContent(ThirdEyeRcaRestClient rcaClient,
-      final MetricConfigManager metricConfigManager,
-      final EventManager eventManager,
-      final AlertManager detectionConfigManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this(metricConfigManager, eventManager, mergedAnomalyResultManager, detectionConfigManager);
-    this.rcaClient = rcaClient;
-  }
-
   @Override
-  public void init(Properties properties, ThirdEyeWorkerConfiguration configuration) {
+  public void init(Properties properties, ThirdEyeCoordinatorConfiguration configuration) {
     super.init(properties, configuration);
 
     if (this.rcaClient == null) {
@@ -89,7 +85,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           this.thirdEyeAnomalyConfig.getTeRestConfig().getSessionKey()
       );
       this.rcaClient = new ThirdEyeRcaRestClient(principal,
-          this.thirdEyeAnomalyConfig.getDashboardHost());
+          this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
     }
   }
 
@@ -157,7 +153,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       double lift = BaseNotificationContent
           .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
       AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-          getAnomalyURL(anomaly, this.thirdEyeAnomalyConfig.getDashboardHost()),
+          getAnomalyURL(anomaly, this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl()),
           getPredictedValue(anomaly),
           getCurrentValue(anomaly),
           getFormattedLiftValue(anomaly, lift),
@@ -188,7 +184,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         anomalyDetails.add(anomalyReport);
         anomalyIds.add(anomalyReport.getAnomalyId());
         functionAnomalyReports.put(functionName, anomalyReport);
-        metricAnomalyReports.put(anomaly.getMetric(), anomalyReport);
+        metricAnomalyReports.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
         functionToId.put(functionName, id);
       }
     }
@@ -202,7 +198,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
           .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
     }
     List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
-    holidays.sort(Comparator.comparingLong(EventBean::getStartTime));
+    holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
 
     // Insert anomaly snapshot image
     if (anomalyDetails.size() == 1) {

@@ -23,7 +23,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.14.0-SNAPSHOT</version>
+    <version>1.17.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -42,6 +42,14 @@
     <dependency>
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_dropwizard</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_servlet</artifactId>
     </dependency>
 
     <!-- ################################### -->
@@ -64,7 +72,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-core</artifactId>
+      <artifactId>thirdeye-persistence</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -81,7 +89,7 @@
         <directory>src/test/resources</directory>
       </testResource>
       <testResource>
-        <directory>../thirdeye-core/src/main/resources</directory>
+        <directory>../thirdeye-persistence/src/main/resources</directory>
       </testResource>
     </testResources>
   </build>

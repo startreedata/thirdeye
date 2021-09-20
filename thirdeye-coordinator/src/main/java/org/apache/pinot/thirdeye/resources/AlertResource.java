@@ -1,16 +1,17 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.respondOk;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.statusResponse;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
@@ -25,22 +26,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.alert.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertDeleter;
 import org.apache.pinot.thirdeye.alert.AlertEvaluator;
 import org.apache.pinot.thirdeye.auth.AuthService;
+import org.apache.pinot.thirdeye.mapper.AlertApiBeanMapper;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Override
   protected AlertDTO createDto(final ThirdEyePrincipal principal, final AlertApi api) {
     ensureExists(api.getName(), "Name must be present");
-    ensureExists(api.getNodes(), "Exactly 1 detection must be present");
 
     if (api.getCron() == null) {
       api.setCron(CRON_EVERY_1MIN);
@@ -101,7 +101,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void validate(final AlertApi api) {
+  protected void validate(final AlertApi api, final AlertDTO existing) {
+    super.validate(api, existing);
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
   }
@@ -142,10 +143,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response runTask(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @PathParam("id") Long id,
-      @FormParam("start") Long startTime,
-      @FormParam("end") Long endTime
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @PathParam("id") final Long id,
+      @FormParam("start") final Long startTime,
+      @FormParam("end") final Long endTime
   ) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
@@ -172,14 +173,28 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
 
-    ensureExists(request.getAlert())
+    final AlertApi alert = request.getAlert();
+    ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
 
-    final AlertEvaluationApi evaluation = alertEvaluator.evaluate(request);
-    return Response
-        .ok(evaluation)
-        .build();
+    return Response.ok(alertEvaluator.evaluate(request)).build();
+  }
+
+  @ApiOperation(value = "Delete associated Anomalies")
+  @DELETE
+  @Path("{id}/reset")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response reset(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @PathParam("id") final Long id) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+    final AlertDTO dto = get(id);
+    alertDeleter.deleteAssociatedAnomalies(dto.getId());
+    log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal));
+
+    return respondOk(toApi(dto));
   }
 
   @DELETE
@@ -188,8 +203,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   @Override
   public Response delete(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @PathParam("id") Long id) {
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @PathParam("id") final Long id) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final AlertDTO dto = alertManager.findById(id);
     if (dto != null) {

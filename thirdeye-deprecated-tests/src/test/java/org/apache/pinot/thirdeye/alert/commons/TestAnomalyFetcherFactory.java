@@ -16,9 +16,10 @@
 
 package org.apache.pinot.thirdeye.alert.commons;
 
-import org.apache.pinot.thirdeye.alert.fetcher.AnomalyFetcher;
-import org.apache.pinot.thirdeye.alert.fetcher.ContinuumAnomalyFetcher;
-import org.apache.pinot.thirdeye.alert.fetcher.UnnotifiedAnomalyFetcher;
+import org.apache.pinot.thirdeye.detection.alert.AnomalyFetcherFactory;
+import org.apache.pinot.thirdeye.detection.alert.fetcher.AnomalyFetcher;
+import org.apache.pinot.thirdeye.detection.alert.fetcher.ContinuumAnomalyFetcher;
+import org.apache.pinot.thirdeye.detection.alert.fetcher.UnnotifiedAnomalyFetcher;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 

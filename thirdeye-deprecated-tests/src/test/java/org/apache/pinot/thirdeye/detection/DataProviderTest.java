@@ -16,6 +16,7 @@
 
 package org.apache.pinot.thirdeye.detection;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,9 +49,9 @@ import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -59,15 +60,16 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -127,7 +129,7 @@ public class DataProviderTest {
     for (String fs : filterStrings) {
       String[] parts = fs.split("=");
       if (!filters.containsKey(parts[0])) {
-        filters.put(parts[0], new ArrayList<String>());
+        filters.put(parts[0], new ArrayList<>());
       }
       filters.get(parts[0]).add(parts[1]);
     }
@@ -247,7 +249,7 @@ public class DataProviderTest {
     // data
     DataFrame data;
     try (Reader dataReader = new InputStreamReader(
-        this.getClass().getResourceAsStream("algorithm/timeseries-4w.csv"))) {
+        this.getClass().getResourceAsStream("/csv/timeseries-4w.csv"))) {
       data = DataFrame.fromCsv(dataReader);
       data.setIndex(DataFrame.COL_TIME);
       data
@@ -275,13 +277,17 @@ public class DataProviderTest {
 
     Map<Long, String> id2name = new HashMap<>();
     id2name.put(this.metricIds.get(1), "value");
-    Map<String, ThirdEyeDataSource> dataSourceMap = new HashMap<>();
-    dataSourceMap.put("myDataSource", CSVThirdEyeDataSource.fromDataFrame(datasets, id2name));
+    final CSVThirdEyeDataSource csvThirdEyeDataSource = CSVThirdEyeDataSource.fromDataFrame(datasets,
+        id2name);
+
+    final DataSourceManager dataSourceManager = mock(DataSourceManager.class);
+    final DataSourceDTO csvDataSource = new DataSourceDTO();
+    when(dataSourceManager.findByPredicate(Predicate.EQ("name", "myDataSource")))
+        .thenReturn(singletonList(csvDataSource));
 
     final DataSourcesLoader dataSourcesLoader = mock(DataSourcesLoader.class);
-    when(dataSourcesLoader.getDataSourceMapFromConfig()).thenReturn(dataSourceMap);
-
-    final DataSourceCache dataSourceCache = new DataSourceCache(mock(DataSourceManager.class),
+    when(dataSourcesLoader.loadDataSource(csvDataSource)).thenReturn(csvThirdEyeDataSource);
+    final DataSourceCache dataSourceCache = new DataSourceCache(dataSourceManager,
         dataSourcesLoader,
         new MetricRegistry());
     final ThirdEyeCacheRegistry cacheRegistry = new ThirdEyeCacheRegistry(
@@ -362,7 +368,7 @@ public class DataProviderTest {
     MetricSlice metricSlice = MetricSlice
         .from(this.metricIds.get(1), 0L, 32400000L, ArrayListMultimap.create());
     Map<MetricSlice, DataFrame> aggregates = this.provider
-        .fetchAggregates(Collections.singletonList(metricSlice), Collections.emptyList(), 1);
+        .fetchAggregates(singletonList(metricSlice), Collections.emptyList(), 1);
     Assert.assertEquals(aggregates.keySet().size(), 1);
   }
 

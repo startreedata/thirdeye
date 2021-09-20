@@ -4,19 +4,23 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: openjdk
-    tag: 8
+    repository: daniellavoie/ci-java-8
+    tag: latest
 
 caches:
-- path: src/m2
+  - path: src/m2
 
 inputs:
-- name: ci-src
 - name: src
+- name: ci-src
 
 outputs:
 - name: src
 - name: version
+
+params:
+  MVN_REPOSITORY_USERNAME: ((artifactory-username))
+  MVN_REPOSITORY_PASSWORD: ((artifactory-password))
 
 run:
   path: ci-src/.concourse/tasks/build-thirdeye/build-thirdeye.sh

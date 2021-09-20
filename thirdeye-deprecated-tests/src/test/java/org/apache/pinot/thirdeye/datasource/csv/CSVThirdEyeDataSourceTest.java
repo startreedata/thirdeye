@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.datasource.csv;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.net.URL;
@@ -26,15 +28,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -76,7 +78,7 @@ public class CSVThirdEyeDataSourceTest {
     CSVThirdEyeDataSource dataSource = CSVThirdEyeDataSource
         .fromDataFrame(sources, Collections.emptyMap());
     Assert.assertEquals(new HashSet<>(dataSource.getDatasets()), sources.keySet());
-    Assert.assertNotSame(new HashSet<>(dataSource.getDatasets()), sources.keySet());
+    assertThat(new HashSet<>(dataSource.getDatasets())).isNotSameAs(sources.keySet());
   }
 
   @Test
@@ -97,9 +99,11 @@ public class CSVThirdEyeDataSourceTest {
     final DatasetConfigDTO datasetConfigDTO = newDataset("business");
 
     Assert.assertEquals(dataSource.getMaxDataTime(datasetConfigDTO), 7200000);
-    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters(newDataset("business")).get("country")),
+    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters(newDataset("business"))
+            .get("country")),
         new HashSet<>(dimensions.get("country")));
-    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters(newDataset("business")).get("browser")),
+    Assert.assertEquals(new HashSet<>(dataSource.getDimensionFilters(newDataset("business"))
+            .get("browser")),
         new HashSet<>(dimensions.get("browser")));
   }
 

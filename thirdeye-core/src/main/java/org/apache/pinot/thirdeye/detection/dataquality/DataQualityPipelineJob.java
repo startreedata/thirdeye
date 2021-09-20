@@ -23,12 +23,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.scheduler.ThirdEyeAbstractJob;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
+import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,12 +53,12 @@ public class DataQualityPipelineJob extends ThirdEyeAbstractJob {
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String
-        .format("%s_%d", TaskConstants.TaskType.DATA_QUALITY, taskInfo.getConfigId());
+        .format("%s_%d", TaskType.DATA_QUALITY, taskInfo.getConfigId());
     final TaskManager taskManager = getInstance(ctx, TaskManager.class);
     if (TaskUtils.checkTaskAlreadyRun(jobName, taskInfo, DATA_AVAILABILITY_TASK_TIMEOUT,
         taskManager)) {
       LOG.info("Skip scheduling {} task for {} with start time {}. Task is already in the queue.",
-          TaskConstants.TaskType.DATA_QUALITY, jobName, taskInfo.getStart());
+          TaskType.DATA_QUALITY, jobName, taskInfo.getStart());
       return;
     }
 

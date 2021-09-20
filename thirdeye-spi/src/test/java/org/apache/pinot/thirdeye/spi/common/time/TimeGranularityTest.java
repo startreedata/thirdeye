@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.testng.annotations.Test;
 
 public class TimeGranularityTest {

@@ -21,15 +21,18 @@
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
 import java.io.Serializable;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyFeedbackType;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AnomalyFeedbackBean;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedbackType;
 
-public class AnomalyFeedbackDTO extends AnomalyFeedbackBean implements AnomalyFeedback,
-    Serializable {
+public class AnomalyFeedbackDTO extends AbstractDTO implements AnomalyFeedback, Serializable {
 
   private static final long serialVersionUID = 1L;
+
+  private AnomalyFeedbackType feedbackType;
+
+  private String comment;
 
   public AnomalyFeedbackDTO() {
     this.setFeedbackType(AnomalyFeedbackType.NO_FEEDBACK);
@@ -46,5 +49,41 @@ public class AnomalyFeedbackDTO extends AnomalyFeedbackBean implements AnomalyFe
         this.setComment(anomalyFeedback.getComment());
       }
     }
+  }
+
+  public AnomalyFeedbackType getFeedbackType() {
+    return feedbackType;
+  }
+
+  public void setFeedbackType(AnomalyFeedbackType feedbackType) {
+    this.feedbackType = feedbackType;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    AnomalyFeedbackDTO that = (AnomalyFeedbackDTO) o;
+    return Objects.equals(getId(), that.getId()) && Objects
+        .equals(feedbackType, that.getFeedbackType())
+        && Objects.equals(comment, that.getComment());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId(), feedbackType, comment);
   }
 }

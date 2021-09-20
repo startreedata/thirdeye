@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
 
 @JsonInclude(Include.NON_NULL)
 public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {

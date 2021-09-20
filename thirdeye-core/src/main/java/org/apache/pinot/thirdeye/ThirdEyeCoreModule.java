@@ -11,8 +11,8 @@ import io.dropwizard.auth.Authenticator;
 import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
-import org.apache.pinot.thirdeye.config.ConfigurationHolder;
 import org.apache.pinot.thirdeye.config.ThirdEyeConfigurationModule;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
@@ -21,7 +21,7 @@ import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
 import org.apache.pinot.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -30,18 +30,18 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 public class ThirdEyeCoreModule extends AbstractModule {
 
   private final DataSource dataSource;
-  private final ConfigurationHolder configurationHolder;
+  private final ThirdEyeCoordinatorConfiguration configuration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
-      final ConfigurationHolder configurationHolder) {
+      final ThirdEyeCoordinatorConfiguration configuration) {
     this.dataSource = dataSource;
-    this.configurationHolder = configurationHolder;
+    this.configuration = configuration;
   }
 
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
-    install(new ThirdEyeConfigurationModule(configurationHolder));
+    install(new ThirdEyeConfigurationModule(configuration));
 
     bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {})
         .to(ThirdEyeAuthenticatorDisabled.class)

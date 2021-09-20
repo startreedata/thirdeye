@@ -1,6 +1,8 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
 import {
+    LogicalMetric,
     LogicalView,
     Metric,
     MetricAggFunction,
@@ -23,6 +25,16 @@ export const createEmptyUiMetric = (): UiMetric => {
         aggregationFunction: noDataMarker as MetricAggFunction,
         views: [],
         viewCount: formatNumber(0),
+    };
+};
+
+export const createEmptyMetric = (): LogicalMetric => {
+    return {
+        name: "",
+        active: true,
+        aggregationFunction: "SUM" as MetricAggFunction,
+        dataset: { name: "" } as Dataset,
+        rollupThreshold: 0,
     };
 };
 

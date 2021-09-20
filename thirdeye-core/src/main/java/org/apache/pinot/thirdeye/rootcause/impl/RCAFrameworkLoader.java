@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.rootcause.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.config.ConfigurationHolder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.rootcause.Pipeline;
@@ -56,13 +54,9 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class RCAFrameworkLoader {
 
-  public static final String PROP_PATH = "path";
-  public static final String PROP_PATH_POSTFIX = "Path";
-
   private static final Logger LOG = LoggerFactory.getLogger(RCAFrameworkLoader.class);
 
   private final RCAConfiguration configuration;
-  private final ConfigurationHolder configurationHolder;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
   private final DataSourceCache dataSourceCache;
@@ -74,7 +68,6 @@ public class RCAFrameworkLoader {
   @Inject
   public RCAFrameworkLoader(
       final RCAConfiguration configuration,
-      final ConfigurationHolder configurationHolder,
       final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
       final DataSourceCache dataSourceCache,
@@ -83,7 +76,6 @@ public class RCAFrameworkLoader {
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.configuration = configuration;
-    this.configurationHolder = configurationHolder;
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
     this.dataSourceCache = dataSourceCache;
@@ -91,19 +83,6 @@ public class RCAFrameworkLoader {
     this.entityToEntityMappingManager = entityToEntityMappingManager;
     this.eventManager = eventManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-  }
-
-  static void augmentPathProperty(Map<String, Object> properties, final String configPath) {
-    for (Map.Entry<String, Object> entry : properties.entrySet()) {
-      if ((entry.getKey().equals(PROP_PATH) ||
-          entry.getKey().endsWith(PROP_PATH_POSTFIX)) &&
-          entry.getValue() instanceof String) {
-        File path = new File(entry.getValue().toString());
-        if (!path.isAbsolute()) {
-          properties.put(entry.getKey(), configPath + File.separator + path);
-        }
-      }
-    }
   }
 
   public Map<String, RCAFramework> getFrameworksFromConfig() {
@@ -119,11 +98,11 @@ public class RCAFrameworkLoader {
   }
 
   public List<Pipeline> getPipelinesFromConfig(String frameworkName) {
-    return getPipelines(frameworkName, configurationHolder.getPath());
+    return getPipelines(frameworkName);
   }
 
   private List<Pipeline> getPipelines(
-      String frameworkName, final String configPath) {
+      String frameworkName) {
     List<Pipeline> pipelines = new ArrayList<>();
     Map<String, List<PipelineConfiguration>> rcaPipelinesConfiguration =
         configuration.getFrameworks();
@@ -142,8 +121,6 @@ public class RCAFrameworkLoader {
         if (properties == null) {
           properties = new HashMap<>();
         }
-
-        augmentPathProperty(properties, configPath);
 
         LOG.info("Creating pipeline '{}' [{}] with inputs '{}'", outputName, className, inputNames);
         final PipelineInitContext initContext = new PipelineInitContext()

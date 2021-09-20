@@ -17,6 +17,7 @@
 package org.apache.pinot.thirdeye.dashboard;
 
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.util.Utils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

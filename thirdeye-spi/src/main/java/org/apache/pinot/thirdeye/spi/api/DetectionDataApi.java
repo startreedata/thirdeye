@@ -23,10 +23,12 @@ package org.apache.pinot.thirdeye.spi.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
+import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
 public class DetectionDataApi {
 
+  private Map<String, List> rawData;
   private List<Long> timestamp;
   private List<Double> upperBound;
   private List<Double> lowerBound;
@@ -75,6 +77,15 @@ public class DetectionDataApi {
 
   public DetectionDataApi setExpected(final List<Double> expected) {
     this.expected = expected;
+    return this;
+  }
+
+  public Map<String, List> getRawData() {
+    return rawData;
+  }
+
+  public DetectionDataApi setRawData(final Map<String, List> rawData) {
+    this.rawData = rawData;
     return this;
   }
 }

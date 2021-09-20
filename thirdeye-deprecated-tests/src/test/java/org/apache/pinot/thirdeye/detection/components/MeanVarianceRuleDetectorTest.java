@@ -25,20 +25,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
+import org.apache.pinot.thirdeye.detection.MockDataProvider;
+import org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetectorSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.Pattern;
-import org.apache.pinot.thirdeye.detection.algorithm.AlgorithmUtils;
-import org.apache.pinot.thirdeye.detection.spec.MeanVarianceRuleDetectorSpec;
-import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.Pattern;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 import org.testng.Assert;
@@ -54,7 +55,7 @@ public class MeanVarianceRuleDetectorTest {
   @BeforeMethod
   public void setUp() throws Exception {
     try (Reader dataReader = new InputStreamReader(
-        AlgorithmUtils.class.getResourceAsStream("timeseries-2y.csv"))) {
+        AlgorithmUtils.class.getResourceAsStream("/csv/timeseries-2y.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
       this.data.setIndex(DataFrame.COL_TIME);
     }

@@ -16,15 +16,25 @@
 
 package org.apache.pinot.thirdeye.integration;
 
-import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestDatasetConfig;
 import static org.apache.pinot.thirdeye.datalayer.DaoTestUtils.getTestMetricConfig;
+import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.mockito.Mockito.mock;
 
 import com.google.inject.Injector;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.datalayer.DaoTestUtils;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
+import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
+import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
+import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.ApplicationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -34,22 +44,12 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DefaultDataProvider;
-import org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter;
-import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
-import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
-import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
-import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.quartz.SchedulerException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -115,7 +115,7 @@ public class NotificationTaskSchedulerTest {
   void initRegistries() {
     DetectionRegistry.registerComponent(ThresholdRuleDetector.class.getName(), "THRESHOLD");
     DetectionAlertRegistry.getInstance()
-        .registerAlertScheme("EMAIL", DetectionEmailAlerter.class.getName());
+        .registerAlertScheme("EMAIL", EmailAlertScheme.class.getName());
     DetectionAlertRegistry.getInstance().registerAlertFilter("DEFAULT_ALERTER_PIPELINE",
         ToAllRecipientsDetectionAlertFilter.class.getName());
   }
@@ -156,6 +156,7 @@ public class NotificationTaskSchedulerTest {
   }
 
   @Test
+  // TODO spyne fixme test runs too long
   public void testNotificationJobCreation() throws Exception {
     // setup test environment
     setup();
@@ -172,7 +173,7 @@ public class NotificationTaskSchedulerTest {
     Assert.assertTrue(tasks.size() > 0);
     //Assert.assertTrue(tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION));
     Assert.assertTrue(
-        tasks.stream().noneMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
+        tasks.stream().noneMatch(x -> x.getTaskType() == TaskType.NOTIFICATION));
 
     // generate an anomaly
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
@@ -186,6 +187,6 @@ public class NotificationTaskSchedulerTest {
     tasks = taskDAO.findAll();
     Assert.assertTrue(tasks.size() > 0);
     Assert.assertTrue(
-        tasks.stream().anyMatch(x -> x.getTaskType() == TaskConstants.TaskType.DETECTION_ALERT));
+        tasks.stream().anyMatch(x -> x.getTaskType() == TaskType.NOTIFICATION));
   }
 }

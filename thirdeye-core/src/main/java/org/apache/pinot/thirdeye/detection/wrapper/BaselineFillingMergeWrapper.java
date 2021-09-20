@@ -30,22 +30,22 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.rootcause.timeseries.BaselineAggregateType;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,7 +218,7 @@ public class BaselineFillingMergeWrapper extends MergeWrapper {
   }
 
   // check if an anomaly is a existing anomaly and the duration is not modified
-  protected boolean isExistingAnomaly(Map<Long, MergedAnomalyResultDTO> existingAnomalies,
+  public static boolean isExistingAnomaly(Map<Long, MergedAnomalyResultDTO> existingAnomalies,
       MergedAnomalyResultDTO anomaly) {
     if (!existingAnomalies.containsKey(anomaly.getId())) {
       return false;

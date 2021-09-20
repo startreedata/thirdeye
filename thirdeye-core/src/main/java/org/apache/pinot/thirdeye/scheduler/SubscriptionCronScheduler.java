@@ -27,14 +27,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertJob;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionAlertConfigBean;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -62,7 +61,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
 
   private static final int DEFAULT_ALERT_DELAY = 1;
   private static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
-  public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskConstants.TaskType.DETECTION_ALERT
+  public static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskType.NOTIFICATION
       .toString();
 
   private final Scheduler scheduler;
@@ -145,7 +144,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-        CronScheduleBuilder.cronSchedule(((DetectionAlertConfigBean) config).getCronExpression()))
+        CronScheduleBuilder.cronSchedule(((SubscriptionGroupDTO) config).getCronExpression()))
         .build();
     this.scheduler.scheduleJob(job, trigger);
     LOG.info(String.format("scheduled subscription pipeline job %s", job.getKey().getName()));
@@ -162,7 +161,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public String getJobKey(Long id, TaskConstants.TaskType taskType) {
+  public String getJobKey(Long id, TaskType taskType) {
     return String.format("%s_%d", taskType, id);
   }
 
@@ -181,7 +180,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
     Long id = subscriptionGroupDTO.getId();
     boolean isActive = subscriptionGroupDTO.isActive();
 
-    JobKey key = new JobKey(getJobKey(id, TaskConstants.TaskType.DETECTION_ALERT),
+    JobKey key = new JobKey(getJobKey(id, TaskType.NOTIFICATION),
         QUARTZ_SUBSCRIPTION_GROUPER);
     JobDetail job = JobBuilder.newJob(DetectionAlertJob.class).withIdentity(key).build();
     boolean isScheduled = scheduledJobs.contains(key);

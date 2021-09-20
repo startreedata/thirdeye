@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils.parseOffset;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils.parseOffset;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -30,9 +30,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.pinot.thirdeye.dashboard.resources.v2.BaselineParsingUtils;
-import org.apache.pinot.thirdeye.rootcause.timeseries.Baseline;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -42,7 +39,11 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
+import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.apache.pinot.thirdeye.util.ResourceUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;

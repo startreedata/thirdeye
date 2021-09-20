@@ -25,12 +25,8 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,61 +36,29 @@ public abstract class DetectionAlertScheme {
   protected static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
-  protected final SubscriptionGroupDTO subsConfig;
-  protected final DetectionAlertFilterResult result;
-  private final MetricConfigManager metricConfigManager;
-  private final AlertManager detectionConfigManager;
-  private final EventManager eventManager;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
-  public DetectionAlertScheme(SubscriptionGroupDTO subsConfig,
-      DetectionAlertFilterResult result,
-      final MetricConfigManager metricConfigManager,
-      final AlertManager detectionConfigManager,
-      final EventManager eventManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this.subsConfig = subsConfig;
-    this.result = result;
-    this.metricConfigManager = metricConfigManager;
-    this.detectionConfigManager = detectionConfigManager;
-    this.eventManager = eventManager;
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+  private final MetricAnomaliesContent metricAnomaliesContent;
+  private final EntityGroupKeyContent entityGroupKeyContent;
+
+  public DetectionAlertScheme(final MetricAnomaliesContent metricAnomaliesContent,
+      final EntityGroupKeyContent entityGroupKeyContent) {
+    this.metricAnomaliesContent = metricAnomaliesContent;
+    this.entityGroupKeyContent = entityGroupKeyContent;
   }
 
-  public abstract void run() throws Exception;
+  public abstract void run(
+      final SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult result) throws Exception;
 
   public void destroy() {
     // do nothing
   }
 
-  /**
-   * Plug the appropriate template based on configuration.
-   */
-  public BaseNotificationContent buildNotificationContent(
-      Properties alertSchemeClientConfigs) {
-    AlertTemplate template = AlertTemplate.DEFAULT_EMAIL;
-    if (alertSchemeClientConfigs != null && alertSchemeClientConfigs.containsKey(PROP_TEMPLATE)) {
-      template = AlertTemplate.valueOf(alertSchemeClientConfigs.get(PROP_TEMPLATE).toString());
+  private EmailTemplateType getTemplate(final Properties properties) {
+    if (properties != null && properties.containsKey(PROP_TEMPLATE)) {
+      return EmailTemplateType.valueOf(properties.get(PROP_TEMPLATE).toString());
     }
-
-    BaseNotificationContent content;
-    switch (template) {
-      case DEFAULT_EMAIL:
-        content = new MetricAnomaliesContent(metricConfigManager, eventManager,
-            mergedAnomalyResultManager, detectionConfigManager);
-        break;
-
-      case ENTITY_GROUPBY_REPORT:
-        content = new EntityGroupKeyContent(metricConfigManager, detectionConfigManager,
-            eventManager, mergedAnomalyResultManager);
-        break;
-
-      default:
-        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
-    }
-
-    LOG.info("Using " + content.getClass().getSimpleName() + " to render the template.");
-    return content;
+    return EmailTemplateType.DEFAULT_EMAIL;
   }
 
   /**
@@ -102,22 +66,24 @@ public abstract class DetectionAlertScheme {
    * alerter,
    * do not fail the alert if a subset of recipients are invalid.
    */
-  void handleAlertFailure(int numOfAnomalies, Exception e) throws Exception {
-    // Dimension recipients not enabled
-    if (this.result.getResult().size() == 1) {
-      throw e;
-    } else {
-      LOG.warn("Skipping! Found illegal arguments while sending {} anomalies for alert {}."
-              + " Exception message: ",
-          numOfAnomalies, this.subsConfig.getId(), e);
+  void handleAlertFailure(final Exception e) {
+    LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
+  }
+
+  protected BaseNotificationContent getNotificationContent(
+      final Properties properties) {
+    final EmailTemplateType template = getTemplate(properties);
+    switch (template) {
+      case DEFAULT_EMAIL:
+        return metricAnomaliesContent;
+      case ENTITY_GROUPBY_REPORT:
+        return entityGroupKeyContent;
+      default:
+        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
     }
   }
 
-  protected BaseNotificationContent getNotificationContent(Properties alertSchemeClientConfigs) {
-    return buildNotificationContent(alertSchemeClientConfigs);
-  }
-
-  public enum AlertTemplate {
+  public enum EmailTemplateType {
     DEFAULT_EMAIL,
     ENTITY_GROUPBY_REPORT
   }

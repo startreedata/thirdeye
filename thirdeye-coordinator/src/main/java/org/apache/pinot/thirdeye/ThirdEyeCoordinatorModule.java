@@ -6,14 +6,13 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
-import org.apache.pinot.thirdeye.config.ConfigurationHolder;
-import org.apache.pinot.thirdeye.config.MockEventsConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.events.MockEventsConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoordinatorModule extends AbstractModule {
 
   private final ThirdEyeCoordinatorConfiguration configuration;
-  private final ConfigurationHolder configurationHolder;
   private final DataSource dataSource;
   private final MetricRegistry metricRegistry;
 
@@ -21,15 +20,15 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
       final DataSource dataSource, final MetricRegistry metricRegistry) {
     this.configuration = configuration;
     this.dataSource = dataSource;
-    configurationHolder = new ConfigurationHolder(configuration.getConfigPath());
     this.metricRegistry = metricRegistry;
   }
 
   @Override
   protected void configure() {
-    install(new ThirdEyeCoreModule(dataSource, configurationHolder));
+    install(new ThirdEyeCoreModule(dataSource, configuration));
 
     bind(MetricRegistry.class).toInstance(metricRegistry);
+    bind(ThirdEyeCoordinatorConfiguration.class).toInstance(configuration);
   }
 
   @Singleton

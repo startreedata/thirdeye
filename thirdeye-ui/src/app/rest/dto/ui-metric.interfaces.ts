@@ -11,4 +11,5 @@ export interface UiMetric {
     aggregationFunction: MetricAggFunction;
     views: LogicalView[];
     viewCount: string;
+    rollupThreshold?: number;
 }

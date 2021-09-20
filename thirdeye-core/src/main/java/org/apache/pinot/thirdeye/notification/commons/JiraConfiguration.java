@@ -20,55 +20,46 @@
 package org.apache.pinot.thirdeye.notification.commons;
 
 import com.google.common.base.MoreObjects;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.collections4.MapUtils;
 
 public class JiraConfiguration {
 
-  public static final String JIRA_CONFIG_KEY = "jiraConfiguration";
-  public static final String JIRA_URL_KEY = "jiraUrl";
-  public static final String JIRA_USER_KEY = "jiraUser";
-  public static final String JIRA_PASSWD_KEY = "jiraPassword";
-  public static final String JIRA_DEFAULT_PROJECT_KEY = "jiraDefaultProject";
-  public static final String JIRA_ISSUE_TYPE_KEY = "jiraIssueTypeId";
-
-  private String jiraUrl;
-  private String jiraUser;
-  private String jiraPassword;
-  private String jiraDefaultProject;
-  private Long jiraIssueTypeId;
+  private String url;
+  private String user;
+  private String password;
+  private String defaultProject = "THIRDEYE";
+  private Long jiraIssueTypeId = 19L;
 
   public String getJiraHost() {
-    return jiraUrl;
+    return url;
   }
 
   public void setJiraHost(String jiraHost) {
-    this.jiraUrl = jiraHost;
+    this.url = jiraHost;
   }
 
-  public String getJiraUser() {
-    return jiraUser;
+  public String getUser() {
+    return user;
   }
 
-  public void setJiraUser(String jiraUser) {
-    this.jiraUser = jiraUser;
+  public void setUser(String user) {
+    this.user = user;
   }
 
-  public String getJiraPassword() {
-    return jiraPassword;
+  public String getPassword() {
+    return password;
   }
 
-  public void setJiraPassword(String jiraPassword) {
-    this.jiraPassword = jiraPassword;
+  public void setPassword(String password) {
+    this.password = password;
   }
 
-  public void setJiraDefaultProjectKey(String jiraDefaultProject) {
-    this.jiraDefaultProject = jiraDefaultProject;
+  public void setDefaultProject(String defaultProject) {
+    this.defaultProject = defaultProject;
   }
 
-  public String getJiraDefaultProjectKey() {
-    return jiraDefaultProject;
+  public String getDefaultProject() {
+    return defaultProject;
   }
 
   public void setJiraIssueTypeId(Long jiraIssueTypeId) {
@@ -85,36 +76,26 @@ public class JiraConfiguration {
       return false;
     }
     JiraConfiguration at = (JiraConfiguration) o;
-    return Objects.equals(jiraUrl, at.getJiraHost())
-        && Objects.equals(jiraUser, at.getJiraUser())
-        && Objects.equals(jiraPassword, at.getJiraPassword())
-        && Objects.equals(jiraDefaultProject, at.getJiraDefaultProjectKey())
+    return Objects.equals(url, at.getJiraHost())
+        && Objects.equals(user, at.getUser())
+        && Objects.equals(password, at.getPassword())
+        && Objects.equals(defaultProject, at.getDefaultProject())
         && Objects.equals(jiraIssueTypeId, at.getJiraIssueTypeId());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jiraUrl, jiraUser, jiraPassword, jiraDefaultProject);
+    return Objects.hash(url, user, password, defaultProject);
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add(JIRA_URL_KEY, jiraUrl).add(JIRA_USER_KEY, jiraUser)
+    return MoreObjects.toStringHelper(this)
+        .add("url", url)
+        .add("user", user)
+        .add("password", password)
+        .add("defaultProject", defaultProject)
+        .add("issueTypeId", jiraIssueTypeId)
         .toString();
-  }
-
-  public static JiraConfiguration createFromProperties(Map<String, Object> jiraConfiguration) {
-    JiraConfiguration conf = new JiraConfiguration();
-    try {
-      conf.setJiraHost(MapUtils.getString(jiraConfiguration, JIRA_URL_KEY));
-      conf.setJiraUser(MapUtils.getString(jiraConfiguration, JIRA_USER_KEY));
-      conf.setJiraPassword(MapUtils.getString(jiraConfiguration, JIRA_PASSWD_KEY));
-      conf.setJiraDefaultProjectKey(
-          MapUtils.getString(jiraConfiguration, JIRA_DEFAULT_PROJECT_KEY, "THIRDEYE"));
-      conf.setJiraIssueTypeId(MapUtils.getLong(jiraConfiguration, JIRA_ISSUE_TYPE_KEY, 19L));
-    } catch (Exception e) {
-      throw new RuntimeException("Error occurred while parsing jira configuration into object.", e);
-    }
-    return conf;
   }
 }

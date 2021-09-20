@@ -1,17 +1,16 @@
 package org.apache.pinot.thirdeye.spi.api;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-@JsonInclude(Include.NON_NULL)
 public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   private Long id;
   private String name;
   private String description;
+  private AlertTemplateApi template;
+  private Map<String, Object> templateProperties;
   private String cron;
   private Date lastTimestamp;
   private Boolean active;
@@ -21,6 +20,7 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private Map<String, List<String>> filters;
   private Map<String, AlertNodeApi> nodes;
   private List<SubscriptionGroupApi> subscriptionGroups;
+
 
   public Long getId() {
     return id;
@@ -46,6 +46,25 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   public AlertApi setDescription(final String description) {
     this.description = description;
+    return this;
+  }
+
+  public AlertTemplateApi getTemplate() {
+    return template;
+  }
+
+  public AlertApi setTemplate(final AlertTemplateApi template) {
+    this.template = template;
+    return this;
+  }
+
+  public Map<String, Object> getTemplateProperties() {
+    return templateProperties;
+  }
+
+  public AlertApi setTemplateProperties(
+      final Map<String, Object> templateProperties) {
+    this.templateProperties = templateProperties;
     return this;
   }
 

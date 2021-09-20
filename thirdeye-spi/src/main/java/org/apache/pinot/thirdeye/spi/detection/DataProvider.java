@@ -23,7 +23,6 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -31,9 +30,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EvaluationSlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;
 
 /**
  * Centralized data source for anomaly detection algorithms. All data used by any
@@ -132,6 +131,6 @@ public interface DataProvider {
       Collection<EvaluationSlice> evaluationSlices, long configId);
 
   default List<DatasetConfigDTO> fetchDatasetByDisplayName(String datasetDisplayName) {
-    throw new NotImplementedException("the method is not implemented");
+    throw new UnsupportedOperationException();
   }
 }

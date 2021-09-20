@@ -5,4 +5,5 @@ export interface MetricCardProps {
     searchWords?: string[];
     showViewDetails?: boolean;
     onDelete?: (uiMetric: UiMetric) => void;
+    onEdit?: (id: number) => void;
 }

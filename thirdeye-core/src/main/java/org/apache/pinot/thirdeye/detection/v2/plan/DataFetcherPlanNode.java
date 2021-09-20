@@ -1,12 +1,11 @@
 package org.apache.pinot.thirdeye.detection.v2.plan;
 
-import static org.apache.pinot.thirdeye.detection.v2.plan.DetectionPipelinePlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
+import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.v2.operator.DataFetcherOperator;
-import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -42,28 +41,17 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Map<String, Object> getParams() {
-    return detectionPlanApi.getParams();
+    return planNodeBean.getParams();
   }
 
   @Override
-  public Operator<DataTable> run() throws Exception {
-    long startTime;
-    try {
-      startTime = Long.parseLong(getParams().get("startTime").toString());
-    } catch (Exception e) {
-      startTime = this.startTime;
-    }
-    long endTime;
-    try {
-      endTime = Long.parseLong(getParams().get("endTime").toString());
-    } catch (Exception e) {
-      endTime = this.endTime;
-    }
+  public Operator run() throws Exception {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     dataFetcherOperator.init(new OperatorContext()
-        .setStartTime(startTime)
-        .setEndTime(endTime)
-        .setDetectionPlanApi(detectionPlanApi)
+        .setStartTime(getParams().getOrDefault("startTime", String.valueOf(this.startTime)).toString())
+        .setEndTime(getParams().getOrDefault("endTime", String.valueOf(this.endTime)).toString())
+        .setTimeFormat(getParams().getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT).toString())
+        .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
     );
     return dataFetcherOperator;

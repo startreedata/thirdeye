@@ -1,8 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.badRequest;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.badRequest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
@@ -18,13 +18,15 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.auth.AuthService;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 
 @Api(tags = "Anomaly")
 @Singleton
@@ -35,15 +37,19 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .put("alert.id", "detectionConfigId")
       .put("startTime", "startTime")
       .put("endTime", "endTime")
+      .put("isChild", "child")
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AlertManager alertManager;
 
   @Inject
   public AnomalyResource(
       final AuthService authService,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertManager alertManager) {
     super(authService, mergedAnomalyResultManager, API_TO_BEAN_MAP);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.alertManager = alertManager;
   }
 
   private static AnomalyFeedbackDTO toAnomalyFeedbackDTO(AnomalyFeedbackApi api) {
@@ -68,7 +74,16 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
 
   @Override
   protected AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
-    return ApiBeanMapper.toApi(dto);
+    final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
+    optional(anomalyApi.getAlert())
+        .filter(alertApi -> alertApi.getId() != null)
+        .ifPresent(this::populateNameIfPossible);
+    return anomalyApi;
+  }
+
+  private void populateNameIfPossible(final AlertApi alertApi) {
+    optional(alertManager.findById(alertApi.getId()))
+        .ifPresent(alert -> alertApi.setName(alert.getName()));
   }
 
   @Path("{id}/feedback")

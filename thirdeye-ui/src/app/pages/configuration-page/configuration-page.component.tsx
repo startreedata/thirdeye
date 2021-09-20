@@ -8,6 +8,8 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { ButtonTile } from "../../components/button-tile/button-tile.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import {
+    getDatasetsPath,
+    getDatasourcesPath,
     getMetricsPath,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
@@ -26,6 +28,14 @@ export const ConfigurationPage: FunctionComponent = () => {
 
     const handleSubscriptionGroupsClick = (): void => {
         history.push(getSubscriptionGroupsPath());
+    };
+
+    const handleDatasetsClick = (): void => {
+        history.push(getDatasetsPath());
+    };
+
+    const handleDatasourcesClick = (): void => {
+        history.push(getDatasourcesPath());
     };
 
     const handleMetricsClick = (): void => {
@@ -53,6 +63,26 @@ export const ConfigurationPage: FunctionComponent = () => {
                             iconColor={theme.palette.primary.main}
                             text={t("label.subscription-groups")}
                             onClick={handleSubscriptionGroupsClick}
+                        />
+                    </Grid>
+
+                    {/* datasets */}
+                    <Grid item>
+                        <ButtonTile
+                            icon={SubscriptionGroupIcon}
+                            iconColor={theme.palette.primary.main}
+                            text={t("label.datasets")}
+                            onClick={handleDatasetsClick}
+                        />
+                    </Grid>
+
+                    {/* datasources */}
+                    <Grid item>
+                        <ButtonTile
+                            icon={SubscriptionGroupIcon}
+                            iconColor={theme.palette.primary.main}
+                            text={t("label.datasources")}
+                            onClick={handleDatasourcesClick}
                         />
                     </Grid>
 

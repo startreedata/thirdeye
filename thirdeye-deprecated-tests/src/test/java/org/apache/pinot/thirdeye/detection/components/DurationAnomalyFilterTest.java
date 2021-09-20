@@ -24,8 +24,9 @@ import static org.apache.pinot.thirdeye.detection.DetectionTestUtils.makeAnomaly
 
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.spec.DurationAnomalyFilterSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyFilter;
+import org.apache.pinot.thirdeye.detection.components.filters.DurationAnomalyFilter;
+import org.apache.pinot.thirdeye.detection.components.filters.DurationAnomalyFilterSpec;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFilter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

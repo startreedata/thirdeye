@@ -3,8 +3,8 @@ package org.apache.pinot.thirdeye.alert;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_FILTER;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,12 +24,12 @@ import org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionProp
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

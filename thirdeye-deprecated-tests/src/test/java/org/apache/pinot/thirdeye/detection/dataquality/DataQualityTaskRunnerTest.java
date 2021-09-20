@@ -27,28 +27,29 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalyType;
-import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
+import org.apache.pinot.thirdeye.detection.MockDataProvider;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DetectionPipelineFactory;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
-import org.apache.pinot.thirdeye.detection.dataquality.components.DataSlaQualityChecker;
-import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
+import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.task.TaskContext;
+import org.apache.pinot.thirdeye.task.runner.DataQualityPipelineTaskRunner;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
@@ -125,7 +126,7 @@ public class DataQualityTaskRunnerTest {
    */
   private AlertDTO translateSlaConfig(long detectionId, String filePath) throws Exception {
     String yamlConfig = IOUtils
-        .toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8);
+        .toString(this.getClass().getResourceAsStream(filePath), StandardCharsets.UTF_8.toString());
     DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, this.provider);
     AlertDTO alertDTO = translator.translate();
     if (detectionId < 0) {

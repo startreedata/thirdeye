@@ -34,23 +34,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.anomaly.override.OverrideConfigHelper;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.detection.detector.email.filter.AlphaBetaAlertFilter;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
 import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
 import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
-import org.apache.pinot.thirdeye.detector.email.filter.AlphaBetaAlertFilter;
-import org.apache.pinot.thirdeye.detector.metric.transfer.ScalingFactor;
 import org.apache.pinot.thirdeye.spi.Constants;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFeedConfig;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyFetcherConfig;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalyNotifiedStatus;
-import org.apache.pinot.thirdeye.spi.alert.commons.AnomalySource;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
@@ -64,7 +56,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedConfig;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFetcherConfig;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyNotifiedStatus;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 
@@ -167,7 +166,7 @@ public class DaoTestUtils {
     JobDTO jobSpec = new JobDTO();
     jobSpec.setJobName("Test_Anomaly_Job");
     jobSpec.setStatus(Constants.JobStatus.SCHEDULED);
-    jobSpec.setTaskType(TaskConstants.TaskType.DETECTION);
+    jobSpec.setTaskType(TaskType.DETECTION);
     jobSpec.setScheduleStartTime(System.currentTimeMillis());
     jobSpec.setWindowStartTime(new DateTime().minusHours(20).getMillis());
     jobSpec.setWindowEndTime(new DateTime().minusHours(10).getMillis());
@@ -204,17 +203,17 @@ public class DaoTestUtils {
     OverrideConfigDTO overrideConfigDTO = new OverrideConfigDTO();
     overrideConfigDTO.setStartTime(now.minusHours(8).getMillis());
     overrideConfigDTO.setEndTime(now.plusHours(8).getMillis());
-    overrideConfigDTO.setTargetEntity(OverrideConfigHelper.ENTITY_TIME_SERIES);
+    overrideConfigDTO.setTargetEntity(OverrideConfigManager.ENTITY_TIME_SERIES);
     overrideConfigDTO.setActive(true);
 
     Map<String, String> overrideProperties = new HashMap<>();
-    overrideProperties.put(ScalingFactor.SCALING_FACTOR, "1.2");
+    overrideProperties.put(Constants.SCALING_FACTOR, "1.2");
     overrideConfigDTO.setOverrideProperties(overrideProperties);
 
     Map<String, List<String>> overrideTarget = new HashMap<>();
     overrideTarget
-        .put(OverrideConfigHelper.TARGET_COLLECTION, Arrays.asList("collection1", "collection2"));
-    overrideTarget.put(OverrideConfigHelper.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
+        .put(OverrideConfigManager.TARGET_COLLECTION, Arrays.asList("collection1", "collection2"));
+    overrideTarget.put(OverrideConfigManager.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     return overrideConfigDTO;

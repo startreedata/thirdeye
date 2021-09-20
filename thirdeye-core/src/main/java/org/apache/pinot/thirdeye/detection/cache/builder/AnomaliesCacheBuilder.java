@@ -37,12 +37,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,8 +160,11 @@ public class AnomaliesCacheBuilder {
       int anomalies = output.values().stream().mapToInt(Collection::size).sum();
       LOG.info(
           "Fetched {} anomalies, from {} slices, took {} milliseconds, {} slices hit cache, {} slices missed cache",
-          anomalies, slices.size(), System.currentTimeMillis() - ts,
-          (slices.size() - futures.size()), futures.size());
+          anomalies,
+          slices.size(),
+          System.currentTimeMillis() - ts,
+          (slices.size() - futures.size()),
+          futures.size());
     } catch (TimeoutException e) {
       LOG.error("Timeout when fetching anomalies so assuming the result is empty.", e);
       for (AnomalySlice slice : slices) {

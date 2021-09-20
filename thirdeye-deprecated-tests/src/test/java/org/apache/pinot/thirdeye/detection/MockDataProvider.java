@@ -38,9 +38,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EvaluationSlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EventSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;
 
 public class MockDataProvider implements DataProvider {
 

@@ -3,6 +3,7 @@
     "recommendations": [
         "dbaeumer.vscode-eslint", // ESLint
         "stylelint.vscode-stylelint", // stylelint
-        "esbenp.prettier-vscode" // Prettier
+        "esbenp.prettier-vscode", // Prettier
+        "streetsidesoftware.code-spell-checker" // Spell Checker
     ]
 }

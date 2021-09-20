@@ -9,13 +9,7 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,6 +26,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
@@ -39,16 +34,13 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
-import org.assertj.core.api.Assertions;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
 
 public class ThirdEyeIntegrationTest {
 
@@ -59,12 +51,9 @@ public class ThirdEyeIntegrationTest {
   private static final String SCHEMA_FILENAME = "schema.json";
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
-  private static final String DATASOURCES_CONFIG_FILE_PATH = "config/data-sources/data-sources-config.yml";
-  private static final String PINOT_DATASOURCE_CLASS = "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource";
-
-  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   private static PinotContainer container;
 
+  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
   private Client client;
   private ThirdEyeH2DatabaseServer db;
 
@@ -100,58 +89,16 @@ public class ThirdEyeIntegrationTest {
     return container;
   }
 
-  private void modifyDataSourceConfig() throws IOException, URISyntaxException {
-    //  URL e2eConfigurationResources = this.getClass().getClassLoader().getResource("e2e");
-    Path resourceDirectory = Paths.get("src", "test", "resources", "e2e");
-    File dataSourcesConfigFile = Paths.get(resourceDirectory.toFile().getAbsolutePath(),
-        DATASOURCES_CONFIG_FILE_PATH).toFile();
-    InputStream inputStream = new FileInputStream(dataSourcesConfigFile);
-    DumperOptions options = new DumperOptions();
-    options.setIndent(2);
-    options.setPrettyFlow(true);
-    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-    Yaml dataSourcesYamlReader = new Yaml();
-    Map<String, Object> dataSourcesConfigurationMap = (Map<String, Object>) dataSourcesYamlReader.load(
-        inputStream);
-    List<Map<String, Object>> dataSourceConfigs = (List<Map<String, Object>>) dataSourcesConfigurationMap
-        .get("dataSourceConfigs");
-    int index = findIndex(dataSourceConfigs, PINOT_DATASOURCE_CLASS);
-    assert index >= 0;
-    Map<String, Object> dataSourceConfig = dataSourceConfigs.get(index);
-    Map<String, Object> dataSourceConfigProperties = (Map<String, Object>) dataSourceConfig.get(
-        "properties");
-    dataSourceConfigProperties
-        .put("zookeeperUrl", "localhost:" + container.getZookeeperPort());
-    dataSourceConfigProperties
-        .put("controllerPort", container.getControllerPort());
-    PrintWriter writer = new PrintWriter(dataSourcesConfigFile);
-    Yaml dataSourcesYamlWriter = new Yaml(options);
-    dataSourcesYamlWriter.dump(dataSourcesConfigurationMap, writer);
-    inputStream.close();
-    writer.close();
-  }
-
-  private int findIndex(List<Map<String, Object>> dataSourceConfigs,
-      String expectedDataSourceClassName) {
-    for (int i = 0; i < dataSourceConfigs.size(); i++) {
-      Map<String, Object> datasourceConfig = dataSourceConfigs.get(i);
-      String actualDataSourceClassName = (String) datasourceConfig.get("className");
-      if (actualDataSourceClassName.equals(expectedDataSourceClassName)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   @BeforeClass
   public void beforeClass() throws Exception {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7120, null);
+    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
     db.start();
+    db.truncateAllTables();
+
     container = startPinot();
     container.addTables();
-    modifyDataSourceConfig();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-        resourceFilePath("e2e/config/coordinator.yml"),
+        resourceFilePath("e2e/config/coordinator.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", db.getDbConfig().getUrl()),
@@ -223,7 +170,7 @@ public class ThirdEyeIntegrationTest {
   @Test(dependsOnMethods = "testDataset")
   public void testDataSourcesLoaded() {
     // A single datasource must exist in the db for the tests to proceed
-    Assertions.assertThat(db.executeSql("SELECT * From dataset_config_index").length())
+    assertThat(db.executeSql("SELECT * From dataset_config_index").size())
         .isGreaterThan(0);
   }
 
@@ -278,7 +225,7 @@ public class ThirdEyeIntegrationTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test(dependsOnMethods = "testDerivedMetrics")
+  @Test(dependsOnMethods = "testDerivedMetrics", enabled = false)
   public void testEvaluate() {
     final AlertEvaluationApi requestAlertEvaluationApi = new AlertEvaluationApi();
     final AlertApi alertApi = new AlertApi();

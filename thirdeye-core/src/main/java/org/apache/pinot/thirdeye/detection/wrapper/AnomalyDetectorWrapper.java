@@ -28,17 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.anomaly.detection.DetectionJobSchedulerUtils;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineException;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.detection.anomaly.detection.DetectionJobSchedulerUtils;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
-import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -47,9 +41,15 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.detection.DetectorDataInsufficientException;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
-import org.apache.pinot.thirdeye.spi.detection.spi.exception.DetectorDataInsufficientException;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTime;
@@ -199,15 +199,25 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
       try {
         LOG.info(
             "[Pipeline] start detection for config {} detector {} metricUrn {} window ({}/{}) - start {} end {}",
-            config.getId(), this.detectorName, metricUrn, i + 1, monitoringWindows.size(),
-            window.getStart(), window.getEnd());
+            config.getId(),
+            this.detectorName,
+            metricUrn,
+            i + 1,
+            monitoringWindows.size(),
+            window.getStart(),
+            window.getEnd());
         long ts = System.currentTimeMillis();
         detectionResult = anomalyDetector.runDetection(window, this.metricUrn);
         LOG.info(
             "[Pipeline] end detection for config {} metricUrn {} window ({}/{}) - start {} end {} used {} milliseconds, detected {} anomalies",
-            config.getId(), metricUrn, i + 1, monitoringWindows.size(), window.getStart(),
+            config.getId(),
+            metricUrn,
+            i + 1,
+            monitoringWindows.size(),
+            window.getStart(),
             window.getEnd(),
-            System.currentTimeMillis() - ts, detectionResult.getAnomalies().size());
+            System.currentTimeMillis() - ts,
+            detectionResult.getAnomalies().size());
         successWindows++;
       } catch (DetectorDataInsufficientException e) {
         LOG.warn("[DetectionConfigID{}] Insufficient data to run detection for window {} to {}.",
@@ -263,7 +273,11 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
     if (i == EARLY_TERMINATE_WINDOW && successWindows == 0) {
       throw new DetectionPipelineException(String.format(
           "Successive first %d/%d detection windows failed for config %d metricUrn %s for monitoring window %d to %d. Discard remaining windows",
-          EARLY_TERMINATE_WINDOW, totalWindows, config.getId(), metricUrn, this.getStartTime(),
+          EARLY_TERMINATE_WINDOW,
+          totalWindows,
+          config.getId(),
+          metricUrn,
+          this.getStartTime(),
           this.getEndTime()), lastException);
     }
   }
@@ -274,7 +288,10 @@ public class AnomalyDetectorWrapper extends DetectionPipeline {
     if (successWindows == 0 && totalWindows > 0) {
       throw new DetectionPipelineException(String.format(
           "Detection failed for all windows for detection config id %d detector %s for monitoring window %d to %d.",
-          this.config.getId(), this.detectorName, this.getStartTime(), this.getEndTime()),
+          this.config.getId(),
+          this.detectorName,
+          this.getStartTime(),
+          this.getEndTime()),
           lastException);
     }
   }

@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.CoreConstants;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -37,7 +36,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.detection.DetectionPipelineTaskInfo;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
+import org.apache.pinot.thirdeye.task.DetectionPipelineTaskInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
@@ -54,11 +55,11 @@ public class TaskUtils {
   /**
    * Build a task with the specified type and properties
    */
-  public static TaskDTO buildTask(long id, String taskInfoJson, TaskConstants.TaskType taskType) {
+  public static TaskDTO buildTask(long id, String taskInfoJson, TaskType taskType) {
     TaskDTO taskDTO = new TaskDTO();
     taskDTO.setTaskType(taskType);
     taskDTO.setJobName(taskType.toString() + "_" + id);
-    taskDTO.setStatus(TaskConstants.TaskStatus.WAITING);
+    taskDTO.setStatus(TaskStatus.WAITING);
     taskDTO.setTaskInfo(taskInfoJson);
     return taskDTO;
   }
@@ -70,8 +71,8 @@ public class TaskUtils {
         .findByPredicate(Predicate.AND(
             Predicate.EQ("name", jobName),
             Predicate.OR(
-                Predicate.EQ("status", TaskConstants.TaskStatus.RUNNING.toString()),
-                Predicate.EQ("status", TaskConstants.TaskStatus.WAITING.toString()))
+                Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+                Predicate.EQ("status", TaskStatus.WAITING.toString()))
             )
         );
 
@@ -111,36 +112,42 @@ public class TaskUtils {
         metricConfigManager);
   }
 
-  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO configDTO,
+  public static DetectionPipelineTaskInfo buildTaskInfoFromDetectionConfig(AlertDTO alert,
       long end,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    final long delay = getDetectionExpectedDelay(configDTO,
-        thirdEyeCacheRegistry,
-        datasetConfigManager,
-        metricConfigManager);
-    final long start = Math.max(configDTO.getLastTimestamp(),
+    long delay;
+    try {
+      delay = getDetectionExpectedDelay(alert,
+          thirdEyeCacheRegistry,
+          datasetConfigManager,
+          metricConfigManager);
+    } catch (Exception e) {
+      LOG.error("Failed to calc delay", e);
+      delay = 0;
+    }
+    final long start = Math.max(alert.getLastTimestamp(),
         end - CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW - delay);
-    return new DetectionPipelineTaskInfo(configDTO.getId(), start, end);
+    return new DetectionPipelineTaskInfo(alert.getId(), start, end);
   }
 
   public static long createDetectionTask(DetectionPipelineTaskInfo taskInfo,
       final TaskManager taskManager) {
-    return TaskUtils.createTask(TaskConstants.TaskType.DETECTION, taskInfo,
+    return TaskUtils.createTask(TaskType.DETECTION, taskInfo,
         taskManager);
   }
 
   public static long createDataQualityTask(DetectionPipelineTaskInfo taskInfo,
       final TaskManager taskManager) {
-    return TaskUtils.createTask(TaskConstants.TaskType.DATA_QUALITY, taskInfo,
+    return TaskUtils.createTask(TaskType.DATA_QUALITY, taskInfo,
         taskManager);
   }
 
   /**
    * Creates a generic task and saves it.
    */
-  public static long createTask(TaskConstants.TaskType taskType,
+  public static long createTask(TaskType taskType,
       DetectionPipelineTaskInfo taskInfo, final TaskManager taskManager) {
     String taskInfoJson = null;
     try {

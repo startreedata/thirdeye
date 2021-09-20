@@ -44,13 +44,14 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
+import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This class formats the content for jira alerts
  */
-public class JiraContentFormatter extends AlertContentFormatter {
+public class JiraContentFormatter {
+  protected static final String PROP_SUBJECT_STYLE = "subject";
+
 
   private static final Logger LOG = LoggerFactory.getLogger(JiraContentFormatter.class);
 
@@ -71,6 +74,11 @@ public class JiraContentFormatter extends AlertContentFormatter {
 
   private static final Map<String, String> alertContentToTemplateMap;
 
+  protected Properties alertClientConfig;
+  protected SubscriptionGroupDTO subsConfig;
+  protected ThirdEyeCoordinatorConfiguration teConfig;
+  protected BaseNotificationContent notificationContent;
+
   static {
     Map<String, String> aMap = new HashMap<>();
     aMap.put(MetricAnomaliesContent.class.getSimpleName(), "jira-metric-anomalies-template.ftl");
@@ -78,20 +86,41 @@ public class JiraContentFormatter extends AlertContentFormatter {
   }
 
   public JiraContentFormatter(JiraConfiguration jiraAdminConfig, Properties jiraClientConfig,
-      BaseNotificationContent content, ThirdEyeWorkerConfiguration teConfig,
+      BaseNotificationContent content, ThirdEyeCoordinatorConfiguration teConfig,
       SubscriptionGroupDTO subsConfig) {
-    super(jiraClientConfig, content, teConfig, subsConfig);
+    this.alertClientConfig = jiraClientConfig;
+    this.teConfig = teConfig;
+    notificationContent = content;
+    this.subsConfig = subsConfig;
+    notificationContent.init(alertClientConfig, teConfig);
+
 
     this.jiraAdminConfig = jiraAdminConfig;
     validateJiraConfigs(jiraAdminConfig);
   }
 
   /**
+   * Plug the appropriate subject style based on configuration
+   */
+  SubjectType getSubjectType(final Properties alertSchemeClientConfigs) {
+    final SubjectType subjectType;
+    if (alertSchemeClientConfigs != null && alertSchemeClientConfigs
+        .containsKey(PROP_SUBJECT_STYLE)) {
+      subjectType = SubjectType
+          .valueOf(alertSchemeClientConfigs.get(PROP_SUBJECT_STYLE).toString());
+    } else {
+      // To support the legacy email subject configuration
+      subjectType = subsConfig.getSubjectType();
+    }
+
+    return subjectType;
+  }
+  /**
    * Make sure the base admin parameters are configured before proceeding
    */
   private void validateJiraConfigs(JiraConfiguration jiraAdminConfig) {
-    Preconditions.checkNotNull(jiraAdminConfig.getJiraUser());
-    Preconditions.checkNotNull(jiraAdminConfig.getJiraPassword());
+    Preconditions.checkNotNull(jiraAdminConfig.getUser());
+    Preconditions.checkNotNull(jiraAdminConfig.getPassword());
     Preconditions.checkNotNull(jiraAdminConfig.getJiraHost());
   }
 
@@ -105,7 +134,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
   public JiraEntity getJiraEntity(Multimap<String, String> dimensionFilters,
       Collection<AnomalyResult> anomalies) {
     Map<String, Object> templateData = notificationContent.format(anomalies, this.subsConfig);
-    templateData.put("dashboardHost", teConfig.getDashboardHost());
+    templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
     return buildJiraEntity(alertContentToTemplateMap.get(notificationContent.getTemplate()),
         templateData,
         dimensionFilters);
@@ -115,7 +144,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
       Multimap<String, String> dimensionFilters) {
     String issueSummary =
         BaseNotificationContent
-            .makeSubject(super.getSubjectType(alertClientConfig), this.subsConfig, templateValues);
+            .makeSubject(getSubjectType(alertClientConfig), this.subsConfig, templateValues);
 
     // Append dimensional info to summary
     StringBuilder dimensions = new StringBuilder();
@@ -123,7 +152,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
       dimensions.append(", ").append(dimFilter.getKey()).append("=")
           .append(String.join(",", dimFilter.getValue()));
     }
-    issueSummary = issueSummary + dimensions.toString();
+    issueSummary = issueSummary + dimensions;
 
     // Truncate summary due to jira character limit
     return StringUtils.abbreviate(issueSummary, MAX_JIRA_SUMMARY_LENGTH);
@@ -178,7 +207,7 @@ public class JiraContentFormatter extends AlertContentFormatter {
   private JiraEntity buildJiraEntity(String jiraTemplate, Map<String, Object> templateValues,
       Multimap<String, String> dimensionFilters) {
     String jiraProject = MapUtils.getString(alertClientConfig, PROP_PROJECT,
-        this.jiraAdminConfig.getJiraDefaultProjectKey());
+        this.jiraAdminConfig.getDefaultProject());
     Long jiraIssueTypeId = MapUtils
         .getLong(alertClientConfig, PROP_ISSUE_TYPE, this.jiraAdminConfig.getJiraIssueTypeId());
 

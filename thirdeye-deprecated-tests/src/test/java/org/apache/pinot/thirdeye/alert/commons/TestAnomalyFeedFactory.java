@@ -16,8 +16,9 @@
 
 package org.apache.pinot.thirdeye.alert.commons;
 
-import org.apache.pinot.thirdeye.alert.feed.AnomalyFeed;
-import org.apache.pinot.thirdeye.alert.feed.UnionAnomalyFeed;
+import org.apache.pinot.thirdeye.detection.alert.AnomalyFeedFactory;
+import org.apache.pinot.thirdeye.detection.alert.feed.AnomalyFeed;
+import org.apache.pinot.thirdeye.detection.alert.feed.UnionAnomalyFeed;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -11,7 +11,7 @@ This is the UI project for StarTree ThirdEye.
 -   [Getting Started](#getting-started)
     -   [Prerequisites](#prerequisites)
         -   [Node Version Manager (nvm)](#node-version-manager-nvm)
-        -   [Configure Node Package Manager (npm) for use with GitHub Packages](#configure-node-package-manager-npm-for-use-with-github-packages)
+        -   [Configure Node Package Manager (npm) for use with Artifactory](#configure-node-package-manager-npm-for-use-with-artifactory)
     -   [Setup](#setup)
     -   [Run](#run)
 -   [Supported Browsers](#supported-browsers)
@@ -23,10 +23,14 @@ This is the UI project for StarTree ThirdEye.
     -   [`test-coverage`](#test-coverage)
     -   [`test-e2e`](#test-e2e)
     -   [`test-e2e-gui`](#test-e2e-gui)
-    -   [`eslint`](#eslint)
-    -   [`stylelint`](#stylelint)
-    -   [`pretty`](#pretty)
+    -   [`eslint-check`](#eslint-check)
+    -   [`eslint-fix`](#eslint-fix)
+    -   [`stylelint-check`](#stylelint-check)
+    -   [`stylelint-fix`](#stylelint-fix)
+    -   [`prettier-check`](#prettier-check)
+    -   [`prettier-fix`](#prettier-fix)
     -   [`lint`](#lint)
+-   [Contributing](#contributing)
 
 ## Getting Started
 
@@ -36,7 +40,7 @@ These instructions will help you get the project up and running on your local ma
 
 #### [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm)
 
-The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](/.nvmrc). Follow the instructions to install nvm for [Linux/macOS](https://github.com/nvm-sh/nvm#installing-and-updating) or [Windows](https://github.com/coreybutler/nvm-windows#installation--upgrades).
+The project uses nvm to maintain the [Node](https://nodejs.org) version. Compatible Node version is listed in project root [**.nvmrc**](./.nvmrc). Follow the instructions to install nvm for [Linux/macOS](https://github.com/nvm-sh/nvm#installing-and-updating) or [Windows](https://github.com/coreybutler/nvm-windows#installation--upgrades).
 
 Once you install nvm, go to the project directory and switch to the compatible Node version
 
@@ -46,10 +50,10 @@ $ nvm use
 
 This will switch to the required Node version if already installed and make `npm` command available in the terminal.
 
-If required Node version is not installed, it will recommend the command to install it
+If the required Node version is not installed, it will recommend the command to install it
 
 ```
-Found '/Users/default/cortex-data/cortex-data-ui/.nvmrc' with version <14.7.0>
+Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.7.0>
 N/A: version "14.7.0 -> N/A" is not yet installed.
 
 You need to run "nvm install 14.7.0" to install it before using it.
@@ -57,13 +61,13 @@ You need to run "nvm install 14.7.0" to install it before using it.
 
 Following the installation, the command above will let you switch to the required Node version.
 
-:warning: `nvm use` (without version number) might not work when using nvm for [Windows](https://github.com/coreybutler/nvm-windows). You may need to specify precise Node version from project root [**.nvmrc**](/.nvmrc).
+:warning: `nvm use` (without version number) might not work when using nvm for [Windows](https://github.com/coreybutler/nvm-windows). You may need to specify precise Node version from project root [**.nvmrc**](./.nvmrc).
 
-#### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with GitHub Packages
+#### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with [Artifactory](https://repo.startreedata.io)
 
-The project may depend on some GitHub Packages and npm needs to be configured to allow access to these packages using a GitHub account. The GitHub repository to install packages from is configured in project root [**.npmrc**](/.npmrc).
+The project may depend on some packages to be installed from Artifactory and npm needs to be configured to allow access to these packages. The Artifactory repository to install packages from is configured in project root [**.npmrc**](./.npmrc).
 
-Follow the official [GitHub Docs](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-with-a-personal-access-token) to configure npm with a GitHub personal access token using **~/.npmrc**.
+Use the Artifactory [Set Me Up](https://jfrog.com/knowledge-base/whats-new-in-the-set-me-up-dialog) to configure npm with Artifactory credentials using **~/.npmrc**.
 
 ### Setup
 
@@ -161,34 +165,62 @@ Run all end to end tests using [Cypress Test Runner](https://docs.cypress.io/gui
 $ npm run test-e2e-gui
 ```
 
-### `eslint`
+### `eslint-check`
 
-Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](/.eslintignore)
-
-```
-$ npm run eslint
-```
-
-### `stylelint`
-
-Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](/.stylelintignore)
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](./.eslintignore) and check for issues
 
 ```
-$ npm run stylelint
+$ npm run eslint-check
 ```
 
-### `pretty`
+### `eslint-fix`
 
-Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](/.prettierignore)
+Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](./.eslintignore) and fix issues
 
 ```
-$ npm run pretty
+$ npm run eslint-fix
+```
+
+### `stylelint-check`
+
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](./.stylelintignore) and check for issues
+
+```
+$ npm run stylelint-check
+```
+
+### `stylelint-fix`
+
+Run [stylelint](https://stylelint.io) across the project except for files and directories listed in project root [**.stylelintignore**](./.stylelintignore) and fix issues
+
+```
+$ npm run stylelint-fix
+```
+
+### `prettier-check`
+
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](./.prettierignore) and check for issues
+
+```
+$ npm run prettier-check
+```
+
+### `prettier-fix`
+
+Run [Prettier](https://prettier.io) across the project except for files and directories listed in project root [**.prettierignore**](./.prettierignore) and fix issues
+
+```
+$ npm run prettier-fix
 ```
 
 ### `lint`
 
-Run [`eslint`](#eslint), [`stylelint`](#stylelint) and [`pretty`](#pretty) scripts
+Run [`eslint-fix`](#eslint-fix), [`stylelint-fix`](#stylelint-fix) and [`prettier-fix`](#prettier-fix) scripts
 
 ```
 $ npm run lint
 ```
+
+## Contributing
+
+[Coding standards, conventions and other things.](./CONTRIBUTING.md)

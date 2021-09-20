@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.AlertNodeType;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
 
 @JsonInclude(Include.NON_NULL)
 public class AlertNodeApi {

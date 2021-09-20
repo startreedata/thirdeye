@@ -32,10 +32,9 @@ import org.apache.pinot.thirdeye.detection.spi.components.ModelEvaluator;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
 import org.apache.pinot.thirdeye.detection.spi.model.ModelStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.EvaluationSlice;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.model.EvaluationSlice;
+import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.joda.time.Instant;
 
 /**
@@ -53,6 +52,18 @@ public class MapeAveragePercentageChangeModelEvaluator implements
 
   private InputDataFetcher dataFetcher;
   private double threshold;
+
+  @Override
+  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec) {
+    this.threshold = spec.getThreshold();
+  }
+
+  @Override
+  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec,
+      InputDataFetcher dataFetcher) {
+    init(spec);
+    this.dataFetcher = dataFetcher;
+  }
 
   @Override
   public ModelEvaluationResult evaluateModel(Instant evaluationTimeStamp) {
@@ -133,13 +144,6 @@ public class MapeAveragePercentageChangeModelEvaluator implements
         evaluations.stream().collect(
             Collectors
                 .groupingBy(e -> String.format("%s:%s", e.getMetricUrn(), e.getDetectorName()),
-                    Collectors.averagingDouble(EvaluationBean::getMape)));
-  }
-
-  @Override
-  public void init(MapeAveragePercentageChangeModelEvaluatorSpec spec,
-      InputDataFetcher dataFetcher) {
-    this.dataFetcher = dataFetcher;
-    this.threshold = spec.getThreshold();
+                    Collectors.averagingDouble(EvaluationDTO::getMape)));
   }
 }

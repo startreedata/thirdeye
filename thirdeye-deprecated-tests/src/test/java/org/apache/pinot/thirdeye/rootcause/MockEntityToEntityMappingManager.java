@@ -38,6 +38,11 @@ public class MockEntityToEntityMappingManager extends
   }
 
   @Override
+  public List<EntityToEntityMappingDTO> findByName(String name) {
+    return findByPredicate(org.apache.pinot.thirdeye.spi.datalayer.Predicate.EQ("name", name));
+  }
+
+  @Override
   public List<EntityToEntityMappingDTO> findByFromURN(final String fromURN) {
     return new ArrayList<>(
         Collections2.filter(this.entities, new Predicate<EntityToEntityMappingDTO>() {

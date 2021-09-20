@@ -20,7 +20,6 @@ import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.RootcauseSessionBean;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.AnomalyEventEntity;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -78,7 +77,7 @@ public class RootCauseSessionResource {
         throw new IllegalArgumentException(String.format("Could not resolve session id %d", session.getId()));
       }
 
-      if (Objects.equals(existing.getPermissions(), RootcauseSessionBean.PermissionType.READ.toString()) &&
+      if (Objects.equals(existing.getPermissions(), RootcauseSessionDTO.PermissionType.READ.toString()) &&
           !Objects.equals(existing.getOwner(),username)) {
         throw new IllegalAccessException(String.format("No write permissions for '%s' on session id %d", username, existing.getId()));
       }

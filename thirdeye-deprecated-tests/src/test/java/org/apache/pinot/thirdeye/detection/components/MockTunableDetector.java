@@ -24,18 +24,28 @@ package org.apache.pinot.thirdeye.detection.components;
 
 import java.util.Collections;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.spec.MockTunableSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
 import org.apache.pinot.thirdeye.detection.spi.components.Tunable;
-import org.apache.pinot.thirdeye.spi.detection.spi.exception.DetectorException;
-import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
+import org.apache.pinot.thirdeye.spi.detection.DetectorException;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.joda.time.Interval;
 
 public class MockTunableDetector implements AnomalyDetector<MockTunableSpec>,
     Tunable<MockTunableSpec> {
 
   private int tuneRunes = 0;
+
+  @Override
+  public void init(final MockTunableSpec spec) {
+
+  }
+
+  @Override
+  public void init(MockTunableSpec spec, InputDataFetcher dataFetcher) {
+    // left empty
+  }
 
   public int getTuneRuns() {
     return tuneRunes;
@@ -51,10 +61,5 @@ public class MockTunableDetector implements AnomalyDetector<MockTunableSpec>,
   @Override
   public DetectionResult runDetection(Interval window, String metricUrn) throws DetectorException {
     return DetectionResult.empty();
-  }
-
-  @Override
-  public void init(MockTunableSpec spec, InputDataFetcher dataFetcher) {
-    // left empty
   }
 }

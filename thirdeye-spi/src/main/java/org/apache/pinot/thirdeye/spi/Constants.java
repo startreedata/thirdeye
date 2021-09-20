@@ -35,8 +35,13 @@ public interface Constants {
   // timestamp field used to get timestamp in RelationalThirdEyeResponse
   String TIMESTAMP = "timestamp";
 
+  // System property var to check for plugins. Default is "plugins"
+  String SYS_PROP_THIRDEYE_PLUGINS_DIR = "thirdEyePluginsDir";
+
   // Environment var to check for plugins. Default is "plugins"
   String ENV_THIRDEYE_PLUGINS_DIR = "THIRDEYE_PLUGINS_DIR";
+
+  String SCALING_FACTOR = "scalingFactor";
 
   enum JobStatus {
     SCHEDULED,

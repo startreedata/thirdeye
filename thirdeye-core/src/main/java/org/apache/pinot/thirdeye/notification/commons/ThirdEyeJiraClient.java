@@ -34,6 +34,8 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import com.google.common.base.Joiner;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -53,6 +55,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A client to communicate with Jira
  */
+@Singleton
 public class ThirdEyeJiraClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeJiraClient.class);
@@ -67,6 +70,7 @@ public class ThirdEyeJiraClient {
   public static final String PROP_LABELS = "labels";
   public static final String PROP_COMPONENTS = "components";
 
+  @Inject
   public ThirdEyeJiraClient(JiraConfiguration jiraAdminConfig) {
     this.restClient = createJiraRestClient(jiraAdminConfig);
   }
@@ -74,8 +78,8 @@ public class ThirdEyeJiraClient {
   private JiraRestClient createJiraRestClient(JiraConfiguration jiraAdminConfig) {
     return new AsynchronousJiraRestClientFactory().createWithBasicHttpAuthentication(
         URI.create(jiraAdminConfig.getJiraHost()),
-        jiraAdminConfig.getJiraUser(),
-        jiraAdminConfig.getJiraPassword());
+        jiraAdminConfig.getUser(),
+        jiraAdminConfig.getPassword());
   }
 
   private String buildQueryOnCreatedBy(long lookBackMillis) {

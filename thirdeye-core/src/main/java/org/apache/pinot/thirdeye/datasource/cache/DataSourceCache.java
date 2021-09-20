@@ -23,12 +23,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -52,7 +53,9 @@ public class DataSourceCache {
   private final DataSourceManager dataSourceManager;
   private final DataSourcesLoader dataSourcesLoader;
   private final ExecutorService executorService;
-  private final Map<String, ThirdEyeDataSource> dataSourcesFromConfig;
+
+  private final Map<String, ThirdEyeDataSource> cache = new HashMap<>();
+
   private final Counter datasourceExceptionCounter;
   private final Counter datasourceDurationCounter;
   private final Counter datasourceCallCounter;
@@ -65,38 +68,33 @@ public class DataSourceCache {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
     this.executorService = Executors.newCachedThreadPool();
-    this.dataSourcesFromConfig = ImmutableMap.copyOf(dataSourcesLoader.getDataSourceMapFromConfig());
-    if (dataSourcesFromConfig.size() == 0) {
-      LOG.warn("No data sources loaded from config!");
-    }
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
     datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
     datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
-  public ThirdEyeDataSource getDataSource(String name) {
-    final List<DataSourceDTO> results = findByName(name);
-    if (results.size() == 1) {
-      final DataSourceDTO ds = results.iterator().next();
-      return dataSourcesLoader.loadDataSource(ds.getType(), ds.getProperties());
+  public synchronized ThirdEyeDataSource getDataSource(String name) {
+    final ThirdEyeDataSource cachedThirdEyeDataSource = cache.get(name);
+    if (cachedThirdEyeDataSource != null) {
+      return cachedThirdEyeDataSource;
     }
 
-    // TODO spyne: remove data-source-config.yml. Keeping this temporarily for now.
-    // Fetch from config if not found in DB.
-    if (dataSourcesFromConfig.containsKey(name)) {
-      return dataSourcesFromConfig.get(name);
+    final Optional<DataSourceDTO> dataSource = findByName(name);
+    if (dataSource.isPresent()) {
+      final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource.get());
+      cache.put(name, thirdEyeDataSource);
+      return thirdEyeDataSource;
     }
-
     throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
   }
 
-  private List<DataSourceDTO> findByName(final String name) {
+  private Optional<DataSourceDTO> findByName(final String name) {
     final List<DataSourceDTO> results =
         dataSourceManager.findByPredicate(Predicate.EQ("name", name));
     checkState(results.size() <= 1, "Multiple data sources found with name: " + name);
 
-    return results;
+    return results.stream().findFirst();
   }
 
   public ThirdEyeResponse getQueryResult(ThirdEyeRequest request) throws Exception {
@@ -125,5 +123,12 @@ public class DataSourceCache {
       responseFuturesMap.put(request, getQueryResultAsync(request));
     }
     return responseFuturesMap;
+  }
+
+  public void clear() throws Exception {
+    for (ThirdEyeDataSource thirdEyeDataSource : cache.values()) {
+      thirdEyeDataSource.close();
+    }
+    cache.clear();
   }
 }

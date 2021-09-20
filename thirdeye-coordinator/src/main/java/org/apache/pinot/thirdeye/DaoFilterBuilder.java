@@ -1,9 +1,9 @@
 package org.apache.pinot.thirdeye;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_QUERY_PARAM_OPERATOR;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_UNEXPECTED_QUERY_PARAM;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -31,6 +31,7 @@ public class DaoFilterBuilder {
       .put("lt", OPER.LT)
       .put("lte", OPER.LE)
       .put("neq", OPER.NEQ)
+      .put("in", OPER.IN)
       .build();
   private static final Pattern PATTERN = Pattern.compile("\\[(\\w+)\\](\\S+)");
   private final ImmutableMap<String, String> apiToBeanMap;

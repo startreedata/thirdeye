@@ -23,7 +23,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.14.0-SNAPSHOT</version>
+    <version>1.17.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -37,13 +37,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-worker</artifactId>
-      <scope>compile</scope>
+      <artifactId>thirdeye-datasources</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-datasources</artifactId>
-      <scope>compile</scope>
+      <artifactId>thirdeye-detection-components</artifactId>
     </dependency>
 
     <!-- test dependencies -->
@@ -65,7 +63,6 @@
     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.dropwizard</groupId>

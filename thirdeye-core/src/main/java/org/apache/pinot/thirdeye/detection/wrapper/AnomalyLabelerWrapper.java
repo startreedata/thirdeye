@@ -29,14 +29,14 @@ import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.detection.spi.components.Labeler;
-import org.apache.pinot.thirdeye.spi.anomaly.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalySeverity;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.detection.Labeler;
 import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 
 /**

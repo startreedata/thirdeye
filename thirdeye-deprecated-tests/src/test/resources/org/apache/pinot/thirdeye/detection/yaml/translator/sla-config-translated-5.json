@@ -56,56 +56,78 @@
   },
   "components": {
     "slaRule1:DATA_SLA": {
+      "name": "slaRule1",
+      "type": "DATA_SLA",
       "sla": "2_DAYS",
-      "className": "org.apache.pinot.thirdeye.detection.dataquality.components.DataSlaQualityChecker",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker",
       "metricUrn": "thirdeye:metric:1"
     },
     "slaRule2:DATA_SLA": {
+      "name": "slaRule2",
+      "type": "DATA_SLA",
       "sla": "2_DAYS",
-      "className": "org.apache.pinot.thirdeye.detection.dataquality.components.DataSlaQualityChecker",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker",
       "metricUrn": "thirdeye:metric:1"
     },
     "slaRule3:DATA_SLA": {
+      "name": "slaRule3",
+      "type": "DATA_SLA",
       "sla": "2_DAYS",
-      "className": "org.apache.pinot.thirdeye.detection.dataquality.components.DataSlaQualityChecker",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.DataSlaQualityChecker",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_1:THRESHOLD": {
+      "name": "maxThreshold_1",
+      "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_2:THRESHOLD": {
+      "name": "maxThreshold_2",
+      "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_3:THRESHOLD": {
+      "name": "maxThreshold_3",
+      "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "maxThreshold_4:THRESHOLD": {
+      "name": "maxThreshold_4",
+      "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1"
     },
     "maxThreshold_5:THRESHOLD": {
+      "name": "maxThreshold_5",
+      "type": "THRESHOLD",
       "max": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector",
+      "className": "org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector",
       "metricUrn": "thirdeye:metric:1"
     },
     "thresholdFilter_1:THRESHOLD_RULE_FILTER": {
+      "name": "thresholdFilter_1",
+      "type": "THRESHOLD_RULE_FILTER",
       "min": 50,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter",
+      "className": "org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "thresholdFilter_2:THRESHOLD_RULE_FILTER": {
+      "name": "thresholdFilter_2",
+      "type": "THRESHOLD_RULE_FILTER",
       "min": 100,
-      "className": "org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter",
+      "className": "org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter",
       "metricUrn": "thirdeye:metric:1:D1%3Dv1:D1%3Dv2:D2%3Dv3"
     },
     "test_grouper:MOCK_GROUPER": {
+      "name": "test_grouper",
+      "type": "MOCK_GROUPER",
       "mockParam": 0.3,
       "className": "org.apache.pinot.thirdeye.detection.components.MockGrouper"
     }

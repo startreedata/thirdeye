@@ -22,11 +22,13 @@ package org.apache.pinot.thirdeye.detection.v2.plan;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.InputApi;
+import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
+import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
 
   protected String name = null;
   protected Map<String, PlanNode> pipelinePlanNodes = null;
-  protected DetectionPlanApi detectionPlanApi = null;
+  protected PlanNodeBean planNodeBean = null;
   protected long startTime = -1;
   protected long endTime = -1;
   protected Map<String, DetectionPipelineResult> inputsMap = new HashMap<>();
@@ -52,7 +54,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     this.name = planNodeContext.getName();
     this.pipelinePlanNodes = planNodeContext.getPipelinePlanNodes();
-    this.detectionPlanApi = planNodeContext.getDetectionPlanApi();
+    this.planNodeBean = planNodeContext.getDetectionPlanApi();
     this.startTime = planNodeContext.getStartTime();
     this.endTime = planNodeContext.getEndTime();
   }
@@ -62,8 +64,8 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
    */
   abstract void setNestedProperties(Map<String, Object> properties);
 
-  public DetectionPlanApi getDetectionPlanApi() {
-    return detectionPlanApi;
+  public PlanNodeBean getDetectionPlanApi() {
+    return planNodeBean;
   }
 
   public long getStartTime() {
@@ -75,8 +77,8 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
   }
 
   @Override
-  public List<InputApi> getPlanNodeInputs() {
-    return detectionPlanApi.getInputs();
+  public List<InputBean> getPlanNodeInputs() {
+    return planNodeBean.getInputs();
   }
 
   public void setInput(String key, DetectionPipelineResult input) {
@@ -85,7 +87,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
 
   @Override
   public Map<String, Object> getParams() {
-    return detectionPlanApi.getParams();
+    return planNodeBean.getParams();
   }
 
   @Override

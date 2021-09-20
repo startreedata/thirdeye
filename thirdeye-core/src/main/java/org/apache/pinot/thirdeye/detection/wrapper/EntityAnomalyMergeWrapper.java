@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
 
 /**
  * Merges the entity anomaly in the anomaly hierarchy with the corresponding entity anomaly in DB

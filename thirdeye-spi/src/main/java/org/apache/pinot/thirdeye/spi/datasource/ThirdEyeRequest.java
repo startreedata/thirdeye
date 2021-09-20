@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;

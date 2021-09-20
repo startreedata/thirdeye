@@ -19,7 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
+import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_TYPE;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
@@ -31,7 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
@@ -40,11 +41,15 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -66,20 +71,10 @@ public abstract class DetectionPipeline {
   protected final long startTime;
   protected final long endTime;
 
-  private DetectionPipelineFactory mockDetectionPipelineFactory;
+  // TODO spyne refactor this to use Guice singleton
+  private final DetectionRegistry detectionRegistry = new DetectionRegistry();
 
-  /**
-   * Only used for testing. To be refactored. Please do not use.
-   *
-   * @param mockDetectionPipelineFactory
-   * @return
-   */
-  @Deprecated
-  public DetectionPipeline setMockDetectionPipelineFactory(
-      final DetectionPipelineFactory mockDetectionPipelineFactory) {
-    this.mockDetectionPipelineFactory = mockDetectionPipelineFactory;
-    return this;
-  }
+  private DetectionPipelineFactory mockDetectionPipelineFactory;
 
   protected DetectionPipeline(DataProvider provider, AlertDTO config, long startTime,
       long endTime) {
@@ -88,6 +83,16 @@ public abstract class DetectionPipeline {
     this.startTime = startTime;
     this.endTime = endTime;
     this.initComponents();
+  }
+
+  /**
+   * Only used for testing. To be refactored. Please do not use.
+   */
+  @Deprecated
+  public DetectionPipeline setMockDetectionPipelineFactory(
+      final DetectionPipelineFactory mockDetectionPipelineFactory) {
+    this.mockDetectionPipelineFactory = mockDetectionPipelineFactory;
+    return this;
   }
 
   /**
@@ -108,7 +113,7 @@ public abstract class DetectionPipeline {
       for (String componentKey : componentSpecs.keySet()) {
         Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
         if (!instancesMap.containsKey(componentKey)) {
-          instancesMap.put(componentKey, createComponent(componentSpec));
+          instancesMap.put(componentKey, createComponent(componentSpec, dataFetcher));
         }
       }
 
@@ -122,14 +127,26 @@ public abstract class DetectionPipeline {
           }
         }
         // Initialize the components
-        instancesMap.get(componentKey).init(getComponentSpec(componentSpec), dataFetcher);
+        if (!componentSpec.containsKey(PROP_TYPE)
+            || detectionRegistry.isAnnotatedType(componentSpec.get(PROP_TYPE).toString())) {
+          instancesMap.get(componentKey).init(getComponentSpec(componentSpec), dataFetcher);
+        }
       }
     }
     config.setComponents(instancesMap);
   }
 
-  private BaseComponent createComponent(Map<String, Object> componentSpec) {
-    String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
+  private BaseComponent createComponent(Map<String, Object> componentSpec,
+      final InputDataFetcher dataFetcher) {
+    final AnomalyDetector<AbstractSpec> detector = optional(componentSpec.get(PROP_TYPE))
+        .map(Object::toString)
+        .map(type -> createDetector(componentSpec, dataFetcher, type))
+        .orElse(null);
+    if (detector != null) {
+      return detector;
+    }
+
+    final String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
     try {
       Class<BaseComponent> clazz = (Class<BaseComponent>) Class.forName(className);
       return clazz.newInstance();
@@ -137,6 +154,17 @@ public abstract class DetectionPipeline {
       throw new IllegalArgumentException("Failed to create component for " + className,
           e.getCause());
     }
+  }
+
+  private AnomalyDetector<AbstractSpec> createDetector(
+      final Map<String, Object> componentSpec, final InputDataFetcher dataFetcher,
+      final String type) {
+    final AnomalyDetector<AbstractSpec> detector = detectionRegistry.buildDetector(type,
+        new AnomalyDetectorFactoryContext()
+            .setInputDataFetcher(dataFetcher)
+            .setProperties(componentSpec)
+    );
+    return detector;
   }
 
   private AbstractSpec getComponentSpec(Map<String, Object> componentSpec) {

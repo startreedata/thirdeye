@@ -19,19 +19,15 @@
 
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi;
-import org.apache.pinot.thirdeye.spi.api.v2.DetectionPlanApi.OutputApi;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.v2.BaseComponent;
+import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
@@ -42,35 +38,53 @@ import org.slf4j.LoggerFactory;
  * DetectionPipeline forms the root of the detection class hierarchy. It represents a wireframe
  * for implementing (intermittently stateful) executable pipelines on top of it.
  */
-public abstract class DetectionPipelineOperator<T extends DetectionPipelineResult> implements
-    Operator {
+public abstract class DetectionPipelineOperator implements Operator {
 
-  private static final String PROP_CLASS_NAME = "className";
+  protected static final String PROP_TYPE = "type";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
 
-  protected DetectionPlanApi config;
+  protected PlanNodeBean planNode;
   protected long startTime;
   protected long endTime;
+  protected TimeConverter timeConverter;
+  protected String timeFormat = OperatorContext.DEFAULT_TIME_FORMAT;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
-  protected Map<String, BaseComponent> instancesMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
   protected Map<String, String> outputKeyMap = new HashMap<>();
 
   protected DetectionPipelineOperator() {
   }
 
+  protected static Map<String, Object> getComponentSpec(final Map<String, Object> params) {
+    final Map<String, Object> componentSpec = new HashMap<>();
+    if (params == null || params.isEmpty()) {
+      return componentSpec;
+    }
+    final String prefix = "component.";
+    params.forEach((key, value) -> {
+      if (key.startsWith(prefix)) {
+        componentSpec.put(key.substring(prefix.length()), value);
+      }
+    });
+    return componentSpec;
+  }
+
   @Override
   public void init(final OperatorContext context) {
-    this.config = context.getDetectionPlanApi();
-    this.startTime = context.getStartTime();
-    this.endTime = context.getEndTime();
-    this.resultMap = new HashMap<>();
-    this.instancesMap = new HashMap<>();
-    this.inputMap = context.getInputsMap();
-    for (OutputApi outputApi : context.getDetectionPlanApi().getOutputs()) {
-      outputKeyMap.put(outputApi.getOutputKey(), outputApi.getOutputName());
+    planNode = context.getPlanNode();
+    timeFormat = context.getTimeFormat();
+    timeConverter = DefaultTimeConverter.get(timeFormat);
+    startTime = optional(context.getStartTime()).map(timeConverter::convert).orElse(-1L);
+    endTime = optional(context.getEndTime()).map(timeConverter::convert).orElse(-1L);
+    checkArgument(startTime <= endTime, "start time cannot be greater than end time");
+
+    resultMap = new HashMap<>();
+    inputMap = context.getInputsMap();
+    if (context.getPlanNode().getOutputs() != null) {
+      for (final OutputBean outputBean : context.getPlanNode().getOutputs()) {
+        outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
+      }
     }
-    this.initComponents();
   }
 
   /**
@@ -78,83 +92,12 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
    *
    * @return detection result
    */
+  @Override
   public abstract void execute()
       throws Exception;
 
-  /**
-   * Initialize all components in the pipeline
-   */
-  protected void initComponents() {
-    Map<String, Object> componentSpecs = getComponentSpecs(config.getParams());
-    if (componentSpecs != null) {
-      for (String componentKey : componentSpecs.keySet()) {
-        Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
-        if (!instancesMap.containsKey(componentKey)) {
-          instancesMap.put(componentKey, createComponent(componentSpec));
-        }
-      }
-
-      for (String componentKey : componentSpecs.keySet()) {
-        // Initialize the components
-        instancesMap.get(componentKey).init(getComponentSpec(componentSpecs, componentKey));
-      }
-    }
-  }
-
-  protected AbstractSpec getComponentSpec(Map<String, Object> componentSpecs, String componentKey) {
-    Map<String, Object> componentSpec = ConfigUtils.getMap(componentSpecs.get(componentKey));
-    for (Map.Entry<String, Object> entry : componentSpec.entrySet()) {
-      if (entry.getValue() != null && DetectionUtils.isReferenceName(entry.getValue()
-          .toString())) {
-        componentSpec
-            .put(entry.getKey(),
-                instancesMap.get(DetectionUtils.getComponentKey(entry.getValue().toString())));
-      }
-    }
-
-    String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
-    try {
-      Class clazz = Class.forName(className);
-      Class<AbstractSpec> specClazz = (Class<AbstractSpec>) Class.forName(getSpecClassName(clazz));
-      return AbstractSpec.fromProperties(componentSpec, specClazz);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to get component spec for " + className, e);
-    }
-  }
-
-  protected Map<String, Object> getComponentSpecs(Map<String, Object> params) {
-    Map<String, Object> componentSpecs = new HashMap<>();
-    if (params != null) {
-      for (String key : params.keySet()) {
-        final String[] splits = key.split("\\.");
-        if (splits.length > 2 && "component".equalsIgnoreCase(splits[0])) {
-          String componentKey = splits[1];
-          if (!componentSpecs.containsKey(componentKey)) {
-            componentSpecs.put(componentKey, new HashMap<>());
-          }
-          final Map<String, Object> componentSpec = (Map<String, Object>) componentSpecs.get(
-              componentKey);
-          componentSpec.put(StringUtils.join(Arrays.copyOfRange(splits, 2, splits.length), "."),
-              params.get(key));
-        }
-      }
-    }
-    return componentSpecs;
-  }
-
-  private BaseComponent createComponent(Map<String, Object> componentSpec) {
-    String className = MapUtils.getString(componentSpec, PROP_CLASS_NAME);
-    try {
-      Class<BaseComponent> clazz = (Class<BaseComponent>) Class.forName(className);
-      return clazz.newInstance();
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to create component for " + className,
-          e.getCause());
-    }
-  }
-
-  public DetectionPlanApi getConfig() {
-    return config;
+  public PlanNodeBean getPlanNode() {
+    return planNode;
   }
 
   public long getStartTime() {
@@ -165,7 +108,11 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
     return endTime;
   }
 
-  protected void setOutput(String key, DetectionPipelineResult output) {
+  public String getTimeFormat() {
+    return timeFormat;
+  }
+
+  protected void setOutput(String key, final DetectionPipelineResult output) {
     if (outputKeyMap.containsKey(key)) {
       key = outputKeyMap.get(key);
     }
@@ -173,16 +120,12 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   }
 
   @Override
-  public void setProperty(String key, Object value) {
-    config.getParams().put(key, value);
-  }
-
-  public Map<String, BaseComponent> getComponents() {
-    return instancesMap;
+  public void setProperty(final String key, final Object value) {
+    planNode.getParams().put(key, value);
   }
 
   @Override
-  public DetectionPipelineResult getOutput(String key) {
+  public DetectionPipelineResult getOutput(final String key) {
     return resultMap.get(key);
   }
 
@@ -192,7 +135,7 @@ public abstract class DetectionPipelineOperator<T extends DetectionPipelineResul
   }
 
   @Override
-  public void setInput(String key, DetectionPipelineResult input) {
-    this.inputMap.put(key, input);
+  public void setInput(final String key, final DetectionPipelineResult input) {
+    inputMap.put(key, input);
   }
 }

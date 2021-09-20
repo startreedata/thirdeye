@@ -1,6 +1,5 @@
 package org.apache.pinot.thirdeye;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
@@ -15,9 +14,13 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
+import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.PluginClassLoader;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +39,7 @@ public class PluginLoader {
   private static final Logger log = LoggerFactory.getLogger(PluginLoader.class);
 
   private final DataSourcesLoader dataSourcesLoader;
+  private final DetectionRegistry detectionRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -43,16 +47,20 @@ public class PluginLoader {
   @Inject
   public PluginLoader(
       final DataSourcesLoader dataSourcesLoader,
-      PluginLoaderConfiguration config) {
+      final DetectionRegistry detectionRegistry,
+      final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
+    this.detectionRegistry = detectionRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
   public void loadPlugins() {
-    if (loading.compareAndSet(false, true)) {
-      checkArgument(pluginsDir.exists() && pluginsDir.isDirectory(),
-          "Plugin dir not found! dir: " + pluginsDir);
+    if (!pluginsDir.exists() || !pluginsDir.isDirectory()) {
+      log.error("Skipping Plugin Loading. Plugin dir not found: " + pluginsDir);
+      return;
+    }
 
+    if (loading.compareAndSet(false, true)) {
       final File[] files = requireNonNull(pluginsDir.listFiles());
       for (File pluginDir : files) {
         if (pluginDir.isDirectory()) {
@@ -80,6 +88,15 @@ public class PluginLoader {
     log.info("Installing plugin: " + plugin.getClass().getName());
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
       dataSourcesLoader.addThirdEyeDataSourceFactory(f);
+    }
+    for (AnomalyDetectorFactory f : plugin.getAnomalyDetectorFactories()) {
+      detectionRegistry.addAnomalyDetectorFactory(f);
+    }
+    for (AnomalyDetectorV2Factory f : plugin.getAnomalyDetectorV2Factories()) {
+      detectionRegistry.addAnomalyDetectorV2Factory(f);
+    }
+    for (EventTriggerFactory f : plugin.getEventTriggerFactories()) {
+      detectionRegistry.addEventTriggerFactory(f);
     }
   }
 

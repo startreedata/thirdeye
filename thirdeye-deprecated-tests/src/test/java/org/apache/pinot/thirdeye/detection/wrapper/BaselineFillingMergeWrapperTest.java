@@ -24,16 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.constant.MetricAggFunction;
-import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.MockPipeline;
 import org.apache.pinot.thirdeye.detection.MockPipelineLoader;
@@ -41,8 +33,16 @@ import org.apache.pinot.thirdeye.detection.MockPipelineOutput;
 import org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper;
 import org.apache.pinot.thirdeye.detection.components.MockBaselineProvider;
 import org.apache.pinot.thirdeye.detection.spec.MockBaselineProviderSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.BaselineProvider;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -50,13 +50,6 @@ import org.testng.annotations.Test;
 public class BaselineFillingMergeWrapperTest {
 
   private static final String PROP_BASELINE_PROVIDER = "baselineValueProvider";
-
-  private AlertDTO config;
-  private MergeWrapper wrapper;
-  private Map<String, Object> properties;
-  private List<Map<String, Object>> nestedProperties;
-  private List<MockPipeline> runs;
-
   private static final Long PROP_ID_VALUE = 1000L;
   private static final String PROP_NAME_VALUE = "myName";
   private static final String PROP_CLASS_NAME = "className";
@@ -64,6 +57,12 @@ public class BaselineFillingMergeWrapperTest {
   private static final String PROP_PROPERTIES = "properties";
   private static final String PROP_NESTED = "nested";
   private static final String PROP_MAX_GAP = "maxGap";
+
+  private AlertDTO config;
+  private MergeWrapper wrapper;
+  private Map<String, Object> properties;
+  private List<Map<String, Object>> nestedProperties;
+  private List<MockPipeline> runs;
 
   @BeforeMethod
   public void beforeMethod() {

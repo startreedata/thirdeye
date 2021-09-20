@@ -36,15 +36,14 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.anomaly.detection.AnomalyDetectionInputContextBuilder;
-import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.detection.anomaly.detection.AnomalyDetectionInputContextBuilder;
+import org.apache.pinot.thirdeye.metric.MetricTimeSeries;
+import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.spi.Constants.CompareMode;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyFeedback;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -54,6 +53,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedback;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.util.Pair;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
@@ -94,7 +95,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeWorkerConfiguration config) {
+  public void init(Properties properties, ThirdEyeCoordinatorConfiguration config) {
     super.init(properties, config);
     relatedEvents = new HashSet<>();
     presentSeasonalValues = Boolean.parseBoolean(
@@ -176,7 +177,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
         getDimensionsList(anomaly.getDimensionMap()),
         getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
         feedbackVal,
-        anomaly.getFunction().getFunctionName(),
+        anomaly.getAnomalyFunction().getFunctionName(),
         "",
         anomaly.getMetric(),
         getDateString(anomaly.getStartTime(), dateTimeZone),
@@ -208,8 +209,8 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
       List<AnomalyReportEntity> rootAnomalyDetail,
       SortedMap<String, List<AnomalyReportEntity>> leafAnomalyDetail) {
     AnomalyReportEntity anomalyReport = generateAnomalyReportEntity(anomaly,
-        thirdEyeAnomalyConfig.getDashboardHost());
-    AnomalyFunctionDTO anomalyFunction = anomaly.getFunction();
+        thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
+    AnomalyFunctionDTO anomalyFunction = anomaly.getAnomalyFunction();
     String exploredDimensions = anomalyFunction.getExploreDimensions();
     // Add WoW number
     if (presentSeasonalValues) {
@@ -246,7 +247,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
    */
   private Double getAvgComparisonBaseline(MergedAnomalyResultDTO anomaly, CompareMode compareMode,
       long start, long end) throws Exception {
-    AnomalyFunctionDTO anomalyFunction = anomaly.getFunction();
+    AnomalyFunctionDTO anomalyFunction = anomaly.getAnomalyFunction();
     DatasetConfigDTO datasetConfigDTO = datasetConfigManager
         .findByDataset(anomalyFunction.getCollection());
     AnomalyDetectionInputContextBuilder contextBuilder = new AnomalyDetectionInputContextBuilder(

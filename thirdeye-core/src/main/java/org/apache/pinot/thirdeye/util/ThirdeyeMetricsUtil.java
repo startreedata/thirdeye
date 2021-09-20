@@ -30,12 +30,6 @@ public class ThirdeyeMetricsUtil {
 
   private static final MetricRegistry metricRegistry = new MetricRegistry();
 
-  public static final Counter detectionTaskCounter =
-      metricRegistry.counter("detectionTaskCounter");
-  public static final Counter detectionTaskSuccessCounter =
-      metricRegistry.counter("detectionTaskSuccessCounter");
-  public static final Counter detectionTaskExceptionCounter =
-      metricRegistry.counter("detectionTaskExceptionCounter");
   public static final Counter dataQualityTaskCounter =
       metricRegistry.counter("dataQualityTaskCounter");
   public static final Counter dataQualityTaskSuccessCounter =
@@ -80,10 +74,6 @@ public class ThirdeyeMetricsUtil {
       metricRegistry.counter("eventScheduledTaskCounter");
   public static final Counter eventScheduledTaskFallbackCounter =
       metricRegistry.counter("eventScheduledTaskFallbackCounter");
-  public static final Counter emailAlertsSucesssCounter =
-      metricRegistry.counter("emailAlertsSucesssCounter");
-  public static final Counter emailAlertsFailedCounter =
-      metricRegistry.counter("emailAlertsFailedCounter");
   public static final Counter jiraAlertsSuccessCounter =
       metricRegistry.counter("jiraAlertsSuccessCounter");
   public static final Counter jiraAlertsFailedCounter =

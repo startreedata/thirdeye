@@ -41,6 +41,8 @@
         "deactivate-entity": "Deactivate {{entity}}",
         "investigate": "Investigate",
         "investigate-entity": "Investigate {{entity}}",
+        "onboard-entity": "Onboard {{entity}}",
+        "onboard": "Onboard",
         "all": "All",
         "all-entity": "All {{entity}}",
         "search": "Search",
@@ -120,12 +122,21 @@
         "email": "Email",
         "emails": "Emails",
         "name": "Name",
+        "cron": "Schedule",
         "detection-configuration": "Detection Configuration",
         "preview-alert": "Preview Alert",
         "reset-configuration": "Reset Configuration",
         "aggregation-column": "Aggregation Column",
         "aggregation-function": "Aggregation Function",
-        "views": "Views"
+        "views": "Views",
+        "metric-properties": "Metric Properties",
+        "threshold": "Threshold",
+
+        "associated-metrics": "Associated Metrics",
+        "dataset-properties": "Dataset Properties",
+        "associated-datasource": "Associated Datasource",
+        "datasource-configuration": "Datasource Configuration",
+        "type": "Type"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -138,14 +149,25 @@
         "update-success": "{{entity}} updated successfully",
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
+        "delete-error": "Error deleting {{entity}}",
+        "onboard-success": "{{entity}} onboarded successfully",
+        "onboard-error": "Error onboarding {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "validation-failed": "Validation failed",
 
         "subscription-group-name-required": "Subscription Group name is required",
 
+        "metrics-name-required": "Name is required",
+        "metrics-threshold-required": "Threshold is required",
+        "metrics-aggregation-function-required": "Aggregation function is required",
+        "metrics-dataset-required": "Dataset is required",
+
         "email-required": "Email is required",
         "invalid-email": "Invalid email",
         "json-input-required": "JSON input is required",
-        "invalid-json": "Invalid JSON"
+        "invalid-json": "Invalid JSON",
+
+        "dataset-name-required": "Dataset name is required",
+        "dataset-datasource-required": "Datasource is required"
     }
 }

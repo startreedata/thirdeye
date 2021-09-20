@@ -15,6 +15,7 @@ import { deepSearchStringProperty } from "../search/search.util";
 export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
     return {
         name: "",
+        cron: "",
         alerts: [] as Alert[],
         notificationSchemes: {
             email: ({
@@ -28,6 +29,7 @@ export const createEmptyUiSubscriptionGroup = (): UiSubscriptionGroup => {
     return {
         id: -1,
         name: i18n.t("label.no-data-marker"),
+        cron: i18n.t("label.no-data-marker"),
         alerts: [],
         alertCount: formatNumber(0),
         emails: [],
@@ -194,6 +196,7 @@ const getUiSubscriptionGroupInternal = (
     // Basic properties
     uiSubscriptionGroup.id = subscriptionGroup.id;
     uiSubscriptionGroup.name = subscriptionGroup.name || noDataMarker;
+    uiSubscriptionGroup.cron = subscriptionGroup.cron || noDataMarker;
 
     // Alerts
     uiSubscriptionGroup.alerts =

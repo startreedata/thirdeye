@@ -34,18 +34,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.anomaly.merge.AnomalyTimeBasedSummarizer;
-import org.apache.pinot.thirdeye.common.metric.MetricSchema;
-import org.apache.pinot.thirdeye.common.metric.MetricSpec;
-import org.apache.pinot.thirdeye.common.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.detection.DetectionPipeline;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineResultV1;
-import org.apache.pinot.thirdeye.detector.function.BaseAnomalyFunction;
-import org.apache.pinot.thirdeye.spi.anomaly.merge.AnomalyMergeConfig;
-import org.apache.pinot.thirdeye.spi.anomaly.merge.AnomalyMergeStrategy;
-import org.apache.pinot.thirdeye.spi.anomalydetection.context.AnomalyResult;
-import org.apache.pinot.thirdeye.spi.common.dimension.DimensionMap;
-import org.apache.pinot.thirdeye.spi.common.metric.MetricType;
+import org.apache.pinot.thirdeye.detection.anomaly.merge.AnomalyTimeBasedSummarizer;
+import org.apache.pinot.thirdeye.detection.detector.function.BaseAnomalyFunction;
+import org.apache.pinot.thirdeye.metric.MetricSchema;
+import org.apache.pinot.thirdeye.metric.MetricSpec;
+import org.apache.pinot.thirdeye.metric.MetricTimeSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -53,9 +48,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.spi.model.AnomalySlice;
+import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.detection.merge.AnomalyMergeConfig;
+import org.apache.pinot.thirdeye.spi.detection.merge.AnomalyMergeStrategy;
+import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
+import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.util.Pair;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
@@ -248,7 +248,7 @@ public class LegacyMergeWrapper extends DetectionPipeline {
               MetricEntity.fromMetric(1.0, anomalyFunctionSpec.getMetricId(), filters).getUrn());
 
           mergedAnomalyResult.setFunctionId(null);
-          mergedAnomalyResult.setFunction(null);
+          mergedAnomalyResult.setAnomalyFunction(null);
           mergedAnomalyResult.setDetectionConfigId(this.config.getId());
 
           // global metric impact

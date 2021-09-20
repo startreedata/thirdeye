@@ -20,28 +20,19 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RuleBaselineProviderSpec extends AbstractSpec {
 
-  private String timezone = DEFAULT_TIMEZONE;
   private String offset = "wo1w";
 
   public RuleBaselineProviderSpec(String timezone, String offset) {
-    this.timezone = timezone;
+    setTimezone(timezone);
     this.offset = offset;
   }
 
   public RuleBaselineProviderSpec() {
-  }
-
-  public String getTimezone() {
-    return timezone;
-  }
-
-  public void setTimezone(String timezone) {
-    this.timezone = timezone;
   }
 
   public String getOffset() {

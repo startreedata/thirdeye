@@ -19,20 +19,26 @@ package org.apache.pinot.thirdeye.detection.alert;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.anomaly.task.TaskContext;
-import org.apache.pinot.thirdeye.config.ThirdEyeWorkerConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
+import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
+import org.apache.pinot.thirdeye.task.TaskContext;
+import org.apache.pinot.thirdeye.task.runner.DetectionAlertTaskRunner;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -87,9 +93,7 @@ public class SendAlertTest {
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(this.detectionConfigId));
 
-    Map<String, Object> emailScheme = new HashMap<>();
-    emailScheme.put("className", "org.apache.pinot.thirdeye.detection.alert.scheme.RandomAlerter");
-    this.alertConfigDTO.setAlertSchemes(Collections.singletonMap("emailScheme", emailScheme));
+    this.alertConfigDTO.setNotificationSchemes(new NotificationSchemesDto());
     this.alertConfigDTO.setProperties(properties);
     this.alertConfigDTO.setFrom(FROM_ADDRESS_VALUE);
     this.alertConfigDTO.setName(ALERT_NAME_VALUE);
@@ -110,7 +114,11 @@ public class SendAlertTest {
     datasetConfigDTO.setDataset(COLLECTION_VALUE);
     this.dataSetDAO.save(datasetConfigDTO);
 
-    this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(null, null, null, null, null),
+    this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(null,
+        null,
+        null,
+        null,
+        null),
         TestDbEnv.getInstance().getDetectionAlertConfigManager(),
         TestDbEnv.getInstance().getMergedAnomalyResultDAO());
   }
@@ -125,15 +133,15 @@ public class SendAlertTest {
     DetectionAlertTaskInfo alertTaskInfo = new DetectionAlertTaskInfo();
     alertTaskInfo.setDetectionAlertConfigId(alertConfigId);
 
-    Map<String, Object> smtpProperties = new HashMap<>();
-    smtpProperties.put("smtpHost", "test");
-    smtpProperties.put("smtpPort", 25);
-    Map<String, Map<String, Object>> alerterProps = new HashMap<>();
-    alerterProps.put("smtpConfiguration", smtpProperties);
+    SmtpConfiguration smtpProperties = new SmtpConfiguration();
+    smtpProperties.setHost("test");
+    smtpProperties.setPort(25);
+    NotificationConfiguration alerterProps = new NotificationConfiguration();
+    alerterProps.setSmtpConfiguration(smtpProperties);
 
-    ThirdEyeWorkerConfiguration thirdEyeConfig = new ThirdEyeWorkerConfiguration();
-    thirdEyeConfig.setDashboardHost(DASHBOARD_HOST_VALUE);
-    thirdEyeConfig.setAlerterConfiguration(alerterProps);
+    ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
+    thirdEyeConfig.setUiConfiguration(new UiConfiguration().setExternalUrl(DASHBOARD_HOST_VALUE));
+    thirdEyeConfig.setAlerterConfigurations(alerterProps);
 
     final TaskContext taskContext = new TaskContext()
         .setThirdEyeWorkerConfiguration(thirdEyeConfig);

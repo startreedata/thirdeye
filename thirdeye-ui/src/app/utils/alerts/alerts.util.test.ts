@@ -15,6 +15,7 @@ import {
     filterAlerts,
     getUiAlert,
     getUiAlerts,
+    omitNonUpdatableData,
 } from "./alerts.util";
 
 jest.mock("i18next", () => ({
@@ -157,6 +158,10 @@ describe("Alerts Util", () => {
             mockUiAlert1,
             mockUiAlert2,
         ]);
+    });
+
+    it("omitNonUpdatableData should return appropriate alert for update alert", () => {
+        expect(omitNonUpdatableData(mockAlert3)).toEqual({});
     });
 });
 

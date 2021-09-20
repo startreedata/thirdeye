@@ -27,16 +27,15 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.detection.DetectionPipelineJob;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.TaskUtils;
+import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.detection.dataquality.DataQualityPipelineJob;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.DetectionConfigBean;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -58,7 +57,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
 
   public static final int DEFAULT_DETECTION_DELAY = 1;
   public static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
-  public static final String QUARTZ_DETECTION_GROUPER = TaskConstants.TaskType.DETECTION.toString();
+  public static final String QUARTZ_DETECTION_GROUPER = TaskType.DETECTION.toString();
 
   final AlertManager detectionDAO;
   final Scheduler scheduler;
@@ -111,7 +110,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
         try {
           // Schedule detection jobs
           JobKey detectionJobKey = new JobKey(
-              getJobKey(config.getId(), TaskConstants.TaskType.DETECTION),
+              getJobKey(config.getId(), TaskType.DETECTION),
               QUARTZ_DETECTION_GROUPER);
           JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class)
               .withIdentity(detectionJobKey).build();
@@ -127,7 +126,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
 
           // Schedule data quality jobs
           JobKey dataQualityJobKey = new JobKey(
-              getJobKey(config.getId(), TaskConstants.TaskType.DATA_QUALITY),
+              getJobKey(config.getId(), TaskType.DATA_QUALITY),
               QUARTZ_DETECTION_GROUPER);
           JobDetail dataQualityJob = JobBuilder.newJob(DataQualityPipelineJob.class)
               .withIdentity(dataQualityJobKey).build();
@@ -194,7 +193,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-        CronScheduleBuilder.cronSchedule(((DetectionConfigBean) config).getCron())).build();
+        CronScheduleBuilder.cronSchedule(((AlertDTO) config).getCron())).build();
     this.scheduler.scheduleJob(job, trigger);
     LOG.info(String.format("scheduled detection pipeline job %s", job.getKey().getName()));
   }
@@ -210,7 +209,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public String getJobKey(Long id, TaskConstants.TaskType taskType) {
+  public String getJobKey(Long id, TaskType taskType) {
     return String.format("%s_%d", taskType, id);
   }
 

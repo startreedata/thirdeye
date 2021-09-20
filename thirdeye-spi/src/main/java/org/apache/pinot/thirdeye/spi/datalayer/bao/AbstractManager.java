@@ -22,7 +22,6 @@ package org.apache.pinot.thirdeye.spi.datalayer.bao;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -36,6 +35,8 @@ public interface AbstractManager<E extends AbstractDTO> {
   int update(List<E> entities);
 
   E findById(Long id);
+
+  List<E> findByName(String name);
 
   List<E> findByIds(List<Long> id);
 
@@ -57,7 +58,6 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   List<E> filter(DaoFilter daoFilter);
 
-
   int update(E entity, Predicate predicate);
 
   /**
@@ -66,6 +66,6 @@ public interface AbstractManager<E extends AbstractDTO> {
    * @return the number of total entities
    */
   default long count() {
-    throw new NotImplementedException("Not Implemented");
+    throw new UnsupportedOperationException();
   }
 }

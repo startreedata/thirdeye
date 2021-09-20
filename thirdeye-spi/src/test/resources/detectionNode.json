@@ -1,8 +1,8 @@
 {
-  "planNodeName": "percentageChangeDetector",
+  "name": "percentageChangeDetector",
   "type": "AnomalyDetector",
   "params": {
-    "detectorName": "PERCENTAGE_RULE",
+    "detectorName": "PERCENTAGE_CHANGE",
     "percentageChange": "${percent_change}",
     "pattern": "down",
     "dimensions": [],

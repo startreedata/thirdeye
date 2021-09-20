@@ -19,23 +19,25 @@
 
 package org.apache.pinot.thirdeye.detection.yaml;
 
-import static org.apache.pinot.thirdeye.detection.DetectionUtils.getSpecClassName;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
-import org.apache.pinot.thirdeye.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.spi.components.Tunable;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
+import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -132,6 +134,12 @@ public class DetectionConfigTuner {
 
     // Tune each tunable component in the detection componentSpecs
     Map<String, Object> allComponentSpecs = this.detectionConfig.getComponentSpecs();
+
+    // Keep it idempotent
+    if (allComponentSpecs == null) {
+      return detectionConfig;
+    }
+
     for (Map.Entry<String, Object> componentSpec : allComponentSpecs.entrySet()) {
       Map<String, Object> tunedComponentProps = new HashMap<>();
 
@@ -139,9 +147,11 @@ public class DetectionConfigTuner {
       Map<String, Object> existingComponentProps = ConfigUtils.getMap(componentSpec.getValue());
 
       // For tunable components, the model params are computed from user supplied yaml params and previous model params.
-      String componentClassName = existingComponentProps.get(PROP_CLASS_NAME).toString();
+      String componentClassName = optional(existingComponentProps.get(PROP_CLASS_NAME))
+          .map(Objects::toString)
+          .orElse(null);
       String type = DetectionUtils.getComponentType(componentKey);
-      if (DETECTION_REGISTRY.isTunable(componentClassName)) {
+      if (componentClassName != null && DETECTION_REGISTRY.isTunable(componentClassName)) {
         try {
           tunedComponentProps
               .putAll(getTunedSpecs(existingComponentProps, tuningWindowStart, tuningWindowEnd));

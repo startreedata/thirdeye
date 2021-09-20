@@ -11,11 +11,13 @@ public class ApiResource {
   private final DatasetResource datasetResource;
   private final MetricResource metricResource;
   private final AlertResource alertResource;
+  private final AlertTemplateResource alertTemplateResource;
   private final SubscriptionGroupResource subscriptionGroupResource;
   private final AnomalyResource anomalyResource;
   private final EntityResource entityResource;
   private final RcaResource rcaResource;
   private final EventResource eventResource;
+  private final TaskResource taskResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
@@ -24,22 +26,26 @@ public class ApiResource {
       final DatasetResource datasetResource,
       final MetricResource metricResource,
       final AlertResource alertResource,
+      final AlertTemplateResource alertTemplateResource,
       final SubscriptionGroupResource subscriptionGroupResource,
       final AnomalyResource anomalyResource,
       final EntityResource entityResource,
       final RcaResource rcaResource,
-      final EventResource eventResource) {
+      final EventResource eventResource,
+      final TaskResource taskResource) {
     this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.dataSourceResource = dataSourceResource;
     this.datasetResource = datasetResource;
     this.metricResource = metricResource;
     this.alertResource = alertResource;
+    this.alertTemplateResource = alertTemplateResource;
     this.subscriptionGroupResource = subscriptionGroupResource;
     this.anomalyResource = anomalyResource;
     this.entityResource = entityResource;
     this.rcaResource = rcaResource;
     this.eventResource = eventResource;
+    this.taskResource = taskResource;
   }
 
   @Path("auth")
@@ -72,6 +78,11 @@ public class ApiResource {
     return alertResource;
   }
 
+  @Path("alert-templates")
+  public AlertTemplateResource getAlertTemplateResource() {
+    return alertTemplateResource;
+  }
+
   @Path("subscription-groups")
   public SubscriptionGroupResource getSubscriptionGroupResource() {
     return subscriptionGroupResource;
@@ -95,5 +106,10 @@ public class ApiResource {
   @Path("events")
   public EventResource getEventResource() {
     return eventResource;
+  }
+
+  @Path("tasks")
+  public TaskResource getTaskResource() {
+    return taskResource;
   }
 }

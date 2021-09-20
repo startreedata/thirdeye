@@ -1,11 +1,11 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensure;
-import static org.apache.pinot.thirdeye.resources.ResourceUtils.ensureNull;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
@@ -14,12 +14,12 @@ import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.auth.AuthService;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.util.ApiBeanMapper;
 import org.quartz.CronExpression;
 
 @Api(tags = "Subscription Group")
@@ -50,12 +50,17 @@ public class SubscriptionGroupResource extends
   }
 
   @Override
-  protected void validate(final SubscriptionGroupApi api) {
+  protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
+    super.validate(api, existing);
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
-    ensure(subscriptionGroupManager.findByPredicate(
-        Predicate.EQ("name", api.getName())).size() == 0,
-        ERR_DUPLICATE_NAME);
+
+    // For new Subscription Group or existing Subscription Group with different name
+    if (existing == null || !existing.getName().equals(api.getName())) {
+      ensure(subscriptionGroupManager.findByPredicate(
+          Predicate.EQ("name", api.getName())).size() == 0,
+          ERR_DUPLICATE_NAME);
+    }
   }
 
   @Override
@@ -77,4 +82,5 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }
+
 }

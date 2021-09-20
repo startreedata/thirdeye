@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -40,8 +39,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.EvaluationBean;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MergedAnomalyResultBean;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.joda.time.Interval;
 
 /**
@@ -219,8 +218,8 @@ public class DetectionHealth {
       // calculate average mapes for each detector
       Map<String, Double> detectorMapes = evaluations.stream()
           .filter(eval -> Objects.nonNull(eval.getMape()))
-          .collect(Collectors.groupingBy(EvaluationBean::getDetectorName,
-              Collectors.averagingDouble(EvaluationBean::getMape)));
+          .collect(Collectors.groupingBy(EvaluationDTO::getDetectorName,
+              Collectors.averagingDouble(EvaluationDTO::getMape)));
 
       // construct regression status
       return RegressionStatus.fromDetectorMapes(detectorMapes);
@@ -238,7 +237,7 @@ public class DetectionHealth {
       // the anomalies can come from different sub-dimensions, merge the anomaly range if possible
       List<Interval> intervals = new ArrayList<>();
       if (!anomalies.isEmpty()) {
-        anomalies.sort(Comparator.comparingLong(MergedAnomalyResultBean::getStartTime));
+        anomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
         long start = Math.max(anomalies.stream().findFirst().get().getStartTime(), this.startTime);
         long end = anomalies.stream().findFirst().get().getEndTime();
         for (MergedAnomalyResultDTO anomaly : anomalies) {
@@ -267,12 +266,12 @@ public class DetectionHealth {
           Predicate.AND(Predicate.EQ(COL_NAME_TASK_NAME, "DETECTION_" + this.detectionConfigId),
               Predicate.LT(COL_NAME_START_TIME, endTime),
               Predicate.GT(COL_NAME_END_TIME, startTime),
-              Predicate.EQ(COL_NAME_TASK_TYPE, TaskConstants.TaskType.DETECTION.toString()),
+              Predicate.EQ(COL_NAME_TASK_TYPE, TaskType.DETECTION.toString()),
               Predicate.IN(COL_NAME_TASK_STATUS,
-                  new String[]{TaskConstants.TaskStatus.COMPLETED.toString(),
-                      TaskConstants.TaskStatus.FAILED.toString(),
-                      TaskConstants.TaskStatus.TIMEOUT.toString(),
-                      TaskConstants.TaskStatus.WAITING.toString()})));
+                  new String[]{TaskStatus.COMPLETED.toString(),
+                      TaskStatus.FAILED.toString(),
+                      TaskStatus.TIMEOUT.toString(),
+                      TaskStatus.WAITING.toString()})));
       long lastTaskExecutionTime = -1L;
       if (lastDetectionHealth != null && lastDetectionHealth.getDetectionTaskStatus() != null) {
         lastTaskExecutionTime = lastDetectionHealth.getDetectionTaskStatus()

@@ -22,9 +22,9 @@ package org.apache.pinot.thirdeye.spi.datalayer.bao;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants.TaskStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
@@ -37,7 +37,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days);
 
   List<TaskDTO> findByStatusesAndTypeWithinDays(List<TaskStatus> statuses,
-      TaskConstants.TaskType type, int days);
+      TaskType type, int days);
 
   List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
 

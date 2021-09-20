@@ -16,17 +16,18 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
+import org.apache.pinot.thirdeye.detection.MockDataProvider;
+import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -70,19 +71,19 @@ public class RuleBaselineProviderTest {
   @Test
   public void testFetchBaselineTimeSeries() {
     DataFrame df = baselineProvider.computePredictedTimeSeries(slice1).getDataFrame();
-    Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).get(0), 100.0);
-    Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).get(1), 200.0);
+    assertThat(df.getDoubles(DataFrame.COL_VALUE).get(0)).isEqualTo(100.0);
+    assertThat(df.getDoubles(DataFrame.COL_VALUE).get(1)).isEqualTo(200.0);
   }
 
   @Test
   public void testFetchBaselineAggregates() {
-    Assert.assertEquals(
-        this.baselineProvider.computePredictedAggregates(slice1, DoubleSeries.MEAN), 150.0);
+    assertThat(
+        this.baselineProvider.computePredictedAggregates(slice1,
+            DoubleSeries.MEAN)).isEqualTo(150.0);
   }
 
   @Test
   public void testFetchBaselineAggregatesNaN() {
-    Assert.assertEquals(
-        this.baselineProvider.computePredictedAggregates(slice2, DoubleSeries.MEAN), Double.NaN);
+    assertThat(this.baselineProvider.computePredictedAggregates(slice2, DoubleSeries.MEAN)).isNaN();
   }
 }

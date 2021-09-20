@@ -20,53 +20,45 @@
 package org.apache.pinot.thirdeye.notification.commons;
 
 import com.google.common.base.MoreObjects;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.collections4.MapUtils;
 
 public class SmtpConfiguration {
 
-  public static final String SMTP_CONFIG_KEY = "smtpConfiguration";
-  public static final String SMTP_HOST_KEY = "smtpHost";
-  public static final String SMTP_PORT_KEY = "smtpPort";
-  public static final String SMTP_USER_KEY = "smtpUser";
-  public static final String SMTP_PASSWD_KEY = "smtpPassword";
+  private String host;
+  private int port = 25;
+  private String user;
+  private String password;
 
-  private String smtpHost;
-  private int smtpPort = 25;
-  private String smtpUser;
-  private String smtpPassword;
-
-  public String getSmtpHost() {
-    return smtpHost;
+  public String getHost() {
+    return host;
   }
 
-  public void setSmtpHost(String smtpHost) {
-    this.smtpHost = smtpHost;
+  public void setHost(String host) {
+    this.host = host;
   }
 
-  public int getSmtpPort() {
-    return smtpPort;
+  public int getPort() {
+    return port;
   }
 
-  public void setSmtpPort(int smtpPort) {
-    this.smtpPort = smtpPort;
+  public void setPort(int port) {
+    this.port = port;
   }
 
-  public String getSmtpUser() {
-    return smtpUser;
+  public String getUser() {
+    return user;
   }
 
-  public void setSmtpUser(String smtpUser) {
-    this.smtpUser = smtpUser;
+  public void setUser(String user) {
+    this.user = user;
   }
 
-  public String getSmtpPassword() {
-    return smtpPassword;
+  public String getPassword() {
+    return password;
   }
 
-  public void setSmtpPassword(String smtpPassword) {
-    this.smtpPassword = smtpPassword;
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   @Override
@@ -75,37 +67,24 @@ public class SmtpConfiguration {
       return false;
     }
     SmtpConfiguration at = (SmtpConfiguration) o;
-    return Objects.equals(smtpHost, at.getSmtpHost())
-        && Objects.equals(smtpPort, at.getSmtpPort())
-        && Objects.equals(smtpUser, at.getSmtpUser())
-        && Objects.equals(smtpPassword, at.getSmtpPassword());
+    return Objects.equals(host, at.getHost())
+        && Objects.equals(port, at.getPort())
+        && Objects.equals(user, at.getUser())
+        && Objects.equals(password, at.getPassword());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(smtpHost, smtpPort, smtpUser, smtpPassword);
+    return Objects.hash(host, port, user, password);
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add(SMTP_HOST_KEY, smtpHost)
-        .add(SMTP_PORT_KEY, smtpPort)
-        .add(SMTP_USER_KEY, smtpUser).toString();
-  }
-
-  public static SmtpConfiguration createFromProperties(Map<String, Object> smtpConfiguration) {
-    SmtpConfiguration conf = new SmtpConfiguration();
-    if (smtpConfiguration != null) {
-      try {
-        conf.setSmtpHost(MapUtils.getString(smtpConfiguration, SMTP_HOST_KEY));
-        conf.setSmtpPort(MapUtils.getIntValue(smtpConfiguration, SMTP_PORT_KEY));
-        conf.setSmtpUser(MapUtils.getString(smtpConfiguration, SMTP_USER_KEY));
-        conf.setSmtpPassword(MapUtils.getString(smtpConfiguration, SMTP_PASSWD_KEY));
-      } catch (Exception e) {
-        throw new RuntimeException("Error occurred while parsing smtp configuration into object.",
-            e);
-      }
-    }
-    return conf;
+    return MoreObjects.toStringHelper(this)
+        .add("host", host)
+        .add("port", port)
+        .add("user", user)
+        .add("password", password)
+        .toString();
   }
 }

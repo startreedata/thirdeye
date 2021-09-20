@@ -33,17 +33,17 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.MockGrouper;
 import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleAnomalyFilter;
-import org.apache.pinot.thirdeye.detection.components.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.filters.ThresholdRuleAnomalyFilter;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -202,7 +202,7 @@ public class SubscriptionConfigValidatorTest {
     Yaml yaml = new Yaml();
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("detection-config-good-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
     ProcessingReport report = schema.validate(config);
@@ -210,7 +210,7 @@ public class SubscriptionConfigValidatorTest {
 
     yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("composite-detection-config-good-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     config = Json.mapper().convertValue(configObject, JsonNode.class);
     report = schema.validate(config);
@@ -226,7 +226,7 @@ public class SubscriptionConfigValidatorTest {
     Yaml yaml = new Yaml();
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("detection-config-bad-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
 
@@ -277,7 +277,7 @@ public class SubscriptionConfigValidatorTest {
     Yaml yaml = new Yaml();
     String yamlConfig = IOUtils
         .toString(this.getClass().getResourceAsStream("composite-detection-config-bad-1.yaml"),
-            StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8.toString());
     Map<String, Object> configObject = ConfigUtils.getMap(yaml.load(yamlConfig));
     JsonNode config = Json.mapper().convertValue(configObject, JsonNode.class);
 

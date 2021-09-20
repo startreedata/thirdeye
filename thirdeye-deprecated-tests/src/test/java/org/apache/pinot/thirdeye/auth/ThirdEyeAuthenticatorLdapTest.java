@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014-2018 LinkedIn Corp. (pinot-core@linkedin.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,8 +25,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.spi.InitialContextFactory;
-import org.apache.pinot.thirdeye.spi.auth.ThirdEyePrincipal;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,6 @@ import org.testng.annotations.Test;
 public class ThirdEyeAuthenticatorLdapTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthenticatorLdapTest.class);
-  private ThirdEyeLdapAuthenticator thirdEyeAuthenticatorLdap;
-  private ThirdEyeCredentials credentials;
-
   private static final String USERNAME1 = "username1"; // @DOMAIN1
   private static final String USERNAME2 = "username2"; // @DOMAIN2
   private static final String USERNAME3 = "username3"; // @DOMAIN3
@@ -47,12 +43,13 @@ public class ThirdEyeAuthenticatorLdapTest {
   private static final String DOMAIN1 = "domain1.do";
   private static final String DOMAIN2 = "domain2.to";
   private static final String DOMAIN3 = "domain3.so";
+  private ThirdEyeLdapAuthenticator thirdEyeAuthenticatorLdap;
+  private ThirdEyeCredentials credentials;
 
   @BeforeClass
   public void setup() {
     List<String> domains = Arrays.asList(DOMAIN1, DOMAIN2);
-    thirdEyeAuthenticatorLdap = new ThirdEyeLdapAuthenticator(domains, "ldaps://someLdap",
-        TestDbEnv.getInstance().getSessionDAO());
+    thirdEyeAuthenticatorLdap = new ThirdEyeLdapAuthenticator(domains, "ldaps://someLdap");
     thirdEyeAuthenticatorLdap
         .setInitialContextFactory(MockInitialDirContextFactory.class.getName());
   }

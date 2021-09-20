@@ -19,24 +19,24 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
-import static org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter.PROP_EMAIL_SCHEME;
-
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.spi.constant.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 
 
@@ -122,28 +122,16 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
    * Extracts the alert schemes from config and also merges (overrides)
    * recipients explicitly defined outside the scope of alert schemes.
    */
-  protected Map<String, Object> generateAlertSchemeProps(SubscriptionGroupDTO config,
-      Set<String> to, Set<String> cc, Set<String> bcc) {
-    Map<String, Object> notificationSchemeProps = new HashMap<>();
-
-    // Make a copy of the current alert schemes
-    if (config.getAlertSchemes() != null) {
-      for (Map.Entry<Object, Object> alertSchemeEntry : ConfigUtils.getMap(config.getAlertSchemes())
-          .entrySet()) {
-        notificationSchemeProps.put(alertSchemeEntry.getKey().toString(),
-            ConfigUtils.getMap(alertSchemeEntry.getValue()));
-      }
-    }
-
+  protected NotificationSchemesDto generateNotificationSchemeProps(SubscriptionGroupDTO config,
+      List<String> to, List<String> cc, List<String> bcc) {
+    NotificationSchemesDto notificationSchemeProps = new NotificationSchemesDto();
+    notificationSchemeProps.setWebhookScheme(config.getNotificationSchemes().getWebhookScheme());
     // Override the email alert scheme
-    Map<String, Object> recipients = new HashMap<>();
-    recipients.put(PROP_TO, cleanupRecipients(to));
-    recipients.put(PROP_CC, cleanupRecipients(cc));
-    recipients.put(PROP_BCC, cleanupRecipients(bcc));
-    Map<String, Object> recipientsHolder = new HashMap<>();
-    recipientsHolder.put(PROP_RECIPIENTS, recipients);
-    ((Map<String, Object>) notificationSchemeProps.get(PROP_EMAIL_SCHEME)).putAll(recipientsHolder);
-
+    EmailSchemeDto emailScheme = new EmailSchemeDto()
+        .setCc(cc)
+        .setTo(to)
+        .setBcc(bcc);
+    notificationSchemeProps.setEmailScheme(emailScheme);
     return notificationSchemeProps;
   }
 }

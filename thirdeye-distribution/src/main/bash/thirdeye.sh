@@ -56,13 +56,6 @@ for filepath in "${LIB_DIR}"/*; do
   CLASSPATH="${CLASSPATH}:${filepath}"
 done
 
-function start_worker {
-  class_ref="org.apache.pinot.thirdeye.worker.ThirdEyeWorker"
-
-  echo "Starting Thirdeye worker.. config_dir: ${CONFIG_DIR}"
-  java -cp "${CLASSPATH}" ${class_ref} "${CONFIG_DIR}"
-}
-
 function start_coordinator {
   class_ref="org.apache.pinot.thirdeye.ThirdEyeCoordinator"
 
@@ -79,7 +72,6 @@ function start_ui {
 MODE=$1
 case ${MODE} in
     "coordinator" )  start_coordinator ;;
-    "worker"  )      start_worker ;;
     "ui"  )          start_ui ;;
     * )              echo "Invalid argument: ${MODE}! Exiting."; exit 1;;
 esac

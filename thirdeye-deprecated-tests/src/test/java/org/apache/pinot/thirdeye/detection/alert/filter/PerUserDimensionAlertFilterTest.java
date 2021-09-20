@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection.alert.filter;
 
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_BCC_VALUE;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_CC_VALUE;
+import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.PROP_TO_VALUE;
 import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.makeAnomaly;
 
 import java.util.ArrayList;
@@ -28,28 +31,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class PerUserDimensionAlertFilterTest {
 
-  private static final String PROP_RECIPIENTS = "recipients";
-  private static final String PROP_EMAIL_SCHEME = "emailScheme";
-  private static final String PROP_TO = "to";
-  private static final String PROP_CC = "cc";
-  private static final String PROP_BCC = "bcc";
-  private static final Set<String> PROP_TO_FOR_VALUE = new HashSet<>(
-      Arrays.asList("myTest@example.com", "myTest@example.org"));
-  private static final Set<String> PROP_TO_FOR_ANOTHER_VALUE = new HashSet<>(
-      Arrays.asList("myTest@example.net", "myTest@example.com"));
+  private static final List<String> PROP_TO_FOR_VALUE =
+      Arrays.asList("myTest@example.com", "myTest@example.org");
+  private static final List<String> PROP_TO_FOR_ANOTHER_VALUE =
+      Arrays.asList("myTest@example.net", "myTest@example.com");
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final String PROP_DIMENSION = "dimension";
   private static final String PROP_DIMENSION_VALUE = "key";
@@ -128,15 +128,11 @@ public class PerUserDimensionAlertFilterTest {
     properties.put(PROP_DIMENSION_TO, PROP_DIMENSION_TO_VALUE);
     alertConfig.setProperties(properties);
 
-    Map<String, Object> alertSchemes = new HashMap<>();
-    Map<String, Object> emailScheme = new HashMap<>();
-    Map<String, Set<String>> recipients = new HashMap<>();
-    recipients.put(PROP_TO, AlertFilterUtils.PROP_TO_VALUE);
-    recipients.put(PROP_CC, AlertFilterUtils.PROP_CC_VALUE);
-    recipients.put(PROP_BCC, AlertFilterUtils.PROP_BCC_VALUE);
-    emailScheme.put(PROP_RECIPIENTS, recipients);
-    alertSchemes.put(PROP_EMAIL_SCHEME, emailScheme);
-    alertConfig.setAlertSchemes(alertSchemes);
+    alertConfig.setNotificationSchemes(new NotificationSchemesDto()
+        .setEmailScheme(new EmailSchemeDto()
+            .setTo(PROP_TO_VALUE)
+            .setCc(PROP_CC_VALUE)
+            .setBcc(PROP_BCC_VALUE)));
 
     Map<Long, Long> vectorClocks = new HashMap<>();
     vectorClocks.put(PROP_ID_VALUE.get(0), this.baseTime);
@@ -156,15 +152,15 @@ public class PerUserDimensionAlertFilterTest {
     Assert.assertEquals(result.getResult().size(), 3);
 
     DetectionAlertFilterNotification notification1 = AlertFilterUtils
-        .makeEmailNotifications(this.alertConfig, Collections.singleton("myTest@example.com"));
+        .makeEmailNotifications(this.alertConfig, Arrays.asList("myTest@example.com"));
     Assert.assertEquals(result.getResult().get(notification1), makeSet(0, 1, 4));
 
     DetectionAlertFilterNotification notification2 = AlertFilterUtils
-        .makeEmailNotifications(this.alertConfig, Collections.singleton("myTest@example.org"));
+        .makeEmailNotifications(this.alertConfig, Arrays.asList("myTest@example.org"));
     Assert.assertEquals(result.getResult().get(notification2), makeSet(0, 4));
 
     DetectionAlertFilterNotification notification3 = AlertFilterUtils
-        .makeEmailNotifications(this.alertConfig, Collections.singleton("myTest@example.net"));
+        .makeEmailNotifications(this.alertConfig, Arrays.asList("myTest@example.net"));
     Assert.assertEquals(result.getResult().get(notification3), makeSet(1));
   }
 

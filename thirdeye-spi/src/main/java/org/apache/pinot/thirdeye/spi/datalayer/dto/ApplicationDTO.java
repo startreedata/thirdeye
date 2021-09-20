@@ -20,8 +20,26 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.ApplicationBean;
+public class ApplicationDTO extends AbstractDTO {
 
-public class ApplicationDTO extends ApplicationBean {
+  String application;
+  String recipients;
 
+  public String getApplication() {
+    return application;
+  }
+
+  public ApplicationDTO setApplication(final String application) {
+    this.application = application;
+    return this;
+  }
+
+  public String getRecipients() {
+    return recipients;
+  }
+
+  public ApplicationDTO setRecipients(final String recipients) {
+    this.recipients = recipients;
+    return this;
+  }
 }

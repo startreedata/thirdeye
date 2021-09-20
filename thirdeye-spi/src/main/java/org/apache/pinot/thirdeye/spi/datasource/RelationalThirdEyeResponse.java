@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.Constants;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 
 public class RelationalThirdEyeResponse extends BaseThirdEyeResponse {
 

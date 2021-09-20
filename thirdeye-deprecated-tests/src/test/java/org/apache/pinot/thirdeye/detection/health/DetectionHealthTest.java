@@ -22,17 +22,18 @@ package org.apache.pinot.thirdeye.detection.health;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
-import org.apache.pinot.thirdeye.spi.anomaly.task.TaskConstants;
+import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
+import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EvaluationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
-import org.apache.pinot.thirdeye.spi.detection.health.DetectionHealth;
-import org.apache.pinot.thirdeye.spi.detection.health.HealthStatus;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.spi.detection.health.DetectionHealth;
+import org.apache.pinot.thirdeye.spi.detection.health.HealthStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskStatus;
+import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -85,26 +86,26 @@ public class DetectionHealthTest {
     long endTime = 200;
     TaskDTO task1 = new TaskDTO();
     task1.setJobName("DETECTION_" + this.configId);
-    task1.setStatus(TaskConstants.TaskStatus.COMPLETED);
+    task1.setStatus(TaskStatus.COMPLETED);
     task1.setStartTime(110);
     task1.setEndTime(120);
-    task1.setTaskType(TaskConstants.TaskType.DETECTION);
+    task1.setTaskType(TaskType.DETECTION);
     this.taskDAO.save(task1);
 
     TaskDTO task2 = new TaskDTO();
     task2.setJobName("DETECTION_" + this.configId);
-    task2.setStatus(TaskConstants.TaskStatus.FAILED);
+    task2.setStatus(TaskStatus.FAILED);
     task2.setStartTime(130);
     task2.setEndTime(140);
-    task2.setTaskType(TaskConstants.TaskType.DETECTION);
+    task2.setTaskType(TaskType.DETECTION);
     this.taskDAO.save(task2);
     DetectionHealth health = new DetectionHealth.Builder(configId, startTime, endTime)
         .addDetectionTaskStatus(this.taskDAO, 2).build();
     Assert.assertEquals(health.getDetectionTaskStatus().getHealthStatus(), HealthStatus.MODERATE);
     Assert.assertEquals(health.getDetectionTaskStatus().getTaskCounts(),
         ImmutableMap
-            .of(TaskConstants.TaskStatus.COMPLETED, 1L, TaskConstants.TaskStatus.TIMEOUT, 0L,
-                TaskConstants.TaskStatus.WAITING, 0L, TaskConstants.TaskStatus.FAILED, 1L));
+            .of(TaskStatus.COMPLETED, 1L, TaskStatus.TIMEOUT, 0L,
+                TaskStatus.WAITING, 0L, TaskStatus.FAILED, 1L));
     Assert.assertEquals(health.getDetectionTaskStatus().getTaskSuccessRate(), 0.5);
     Assert.assertEquals(health.getDetectionTaskStatus().getTasks(), Arrays.asList(task2, task1));
   }

@@ -23,31 +23,34 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.14.0-SNAPSHOT</version>
+    <version>1.17.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>thirdeye-deprecated-tests</artifactId>
 
   <dependencies>
+    <!-- test dependencies -->
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-coordinator</artifactId>
-      <scope>compile</scope>
+      <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-worker</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- test dependencies -->
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-datasources</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-datasource-pinot-legacy</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-detection-components</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
@@ -73,6 +76,12 @@
       <artifactId>dropwizard-client</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+      <version>1.3.7</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 
@@ -82,7 +91,7 @@
         <directory>src/test/resources</directory>
       </testResource>
       <testResource>
-        <directory>../thirdeye-core/src/main/resources</directory>
+        <directory>../thirdeye-persistence/src/main/resources</directory>
       </testResource>
     </testResources>
     <plugins>

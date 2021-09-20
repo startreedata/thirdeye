@@ -14,11 +14,11 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.spi.data.DateTimeFieldSpec;
-import org.apache.pinot.thirdeye.spi.common.time.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.common.time.TimeSpec;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.pojo.MetricConfigBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -42,13 +42,17 @@ public class SpiUtils {
     return Optional.ofNullable(o);
   }
 
+  public static boolean bool(Boolean value) {
+    return value != null && value;
+  }
+
   public static String constructMetricAlias(String datasetName, String metricName) {
-    return datasetName + MetricConfigBean.ALIAS_JOINER + metricName;
+    return datasetName + MetricConfigDTO.ALIAS_JOINER + metricName;
   }
 
   public static String getTimeFormatString(DatasetConfigDTO datasetConfig) {
     String timeFormat = datasetConfig.getTimeFormat();
-    if (timeFormat.startsWith(DateTimeFieldSpec.TimeFormat.SIMPLE_DATE_FORMAT.toString())) {
+    if (timeFormat.startsWith(TimeFormat.SIMPLE_DATE_FORMAT.toString())) {
       timeFormat = getSDFPatternFromTimeFormat(timeFormat);
     }
     return timeFormat;
@@ -275,5 +279,17 @@ public class SpiUtils {
       }
     }
     return props;
+  }
+
+  /**
+   * check if the metric aggregation is cumulative
+   */
+  public static boolean isAggCumulative(MetricConfigDTO metric) {
+    MetricAggFunction aggFunction = metric.getDefaultAggFunction();
+    return aggFunction.equals(MetricAggFunction.SUM) || aggFunction.equals(MetricAggFunction.COUNT);
+  }
+
+  public enum TimeFormat {
+    EPOCH, SIMPLE_DATE_FORMAT
   }
 }

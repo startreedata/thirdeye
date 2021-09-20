@@ -1,6 +1,8 @@
 package org.apache.pinot.thirdeye;
 
+import static org.apache.pinot.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.apache.pinot.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
+import static org.apache.pinot.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.inject.Guice;
@@ -8,20 +10,31 @@ import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.exporter.MetricsServlet;
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import org.apache.pinot.thirdeye.anomaly.events.MockEventsLoader;
+import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
+import org.apache.pinot.thirdeye.events.MockEventsLoader;
+import org.apache.pinot.thirdeye.healthcheck.DatabaseHealthCheck;
 import org.apache.pinot.thirdeye.resources.RootResource;
+import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
+import org.apache.pinot.thirdeye.scheduler.SchedulerService;
+import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.task.TaskDriver;
+import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.slf4j.Logger;
@@ -31,16 +44,18 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeCoordinator.class);
 
+  private Injector injector;
+  private RequestStatisticsLogger requestStatisticsLogger = null;
+  private TaskDriver taskDriver = null;
+  private SchedulerService schedulerService = null;
+
   /**
    * Use {@link ThirdEyeCoordinatorDebug} class for debugging purposes.
    * The integration-tests/tools module will load all the thirdeye jars including datasources
    * making it easier to debug.
    */
   public static void main(String[] args) throws Exception {
-    final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-    log.info(String.format("JVM (%s) arguments: %s",
-        System.getProperty("java.version"),
-        runtimeMxBean.getInputArguments()));
+    AppUtils.logJvmSettings();
 
     new ThirdEyeCoordinator().run(args);
   }
@@ -65,7 +80,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
 
-    final Injector injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
+    injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
         configuration,
         dataSource,
         env.metrics()));
@@ -74,7 +89,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     // Load plugins
-    optional(System.getenv(ENV_THIRDEYE_PLUGINS_DIR))
+    optional(thirdEyePluginDirOverride())
         .ifPresent(pluginsPath -> injector
             .getInstance(PluginLoaderConfiguration.class)
             .setPluginsPath(pluginsPath));
@@ -88,11 +103,77 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     env.jersey().register(injector.getInstance(RootResource.class));
 
+    // Expose dropwizard metrics in prometheus compatible format
+    if(configuration.getPrometheusConfiguration().isEnabled()) {
+      CollectorRegistry collectorRegistry = new CollectorRegistry();
+      collectorRegistry.register(new DropwizardExports(env.metrics()));
+      env.admin()
+          .addServlet("prometheus", new MetricsServlet(collectorRegistry))
+          .addMapping("/prometheus");
+    }
+
+    // Persistence layer connectivity health check registry
+    env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
+
     // Enable CORS. Opens up the API server to respond to requests from all external domains.
     addCorsFilter(env);
 
     // Load mock events if enabled.
     injector.getInstance(MockEventsLoader.class).run();
+    env.lifecycle().manage(lifecycleManager(configuration));
+  }
+
+  private Managed lifecycleManager(ThirdEyeCoordinatorConfiguration config) {
+    return new Managed() {
+      @Override
+      public void start() throws Exception {
+        if (config.getSchedulerConfiguration().isEnabled()) {
+          // Allow the jobs to use the injector
+          injector.getInstance(DetectionCronScheduler.class)
+              .addToContext(CTX_INJECTOR, injector);
+
+          injector.getInstance(SubscriptionCronScheduler.class)
+              .addToContext(CTX_INJECTOR, injector);
+
+          schedulerService = injector.getInstance(SchedulerService.class);
+
+          // Start the scheduler
+          schedulerService.start();
+        }
+
+        requestStatisticsLogger = new RequestStatisticsLogger(
+            new TimeGranularity(1, TimeUnit.DAYS));
+        requestStatisticsLogger.start();
+
+        if (config.getTaskDriverConfiguration().isEnabled()) {
+          taskDriver = injector.getInstance(TaskDriver.class);
+          taskDriver.start();
+        }
+      }
+
+      @Override
+      public void stop() throws Exception {
+        if (requestStatisticsLogger != null) {
+          requestStatisticsLogger.shutdown();
+        }
+        if (taskDriver != null) {
+          taskDriver.shutdown();
+        }
+        if (schedulerService != null) {
+          schedulerService.stop();
+        }
+      }
+    };
+  }
+
+  /**
+   * Prefer system property over env variable when overriding plugins Dir.
+   *
+   * @return overridden thirdEye plugins dir
+   */
+  private String thirdEyePluginDirOverride() {
+    return optional(System.getProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR))
+        .orElse(System.getenv(ENV_THIRDEYE_PLUGINS_DIR));
   }
 
   void addCorsFilter(final Environment environment) {
@@ -107,5 +188,14 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
 
     // Add URL mapping
     cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+  }
+
+  /**
+   * Maintained for enabling debug tools.
+   *
+   * @return injector instance used by the coordinator.
+   */
+  public Injector getInjector() {
+    return injector;
   }
 }

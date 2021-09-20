@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
+import org.apache.pinot.thirdeye.detection.MockDataProvider;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.detectors.ThresholdRuleDetectorSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -28,14 +32,11 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.spec.ThresholdRuleDetectorSpec;
-import org.apache.pinot.thirdeye.detection.spi.components.AnomalyDetector;
-import org.apache.pinot.thirdeye.spi.detection.spi.exception.DetectorException;
-import org.apache.pinot.thirdeye.detection.spi.model.DetectionResult;
-import org.apache.pinot.thirdeye.detection.spi.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.DetectorException;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.joda.time.Interval;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -49,13 +50,13 @@ public class ThresholdRuleDetectorTest {
   public void beforeMethod() {
     Map<MetricSlice, DataFrame> timeSeries = new HashMap<>();
     timeSeries.put(MetricSlice.from(123L, 0, 10),
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 0, 100, 200, 500, 1000).addSeries(
-            DataFrame.COL_TIME, 0, 2, 4, 6, 8));
+        new DataFrame()
+            .addSeries(DataFrame.COL_VALUE, 0, 100, 200, 500, 1000)
+            .addSeries(DataFrame.COL_TIME, 0, 2, 4, 6, 8));
     timeSeries.put(MetricSlice.from(123L, 1546214400000L, 1551398400000L),
         new DataFrame()
             .addSeries(DataFrame.COL_TIME, 1546214400000L, 1548892800000L, 1551312000000L)
-            .addSeries(
-                DataFrame.COL_VALUE, 100, 200, 300));
+            .addSeries(DataFrame.COL_VALUE, 100, 200, 300));
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     metricConfigDTO.setId(123L);
@@ -102,6 +103,7 @@ public class ThresholdRuleDetectorTest {
     Assert.assertEquals(anomalies.get(0).getEndTime(), 2);
     Assert.assertEquals(anomalies.get(1).getStartTime(), 8);
     Assert.assertEquals(anomalies.get(1).getEndTime(), 10);
+
     TimeSeries ts = result.getTimeseries();
     Assert.assertEquals(ts.getPredictedUpperBound(), DoubleSeries.fillValues(ts.size(), 500));
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.fillValues(ts.size(), 100));

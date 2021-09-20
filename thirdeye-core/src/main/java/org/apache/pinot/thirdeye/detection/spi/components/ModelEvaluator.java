@@ -23,8 +23,8 @@
 package org.apache.pinot.thirdeye.detection.spi.components;
 
 import org.apache.pinot.thirdeye.detection.spi.model.ModelEvaluationResult;
-import org.apache.pinot.thirdeye.spi.detection.spec.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.spi.components.BaseComponent;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
+import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.joda.time.Instant;
 
 /**

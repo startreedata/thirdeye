@@ -75,6 +75,14 @@ export const SubscriptionGroupList: FunctionComponent<SubscriptionGroupListProps
                         handleSubscriptionGroupViewDetailsByNameAndId
                     ),
             },
+            // Schedule(or Cron)
+            {
+                field: "cron",
+                type: "string",
+                sortable: true,
+                headerName: t("label.cron"),
+                flex: 1,
+            },
             // Alert count
             {
                 field: "alertCount",

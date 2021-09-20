@@ -26,6 +26,21 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 </Typography>
             </Grid>
 
+            {/* Schedule(or Cron) */}
+            <Grid item sm={2}>
+                <Typography variant="subtitle1">
+                    <strong>{t("label.cron")}</strong>
+                </Typography>
+            </Grid>
+
+            <Grid item sm={10}>
+                <Typography variant="body1">
+                    {(props.subscriptionGroup &&
+                        props.subscriptionGroup.cron) ||
+                        t("label.no-data-marker")}
+                </Typography>
+            </Grid>
+
             {/* Subscribed alerts */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">

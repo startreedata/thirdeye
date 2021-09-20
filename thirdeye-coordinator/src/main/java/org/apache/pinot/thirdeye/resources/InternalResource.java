@@ -1,6 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,6 +16,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,11 +31,14 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = "zzz Internal zzz")
 public class InternalResource {
 
+  private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
@@ -139,11 +145,18 @@ public class InternalResource {
   @POST
   @Path("webhook")
   public Response webhookDummy(
-      Object payload
+      Object payload,
+      @HeaderParam("X-Signature") String signature
   ) throws Exception {
-    System.out.println("========================= Webhook request ==============================");
-    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
-    System.out.println("========================================================================");
+    log.info("========================= Webhook request ==============================");
+    //replace it with relevant secret key acquired during subscription group creation
+    String secretKey = "secretKey";
+    String result = hmacSHA512(payload, secretKey);
+    log.info("Header signature: {}", signature);
+    log.info("Generated signature: {}", result);
+    ensure(result.equals(signature), "Broken request!");
+    log.info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
+    log.info("========================================================================");
     return Response.ok().build();
   }
 }

@@ -38,7 +38,7 @@ describe("Anomalies REST", () => {
 
         await expect(getAllAnomalies()).resolves.toEqual([mockAnomaly]);
 
-        expect(axios.get).toHaveBeenCalledWith("/api/anomalies");
+        expect(axios.get).toHaveBeenCalledWith("/api/anomalies?isChild=false");
     });
 
     it("getAllAnomalies should throw encountered error", async () => {
@@ -54,7 +54,9 @@ describe("Anomalies REST", () => {
 
         await expect(getAnomaliesByAlertId(1)).resolves.toEqual([mockAnomaly]);
 
-        expect(axios.get).toHaveBeenCalledWith("/api/anomalies?alert.id=1");
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/anomalies?isChild=false&alert.id=1"
+        );
     });
 
     it("getAnomaliesByAlertId should throw encountered error", async () => {
@@ -71,7 +73,7 @@ describe("Anomalies REST", () => {
         await expect(getAnomaliesByTime(1, 2)).resolves.toEqual([mockAnomaly]);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/anomalies?startTime=[gte]1&endTime=[lte]2"
+            "/api/anomalies?isChild=false&startTime=[gte]1&endTime=[lte]2"
         );
     });
 
@@ -91,7 +93,7 @@ describe("Anomalies REST", () => {
         ]);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/anomalies?alert.id=1&startTime=[gte]2&endTime=[lte]3"
+            "/api/anomalies?isChild=false&alert.id=1&startTime=[gte]2&endTime=[lte]3"
         );
     });
 

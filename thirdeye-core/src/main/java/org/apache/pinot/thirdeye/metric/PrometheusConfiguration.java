@@ -12,4 +12,9 @@ public class PrometheusConfiguration {
     this.enabled = enabled;
     return this;
   }
+
+  public PrometheusConfiguration setEnabled(final String enabled) {
+    this.enabled = enabled.equalsIgnoreCase("true");
+    return this;
+  }
 }

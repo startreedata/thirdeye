@@ -5,6 +5,7 @@ import { User } from "./user.interfaces";
 export interface SubscriptionGroup {
     id: number;
     name: string;
+    cron: string;
     application: Application;
     alerts: Alert[];
     created: number;

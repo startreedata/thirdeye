@@ -15,10 +15,7 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
@@ -47,17 +44,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         let fetchedAlerts: Alert[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupsResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
                 // Attempt to gather data
                 if (alertsResponse.status === "fulfilled") {
                     fetchedAlerts = alertsResponse.value;
@@ -90,8 +76,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const handleSubscriptionGroupDeleteOk = (
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
-        deleteSubscriptionGroup(uiSubscriptionGroup.id)
-            .then((subscriptionGroup) => {
+        deleteSubscriptionGroup(uiSubscriptionGroup.id).then(
+            (subscriptionGroup) => {
                 enqueueSnackbar(
                     t("message.delete-success", {
                         entity: t("label.subscription-group"),
@@ -101,15 +87,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
 
                 // Remove deleted subscription group from fetched subscription groups
                 removeUiSubscriptionGroup(subscriptionGroup);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                )
-            );
+            }
+        );
     };
 
     const removeUiSubscriptionGroup = (

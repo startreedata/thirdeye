@@ -248,6 +248,7 @@ describe("Subscription Groups Util", () => {
 
 const mockEmptySubscriptionGroup = {
     name: "",
+    cron: "",
     alerts: [],
     notificationSchemes: {
         email: {
@@ -259,6 +260,7 @@ const mockEmptySubscriptionGroup = {
 const mockEmptyUiSubscriptionGroup = {
     id: -1,
     name: "label.no-data-marker",
+    cron: "label.no-data-marker",
     alerts: [],
     alertCount: "0",
     emails: [],
@@ -274,6 +276,7 @@ const mockEmptyUiSubscriptionGroupAlert = {
 const mockSubscriptionGroup1 = {
     id: 1,
     name: "testNameSubscriptionGroup1",
+    cron: "0 0 3 ? * MON *",
     alerts: [
         {
             id: 2,
@@ -304,6 +307,7 @@ const mockSubscriptionGroup2 = {
 const mockSubscriptionGroup3 = {
     id: 6,
     name: "testNameSubscriptionGroup6",
+    cron: "0 0 12 ? * MON-FRI *",
 } as SubscriptionGroup;
 
 const mockSubscriptionGroups = [
@@ -352,6 +356,7 @@ const mockUiSubscriptionGroupAlerts = [
 const mockUiSubscriptionGroup1 = {
     id: 1,
     name: "testNameSubscriptionGroup1",
+    cron: "0 0 3 ? * MON *",
     alerts: [
         {
             id: 2,
@@ -371,6 +376,7 @@ const mockUiSubscriptionGroup1 = {
 const mockUiSubscriptionGroup2 = {
     id: 5,
     name: "label.no-data-marker",
+    cron: "label.no-data-marker",
     alerts: [],
     alertCount: "0",
     emails: [],
@@ -381,6 +387,7 @@ const mockUiSubscriptionGroup2 = {
 const mockUiSubscriptionGroup3 = {
     id: 6,
     name: "testNameSubscriptionGroup6",
+    cron: "0 0 12 ? * MON-FRI *",
     alerts: [],
     alertCount: "0",
     emails: [],

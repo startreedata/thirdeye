@@ -10,7 +10,7 @@ export const getAnomaly = async (id: number): Promise<Anomaly> => {
 };
 
 export const getAllAnomalies = async (): Promise<Anomaly[]> => {
-    const response = await axios.get(BASE_URL_ANOMALIES);
+    const response = await axios.get(`${BASE_URL_ANOMALIES}?isChild=false`);
 
     return response.data;
 };
@@ -19,7 +19,7 @@ export const getAnomaliesByAlertId = async (
     alertId: number
 ): Promise<Anomaly[]> => {
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?alert.id=${alertId}`
+        `${BASE_URL_ANOMALIES}?isChild=false&alert.id=${alertId}`
     );
 
     return response.data;
@@ -30,7 +30,7 @@ export const getAnomaliesByTime = async (
     endTime: number
 ): Promise<Anomaly[]> => {
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?startTime=[gte]${startTime}&endTime=[lte]${endTime}`
+        `${BASE_URL_ANOMALIES}?isChild=false&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
     );
 
     return response.data;
@@ -42,7 +42,7 @@ export const getAnomaliesByAlertIdAndTime = async (
     endTime: number
 ): Promise<Anomaly[]> => {
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?alert.id=${alertId}&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
+        `${BASE_URL_ANOMALIES}?isChild=false&alert.id=${alertId}&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
     );
 
     return response.data;

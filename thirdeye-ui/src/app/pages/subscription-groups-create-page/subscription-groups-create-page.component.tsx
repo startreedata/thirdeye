@@ -11,10 +11,7 @@ import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -36,8 +33,8 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             return;
         }
 
-        createSubscriptionGroup(subscriptionGroup)
-            .then((subscriptionGroup: SubscriptionGroup): void => {
+        createSubscriptionGroup(subscriptionGroup).then(
+            (subscriptionGroup: SubscriptionGroup): void => {
                 enqueueSnackbar(
                     t("message.create-success", {
                         entity: t("label.subscription-group"),
@@ -49,27 +46,14 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                 history.push(
                     getSubscriptionGroupsViewPath(subscriptionGroup.id)
                 );
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.create-error", {
-                        entity: t("label.subscription-group"),
-                    }),
-                    getErrorSnackbarOption()
-                );
-            });
+            }
+        );
     };
 
     const fetchAllAlerts = (): void => {
         getAllAlerts()
             .then((alerts: Alert[]): void => {
                 setAlerts(alerts);
-            })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
             })
             .finally((): void => {
                 setLoading(false);

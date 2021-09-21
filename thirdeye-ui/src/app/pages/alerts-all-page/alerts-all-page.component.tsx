@@ -17,10 +17,7 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getUiAlert, getUiAlerts } from "../../utils/alerts/alerts.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
@@ -49,17 +46,6 @@ export const AlertsAllPage: FunctionComponent = () => {
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
         Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
             .then(([alertsResponse, subscriptionGroupsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    alertsResponse.status === "rejected" ||
-                    subscriptionGroupsResponse.status === "rejected"
-                ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
-                }
-
                 // Attempt to gather data
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =
@@ -83,22 +69,15 @@ export const AlertsAllPage: FunctionComponent = () => {
             return;
         }
 
-        updateAlert(uiAlert.alert)
-            .then((alert) => {
-                enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Replace updated alert in fetched alerts
-                replaceUiAlert(alert);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                )
+        updateAlert(uiAlert.alert).then((alert) => {
+            enqueueSnackbar(
+                t("message.update-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
             );
+
+            // Replace updated alert in fetched alerts
+            replaceUiAlert(alert);
+        });
     };
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
@@ -111,22 +90,15 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
-        deleteAlert(uiAlert.id)
-            .then((alert) => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
-                );
-
-                // Remove deleted alert from fetched alerts
-                removeUiAlert(alert);
-            })
-            .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
-                )
+        deleteAlert(uiAlert.id).then((alert) => {
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
             );
+
+            // Remove deleted alert from fetched alerts
+            removeUiAlert(alert);
+        });
     };
 
     const replaceUiAlert = (alert: Alert): void => {

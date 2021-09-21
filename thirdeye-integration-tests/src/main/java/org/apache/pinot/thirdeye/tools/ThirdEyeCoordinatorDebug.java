@@ -3,9 +3,11 @@ package org.apache.pinot.thirdeye.tools;
 import static org.apache.pinot.thirdeye.AppUtils.logJvmSettings;
 
 import com.google.inject.Injector;
+import java.util.stream.Stream;
 import org.apache.pinot.thirdeye.ThirdEyeCoordinator;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.DefaultDataSourcesPlugin;
+import org.apache.pinot.thirdeye.datasource.PinotDataSourcePlugin;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.DetectionComponentsPlugin;
 import org.slf4j.Logger;
@@ -32,15 +34,16 @@ public class ThirdEyeCoordinatorDebug {
    * Default Data sources module is packaged as a plugin and therefore not available in the
    * application. This module has data sources added into it for dev purposes. Any changes WILL
    * require eventual testing with the final distribution.
-   *
-   * @param dataSourcesLoader
    */
   static void loadDefaultDataSources(final DataSourcesLoader dataSourcesLoader) {
     // Load the default data sources.
     // If there are duplicate additions, this will throw an error.
-    new DefaultDataSourcesPlugin()
-        .getDataSourceFactories()
-        .forEach(dataSourcesLoader::addThirdEyeDataSourceFactory);
+    Stream.of(
+            new DefaultDataSourcesPlugin(),
+            new PinotDataSourcePlugin())
+        .forEach(plugin -> plugin
+            .getDataSourceFactories()
+            .forEach(dataSourcesLoader::addThirdEyeDataSourceFactory));
   }
 
   static void loadDetectors(final DetectionRegistry detectionRegistry) {

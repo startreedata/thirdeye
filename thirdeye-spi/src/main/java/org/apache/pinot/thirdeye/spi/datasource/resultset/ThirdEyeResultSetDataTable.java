@@ -106,11 +106,7 @@ public class ThirdEyeResultSetDataTable implements DataTable {
     //   Always cast dimension values to STRING type
 
     for (int i = 0; i < getColumnCount(); i++) {
-      if (i < groupKeyLength) {
-        columnNameWithDataType.add(getColumns().get(i));
-      } else {
-        columnNameWithDataType.add(getColumns().get(i));
-      }
+      columnNameWithDataType.add(getColumns().get(i));
     }
     DataFrame.Builder dfBuilder = DataFrame.builder(columnNameWithDataType);
 

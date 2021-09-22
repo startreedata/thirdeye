@@ -20,11 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.pinotsql;
 
 import com.google.common.base.MoreObjects;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.pinot.thirdeye.spi.datasource.RelationalQuery;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.TimeSpec;
 
 public class PinotSqlQuery extends RelationalQuery {
 

@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -34,9 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeDataFrameResultSet;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +111,7 @@ public class PinotSqlControllerResponseCacheLoader extends PinotSqlResponseCache
   }
 
   @Override
-  public ThirdEyeResultSetGroup load(PinotSqlQuery query) throws Exception {
+  public ResultSet load(PinotSqlQuery query) throws Exception {
     try {
       Connection connection = getConnection();
       try {
@@ -127,14 +123,7 @@ public class PinotSqlControllerResponseCacheLoader extends PinotSqlResponseCache
           long end = System.currentTimeMillis();
           LOG.info("Query:{}  took:{} ms  connections:{}", query.getQuery(), (end - start),
               activeConnections);
-          ThirdEyeResultSet teResultSet = ThirdEyeDataFrameResultSet.fromSQLResultSet(resultSet,
-              SqlUtils.getMetricFromQuery(query.getQuery()),
-              SqlUtils.getGroupByKeysFromQuery(query.getQuery()),
-              null,
-              null);
-          List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
-          thirdEyeResultSets.add(teResultSet);
-          return new ThirdEyeResultSetGroup(thirdEyeResultSets);
+          return resultSet;
         }
       } finally {
         this.activeConnections.decrementAndGet();

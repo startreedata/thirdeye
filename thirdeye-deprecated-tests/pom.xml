@@ -43,7 +43,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-datasource-pinot-legacy</artifactId>
+      <artifactId>thirdeye-pinot</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

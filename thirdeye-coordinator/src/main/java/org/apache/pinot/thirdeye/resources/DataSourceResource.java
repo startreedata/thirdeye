@@ -84,6 +84,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     ensureExists(datasetName, "datasetName is a required field");
 
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
+    ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceName);
+
     final DatasetConfigDTO datasetConfigDTO = dataSource.onboardDataset(datasetName);
 
     return respondOk(ApiBeanMapper.toApi(datasetConfigDTO));
@@ -101,6 +103,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     ensureExists(name, "name is a required field");
 
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
+    ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, name);
+
     final List<DatasetConfigDTO> datasets = dataSource.onboardAll();
 
     return respondOk(datasets.stream()

@@ -4,6 +4,7 @@ public enum ThirdEyeStatus {
 
   ERR_DATASOURCE_NOT_FOUND("Data Source not found! %s"),
   ERR_DATASOURCE_UNREACHABLE("Data source validation failed!"),
+  ERR_DATASOURCE_NOT_LOADED("Data source cannot be instantiated! %s"),
   ERR_DATASET_NOT_FOUND("Dataset not found! %s"),
   ERR_MULTIPLE_DATASETS_FOUND(
       "Multiple datasets found based on the dataset's display name %s, candidates: %s"),

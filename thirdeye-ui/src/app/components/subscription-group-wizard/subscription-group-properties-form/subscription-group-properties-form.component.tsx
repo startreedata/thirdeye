@@ -40,7 +40,7 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
             onSubmit={handleSubmit(onSubmitSusbcriptionGroupPropertiesForm)}
         >
             <Grid container>
-                <Grid item sm={4}>
+                <Grid item sm={6}>
                     {/* Name */}
                     <TextField
                         fullWidth
@@ -52,6 +52,17 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
                         inputRef={register}
                         label={t("label.name")}
                         name="name"
+                        type="string"
+                        variant="outlined"
+                    />
+                </Grid>
+                <Grid item sm={6}>
+                    {/* Schedule (or Cron) */}
+                    <TextField
+                        fullWidth
+                        inputRef={register}
+                        label={t("label.cron")}
+                        name="cron"
                         type="string"
                         variant="outlined"
                     />

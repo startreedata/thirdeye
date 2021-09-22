@@ -41,6 +41,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
+      <artifactId>thirdeye-pinot</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-detection-components</artifactId>
     </dependency>
 

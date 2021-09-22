@@ -3,6 +3,7 @@ import { SubscriptionGroup } from "./subscription-group.interfaces";
 export interface UiSubscriptionGroup {
     id: number;
     name: string;
+    cron: string;
     alerts: UiSubscriptionGroupAlert[];
     alertCount: string;
     emails: string[];

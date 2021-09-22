@@ -123,6 +123,10 @@ data:
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}
 
+    # Prometheus compatible metrics will be exposed at /admin/prometheus
+    prometheus:
+      enabled: ${PROMETHEUS_ENABLED}
+
     notifications:
       smtp:
         host: ${SMTP_HOST}

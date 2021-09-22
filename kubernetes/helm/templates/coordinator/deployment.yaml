@@ -72,6 +72,8 @@ spec:
               secretKeyRef:
                 name: {{ .Values.smtp.secretKeyRef.name }}
                 key: password
+          - name: PROMETHEUS_ENABLED
+            value: {{ .Values.prometheus.enabled | quote }}
         args: [
             "coordinator"
         ]

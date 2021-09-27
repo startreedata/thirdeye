@@ -20,11 +20,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "thirdeye.coordinator.fullname" . }}
+  name: {{ include "thirdeye.scheduler.fullname" . }}
   labels:
     app: {{ include "thirdeye.name" . }}
     chart: {{ include "thirdeye.chart" . }}
-    component: {{ .Values.coordinator.name }}
+    component: {{ .Values.scheduler.name }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -32,51 +32,38 @@ spec:
     matchLabels:
       app: {{ include "thirdeye.name" . }}
       release: {{ .Release.Name }}
-      component: {{ .Values.coordinator.name }}
-  replicas: {{ .Values.coordinator.replicaCount }}
+      component: {{ .Values.scheduler.name }}
+  replicas: 1
   template:
     metadata:
       labels:
         app: {{ include "thirdeye.name" . }}
         release: {{ .Release.Name }}
-        component: {{ .Values.coordinator.name }}
+        component: {{ .Values.scheduler.name }}
       annotations:
-{{ toYaml .Values.coordinator.podAnnotations | indent 8 }}
+        prometheus.io/port: {{ .Values.scheduler.port | quote }}
+        prometheus.io/path: "/admin/prometheus"
+{{ toYaml .Values.scheduler.podAnnotations | indent 8 }}
     spec:
       {{- if .Values.image.pullSecretsName }}
       imagePullSecrets:
-        - name: "{{ .Values.image.pullSecretsName }}"
+        - name: {{ .Values.image.pullSecretsName | quote}}
       {{- end }}
       nodeSelector:
-{{ toYaml .Values.coordinator.nodeSelector | indent 8 }}
+{{ toYaml .Values.scheduler.nodeSelector | indent 8 }}
       affinity:
-{{ toYaml .Values.coordinator.affinity | indent 8 }}
+{{ toYaml .Values.scheduler.affinity | indent 8 }}
       tolerations:
-{{ toYaml .Values.coordinator.tolerations | indent 8 }}
+{{ toYaml .Values.scheduler.tolerations | indent 8 }}
       containers:
-      - name: coordinator
+      - name: scheduler
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        env:
-          - name: SMTP_HOST
-            value: {{ .Values.smtp.host | quote }}
-          - name: SMTP_PORT
-            value: {{ .Values.smtp.port  | quote }}
-          - name: SMTP_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.smtp.secretKeyRef.name }}
-                key: username
-          - name: SMTP_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.smtp.secretKeyRef.name }}
-                key: password
         args: [
             "coordinator"
         ]
         ports:
-          - containerPort: {{ .Values.coordinator.port }}
+          - containerPort: {{ .Values.scheduler.port }}
             protocol: TCP
         volumeMounts:
           - name: thirdeye-config
@@ -90,9 +77,9 @@ spec:
             readOnly: true
         {{- end }}
         resources:
-{{ toYaml .Values.coordinator.resources | indent 12 }}
+{{ toYaml .Values.scheduler.resources | indent 12 }}
       restartPolicy: Always
       volumes:
         - name: thirdeye-config
           configMap:
-            name: thirdeye-config
+            name: thirdeye-scheduler

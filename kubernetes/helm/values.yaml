@@ -58,10 +58,25 @@ coordinator:
     prometheus.io/port: "8080"
     prometheus.io/scrape: "false"
     prometheus.io/path: "/admin/prometheus"
+  # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
+  prometheus:
+    enabled: false
 
-# Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
-prometheus:
-  enabled: false
+scheduler:
+  enabled: true
+  name: scheduler
+  port: 8082
+  serviceType: LoadBalancer
+
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations:
+    prometheus.io/scrape: "false"
+  # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
+  prometheus:
+    enabled: true
 
 # Persistence layer configuration
 mysql:

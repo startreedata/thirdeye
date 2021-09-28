@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.cache;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -67,14 +68,14 @@ public class DataSourceCache {
       final MetricRegistry metricRegistry) {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
-    this.executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
     datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
     datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
-  public synchronized ThirdEyeDataSource getDataSource(String name) {
+  public synchronized ThirdEyeDataSource getDataSource(final String name) {
     final ThirdEyeDataSource cachedThirdEyeDataSource = cache.get(name);
     if (cachedThirdEyeDataSource != null) {
       return cachedThirdEyeDataSource;
@@ -83,6 +84,8 @@ public class DataSourceCache {
     final Optional<DataSourceDTO> dataSource = findByName(name);
     if (dataSource.isPresent()) {
       final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource.get());
+
+      requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + name);
       cache.put(name, thirdEyeDataSource);
       return thirdEyeDataSource;
     }
@@ -97,14 +100,14 @@ public class DataSourceCache {
     return results.stream().findFirst();
   }
 
-  public ThirdEyeResponse getQueryResult(ThirdEyeRequest request) throws Exception {
+  public ThirdEyeResponse getQueryResult(final ThirdEyeRequest request) throws Exception {
     datasourceCallCounter.inc();
-    long tStart = System.nanoTime();
+    final long tStart = System.nanoTime();
     try {
-      String dataSource = request.getDataSource();
+      final String dataSource = request.getDataSource();
 
       return getDataSource(dataSource).execute(request);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       datasourceExceptionCounter.inc();
       throw e;
     } finally {
@@ -118,7 +121,7 @@ public class DataSourceCache {
 
   public Map<ThirdEyeRequest, Future<ThirdEyeResponse>> getQueryResultsAsync(
       final List<ThirdEyeRequest> requests) {
-    Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
+    final Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
     for (final ThirdEyeRequest request : requests) {
       responseFuturesMap.put(request, getQueryResultAsync(request));
     }
@@ -126,7 +129,7 @@ public class DataSourceCache {
   }
 
   public void clear() throws Exception {
-    for (ThirdEyeDataSource thirdEyeDataSource : cache.values()) {
+    for (final ThirdEyeDataSource thirdEyeDataSource : cache.values()) {
       thirdEyeDataSource.close();
     }
     cache.clear();

@@ -148,8 +148,8 @@ data:
       # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
       enabled: {{ not .Values.scheduler.enabled }}
 
-      detectionPipeline: {{ not .Values.scheduler.enabled }}
-      detectionAlert: {{ not .Values.scheduler.enabled }}
+      detectionPipeline: true
+      detectionAlert: true
 
       holidayEvents:
         enabled: {{ not .Values.config.holidayLoaderKey | ternary "false" "true" }}

@@ -1,20 +1,22 @@
 
+{{ if .Values.scheduler.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "thirdeye.ui.headless" . }}
+  name: {{ include "thirdeye.scheduler.fullname" . }}
   labels:
     app: {{ include "thirdeye.name" . }}
     chart: {{ include "thirdeye.chart" . }}
-    component: {{ .Values.ui.name }}
+    component: {{ .Values.scheduler.name }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  clusterIP: None
+  type: {{ .Values.scheduler.serviceType }}
   ports:
     # [pod_name].[service_name].[namespace].svc.cluster.local
-    - port: {{ .Values.ui.port }}
+    - port: {{ .Values.scheduler.port }}
   selector:
     app: {{ include "thirdeye.name" . }}
     release: {{ .Release.Name }}
-    component: {{ .Values.ui.name }}
+    component: {{ .Values.scheduler.name }}
+{{ end }}

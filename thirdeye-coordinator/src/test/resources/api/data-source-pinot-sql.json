@@ -4,7 +4,8 @@
     "type": "pinot-sql",
     "properties": {
       "controllerHost": "localhost",
-      "controllerPort": 9000
+      "controllerPort": 9000,
+      "controllerConnectionScheme": "http"
     }
   }
 ]

@@ -13,7 +13,23 @@ if [ -z "${PINOT_DIST_ROOT}" ]; then
     PINOT_DIST_ROOT=/tmp/pinot-bin/apache-pinot-incubating-${PINOT_VERSION}-bin
 fi
 cd ${TE_REPO}
-${PINOT_DIST_ROOT}/bin/pinot-admin.sh AddTable -tableConfigFile examples/pageviews/pageviews_offline_table_config.json -schemaFile examples/pageviews/pageviews_schema.json  -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} -exec
+
+# Create a pinot table using a given schema and table config
+function add_table() {
+  tableConfigFile=$1
+  schemaFile=$2
+  ${PINOT_DIST_ROOT}/bin/pinot-admin.sh AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile"  -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} -exec
+}
+
+# #unused. Please do not remove.
+# This utility can be used to upload all segments in a certain directory (compressed or uncompressed)
+# Usage: add_segments /path/to/segments
+function add_segments() {
+  segmentDirectoryPath=$1
+  ${PINOT_DIST_ROOT}/bin/pinot-admin.sh UploadSegment -controllerHost "${CONTROLLER_HOST}" -controllerPort "${CONTROLLER_PORT}" -segmentDir "$segmentDirectoryPath"
+}
+
+add_table "examples/pageviews/pageviews_offline_table_config.json" "examples/pageviews/pageviews_schema.json"
 
 if [ -z "${JOB_SPEC}" ]; then
     JOB_SPEC=examples/pageviews/ingestionJobSpec.yaml

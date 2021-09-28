@@ -41,6 +41,8 @@ spec:
         release: {{ .Release.Name }}
         component: {{ .Values.coordinator.name }}
       annotations:
+        prometheus.io/port: {{ .Values.coordinator.port | quote }}
+        prometheus.io/path: "/admin/prometheus"
 {{ toYaml .Values.coordinator.podAnnotations | indent 8 }}
     spec:
       {{- if .Values.image.pullSecretsName }}

@@ -55,9 +55,7 @@ coordinator:
   tolerations: []
   affinity: {}
   podAnnotations:
-    prometheus.io/port: "8080"
     prometheus.io/scrape: "false"
-    prometheus.io/path: "/admin/prometheus"
   # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
   prometheus:
     enabled: false
@@ -76,7 +74,7 @@ scheduler:
     prometheus.io/scrape: "false"
   # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
   prometheus:
-    enabled: true
+    enabled: false
 
 # Persistence layer configuration
 mysql:

@@ -17,6 +17,7 @@
 # under the License.
 #
 
+{{ if .Values.scheduler.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -36,3 +37,4 @@ spec:
     app: {{ include "thirdeye.name" . }}
     release: {{ .Release.Name }}
     component: {{ .Values.scheduler.name }}
+{{ end }}

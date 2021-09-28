@@ -17,6 +17,7 @@
 # under the License.
 #
 
+{{ if .Values.scheduler.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -83,3 +84,4 @@ spec:
         - name: thirdeye-config
           configMap:
             name: thirdeye-scheduler
+{{ end }}

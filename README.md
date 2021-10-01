@@ -64,6 +64,12 @@ mvn install
 
 # To skip tests during build
 mvn install -DskipTests
+
+# If you are working on backend, You may skip the ui and docs modules
+mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs' -pl
+
+# To Skip Integration tests
+mvn install -pl '!thirdeye-integration-tests'
 ```
 
 ### Running ThirdEye from Distribution
@@ -74,17 +80,18 @@ ThirdEye builds a tarball and creates an installed dir post build.
 cd thirdeye-distribution/target/thirdeye-distribution-1.0.0-SNAPSHOT-dist/thirdeye-distribution-1.0.0-SNAPSHOT
 ```
 
-ThirdEye has 2 components
+ThirdEye has 3 main components all of which start from a single launcher
 - **Coordinator**: This is the API server which exposes a swagger endpoint that will be used in this guide
+- **Scheduler**: This is the component that runs the cron jobs and automated pipelines
 - **Worker**: This is the component that does all the hard work: running detection tasks and generating anomalies.
 
-> **Warning! You must have at least 1 worker running in order to generate alerts and fire emails.**
 ```
+# WIP: This section needs to be refactored.
+#
 # Run the coordinator
+# To run a scheduler, enable scheduler.enabled: true inside the configuration
+# To run a worker, enable taskDriver.enabled: true inside the configuration
 bin/thirdeye.sh coordinator
-
-# Run the worker
-bin/thirdeye.sh worker
 ```
 
 ### Docker
@@ -114,18 +121,6 @@ docker run \
 ## Developer Guide
 
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
-
-### Install the Error Prone Compiler plugin
-
-ThirdEye uses [errorprone](https://errorprone.info/) for compile type code analysis.
-
-To add the plugin, start the IDE
- - Go to preferences and find the Plugins dialog. 
- - Browse Repositories, choose Category: Build, and find the Error-prone plugin. 
- - Right-click and choose “Download and install”.
-
-To enable Error Prone, choose `Settings | Compiler | Java Compiler | Use compiler: Javac with error-prone` 
-and also make sure `Settings | Compiler | Use external build` is NOT selected.
 
 ### Running ThirdEye Coordinator in debug mode
 After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeCoordinator` class. Press the `play ▶️` icon

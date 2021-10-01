@@ -1,11 +1,11 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SignInPage } from "./sign-in-page.component";
+import { LogoutPage } from "./logout-page.component";
 
 jest.mock("../../components/auth-provider/auth-provider.component", () => ({
     useAuth: jest.fn().mockImplementation(() => ({
-        signIn: mockSignIn,
+        logout: mockLogout,
     })),
 }));
 
@@ -28,10 +28,17 @@ jest.mock("../../components/page-contents/page-contents.component", () => ({
     PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
-describe("Sign In Page", () => {
+jest.mock(
+    "../../components/loading-indicator/loading-indicator.component",
+    () => ({
+        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
+    })
+);
+
+describe("Logout Page", () => {
     it("should set appropriate page breadcrumbs", async () => {
         act(() => {
-            render(<SignInPage />);
+            render(<LogoutPage />);
         });
 
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
@@ -39,38 +46,36 @@ describe("Sign In Page", () => {
 
     it("should set appropriate page title", async () => {
         act(() => {
-            render(<SignInPage />);
+            render(<LogoutPage />);
         });
 
         expect(PageContents).toHaveBeenCalledWith(
             {
                 hideHeader: true,
-                title: "label.sign-in",
+                title: "label.logout",
                 children: expect.any(Object),
             },
             {}
         );
     });
 
-    it("should render sign in button", async () => {
+    it("should logout", async () => {
         act(() => {
-            render(<SignInPage />);
+            render(<LogoutPage />);
         });
 
-        expect(screen.getByText("label.sign-in")).toBeInTheDocument();
+        expect(mockLogout).toHaveBeenCalled();
     });
 
-    it("should sign in on sign in button click", async () => {
+    it("should render loading indicator", async () => {
         act(() => {
-            render(<SignInPage />);
+            render(<LogoutPage />);
         });
 
-        fireEvent.click(screen.getByText("label.sign-in"));
-
-        expect(mockSignIn).toHaveBeenCalled();
+        expect(screen.getByText("testLoadingIndicator")).toBeInTheDocument();
     });
 });
 
 const mockSetPageBreadcrumbs = jest.fn();
 
-const mockSignIn = jest.fn();
+const mockLogout = jest.fn();

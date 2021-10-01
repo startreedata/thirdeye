@@ -25,8 +25,8 @@ jest.mock("../../pages/home-page/home-page.component", () => ({
     HomePage: jest.fn().mockReturnValue("testHomePage"),
 }));
 
-jest.mock("../../pages/sign-out-page/sign-out-page.component", () => ({
-    SignOutPage: jest.fn().mockReturnValue("testSignOutPage"),
+jest.mock("../../pages/logout-page/logout-page.component", () => ({
+    LogoutPage: jest.fn().mockReturnValue("testLogoutPage"),
 }));
 
 jest.mock(
@@ -105,9 +105,9 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render home page at exact sign in path", async () => {
+    it("should render home page at exact login path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
+            <MemoryRouter initialEntries={[AppRoute.LOGIN]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
@@ -117,9 +117,9 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render page not found page at invalid sign in path", async () => {
+    it("should render page not found page at invalid login path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
+            <MemoryRouter initialEntries={[`${AppRoute.LOGIN}/testPath`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
@@ -129,21 +129,21 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render sign out page at exact sign out path", async () => {
+    it("should render logout page at exact logout path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.SIGN_OUT]}>
+            <MemoryRouter initialEntries={[AppRoute.LOGOUT]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testSignOutPage")
+            screen.findByText("testLogoutPage")
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render page not found page at invalid sign out path", async () => {
+    it("should render page not found page at invalid logout path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.SIGN_OUT}/testPath`]}>
+            <MemoryRouter initialEntries={[`${AppRoute.LOGOUT}/testPath`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );

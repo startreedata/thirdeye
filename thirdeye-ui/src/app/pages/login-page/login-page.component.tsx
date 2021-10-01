@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { useSignInPageStyles } from "./sign-in-page.styles";
+import { useLoginPageStyles } from "./login-page.styles";
 
-export const SignInPage: FunctionComponent = () => {
-    const signInPageClasses = useSignInPageStyles();
-    const { signIn } = useAuth();
+export const LoginPage: FunctionComponent = () => {
+    const loginPageClasses = useLoginPageStyles();
+    const { login } = useAuth();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { t } = useTranslation();
 
@@ -17,21 +17,17 @@ export const SignInPage: FunctionComponent = () => {
     }, []);
 
     return (
-        <PageContents hideHeader title={t("label.sign-in")}>
+        <PageContents hideHeader title={t("label.login")}>
             <Grid
                 container
                 alignItems="center"
-                className={signInPageClasses.signInPage}
+                className={loginPageClasses.loginPage}
                 justify="center"
             >
                 <Grid item>
-                    {/* Sign in button */}
-                    <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={signIn}
-                    >
-                        {t("label.sign-in")}
+                    {/* Login button */}
+                    <Button color="primary" variant="contained" onClick={login}>
+                        {t("label.login")}
                     </Button>
                 </Grid>
             </Grid>

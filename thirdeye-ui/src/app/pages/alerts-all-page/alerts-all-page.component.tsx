@@ -1,3 +1,4 @@
+import { PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -133,13 +134,15 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
-            {/* Alert list */}
-            <AlertList
-                alerts={uiAlerts}
-                onChange={handleAlertChange}
-                onDelete={handleAlertDelete}
-            />
-        </PageContents>
+        <PageV1>
+            <PageContents centered hideAppBreadcrumbs title={t("label.alerts")}>
+                {/* Alert list */}
+                <AlertList
+                    alerts={uiAlerts}
+                    onChange={handleAlertChange}
+                    onDelete={handleAlertDelete}
+                />
+            </PageContents>
+        </PageV1>
     );
 };

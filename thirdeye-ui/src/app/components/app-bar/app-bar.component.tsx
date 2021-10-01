@@ -1,21 +1,19 @@
+import { Menu, MenuItem } from "@material-ui/core";
+import { Add, ExitToApp, Home, LockOpen } from "@material-ui/icons";
 import {
-    AppBar as MuiAppBar,
-    Fab,
-    Hidden,
-    IconButton,
-    Link,
-    Menu,
-    MenuItem,
-    Toolbar,
-} from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import MenuIcon from "@material-ui/icons/Menu";
-import PersonIcon from "@material-ui/icons/Person";
-import classnames from "classnames";
+    NavBarLinkIconV1,
+    NavBarLinkTextV1,
+    NavBarLinkV1,
+    NavBarPrimaryContainerV1,
+    NavBarSecondaryContainerV1,
+    NavBarV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
-import { ReactComponent as ThirdEyeIcon } from "../../../assets/images/thirdeye.svg";
+import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
+import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
+import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import {
     AppRoute,
     getAlertsCreatePath,
@@ -25,66 +23,23 @@ import {
     getConfigurationPath,
     getDatasetsOnboardPath,
     getDatasourcesCreatePath,
-    getHomePath,
+    getLoginPath,
+    getLogoutPath,
     getMetricsCreatePath,
-    getSignInPath,
-    getSignOutPath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
-import { AppBarDrawer } from "../app-bar-drawer/app-bar-drawer.component";
 import { useAuth } from "../auth-provider/auth-provider.component";
-import { useAppBarStyles } from "./app-bar.styles";
-
-const ELEVATION_APP_BAR = 6;
-const HEIGHT_LOGO = 32;
 
 export const AppBar: FunctionComponent = () => {
-    const appBarClasses = useAppBarStyles();
-    const [appBarDrawerOpen, setAppBarDrawerOpen] = useState(false);
     const [
         shortcutOptionsAnchorElement,
         setShortcutOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const [
-        accountOptionsAnchorElement,
-        setAccountOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
+
     const { authDisabled, authenticated } = useAuth();
     const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
-
-    const handleAppBarDrawerClick = (): void => {
-        setAppBarDrawerOpen(true);
-    };
-
-    const handleAppBarDrawerClose = (): void => {
-        setAppBarDrawerOpen(false);
-    };
-
-    const handleLogoClick = (): void => {
-        history.push(getBasePath());
-    };
-
-    const handleHomeClick = (): void => {
-        history.push(getHomePath());
-    };
-
-    const handleAlertsClick = (): void => {
-        history.push(getAlertsPath());
-    };
-
-    const handleAnomaliesClick = (): void => {
-        history.push(getAnomaliesAllPath());
-    };
-
-    const handleConfigurationClick = (): void => {
-        history.push(getConfigurationPath());
-    };
-
-    const handleSignIn = (): void => {
-        history.push(getSignInPath());
-    };
 
     const handleShortcutOptionsClick = (
         event: MouseEvent<HTMLElement>
@@ -121,149 +76,72 @@ export const AppBar: FunctionComponent = () => {
         handleShortcutOptionsClose();
     };
 
-    const handleAccountOptionsClick = (
-        event: MouseEvent<HTMLElement>
-    ): void => {
-        setAccountOptionsAnchorElement(event.currentTarget);
-    };
-
-    const handleAccountOptionsClose = (): void => {
-        setAccountOptionsAnchorElement(null);
-    };
-
-    const handleSignOut = (): void => {
-        history.push(getSignOutPath());
-        handleAccountOptionsClose();
-    };
-
     const isRouteCurrent = (route: string): boolean => {
         return location.pathname.indexOf(route) === 0;
     };
 
     return (
-        <MuiAppBar
-            className={appBarClasses.appBar}
-            elevation={ELEVATION_APP_BAR}
+        <NavBarV1
+            maximizeLabel={t("label.maximize")}
+            minimizeLabel={t("label.minimize")}
         >
-            <Toolbar>
-                <Hidden smUp>
-                    {/* App bar drawer button */}
-                    <IconButton edge="start" onClick={handleAppBarDrawerClick}>
-                        <MenuIcon />
-                    </IconButton>
-
-                    {/* App bar drawer */}
-                    <AppBarDrawer
-                        open={appBarDrawerOpen}
-                        onClose={handleAppBarDrawerClose}
-                    />
-                </Hidden>
-
-                {/* ThirdEye logo */}
-                <Link
-                    className={appBarClasses.logo}
-                    component="button"
-                    onClick={handleLogoClick}
+            <NavBarPrimaryContainerV1>
+                {/* Home */}
+                <NavBarLinkV1
+                    href={getBasePath()}
+                    selected={isRouteCurrent(AppRoute.HOME)}
                 >
-                    <ThirdEyeIcon height={HEIGHT_LOGO} />
-                </Link>
+                    <NavBarLinkIconV1>
+                        <Home />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>{t("label.home")}</NavBarLinkTextV1>
+                </NavBarLinkV1>
 
-                <Hidden xsDown>
-                    {/* Home */}
-                    <Link
-                        className={appBarClasses.link}
-                        color={
-                            isRouteCurrent(AppRoute.HOME)
-                                ? "textPrimary"
-                                : "primary"
-                        }
-                        component="button"
-                        variant="subtitle1"
-                        onClick={handleHomeClick}
-                    >
-                        {t("label.home")}
-                    </Link>
+                {/* Alerts */}
+                <NavBarLinkV1
+                    href={getAlertsPath()}
+                    selected={isRouteCurrent(AppRoute.ALERTS)}
+                >
+                    <NavBarLinkIconV1>
+                        <AlertIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>{t("label.alerts")}</NavBarLinkTextV1>
+                </NavBarLinkV1>
 
-                    {/* Alerts */}
-                    <Link
-                        className={appBarClasses.link}
-                        color={
-                            isRouteCurrent(AppRoute.ALERTS)
-                                ? "textPrimary"
-                                : "primary"
-                        }
-                        component="button"
-                        variant="subtitle1"
-                        onClick={handleAlertsClick}
-                    >
-                        {t("label.alerts")}
-                    </Link>
+                {/* Anomalies */}
+                <NavBarLinkV1
+                    href={getAnomaliesAllPath()}
+                    selected={isRouteCurrent(AppRoute.ANOMALIES)}
+                >
+                    <NavBarLinkIconV1>
+                        <AnomalyIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>{t("label.anomalies")}</NavBarLinkTextV1>
+                </NavBarLinkV1>
 
-                    {/* Anomalies */}
-                    <Link
-                        className={appBarClasses.link}
-                        color={
-                            isRouteCurrent(AppRoute.ANOMALIES)
-                                ? "textPrimary"
-                                : "primary"
-                        }
-                        component="button"
-                        variant="subtitle1"
-                        onClick={handleAnomaliesClick}
-                    >
-                        {t("label.anomalies")}
-                    </Link>
-
-                    {/* Configuration */}
-                    <Link
-                        className={appBarClasses.link}
-                        color={
-                            isRouteCurrent(AppRoute.CONFIGURATION)
-                                ? "textPrimary"
-                                : "primary"
-                        }
-                        component="button"
-                        variant="subtitle1"
-                        onClick={handleConfigurationClick}
-                    >
+                {/* Configuration */}
+                <NavBarLinkV1
+                    href={getConfigurationPath()}
+                    selected={isRouteCurrent(AppRoute.CONFIGURATION)}
+                >
+                    <NavBarLinkIconV1>
+                        <ConfigurationIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>
                         {t("label.configuration")}
-                    </Link>
-                </Hidden>
-
-                {!authDisabled && !authenticated && (
-                    // Sign in
-                    <Link
-                        className={classnames(
-                            appBarClasses.link,
-                            appBarClasses.linkRightAligned
-                        )}
-                        color={
-                            isRouteCurrent(AppRoute.SIGN_IN)
-                                ? "textPrimary"
-                                : "primary"
-                        }
-                        component="button"
-                        variant="subtitle1"
-                        onClick={handleSignIn}
-                    >
-                        {t("label.sign-in")}
-                    </Link>
-                )}
+                    </NavBarLinkTextV1>
+                </NavBarLinkV1>
 
                 {(authDisabled || authenticated) && (
                     <>
-                        {/* Shortcut options button */}
-                        <Fab
-                            className={classnames(
-                                appBarClasses.link,
-                                appBarClasses.linkRightAligned
-                            )}
-                            color="primary"
-                            size="small"
-                            onClick={handleShortcutOptionsClick}
-                        >
-                            <AddIcon />
-                        </Fab>
+                        <span onClick={handleShortcutOptionsClick}>
+                            <NavBarLinkV1>
+                                <NavBarLinkIconV1>
+                                    <Add />
+                                </NavBarLinkIconV1>
+                                <NavBarLinkTextV1>Add New</NavBarLinkTextV1>
+                            </NavBarLinkV1>
+                        </span>
 
                         {/* Shortcut options */}
                         <Menu
@@ -308,31 +186,36 @@ export const AppBar: FunctionComponent = () => {
                         </Menu>
                     </>
                 )}
+            </NavBarPrimaryContainerV1>
+            <NavBarSecondaryContainerV1>
+                {/* Login */}
+                {!authenticated && !authDisabled && (
+                    <NavBarLinkV1
+                        href={getLoginPath()}
+                        selected={isRouteCurrent(AppRoute.LOGIN)}
+                    >
+                        <NavBarLinkIconV1>
+                            <LockOpen />
+                        </NavBarLinkIconV1>
 
-                {!authDisabled && authenticated && (
-                    <>
-                        {/* Account options button */}
-                        <IconButton
-                            edge="end"
-                            onClick={handleAccountOptionsClick}
-                        >
-                            <PersonIcon />
-                        </IconButton>
-
-                        {/* Account options */}
-                        <Menu
-                            anchorEl={accountOptionsAnchorElement}
-                            open={Boolean(accountOptionsAnchorElement)}
-                            onClose={handleAccountOptionsClose}
-                        >
-                            {/* Sign out */}
-                            <MenuItem onClick={handleSignOut}>
-                                {t("label.sign-out")}
-                            </MenuItem>
-                        </Menu>
-                    </>
+                        <NavBarLinkTextV1>{t("label.login")}</NavBarLinkTextV1>
+                    </NavBarLinkV1>
                 )}
-            </Toolbar>
-        </MuiAppBar>
+
+                {/* Logout */}
+                {authenticated && !authDisabled && (
+                    <NavBarLinkV1
+                        href={getLogoutPath()}
+                        selected={isRouteCurrent(AppRoute.LOGIN)}
+                    >
+                        <NavBarLinkIconV1>
+                            <ExitToApp />
+                        </NavBarLinkIconV1>
+
+                        <NavBarLinkTextV1>{t("label.logout")}</NavBarLinkTextV1>
+                    </NavBarLinkV1>
+                )}
+            </NavBarSecondaryContainerV1>
+        </NavBarV1>
     );
 };

@@ -1,3 +1,4 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     lazy,
@@ -7,7 +8,6 @@ import React, {
 } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
     getBasePath,
@@ -20,10 +20,10 @@ const HomePage = lazy(() =>
     ).then((module) => ({ default: module.HomePage }))
 );
 
-const SignOutPage = lazy(() =>
+const LogoutPage = lazy(() =>
     import(
-        /* webpackChunkName: "sign-out-page" */ "../../pages/sign-out-page/sign-out-page.component"
-    ).then((module) => ({ default: module.SignOutPage }))
+        /* webpackChunkName: "logout-page" */ "../../pages/logout-page/logout-page.component"
+    ).then((module) => ({ default: module.LogoutPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -42,11 +42,11 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     }, []);
 
     if (loading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     return (
-        <Suspense fallback={<LoadingIndicator />}>
+        <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Switch>
                 {/* Base path */}
                 <Route exact path={AppRoute.BASE}>
@@ -57,14 +57,14 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
                 {/* Home path */}
                 <Route exact component={HomePage} path={AppRoute.HOME} />
 
-                {/* Sign in path */}
-                <Route exact path={AppRoute.SIGN_IN}>
+                {/* Login path */}
+                <Route exact path={AppRoute.LOGIN}>
                     {/* Already authenticated, redirect to base path */}
                     <Redirect to={getBasePath()} />
                 </Route>
 
-                {/* Sign out path */}
-                <Route exact component={SignOutPage} path={AppRoute.SIGN_OUT} />
+                {/* Logout path */}
+                <Route exact component={LogoutPage} path={AppRoute.LOGOUT} />
 
                 {/* No match found, render page not found */}
                 <Route component={PageNotFoundPage} />

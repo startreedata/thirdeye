@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,7 +7,6 @@ import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { filterAnomalies } from "../../utils/anomalies/anomalies.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import { AnomalyCard } from "../entity-cards/anomaly-card/anomaly-card.component";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { AnomalyListProps } from "./anomaly-list.interfaces";
@@ -66,7 +66,7 @@ export const AnomalyList: FunctionComponent<AnomalyListProps> = (
             </Grid>
 
             {/* Loading indicator */}
-            {!props.anomalies && <LoadingIndicator />}
+            {!props.anomalies && <AppLoadingIndicatorV1 />}
 
             {/* No data available message */}
             {props.anomalies &&

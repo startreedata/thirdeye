@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useSignInPageStyles = makeStyles({
-    signInPage: {
+export const useLoginPageStyles = makeStyles({
+    loginPage: {
         flex: 1,
     },
 });

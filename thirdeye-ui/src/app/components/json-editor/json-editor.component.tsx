@@ -1,4 +1,5 @@
 import { FormHelperText } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import { Editor, EditorChange } from "codemirror";
 import "codemirror/addon/edit/closebrackets.js";
@@ -16,7 +17,6 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { JSONEditorProps } from "./json-editor.interfaces";
 import { useJSONEditorStyles } from "./json-editor.styles";
 
@@ -96,7 +96,7 @@ export const JSONEditor: FunctionComponent<JSONEditorProps> = (
                 })}
             >
                 {/* CodeMirror */}
-                <Suspense fallback={<LoadingIndicator />}>
+                <Suspense fallback={<AppLoadingIndicatorV1 />}>
                     <CodeMirror
                         className={jsonEditorClasses.codeMirror}
                         options={{

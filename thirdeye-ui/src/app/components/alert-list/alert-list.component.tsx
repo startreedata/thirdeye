@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,7 +7,6 @@ import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { filterAlerts } from "../../utils/alerts/alerts.util";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import { AlertCard } from "../entity-cards/alert-card/alert-card.component";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { AlertListProps } from "./alert-list.interfaces";
@@ -61,7 +61,7 @@ export const AlertList: FunctionComponent<AlertListProps> = (
             </Grid>
 
             {/* Loading indicator */}
-            {!props.alerts && <LoadingIndicator />}
+            {!props.alerts && <AppLoadingIndicatorV1 />}
 
             {/* No data available message */}
             {props.alerts &&

@@ -1,3 +1,4 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, {
@@ -20,7 +21,6 @@ import {
     getErrorSnackbarOption,
     getWarningSnackbarOption,
 } from "../../utils/snackbar/snackbar.util";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import {
     AuthContextProps,
     AuthProviderProps,
@@ -104,10 +104,7 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
 
     const handleUnauthenticatedAccess = (): void => {
         clearAccessToken();
-        enqueueSnackbar(
-            t("message.signed-out"),
-            getWarningSnackbarOption(true)
-        );
+        enqueueSnackbar(t("message.logout"), getWarningSnackbarOption(true));
     };
 
     const performLogin = async (): Promise<boolean> => {
@@ -119,7 +116,7 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
             const auth = await login();
             if (!auth || !auth.accessToken) {
                 enqueueSnackbar(
-                    t("message.sign-in-error"),
+                    t("message.login-error"),
                     getErrorSnackbarOption()
                 );
 
@@ -138,12 +135,12 @@ export const AuthProvider: FunctionComponent<AuthProviderProps> = (
         authDisabled: authDisabled,
         authenticated: authenticated,
         accessToken: accessToken,
-        signIn: performLogin,
-        signOut: clearAccessToken,
+        login: performLogin,
+        logout: clearAccessToken,
     };
 
     if (authLoading || axiosLoading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     return (

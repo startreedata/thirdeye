@@ -1,9 +1,9 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
@@ -55,7 +55,7 @@ export const MetricsCreatePage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     return (

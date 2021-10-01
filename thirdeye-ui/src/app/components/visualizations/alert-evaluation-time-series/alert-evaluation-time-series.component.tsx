@@ -1,4 +1,5 @@
 import { Box, useTheme } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
@@ -36,7 +37,6 @@ import {
     getAlertEvaluationTimeSeriesPointsMaxValue,
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
 } from "../../../utils/visualization/visualization.util";
-import { LoadingIndicator } from "../../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LinearAxisLeft } from "../linear-axis-left/linear-axis-left.component";
 import { MouseHoverMarker } from "../mouse-hover-marker/mouse-hover-marker.component";
@@ -514,7 +514,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     );
 
     if (loading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     if (noData) {

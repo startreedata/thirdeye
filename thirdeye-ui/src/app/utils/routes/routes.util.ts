@@ -34,8 +34,8 @@ export const AppRoute = {
     METRICS_VIEW: `/configuration/metrics/view/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS_CREATE: `/configuration/metrics/create`,
     METRICS_UPDATE: `/configuration/metrics/update/id/${PLACEHOLDER_ROUTE_ID}`,
-    SIGN_IN: "/sign-in",
-    SIGN_OUT: "/sign-out",
+    LOGIN: "/login",
+    LOGOUT: "/logout",
 } as const;
 
 export const getBasePath = (): string => {
@@ -199,12 +199,12 @@ export const getMetricsUpdatePath = (id: number): string => {
     return createPathWithRecognizedQueryString(path);
 };
 
-export const getSignInPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.SIGN_IN);
+export const getLoginPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.LOGIN);
 };
 
-export const getSignOutPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.SIGN_OUT);
+export const getLogoutPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.LOGOUT);
 };
 
 // Creates path with only the recognized app query string key-value pairs from URL that are allowed

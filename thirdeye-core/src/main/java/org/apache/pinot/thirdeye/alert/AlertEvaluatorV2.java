@@ -114,7 +114,8 @@ public class AlertEvaluatorV2 {
           ))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-      return toApi(result);
+      return toApi(result)
+          .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {

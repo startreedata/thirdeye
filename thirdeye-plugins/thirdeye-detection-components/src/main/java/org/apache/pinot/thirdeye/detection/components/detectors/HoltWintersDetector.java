@@ -381,7 +381,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-    dfBase = dfBase.joinRight(df.retainSeries(DataFrame.COL_TIME, COL_CURR), DataFrame.COL_TIME);
+    dfBase = dfBase
+        .joinRight(df.retainSeries(DataFrame.COL_TIME, COL_CURR), DataFrame.COL_TIME)
+        .sortedBy(DataFrame.COL_TIME);
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(dfBase));
   }
 
@@ -579,10 +581,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     for (int k = 0; k < size; k++) {
       final DataFrame trainingDF;
-      if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY) && !monitoringGranularity
-          .endsWith(
-              TimeGranularity.MONTHS) && !monitoringGranularity
-          .endsWith(TimeGranularity.WEEKS)) {
+      if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
+          && !monitoringGranularity.endsWith(TimeGranularity.MONTHS)
+          && !monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
         trainingDF = getDailyDF(inputDF, forecastDF.getLong(DataFrame.COL_TIME, k), timezone);
       } else {
         trainingDF = getLookbackDF(inputDF, forecastDF.getLong(DataFrame.COL_TIME, k));

@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -93,7 +94,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private static final String COL_DIFF_VIOLATION = "diff_violation";
   private static final String COL_ERROR = "error";
   private static final long KERNEL_PERIOD = 3600000L;
-  private static final int LOOKBACK = 60;
 
   private InputDataFetcher dataFetcher;
   private int period;
@@ -109,6 +109,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private HoltWintersDetectorSpec spec;
   private Period monitoringGranularityPeriod;
   private TimeConverter timeConverter;
+  private int lookback = 60;
 
   private static double calculateInitialLevel(final double[] y) {
     return y[0];
@@ -223,6 +224,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
       weekStart = DayOfWeek.valueOf(spec.getWeekStart());
     }
+    optional(spec.getLookback())
+        .ifPresent(lookback -> this.lookback = lookback);
   }
 
   @Override
@@ -259,13 +262,13 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   private DateTime getTrainingStartTime(final DateTime windowStart) {
     if (isMultiDayGranularity()) {
-      return windowStart.minusDays(timeGranularity.getSize() * LOOKBACK);
+      return windowStart.minusDays(timeGranularity.getSize() * lookback);
     } else if (monitoringGranularity.endsWith(TimeGranularity.MONTHS)) {
-      return windowStart.minusMonths(LOOKBACK);
+      return windowStart.minusMonths(lookback);
     } else if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      return windowStart.minusWeeks(LOOKBACK);
+      return windowStart.minusWeeks(lookback);
     }
-    return windowStart.minusDays(LOOKBACK);
+    return windowStart.minusDays(lookback);
   }
 
   @Override
@@ -438,7 +441,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     DataFrame df = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build();
 
     if (indexFinish != -1) {
-      final int indexStart = Math.max(0, indexFinish - LOOKBACK);
+      final int indexStart = Math.max(0, indexFinish - lookback);
       df = df.append(originalDF.slice(indexStart, indexFinish));
     }
     return df;
@@ -449,7 +452,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    *
    * @param originalDF the original dataframe
    * @param time the prediction time, in unix timestamp
-   * @return DataFrame containing same time of daily data for LOOKBACK number of days
+   * @return DataFrame containing same time of daily data for lookback number of days
    */
   private DataFrame getDailyDF(final DataFrame originalDF, final Long time, final String timezone) {
     final LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
@@ -457,7 +460,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     DateTime dt = new DateTime(time).withZone(DateTimeZone.forID(timezone));
     DataFrame df = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build();
 
-    for (int i = 0; i < LOOKBACK; i++) {
+    for (int i = 0; i < lookback; i++) {
       DateTime subDt = dt.minusDays(1);
       final long t = subDt.getMillis();
       if (t < start) {

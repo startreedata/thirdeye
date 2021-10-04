@@ -31,6 +31,7 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
   private Pattern pattern = Pattern.UP_OR_DOWN;
   private boolean smoothing = true;
   private String weekStart = "WEDNESDAY";
+  private Integer lookback = null;
 
   public double getAlpha() {
     return alpha;
@@ -101,6 +102,15 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
 
   public HoltWintersDetectorSpec setWeekStart(final String weekStart) {
     this.weekStart = weekStart;
+    return this;
+  }
+
+  public Integer getLookback() {
+    return lookback;
+  }
+
+  public HoltWintersDetectorSpec setLookback(final Integer lookback) {
+    this.lookback = lookback;
     return this;
   }
 }

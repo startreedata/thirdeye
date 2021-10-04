@@ -99,7 +99,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
    * @param sensitivity double from 0 to 10. Values outside this range are clipped to 0, 10
    * @return sigma
    */
-  private static double sigma(double sensitivity) {
+  private static double sigma(final double sensitivity) {
     return 0.5 + 0.1 * (10 - Math.max(Math.min(sensitivity, 10), 0));
   }
 
@@ -260,7 +260,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-    DataFrame result = dfBase.joinRight(df.retainSeries(COL_TIME, COL_CURR), COL_TIME);
+    final DataFrame result = dfBase
+        .joinRight(df.retainSeries(COL_TIME, COL_CURR), COL_TIME)
+        .sortedBy(DataFrame.COL_TIME);
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(result));
   }
 
@@ -372,7 +374,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   @Override
-  public void setTimeConverter(TimeConverter timeConverter) {
+  public void setTimeConverter(final TimeConverter timeConverter) {
     this.timeConverter = timeConverter;
   }
 }

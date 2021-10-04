@@ -10,7 +10,7 @@ if [ -z "${CONTROLLER_PORT}" ]; then
     CONTROLLER_PORT=9000
 fi
 if [ -z "${PINOT_DIST_ROOT}" ]; then
-    PINOT_DIST_ROOT=/tmp/pinot-bin/apache-pinot-incubating-${PINOT_VERSION}-bin
+    PINOT_DIST_ROOT="${TE_REPO}/tmp/pinot-bin/apache-pinot-incubating-${PINOT_VERSION}-bin"
 fi
 cd ${TE_REPO}
 

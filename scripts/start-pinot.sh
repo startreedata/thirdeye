@@ -1,8 +1,11 @@
-if [ -z "${PINOT_VERSION}" ]; then 
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+REPO_DIR="${SCRIPT_DIR}/.."
+
+if [ -z "${PINOT_VERSION}" ]; then
     PINOT_VERSION=0.7.1
 fi
 
-export PINOT_INSTALL_TMP_DIR="/tmp/pinot-bin"
+export PINOT_INSTALL_TMP_DIR="${REPO_DIR}/tmp/pinot-bin"
 export PINOT_DIR="${PINOT_INSTALL_TMP_DIR}/apache-pinot-incubating-${PINOT_VERSION}-bin"
 export PINOT_LAUNCH_SH="${PINOT_DIR}/bin/quick-start-batch.sh"
 
@@ -21,4 +24,4 @@ if [[ ! -f "${PINOT_LAUNCH_SH}" ]]; then
 fi
 
 # Launch pinot
-cd ${PINOT_DIR} && ${PINOT_LAUNCH_SH}
+cd "${PINOT_DIR}" && ${PINOT_LAUNCH_SH}

@@ -1,6 +1,8 @@
 # Scripts
 
-This directory holds utility scripts that aid in the dev/testing of ThirdEye
+This directory holds utility scripts that aid in the dev/testing of ThirdEye. 
+
+Note: Please use bash instead of sh. The scripts may contain bash functions.  
 
 ## Launching a Pinot Cluster
 

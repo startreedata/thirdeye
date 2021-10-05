@@ -1,7 +1,7 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Switch } from "react-router-dom";
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 
 const AlertsRouter = lazy(() =>
@@ -39,7 +39,7 @@ export const AppRouter: FunctionComponent = () => {
 
     if (authDisabled || authenticated) {
         return (
-            <Suspense fallback={<LoadingIndicator />}>
+            <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Switch>
                     {/* Direct all alerts paths to alerts router */}
                     <Route component={AlertsRouter} path={AppRoute.ALERTS} />
@@ -64,7 +64,7 @@ export const AppRouter: FunctionComponent = () => {
     }
 
     return (
-        <Suspense fallback={<LoadingIndicator />}>
+        <Suspense fallback={<AppLoadingIndicatorV1 />}>
             {/* Not authenticated, direct all paths to general unauthenticated router */}
             <GeneralUnauthenticatedRouter />
         </Suspense>

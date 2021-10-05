@@ -1,10 +1,5 @@
-import {
-    List,
-    ListItem,
-    ListItemText,
-    ListSubheader,
-    Tooltip,
-} from "@material-ui/core";
+import { List, ListItem, ListItemText, ListSubheader } from "@material-ui/core";
+import { TooltipV1 } from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,8 +34,8 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
             {props.recentCustomTimeRangeDurations &&
                 props.recentCustomTimeRangeDurations.map(
                     (recentCustomTimeRangeDuration, index) => (
-                        <Tooltip
-                            arrow
+                        <TooltipV1
+                            visible
                             key={index}
                             placement="right"
                             title={formatTimeRangeDuration(
@@ -71,7 +66,7 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = (
                                     }}
                                 />
                             </ListItem>
-                        </Tooltip>
+                        </TooltipV1>
                     )
                 )}
 

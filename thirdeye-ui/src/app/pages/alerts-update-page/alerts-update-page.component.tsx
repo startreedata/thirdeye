@@ -1,3 +1,4 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { assign, isEmpty, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -5,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -251,7 +251,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     };
 
     if (loading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     return (

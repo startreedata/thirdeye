@@ -1,20 +1,31 @@
-import React, { FunctionComponent, useEffect } from "react";
+import { Grid } from "@material-ui/core";
+import {
+    PageContentsGridV1,
+    PageHeaderTextV1,
+    PageHeaderV1,
+    PageNotFoundIndicatorV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
-import { PageNotFoundIndicator } from "../../components/page-not-found-indicator/page-not-found-indicator.component";
 
 export const PageNotFoundPage: FunctionComponent = () => {
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { t } = useTranslation();
 
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
-
     return (
-        <PageContents hideHeader title={t("label.page-not-found")}>
-            <PageNotFoundIndicator />
-        </PageContents>
+        <PageV1>
+            <PageHeaderV1>
+                <PageHeaderTextV1>{t("label.page-not-found")}</PageHeaderTextV1>
+            </PageHeaderV1>
+
+            <PageContentsGridV1 fullHeight>
+                <Grid item xs={12}>
+                    <PageNotFoundIndicatorV1
+                        headerText={t("label.404")}
+                        messageText={t("message.page-not-found")}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

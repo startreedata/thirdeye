@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import React, {
     FunctionComponent,
@@ -23,7 +24,6 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 
@@ -170,7 +170,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                         )}
 
                         {/* Loading indicator */}
-                        {props.loading && <LoadingIndicator />}
+                        {props.loading && <AppLoadingIndicatorV1 />}
                     </CardContent>
                 </Card>
             </Grid>

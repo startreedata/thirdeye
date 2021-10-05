@@ -8,6 +8,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,7 +23,6 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { JSONEditor } from "../json-editor/json-editor.component";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
@@ -437,7 +437,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                     {loading &&
                         currentWizardStep ===
                             AlertWizardStep.SUBSCRIPTION_GROUPS && (
-                            <LoadingIndicator />
+                            <AppLoadingIndicatorV1 />
                         )}
 
                     {/* Spacer */}

@@ -21,8 +21,8 @@ jest.mock(
     })
 );
 
-jest.mock("../../pages/sign-in-page/sign-in-page.component", () => ({
-    SignInPage: jest.fn().mockReturnValue("testSignInPage"),
+jest.mock("../../pages/login-page/login-page.component", () => ({
+    LoginPage: jest.fn().mockReturnValue("testLoginPage"),
 }));
 
 describe("General Unauthenticated Router", () => {
@@ -46,31 +46,31 @@ describe("General Unauthenticated Router", () => {
         expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
-    it("should render sign in page at exact sign in path", async () => {
+    it("should render login page at exact login path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.SIGN_IN]}>
+            <MemoryRouter initialEntries={[AppRoute.LOGIN]}>
                 <GeneralUnauthenticatedRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testSignInPage")
+            screen.findByText("testLoginPage")
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render sign in page at invalid sign in path", async () => {
+    it("should render login page at invalid login path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.SIGN_IN}/testPath`]}>
+            <MemoryRouter initialEntries={[`${AppRoute.LOGIN}/testPath`]}>
                 <GeneralUnauthenticatedRouter />
             </MemoryRouter>
         );
 
         await expect(
-            screen.findByText("testSignInPage")
+            screen.findByText("testLoginPage")
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render sign in page at any other path", async () => {
+    it("should render login page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
                 <GeneralUnauthenticatedRouter />
@@ -78,11 +78,11 @@ describe("General Unauthenticated Router", () => {
         );
 
         await expect(
-            screen.findByText("testSignInPage")
+            screen.findByText("testLoginPage")
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render sign in page by default", async () => {
+    it("should render login page by default", async () => {
         render(
             <MemoryRouter>
                 <GeneralUnauthenticatedRouter />
@@ -90,7 +90,7 @@ describe("General Unauthenticated Router", () => {
         );
 
         await expect(
-            screen.findByText("testSignInPage")
+            screen.findByText("testLoginPage")
         ).resolves.toBeInTheDocument();
     });
 });

@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import CloseIcon from "@material-ui/icons/Close";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import { produce } from "immer";
 import { isEmpty } from "lodash";
@@ -19,7 +20,6 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
-import { LoadingIndicator } from "../loading-indicator/loading-indicator.component";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { SearchBar } from "../search-bar/search-bar.component";
 import { TextHighlighter } from "../text-highlighter/text-highlighter.component";
@@ -298,7 +298,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                 )}
 
                                 {/* Loading indicator */}
-                                {props.loading && <LoadingIndicator />}
+                                {props.loading && <AppLoadingIndicatorV1 />}
 
                                 {/* No search results available message */}
                                 {!props.loading &&
@@ -419,7 +419,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                 )}
 
                                 {/* Loading indicator */}
-                                {props.loading && <LoadingIndicator />}
+                                {props.loading && <AppLoadingIndicatorV1 />}
 
                                 {/* No search results available message */}
                                 {!props.loading &&

@@ -1,3 +1,4 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     lazy,
@@ -8,7 +9,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import {
     AppRoute,
     getAlertsAllPath,
@@ -62,11 +62,11 @@ export const AlertsRouter: FunctionComponent = () => {
     }, []);
 
     if (loading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     return (
-        <Suspense fallback={<LoadingIndicator />}>
+        <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Switch>
                 {/* Alerts path */}
                 <Route exact path={AppRoute.ALERTS}>

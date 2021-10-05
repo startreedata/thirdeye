@@ -11,11 +11,11 @@ import {
     getBasePath,
     getConfigurationPath,
     getHomePath,
+    getLoginPath,
+    getLogoutPath,
     getMetricsAllPath,
     getMetricsPath,
     getMetricsViewPath,
-    getSignInPath,
-    getSignOutPath,
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsCreatePath,
     getSubscriptionGroupsPath,
@@ -128,12 +128,12 @@ describe("Routes Util", () => {
         );
     });
 
-    it("getSignInPath should return appropriate path with appropriate query string", () => {
-        expect(getSignInPath()).toEqual("/sign-in?testQueryString");
+    it("getLoginPath should return appropriate path with appropriate query string", () => {
+        expect(getLoginPath()).toEqual("/login?testQueryString");
     });
 
-    it("getSignOutPath should return appropriate path with appropriate query string", () => {
-        expect(getSignOutPath()).toEqual("/sign-out?testQueryString");
+    it("getLogoutPath should return appropriate path with appropriate query string", () => {
+        expect(getLogoutPath()).toEqual("/logout?testQueryString");
     });
 
     it("createPathWithTimeRangeQueryString should return path with appropriate query string", () => {

@@ -1,3 +1,4 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     lazy,
@@ -7,13 +8,12 @@ import React, {
 } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
-import { AppRoute, getSignInPath } from "../../utils/routes/routes.util";
+import { AppRoute, getLoginPath } from "../../utils/routes/routes.util";
 
-const SignInPage = lazy(() =>
+const LoginPage = lazy(() =>
     import(
-        /* webpackChunkName: "sign-in-page" */ "../../pages/sign-in-page/sign-in-page.component"
-    ).then((module) => ({ default: module.SignInPage }))
+        /* webpackChunkName: "login-page" */ "../../pages/login-page/login-page.component"
+    ).then((module) => ({ default: module.LoginPage }))
 );
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
@@ -26,17 +26,17 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     }, []);
 
     if (loading) {
-        return <LoadingIndicator />;
+        return <AppLoadingIndicatorV1 />;
     }
 
     return (
-        <Suspense fallback={<LoadingIndicator />}>
+        <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Switch>
-                {/* Sign in path */}
-                <Route exact component={SignInPage} path={AppRoute.SIGN_IN} />
+                {/* Login path */}
+                <Route exact component={LoginPage} path={AppRoute.LOGIN} />
 
-                {/* No match found, redirect to sign in path */}
-                <Redirect to={getSignInPath()} />
+                {/* No match found, redirect to login path */}
+                <Redirect to={getLoginPath()} />
             </Switch>
         </Suspense>
     );

@@ -15,8 +15,8 @@
         "datasets": "Datasets",
         "datasource": "Datasource",
         "datasources": "Datasources",
-        "sign-in": "Sign In",
-        "sign-out": "Sign Out",
+        "login": "Login",
+        "logout": "Logout",
         "document-title": "{{page}} - {{app}}",
         "document-title-page": "{{router}}: {{title}} {{page}}",
         "document-title-page-partial-router": "{{router}}: {{title}}",
@@ -136,12 +136,14 @@
         "dataset-properties": "Dataset Properties",
         "associated-datasource": "Associated Datasource",
         "datasource-configuration": "Datasource Configuration",
-        "type": "Type"
+        "type": "Type",
+        "minimize": "Minimize",
+        "maximize": "Maximize"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
-        "sign-in-error": "Unable to sign in",
-        "signed-out": "You have been signed out",
+        "login-error": "Unable to login",
+        "logout": "You have been logged out",
         "no-data": "No data available",
         "no-search-results": "No search results available",
         "invalid-id": "Invalid {{entity}} id {{id}}",

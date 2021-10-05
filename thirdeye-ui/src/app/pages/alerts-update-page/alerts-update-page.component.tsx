@@ -55,11 +55,6 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     }, [alert]);
 
     useEffect(() => {
-        const init = async (): Promise<void> => {
-            setLoading(false);
-        };
-
-        init();
         fetchAlert();
     }, []);
 

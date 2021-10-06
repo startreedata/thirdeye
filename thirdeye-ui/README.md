@@ -67,7 +67,21 @@ Following the installation, the command above will let you switch to the require
 
 The project may depend on some packages to be installed from Artifactory and npm needs to be configured to allow access to these packages. The Artifactory repository to install packages from is configured in project root [**.npmrc**](./.npmrc).
 
-Use the Artifactory [Set Me Up](https://jfrog.com/knowledge-base/whats-new-in-the-set-me-up-dialog) to configure npm with Artifactory credentials using **~/.npmrc**.
+You need to append your credentials to [**.npmrc**](./.npmrc) to access the Artifactory.
+
+-   Go to [https://repo.startreedata.io/ui/admin/artifactory/user_profile](https://repo.startreedata.io/ui/admin/artifactory/user_profile). You can connect with the Okta SSO.
+-   Create an API key
+-   Run the request:
+
+    curl -H "X-JFrog-Art-Api:[YOUR_API_KEY]" https://repo.startreedata.io/artifactory/api/npm/auth
+
+This will return HTTP basic auth credentials:
+
+    _auth = VERY_LONG_BASE_64_TOKENY3lyaWxAc3RhcnRyZWUuYWNG1lcVBiS0QyRjJhN3M3Qm9uV1dkV2FxbzVWNVJraWF0Z2sxbmViYVVmeFpqZ1NTMw==
+    always-auth = true
+    email = your_name@startree.ai
+
+-   Append these credentials to the [**.npmrc**](./.npmrc) file.
 
 ### Setup
 

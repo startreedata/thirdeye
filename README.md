@@ -48,7 +48,9 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 ## Build
 
 ### Prerequisite
-We recommend using MySQL 5.7 with ThirdEye
+ThirdEye requires Java 8.
+We recommend using MySQL 5.7 with ThirdEye.
+ThirdEye UI requires internal npm packages. Make sure you can access them. See [thirdeye-ui prerequisites](./thirdeye-ui/README.md#configure-node-package-manager-npm-for-use-with-artifactory)
 
 ### Database setup
 If you have MySQL 5.7 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
@@ -57,6 +59,7 @@ create the database and tables.
 Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql-docker-start.sh`
 
 ### Build with Maven
+
 ThirdEye is a maven project and uses standard maven commands
 ```
 # Build ThirdEye from source

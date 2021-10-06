@@ -1,3 +1,4 @@
+#!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then

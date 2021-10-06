@@ -66,7 +66,7 @@ mvn install
 mvn install -DskipTests
 
 # If you are working on backend, You may skip the ui and docs modules
-mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs' -pl
+mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs'
 
 # To Skip Integration tests
 mvn install -pl '!thirdeye-integration-tests'

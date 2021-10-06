@@ -73,7 +73,9 @@ You need to append your credentials to [**.npmrc**](./.npmrc) to access the Arti
 -   Create an API key
 -   Run the request:
 
-    curl -H "X-JFrog-Art-Api:[YOUR_API_KEY]" https://repo.startreedata.io/artifactory/api/npm/auth
+```shell
+curl -H "X-JFrog-Art-Api:[YOUR_API_KEY]" https://repo.startreedata.io/artifactory/api/npm/auth
+```
 
 This will return HTTP basic auth credentials:
 

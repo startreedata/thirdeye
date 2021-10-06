@@ -60,7 +60,8 @@ Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql
 
 ### Build with Maven
 
-ThirdEye is a maven project and uses standard maven commands
+ThirdEye is a maven project and uses standard maven commands.  
+You can use the maven wrapper `./mnwv` instead of maven `mvn`.  
 ```
 # Build ThirdEye from source
 mvn install

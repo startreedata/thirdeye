@@ -11,7 +11,7 @@ You can use the instuctions below to load up a local pinot cluster.
 ### Starting pinot
 ```
 # Download and Start Pinot
-./pinot-start.sh
+./start-pinot.sh
 ```
 After some time, you should be able to access pinot controller at http://localhost:9000
 

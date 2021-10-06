@@ -1,3 +1,4 @@
+#!/bin/bash
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 REPO_DIR="${SCRIPT_DIR}/.."
 
@@ -17,7 +18,7 @@ if [[ ! -f "${PINOT_LAUNCH_SH}" ]]; then
 
   # Download pinot
   curl -o /tmp/pinot-bin.tar.gz "https://downloads.apache.org/pinot/apache-pinot-incubating-${PINOT_VERSION}/apache-pinot-incubating-${PINOT_VERSION}-bin.tar.gz"
-  mkdir "${PINOT_INSTALL_TMP_DIR}"
+  mkdir -p "${PINOT_INSTALL_TMP_DIR}"
 
   # extract pinot
   tar -vxf /tmp/pinot-bin.tar.gz -C "${PINOT_INSTALL_TMP_DIR}/"

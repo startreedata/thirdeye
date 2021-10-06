@@ -1,6 +1,6 @@
 [
   {
-    "name": "pinot1",
+    "name": "pinotQuickStartLocal",
     "type": "pinot",
     "properties": {
       "zookeeperUrl": "localhost:2123",

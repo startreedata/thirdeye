@@ -1,3 +1,4 @@
+#!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 TE_REPO="${SCRIPT_DIR}/.."
 DB_SCRIPTS="${TE_REPO}/thirdeye-persistence/src/main/resources/db"

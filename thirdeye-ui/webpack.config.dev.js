@@ -32,7 +32,6 @@ module.exports = {
                 options: {
                     transpileOnly: true, // Speed up compilation in development mode
                 },
-                exclude: /node_modules/, // Just the source code
             },
             // .css and .scss files to be handled by sass-loader
             {

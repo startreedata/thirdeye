@@ -14,10 +14,10 @@ import org.apache.pinot.thirdeye.task.TaskDriverConfiguration;
 
 public class ThirdEyeConfigurationModule extends AbstractModule {
 
-  private final ThirdEyeCoordinatorConfiguration configuration;
+  private final ThirdEyeServerConfiguration configuration;
 
   public ThirdEyeConfigurationModule(
-      final ThirdEyeCoordinatorConfiguration configuration) {
+      final ThirdEyeServerConfiguration configuration) {
     this.configuration = configuration;
   }
 

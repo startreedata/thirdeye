@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
@@ -43,7 +43,6 @@ import org.apache.pinot.thirdeye.notification.formatter.channels.JiraContentForm
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
-import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
 import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
@@ -75,11 +74,11 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
   public static final int JIRA_ONE_LINE_COMMENT_LENGTH = 250;
   private static final Logger LOG = LoggerFactory.getLogger(DetectionJiraAlerter.class);
 
-  private final ThirdEyeCoordinatorConfiguration teConfig;
+  private final ThirdEyeServerConfiguration teConfig;
   private final ThirdEyeJiraClient jiraClient;
   private final JiraConfiguration jiraAdminConfig;
 
-  public DetectionJiraAlerter(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
+  public DetectionJiraAlerter(final ThirdEyeServerConfiguration thirdeyeConfig,
       final ThirdEyeJiraClient jiraClient,
       final MetricAnomaliesContent metricAnomaliesContent,
       final EntityGroupKeyContent entityGroupKeyContent) {

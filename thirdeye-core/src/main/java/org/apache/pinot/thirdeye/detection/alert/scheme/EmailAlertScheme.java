@@ -34,14 +34,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -76,7 +75,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
-  private final ThirdEyeCoordinatorConfiguration teConfig;
+  private final ThirdEyeServerConfiguration teConfig;
   private final EmailContentFormatter emailContentFormatter;
   private final SmtpConfiguration smtpConfig;
 
@@ -84,7 +83,7 @@ public class EmailAlertScheme extends DetectionAlertScheme {
   private final Counter emailAlertsSuccessCounter;
 
   @Inject
-  public EmailAlertScheme(final ThirdEyeCoordinatorConfiguration thirdeyeConfig,
+  public EmailAlertScheme(final ThirdEyeServerConfiguration thirdeyeConfig,
       final EmailContentFormatter emailContentFormatter,
       final MetricAnomaliesContent metricAnomaliesContent,
       final EntityGroupKeyContent entityGroupKeyContent,

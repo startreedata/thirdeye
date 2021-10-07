@@ -33,7 +33,7 @@
     <!-- test dependencies -->
     <dependency>
       <groupId>org.apache.pinot.thirdeye</groupId>
-      <artifactId>thirdeye-coordinator</artifactId>
+      <artifactId>thirdeye-server</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

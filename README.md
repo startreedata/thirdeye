@@ -95,7 +95,7 @@ ThirdEye has 3 main components all of which start from a single launcher
 # Run the coordinator
 # To run a scheduler, enable scheduler.enabled: true inside the configuration
 # To run a worker, enable taskDriver.enabled: true inside the configuration
-bin/thirdeye.sh coordinator
+bin/thirdeye.sh server
 ```
 
 ### Docker
@@ -127,11 +127,11 @@ docker run \
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
 ### Running ThirdEye Coordinator in debug mode
-After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeCoordinator` class. Press the `play ▶️` icon
+After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.
 
 In the debug configuration settings, set the following values:
-- Set program args to `server config/coordinator.yaml`
+- Set program args to `server config/server.yaml`
 
 You are all set. Run the debug now (you can just press the debug button) to run the server. By default,
 the server should be accessible at http://localhost:8080

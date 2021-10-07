@@ -22,7 +22,7 @@ import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
@@ -40,9 +40,9 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfiguration> {
+public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
-  private static final Logger log = LoggerFactory.getLogger(ThirdEyeCoordinator.class);
+  private static final Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
 
   private Injector injector;
   private RequestStatisticsLogger requestStatisticsLogger = null;
@@ -50,37 +50,37 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
   private SchedulerService schedulerService = null;
 
   /**
-   * Use {@link ThirdEyeCoordinatorDebug} class for debugging purposes.
+   * Use {@link ThirdEyeServerDebug} class for debugging purposes.
    * The integration-tests/tools module will load all the thirdeye jars including datasources
    * making it easier to debug.
    */
   public static void main(String[] args) throws Exception {
     AppUtils.logJvmSettings();
 
-    new ThirdEyeCoordinator().run(args);
+    new ThirdEyeServer().run(args);
   }
 
   @Override
-  public void initialize(final Bootstrap<ThirdEyeCoordinatorConfiguration> bootstrap) {
+  public void initialize(final Bootstrap<ThirdEyeServerConfiguration> bootstrap) {
     bootstrap.setConfigurationSourceProvider(
         new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
             new EnvironmentVariableSubstitutor()));
-    bootstrap.addBundle(new SwaggerBundle<ThirdEyeCoordinatorConfiguration>() {
+    bootstrap.addBundle(new SwaggerBundle<ThirdEyeServerConfiguration>() {
       @Override
       protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
-          ThirdEyeCoordinatorConfiguration configuration) {
+          ThirdEyeServerConfiguration configuration) {
         return configuration.getSwaggerBundleConfiguration();
       }
     });
   }
 
   @Override
-  public void run(final ThirdEyeCoordinatorConfiguration configuration, final Environment env) {
+  public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
 
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
 
-    injector = Guice.createInjector(new ThirdEyeCoordinatorModule(
+    injector = Guice.createInjector(new ThirdEyeServerModule(
         configuration,
         dataSource,
         env.metrics()));
@@ -123,7 +123,7 @@ public class ThirdEyeCoordinator extends Application<ThirdEyeCoordinatorConfigur
     env.lifecycle().manage(lifecycleManager(configuration));
   }
 
-  private Managed lifecycleManager(ThirdEyeCoordinatorConfiguration config) {
+  private Managed lifecycleManager(ThirdEyeServerConfiguration config) {
     return new Managed() {
       @Override
       public void start() throws Exception {

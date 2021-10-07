@@ -4,7 +4,7 @@ import static org.apache.pinot.thirdeye.AppUtils.logJvmSettings;
 
 import com.google.inject.Injector;
 import java.util.stream.Stream;
-import org.apache.pinot.thirdeye.ThirdEyeCoordinator;
+import org.apache.pinot.thirdeye.ThirdEyeServer;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.datasource.DefaultDataSourcesPlugin;
 import org.apache.pinot.thirdeye.datasource.PinotDataSourcePlugin;
@@ -13,17 +13,17 @@ import org.apache.pinot.thirdeye.detection.components.DetectionComponentsPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeCoordinatorDebug {
+public class ThirdEyeServerDebug {
 
-  private static final Logger log = LoggerFactory.getLogger(ThirdEyeCoordinatorDebug.class);
+  private static final Logger log = LoggerFactory.getLogger(ThirdEyeServerDebug.class);
 
   public static void main(String[] args) throws Exception {
     logJvmSettings();
 
-    final ThirdEyeCoordinator thirdEyeCoordinator = new ThirdEyeCoordinator();
-    thirdEyeCoordinator.run(args);
+    final ThirdEyeServer thirdEyeServer = new ThirdEyeServer();
+    thirdEyeServer.run(args);
 
-    final Injector injector = thirdEyeCoordinator.getInjector();
+    final Injector injector = thirdEyeServer.getInjector();
 
     loadDefaultDataSources(injector.getInstance(DataSourcesLoader.class));
     loadDetectors(injector.getInstance(DetectionRegistry.class));

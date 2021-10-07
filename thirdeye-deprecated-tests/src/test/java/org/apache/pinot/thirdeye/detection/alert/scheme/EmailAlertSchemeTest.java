@@ -32,7 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.mail.Session;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -67,7 +67,7 @@ public class EmailAlertSchemeTest {
 
   private MergedAnomalyResultManager anomalyDAO;
   private SubscriptionGroupDTO subscriptionGroupDTO;
-  private ThirdEyeCoordinatorConfiguration thirdEyeConfig;
+  private ThirdEyeServerConfiguration thirdEyeConfig;
   private AlertManager alertManager;
 
   @BeforeMethod
@@ -116,7 +116,7 @@ public class EmailAlertSchemeTest {
     anomalyResultDTO.setId(12L);
     when(anomalyDAO.findAll()).thenReturn(Arrays.asList(anomalyResultDTO, anomalyResultDTO2));
 
-    thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
+    thirdEyeConfig = new ThirdEyeServerConfiguration();
     thirdEyeConfig.setUiConfiguration(new UiConfiguration().setExternalUrl(DASHBOARD_HOST_VALUE));
     final SmtpConfiguration smtpProperties = new SmtpConfiguration();
     smtpProperties.setHost("test");

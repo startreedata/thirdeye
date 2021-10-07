@@ -44,7 +44,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datalayer.util.DatabaseConfiguration;
@@ -132,7 +132,7 @@ public class RCAFrameworkRunner {
     final DataSource dataSource = new DataSourceBuilder().build(dbConfig);
     Injector injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
 
-    ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
+    ThirdEyeServerConfiguration thirdEyeConfig = new ThirdEyeServerConfiguration();
     thirdEyeConfig.setRootDir(config.getAbsolutePath());
 
     injector.getInstance(ThirdEyeCacheRegistry.class)

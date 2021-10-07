@@ -35,11 +35,11 @@ public class EndToEndTest {
   }
 
   private void init() {
-    coordinatorExecutor.execute(catchAll(() -> ThirdEyeCoordinator
-        .main(new String[]{"server", "thirdeye-integration-tests/config/coordinator.yaml"})));
+    coordinatorExecutor.execute(catchAll(() -> ThirdEyeServer
+        .main(new String[]{"server", "thirdeye-integration-tests/config/server.yaml"})));
 
 //    workerExecutor.execute(catchAll(() -> ThirdEyeWorker
-//        .main(new String[]{"server", "thirdeye-integration-tests/config/coordinator.yaml"})));
+//        .main(new String[]{"server", "thirdeye-integration-tests/config/server.yaml"})));
   }
 
   private Runnable catchAll(RunnableWithException r) {

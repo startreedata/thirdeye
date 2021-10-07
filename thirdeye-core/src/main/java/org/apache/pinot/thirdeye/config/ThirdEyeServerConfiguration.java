@@ -16,7 +16,7 @@ import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.apache.pinot.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import org.apache.pinot.thirdeye.task.TaskDriverConfiguration;
 
-public class ThirdEyeCoordinatorConfiguration extends Configuration {
+public class ThirdEyeServerConfiguration extends Configuration {
 
   @JsonProperty("auth")
   private AuthConfiguration authConfiguration;
@@ -66,7 +66,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return authConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setAuthConfiguration(
+  public ThirdEyeServerConfiguration setAuthConfiguration(
       final AuthConfiguration authConfiguration) {
     this.authConfiguration = authConfiguration;
     return this;
@@ -85,7 +85,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return databaseConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setDatabaseConfiguration(
+  public ThirdEyeServerConfiguration setDatabaseConfiguration(
       final DatabaseConfiguration databaseConfiguration) {
     this.databaseConfiguration = databaseConfiguration;
     return this;
@@ -95,7 +95,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return configPath;
   }
 
-  public ThirdEyeCoordinatorConfiguration setConfigPath(final String configPath) {
+  public ThirdEyeServerConfiguration setConfigPath(final String configPath) {
     this.configPath = configPath;
     return this;
   }
@@ -104,7 +104,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return mockEventsConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setMockEventsConfiguration(
+  public ThirdEyeServerConfiguration setMockEventsConfiguration(
       final MockEventsConfiguration mockEventsConfiguration) {
     this.mockEventsConfiguration = mockEventsConfiguration;
     return this;
@@ -114,7 +114,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return taskDriverConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setTaskDriverConfiguration(
+  public ThirdEyeServerConfiguration setTaskDriverConfiguration(
       final TaskDriverConfiguration taskDriverConfiguration) {
     this.taskDriverConfiguration = taskDriverConfiguration;
     return this;
@@ -124,7 +124,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return notificationConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setAlerterConfigurations(
+  public ThirdEyeServerConfiguration setAlerterConfigurations(
       final NotificationConfiguration notificationConfiguration) {
     this.notificationConfiguration = notificationConfiguration;
     return this;
@@ -134,7 +134,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return phantomJsPath;
   }
 
-  public ThirdEyeCoordinatorConfiguration setPhantomJsPath(final String phantomJsPath) {
+  public ThirdEyeServerConfiguration setPhantomJsPath(final String phantomJsPath) {
     this.phantomJsPath = phantomJsPath;
     return this;
   }
@@ -143,7 +143,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return failureFromAddress;
   }
 
-  public ThirdEyeCoordinatorConfiguration setFailureFromAddress(final String failureFromAddress) {
+  public ThirdEyeServerConfiguration setFailureFromAddress(final String failureFromAddress) {
     this.failureFromAddress = failureFromAddress;
     return this;
   }
@@ -152,7 +152,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return failureToAddress;
   }
 
-  public ThirdEyeCoordinatorConfiguration setFailureToAddress(final String failureToAddress) {
+  public ThirdEyeServerConfiguration setFailureToAddress(final String failureToAddress) {
     this.failureToAddress = failureToAddress;
     return this;
   }
@@ -161,7 +161,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return teRestConfig;
   }
 
-  public ThirdEyeCoordinatorConfiguration setTeRestConfig(
+  public ThirdEyeServerConfiguration setTeRestConfig(
       final ThirdEyeRestClientConfiguration teRestConfig) {
     this.teRestConfig = teRestConfig;
     return this;
@@ -171,7 +171,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return dataAvailabilitySchedulingConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setDataAvailabilitySchedulingConfiguration(
+  public ThirdEyeServerConfiguration setDataAvailabilitySchedulingConfiguration(
       final DataAvailabilitySchedulingConfiguration dataAvailabilitySchedulingConfiguration) {
     this.dataAvailabilitySchedulingConfiguration = dataAvailabilitySchedulingConfiguration;
     return this;
@@ -181,7 +181,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return holidayCountriesWhitelist;
   }
 
-  public ThirdEyeCoordinatorConfiguration setHolidayCountriesWhitelist(
+  public ThirdEyeServerConfiguration setHolidayCountriesWhitelist(
       final List<String> holidayCountriesWhitelist) {
     this.holidayCountriesWhitelist = holidayCountriesWhitelist;
     return this;
@@ -191,7 +191,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return rootDir;
   }
 
-  public ThirdEyeCoordinatorConfiguration setRootDir(final String rootDir) {
+  public ThirdEyeServerConfiguration setRootDir(final String rootDir) {
     this.rootDir = rootDir;
     return this;
   }
@@ -200,7 +200,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return schedulerConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setSchedulerConfiguration(
+  public ThirdEyeServerConfiguration setSchedulerConfiguration(
       final ThirdEyeSchedulerConfiguration schedulerConfiguration) {
     this.schedulerConfiguration = schedulerConfiguration;
     return this;
@@ -210,7 +210,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return cacheConfig;
   }
 
-  public ThirdEyeCoordinatorConfiguration setCacheConfig(
+  public ThirdEyeServerConfiguration setCacheConfig(
       final CacheConfig cacheConfig) {
     this.cacheConfig = cacheConfig;
     return this;
@@ -220,7 +220,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return rcaConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setRcaConfiguration(
+  public ThirdEyeServerConfiguration setRcaConfiguration(
       final RCAConfiguration rcaConfiguration) {
     this.rcaConfiguration = rcaConfiguration;
     return this;
@@ -230,7 +230,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return uiConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setUiConfiguration(
+  public ThirdEyeServerConfiguration setUiConfiguration(
       final UiConfiguration uiConfiguration) {
     this.uiConfiguration = uiConfiguration;
     return this;
@@ -240,7 +240,7 @@ public class ThirdEyeCoordinatorConfiguration extends Configuration {
     return prometheusConfiguration;
   }
 
-  public ThirdEyeCoordinatorConfiguration setPrometheusConfiguration(
+  public ThirdEyeServerConfiguration setPrometheusConfiguration(
       final PrometheusConfiguration prometheusConfiguration) {
     this.prometheusConfiguration = prometheusConfiguration;
     return this;

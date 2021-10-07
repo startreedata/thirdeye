@@ -11,7 +11,7 @@ import io.dropwizard.auth.Authenticator;
 import javax.annotation.Nullable;
 import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import org.apache.pinot.thirdeye.auth.ThirdEyeCredentials;
-import org.apache.pinot.thirdeye.config.ThirdEyeConfigurationModule;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfigurationModule;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
@@ -41,7 +41,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
-    install(new ThirdEyeConfigurationModule(configuration));
+    install(new ThirdEyeServerConfigurationModule(configuration));
 
     bind(new TypeLiteral<Authenticator<ThirdEyeCredentials, ThirdEyePrincipal>>() {})
         .to(ThirdEyeAuthenticatorDisabled.class)

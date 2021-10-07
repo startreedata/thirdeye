@@ -12,11 +12,11 @@ import org.apache.pinot.thirdeye.rootcause.impl.RCAConfiguration;
 import org.apache.pinot.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import org.apache.pinot.thirdeye.task.TaskDriverConfiguration;
 
-public class ThirdEyeConfigurationModule extends AbstractModule {
+public class ThirdEyeServerConfigurationModule extends AbstractModule {
 
   private final ThirdEyeServerConfiguration configuration;
 
-  public ThirdEyeConfigurationModule(
+  public ThirdEyeServerConfigurationModule(
       final ThirdEyeServerConfiguration configuration) {
     this.configuration = configuration;
   }

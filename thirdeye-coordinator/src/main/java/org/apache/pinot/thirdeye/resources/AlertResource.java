@@ -216,4 +216,18 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
     return respondOk(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id));
   }
+
+  @DELETE
+  @Path("/all")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @Override
+  public Response deleteAll(
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) {
+    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
+    alertManager.findAll().forEach(alertDeleter::delete);
+    log.warn(String.format("Deleted all alerts by principal: %s", principal));
+
+    return Response.ok().build();
+  }
 }

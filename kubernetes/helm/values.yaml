@@ -60,7 +60,6 @@ scheduler:
 worker:
   enabled: true
   name: worker
-  replicaCount: 1
   port: 8083
   serviceType: ClusterIP
 

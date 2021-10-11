@@ -48,7 +48,9 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 ## Build
 
 ### Prerequisite
-We recommend using MySQL 5.7 with ThirdEye
+ThirdEye requires Java 8.
+We recommend using MySQL 5.7 with ThirdEye.
+ThirdEye UI requires internal npm packages. Make sure you can access them. See [thirdeye-ui prerequisites](./thirdeye-ui/README.md#configure-node-package-manager-npm-for-use-with-artifactory)
 
 ### Database setup
 If you have MySQL 5.7 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
@@ -57,7 +59,9 @@ create the database and tables.
 Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql-docker-start.sh`
 
 ### Build with Maven
-ThirdEye is a maven project and uses standard maven commands
+
+ThirdEye is a maven project and uses standard maven commands.  
+You can use the maven wrapper `./mnwv` instead of maven `mvn`.  
 ```
 # Build ThirdEye from source
 mvn install
@@ -66,7 +70,7 @@ mvn install
 mvn install -DskipTests
 
 # If you are working on backend, You may skip the ui and docs modules
-mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs' -pl
+mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs'
 
 # To Skip Integration tests
 mvn install -pl '!thirdeye-integration-tests'
@@ -91,7 +95,7 @@ ThirdEye has 3 main components all of which start from a single launcher
 # Run the coordinator
 # To run a scheduler, enable scheduler.enabled: true inside the configuration
 # To run a worker, enable taskDriver.enabled: true inside the configuration
-bin/thirdeye.sh coordinator
+bin/thirdeye.sh server
 ```
 
 ### Docker
@@ -123,11 +127,11 @@ docker run \
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
 ### Running ThirdEye Coordinator in debug mode
-After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeCoordinator` class. Press the `play ▶️` icon
+After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.
 
 In the debug configuration settings, set the following values:
-- Set program args to `server config/coordinator.yaml`
+- Set program args to `server config/server.yaml`
 
 You are all set. Run the debug now (you can just press the debug button) to run the server. By default,
 the server should be accessible at http://localhost:8080

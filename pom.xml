@@ -28,7 +28,7 @@
     <module>thirdeye-spi</module>
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
-    <module>thirdeye-coordinator</module>
+    <module>thirdeye-server</module>
 
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
@@ -329,7 +329,7 @@
       </dependency>
       <dependency>
         <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-coordinator</artifactId>
+        <artifactId>thirdeye-server</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -123,6 +123,10 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }
 
+  protected void deleteDto(DtoT dto) {
+    dtoManager.delete(dto);
+  }
+
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
@@ -195,7 +199,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
-      dtoManager.delete(dto);
+      deleteDto(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal));
 
       return respondOk(toApi(dto));
@@ -211,7 +215,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response deleteAll(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) {
     final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    dtoManager.findAll().forEach(dtoManager::delete);
+    dtoManager.findAll().forEach(this::deleteDto);
     return Response.ok().build();
   }
 }

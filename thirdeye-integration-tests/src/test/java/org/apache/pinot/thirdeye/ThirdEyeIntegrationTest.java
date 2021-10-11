@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
@@ -53,7 +53,7 @@ public class ThirdEyeIntegrationTest {
   private static final String DATA_FILENAME = "data.csv";
   private static PinotContainer container;
 
-  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
+  public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
   private ThirdEyeH2DatabaseServer db;
 
@@ -97,8 +97,8 @@ public class ThirdEyeIntegrationTest {
 
     container = startPinot();
     container.addTables();
-    SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-        resourceFilePath("e2e/config/coordinator.yaml"),
+    SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
+        resourceFilePath("e2e/config/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", db.getDbConfig().getUrl()),

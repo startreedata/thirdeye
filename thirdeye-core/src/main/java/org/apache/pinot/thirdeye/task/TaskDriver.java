@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -55,13 +55,13 @@ public class TaskDriver {
   private final MetricRegistry metricRegistry;
 
   @Inject
-  public TaskDriver(final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration,
+  public TaskDriver(final ThirdEyeServerConfiguration thirdEyeServerConfiguration,
       final TaskManager taskManager,
       final TaskRunnerFactory taskRunnerFactory,
       final MetricRegistry metricRegistry) {
     this.taskManager = taskManager;
     this.metricRegistry = metricRegistry;
-    config = thirdEyeCoordinatorConfiguration.getTaskDriverConfiguration();
+    config = thirdEyeServerConfiguration.getTaskDriverConfiguration();
     workerId = requireNonNull(config.getId(),
         "worker id must be provided and unique for every worker");
     checkArgument(workerId >= 0,
@@ -80,7 +80,7 @@ public class TaskDriver {
             .setDaemon(true)
             .build());
 
-    taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeCoordinatorConfiguration);
+    taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeServerConfiguration);
 
     this.taskRunnerFactory = taskRunnerFactory;
   }

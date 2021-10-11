@@ -6,17 +6,17 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.JwtConfiguration;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.events.MockEventsConfiguration;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
-public class ThirdEyeCoordinatorModule extends AbstractModule {
+public class ThirdEyeServerModule extends AbstractModule {
 
-  private final ThirdEyeCoordinatorConfiguration configuration;
+  private final ThirdEyeServerConfiguration configuration;
   private final DataSource dataSource;
   private final MetricRegistry metricRegistry;
 
-  public ThirdEyeCoordinatorModule(final ThirdEyeCoordinatorConfiguration configuration,
+  public ThirdEyeServerModule(final ThirdEyeServerConfiguration configuration,
       final DataSource dataSource, final MetricRegistry metricRegistry) {
     this.configuration = configuration;
     this.dataSource = dataSource;
@@ -28,7 +28,7 @@ public class ThirdEyeCoordinatorModule extends AbstractModule {
     install(new ThirdEyeCoreModule(dataSource, configuration));
 
     bind(MetricRegistry.class).toInstance(metricRegistry);
-    bind(ThirdEyeCoordinatorConfiguration.class).toInstance(configuration);
+    bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
   }
 
   @Singleton

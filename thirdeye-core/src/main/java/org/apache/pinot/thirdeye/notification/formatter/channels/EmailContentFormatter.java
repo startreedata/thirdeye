@@ -35,7 +35,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
@@ -66,10 +66,10 @@ public class EmailContentFormatter {
           "hierarchical-anomalies-email-template.ftl")
       .build();
 
-  protected ThirdEyeCoordinatorConfiguration teConfig;
+  protected ThirdEyeServerConfiguration teConfig;
 
   @Inject
-  public EmailContentFormatter(final ThirdEyeCoordinatorConfiguration teConfig) {
+  public EmailContentFormatter(final ThirdEyeServerConfiguration teConfig) {
     this.teConfig = teConfig;
   }
 

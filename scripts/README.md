@@ -1,6 +1,8 @@
 # Scripts
 
-This directory holds utility scripts that aid in the dev/testing of ThirdEye
+This directory holds utility scripts that aid in the dev/testing of ThirdEye. 
+
+Note: Please use bash instead of sh. The scripts may contain bash functions.  
 
 ## Launching a Pinot Cluster
 
@@ -9,7 +11,7 @@ You can use the instuctions below to load up a local pinot cluster.
 ### Starting pinot
 ```
 # Download and Start Pinot
-./pinot-start.sh
+./start-pinot.sh
 ```
 After some time, you should be able to access pinot controller at http://localhost:9000
 

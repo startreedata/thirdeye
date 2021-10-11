@@ -28,7 +28,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
@@ -36,12 +36,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class CoordinatorTest {
+public class ServerTest {
 
   public static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  public DropwizardTestSupport<ThirdEyeCoordinatorConfiguration> SUPPORT;
+  public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
   private ThirdEyeH2DatabaseServer db;
 
@@ -60,15 +60,15 @@ public class CoordinatorTest {
 
   @BeforeClass
   public void beforeClass() throws SQLException {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7124, "CoordinatorTest");
+    db = new ThirdEyeH2DatabaseServer("localhost", 7124, "ServerTest");
     db.start();
     db.truncateAllTables();
 
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
-    SUPPORT = new DropwizardTestSupport<>(ThirdEyeCoordinator.class,
-        resourceFilePath("e2e/config/coordinator.yaml"),
+    SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
+        resourceFilePath("e2e/config/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", db.getDbConfig().getUrl()),

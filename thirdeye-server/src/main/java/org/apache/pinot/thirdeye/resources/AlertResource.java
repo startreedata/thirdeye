@@ -83,6 +83,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
+  protected void deleteDto(AlertDTO dto) {
+    alertDeleter.delete(dto);
+  }
+
+  @Override
   protected AlertDTO createDto(final ThirdEyePrincipal principal, final AlertApi api) {
     ensureExists(api.getName(), "Name must be present");
 
@@ -195,25 +200,5 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal));
 
     return respondOk(toApi(dto));
-  }
-
-  @DELETE
-  @Path("{id}")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  @Override
-  public Response delete(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
-      @PathParam("id") final Long id) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-    final AlertDTO dto = alertManager.findById(id);
-    if (dto != null) {
-      alertDeleter.delete(dto);
-      log.warn(String.format("Deleted id: %d by principal: %s", id, principal));
-
-      return respondOk(toApi(dto));
-    }
-
-    return respondOk(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id));
   }
 }

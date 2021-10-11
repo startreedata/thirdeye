@@ -1,31 +1,12 @@
 #!/bin/bash
-#
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-#
-#
 
 # Script Usage
 # ---------------------------------------------
 # ./thirdeye.sh ${MODE}
 #
-# - MODE: Choices: {coordinator, worker, * }
-#       coordinator: Start the coordinator
-#       worker: Start the worker
+# - MODE: Choices: {coordinator, ui, * }
+#       server: Start the server
+#       ui: Start the ui server
 #       For any other value, the script fails.
 #
 
@@ -56,11 +37,11 @@ for filepath in "${LIB_DIR}"/*; do
   CLASSPATH="${CLASSPATH}:${filepath}"
 done
 
-function start_coordinator {
-  class_ref="org.apache.pinot.thirdeye.ThirdEyeCoordinator"
+function start_server {
+  class_ref="org.apache.pinot.thirdeye.ThirdEyeServer"
 
-  echo "Starting Thirdeye coordinator.. config_dir: ${CONFIG_DIR}"
-  java -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/coordinator.yaml
+  echo "Starting Thirdeye server.. config_dir: ${CONFIG_DIR}"
+  java -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/server.yaml
 }
 
 function start_ui {
@@ -71,7 +52,7 @@ function start_ui {
 
 MODE=$1
 case ${MODE} in
-    "coordinator" )  start_coordinator ;;
+    "server" )  start_server ;;
     "ui"  )          start_ui ;;
     * )              echo "Invalid argument: ${MODE}! Exiting."; exit 1;;
 esac

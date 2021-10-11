@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.detection.events.EventType;
 import org.testng.Assert;
@@ -62,7 +62,7 @@ public class HolidayEventsLoaderTest {
     anotherEventDTO.setId(1L);
     eventsDAO = new MockEventsManager(new HashSet<>(Arrays.asList(eventDTO, anotherEventDTO)),
         null);
-    holidayEventsLoader = new HolidayEventsLoader(mock(ThirdEyeCoordinatorConfiguration.class),
+    holidayEventsLoader = new HolidayEventsLoader(mock(ThirdEyeServerConfiguration.class),
         eventsDAO,
         holidayEventsLoaderConfiguration);
   }

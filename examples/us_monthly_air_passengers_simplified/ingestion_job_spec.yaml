@@ -5,9 +5,9 @@ executionFrameworkSpec:
   segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
   segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
 jobType: SegmentCreationAndTarPush
-inputDirURI: 'examples/pageviews/rawdata'
+inputDirURI: 'examples/us_monthly_air_passengers_simplified/rawdata'
 includeFileNamePattern: 'glob:**/*.csv'
-outputDirURI: 'examples/pageviews/segments'
+outputDirURI: 'tmp/data/segments/us_monthly_air_passengers_simplified'
 overwriteOutput: true
 pinotFSSpecs:
   - scheme: file
@@ -17,8 +17,8 @@ recordReaderSpec:
   className: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReader'
   configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
 tableSpec:
-  tableName: 'pageviews'
-  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews/schema'
-  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews'
+  tableName: 'us_monthly_air_passengers_simplified'
+  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified/schema'
+  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified'
 pinotClusterSpecs:
   - controllerURI: 'http://${controllerHost}:${controllerPort}'

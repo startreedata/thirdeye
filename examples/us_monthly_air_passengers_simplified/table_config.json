@@ -1,0 +1,20 @@
+
+{
+  "tableName": "us_monthly_air_passengers_simplified",
+  "segmentsConfig" : {
+    "timeColumnName": "date",
+    "timeType": "DAYS",
+    "replication" : "1",
+    "schemaName" : "us_monthly_air_passengers_simplified"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

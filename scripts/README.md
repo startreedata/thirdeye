@@ -20,6 +20,6 @@ After some time, you should be able to access pinot controller at http://localho
 We internally use pageviews for testing.
 ```bash
 # Run this once you are able to access pinot controller on the browser.
-./load-pageviews.sh
+./load-datasets.sh
 ```
 After this, you should be able to view pageviews data on pinot

@@ -1,0 +1,20 @@
+{
+  "schemaName": "us_monthly_air_passengers_simplified",
+  "dimensionFieldSpecs": [
+
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "passenger_count",
+      "dataType": "INT"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "date",
+      "dataType": "LONG",
+      "format": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "granularity": "1:DAYS"
+    }
+  ]
+}

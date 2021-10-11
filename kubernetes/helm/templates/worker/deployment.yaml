@@ -1,0 +1,78 @@
+
+{{ if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thirdeye.worker.fullname" . }}
+  labels:
+    app: {{ include "thirdeye.name" . }}
+    chart: {{ include "thirdeye.chart" . }}
+    component: {{ .Values.worker.name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "thirdeye.name" . }}
+      release: {{ .Release.Name }}
+      component: {{ .Values.worker.name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ include "thirdeye.name" . }}
+        release: {{ .Release.Name }}
+        component: {{ .Values.worker.name }}
+      annotations:
+        prometheus.io/port: {{ .Values.worker.port | quote }}
+        prometheus.io/path: "/admin/prometheus"
+{{ toYaml .Values.worker.podAnnotations | indent 8 }}
+    spec:
+      {{- if .Values.image.pullSecretsName }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecretsName | quote}}
+      {{- end }}
+      nodeSelector:
+{{ toYaml .Values.worker.nodeSelector | indent 8 }}
+      affinity:
+{{ toYaml .Values.worker.affinity | indent 8 }}
+      tolerations:
+{{ toYaml .Values.worker.tolerations | indent 8 }}
+      containers:
+      - name: worker
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: SMTP_HOST
+            value: {{ .Values.smtp.host | quote }}
+          - name: SMTP_PORT
+            value: {{ .Values.smtp.port  | quote }}
+          - name: SMTP_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.smtp.secretKeyRef.name }}
+                key: username
+          - name: SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.smtp.secretKeyRef.name }}
+                key: password
+        args: [
+            "server"
+        ]
+        ports:
+          - containerPort: {{ .Values.worker.port }}
+            protocol: TCP
+        volumeMounts:
+          - name: thirdeye-config
+            mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
+            subPath: "server.yaml"
+            readOnly: true
+        resources:
+{{ toYaml .Values.worker.resources | indent 12 }}
+      restartPolicy: Always
+      volumes:
+        - name: thirdeye-config
+          configMap:
+            name: thirdeye-worker
+{{ end }}

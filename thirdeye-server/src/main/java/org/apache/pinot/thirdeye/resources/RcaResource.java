@@ -22,13 +22,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
 import org.apache.pinot.thirdeye.rca.RootCauseAnalysisService;
 import org.apache.pinot.thirdeye.rca.RootCauseEntityFormatter;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
 import org.apache.pinot.thirdeye.spi.api.RootCauseEntity;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
@@ -50,8 +48,6 @@ public class RcaResource {
 
   private final List<RootCauseEntityFormatter> formatters;
   private final Map<String, RCAFramework> frameworks;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
   private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RootCauseSessionResource rootCauseSessionResource;
   private final RootCauseMetricResource rootCauseMetricResource;
@@ -60,16 +56,12 @@ public class RcaResource {
   @Inject
   public RcaResource(
       final RootCauseAnalysisService rootCauseAnalysisService,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final DataCubeSummaryCalculator dataCubeSummaryCalculator,
       final RootCauseTemplateResource rootCauseTemplateResource,
       final RootCauseSessionResource rootCauseSessionResource,
       final RootCauseMetricResource rootCauseMetricResource,
       final DimensionAnalysisResource dimensionAnalysisResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
     this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rootCauseSessionResource = rootCauseSessionResource;
     this.rootCauseMetricResource = rootCauseMetricResource;

@@ -1,12 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
-import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
-import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
@@ -55,7 +53,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final String CRON_EVERY_1MIN = "0 */1 * * * ?";
 
-  private final AlertManager alertManager;
   private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
@@ -73,7 +70,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AuthService authService,
       final AlertEvaluator alertEvaluator) {
     super(authService, alertManager, ImmutableMap.of());
-    this.alertManager = alertManager;
     this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;

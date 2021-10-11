@@ -19,7 +19,7 @@ package org.apache.pinot.thirdeye.detection.alert;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
@@ -139,7 +139,7 @@ public class SendAlertTest {
     NotificationConfiguration alerterProps = new NotificationConfiguration();
     alerterProps.setSmtpConfiguration(smtpProperties);
 
-    ThirdEyeCoordinatorConfiguration thirdEyeConfig = new ThirdEyeCoordinatorConfiguration();
+    ThirdEyeServerConfiguration thirdEyeConfig = new ThirdEyeServerConfiguration();
     thirdEyeConfig.setUiConfiguration(new UiConfiguration().setExternalUrl(DASHBOARD_HOST_VALUE));
     thirdEyeConfig.setAlerterConfigurations(alerterProps);
 

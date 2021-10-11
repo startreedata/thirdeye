@@ -27,7 +27,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-coordinator</artifactId>
+  <artifactId>thirdeye-server</artifactId>
 
   <dependencies>
     <dependency>

@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -76,7 +76,7 @@ public class JiraContentFormatter {
 
   protected Properties alertClientConfig;
   protected SubscriptionGroupDTO subsConfig;
-  protected ThirdEyeCoordinatorConfiguration teConfig;
+  protected ThirdEyeServerConfiguration teConfig;
   protected BaseNotificationContent notificationContent;
 
   static {
@@ -86,7 +86,7 @@ public class JiraContentFormatter {
   }
 
   public JiraContentFormatter(JiraConfiguration jiraAdminConfig, Properties jiraClientConfig,
-      BaseNotificationContent content, ThirdEyeCoordinatorConfiguration teConfig,
+      BaseNotificationContent content, ThirdEyeServerConfiguration teConfig,
       SubscriptionGroupDTO subsConfig) {
     this.alertClientConfig = jiraClientConfig;
     this.teConfig = teConfig;

@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.alert.util.EmailHelper;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorJobRunner;
@@ -69,7 +69,7 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private final TaskManager taskManager;
   private final JobManager jobManager;
-  private final ThirdEyeCoordinatorConfiguration configuration;
+  private final ThirdEyeServerConfiguration configuration;
   private final AlertManager alertManager;
   private final DetectionStatusManager detectionStatusManager;
   private final EvaluationManager evaluationManager;
@@ -77,7 +77,7 @@ public class MonitorTaskRunner implements TaskRunner {
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
   @Inject
-  public MonitorTaskRunner(final ThirdEyeCoordinatorConfiguration configuration,
+  public MonitorTaskRunner(final ThirdEyeServerConfiguration configuration,
       final TaskManager taskManager,
       final JobManager jobManager,
       final AlertManager alertManager,

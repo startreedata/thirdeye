@@ -23,7 +23,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
@@ -46,7 +46,7 @@ public class InternalResource {
   private final DatabaseAdminResource databaseAdminResource;
   private final EmailAlertScheme emailAlertScheme;
   private final MetricAnomaliesContent metricAnomaliesContent;
-  private final ThirdEyeCoordinatorConfiguration configuration;
+  private final ThirdEyeServerConfiguration configuration;
   private final EmailContentFormatter emailContentFormatter;
 
   @Inject
@@ -56,7 +56,7 @@ public class InternalResource {
       final DatabaseAdminResource databaseAdminResource,
       final EmailAlertScheme emailAlertScheme,
       final MetricAnomaliesContent metricAnomaliesContent,
-      final ThirdEyeCoordinatorConfiguration configuration,
+      final ThirdEyeServerConfiguration configuration,
       final EmailContentFormatter emailContentFormatter) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.subscriptionGroupManager = subscriptionGroupManager;

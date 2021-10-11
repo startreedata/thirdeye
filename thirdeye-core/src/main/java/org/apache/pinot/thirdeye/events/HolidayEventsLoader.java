@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.config.ThirdEyeCoordinatorConfiguration;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 import org.apache.pinot.thirdeye.spi.detection.events.EventType;
@@ -78,7 +78,7 @@ public class HolidayEventsLoader implements Runnable {
     }
   }
 
-  private final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration;
+  private final ThirdEyeServerConfiguration thirdEyeServerConfiguration;
   private final HolidayEventsLoaderConfiguration config;
   /**
    * Calendar Api private key path
@@ -89,10 +89,10 @@ public class HolidayEventsLoader implements Runnable {
 
   @Inject
   public HolidayEventsLoader(
-      final ThirdEyeCoordinatorConfiguration thirdEyeCoordinatorConfiguration,
+      final ThirdEyeServerConfiguration thirdEyeServerConfiguration,
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration config) {
-    this.thirdEyeCoordinatorConfiguration = thirdEyeCoordinatorConfiguration;
+    this.thirdEyeServerConfiguration = thirdEyeServerConfiguration;
     this.config = config;
     this.keyPath = getCalendarApiKeyPath(config);
     this.eventManager = eventManager;
@@ -100,7 +100,7 @@ public class HolidayEventsLoader implements Runnable {
   }
 
   private String getCalendarApiKeyPath(final HolidayEventsLoaderConfiguration config) {
-    return thirdEyeCoordinatorConfiguration.getConfigPath() + File.separator + config.getGoogleJsonKey();
+    return thirdEyeServerConfiguration.getConfigPath() + File.separator + config.getGoogleJsonKey();
   }
 
   public void start() {

@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: thirdeye-worker
 data:
-  coordinator.yaml: |
+  server.yaml: |
     ######################################################
     # ThirdEye Worker helm config
     ######################################################

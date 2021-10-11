@@ -58,15 +58,15 @@ spec:
                 name: {{ .Values.smtp.secretKeyRef.name }}
                 key: password
         args: [
-            "coordinator"
+            "server"
         ]
         ports:
           - containerPort: {{ .Values.worker.port }}
             protocol: TCP
         volumeMounts:
           - name: thirdeye-config
-            mountPath: "/home/thirdeye/thirdeye/config/coordinator.yaml"
-            subPath: "coordinator.yaml"
+            mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
+            subPath: "server.yaml"
             readOnly: true
         resources:
 {{ toYaml .Values.worker.resources | indent 12 }}

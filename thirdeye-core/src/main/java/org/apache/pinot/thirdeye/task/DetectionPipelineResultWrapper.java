@@ -29,6 +29,16 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
     return delegate.getDetectionResults();
   }
 
+  @Override
+  public void setNodeName(final String nodeName) {
+    delegate.setNodeName(nodeName);
+  }
+
+  @Override
+  public void setAlertName(final String alertName) {
+    delegate.setAlertName(alertName);
+  }
+
   /**
    * Choose the max out of all the timestamps
    *

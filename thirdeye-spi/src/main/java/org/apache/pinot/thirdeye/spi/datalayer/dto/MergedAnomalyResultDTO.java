@@ -72,6 +72,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private boolean isChild;
   private AnomalyType type;
   private AnomalySeverity severityLabel = AnomalySeverity.DEFAULT;
+  private String nodeName;
+  private String alertName;
   // TODO: Remove raw anomaly id list after old merged anomalies are cleaned up
   @Deprecated
   private List<Long> rawAnomalyIdList;
@@ -411,6 +413,22 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   public void setRenotify(boolean renotify) {
     this.renotify = renotify;
+  }
+
+  public String getNodeName() {
+    return nodeName;
+  }
+
+  public void setNodeName(final String nodeName) {
+    this.nodeName = nodeName;
+  }
+
+  public String getAlertName() {
+    return alertName;
+  }
+
+  public void setAlertName(final String alertName) {
+    this.alertName = alertName;
   }
 
   @Override

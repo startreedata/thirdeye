@@ -120,6 +120,16 @@ public class DetectionResult implements DetectionPipelineResult {
     return ImmutableList.of(this);
   }
 
+  @Override
+  public void setNodeName(final String nodeName) {
+    anomalies.forEach(anomaly -> anomaly.setNodeName(nodeName));
+  }
+
+  @Override
+  public void setAlertName(final String alertName) {
+    anomalies.forEach(anomaly -> anomaly.setAlertName(alertName));
+  }
+
   public Map<String, List> getRawData() {
     return rawData;
   }

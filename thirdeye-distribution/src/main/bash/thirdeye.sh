@@ -4,7 +4,7 @@
 # ---------------------------------------------
 # ./thirdeye.sh ${MODE}
 #
-# - MODE: Choices: {coordinator, ui, * }
+# - MODE: Choices: {server, ui, * }
 #       server: Start the server
 #       ui: Start the ui server
 #       For any other value, the script fails.

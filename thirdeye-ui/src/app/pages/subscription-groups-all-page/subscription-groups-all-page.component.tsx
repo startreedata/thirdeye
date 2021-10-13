@@ -1,11 +1,12 @@
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SubscriptionGroupList } from "../../components/subscription-group-list/subscription-group-list.component";
+import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
@@ -109,17 +110,14 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            maxRouterBreadcrumbs={1}
-            title={t("label.subscription-groups")}
-        >
-            {/* Subscription group list */}
-            <SubscriptionGroupList
-                subscriptionGroups={uiSubscriptionGroups}
-                onDelete={handleSubscriptionGroupDelete}
-            />
-        </PageContents>
+        <PageV1>
+            <ConfigurationPageHeader selectedIndex={0} />
+            <PageContentsGridV1 fullHeight>
+                <SubscriptionGroupListV1
+                    subscriptionGroups={uiSubscriptionGroups}
+                    onDelete={handleSubscriptionGroupDelete}
+                />
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

@@ -7,15 +7,9 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Switch, useHistory } from "react-router-dom";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
-
-const ConfigurationPage = lazy(() =>
-    import(
-        /* webpackChunkName: "configuration-page" */ "../../pages/configuration-page/configuration-page.component"
-    ).then((module) => ({ default: module.ConfigurationPage }))
-);
 
 const SubscriptionGroupsRouter = lazy(() =>
     import(
@@ -71,11 +65,9 @@ export const ConfigurationRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Switch>
                 {/* Configuration path */}
-                <Route
-                    exact
-                    component={ConfigurationPage}
-                    path={AppRoute.CONFIGURATION}
-                />
+                <Route exact path={AppRoute.CONFIGURATION}>
+                    <Redirect to={AppRoute.SUBSCRIPTION_GROUPS} />
+                </Route>
 
                 {/* Direct all subscription groups paths to subscription groups router */}
                 <Route

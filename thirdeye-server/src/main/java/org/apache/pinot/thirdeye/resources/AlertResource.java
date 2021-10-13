@@ -57,7 +57,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
   private final AlertApiBeanMapper alertApiBeanMapper;
-  private final AuthService authService;
   private final AlertEvaluator alertEvaluator;
 
   @Inject
@@ -74,7 +73,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertApiBeanMapper = alertApiBeanMapper;
-    this.authService = authService;
     this.alertEvaluator = alertEvaluator;
   }
 

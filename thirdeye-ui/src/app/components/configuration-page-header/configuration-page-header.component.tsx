@@ -8,7 +8,7 @@ import {
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router";
+import { useHistory, useLocation } from "react-router";
 import {
     AppRoute,
     getAlertsCreatePath,
@@ -17,17 +17,15 @@ import {
     getMetricsCreatePath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
-import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
 
-export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderProps> = (
-    props: ConfigurationPageHeaderProps
-) => {
+export const ConfigurationPageHeader: FunctionComponent = () => {
     const { t } = useTranslation();
     const [
         shortcutOptionsAnchorElement,
         setShortcutOptionsAnchorElement,
     ] = React.useState<null | HTMLElement>(null);
     const history = useHistory();
+    const location = useLocation();
 
     const handleShortcutOptionsClick = (
         event: MouseEvent<HTMLElement>
@@ -62,6 +60,21 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
     const handleCreateDatasource = (): void => {
         history.push(getDatasourcesCreatePath());
         handleShortcutOptionsClose();
+    };
+
+    const getCurrentTabIndex = (): number => {
+        switch (location.pathname) {
+            case AppRoute.SUBSCRIPTION_GROUPS_ALL:
+                return 0;
+            case AppRoute.DATASETS_ALL:
+                return 1;
+            case AppRoute.DATASOURCES_ALL:
+                return 2;
+            case AppRoute.METRICS_ALL:
+                return 3;
+            default:
+                return 0;
+        }
     };
 
     return (
@@ -116,7 +129,7 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
                     })}
                 </MenuItem>
             </Menu>
-            <PageHeaderTabsV1 selectedIndex={props.selectedIndex}>
+            <PageHeaderTabsV1 selectedIndex={getCurrentTabIndex()}>
                 <PageHeaderTabV1 href={AppRoute.SUBSCRIPTION_GROUPS}>
                     {t("label.subscription-groups")}
                 </PageHeaderTabV1>

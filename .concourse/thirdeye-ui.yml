@@ -22,7 +22,7 @@ resources:
     icon: git
     type: pull-request
     source:
-      repository: startreedata/startree-ui
+      repository: startreedata/thirdeye
       access_token: ((github-token))
       base_branch: ((git-branch))
       paths:
@@ -30,11 +30,12 @@ resources:
 
   # Merge Resource
   - name: ((merge.resource.name))
-    icon: git
     type: git
+    icon: github
     source:
       uri: ((git-uri))
       branch: ((git-branch))
+      private_key: ((ssh-private-key))
       paths:
         - ((merge.resource.path))
 

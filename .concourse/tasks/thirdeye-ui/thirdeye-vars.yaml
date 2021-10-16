@@ -1,0 +1,38 @@
+merge:
+  job:
+    build: build-thirdeye-ui
+    lint: lint-thirdeye-ui
+    notify:
+      app-name: "ThirdEye UI"
+      context: thirdeye-ui
+      fail:
+        description: "ThirdEye UI merge failed"
+      pending:
+        description: "ThirdEye UI merge started"
+      success:
+        description: "ThirdEye UI merge successful"
+    prepare: prepare-thirdeye-ui
+    test: test-thirdeye-ui
+  resource:
+    name: thirdeye-ui-merge-src
+    path: thirdeye-ui
+    project: thirdeye-ui
+pr:
+  job:
+    build: build-thirdeye-ui
+    lint: lint-thirdeye-ui
+    notify:
+      app-name: "ThirdEye UI"
+      context: thirdeye-ui
+      fail:
+        description: "ThirdEye UI build failed"
+      pending:
+        description: "ThirdEye UI build started"
+      success:
+        description: "ThirdEye UI build successful"
+    prepare: prepare-thirdeye-ui
+    test: test-thirdeye-ui
+  resource:
+    name: thirdeye-ui-pr-src
+    path: thirdeye-ui
+    project: thirdeye-ui

@@ -1,4 +1,9 @@
 resource_types:
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+
   - name: slack
     type: docker-image
     source:

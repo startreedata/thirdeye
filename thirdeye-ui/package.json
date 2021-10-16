@@ -43,7 +43,8 @@
         "stylelint-fix": "stylelint '**/*.{css,scss}' --allow-empty-input --fix",
         "prettier-check": "prettier . --check",
         "prettier-fix": "prettier . --write",
-        "lint": "npm run eslint-fix && npm run stylelint-fix && npm run prettier-fix"
+        "lint": "npm run eslint-fix && npm run stylelint-fix && npm run prettier-fix",
+        "lint-check": "npm run eslint-check && npm run stylelint-check && npm run prettier-check"
     },
     "dependencies": {
         "@date-io/luxon": "^1.3.13",

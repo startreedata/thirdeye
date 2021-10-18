@@ -64,7 +64,7 @@ public class AlertTemplateRenderer {
     final Map<String, Object> templateProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
-    return renderAlertInternal(alertTemplateDTO, templateProperties, start, end);
+    return renderAlertInternal(alertTemplateDTO, templateProperties, start, end, alert.getName());
   }
 
   /**
@@ -82,19 +82,22 @@ public class AlertTemplateRenderer {
         alert.getTemplate(),
         alert.getTemplateProperties(),
         start,
-        end);
+        end,
+        alert.getName());
   }
 
   private AlertTemplateDTO renderAlertInternal(final AlertTemplateDTO alertTemplateInsideAlertDto,
       final Map<String, Object> templateProperties,
       final Date start,
-      final Date end)
+      final Date end,
+      final String alertName)
       throws IOException, ClassNotFoundException {
     final AlertTemplateDTO template = getTemplate(alertTemplateInsideAlertDto);
     return applyContext(template,
         templateProperties,
         start,
-        end);
+        end,
+        alertName);
   }
 
   private AlertTemplateDTO getTemplate(final AlertTemplateDTO alertTemplateDTO) {
@@ -116,7 +119,8 @@ public class AlertTemplateRenderer {
   private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
       final Map<String, Object> templateProperties,
       final Date startTime,
-      final Date endTime) throws IOException, ClassNotFoundException {
+      final Date endTime,
+      final String alertName) throws IOException, ClassNotFoundException {
     final Map<String, Object> properties = new HashMap<>();
     if (templateProperties != null) {
       properties.putAll(templateProperties);
@@ -127,6 +131,9 @@ public class AlertTemplateRenderer {
 
     properties.put("startTime", timeConverter.convertMillis(startTime.getTime()));
     properties.put("endTime", timeConverter.convertMillis(endTime.getTime()));
+    // add source metadata to each node
+    template.getNodes().forEach(
+        node -> node.getParams().put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
 
     final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
     return GroovyTemplateUtils.applyContextToTemplate(jsonString,

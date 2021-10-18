@@ -110,8 +110,7 @@ public class AlertEvaluatorV2 {
           .submit(() -> planExecutor.runPipeline(
               templateWithProperties.getNodes(),
               request.getStart().getTime(),
-              request.getEnd().getTime(),
-              request.getAlert().getName()
+              request.getEnd().getTime()
           ))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 

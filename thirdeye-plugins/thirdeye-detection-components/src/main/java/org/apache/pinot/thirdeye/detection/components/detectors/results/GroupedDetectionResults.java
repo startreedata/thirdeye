@@ -23,7 +23,6 @@ package org.apache.pinot.thirdeye.detection.components.detectors.results;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 
@@ -59,16 +58,6 @@ public class GroupedDetectionResults implements DetectionPipelineResult {
 
   public List<DetectionResult> getDetectionResults() {
     return detectionResults;
-  }
-
-  @Override
-  public void setNodeName(final String nodeName) {
-    detectionResults.forEach(result -> result.setNodeName(nodeName));
-  }
-
-  @Override
-  public void setAlertName(final String alertName) {
-    detectionResults.forEach(result -> result.setAlertName(alertName));
   }
 
   @Override

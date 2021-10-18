@@ -9,24 +9,6 @@ public interface DetectionPipelineResult {
 
   List<DetectionResult> getDetectionResults();
 
-  /**
-   * Set a nodeName value for all anomalies.
-   * Default: Do nothing (means the implementation does not hold anomalies).
-   * Override if the instance holds anomalies.
-   */
-  default void setNodeName(String nodeName) {
-    ;
-  }
-
-  /**
-   * Set an alertName value for all anomalies.
-   * Default: Do nothing (means the implementation does not hold anomalies).
-   * Override if the instance holds anomalies.
-   */
-  default void setAlertName(String alertName) {
-    ;
-  }
-
   default long getLastTimestamp() {
     return -1;
   }

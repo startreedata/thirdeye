@@ -105,14 +105,4 @@ public class DetectionPipelineResultV1 implements DetectionPipelineResult {
   public List<DetectionResult> getDetectionResults() {
     throw new UnsupportedOperationException("Not supported");
   }
-
-  @Override
-  public void setNodeName(final String nodeName) {
-    anomalies.forEach(anomaly -> anomaly.setNodeName(nodeName));
-  }
-
-  @Override
-  public void setAlertName(final String alertName) {
-    anomalies.forEach(anomaly -> anomaly.setAlertName(alertName));
-  }
 }

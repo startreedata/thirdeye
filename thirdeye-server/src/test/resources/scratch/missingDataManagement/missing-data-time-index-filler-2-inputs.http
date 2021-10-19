@@ -1,0 +1,138 @@
+### Threshold Alert
+## no baselineMissingDataManager + february (left missing data) --> fails
+## no currentMissingDataManager + end of july (right missing data) --> fails
+## does not fail with the missingDataManagers
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "start": "{{start}}",
+  "end": "{{end}}",
+  "alert": {"name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "ABSOLUTE_CHANGE",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.absoluteChange": "${absoluteChange}",
+            "component.offset": "${offset}",
+            "component.pattern": "${pattern}",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "baseline",
+              "sourcePlanNode": "baselineMissingDataManager",
+              "sourceProperty": "baselineOutput"
+            },
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentMissingDataManager",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "currentMissingDataManager",
+          "type": "TimeIndexFiller",
+          "params": {
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.minTimeInference": "FROM_DETECTION_TIME",
+            "component.maxTimeInference": "FROM_DETECTION_TIME"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputKey": "filler",
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
+          "name": "baselineMissingDataManager",
+          "type": "TimeIndexFiller",
+          "params": {
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.minTimeInference": "FROM_DETECTION_TIME_WITH_LOOKBACK",
+            "component.maxTimeInference": "FROM_DETECTION_TIME_WITH_LOOKBACK",
+            "component.lookback": "P7D"
+          },
+          "inputs": [
+            {
+              "targetProperty": "baseline",
+              "sourcePlanNode": "baselineDataFetcher",
+              "sourceProperty": "baselineOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputKey": "filler",
+              "outputName": "baselineOutput"
+            }
+          ]
+        },
+        {
+          "name": "baselineDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "baselineOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews_with_missing_data",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "absoluteChange": "100000",
+      "offset": "wo1w",
+      "offsetDays": "7",
+      "pattern": "down"
+    }
+  }
+}

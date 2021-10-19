@@ -1,0 +1,94 @@
+### Threshold Alert
+## uses the default limit inference strategies:
+## minTime: FROM_DATA
+## maxTime: FROM_DETECTION TIME
+## no baselineMissingDataManager + february (left missing data) --> fails
+## no currentMissingDataManager + end of july (right missing data) --> fails
+## does not fail with the missingDataManagers
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+
+{
+  "start": "{{start}}",
+  "end": "{{end}}",
+  "alert": {"name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "HOLT_WINTERS",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.dimensions": [],
+            "component.pattern": "${pattern}",
+            "component.sensitivity": "${sensitivity}",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "missingDataManager",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "missingDataManager",
+          "type": "TimeIndexFiller",
+          "params": {
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts"
+          },
+          "inputs": [
+            {
+              "targetProperty": "baseline",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputKey": "filler",
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews_with_missing_data",
+      "metric": "sum(views)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "lookback": "14",
+      "pattern": "DOWN",
+      "sensitivity": "1"
+    }
+  }
+}

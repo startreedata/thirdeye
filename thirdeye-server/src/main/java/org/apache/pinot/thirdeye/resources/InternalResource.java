@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -127,7 +128,9 @@ public class InternalResource {
     final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO()
         .setName("report-generation");
 
-    metricAnomaliesContent.init(new Properties(), configuration);
+    metricAnomaliesContent.init(new NotificationContext()
+        .setProperties(new Properties())
+        .setConfig(configuration));
     final Map<String, Object> templateData = metricAnomaliesContent.format(
         new ArrayList<>(anomalies),
         subscriptionGroup);

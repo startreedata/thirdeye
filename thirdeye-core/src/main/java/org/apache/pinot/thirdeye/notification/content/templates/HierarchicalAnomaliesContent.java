@@ -209,7 +209,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
       List<AnomalyReportEntity> rootAnomalyDetail,
       SortedMap<String, List<AnomalyReportEntity>> leafAnomalyDetail) {
     AnomalyReportEntity anomalyReport = generateAnomalyReportEntity(anomaly,
-        thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
+        context.getUiPublicUrl());
     AnomalyFunctionDTO anomalyFunction = anomaly.getAnomalyFunction();
     String exploredDimensions = anomalyFunction.getExploreDimensions();
     // Add WoW number

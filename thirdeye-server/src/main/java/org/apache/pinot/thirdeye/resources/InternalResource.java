@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
@@ -24,6 +25,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
@@ -130,7 +132,10 @@ public class InternalResource {
 
     metricAnomaliesContent.init(new NotificationContext()
         .setProperties(new Properties())
-        .setConfig(configuration));
+        .setUiPublicUrl(optional(configuration)
+            .map(ThirdEyeServerConfiguration::getUiConfiguration)
+            .map(UiConfiguration::getExternalUrl)
+            .orElse("")));
     final Map<String, Object> templateData = metricAnomaliesContent.format(
         new ArrayList<>(anomalies),
         subscriptionGroup);

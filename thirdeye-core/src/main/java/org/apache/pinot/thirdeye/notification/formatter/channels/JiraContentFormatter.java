@@ -26,6 +26,7 @@ import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_LABELS;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_MERGE_GAP;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_PROJECT;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
@@ -45,6 +46,7 @@ import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
@@ -95,7 +97,10 @@ public class JiraContentFormatter {
     this.subsConfig = subsConfig;
     notificationContent.init(new NotificationContext()
         .setProperties(jiraClientConfig)
-        .setConfig(teConfig));
+        .setUiPublicUrl(optional(teConfig)
+            .map(ThirdEyeServerConfiguration::getUiConfiguration)
+            .map(UiConfiguration::getExternalUrl)
+            .orElse("")));
 
 
     this.jiraAdminConfig = jiraAdminConfig;

@@ -151,7 +151,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       final double lift = BaseNotificationContent
           .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
       final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-          getAnomalyURL(anomaly, thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl()),
+          getAnomalyURL(anomaly, context.getUiPublicUrl()),
           getPredictedValue(anomaly),
           getCurrentValue(anomaly),
           getFormattedLiftValue(anomaly, lift),
@@ -206,7 +206,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       try {
         imgPath = AlertScreenshotHelper
             .takeGraphScreenShot(singleAnomaly.getAnomalyId(),
-                thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
+                context.getUiPublicUrl());
       } catch (final Exception e) {
         LOG.error("Exception while embedding screenshot for anomaly {}",
             singleAnomaly.getAnomalyId(), e);

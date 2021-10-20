@@ -1,12 +1,11 @@
 package org.apache.pinot.thirdeye.notification;
 
 import java.util.Properties;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 
 public class NotificationContext {
 
   private Properties properties;
-  private ThirdEyeServerConfiguration config;
+  private String uiPublicUrl;
 
   public Properties getProperties() {
     return properties;
@@ -17,13 +16,12 @@ public class NotificationContext {
     return this;
   }
 
-  public ThirdEyeServerConfiguration getConfig() {
-    return config;
+  public String getUiPublicUrl() {
+    return uiPublicUrl;
   }
 
-  public NotificationContext setConfig(
-      final ThirdEyeServerConfiguration config) {
-    this.config = config;
+  public NotificationContext setUiPublicUrl(final String uiPublicUrl) {
+    this.uiPublicUrl = uiPublicUrl;
     return this;
   }
 }

@@ -41,6 +41,7 @@ import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
@@ -165,7 +166,10 @@ public class EmailAlertScheme extends DetectionAlertScheme {
     final BaseNotificationContent content = getNotificationContent(emailClientConfigs);
     content.init(new NotificationContext()
         .setProperties(emailClientConfigs)
-        .setConfig(teConfig));
+        .setUiPublicUrl(optional(teConfig)
+            .map(ThirdEyeServerConfiguration::getUiConfiguration)
+            .map(UiConfiguration::getExternalUrl)
+            .orElse("")));
 
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(emailClientConfigs,
         content,

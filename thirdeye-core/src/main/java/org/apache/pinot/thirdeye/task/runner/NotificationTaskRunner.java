@@ -29,7 +29,7 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-import org.apache.pinot.thirdeye.detection.alert.NotificationTaskFactory;
+import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -54,7 +54,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
-  private final NotificationTaskFactory notificationTaskFactory;
+  private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
@@ -62,11 +62,11 @@ public class NotificationTaskRunner implements TaskRunner {
   private final Counter notificationTaskCounter;
 
   @Inject
-  public NotificationTaskRunner(final NotificationTaskFactory notificationTaskFactory,
+  public NotificationTaskRunner(final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final MetricRegistry metricRegistry) {
-    this.notificationTaskFactory = notificationTaskFactory;
+    this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
 
@@ -109,7 +109,7 @@ public class NotificationTaskRunner implements TaskRunner {
       final SubscriptionGroupDTO alertConfig = loadDetectionAlertConfig(alertId);
 
       // Load all the anomalies along with their recipients
-      final DetectionAlertFilter alertFilter = notificationTaskFactory
+      final DetectionAlertFilter alertFilter = notificationSchemeFactory
           .loadAlertFilter(alertConfig, System.currentTimeMillis());
       DetectionAlertFilterResult result = alertFilter.run();
 
@@ -121,14 +121,14 @@ public class NotificationTaskRunner implements TaskRunner {
       }
 
       // Suppress alerts if any and get the filtered anomalies to be notified
-      final Set<DetectionAlertSuppressor> alertSuppressors = notificationTaskFactory
+      final Set<DetectionAlertSuppressor> alertSuppressors = notificationSchemeFactory
           .loadAlertSuppressors(alertConfig);
       for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
         result = alertSuppressor.run(result);
       }
 
       // Send out alert notifications (email and/or iris)
-      final Set<NotificationScheme> alertSchemes = notificationTaskFactory.getAlertSchemes();
+      final Set<NotificationScheme> alertSchemes = notificationSchemeFactory.getAlertSchemes();
       for (final NotificationScheme alertScheme : alertSchemes) {
         alertScheme.run(alertConfig, result);
         alertScheme.destroy();

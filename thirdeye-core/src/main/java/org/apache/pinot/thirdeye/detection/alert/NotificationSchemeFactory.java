@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -27,10 +28,15 @@ import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
+import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -40,9 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class NotificationTaskFactory {
+public class NotificationSchemeFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationSchemeFactory.class);
 
   private static final String PROP_CLASS_NAME = "className";
 
@@ -51,18 +57,43 @@ public class NotificationTaskFactory {
   private final AlertManager alertManager;
   private final WebhookAlertScheme webhookAlertScheme;
   private final EmailAlertScheme emailAlertScheme;
+  private final NotificationSchemeContext context;
 
   @Inject
-  public NotificationTaskFactory(final DataProvider provider,
+  public NotificationSchemeFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final EmailAlertScheme emailAlertScheme,
-      final WebhookAlertScheme webhookAlertScheme) {
+      final ThirdEyeServerConfiguration configuration,
+      final EntityGroupKeyContent entityGroupKeyContent,
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final MetricRegistry metricRegistry,
+      final EmailContentFormatter emailContentFormatter) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
-    this.webhookAlertScheme = webhookAlertScheme;
-    this.emailAlertScheme = emailAlertScheme;
+
+    context = new NotificationSchemeContext()
+        .setUiPublicUrl(configuration.getUiConfiguration().getExternalUrl())
+        .setEntityGroupKeyContent(entityGroupKeyContent)
+        .setMetricAnomaliesContent(metricAnomaliesContent)
+        .setMetricRegistry(metricRegistry)
+        .setSmtpConfiguration(configuration.getAlerterConfigurations().getSmtpConfiguration())
+        .setEmailContentFormatter(emailContentFormatter)
+    ;
+    this.webhookAlertScheme = createWebhookAlertScheme();
+    this.emailAlertScheme = createEmailAlertScheme();
+  }
+
+  public EmailAlertScheme createEmailAlertScheme() {
+    final EmailAlertScheme instance = new EmailAlertScheme();
+    instance.init(context);
+    return instance;
+  }
+
+  public WebhookAlertScheme createWebhookAlertScheme() {
+    final WebhookAlertScheme instance = new WebhookAlertScheme();
+    instance.init(context);
+    return instance;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)

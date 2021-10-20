@@ -51,6 +51,7 @@ import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -80,7 +81,7 @@ public class JiraContentFormatter {
   protected Properties alertClientConfig;
   protected SubscriptionGroupDTO subsConfig;
   protected ThirdEyeServerConfiguration teConfig;
-  protected BaseNotificationContent notificationContent;
+  protected NotificationContent notificationContent;
 
   static {
     Map<String, String> aMap = new HashMap<>();
@@ -89,7 +90,7 @@ public class JiraContentFormatter {
   }
 
   public JiraContentFormatter(JiraConfiguration jiraAdminConfig, Properties jiraClientConfig,
-      BaseNotificationContent content, ThirdEyeServerConfiguration teConfig,
+      NotificationContent content, ThirdEyeServerConfiguration teConfig,
       SubscriptionGroupDTO subsConfig) {
     this.alertClientConfig = jiraClientConfig;
     this.teConfig = teConfig;

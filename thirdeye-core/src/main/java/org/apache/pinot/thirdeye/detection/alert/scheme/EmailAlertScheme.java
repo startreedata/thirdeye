@@ -23,10 +23,8 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,17 +38,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
-import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
+import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
-import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
-import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -74,26 +69,19 @@ public class EmailAlertScheme extends NotificationScheme {
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
-  private final ThirdEyeServerConfiguration teConfig;
-  private final EmailContentFormatter emailContentFormatter;
-  private final SmtpConfiguration smtpConfig;
-  private final Counter emailAlertsFailedCounter;
-  private final Counter emailAlertsSuccessCounter;
-  private List<String> adminRecipients;
-  private List<String> emailWhitelist;
+  private SmtpConfiguration smtpConfig;
+  private EmailContentFormatter emailContentFormatter;
+  private Counter emailAlertsFailedCounter;
+  private Counter emailAlertsSuccessCounter;
+  private List<String> adminRecipients = new ArrayList<>();
+  private List<String> emailWhitelist = new ArrayList<>();
 
-  @Inject
-  public EmailAlertScheme(final ThirdEyeServerConfiguration thirdeyeConfig,
-      final EmailContentFormatter emailContentFormatter,
-      final MetricAnomaliesContent metricAnomaliesContent,
-      final EntityGroupKeyContent entityGroupKeyContent,
-      final MetricRegistry metricRegistry) {
-    super(metricAnomaliesContent, entityGroupKeyContent);
-    teConfig = thirdeyeConfig;
-    smtpConfig = thirdeyeConfig.getAlerterConfigurations().getSmtpConfiguration();
-    this.emailContentFormatter = emailContentFormatter;
-    adminRecipients = new ArrayList<>();
-    emailWhitelist = new ArrayList<>();
+  @Override
+  public void init(final NotificationSchemeContext context) {
+    super.init(context);
+
+    smtpConfig = context.getSmtpConfiguration();
+    emailContentFormatter = context.getEmailContentFormatter();
 
     emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
     emailAlertsSuccessCounter = metricRegistry.counter("emailAlertsSuccessCounter");
@@ -161,13 +149,10 @@ public class EmailAlertScheme extends NotificationScheme {
     blacklistRecipients(recipients);
     validateAlert(recipients, anomalies);
 
-    final BaseNotificationContent content = getNotificationContent(emailClientConfigs);
+    final NotificationContent content = getNotificationContent(emailClientConfigs);
     content.init(new NotificationContext()
         .setProperties(emailClientConfigs)
-        .setUiPublicUrl(optional(teConfig)
-            .map(ThirdEyeServerConfiguration::getUiConfiguration)
-            .map(UiConfiguration::getExternalUrl)
-            .orElse("")));
+        .setUiPublicUrl(context.getUiPublicUrl()));
 
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(emailClientConfigs,
         content,

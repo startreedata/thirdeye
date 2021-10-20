@@ -19,12 +19,12 @@
 
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
+import com.codahale.metrics.MetricRegistry;
 import java.util.Comparator;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
-import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
+import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.slf4j.Logger;
@@ -32,18 +32,21 @@ import org.slf4j.LoggerFactory;
 
 public abstract class NotificationScheme {
 
-  public static final String PROP_TEMPLATE = "template";
+  private static final String PROP_TEMPLATE = "template";
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationScheme.class);
   protected static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
-  private static final Logger LOG = LoggerFactory.getLogger(NotificationScheme.class);
 
-  private final MetricAnomaliesContent metricAnomaliesContent;
-  private final EntityGroupKeyContent entityGroupKeyContent;
+  protected NotificationSchemeContext context;
+  protected MetricRegistry metricRegistry;
+  private NotificationContent metricAnomaliesContent;
+  private NotificationContent entityGroupKeyContent;
 
-  public NotificationScheme(final MetricAnomaliesContent metricAnomaliesContent,
-      final EntityGroupKeyContent entityGroupKeyContent) {
-    this.metricAnomaliesContent = metricAnomaliesContent;
-    this.entityGroupKeyContent = entityGroupKeyContent;
+  public void init(NotificationSchemeContext context) {
+    this.context = context;
+    this.metricAnomaliesContent = context.getMetricAnomaliesContent();
+    this.entityGroupKeyContent = context.getEntityGroupKeyContent();
+    this.metricRegistry = context.getMetricRegistry();
   }
 
   public abstract void run(
@@ -70,7 +73,7 @@ public abstract class NotificationScheme {
     LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
   }
 
-  protected BaseNotificationContent getNotificationContent(
+  protected NotificationContent getNotificationContent(
       final Properties properties) {
     final EmailTemplateType template = getTemplate(properties);
     switch (template) {

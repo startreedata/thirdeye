@@ -2,13 +2,16 @@ package org.apache.pinot.thirdeye.detection.alert;
 
 import static org.mockito.Mockito.mock;
 
+import com.codahale.metrics.MetricRegistry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -20,13 +23,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class NotificationTaskFactoryTest {
+public class NotificationSchemeFactoryTest {
 
   private TestDbEnv testDAOProvider;
   private SubscriptionGroupDTO alertConfigDTO;
   private SubscriptionGroupManager alertConfigDAO;
   private NotificationSchemesDto alerters;
-  private NotificationTaskFactory notificationTaskFactory;
+  private NotificationSchemeFactory notificationSchemeFactory;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
@@ -44,11 +47,14 @@ public class NotificationTaskFactoryTest {
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.alertConfigDTO = new SubscriptionGroupDTO();
 
-    notificationTaskFactory = new NotificationTaskFactory(mock(DataProvider.class),
+    notificationSchemeFactory = new NotificationSchemeFactory(mock(DataProvider.class),
         mock(MergedAnomalyResultManager.class),
         mock(AlertManager.class),
-        mock(EmailAlertScheme.class),
-        mock(WebhookAlertScheme.class));
+        new ThirdEyeServerConfiguration(),
+        mock(EntityGroupKeyContent.class),
+        mock(MetricAnomaliesContent.class),
+        new MetricRegistry(),
+        mock(EmailContentFormatter.class));
   }
 
   @AfterClass(alwaysRun = true)
@@ -78,7 +84,7 @@ public class NotificationTaskFactoryTest {
     SubscriptionGroupDTO alertConfig = createAlertConfig(alerters,
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     long endTime = 9999l;
-    DetectionAlertFilter detectionAlertFilter = notificationTaskFactory
+    DetectionAlertFilter detectionAlertFilter = notificationSchemeFactory
         .loadAlertFilter(alertConfig, endTime);
 
     Assert.assertEquals(detectionAlertFilter.config.getId().longValue(),

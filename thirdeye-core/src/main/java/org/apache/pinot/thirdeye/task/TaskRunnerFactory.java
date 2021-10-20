@@ -23,9 +23,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.pinot.thirdeye.spi.task.TaskType;
 import org.apache.pinot.thirdeye.task.runner.DataQualityPipelineTaskRunner;
-import org.apache.pinot.thirdeye.task.runner.DetectionAlertTaskRunner;
 import org.apache.pinot.thirdeye.task.runner.DetectionPipelineTaskRunner;
 import org.apache.pinot.thirdeye.task.runner.MonitorTaskRunner;
+import org.apache.pinot.thirdeye.task.runner.NotificationTaskRunner;
 import org.apache.pinot.thirdeye.task.runner.OnboardingTaskRunner;
 
 @Singleton
@@ -33,7 +33,7 @@ public class TaskRunnerFactory {
 
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
   private final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner;
-  private final DetectionAlertTaskRunner detectionAlertTaskRunner;
+  private final NotificationTaskRunner notificationTaskRunner;
   private final OnboardingTaskRunner onboardingTaskRunner;
   private final MonitorTaskRunner monitorTaskRunner;
 
@@ -41,12 +41,12 @@ public class TaskRunnerFactory {
   public TaskRunnerFactory(
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
       final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner,
-      final DetectionAlertTaskRunner detectionAlertTaskRunner,
+      final NotificationTaskRunner notificationTaskRunner,
       final OnboardingTaskRunner onboardingTaskRunner,
       final MonitorTaskRunner monitorTaskRunner) {
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
     this.dataQualityPipelineTaskRunner = dataQualityPipelineTaskRunner;
-    this.detectionAlertTaskRunner = detectionAlertTaskRunner;
+    this.notificationTaskRunner = notificationTaskRunner;
     this.onboardingTaskRunner = onboardingTaskRunner;
     this.monitorTaskRunner = monitorTaskRunner;
   }
@@ -58,7 +58,7 @@ public class TaskRunnerFactory {
       case DETECTION:
         return detectionPipelineTaskRunner;
       case NOTIFICATION:
-        return detectionAlertTaskRunner;
+        return notificationTaskRunner;
       case ONBOARDING:
         return onboardingTaskRunner;
       case MONITOR:

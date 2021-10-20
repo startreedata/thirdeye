@@ -5,7 +5,7 @@ import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyCo
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 
-public class RandomAlerter extends DetectionAlertScheme {
+public class RandomAlerter extends NotificationScheme {
 
   public RandomAlerter(
       final MetricAnomaliesContent metricAnomaliesContent,

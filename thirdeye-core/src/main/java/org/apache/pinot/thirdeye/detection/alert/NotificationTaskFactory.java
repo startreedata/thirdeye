@@ -27,8 +27,8 @@ import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -40,9 +40,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DetectionAlertTaskFactory {
+public class NotificationTaskFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskFactory.class);
 
   private static final String PROP_CLASS_NAME = "className";
 
@@ -53,7 +53,7 @@ public class DetectionAlertTaskFactory {
   private final EmailAlertScheme emailAlertScheme;
 
   @Inject
-  public DetectionAlertTaskFactory(final DataProvider provider,
+  public NotificationTaskFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
       final EmailAlertScheme emailAlertScheme,
@@ -83,8 +83,7 @@ public class DetectionAlertTaskFactory {
         this.alertManager);
   }
 
-  public Set<DetectionAlertScheme> getAlertSchemes()
-      throws Exception {
+  public Set<NotificationScheme> getAlertSchemes() {
     return ImmutableSet.of(emailAlertScheme, webhookAlertScheme);
   }
 

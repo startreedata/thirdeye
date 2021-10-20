@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * test2: value2
  */
 @AlertScheme(type = "JIRA")
-public class DetectionJiraAlerter extends DetectionAlertScheme {
+public class DetectionJiraAlerter extends NotificationScheme {
 
   public static final String PROP_JIRA_SCHEME = "jiraScheme";
   public static final int JIRA_DESCRIPTION_MAX_LENGTH = 100000;

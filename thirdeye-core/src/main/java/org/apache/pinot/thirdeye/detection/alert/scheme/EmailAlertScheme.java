@@ -66,23 +66,21 @@ import org.slf4j.LoggerFactory;
  */
 @AlertScheme(type = "EMAIL")
 @Singleton
-public class EmailAlertScheme extends DetectionAlertScheme {
+public class EmailAlertScheme extends NotificationScheme {
 
   public static final String PROP_RECIPIENTS = "recipients";
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailAlertScheme.class);
-
-  private List<String> adminRecipients;
-  private List<String> emailWhitelist;
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
   private final ThirdEyeServerConfiguration teConfig;
   private final EmailContentFormatter emailContentFormatter;
   private final SmtpConfiguration smtpConfig;
-
   private final Counter emailAlertsFailedCounter;
   private final Counter emailAlertsSuccessCounter;
+  private List<String> adminRecipients;
+  private List<String> emailWhitelist;
 
   @Inject
   public EmailAlertScheme(final ThirdEyeServerConfiguration thirdeyeConfig,

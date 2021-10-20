@@ -30,17 +30,17 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DetectionAlertScheme {
+public abstract class NotificationScheme {
 
   public static final String PROP_TEMPLATE = "template";
   protected static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertScheme.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationScheme.class);
 
   private final MetricAnomaliesContent metricAnomaliesContent;
   private final EntityGroupKeyContent entityGroupKeyContent;
 
-  public DetectionAlertScheme(final MetricAnomaliesContent metricAnomaliesContent,
+  public NotificationScheme(final MetricAnomaliesContent metricAnomaliesContent,
       final EntityGroupKeyContent entityGroupKeyContent) {
     this.metricAnomaliesContent = metricAnomaliesContent;
     this.entityGroupKeyContent = entityGroupKeyContent;

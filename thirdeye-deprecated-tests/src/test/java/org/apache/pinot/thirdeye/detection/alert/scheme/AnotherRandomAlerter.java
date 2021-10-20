@@ -9,7 +9,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
  * Used in tests
  */
 @SuppressWarnings("unused")
-public class AnotherRandomAlerter extends DetectionAlertScheme {
+public class AnotherRandomAlerter extends NotificationScheme {
 
   public AnotherRandomAlerter(
       final MetricAnomaliesContent metricAnomaliesContent,

@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.task.runner;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -27,8 +29,8 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertTaskFactory;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.NotificationTaskFactory;
+import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -39,7 +41,6 @@ import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskContext;
 import org.apache.pinot.thirdeye.task.TaskResult;
 import org.apache.pinot.thirdeye.task.TaskRunner;
-import org.apache.pinot.thirdeye.util.ThirdeyeMetricsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,25 +50,32 @@ import org.slf4j.LoggerFactory;
  * mappings from anomalies to recipients and then send email to the recipients.
  */
 @Singleton
-public class DetectionAlertTaskRunner implements TaskRunner {
+public class NotificationTaskRunner implements TaskRunner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertTaskRunner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
-  private final DetectionAlertTaskFactory detAlertTaskFactory;
-  private final SubscriptionGroupManager subscriptionConfigDAO;
-  private final MergedAnomalyResultManager mergedAnomalyDAO;
+  private final NotificationTaskFactory notificationTaskFactory;
+  private final SubscriptionGroupManager subscriptionGroupManager;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+
+  private final Counter notificationTaskSuccessCounter;
+  private final Counter notificationTaskCounter;
 
   @Inject
-  public DetectionAlertTaskRunner(final DetectionAlertTaskFactory detectionAlertTaskFactory,
-      final SubscriptionGroupManager detectionAlertConfigManager,
-      final MergedAnomalyResultManager mergedAnomalyResultDAO) {
-    this.detAlertTaskFactory = detectionAlertTaskFactory;
-    this.subscriptionConfigDAO = detectionAlertConfigManager;
-    this.mergedAnomalyDAO = mergedAnomalyResultDAO;
+  public NotificationTaskRunner(final NotificationTaskFactory notificationTaskFactory,
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final MetricRegistry metricRegistry) {
+    this.notificationTaskFactory = notificationTaskFactory;
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+
+    notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
+    notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
   }
 
-  private SubscriptionGroupDTO loadDetectionAlertConfig(long detectionAlertConfigId) {
-    SubscriptionGroupDTO detectionAlertConfig = this.subscriptionConfigDAO
+  private SubscriptionGroupDTO loadDetectionAlertConfig(final long detectionAlertConfigId) {
+    final SubscriptionGroupDTO detectionAlertConfig = this.subscriptionGroupManager
         .findById(detectionAlertConfigId);
     if (detectionAlertConfig == null) {
       throw new RuntimeException("Cannot find detection alert config id " + detectionAlertConfigId);
@@ -79,48 +87,49 @@ public class DetectionAlertTaskRunner implements TaskRunner {
     return detectionAlertConfig;
   }
 
-  private void updateSubscriptionWatermarks(DetectionAlertFilterResult result,
-      SubscriptionGroupDTO subscriptionConfig) {
+  private void updateSubscriptionWatermarks(final DetectionAlertFilterResult result,
+      final SubscriptionGroupDTO subscriptionConfig) {
     if (!result.getAllAnomalies().isEmpty()) {
       subscriptionConfig.setVectorClocks(
           AlertUtils.mergeVectorClock(subscriptionConfig.getVectorClocks(),
               AlertUtils.makeVectorClock(result.getAllAnomalies())));
 
       LOG.info("Updating watermarks for subscription config : {}", subscriptionConfig.getId());
-      this.subscriptionConfigDAO.save(subscriptionConfig);
+      this.subscriptionGroupManager.save(subscriptionConfig);
     }
   }
 
   @Override
-  public List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception {
-    ThirdeyeMetricsUtil.alertTaskCounter.inc();
+  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
+      throws Exception {
+    notificationTaskCounter.inc();
 
     try {
-      long alertId = ((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId();
-      SubscriptionGroupDTO alertConfig = loadDetectionAlertConfig(alertId);
+      final long alertId = ((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId();
+      final SubscriptionGroupDTO alertConfig = loadDetectionAlertConfig(alertId);
 
       // Load all the anomalies along with their recipients
-      DetectionAlertFilter alertFilter = detAlertTaskFactory
+      final DetectionAlertFilter alertFilter = notificationTaskFactory
           .loadAlertFilter(alertConfig, System.currentTimeMillis());
       DetectionAlertFilterResult result = alertFilter.run();
 
       // TODO: The old UI relies on notified tag to display the anomalies. After the migration
       // we need to clean up all references to notified tag.
-      for (MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
+      for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
         anomaly.setNotified(true);
-        mergedAnomalyDAO.update(anomaly);
+        mergedAnomalyResultManager.update(anomaly);
       }
 
       // Suppress alerts if any and get the filtered anomalies to be notified
-      Set<DetectionAlertSuppressor> alertSuppressors = detAlertTaskFactory
+      final Set<DetectionAlertSuppressor> alertSuppressors = notificationTaskFactory
           .loadAlertSuppressors(alertConfig);
-      for (DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
+      for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
         result = alertSuppressor.run(result);
       }
 
       // Send out alert notifications (email and/or iris)
-      Set<DetectionAlertScheme> alertSchemes = detAlertTaskFactory.getAlertSchemes();
-      for (DetectionAlertScheme alertScheme : alertSchemes) {
+      final Set<NotificationScheme> alertSchemes = notificationTaskFactory.getAlertSchemes();
+      for (final NotificationScheme alertScheme : alertSchemes) {
         alertScheme.run(alertConfig, result);
         alertScheme.destroy();
       }
@@ -128,7 +137,7 @@ public class DetectionAlertTaskRunner implements TaskRunner {
       updateSubscriptionWatermarks(result, alertConfig);
       return new ArrayList<>();
     } finally {
-      ThirdeyeMetricsUtil.alertTaskSuccessCounter.inc();
+      notificationTaskSuccessCounter.inc();
     }
   }
 }

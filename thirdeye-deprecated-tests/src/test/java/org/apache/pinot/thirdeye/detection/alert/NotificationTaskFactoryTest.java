@@ -20,13 +20,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DetectionAlertTaskFactoryTest {
+public class NotificationTaskFactoryTest {
 
   private TestDbEnv testDAOProvider;
   private SubscriptionGroupDTO alertConfigDTO;
   private SubscriptionGroupManager alertConfigDAO;
   private NotificationSchemesDto alerters;
-  private DetectionAlertTaskFactory detectionAlertTaskFactory;
+  private NotificationTaskFactory notificationTaskFactory;
 
   @BeforeMethod
   public void beforeMethod() throws Exception {
@@ -44,7 +44,7 @@ public class DetectionAlertTaskFactoryTest {
     this.alertConfigDAO = daoRegistry.getDetectionAlertConfigManager();
     this.alertConfigDTO = new SubscriptionGroupDTO();
 
-    detectionAlertTaskFactory = new DetectionAlertTaskFactory(mock(DataProvider.class),
+    notificationTaskFactory = new NotificationTaskFactory(mock(DataProvider.class),
         mock(MergedAnomalyResultManager.class),
         mock(AlertManager.class),
         mock(EmailAlertScheme.class),
@@ -78,7 +78,7 @@ public class DetectionAlertTaskFactoryTest {
     SubscriptionGroupDTO alertConfig = createAlertConfig(alerters,
         "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter");
     long endTime = 9999l;
-    DetectionAlertFilter detectionAlertFilter = detectionAlertTaskFactory
+    DetectionAlertFilter detectionAlertFilter = notificationTaskFactory
         .loadAlertFilter(alertConfig, endTime);
 
     Assert.assertEquals(detectionAlertFilter.config.getId().longValue(),

@@ -33,7 +33,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @AlertScheme(type = "WEBHOOK")
 @Singleton
-public class WebhookAlertScheme extends DetectionAlertScheme {
+public class WebhookAlertScheme extends NotificationScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
   private final WebhookContentFormatter formatter;

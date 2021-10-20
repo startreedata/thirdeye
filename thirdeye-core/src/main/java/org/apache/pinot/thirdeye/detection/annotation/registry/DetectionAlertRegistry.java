@@ -29,7 +29,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
-import org.apache.pinot.thirdeye.detection.alert.scheme.DetectionAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertFilter;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
@@ -87,7 +87,7 @@ public class DetectionAlertRegistry {
 
       // register alert schemes
       ClassInfoList alertSchemeClasses = scanResult
-          .getSubclasses(DetectionAlertScheme.class.getName());
+          .getSubclasses(NotificationScheme.class.getName());
       for (ClassInfo classInfo : alertSchemeClasses) {
         for (AnnotationInfo annotationInfo : classInfo.getAnnotationInfo()) {
           if (annotationInfo.getName().equals(AlertScheme.class.getName())) {

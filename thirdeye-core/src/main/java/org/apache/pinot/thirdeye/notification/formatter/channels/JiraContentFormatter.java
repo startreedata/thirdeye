@@ -45,6 +45,7 @@ import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -92,7 +93,9 @@ public class JiraContentFormatter {
     this.teConfig = teConfig;
     notificationContent = content;
     this.subsConfig = subsConfig;
-    notificationContent.init(alertClientConfig, teConfig);
+    notificationContent.init(new NotificationContext()
+        .setProperties(jiraClientConfig)
+        .setConfig(teConfig));
 
 
     this.jiraAdminConfig = jiraAdminConfig;

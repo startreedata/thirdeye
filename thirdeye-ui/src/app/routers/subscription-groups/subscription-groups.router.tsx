@@ -95,7 +95,6 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
 
                 {/* Subscription groups create path */}
                 <Route
-                    exact
                     component={SubscriptionGroupsCreatePage}
                     path={AppRoute.SUBSCRIPTION_GROUPS_CREATE}
                 />

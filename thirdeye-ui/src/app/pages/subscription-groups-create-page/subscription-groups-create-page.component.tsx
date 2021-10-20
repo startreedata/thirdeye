@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
-import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import { SubscriptionGroupWizardV1 } from "../../components/subscription-group-wizard/subscription-group-wizard-v1.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -66,7 +66,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
 
     return (
         <PageContents centered hideTimeRange title={t("label.create")}>
-            <SubscriptionGroupWizard
+            <SubscriptionGroupWizardV1
                 alerts={alerts}
                 onFinish={onSubscriptionGroupWizardFinish}
             />

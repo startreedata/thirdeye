@@ -46,6 +46,11 @@ public interface NotificationContent {
   String getTemplate();
 
   /**
+   * Path to the img which contains the anomaly snapshot
+   */
+  String getSnaphotPath();
+
+  /**
    * Cleanup any temporary data
    */
   void cleanup();

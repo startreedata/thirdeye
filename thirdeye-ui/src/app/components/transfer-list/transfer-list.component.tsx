@@ -282,6 +282,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                         {/* Transfer button */}
                                                         <ListItemSecondaryAction>
                                                             <IconButton
+                                                                color="secondary"
                                                                 onClick={() =>
                                                                     handleListItemTransfer(
                                                                         fromListItem
@@ -403,6 +404,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                         {/* Remove button */}
                                                         <ListItemSecondaryAction>
                                                             <IconButton
+                                                                color="secondary"
                                                                 onClick={() =>
                                                                     handleListItemRemove(
                                                                         toListItem

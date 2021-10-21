@@ -4,19 +4,19 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: daniellavoie/ci-cortex-distrib-ubuntu
+    repository: daniellavoie/startree-platform-ci
     tag: latest
 
 inputs:
-- name: ci-src
-- name: chart-src
-- name: version
+  - name: ci-src
+  - name: chart-src
+  - name: version
 
 outputs:
-- name: build
+  - name: build
 
 params:
-  CHART_DIR: 
+  CHART_DIR:
 
 run:
   path: ci-src/.concourse/tasks/build-helm-chart/build-helm-chart.sh

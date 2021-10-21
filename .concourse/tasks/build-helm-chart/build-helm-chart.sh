@@ -24,7 +24,7 @@ VERSION=$(cat version/version)
 
 pushd $CHART_DIR && \
   yq --version && \
-  NEW_CHART_CONTENT=$(yq w Chart.yaml version ${VERSION}) && \
+  NEW_CHART_CONTENT=$(yq eval ".version = \"${VERSION}\"" Chart.yaml) && \
   echo "$NEW_CHART_CONTENT" > Chart.yaml && \
   INITDBSQL=$(cat ./config/initdb.sql) yq e -i '.mysql.initializationFiles."initdb.sql" = strenv(INITDBSQL)' values.yaml && \
   helm dependency update && \

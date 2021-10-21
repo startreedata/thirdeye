@@ -90,7 +90,6 @@ export const AlertsRouter: FunctionComponent = () => {
 
                 {/* Alerts create path */}
                 <Route
-                    exact
                     component={AlertsCreatePage}
                     path={AppRoute.ALERTS_CREATE}
                 />

@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
+import { AlertWizardV1 } from "../../components/alert-wizard/alert-wizard-v1.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
@@ -153,7 +153,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
     return (
         <PageContents centered title={t("label.create")}>
-            <AlertWizard
+            <AlertWizardV1
                 getAlertEvaluation={fetchAlertEvaluation}
                 getAllAlerts={fetchAllAlerts}
                 getAllSubscriptionGroups={fetchAllSubscriptionGroups}

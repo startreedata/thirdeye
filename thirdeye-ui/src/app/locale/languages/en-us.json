@@ -4,6 +4,7 @@
         "home": "Home",
         "alert": "Alert",
         "alerts": "Alerts",
+        "alert-name": "Alert Name",
         "anomaly": "Anomaly",
         "anomalies": "Anomalies",
         "configuration": "Configuration",

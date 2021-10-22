@@ -75,18 +75,16 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         history.push(getSubscriptionGroupsViewPath(id));
     };
 
-    const renderLink = ({
-        rowData,
-    }: {
-        rowData: UiSubscriptionGroup;
-    }): ReactElement => {
+    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
         return (
             <Link
                 onClick={() =>
-                    handleSubscriptionGroupViewDetailsById(rowData.id)
+                    handleSubscriptionGroupViewDetailsById(
+                        (renderProps.rowData as UiSubscriptionGroup).id
+                    )
                 }
             >
-                {rowData.name}
+                {(renderProps.rowData as UiSubscriptionGroup).name}
             </Link>
         );
     };
@@ -96,7 +94,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
             key: "name",
             dataKey: "name",
             title: t("label.name"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1.5,
             sortable: true,
             cellRenderer: renderLink,
@@ -105,14 +103,14 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
             key: "cron",
             dataKey: "cron",
             title: t("label.cron"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1,
         },
         {
             key: "alertCount",
             dataKey: "alertCount",
             title: t("label.subscribed-alerts"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1,
             sortable: true,
         },
@@ -120,7 +118,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
             key: "emailCount",
             dataKey: "emailCount",
             title: t("label.subscribed-emails"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1,
             sortable: true,
         },
@@ -130,12 +128,19 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1
-                    disableBorder
+                    hideBorder
                     columns={subscriptionGroupColumns}
-                    data={props.subscriptionGroups}
+                    data={
+                        (props.subscriptionGroups as unknown) as Record<
+                            string,
+                            unknown
+                        >[]
+                    }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
-                    selection={selectedSubscriptionGroup}
+                    searchPlaceholder={t("label.search-entity", {
+                        entity: t("label.subscription-groups"),
+                    })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>

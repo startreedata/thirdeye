@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pinot.thirdeye.detection.v2.plan.AnomalyDetectorPlanNode;
 import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
@@ -132,8 +133,10 @@ public class AlertTemplateRenderer {
     properties.put("startTime", timeConverter.convertMillis(startTime.getTime()));
     properties.put("endTime", timeConverter.convertMillis(endTime.getTime()));
     // add source metadata to each node
-    template.getNodes().forEach(
-        node -> node.getParams().put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
+    template.getNodes().stream()
+        .filter(node -> node.getType().equals(AnomalyDetectorPlanNode.TYPE))
+        .forEach(node -> node.getParams()
+            .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
 
     final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
     return GroovyTemplateUtils.applyContextToTemplate(jsonString,

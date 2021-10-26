@@ -1,6 +1,9 @@
-import { Button, Menu, MenuItem } from "@material-ui/core";
-import { KeyboardArrowDown } from "@material-ui/icons";
-import React, { FunctionComponent, MouseEvent } from "react";
+import {
+    DropdownButtonTypeV1,
+    DropdownButtonV1,
+    PageHeaderActionsV1,
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router";
 import {
@@ -12,100 +15,102 @@ import {
 } from "../../utils/routes/routes.util";
 
 export const CreateMenuButton: FunctionComponent = () => {
-    const [
-        shortcutOptionsAnchorElement,
-        setShortcutOptionsAnchorElement,
-    ] = React.useState<null | HTMLElement>(null);
-
     const { t } = useTranslation();
     const history = useHistory();
 
-    const handleShortcutOptionsClick = (
-        event: MouseEvent<HTMLElement>
-    ): void => {
-        setShortcutOptionsAnchorElement(event.currentTarget);
-    };
-
-    const handleShortcutOptionsClose = (): void => {
-        setShortcutOptionsAnchorElement(null);
-    };
-
     const handleCreateAlert = (): void => {
         history.push(getAlertsCreatePath());
-        handleShortcutOptionsClose();
     };
 
     const handleCreateSubscriptionGroup = (): void => {
         history.push(getSubscriptionGroupsCreatePath());
-        handleShortcutOptionsClose();
     };
 
     const handleCreateMetric = (): void => {
         history.push(getMetricsCreatePath());
-        handleShortcutOptionsClose();
     };
 
     const handleOnBoardDataset = (): void => {
         history.push(getDatasetsOnboardPath());
-        handleShortcutOptionsClose();
     };
 
     const handleCreateDatasource = (): void => {
         history.push(getDatasourcesCreatePath());
-        handleShortcutOptionsClose();
+    };
+
+    const shortcutCreateMenuItems = [
+        {
+            id: "createAlert",
+            text: t("label.create-entity", {
+                entity: t("label.alert"),
+            }),
+        },
+        {
+            id: "createSubscriptionGroup",
+            text: t("label.create-entity", {
+                entity: t("label.subscription-group"),
+            }),
+        },
+        {
+            id: "createMetric",
+            text: t("label.create-entity", {
+                entity: t("label.metric"),
+            }),
+        },
+        {
+            id: "onboardDataset",
+            text: t("label.onboard-entity", {
+                entity: t("label.dataset"),
+            }),
+        },
+        {
+            id: "createDatasource",
+            text: t("label.create-entity", {
+                entity: t("label.datasource"),
+            }),
+        },
+    ];
+
+    const handleShortcutCreateOnclick = (
+        id: number | string,
+        _: string
+    ): void => {
+        switch (id) {
+            case "createAlert":
+                handleCreateAlert();
+
+                break;
+            case "createSubscriptionGroup":
+                handleCreateSubscriptionGroup();
+
+                break;
+            case "createMetric":
+                handleCreateMetric();
+
+                break;
+            case "onboardDataset":
+                handleOnBoardDataset();
+
+                break;
+            case "createDatasource":
+                handleCreateDatasource();
+
+                break;
+            default:
+                break;
+        }
     };
 
     return (
-        <>
-            <Button
+        <PageHeaderActionsV1>
+            <DropdownButtonV1
                 color="primary"
-                endIcon={<KeyboardArrowDown />}
-                variant="contained"
-                onClick={handleShortcutOptionsClick}
+                dropdownMenuItems={shortcutCreateMenuItems}
+                type={DropdownButtonTypeV1.Regular}
+                onClick={handleShortcutCreateOnclick}
             >
                 {t("label.create")}
-            </Button>
-            {/* Shortcut options */}
-            <Menu
-                anchorEl={shortcutOptionsAnchorElement}
-                open={Boolean(shortcutOptionsAnchorElement)}
-                onClose={handleShortcutOptionsClose}
-            >
-                {/* Create alert */}
-                <MenuItem onClick={handleCreateAlert}>
-                    {t("label.create-entity", {
-                        entity: t("label.alert"),
-                    })}
-                </MenuItem>
-
-                {/* Create subscription group */}
-                <MenuItem onClick={handleCreateSubscriptionGroup}>
-                    {t("label.create-entity", {
-                        entity: t("label.subscription-group"),
-                    })}
-                </MenuItem>
-
-                {/* Create metric */}
-                <MenuItem onClick={handleCreateMetric}>
-                    {t("label.create-entity", {
-                        entity: t("label.metric"),
-                    })}
-                </MenuItem>
-
-                {/* Create dataset */}
-                <MenuItem onClick={handleOnBoardDataset}>
-                    {t("label.onboard-entity", {
-                        entity: t("label.dataset"),
-                    })}
-                </MenuItem>
-
-                {/* Create datasource */}
-                <MenuItem onClick={handleCreateDatasource}>
-                    {t("label.create-entity", {
-                        entity: t("label.datasource"),
-                    })}
-                </MenuItem>
-            </Menu>
-        </>
+            </DropdownButtonV1>
+        </PageHeaderActionsV1>
     );
 };

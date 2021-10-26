@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
@@ -28,10 +27,9 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   private final MetricConfigManager metricConfigManager;
 
   @Inject
-  public MetricResource(final AuthService authService,
-      final MetricConfigManager metricConfigManager,
+  public MetricResource(final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager) {
-    super(authService, metricConfigManager, ImmutableMap.of());
+    super(metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
   }

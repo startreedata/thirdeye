@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
@@ -14,7 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.TaskApi;
@@ -32,8 +32,8 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       .build();
 
   @Inject
-  public TaskResource(final AuthService authService, final TaskManager taskManager) {
-    super(authService, taskManager, API_TO_BEAN_MAP);
+  public TaskResource(final TaskManager taskManager) {
+    super(taskManager, API_TO_BEAN_MAP);
   }
 
   // Operation not supported to prevent create of tasks
@@ -54,7 +54,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @Auth ThirdEyePrincipal principal,
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -66,7 +66,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @Auth ThirdEyePrincipal principal,
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }

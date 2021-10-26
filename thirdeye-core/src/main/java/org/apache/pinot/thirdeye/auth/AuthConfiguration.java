@@ -9,6 +9,18 @@ public class AuthConfiguration {
   @JsonProperty("jwt")
   private JwtConfiguration jwtConfiguration;
 
+  @JsonProperty("oauth")
+  private OAuthConfig oAuthConfig;
+
+  public OAuthConfig getOAuthConfig() {
+    return oAuthConfig;
+  }
+
+  public AuthConfiguration setOAuthConfig(final OAuthConfig oAuthConfig) {
+    this.oAuthConfig = oAuthConfig;
+    return this;
+  }
+
   public JwtConfiguration getJwtConfiguration() {
     return jwtConfiguration;
   }

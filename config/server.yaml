@@ -26,11 +26,14 @@ logging:
     org.apache.zookeeper: WARN
 
 auth:
-  enabled: false
+  enabled: true
   jwt:
     signingKey: 9sz834jghfdglsE4sYNT4zfrU4JwLARcUhxd2
     issuer: thirdeye
     accessTokenExpiry: P1D # Duration: 1 day. Format: https://en.wikipedia.org/wiki/ISO_8601
+  oauth:
+    issuer: http://identity.startree.ai
+    baseUrl: file://<path to project dir>/config/jwks.json
 
 database:
   # Assuming a local MySQL server running on the default port 3306

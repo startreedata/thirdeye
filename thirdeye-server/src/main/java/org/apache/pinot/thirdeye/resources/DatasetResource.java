@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
@@ -20,9 +19,8 @@ public class DatasetResource extends CrudResource<DatasetApi, DatasetConfigDTO> 
 
   @Inject
   public DatasetResource(
-      final AuthService authService,
       final DatasetConfigManager datasetConfigManager) {
-    super(authService, datasetConfigManager, ImmutableMap.of());
+    super(datasetConfigManager, ImmutableMap.of());
   }
 
   @Override

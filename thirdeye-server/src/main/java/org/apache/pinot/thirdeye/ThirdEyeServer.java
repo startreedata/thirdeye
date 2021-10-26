@@ -8,6 +8,9 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.lifecycle.Managed;
@@ -22,6 +25,8 @@ import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import org.apache.pinot.thirdeye.auth.AuthConfiguration;
+import org.apache.pinot.thirdeye.auth.ThirdeyeAuthenticator;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -32,6 +37,7 @@ import org.apache.pinot.thirdeye.resources.RootResource;
 import org.apache.pinot.thirdeye.scheduler.DetectionCronScheduler;
 import org.apache.pinot.thirdeye.scheduler.SchedulerService;
 import org.apache.pinot.thirdeye.scheduler.SubscriptionCronScheduler;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.task.TaskDriver;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
@@ -115,6 +121,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
 
+    registerAuthFilter(env, configuration.getAuthConfiguration());
+
     // Enable CORS. Opens up the API server to respond to requests from all external domains.
     addCorsFilter(env);
 
@@ -188,6 +196,22 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     // Add URL mapping
     cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+  }
+
+  void registerAuthFilter(final Environment environment, AuthConfiguration config){
+    try {
+      if(config.isEnabled()) {
+        environment.jersey().register(new AuthDynamicFeature(
+            new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+                .setAuthenticator(new ThirdeyeAuthenticator(config))
+                .setPrefix("Bearer")
+                .buildAuthFilter()));
+        environment.jersey()
+            .register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
+      }
+    } catch (Exception e) {
+      throw new IllegalStateException("Failed to configure Authentication filter", e);
+    }
   }
 
   /**

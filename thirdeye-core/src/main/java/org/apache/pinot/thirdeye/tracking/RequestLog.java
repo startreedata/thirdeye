@@ -19,14 +19,11 @@
 
 package org.apache.pinot.thirdeye.tracking;
 
-import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 
 /**
  * Concurrent request log. Tracks request success and failure events with deep information.
@@ -74,10 +71,8 @@ public class RequestLog {
    * @return principal name
    */
   private static String getPrincipal() {
-    if (ThirdEyeAuthFilter.getCurrentPrincipal() == null) {
-      return NO_AUTH_USER;
-    }
-    return ThirdEyeAuthFilter.getCurrentPrincipal().getName();
+    // TODO : revisit after oAuth refactor
+    return null;
   }
 
   /**

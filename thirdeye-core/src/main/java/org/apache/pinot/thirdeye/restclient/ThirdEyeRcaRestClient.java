@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.restclient;
 
-import static org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter.AUTH_TOKEN_NAME;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DEPTH;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_ORDER_TYPE;
@@ -82,7 +81,6 @@ public class ThirdEyeRcaRestClient extends AbstractRestClient {
     queryParameters.put("anomalyId", String.valueOf(anomalyId));
 
     MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-    headers.put("Cookie", Arrays.asList(AUTH_TOKEN_NAME + "=" + principal.getSessionKey()));
 
     return doGet(
         composeUrl(this.thirdEyeHost, THIRDEYE_RCA_HIGHLIGHTS_URI, queryParameters),
@@ -109,7 +107,6 @@ public class ThirdEyeRcaRestClient extends AbstractRestClient {
     queryParameters.put(CUBE_ORDER_TYPE, "auto");
 
     MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-    headers.put("Cookie", Arrays.asList(AUTH_TOKEN_NAME + "=" + principal.getSessionKey()));
 
     return doGet(
         composeUrl(this.thirdEyeHost, THIRDEYE_RCA_CUBE_URI, queryParameters),

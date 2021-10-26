@@ -48,7 +48,7 @@ public class MockThirdEyeRcaRestClient {
     when(builder.get()).thenReturn(response);
     when(response.readEntity(any(GenericType.class))).thenReturn(expectedResponse);
 
-    ThirdEyePrincipal principal = new ThirdEyePrincipal(null, "dummy");
+    ThirdEyePrincipal principal = new ThirdEyePrincipal(null);
 
     return new ThirdEyeRcaRestClient(client, principal);
   }

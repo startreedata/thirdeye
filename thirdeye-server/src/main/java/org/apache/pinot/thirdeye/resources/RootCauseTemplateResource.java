@@ -17,7 +17,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisModuleConfig;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
@@ -91,7 +90,8 @@ public class RootCauseTemplateResource {
       @QueryParam("dimensionDepth") int dimensionDepth
   ) {
     ObjectMapper objMapper = new ObjectMapper();
-    final String username = ThirdEyeAuthFilter.getCurrentPrincipal().getName();
+    // TODO : revisit after oAuth refactor
+    final String username = "user";
     MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
     MetricConfigDTO metricConfigDTO = metricConfigManager.findById(metricEntity.getId());
     String templateName = DIM_ANALYSIS_TEMPLATE_NAME_PREFIX + metricConfigDTO.getAlias();

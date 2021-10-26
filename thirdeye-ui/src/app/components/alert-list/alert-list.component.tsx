@@ -47,7 +47,9 @@ export const AlertList: FunctionComponent<AlertListProps> = (
         history.push(getAlertsViewPath(id));
     };
 
-    const renderLink = ({ rowData }: { rowData: UiAlert }): ReactElement => {
+    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
+        const rowData = renderProps.rowData as UiAlert;
+
         return (
             <Link onClick={() => handleAlertViewDetails(rowData.id)}>
                 {rowData.name}
@@ -55,11 +57,10 @@ export const AlertList: FunctionComponent<AlertListProps> = (
         );
     };
 
-    const renderAlertStatus = ({
-        rowData,
-    }: {
-        rowData: UiAlert;
-    }): ReactElement => {
+    const renderAlertStatus = (
+        renderProps: Record<string, unknown>
+    ): ReactElement => {
+        const rowData = renderProps.rowData as UiAlert;
         const { active } = rowData;
 
         return (
@@ -103,7 +104,7 @@ export const AlertList: FunctionComponent<AlertListProps> = (
             key: "name",
             dataKey: "name",
             title: t("label.alert-name"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1.5,
             sortable: true,
             cellRenderer: renderLink,
@@ -112,14 +113,14 @@ export const AlertList: FunctionComponent<AlertListProps> = (
             key: "createdBy",
             dataKey: "createdBy",
             title: t("label.created-by"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1,
         },
         {
             key: "active",
             dataKey: "active",
             title: t("label.active"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1,
             cellRenderer: renderAlertStatus,
         },
@@ -143,11 +144,15 @@ export const AlertList: FunctionComponent<AlertListProps> = (
             </Paper>
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1
-                    disableBorder
+                    hideBorder
                     columns={alertGroupColumns}
-                    data={props.alerts}
+                    data={
+                        (props.alerts as unknown) as Record<string, unknown>[]
+                    }
                     rowKey="id"
-                    selection={selectedAlert}
+                    searchPlaceholder={t("label.search-entity", {
+                        entity: t("label.alerts"),
+                    })}
                     toolbarComponent={
                         <Grid>
                             <Button

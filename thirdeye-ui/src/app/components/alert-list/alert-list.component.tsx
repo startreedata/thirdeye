@@ -1,4 +1,11 @@
-import { Button, Grid, Link, useTheme } from "@material-ui/core";
+import {
+    Button,
+    Grid,
+    Link,
+    Paper,
+    useMediaQuery,
+    useTheme,
+} from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import {
@@ -12,7 +19,10 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeSelectorV1 } from "../time-range/time-range-selector/time-range-selector-v1/time-range-selector-v1.component";
 import { AlertListProps } from "./alert-list.interfaces";
+import { useAlertListStyles } from "./alert-list.styles";
 
 export const AlertList: FunctionComponent<AlertListProps> = (
     props: AlertListProps
@@ -23,8 +33,15 @@ export const AlertList: FunctionComponent<AlertListProps> = (
     ] = useState<DataGridSelectionModelV1>();
     const history = useHistory();
 
+    const {
+        timeRangeDuration,
+        recentCustomTimeRangeDurations,
+        setTimeRangeDuration,
+    } = useTimeRange();
+
     const { t } = useTranslation();
     const theme = useTheme();
+    const { timeRangeContainer } = useAlertListStyles();
 
     const handleAlertViewDetails = (id: number): void => {
         history.push(getAlertsViewPath(id));
@@ -108,34 +125,45 @@ export const AlertList: FunctionComponent<AlertListProps> = (
         },
     ];
 
-    return (
-        <>
-            <Grid item xs={12}>
-                <PageContentsCardV1 disablePadding fullHeight>
-                    <DataGridV1
-                        disableBorder
-                        columns={alertGroupColumns}
-                        data={props.alerts}
-                        rowKey="id"
-                        selection={selectedAlert}
-                        toolbarComponent={
-                            <Grid>
-                                <Button
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
-                            </Grid>
+    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
+    return props.alerts ? (
+        <Grid item xs={12}>
+            <Paper className={timeRangeContainer} elevation={0}>
+                <PageContentsCardV1>
+                    <TimeRangeSelectorV1
+                        hideTimeRange={!screenWidthSmUp}
+                        recentCustomTimeRangeDurations={
+                            recentCustomTimeRangeDurations
                         }
-                        onSelectionChange={setSelectedAlert}
+                        timeRangeDuration={timeRangeDuration}
+                        onChange={setTimeRangeDuration}
                     />
                 </PageContentsCardV1>
-            </Grid>
-
-            {/* Loading indicator */}
-            {!props.alerts && <AppLoadingIndicatorV1 />}
-        </>
+            </Paper>
+            <PageContentsCardV1 disablePadding fullHeight>
+                <DataGridV1
+                    disableBorder
+                    columns={alertGroupColumns}
+                    data={props.alerts}
+                    rowKey="id"
+                    selection={selectedAlert}
+                    toolbarComponent={
+                        <Grid>
+                            <Button
+                                disabled={isActionButtonDisable}
+                                variant="contained"
+                                onClick={handleAlertDelete}
+                            >
+                                {t("label.delete")}
+                            </Button>
+                        </Grid>
+                    }
+                    onSelectionChange={setSelectedAlert}
+                />
+            </PageContentsCardV1>
+        </Grid>
+    ) : (
+        <AppLoadingIndicatorV1 />
     );
 };

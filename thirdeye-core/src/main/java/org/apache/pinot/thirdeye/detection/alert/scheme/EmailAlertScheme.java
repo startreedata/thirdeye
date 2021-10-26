@@ -51,6 +51,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
+import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
 import org.slf4j.Logger;
@@ -243,9 +244,6 @@ public class EmailAlertScheme extends NotificationScheme {
 //    TODO accommodate all required properties in EmailSchemeDto
 //    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
     final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
-    if (emailConfig.get(PROP_RECIPIENTS) == null) {
-      return;
-    }
 
     if (emailScheme.getTo() == null || emailScheme.getTo().isEmpty()) {
       throw new IllegalArgumentException(

@@ -68,14 +68,16 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         history.push(getDatasourcesViewPath(id));
     };
 
-    const renderLink = ({
-        rowData,
-    }: {
-        rowData: UiDatasource;
-    }): ReactElement => {
+    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
         return (
-            <Link onClick={() => handleDatasourceViewDetailsById(rowData.id)}>
-                {rowData.name}
+            <Link
+                onClick={() =>
+                    handleDatasourceViewDetailsById(
+                        (renderProps.rowData as UiDatasource).id
+                    )
+                }
+            >
+                {(renderProps.rowData as UiDatasource).name}
             </Link>
         );
     };
@@ -85,7 +87,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
             key: "name",
             dataKey: "name",
             title: t("label.name"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1.5,
             sortable: true,
             cellRenderer: renderLink,
@@ -95,7 +97,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
             dataKey: "type",
             sortable: true,
             title: t("label.type"),
-            width: 0,
+            minWidth: 0,
             flexGrow: 1,
         },
     ];
@@ -104,12 +106,19 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1
-                    disableBorder
+                    hideBorder
                     columns={datasourceColumns}
-                    data={props.datasources}
+                    data={
+                        (props.datasources as unknown) as Record<
+                            string,
+                            unknown
+                        >[]
+                    }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
-                    selection={selectedDatasource}
+                    searchPlaceholder={t("label.search-entity", {
+                        entity: t("label.datasources"),
+                    })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>

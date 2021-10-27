@@ -16,123 +16,82 @@ resources:
     type: slack
     source:
       url: ((slack-webhook-url))
+    
+  - name: ci-src
+    icon: github
+    type: git
+    source:
+      uri: ((git-uri))
+      branch: ((git-branch))
+      paths:
+      - .concourse
 
   # PR Resource
-  - name: ((pr.resource.name))
+  - name: ((resources.pull_request.name))
     icon: git
     type: pull-request
     source:
       repository: startreedata/thirdeye
       access_token: ((github-token))
-      base_branch: ((git-branch))
-      paths:
-        - ((pr.resource.path))
+      paths: ((resources.pull_request.paths))
 
   # Merge Resource
-  - name: ((merge.resource.name))
-    type: git
+  - name: ((resources.merge.name))
     icon: github
+    type: git
     source:
       uri: ((git-uri))
       branch: ((git-branch))
       private_key: ((ssh-private-key))
-      paths:
-        - ((merge.resource.path))
+      paths: ((resources.merge.paths))
 
 jobs:
   # PR Task
-  - name: ((pr.resource.project))-pr
-    plan:
-      - get: ((pr.resource.name))
-        trigger: true
-        version: every
-      - put: notify-pending
-        resource: ((pr.resource.name))
-        params:
-          base_context: startree-ci
-          context: ((pr.job.notify.context))
-          description: ((pr.job.notify.pending.description))
-          path: ((pr.resource.name))
-          status: pending
-      - task: prepare-((pr.resource.project))
-        file: ((pr.resource.name))/.concourse/tasks/((pr.resource.project))/((pr.job.prepare)).yml
-        input_mapping:
-          ci-src: ((pr.resource.name))
-      - in_parallel:
-          - task: build-((pr.resource.project))
-            file: ((pr.resource.name))/.concourse/tasks/((pr.resource.project))/((pr.job.build)).yml
-            input_mapping:
-              ci-src: ((pr.resource.name))
-          - task: lint-((pr.resource.project))
-            file: ((pr.resource.name))/.concourse/tasks/((pr.resource.project))/((pr.job.lint)).yml
-            input_mapping:
-              ci-src: ((pr.resource.name))
-          - task: test-((pr.resource.project))
-            file: ((pr.resource.name))/.concourse/tasks/((pr.resource.project))/((pr.job.test)).yml
-            input_mapping:
-              ci-src: ((pr.resource.name))
+  - name: ((project.id))-pr
+    plan: ((pull_request.plan))
     on_success:
       do:
         - put: notify-success
-          resource: ((pr.resource.name))
+          resource: ((resources.pull_request.name))
           params:
             base_context: startree-ci
-            context: ((pr.job.notify.context))
-            description: ((pr.job.notify.success.description))
-            path: ((pr.resource.name))
+            context: ((project.id))
+            description: Pull Request for ((project.name)) has been successfully built.
+            path: ((resources.pull_request.name))
             status: success
         - put: slack
           params:
             channel: ((slack-channel))
             text: |
-              PR for ((pr.job.notify.app-name)) has been successfully built.
+              Pull Request for ((project.name)) has been successfully built.
               ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
     on_failure:
       do:
         - put: notify-failure
-          resource: ((pr.resource.name))
+          resource: ((resources.pull_request.name))
           params:
             base_context: startree-ci
-            context: ((pr.job.notify.context))
-            description: ((pr.job.notify.fail.description))
-            path: ((pr.resource.name))
+            context: ((project.id))
+            description: Failed to build Pull Request for ((project.name))
+            path: ((resources.pull_request.name))
             status: failure
         - put: slack
           params:
             channel: ((slack-channel))
             text: |
-              <!channel> Failed to built PR for ((pr.job.notify.app-name))
+              <!channel> Failed to build Pull Request for ((project.name))
               ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
   # Merge Tasks
-  - name: ((merge.resource.project))-merge
-    plan:
-      - get: ((merge.resource.name))
-        trigger: true
-      - task: prepare-((merge.resource.project))
-        file: ((merge.resource.name))/.concourse/tasks/((merge.resource.project))/((merge.job.prepare)).yml
-        input_mapping:
-          ci-src: ((merge.resource.name))
-      - in_parallel:
-          - task: build-((merge.resource.project))
-            file: ((merge.resource.name))/.concourse/tasks/((merge.resource.project))/((merge.job.build)).yml
-            input_mapping:
-              ci-src: ((merge.resource.name))
-          - task: lint-((merge.resource.project))
-            file: ((merge.resource.name))/.concourse/tasks/((merge.resource.project))/((merge.job.lint)).yml
-            input_mapping:
-              ci-src: ((merge.resource.name))
-          - task: test-((merge.resource.project))
-            file: ((merge.resource.name))/.concourse/tasks/((merge.resource.project))/((merge.job.test)).yml
-            input_mapping:
-              ci-src: ((merge.resource.name))
+  - name: ((project.id))-merge
+    plan: ((merge.plan))
     on_success:
       do:
         - put: slack
           params:
             channel: ((slack-channel))
             text: |
-              ((merge.job.notify.app-name)) has been successfully built for merge 
+              After merge to ((git-branch)), ((project.name)) has been successfully built
               ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
     on_failure:
       do:
@@ -140,5 +99,5 @@ jobs:
           params:
             channel: ((slack-channel))
             text: |
-              <!channel> Failed to build ((merge.job.notify.app-name)) for merge
+              <!channel> Failed to build ((project.name)) after latest merge to ((git-branch))
               ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

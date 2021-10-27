@@ -1,30 +1,17 @@
 [
   {
-    "name": "sgn2",
-    "cron": "*/5 * * * * ?",
-    "application": {
-      "name": "myApp"
-    },
+    "name": "my-sg",
+    "cron": "*/1 * * * * ?",
     "alerts": [
       {
-        "id": 7590
-      },
-      {
-        "id": 7597
+        "id": 15263
       }
     ],
     "notificationSchemes": {
       "email": {
-        "from": "from@thirdeye.com",
         "to": [
-          "to@thirdeye.com"
-        ],
-        "cc": [
-          "cc@thirdeye.com"
+          "pyne.suvodeep@gmail.com"
         ]
-      },
-      "webhook": {
-        "url": "http://localhost:8080/internal/webhook"
       }
     }
   }

@@ -34,12 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.restclient.ThirdEyeRcaRestClient;
-import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -63,8 +61,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricAnomaliesContent.class);
 
-  private AlertManager configDAO = null;
-  private ThirdEyeRcaRestClient rcaClient;
+  private final AlertManager alertManager;
 
   @Inject
   public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
@@ -72,21 +69,22 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
     super(metricConfigManager, eventManager, mergedAnomalyResultManager);
-    this.configDAO = detectionConfigManager;
+    alertManager = detectionConfigManager;
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeServerConfiguration configuration) {
-    super.init(properties, configuration);
+  public void init(final NotificationContext context) {
+    super.init(context);
 
-    if (this.rcaClient == null) {
-      final ThirdEyePrincipal principal = new ThirdEyePrincipal(
-          this.thirdEyeAnomalyConfig.getTeRestConfig().getAdminUser(),
-          this.thirdEyeAnomalyConfig.getTeRestConfig().getSessionKey()
-      );
-      this.rcaClient = new ThirdEyeRcaRestClient(principal,
-          this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
-    }
+    // TODO spyne Investigate if rcaClient is required. Else remove.
+//    if (this.rcaClient == null) {
+//      final ThirdEyePrincipal principal = new ThirdEyePrincipal(
+//          this.thirdEyeAnomalyConfig.getTeRestConfig().getAdminUser(),
+//          this.thirdEyeAnomalyConfig.getTeRestConfig().getSessionKey()
+//      );
+//      this.rcaClient = new ThirdEyeRcaRestClient(principal,
+//          this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
+//    }
   }
 
   @Override
@@ -95,34 +93,34 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
   }
 
   @Override
-  public Map<String, Object> format(Collection<AnomalyResult> anomalies,
-      SubscriptionGroupDTO subsConfig) {
-    Map<String, Object> templateData = super.getTemplateData(subsConfig, anomalies);
+  public Map<String, Object> format(final Collection<AnomalyResult> anomalies,
+      final SubscriptionGroupDTO subsConfig) {
+    final Map<String, Object> templateData = super.getTemplateData(subsConfig, anomalies);
     enrichMetricInfo(templateData, anomalies);
 
     DateTime windowStart = DateTime.now();
     DateTime windowEnd = new DateTime(0);
 
-    Map<String, Long> functionToId = new HashMap<>();
-    Multimap<String, String> anomalyDimensions = ArrayListMultimap.create();
-    Multimap<String, AnomalyReportEntity> functionAnomalyReports = ArrayListMultimap.create();
-    Multimap<String, AnomalyReportEntity> metricAnomalyReports = ArrayListMultimap.create();
-    List<AnomalyReportEntity> anomalyDetails = new ArrayList<>();
-    List<String> anomalyIds = new ArrayList<>();
+    final Map<String, Long> functionToId = new HashMap<>();
+    final Multimap<String, String> anomalyDimensions = ArrayListMultimap.create();
+    final Multimap<String, AnomalyReportEntity> functionAnomalyReports = ArrayListMultimap.create();
+    final Multimap<String, AnomalyReportEntity> metricAnomalyReports = ArrayListMultimap.create();
+    final List<AnomalyReportEntity> anomalyDetails = new ArrayList<>();
+    final List<String> anomalyIds = new ArrayList<>();
 
-    List<AnomalyResult> sortedAnomalies = new ArrayList<>(anomalies);
+    final List<AnomalyResult> sortedAnomalies = new ArrayList<>(anomalies);
     sortedAnomalies.sort(Comparator.comparingDouble(AnomalyResult::getWeight));
 
-    for (AnomalyResult anomalyResult : anomalies) {
+    for (final AnomalyResult anomalyResult : anomalies) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
         LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
             anomalyResult);
         continue;
       }
-      MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
+      final MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
 
-      DateTime anomalyStartTime = new DateTime(anomaly.getStartTime(), dateTimeZone);
-      DateTime anomalyEndTime = new DateTime(anomaly.getEndTime(), dateTimeZone);
+      final DateTime anomalyStartTime = new DateTime(anomaly.getStartTime(), dateTimeZone);
+      final DateTime anomalyEndTime = new DateTime(anomaly.getEndTime(), dateTimeZone);
 
       if (anomalyStartTime.isBefore(windowStart)) {
         windowStart = anomalyStartTime;
@@ -131,16 +129,16 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         windowEnd = anomalyEndTime;
       }
 
-      AnomalyFeedback feedback = anomaly.getFeedback();
+      final AnomalyFeedback feedback = anomaly.getFeedback();
 
-      String feedbackVal = getFeedbackValue(feedback);
+      final String feedbackVal = getFeedbackValue(feedback);
 
       String functionName = "Alerts";
       String funcDescription = "";
       Long id = -1L;
 
       if (anomaly.getDetectionConfigId() != null) {
-        AlertDTO config = this.configDAO.findById(anomaly.getDetectionConfigId());
+        final AlertDTO config = alertManager.findById(anomaly.getDetectionConfigId());
         Preconditions.checkNotNull(config,
             String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
         functionName = config.getName();
@@ -148,12 +146,12 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         id = config.getId();
       }
 
-      Properties props = new Properties();
+      final Properties props = new Properties();
       props.putAll(anomaly.getProperties());
-      double lift = BaseNotificationContent
+      final double lift = BaseNotificationContent
           .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
-      AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-          getAnomalyURL(anomaly, this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl()),
+      final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
+          getAnomalyURL(anomaly, context.getUiPublicUrl()),
           getPredictedValue(anomaly),
           getCurrentValue(anomaly),
           getFormattedLiftValue(anomaly, lift),
@@ -175,7 +173,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       );
 
       // dimension filters / values
-      for (Map.Entry<String, String> entry : anomaly.getDimensions().entrySet()) {
+      for (final Map.Entry<String, String> entry : anomaly.getDimensions().entrySet()) {
         anomalyDimensions.put(entry.getKey(), entry.getValue());
       }
 
@@ -192,21 +190,24 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     // holidays
     final DateTime eventStart = windowStart.minus(preEventCrawlOffset);
     final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
-    Map<String, List<String>> targetDimensions = new HashMap<>();
-    if (thirdEyeAnomalyConfig.getHolidayCountriesWhitelist() != null) {
-      targetDimensions
-          .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
-    }
-    List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
+    final Map<String, List<String>> targetDimensions = new HashMap<>();
+
+    // TODO spyne understand and restore HolidayContriesWhiteList feature
+//    if (thirdEyeAnomalyConfig.getHolidayCountriesWhitelist() != null) {
+//      targetDimensions
+//          .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
+//    }
+    final List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
     holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
 
     // Insert anomaly snapshot image
     if (anomalyDetails.size() == 1) {
-      AnomalyReportEntity singleAnomaly = anomalyDetails.get(0);
+      final AnomalyReportEntity singleAnomaly = anomalyDetails.get(0);
       try {
-        this.imgPath = AlertScreenshotHelper
-            .takeGraphScreenShot(singleAnomaly.getAnomalyId(), thirdEyeAnomalyConfig);
-      } catch (Exception e) {
+        imgPath = AlertScreenshotHelper
+            .takeGraphScreenShot(singleAnomaly.getAnomalyId(),
+                context.getUiPublicUrl());
+      } catch (final Exception e) {
         LOG.error("Exception while embedding screenshot for anomaly {}",
             singleAnomaly.getAnomalyId(), e);
       }

@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
@@ -24,7 +25,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
+import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -54,17 +58,18 @@ public class InternalResource {
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final DatabaseAdminResource databaseAdminResource,
-      final EmailAlertScheme emailAlertScheme,
+      final NotificationSchemeFactory notificationSchemeFactory,
       final MetricAnomaliesContent metricAnomaliesContent,
       final ThirdEyeServerConfiguration configuration,
       final EmailContentFormatter emailContentFormatter) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.databaseAdminResource = databaseAdminResource;
-    this.emailAlertScheme = emailAlertScheme;
     this.metricAnomaliesContent = metricAnomaliesContent;
     this.configuration = configuration;
     this.emailContentFormatter = emailContentFormatter;
+
+    this.emailAlertScheme = notificationSchemeFactory.createEmailAlertScheme();
   }
 
   @Path("db-admin")
@@ -127,7 +132,12 @@ public class InternalResource {
     final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO()
         .setName("report-generation");
 
-    metricAnomaliesContent.init(new Properties(), configuration);
+    metricAnomaliesContent.init(new NotificationContext()
+        .setProperties(new Properties())
+        .setUiPublicUrl(optional(configuration)
+            .map(ThirdEyeServerConfiguration::getUiConfiguration)
+            .map(UiConfiguration::getExternalUrl)
+            .orElse("")));
     final Map<String, Object> templateData = metricAnomaliesContent.format(
         new ArrayList<>(anomalies),
         subscriptionGroup);

@@ -36,11 +36,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.detection.anomaly.detection.AnomalyDetectionInputContextBuilder;
 import org.apache.pinot.thirdeye.metric.MetricTimeSeries;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.content.AnomalyReportEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.spi.Constants.CompareMode;
@@ -95,8 +95,8 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
   }
 
   @Override
-  public void init(Properties properties, ThirdEyeServerConfiguration config) {
-    super.init(properties, config);
+  public void init(NotificationContext context) {
+    super.init(context);
     relatedEvents = new HashSet<>();
     presentSeasonalValues = Boolean.parseBoolean(
         properties.getProperty(PRESENT_SEASONAL_VALUES, DEFAULT_PRESENT_SEASONAL_VALUES));
@@ -209,7 +209,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
       List<AnomalyReportEntity> rootAnomalyDetail,
       SortedMap<String, List<AnomalyReportEntity>> leafAnomalyDetail) {
     AnomalyReportEntity anomalyReport = generateAnomalyReportEntity(anomaly,
-        thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
+        context.getUiPublicUrl());
     AnomalyFunctionDTO anomalyFunction = anomaly.getAnomalyFunction();
     String exploredDimensions = anomalyFunction.getExploreDimensions();
     // Add WoW number

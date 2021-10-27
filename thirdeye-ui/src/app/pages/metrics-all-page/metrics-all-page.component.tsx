@@ -1,11 +1,12 @@
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { MetricList } from "../../components/metric-list/metric-list.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { MetricListV1 } from "../../components/metric-list-v1/metric-list-v1.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
@@ -75,14 +76,14 @@ export const MetricsAllPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            maxRouterBreadcrumbs={1}
-            title={t("label.metrics")}
-        >
-            {/* Metric list */}
-            <MetricList metrics={uiMetrics} onDelete={handleMetricDelete} />
-        </PageContents>
+        <PageV1>
+            <ConfigurationPageHeader selectedIndex={3} />
+            <PageContentsGridV1 fullHeight>
+                <MetricListV1
+                    metrics={uiMetrics}
+                    onDelete={handleMetricDelete}
+                />
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

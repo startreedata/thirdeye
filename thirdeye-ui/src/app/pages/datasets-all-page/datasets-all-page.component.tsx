@@ -1,11 +1,12 @@
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { DatasetList } from "../../components/dataset-list/dataset-list.component";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteDataset,
@@ -94,14 +95,14 @@ export const DatasetsAllPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            maxRouterBreadcrumbs={1}
-            title={t("label.datasets")}
-        >
-            {/* dataset list */}
-            <DatasetList datasets={uiDatasets} onDelete={handleDatasetDelete} />
-        </PageContents>
+        <PageV1>
+            <ConfigurationPageHeader selectedIndex={1} />
+            <PageContentsGridV1 fullHeight>
+                <DatasetListV1
+                    datasets={uiDatasets}
+                    onDelete={handleDatasetDelete}
+                />
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

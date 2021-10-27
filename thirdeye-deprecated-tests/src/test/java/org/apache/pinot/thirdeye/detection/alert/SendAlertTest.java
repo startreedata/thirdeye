@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection.alert;
 
+import static org.mockito.Mockito.mock;
+
+import com.codahale.metrics.MetricRegistry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +28,9 @@ import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
 import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -38,7 +44,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskContext;
-import org.apache.pinot.thirdeye.task.runner.DetectionAlertTaskRunner;
+import org.apache.pinot.thirdeye.task.runner.NotificationTaskRunner;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -56,7 +62,7 @@ public class SendAlertTest {
   private static final String METRIC_VALUE = "test_metric";
 
   private TestDbEnv testDAOProvider;
-  private DetectionAlertTaskRunner taskRunner;
+  private NotificationTaskRunner taskRunner;
   private SubscriptionGroupManager alertConfigDAO;
   private MergedAnomalyResultManager anomalyDAO;
   private AlertManager detectionDAO;
@@ -114,13 +120,18 @@ public class SendAlertTest {
     datasetConfigDTO.setDataset(COLLECTION_VALUE);
     this.dataSetDAO.save(datasetConfigDTO);
 
-    this.taskRunner = new DetectionAlertTaskRunner(new DetectionAlertTaskFactory(null,
+    final NotificationSchemeFactory notificationSchemeFactory = new NotificationSchemeFactory(null,
         null,
         null,
         null,
-        null),
+        mock(EntityGroupKeyContent.class),
+        mock(MetricAnomaliesContent.class),
+        new MetricRegistry(),
+        mock(EmailContentFormatter.class));
+    this.taskRunner = new NotificationTaskRunner(notificationSchemeFactory,
         TestDbEnv.getInstance().getDetectionAlertConfigManager(),
-        TestDbEnv.getInstance().getMergedAnomalyResultDAO());
+        TestDbEnv.getInstance().getMergedAnomalyResultDAO(),
+        new MetricRegistry());
   }
 
   @AfterMethod(alwaysRun = true)

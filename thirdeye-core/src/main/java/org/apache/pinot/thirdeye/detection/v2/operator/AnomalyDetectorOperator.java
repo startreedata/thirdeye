@@ -53,16 +53,29 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       final DetectionPipelineResult detectionResult = detector
           .runDetection(interval, timeSeriesMap);
 
-      // Annotate each anomaly with a metric name
-      optional(planNode.getParams().get("anomaly.metric"))
-          .map(Object::toString)
-          .ifPresent(anomalyMetric -> detectionResult.getDetectionResults().stream()
-              .map(DetectionResult::getAnomalies)
-              .flatMap(Collection::stream)
-              .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
+      addMetadata(detectionResult);
 
       setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
     }
+  }
+
+  private void addMetadata(DetectionPipelineResult detectionPipelineResult) {
+    // Annotate each anomaly with a metric name
+    optional(planNode.getParams().get("anomaly.metric"))
+        .map(Object::toString)
+        .ifPresent(anomalyMetric -> detectionPipelineResult.getDetectionResults().stream()
+            .map(DetectionResult::getAnomalies)
+            .flatMap(Collection::stream)
+            .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
+
+    // Annotate each anomaly with source info
+    optional(planNode.getParams().get("anomaly.source"))
+        .map(Object::toString)
+        .ifPresent(anomalySource -> detectionPipelineResult.getDetectionResults().stream()
+            .map(DetectionResult::getAnomalies)
+            .flatMap(Collection::stream)
+            .forEach(anomaly -> anomaly.setSource(anomalySource)));
+
   }
 
   private List<Interval> getMonitoringWindows() {

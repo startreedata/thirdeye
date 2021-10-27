@@ -38,6 +38,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.HierarchicalAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
@@ -92,7 +93,7 @@ public class EmailContentFormatter {
   }
 
   public EmailEntity getEmailEntity(final Properties emailClientConfigs,
-      final BaseNotificationContent content,
+      final NotificationContent content,
       final SubscriptionGroupDTO subsConfig,
       final Collection<AnomalyResult> anomalies) {
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);

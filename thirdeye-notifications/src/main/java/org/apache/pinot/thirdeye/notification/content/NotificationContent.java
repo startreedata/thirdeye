@@ -21,8 +21,7 @@ package org.apache.pinot.thirdeye.notification.content;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Properties;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 
@@ -34,7 +33,7 @@ public interface NotificationContent {
   /**
    * Initialize the content formatter
    */
-  void init(Properties properties, ThirdEyeServerConfiguration configuration);
+  void init(NotificationContext context);
 
   /**
    * Generate the template dictionary from the list of anomaly results to render in the template
@@ -45,6 +44,11 @@ public interface NotificationContent {
    * Retrieves the template file (.ftl)
    */
   String getTemplate();
+
+  /**
+   * Path to the img which contains the anomaly snapshot
+   */
+  String getSnaphotPath();
 
   /**
    * Cleanup any temporary data

@@ -26,6 +26,7 @@ import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_LABELS;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_MERGE_GAP;
 import static org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_PROJECT;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
@@ -45,9 +46,12 @@ import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
+import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -77,7 +81,7 @@ public class JiraContentFormatter {
   protected Properties alertClientConfig;
   protected SubscriptionGroupDTO subsConfig;
   protected ThirdEyeServerConfiguration teConfig;
-  protected BaseNotificationContent notificationContent;
+  protected NotificationContent notificationContent;
 
   static {
     Map<String, String> aMap = new HashMap<>();
@@ -86,13 +90,18 @@ public class JiraContentFormatter {
   }
 
   public JiraContentFormatter(JiraConfiguration jiraAdminConfig, Properties jiraClientConfig,
-      BaseNotificationContent content, ThirdEyeServerConfiguration teConfig,
+      NotificationContent content, ThirdEyeServerConfiguration teConfig,
       SubscriptionGroupDTO subsConfig) {
     this.alertClientConfig = jiraClientConfig;
     this.teConfig = teConfig;
     notificationContent = content;
     this.subsConfig = subsConfig;
-    notificationContent.init(alertClientConfig, teConfig);
+    notificationContent.init(new NotificationContext()
+        .setProperties(jiraClientConfig)
+        .setUiPublicUrl(optional(teConfig)
+            .map(ThirdEyeServerConfiguration::getUiConfiguration)
+            .map(UiConfiguration::getExternalUrl)
+            .orElse("")));
 
 
     this.jiraAdminConfig = jiraAdminConfig;

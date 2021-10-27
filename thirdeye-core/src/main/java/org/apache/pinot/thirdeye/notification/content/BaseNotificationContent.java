@@ -39,12 +39,12 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import org.apache.pinot.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import org.apache.pinot.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
 import org.apache.pinot.thirdeye.events.EventFilter;
 import org.apache.pinot.thirdeye.events.HolidayEventProvider;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.spi.Constants.CompareMode;
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
@@ -101,7 +101,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
   protected Period preEventCrawlOffset;
   protected Period postEventCrawlOffset;
   protected String imgPath = null;
-  protected ThirdEyeServerConfiguration thirdEyeAnomalyConfig;
+  protected NotificationContext context;
   protected Properties properties;
 
   protected BaseNotificationContent(final MetricConfigManager metricConfigManager,
@@ -326,9 +326,10 @@ public abstract class BaseNotificationContent implements NotificationContent {
     }
   }
 
-  public void init(Properties properties, ThirdEyeServerConfiguration config) {
-    this.properties = properties;
-    this.thirdEyeAnomalyConfig = config;
+  @Override
+  public void init(NotificationContext context) {
+    this.context = context;
+    this.properties = context.getProperties();
 
     this.includeSentAnomaliesOnly = Boolean.parseBoolean(
         properties.getProperty(INCLUDE_SENT_ANOMALY_ONLY, DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));

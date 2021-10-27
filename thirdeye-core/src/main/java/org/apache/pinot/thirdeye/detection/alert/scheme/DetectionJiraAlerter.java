@@ -36,9 +36,7 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.notification.commons.JiraConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.JiraEntity;
 import org.apache.pinot.thirdeye.notification.commons.ThirdEyeJiraClient;
-import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
-import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
-import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.JiraContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -67,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * test2: value2
  */
 @AlertScheme(type = "JIRA")
-public class DetectionJiraAlerter extends DetectionAlertScheme {
+public class DetectionJiraAlerter extends NotificationScheme {
 
   public static final String PROP_JIRA_SCHEME = "jiraScheme";
   public static final int JIRA_DESCRIPTION_MAX_LENGTH = 100000;
@@ -79,10 +77,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
   private final JiraConfiguration jiraAdminConfig;
 
   public DetectionJiraAlerter(final ThirdEyeServerConfiguration thirdeyeConfig,
-      final ThirdEyeJiraClient jiraClient,
-      final MetricAnomaliesContent metricAnomaliesContent,
-      final EntityGroupKeyContent entityGroupKeyContent) {
-    super(metricAnomaliesContent, entityGroupKeyContent);
+      final ThirdEyeJiraClient jiraClient) {
     teConfig = thirdeyeConfig;
 
     jiraAdminConfig = thirdeyeConfig.getAlerterConfigurations().getJiraConfiguration();
@@ -146,7 +141,7 @@ public class DetectionJiraAlerter extends DetectionAlertScheme {
     final List<AnomalyResult> anomalyResultListOfGroup = new ArrayList<>(anomalies);
     anomalyResultListOfGroup.sort(COMPARATOR_DESC);
 
-    final BaseNotificationContent content = getNotificationContent(jiraClientConfig);
+    final NotificationContent content = getNotificationContent(jiraClientConfig);
 
     return new JiraContentFormatter(jiraAdminConfig, jiraClientConfig, content, teConfig,
         subsetSubsConfig)

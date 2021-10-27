@@ -5,20 +5,19 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
+import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
+import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
 import org.apache.pinot.thirdeye.notification.commons.WebhookService;
-import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
-import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import org.apache.pinot.thirdeye.notification.formatter.channels.WebhookContentFormatter;
+import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
 import org.apache.pinot.thirdeye.spi.api.WebhookApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -33,21 +32,18 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @AlertScheme(type = "WEBHOOK")
 @Singleton
-public class WebhookAlertScheme extends DetectionAlertScheme {
+public class WebhookAlertScheme extends NotificationScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
-  private final WebhookContentFormatter formatter;
-  private final Counter webhookAlertsFailedCounter;
-  private final Counter webhookAlertsSuccessCounter;
+  private static final String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
 
-  @Inject
-  public WebhookAlertScheme(
-      final WebhookContentFormatter formatter,
-      final MetricAnomaliesContent metricAnomaliesContent,
-      final EntityGroupKeyContent entityGroupKeyContent,
-      final MetricRegistry metricRegistry) {
-    super(metricAnomaliesContent, entityGroupKeyContent);
-    this.formatter = formatter;
+  private Counter webhookAlertsFailedCounter;
+  private Counter webhookAlertsSuccessCounter;
+
+  @Override
+  public void init(final NotificationSchemeContext context) {
+    super.init(context);
+
     webhookAlertsFailedCounter = metricRegistry.counter("webhookAlertsFailedCounter");
     webhookAlertsSuccessCounter = metricRegistry.counter("webhookAlertsSuccessCounter");
   }
@@ -112,6 +108,24 @@ public class WebhookAlertScheme extends DetectionAlertScheme {
 
   private WebhookApi processResults(final SubscriptionGroupDTO subscriptionGroup,
       final List<MergedAnomalyResultDTO> anomalyResults) {
-    return formatter.getWebhookApi(anomalyResults, subscriptionGroup);
+    return getWebhookApi(anomalyResults, subscriptionGroup);
+  }
+
+  public WebhookApi getWebhookApi(final List<MergedAnomalyResultDTO> anomalies,
+      SubscriptionGroupDTO subsConfig) {
+    WebhookApi api = ApiBeanMapper.toWebhookApi(anomalies, subsConfig);
+    List<AnomalyReportApi> results = api.getAnomalyReports();
+    return api.setAnomalyReports(results.stream()
+        .map(result -> result.setUrl(getDashboardUrl(result.getAnomaly().getId())))
+        .collect(
+            Collectors.toList()));
+  }
+
+  private String getDashboardUrl(final Long id) {
+    String extUrl = context.getUiPublicUrl();
+    if (!extUrl.matches(".*/")) {
+      extUrl += "/";
+    }
+    return String.format("%s%s%s", extUrl, ANOMALY_DASHBOARD_PREFIX, id);
   }
 }

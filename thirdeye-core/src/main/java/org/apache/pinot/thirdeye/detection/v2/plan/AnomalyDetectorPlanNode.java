@@ -10,6 +10,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
 
 public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
+  public static final String TYPE = "AnomalyDetector";
   private static final String PROP_DETECTOR = "detector";
   private static final String PROP_METRIC_URN = "metricUrn";
 
@@ -41,7 +42,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public String getType() {
-    return "AnomalyDetector";
+    return TYPE;
   }
 
   @Override

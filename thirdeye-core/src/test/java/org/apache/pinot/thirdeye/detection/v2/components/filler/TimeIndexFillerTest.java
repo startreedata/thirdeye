@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.components.filler;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
 import org.apache.pinot.thirdeye.detection.v2.components.filler.TimeIndexFiller.TimeLimitInferenceStrategy;
 import org.apache.pinot.thirdeye.detection.v2.spec.TimeIndexFillerSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -182,13 +184,10 @@ public class TimeIndexFillerTest {
     final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
 
     final DataFrame dataFrame = new DataFrame();
-    // october 23 missing in the middle
-    dataFrame.addSeries("ts", OCTOBER_22_MILLIS, OCTOBER_24_MILLIS);
-    dataFrame.addSeries("met", METRIC_VALUE, METRIC_VALUE);
+    // october 19 missing before detection period - october 23 missing in the detection period
+    dataFrame.addSeries("ts", OCTOBER_18_MILLIS, OCTOBER_20_MILLIS, OCTOBER_21_MILLIS, OCTOBER_22_MILLIS, OCTOBER_24_MILLIS);
+    dataFrame.addSeries("met", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
     final DataTable inputDataTable = SimpleDataTable.fromDataFrame(dataFrame);
-
-    final DataFrame expectedDataFrame = new DataFrame();
-    expectedDataFrame.addSeries("ts", OCTOBER_22_MILLIS, OCTOBER_23_MILLIS, OCTOBER_24_MILLIS);
 
     DataTable output = null;
     try {
@@ -196,8 +195,19 @@ public class TimeIndexFillerTest {
     } catch (Exception e) {
       Assert.fail("Index filling failed: " + e);
     }
-    // (met,OCTOBER_23_MILLIS) should be null
-    assert output.getObject(1,1) == null;
+    assert output.getRowCount() == 7;
+    // (met,OCTOBER_19_MILLIS) should be null
+    Object october19Value = output.getObject(1,1);
+    assert october19Value == null;
+    // (met,OCTOBER_23_MILLIS) should be filled with a zero
+    Object october23Value = output.getObject(5,1);
+    assert october23Value instanceof Double && (double) october23Value == ZERO_FILLER;
+    // other days should have value METRIC_VALUE
+    final DataTable finalOutput = output;
+    Stream.of(0,2,3,4,6).forEach( rowIdx -> {
+      Object value = finalOutput.getObject(rowIdx,1);
+      assert value instanceof Double && (double) value == METRIC_VALUE;
+    });
   }
 
   @Test

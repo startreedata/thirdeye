@@ -12,6 +12,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries.Builder;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.IndexFiller;
 import org.apache.pinot.thirdeye.spi.detection.NullReplacer;
@@ -34,6 +35,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     FROM_DETECTION_TIME,
     FROM_DETECTION_TIME_WITH_LOOKBACK,
   }
+
+  private static final NullReplacer WITH_ZERO_NULL_REPLACER = new NullReplacerRegistry().buildNullReplacer("FILL_WITH_ZEROES", new HashMap<>());
 
   private TimeGranularity timeGranularity;
   private String timeColumn;
@@ -89,9 +92,22 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         "'" + timeColumn + "' column not found in DataFrame");
     DataFrame correctIndex = generateCorrectIndex(interval, rawData);
     DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
-    DataFrame nullReplacedData = nullReplacer.replaceNulls(filledData);
+    DataFrame nullReplacedData = replaceNullData(interval.getStart(), filledData);
 
     return SimpleDataTable.fromDataFrame(nullReplacedData);
+  }
+
+  private DataFrame replaceNullData(final DateTime start, final DataFrame dataFrame) {
+    // only apply replacer *before* the detection period - on detection period, replace nulls by zeroes
+    DataFrame beforeDetectionStart = dataFrame.filter((LongConditional) values ->
+        values[0] < start.getMillis(), timeColumn).dropNull(timeColumn);
+    DataFrame afterDetectionStart = dataFrame.filter((LongConditional) values ->
+        values[0] >= start.getMillis(), timeColumn).dropNull(timeColumn);
+
+    return DataFrame.concatenate(
+        nullReplacer.replaceNulls(beforeDetectionStart),
+        WITH_ZERO_NULL_REPLACER.replaceNulls(afterDetectionStart)
+    );
   }
 
   private DataFrame generateCorrectIndex(final Interval interval,

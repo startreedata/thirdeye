@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.spec;
 
-import org.apache.pinot.thirdeye.detection.v2.components.filler.TimeIndexFiller.FillNullMethod;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.pinot.thirdeye.detection.v2.components.filler.TimeIndexFiller.TimeLimitInferenceStrategy;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
@@ -22,7 +23,12 @@ public class TimeIndexFillerSpec extends AbstractSpec {
    * Method to use to fill null values in other columns.
    * Index filling can generate nulls in other columns.
    */
-  private String fillNullMethod = FillNullMethod.FILL_WITH_ZEROES.toString();
+  private String fillNullMethod = "FILL_WITH_ZEROES";
+
+  /**
+   * Params for the FillNullMethod.
+   */
+  private Map<String, Object> fillNullParams = new HashMap<>();
 
   /**
    * Period Java ISO8601 standard. Used when time inference uses a lookback time.
@@ -54,6 +60,16 @@ public class TimeIndexFillerSpec extends AbstractSpec {
 
   public TimeIndexFillerSpec setFillNullMethod(final String fillNullMethod) {
     this.fillNullMethod = fillNullMethod;
+    return this;
+  }
+
+  public Map<String, Object> getFillNullParams() {
+    return fillNullParams;
+  }
+
+  public TimeIndexFillerSpec setFillNullParams(
+      final Map<String, Object> fillNullParams) {
+    this.fillNullParams = fillNullParams;
     return this;
   }
 

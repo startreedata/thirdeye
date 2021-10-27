@@ -5,6 +5,8 @@ import static org.apache.pinot.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.pinot.thirdeye.detection.v2.spec.TimeIndexFillerSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
@@ -12,6 +14,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.LongSeries.Builder;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.IndexFiller;
+import org.apache.pinot.thirdeye.spi.detection.NullReplacer;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -32,14 +35,6 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     FROM_DETECTION_TIME_WITH_LOOKBACK,
   }
 
-  /**
-   * Available methods to fill null values generated in other columns when the index is completed.
-   */
-  public enum FillNullMethod {
-    KEEP_NULL,
-    FILL_WITH_ZEROES
-  }
-
   private TimeGranularity timeGranularity;
   private String timeColumn;
   /**
@@ -55,14 +50,14 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
    */
   private Period lookback;
   /**
-   * Method to fill null values.
+   * Replacer of null values in metric/dimensions columns.
    */
-  private FillNullMethod fillNullMethod;
+  private NullReplacer nullReplacer;
 
   @Override
   public void init(final TimeIndexFillerSpec spec) {
     timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    // TODO CYRIL if granularity not set, infer it - it is min(ts[n]-ts[n-1])
+    // TODO CYRIL if granularity not set, infer it - it is min(ts[n]-ts[n-1]) when n big enough
     checkArgument(!MetricSlice.NATIVE_GRANULARITY.equals(timeGranularity),
         "NATIVE_GRANULARITY not supported in v2 interface - set `monitoringGranularity` parameter");
 
@@ -77,7 +72,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         "maxTime inference based on lookback requires a valid `lookback` parameter");
 
     timeColumn = spec.getTimestamp();
-    fillNullMethod = FillNullMethod.valueOf(spec.getFillNullMethod().toUpperCase());
+    nullReplacer = new NullReplacerRegistry().buildNullReplacer(spec.getFillNullMethod()
+        .toUpperCase(), spec.getFillNullParams());
   }
 
   private static boolean isValidInferenceConfig(TimeLimitInferenceStrategy strategy,
@@ -93,12 +89,9 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         "'" + timeColumn + "' column not found in DataFrame");
     DataFrame correctIndex = generateCorrectIndex(interval, rawData);
     DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
+    DataFrame nullReplacedData = nullReplacer.replaceNulls(filledData);
 
-    if (fillNullMethod == FillNullMethod.FILL_WITH_ZEROES) {
-      filledData = filledData.fillNull(filledData.getSeriesNames());
-    }
-
-    return SimpleDataTable.fromDataFrame(filledData);
+    return SimpleDataTable.fromDataFrame(nullReplacedData);
   }
 
   private DataFrame generateCorrectIndex(final Interval interval,
@@ -243,5 +236,27 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     // TODO CYRIL refactor to a IsoDateUtils class
     return lookback.equals(Period.ZERO)
         || Arrays.stream(lookback.getValues()).filter(v -> v == 0).count() == 7;
+  }
+
+  private static class NullReplacerRegistry {
+
+    // extract this class and build map of NullReplacer *factories* dynamically when NullReplacers are pluginized
+    public static Map<String, NullReplacer> nullReplacerMap = new HashMap<>();
+
+    static {
+      nullReplacerMap.put("KEEP_NULL", df -> df);
+      nullReplacerMap.put("FILL_WITH_ZEROES", df -> df.fillNull(df.getSeriesNames()));
+    }
+
+    public NullReplacer buildNullReplacer(String fillNullMethod,
+        Map<String, Object> fillNullParams) {
+      //fillNullParams to be used by factories when pluginized - eg method=SPLINE, params={order=3, kind="smooth"}
+      checkArgument(nullReplacerMap.containsKey(fillNullMethod),
+          String.format("fillNull Method not registered: %s. Available null replacers: %s",
+              fillNullMethod,
+              nullReplacerMap.keySet()));
+
+      return nullReplacerMap.get(fillNullMethod);
+    }
   }
 }

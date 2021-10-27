@@ -86,13 +86,13 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   @Override
-  public DataTable fillIndex(Interval interval, final DataTable dataTable) throws Exception {
+  public DataTable fillIndex(Interval detectionInterval, final DataTable dataTable) throws Exception {
     DataFrame rawData = dataTable.getDataFrame();
     checkArgument(rawData.contains(timeColumn),
         "'" + timeColumn + "' column not found in DataFrame");
-    DataFrame correctIndex = generateCorrectIndex(interval, rawData);
+    DataFrame correctIndex = generateCorrectIndex(detectionInterval, rawData);
     DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
-    DataFrame nullReplacedData = replaceNullData(interval.getStart(), filledData);
+    DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
     return SimpleDataTable.fromDataFrame(nullReplacedData);
   }
@@ -110,10 +110,10 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     );
   }
 
-  private DataFrame generateCorrectIndex(final Interval interval,
+  private DataFrame generateCorrectIndex(final Interval detectionInterval,
       final DataFrame rawDataFrame) {
-    long inferredMinTime = inferMinTime(interval.getStart(), rawDataFrame);
-    long inferredMaxTime = inferMaxTime(interval.getEnd(), rawDataFrame);
+    long inferredMinTime = inferMinTime(detectionInterval.getStart(), rawDataFrame);
+    long inferredMaxTime = inferMaxTime(detectionInterval.getEnd(), rawDataFrame);
 
     Period timePeriod = timeGranularity.toPeriod();
     DateTime firstIndexValue = getFirstIndexValue(inferredMinTime, timePeriod);

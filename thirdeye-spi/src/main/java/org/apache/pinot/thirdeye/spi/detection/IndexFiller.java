@@ -5,5 +5,5 @@ import org.joda.time.Interval;
 
 public interface IndexFiller<T extends AbstractSpec> extends BaseComponent<T> {
 
-  DataTable fillIndex(Interval interval, DataTable dataTable) throws Exception;
+  DataTable fillIndex(Interval detectionInterval, DataTable dataTable) throws Exception;
 }

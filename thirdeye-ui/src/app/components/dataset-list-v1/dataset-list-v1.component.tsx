@@ -19,10 +19,8 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     props: DatasetListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedDataset,
-        setSelectedDataset,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedDataset, setSelectedDataset] =
+        useState<DataGridSelectionModelV1>();
     const history = useHistory();
 
     const handleDatasetDelete = (): void => {
@@ -107,7 +105,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
                     hideBorder
                     columns={datasetColumns}
                     data={
-                        (props.datasets as unknown) as Record<string, unknown>[]
+                        props.datasets as unknown as Record<string, unknown>[]
                     }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}

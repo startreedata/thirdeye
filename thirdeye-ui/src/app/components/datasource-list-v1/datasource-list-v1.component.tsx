@@ -19,10 +19,8 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedDatasource,
-        setSelectedDatasource,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedDatasource, setSelectedDatasource] =
+        useState<DataGridSelectionModelV1>();
     const history = useHistory();
 
     const handleDatasourceDelete = (): void => {
@@ -109,7 +107,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
                     hideBorder
                     columns={datasourceColumns}
                     data={
-                        (props.datasources as unknown) as Record<
+                        props.datasources as unknown as Record<
                             string,
                             unknown
                         >[]

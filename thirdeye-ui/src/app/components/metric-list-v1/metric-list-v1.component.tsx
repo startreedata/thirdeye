@@ -21,10 +21,8 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     props: MetricListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedMetric,
-        setSelectedMetric,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedMetric, setSelectedMetric] =
+        useState<DataGridSelectionModelV1>();
     const history = useHistory();
     const theme = useTheme();
 
@@ -168,9 +166,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
                 <DataGridV1
                     hideBorder
                     columns={metricColumns}
-                    data={
-                        (props.metrics as unknown) as Record<string, unknown>[]
-                    }
+                    data={props.metrics as unknown as Record<string, unknown>[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

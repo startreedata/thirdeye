@@ -69,24 +69,28 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         history.push(getMetricsViewPath(id));
     };
 
-    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
             <Link
                 onClick={() =>
                     handleMetricViewDetailsById(
-                        (renderProps.rowData as UiMetric).id
+                        ((data as unknown) as UiMetric).id
                     )
                 }
             >
-                {(renderProps.rowData as UiMetric).name}
+                {cellValue}
             </Link>
         );
     };
 
     const renderMetricStatus = (
-        renderProps: Record<string, unknown>
+        _: Record<string, unknown>,
+        data: Record<string, unknown>
     ): ReactElement => {
-        const active = (renderProps.rowData as UiMetric).active;
+        const active = ((data as unknown) as UiMetric).active;
 
         return (
             <>
@@ -113,52 +117,52 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         {
             key: "name",
             dataKey: "name",
-            title: t("label.name"),
+            header: t("label.name"),
             minWidth: 0,
-            flexGrow: 1.5,
+            flex: 1.5,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "datasetName",
             dataKey: "datasetName",
             sortable: true,
-            title: t("label.dataset"),
+            header: t("label.dataset"),
             minWidth: 0,
-            flexGrow: 1.5,
+            flex: 1.5,
         },
         {
             key: "active",
             dataKey: "active",
             sortable: true,
-            title: t("label.active"),
+            header: t("label.active"),
             minWidth: 0,
-            flexGrow: 0.5,
-            cellRenderer: renderMetricStatus,
+            flex: 0.5,
+            customCellRenderer: renderMetricStatus,
         },
         {
             key: "aggregationColumn",
             dataKey: "aggregationColumn",
             sortable: true,
-            title: t("label.aggregation-column"),
+            header: t("label.aggregation-column"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
         },
         {
             key: "aggregationFunction",
             dataKey: "aggregationFunction",
             sortable: true,
-            title: t("label.aggregation-function"),
+            header: t("label.aggregation-function"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
         },
         {
             key: "viewCount",
             dataKey: "viewCount",
             sortable: true,
-            title: t("label.views"),
+            header: t("label.views"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
         },
     ];
 

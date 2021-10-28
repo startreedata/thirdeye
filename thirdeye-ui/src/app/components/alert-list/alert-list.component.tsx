@@ -2,6 +2,7 @@ import { Button, Grid, Link, Paper, useTheme } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import {
+    DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
@@ -16,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelectorV1 } from "../time-range/time-range-selector/time-range-selector-v1/time-range-selector-v1.component";
 import { AlertListProps } from "./alert-list.interfaces";
@@ -47,8 +49,7 @@ export const AlertList: FunctionComponent<AlertListProps> = (
             children: [
                 {
                     id: index,
-                    // ToDo
-                    expandPanelContents: <p>Alert details</p>,
+                    expandPanelContents: <AlertCardV1 uiAlert={alert} />,
                 },
             ],
         }));
@@ -172,6 +173,7 @@ export const AlertList: FunctionComponent<AlertListProps> = (
                     data={(alertsData as unknown) as Record<string, unknown>[]}
                     expandColumnKey="name"
                     rowKey="id"
+                    scroll={DataGridScrollV1.Body}
                     searchPlaceholder={t("label.search-entity", {
                         entity: t("label.alerts"),
                     })}

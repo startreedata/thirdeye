@@ -75,16 +75,19 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         history.push(getSubscriptionGroupsViewPath(id));
     };
 
-    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
             <Link
                 onClick={() =>
                     handleSubscriptionGroupViewDetailsById(
-                        (renderProps.rowData as UiSubscriptionGroup).id
+                        ((data as unknown) as UiSubscriptionGroup).id
                     )
                 }
             >
-                {(renderProps.rowData as UiSubscriptionGroup).name}
+                {cellValue}
             </Link>
         );
     };
@@ -93,33 +96,33 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         {
             key: "name",
             dataKey: "name",
-            title: t("label.name"),
+            header: t("label.name"),
             minWidth: 0,
-            flexGrow: 1.5,
+            flex: 1.5,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "cron",
             dataKey: "cron",
-            title: t("label.cron"),
+            header: t("label.cron"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
         },
         {
             key: "alertCount",
             dataKey: "alertCount",
-            title: t("label.subscribed-alerts"),
+            header: t("label.subscribed-alerts"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
             sortable: true,
         },
         {
             key: "emailCount",
             dataKey: "emailCount",
-            title: t("label.subscribed-emails"),
+            header: t("label.subscribed-emails"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
             sortable: true,
         },
     ];

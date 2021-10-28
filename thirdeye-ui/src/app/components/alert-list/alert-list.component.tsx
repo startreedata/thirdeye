@@ -1,20 +1,17 @@
-import {
-    Button,
-    Grid,
-    Link,
-    Paper,
-    useMediaQuery,
-    useTheme,
-} from "@material-ui/core";
+import { Button, Grid, Link, Paper, useTheme } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import {
-    AppLoadingIndicatorV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
 } from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactElement, useState } from "react";
+import React, {
+    FunctionComponent,
+    ReactElement,
+    useEffect,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
@@ -31,6 +28,7 @@ export const AlertList: FunctionComponent<AlertListProps> = (
         selectedAlert,
         setSelectedAlert,
     ] = useState<DataGridSelectionModelV1>();
+    const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
     const history = useHistory();
 
     const {
@@ -43,25 +41,52 @@ export const AlertList: FunctionComponent<AlertListProps> = (
     const theme = useTheme();
     const { timeRangeContainer } = useAlertListStyles();
 
+    const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
+        return data?.map((alert, index) => ({
+            ...alert,
+            children: [
+                {
+                    id: index,
+                    // ToDo
+                    expandPanelContents: <p>Alert details</p>,
+                },
+            ],
+        }));
+    };
+
+    useEffect(() => {
+        if (!props.alerts) {
+            return;
+        }
+
+        const alertsData = generateDataWithChildren(props.alerts);
+        setAlertsData(alertsData);
+    }, [props.alerts]);
+
     const handleAlertViewDetails = (id: number): void => {
         history.push(getAlertsViewPath(id));
     };
 
-    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
-        const rowData = renderProps.rowData as UiAlert;
-
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
-            <Link onClick={() => handleAlertViewDetails(rowData.id)}>
-                {rowData.name}
+            <Link
+                onClick={() =>
+                    handleAlertViewDetails(((data as unknown) as UiAlert).id)
+                }
+            >
+                {cellValue}
             </Link>
         );
     };
 
     const renderAlertStatus = (
-        renderProps: Record<string, unknown>
+        _: Record<string, unknown>,
+        data: Record<string, unknown>
     ): ReactElement => {
-        const rowData = renderProps.rowData as UiAlert;
-        const { active } = rowData;
+        const active = ((data as unknown) as UiAlert).active;
 
         return (
             <>
@@ -93,6 +118,7 @@ export const AlertList: FunctionComponent<AlertListProps> = (
             const selectedUiAlert = props.alerts?.find(
                 (alert) => alert.id === selectedAlert?.rowKeyValues[0]
             );
+
             selectedUiAlert &&
                 props.onDelete &&
                 props.onDelete(selectedUiAlert);
@@ -103,37 +129,34 @@ export const AlertList: FunctionComponent<AlertListProps> = (
         {
             key: "name",
             dataKey: "name",
-            title: t("label.alert-name"),
+            header: t("label.alert-name"),
             minWidth: 0,
-            flexGrow: 1.5,
+            flex: 1.5,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "createdBy",
             dataKey: "createdBy",
-            title: t("label.created-by"),
+            header: t("label.created-by"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
         },
         {
             key: "active",
             dataKey: "active",
-            title: t("label.active"),
+            header: t("label.active"),
             minWidth: 0,
-            flexGrow: 1,
-            cellRenderer: renderAlertStatus,
+            flex: 1,
+            customCellRenderer: renderAlertStatus,
         },
     ];
 
-    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
-
-    return props.alerts ? (
+    return (
         <Grid item xs={12}>
             <Paper className={timeRangeContainer} elevation={0}>
                 <PageContentsCardV1>
                     <TimeRangeSelectorV1
-                        hideTimeRange={!screenWidthSmUp}
                         recentCustomTimeRangeDurations={
                             recentCustomTimeRangeDurations
                         }
@@ -146,9 +169,8 @@ export const AlertList: FunctionComponent<AlertListProps> = (
                 <DataGridV1
                     hideBorder
                     columns={alertGroupColumns}
-                    data={
-                        (props.alerts as unknown) as Record<string, unknown>[]
-                    }
+                    data={(alertsData as unknown) as Record<string, unknown>[]}
+                    expandColumnKey="name"
                     rowKey="id"
                     searchPlaceholder={t("label.search-entity", {
                         entity: t("label.alerts"),
@@ -168,7 +190,5 @@ export const AlertList: FunctionComponent<AlertListProps> = (
                 />
             </PageContentsCardV1>
         </Grid>
-    ) : (
-        <AppLoadingIndicatorV1 />
     );
 };

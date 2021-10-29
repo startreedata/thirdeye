@@ -1,194 +1,79 @@
-import { Button, Grid, Link, Paper, useTheme } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
-import {
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "@startree-ui/platform-ui";
-import React, {
-    FunctionComponent,
-    ReactElement,
-    useEffect,
-    useState,
-} from "react";
+import { Grid } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import { getAlertsViewPath } from "../../utils/routes/routes.util";
-import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
-import { TimeRangeSelectorV1 } from "../time-range/time-range-selector/time-range-selector-v1/time-range-selector-v1.component";
+import { filterAlerts } from "../../utils/alerts/alerts.util";
+import { getSearchStatusLabel } from "../../utils/search/search.util";
+import { AlertCard } from "../entity-cards/alert-card/alert-card.component";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
+import { SearchBar } from "../search-bar/search-bar.component";
 import { AlertListProps } from "./alert-list.interfaces";
-import { useAlertListStyles } from "./alert-list.styles";
 
 export const AlertList: FunctionComponent<AlertListProps> = (
     props: AlertListProps
 ) => {
-    const [
-        selectedAlert,
-        setSelectedAlert,
-    ] = useState<DataGridSelectionModelV1>();
-    const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
-    const history = useHistory();
-
-    const {
-        timeRangeDuration,
-        recentCustomTimeRangeDurations,
-        setTimeRangeDuration,
-    } = useTimeRange();
-
+    const [filteredUiAlerts, setFilteredUiAlerts] = useState<UiAlert[]>([]);
+    const [searchWords, setSearchWords] = useState<string[]>([]);
     const { t } = useTranslation();
-    const theme = useTheme();
-    const { timeRangeContainer } = useAlertListStyles();
-
-    const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
-        return data?.map((alert, index) => ({
-            ...alert,
-            children: [
-                {
-                    id: index,
-                    // ToDo
-                    expandPanelContents: <p>Alert details</p>,
-                },
-            ],
-        }));
-    };
 
     useEffect(() => {
-        if (!props.alerts) {
-            return;
-        }
-
-        const alertsData = generateDataWithChildren(props.alerts);
-        setAlertsData(alertsData);
-    }, [props.alerts]);
-
-    const handleAlertViewDetails = (id: number): void => {
-        history.push(getAlertsViewPath(id));
-    };
-
-    const renderLink = (
-        cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
-    ): ReactElement => {
-        return (
-            <Link
-                onClick={() =>
-                    handleAlertViewDetails(((data as unknown) as UiAlert).id)
-                }
-            >
-                {cellValue}
-            </Link>
-        );
-    };
-
-    const renderAlertStatus = (
-        _: Record<string, unknown>,
-        data: Record<string, unknown>
-    ): ReactElement => {
-        const active = ((data as unknown) as UiAlert).active;
-
-        return (
-            <>
-                {/* Active */}
-                {active && (
-                    <CheckIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.success.main}
-                    />
-                )}
-
-                {/* Inactive */}
-                {!active && (
-                    <CloseIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.error.main}
-                    />
-                )}
-            </>
-        );
-    };
-
-    const isActionButtonDisable = !(
-        selectedAlert && selectedAlert.rowKeyValues.length === 1
-    );
-
-    const handleAlertDelete = (): void => {
-        if (!isActionButtonDisable) {
-            const selectedUiAlert = props.alerts?.find(
-                (alert) => alert.id === selectedAlert?.rowKeyValues[0]
-            );
-
-            selectedUiAlert &&
-                props.onDelete &&
-                props.onDelete(selectedUiAlert);
-        }
-    };
-
-    const alertGroupColumns = [
-        {
-            key: "name",
-            dataKey: "name",
-            header: t("label.alert-name"),
-            minWidth: 0,
-            flex: 1.5,
-            sortable: true,
-            customCellRenderer: renderLink,
-        },
-        {
-            key: "createdBy",
-            dataKey: "createdBy",
-            header: t("label.created-by"),
-            minWidth: 0,
-            flex: 1,
-        },
-        {
-            key: "active",
-            dataKey: "active",
-            header: t("label.active"),
-            minWidth: 0,
-            flex: 1,
-            customCellRenderer: renderAlertStatus,
-        },
-    ];
+        // Input alerts or search changed, reset
+        setFilteredUiAlerts(filterAlerts(props.alerts || [], searchWords));
+    }, [props.alerts, searchWords]);
 
     return (
-        <Grid item xs={12}>
-            <Paper className={timeRangeContainer} elevation={0}>
-                <PageContentsCardV1>
-                    <TimeRangeSelectorV1
-                        recentCustomTimeRangeDurations={
-                            recentCustomTimeRangeDurations
-                        }
-                        timeRangeDuration={timeRangeDuration}
-                        onChange={setTimeRangeDuration}
-                    />
-                </PageContentsCardV1>
-            </Paper>
-            <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
-                    hideBorder
-                    columns={alertGroupColumns}
-                    data={(alertsData as unknown) as Record<string, unknown>[]}
-                    expandColumnKey="name"
-                    rowKey="id"
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.alerts"),
-                    })}
-                    toolbarComponent={
-                        <Grid>
-                            <Button
-                                disabled={isActionButtonDisable}
-                                variant="contained"
-                                onClick={handleAlertDelete}
-                            >
-                                {t("label.delete")}
-                            </Button>
+        <>
+            <Grid container>
+                {/* Search */}
+                {!props.hideSearchBar && (
+                    <Grid item xs={12}>
+                        <SearchBar
+                            autoFocus
+                            setSearchQueryString
+                            searchLabel={t("label.search-entity", {
+                                entity: t("label.alerts"),
+                            })}
+                            searchStatusLabel={getSearchStatusLabel(
+                                filteredUiAlerts ? filteredUiAlerts.length : 0,
+                                props.alerts ? props.alerts.length : 0
+                            )}
+                            onChange={setSearchWords}
+                        />
+                    </Grid>
+                )}
+
+                {/* Alerts */}
+                {props.alerts &&
+                    filteredUiAlerts &&
+                    filteredUiAlerts.map((filteredUiAlert, index) => (
+                        <Grid item key={index} sm={12}>
+                            <AlertCard
+                                showViewDetails
+                                searchWords={searchWords}
+                                uiAlert={filteredUiAlert}
+                                onChange={props.onChange}
+                                onDelete={props.onDelete}
+                            />
                         </Grid>
-                    }
-                    onSelectionChange={setSelectedAlert}
-                />
-            </PageContentsCardV1>
-        </Grid>
+                    ))}
+            </Grid>
+
+            {/* Loading indicator */}
+            {!props.alerts && <AppLoadingIndicatorV1 />}
+
+            {/* No data available message */}
+            {props.alerts &&
+                isEmpty(filteredUiAlerts) &&
+                isEmpty(searchWords) && <NoDataIndicator />}
+
+            {/* No search results available message */}
+            {props.alerts &&
+                isEmpty(filteredUiAlerts) &&
+                !isEmpty(searchWords) && (
+                    <NoDataIndicator text={t("message.no-search-results")} />
+                )}
+        </>
     );
 };

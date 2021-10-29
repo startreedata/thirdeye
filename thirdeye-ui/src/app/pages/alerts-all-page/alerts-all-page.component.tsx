@@ -7,7 +7,7 @@ import {
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertList } from "../../components/alert-list/alert-list.component";
+import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { CreateMenuButton } from "../../components/create-menu-button.component/create-menu-button.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
@@ -146,7 +146,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             </PageHeaderV1>
             <PageContentsGridV1 fullHeight>
                 {/* Alert list */}
-                <AlertList
+                <AlertListV1
                     alerts={uiAlerts}
                     onChange={handleAlertChange}
                     onDelete={handleAlertDelete}

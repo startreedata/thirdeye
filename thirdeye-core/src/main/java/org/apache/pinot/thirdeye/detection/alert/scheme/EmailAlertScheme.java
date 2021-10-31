@@ -131,11 +131,12 @@ public class EmailAlertScheme extends NotificationScheme {
     validateAlert(recipients, anomalies);
 
     final NotificationContent content = getNotificationContent(emailClientConfigs);
-    content.init(new NotificationContext()
+    final NotificationContext notificationContext = new NotificationContext()
         .setProperties(emailClientConfigs)
-        .setUiPublicUrl(context.getUiPublicUrl()));
+        .setUiPublicUrl(this.context.getUiPublicUrl());
+    content.init(notificationContext);
 
-    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(emailClientConfigs,
+    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
         content,
         subsConfig,
         anomalies);

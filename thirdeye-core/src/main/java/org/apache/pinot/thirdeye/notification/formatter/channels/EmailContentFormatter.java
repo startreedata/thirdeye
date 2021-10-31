@@ -20,8 +20,6 @@
 package org.apache.pinot.thirdeye.notification.formatter.channels;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
@@ -35,7 +33,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.NotificationContent;
@@ -51,7 +49,6 @@ import org.slf4j.LoggerFactory;
 /**
  * This class formats the content for email alerts.
  */
-@Singleton
 public class EmailContentFormatter {
 
   protected static final String PROP_SUBJECT_STYLE = "subject";
@@ -66,13 +63,6 @@ public class EmailContentFormatter {
       .put(HierarchicalAnomaliesContent.class.getSimpleName(),
           "hierarchical-anomalies-email-template.ftl")
       .build();
-
-  protected ThirdEyeServerConfiguration teConfig;
-
-  @Inject
-  public EmailContentFormatter(final ThirdEyeServerConfiguration teConfig) {
-    this.teConfig = teConfig;
-  }
 
   /**
    * Plug the appropriate subject style based on configuration
@@ -92,12 +82,13 @@ public class EmailContentFormatter {
     return subjectType;
   }
 
-  public EmailEntity getEmailEntity(final Properties emailClientConfigs,
+  public EmailEntity getEmailEntity(
+      final NotificationContext notificationContext,
       final NotificationContent content,
       final SubscriptionGroupDTO subsConfig,
       final Collection<AnomalyResult> anomalies) {
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);
-    templateData.put("dashboardHost", teConfig.getUiConfiguration().getExternalUrl());
+    templateData.put("dashboardHost", notificationContext.getUiPublicUrl());
     final HtmlEmail htmlEmail = new HtmlEmail();
     String contentId = "";
     try {
@@ -110,7 +101,11 @@ public class EmailContentFormatter {
     templateData.put("cid", contentId);
 
     final String htmlText = buildHtml(TEMPLATE_MAP.get(content.getTemplate()), templateData);
-    return buildEmailEntity(templateData, htmlEmail, htmlText, emailClientConfigs, subsConfig);
+    return buildEmailEntity(templateData,
+        htmlEmail,
+        htmlText,
+        notificationContext.getProperties(),
+        subsConfig);
   }
 
   public String buildHtml(final String templateName, final Map<String, Object> templateValues) {

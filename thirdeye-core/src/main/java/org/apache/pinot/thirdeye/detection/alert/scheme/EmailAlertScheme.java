@@ -62,7 +62,7 @@ public class EmailAlertScheme extends NotificationScheme {
     super.init(context);
 
     smtpConfig = context.getSmtpConfiguration();
-    emailContentFormatter = context.getEmailContentFormatter();
+    emailContentFormatter = new EmailContentFormatter();
 
     emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
     emailAlertsSuccessCounter = metricRegistry.counter("emailAlertsSuccessCounter");

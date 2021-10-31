@@ -3,7 +3,6 @@ package org.apache.pinot.thirdeye.notification;
 import com.codahale.metrics.MetricRegistry;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.NotificationContent;
-import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 
 public class NotificationSchemeContext {
 
@@ -12,7 +11,6 @@ public class NotificationSchemeContext {
   private NotificationContent entityGroupKeyContent;
   private MetricRegistry metricRegistry;
   private SmtpConfiguration smtpConfiguration;
-  private EmailContentFormatter emailContentFormatter;
 
   public String getUiPublicUrl() {
     return uiPublicUrl;
@@ -59,16 +57,6 @@ public class NotificationSchemeContext {
   public NotificationSchemeContext setSmtpConfiguration(
       final SmtpConfiguration smtpConfiguration) {
     this.smtpConfiguration = smtpConfiguration;
-    return this;
-  }
-
-  public EmailContentFormatter getEmailContentFormatter() {
-    return emailContentFormatter;
-  }
-
-  public NotificationSchemeContext setEmailContentFormatter(
-      final EmailContentFormatter emailContentFormatter) {
-    this.emailContentFormatter = emailContentFormatter;
     return this;
   }
 }

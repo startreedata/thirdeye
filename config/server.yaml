@@ -33,8 +33,10 @@ auth:
     accessTokenExpiry: P1D # Duration: 1 day. Format: https://en.wikipedia.org/wiki/ISO_8601
   oauth:
     issuer: http://identity.startree.ai
-    baseUrl: file://<path to project dir>/config/jwks.json
-
+    keysUrl: file:///Users/shounak/Documents/Startree/thirdeye/config/jwks.json
+    cache:
+      size: 64
+      ttl: 60000
 database:
   # Assuming a local MySQL server running on the default port 3306
   url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&useSSL=false

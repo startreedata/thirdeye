@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
-import org.apache.pinot.thirdeye.auth.ThirdeyeAuthenticator;
+import org.apache.pinot.thirdeye.auth.ThirdEyeAuthenticator;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.DataSourceBuilder;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -43,6 +43,7 @@ import org.apache.pinot.thirdeye.task.TaskDriver;
 import org.apache.pinot.thirdeye.tracking.RequestStatisticsLogger;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,9 +204,10 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       if(config.isEnabled()) {
         environment.jersey().register(new AuthDynamicFeature(
             new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
-                .setAuthenticator(new ThirdeyeAuthenticator(config))
+                .setAuthenticator(new ThirdEyeAuthenticator(config))
                 .setPrefix("Bearer")
                 .buildAuthFilter()));
+        environment.jersey().register(RolesAllowedDynamicFeature.class);
         environment.jersey()
             .register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
       }

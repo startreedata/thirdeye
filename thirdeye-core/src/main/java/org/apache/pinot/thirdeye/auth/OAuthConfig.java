@@ -1,17 +1,18 @@
 package org.apache.pinot.thirdeye.auth;
 
 public class OAuthConfig {
-  private String baseUrl;
+  private String keysUrl;
   private String clientId;
   private String issuer;
   private String audience;
+  private CacheConfig cache;
 
-  public String getBaseUrl() {
-    return baseUrl;
+  public String getKeysUrl() {
+    return keysUrl;
   }
 
-  public OAuthConfig setBaseUrl(final String baseUrl) {
-    this.baseUrl = baseUrl;
+  public OAuthConfig setKeysUrl(final String baseUrl) {
+    this.keysUrl = baseUrl;
     return this;
   }
 
@@ -39,6 +40,15 @@ public class OAuthConfig {
 
   public OAuthConfig setAudience(final String audience) {
     this.audience = audience;
+    return this;
+  }
+
+  public CacheConfig getCache() {
+    return cache;
+  }
+
+  public OAuthConfig setCache(final CacheConfig cache) {
+    this.cache = cache;
     return this;
   }
 }

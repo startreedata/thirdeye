@@ -1,19 +1,30 @@
 package org.apache.pinot.thirdeye.spi;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import java.security.Principal;
 
 public class ThirdEyePrincipal implements Principal {
 
-  private static final String SUBJECT = "sub";
-  private final DecodedJWT accessToken;
+  private JWTClaimsSet claims;
 
-  public ThirdEyePrincipal(final DecodedJWT accessToken) {
-    this.accessToken = accessToken;
+  public ThirdEyePrincipal() {
+  }
+
+  public ThirdEyePrincipal(final JWTClaimsSet claims) {
+    this.claims = claims;
   }
 
   @Override
   public String getName() {
-    return accessToken.getClaim(SUBJECT).asString();
+    return claims.getSubject();
+  }
+
+  public JWTClaimsSet getClaims() {
+    return claims;
+  }
+
+  public ThirdEyePrincipal setClaims(final JWTClaimsSet claims) {
+    this.claims = claims;
+    return this;
   }
 }

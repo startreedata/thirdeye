@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class OidcJWTProcessor extends DefaultJWTProcessor<OidcContext> {
   public OidcJWTProcessor(Collection<JWK> keys, OidcContext context) {
     super();
-
     Map<String, Key> keyMap = keys.stream().collect(Collectors.toMap(JWK::getKeyID, OidcJWTProcessor::toPublicKey));
     JWTClaimsSetVerifier verifier = new DefaultJWTClaimsVerifier(
         getExactMatchClaimSet(context),

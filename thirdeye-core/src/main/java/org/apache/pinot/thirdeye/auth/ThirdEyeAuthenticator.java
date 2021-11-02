@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.auth;
 import static org.apache.pinot.thirdeye.auth.OidcUtils.makeDefaultCache;
 
 import com.google.common.cache.LoadingCache;
+import com.google.inject.Inject;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
@@ -16,22 +17,20 @@ public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrin
   private AuthConfiguration config;
   private LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
+  @Inject
   public ThirdEyeAuthenticator(final AuthConfiguration config) {
     this.config = config;
     this.bindingsCache = makeDefaultCache(new OidcContext(config.getOAuthConfig()));
   }
 
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String authToken) throws AuthenticationException {
+  public Optional<ThirdEyePrincipal> authenticate(final String authToken)
+      throws AuthenticationException {
     try {
-        ThirdEyePrincipal principal = bindingsCache.get(authToken);
-        if (principal != null) {
-          return Optional.of(principal);
-        }
-    } catch (Exception exception){
+      return Optional.ofNullable(bindingsCache.get(authToken));
+    } catch (Exception exception) {
       LOG.info("Authentication failed. ", exception);
+      return Optional.empty();
     }
-    return Optional.empty();
   }
-
 }

@@ -1,19 +1,25 @@
 package org.apache.pinot.thirdeye.auth;
 
+import static org.apache.pinot.thirdeye.auth.CacheConfig.DEFAULT_SIZE;
+import static org.apache.pinot.thirdeye.auth.CacheConfig.DEFAULT_TTL;
+
 import com.nimbusds.jose.proc.SecurityContext;
+import java.util.Optional;
 
 public class OidcContext implements SecurityContext {
 
   private String issuer;
   private String keysUrl;
-  private long cacheSize;
-  private long cacheTtl;
+  private long cacheSize = DEFAULT_SIZE;
+  private long cacheTtl = DEFAULT_TTL;
 
   public OidcContext(final OAuthConfig config) {
     this.issuer = config.getIssuer();
     this.keysUrl = config.getKeysUrl();
-    this.cacheSize = config.getCache().getSize();
-    this.cacheTtl = config.getCache().getTtl();
+    Optional.of(config.getCache()).ifPresent(cache -> {
+      this.cacheSize = config.getCache().getSize();
+      this.cacheTtl = config.getCache().getTtl();
+    });
   }
 
   public String getIssuer() {

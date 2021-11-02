@@ -2,8 +2,10 @@ package org.apache.pinot.thirdeye.auth;
 
 public class CacheConfig {
 
-  private long size = 64;
-  private long ttl = 60000;
+  public static final long DEFAULT_SIZE = 64;
+  public static final long DEFAULT_TTL = 60000;
+  private long size = DEFAULT_SIZE;
+  private long ttl = DEFAULT_TTL;
 
   public long getSize() {
     return size;

@@ -23,6 +23,7 @@ public interface Constants {
 
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
+  String AUTH_BEARER = "Bearer";
 
   // Used in Quartz Scheduler context
   String CTX_INJECTOR = "CTX_INJECTOR";

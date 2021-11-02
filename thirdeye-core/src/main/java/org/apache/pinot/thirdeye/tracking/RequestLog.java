@@ -71,7 +71,6 @@ public class RequestLog {
    * @return principal name
    */
   private static String getPrincipal() {
-    // TODO : revisit after oAuth refactor
     return null;
   }
 

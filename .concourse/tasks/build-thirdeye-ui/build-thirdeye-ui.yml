@@ -18,5 +18,8 @@ inputs:
 outputs:
 - name: src
 
+params:
+  NPM_CONFIG__AUTH: ((artifactory-auth-token))
+
 run:
   path: ci-src/.concourse/tasks/build-thirdeye-ui/build-thirdeye-ui.sh

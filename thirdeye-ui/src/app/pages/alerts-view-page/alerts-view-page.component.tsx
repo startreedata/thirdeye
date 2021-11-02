@@ -1,4 +1,17 @@
-import { Grid } from "@material-ui/core";
+import { Box, Button, Grid } from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
+import {
+    AppLoadingIndicatorV1,
+    DropdownButtonTypeV1,
+    DropdownButtonV1,
+    PageContentsCardV1,
+    PageContentsGridV1,
+    PageHeaderActionsV1,
+    PageHeaderTextV1,
+    PageHeaderV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -7,8 +20,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { AlertCardV1 } from "../../components/entity-cards/alert-card-v1/alert-card-v1.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -26,7 +38,10 @@ import {
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getAlertsAllPath } from "../../utils/routes/routes.util";
+import {
+    getAlertsAllPath,
+    getAlertsUpdatePath,
+} from "../../utils/routes/routes.util";
 import {
     getErrorSnackbarOption,
     getSuccessSnackbarOption,
@@ -147,7 +162,10 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    const handleAlertDelete = (uiAlert: UiAlert): void => {
+    const handleAlertDelete = (): void => {
+        if (!uiAlert) {
+            return;
+        }
         showDialog({
             type: DialogType.ALERT,
             text: t("message.delete-confirmation", { name: uiAlert.name }),
@@ -168,16 +186,102 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    return (
-        <PageContents centered title={uiAlert ? uiAlert.name : ""}>
-            <Grid container>
-                {/* Alert */}
+    const handleAlertStateToggle = (): void => {
+        if (uiAlert && uiAlert.alert) {
+            uiAlert.alert.active = !uiAlert.alert.active;
+            handleAlertChange(uiAlert);
+        }
+    };
+
+    const handleAlertEdit = (): void => {
+        if (uiAlert) {
+            history.push(getAlertsUpdatePath(uiAlert.id));
+        }
+    };
+
+    const handleAlertMenuOnclick = (id: number | string, _: string): void => {
+        switch (id) {
+            case "activateDeactivateAlert":
+                handleAlertStateToggle();
+
+                break;
+            case "editAlert":
+                handleAlertEdit();
+
+                break;
+            case "deleteAlert":
+                handleAlertDelete();
+
+                break;
+            default:
+                break;
+        }
+    };
+
+    const alertMenuItems = [
+        {
+            id: "activateDeactivateAlert",
+            text: uiAlert?.active
+                ? t("label.deactivate-entity", {
+                      entity: t("label.alert"),
+                  })
+                : t("label.activate-entity", {
+                      entity: t("label.alert"),
+                  }),
+        },
+        {
+            id: "editAlert",
+            text: t("label.edit-entity", {
+                entity: t("label.alert"),
+            }),
+        },
+        {
+            id: "deleteAlert",
+            text: t("label.delete-entity", {
+                entity: t("label.alert"),
+            }),
+        },
+    ];
+
+    return !uiAlert ? (
+        <AppLoadingIndicatorV1 />
+    ) : (
+        <PageV1>
+            <PageHeaderV1>
+                <PageHeaderTextV1>
+                    {uiAlert.name}
+                    <Box component="span" paddingLeft={3}>
+                        <Button
+                            disableRipple
+                            startIcon={
+                                uiAlert.active ? (
+                                    <CheckIcon color="primary" />
+                                ) : (
+                                    <CloseIcon color="error" />
+                                )
+                            }
+                        >
+                            {t("label.active")}
+                        </Button>
+                    </Box>
+                </PageHeaderTextV1>
+                <PageHeaderActionsV1>
+                    <DropdownButtonV1
+                        dropdownMenuItems={alertMenuItems}
+                        type={DropdownButtonTypeV1.MoreOptions}
+                        onClick={handleAlertMenuOnclick}
+                    >
+                        {t("label.create")}
+                    </DropdownButtonV1>
+                </PageHeaderActionsV1>
+            </PageHeaderV1>
+
+            <PageContentsGridV1>
+                {/* Alert Details Card*/}
                 <Grid item xs={12}>
-                    <AlertCard
-                        uiAlert={uiAlert}
-                        onChange={handleAlertChange}
-                        onDelete={handleAlertDelete}
-                    />
+                    <PageContentsCardV1>
+                        <AlertCardV1 showCreatedBy uiAlert={uiAlert} />
+                    </PageContentsCardV1>
                 </Grid>
 
                 {/* Alert evaluation time series */}
@@ -185,11 +289,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                     <AlertEvaluationTimeSeriesCard
                         alertEvaluation={alertEvaluation}
                         alertEvaluationTimeSeriesHeight={300}
-                        maximizedTitle={uiAlert ? uiAlert.name : ""}
+                        title={uiAlert.name}
                         onRefresh={fetchAlertEvaluation}
                     />
                 </Grid>
-            </Grid>
-        </PageContents>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

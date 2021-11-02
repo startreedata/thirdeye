@@ -30,7 +30,6 @@ import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -126,8 +125,7 @@ public class SendAlertTest {
         null,
         mock(EntityGroupKeyContent.class),
         mock(MetricAnomaliesContent.class),
-        new MetricRegistry(),
-        mock(EmailContentFormatter.class));
+        new MetricRegistry());
     this.taskRunner = new NotificationTaskRunner(notificationSchemeFactory,
         TestDbEnv.getInstance().getDetectionAlertConfigManager(),
         TestDbEnv.getInstance().getMergedAnomalyResultDAO(),

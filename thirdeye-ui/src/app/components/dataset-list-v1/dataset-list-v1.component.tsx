@@ -66,10 +66,19 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         history.push(getDatasetsViewPath(id));
     };
 
-    const renderLink = ({ rowData }: { rowData: UiDataset }): ReactElement => {
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
-            <Link onClick={() => handleDatasetViewDetailsById(rowData.id)}>
-                {rowData.name}
+            <Link
+                onClick={() =>
+                    handleDatasetViewDetailsById(
+                        ((data as unknown) as UiDataset).id
+                    )
+                }
+            >
+                {cellValue}
             </Link>
         );
     };
@@ -78,19 +87,19 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         {
             key: "name",
             dataKey: "name",
-            title: t("label.name"),
-            width: 0,
-            flexGrow: 1,
+            header: t("label.name"),
+            minWidth: 0,
+            flex: 1,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "datasourceName",
             dataKey: "datasourceName",
-            title: t("label.datasource"),
-            width: 0,
+            header: t("label.datasource"),
+            minWidth: 0,
             sortable: true,
-            flexGrow: 1,
+            flex: 1,
         },
     ];
 
@@ -98,12 +107,16 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1
-                    disableBorder
+                    hideBorder
                     columns={datasetColumns}
-                    data={props.datasets}
+                    data={
+                        (props.datasets as unknown) as Record<string, unknown>[]
+                    }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
-                    selection={selectedDataset}
+                    searchPlaceholder={t("label.search-entity", {
+                        entity: t("label.datasets"),
+                    })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>

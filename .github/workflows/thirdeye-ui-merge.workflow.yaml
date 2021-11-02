@@ -10,6 +10,8 @@ jobs:
     thirdeye-ui-merge-checks:
         name: Merge Checks
         runs-on: ubuntu-latest
+        env:
+          NPM_CONFIG__AUTH: ${{ secrets.NPM_ARTIFACTORY_TOKEN }}
         steps:
             - name: Checkout
               uses: actions/checkout@v2

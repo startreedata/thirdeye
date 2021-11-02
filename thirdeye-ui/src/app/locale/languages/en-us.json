@@ -107,6 +107,7 @@
         "years-lowercase": "years",
         "created-by": "Created by",
         "detection-type": "Detection Type",
+        "dataset-metric": "Dataset/Metric",
         "filtered-by": "Filtered by",
         "current": "Current",
         "predicted": "Predicted",

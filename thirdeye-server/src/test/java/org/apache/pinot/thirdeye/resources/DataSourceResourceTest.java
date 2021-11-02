@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
@@ -27,7 +26,7 @@ public class DataSourceResourceTest {
   void setup() {
     this.dataSource = mock(ThirdEyeDataSource.class);
     this.dataSourceCache = mock(DataSourceCache.class);
-    this.dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
+    this.dataSourceResource = new DataSourceResource(mock(
         DataSourceManager.class), dataSourceCache);
   }
 

@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 
 /**
  * Concurrent request log. Tracks request success and failure events with deep information.
@@ -74,10 +73,7 @@ public class RequestLog {
    * @return principal name
    */
   private static String getPrincipal() {
-    if (ThirdEyeAuthFilter.getCurrentPrincipal() == null) {
       return NO_AUTH_USER;
-    }
-    return ThirdEyeAuthFilter.getCurrentPrincipal().getName();
   }
 
   /**

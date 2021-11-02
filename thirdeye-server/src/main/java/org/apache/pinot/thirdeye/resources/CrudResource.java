@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
@@ -32,7 +33,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.DaoFilterBuilder;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.ThirdEyeCrudApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -44,17 +44,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
-  protected final AuthService authService;
   protected final AbstractManager<DtoT> dtoManager;
   protected final ImmutableMap<String, String> apiToBeanMap;
 
   @Inject
   public CrudResource(
-      final AuthService authService,
       final AbstractManager<DtoT> dtoManager,
       final ImmutableMap<String, String> apiToBeanMap) {
     this.dtoManager = dtoManager;
-    this.authService = authService;
     this.apiToBeanMap = apiToBeanMap;
   }
 
@@ -134,8 +131,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @Context UriInfo uriInfo
   ) {
-    authService.authenticate(authHeader);
-
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
         ? dtoManager.filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(queryParameters))
@@ -150,13 +145,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response createMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApiT> list) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
     ensureExists(list, "Invalid request");
 
     return respondOk(list.stream()
         .peek(api1 -> validate(api1, null))
-        .map(api -> createDto(principal, api))
+        .map(api -> createDto(new ThirdEyePrincipal(NO_AUTH_USER), api))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(this::toApi)
@@ -170,9 +163,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response editMultiple(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApiT> list) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     return respondOk(list.stream()
-        .map(o -> updateDto(principal, o))
+        .map(o -> updateDto(new ThirdEyePrincipal(NO_AUTH_USER), o))
         .peek(dtoManager::update)
         .map(this::toApi)
         .collect(Collectors.toList()));
@@ -185,7 +177,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response get(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
-    authService.authenticate(authHeader);
     return respondOk(toApi(get(id)));
   }
 
@@ -196,11 +187,10 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response delete(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
       deleteDto(dto);
-      log.warn(String.format("Deleted id: %d by principal: %s", id, principal));
+      log.warn(String.format("Deleted id: %d by principal: %s", id, NO_AUTH_USER));
 
       return respondOk(toApi(dto));
     }
@@ -214,7 +204,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response deleteAll(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     dtoManager.findAll().forEach(this::deleteDto);
     return Response.ok().build();
   }

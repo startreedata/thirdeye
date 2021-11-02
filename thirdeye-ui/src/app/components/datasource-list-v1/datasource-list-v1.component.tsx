@@ -19,8 +19,10 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedDatasource, setSelectedDatasource] =
-        useState<DataGridSelectionModelV1>();
+    const [
+        selectedDatasource,
+        setSelectedDatasource,
+    ] = useState<DataGridSelectionModelV1>();
     const history = useHistory();
 
     const handleDatasourceDelete = (): void => {
@@ -66,16 +68,19 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         history.push(getDatasourcesViewPath(id));
     };
 
-    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
             <Link
                 onClick={() =>
                     handleDatasourceViewDetailsById(
-                        (renderProps.rowData as UiDatasource).id
+                        ((data as unknown) as UiDatasource).id
                     )
                 }
             >
-                {(renderProps.rowData as UiDatasource).name}
+                {cellValue}
             </Link>
         );
     };
@@ -84,19 +89,19 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         {
             key: "name",
             dataKey: "name",
-            title: t("label.name"),
+            header: t("label.name"),
             minWidth: 0,
-            flexGrow: 1.5,
+            flex: 1.5,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "type",
             dataKey: "type",
             sortable: true,
-            title: t("label.type"),
+            header: t("label.type"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
         },
     ];
 
@@ -107,7 +112,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
                     hideBorder
                     columns={datasourceColumns}
                     data={
-                        props.datasources as unknown as Record<
+                        (props.datasources as unknown) as Record<
                             string,
                             unknown
                         >[]

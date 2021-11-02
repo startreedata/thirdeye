@@ -19,8 +19,10 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     props: DatasetListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedDataset, setSelectedDataset] =
-        useState<DataGridSelectionModelV1>();
+    const [
+        selectedDataset,
+        setSelectedDataset,
+    ] = useState<DataGridSelectionModelV1>();
     const history = useHistory();
 
     const handleDatasetDelete = (): void => {
@@ -64,16 +66,19 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         history.push(getDatasetsViewPath(id));
     };
 
-    const renderLink = (renderProps: Record<string, unknown>): ReactElement => {
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
             <Link
                 onClick={() =>
                     handleDatasetViewDetailsById(
-                        (renderProps.rowData as UiDataset).id
+                        ((data as unknown) as UiDataset).id
                     )
                 }
             >
-                {(renderProps.rowData as UiDataset).name}
+                {cellValue}
             </Link>
         );
     };
@@ -82,19 +87,19 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         {
             key: "name",
             dataKey: "name",
-            title: t("label.name"),
+            header: t("label.name"),
             minWidth: 0,
-            flexGrow: 1,
+            flex: 1,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "datasourceName",
             dataKey: "datasourceName",
-            title: t("label.datasource"),
+            header: t("label.datasource"),
             minWidth: 0,
             sortable: true,
-            flexGrow: 1,
+            flex: 1,
         },
     ];
 
@@ -105,7 +110,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
                     hideBorder
                     columns={datasetColumns}
                     data={
-                        props.datasets as unknown as Record<string, unknown>[]
+                        (props.datasets as unknown) as Record<string, unknown>[]
                     }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}

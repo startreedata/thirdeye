@@ -1,0 +1,8 @@
+# For any change in the repository
+@platform-ui
+
+# Individual projects
+/projects/auth-ui/src/ @platform-ui
+/projects/data-manager-ui/src/
+/projects/mission-control-ui/src/ @platform-ui
+/projects/my-apps-ui/src/ @platform-ui

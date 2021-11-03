@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: node
+    tag: 14.7.0
+
+# npm authentication
+params:
+  NPM_CONFIG__AUTH: ((artifactory-startree-ui-token-base64))
+
+inputs:
+  - name: ci-src
+
+outputs:
+  - name: ci-src/thirdeye-ui/node_modules
+
+run:
+  dir: ci-src/thirdeye-ui
+  path: npm
+  args: ["ci"]

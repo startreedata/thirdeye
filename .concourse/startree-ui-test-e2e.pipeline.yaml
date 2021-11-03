@@ -1,0 +1,100 @@
+resource_types:
+    - name: pull-request
+      type: docker-image
+      source:
+          repository: teliaoss/github-pr-resource
+
+    - name: slack
+      type: docker-image
+      source:
+          repository: cfcommunity/slack-notification-resource
+          tag: latest
+
+resources:
+    # Slack Resource
+    - name: slack
+      icon: slack
+      type: slack
+      source:
+          url: ((project.slack_url))
+
+    # Time Resource
+    - name: ((project.resources.test_e2e.name))
+      type: time
+      icon: clock-outline
+      source: ((project.resources.test_e2e.source))
+
+    # Merge Resource
+    - name: ((project.resources.merge.name))
+      icon: github
+      type: git
+      source:
+          uri: ((git-uri))
+          branch: ((branch))
+          paths: ((project.resources.merge.paths))
+
+jobs:
+    # Test E2E Job
+    - name: ((project.jobs.test_e2e.name))
+      plan:
+          - get: ((project.resources.merge.name))
+            version: latest
+          - get: time-trigger
+            trigger: true
+          - in_parallel:
+                fail_fast: true
+                steps:
+                    - task: install-repository
+                      file: ((project.resources.merge.name))/.concourse/tasks/((project.id))/install-repository.task.yaml
+                      input_mapping:
+                          ci-src: ((project.resources.merge.name))
+                    - task: install-project
+                      file: ((project.resources.merge.name))/.concourse/tasks/((project.id))/install-project.task.yaml
+                      input_mapping:
+                          ci-src: ((project.resources.merge.name))
+          - task: test-e2e
+            file: ((project.resources.merge.name))/.concourse/tasks/((project.id))/test-e2e.task.yml
+            input_mapping:
+                ci-src: ((project.resources.merge.name))
+            params:
+                CYPRESS_BASE_URL: ((baseUrl))
+                USERNAME: ((e2e-test-username-user))
+                PASSWORD: ((e2e-test-password-user))
+                CLIENT_SECRET: ((e2e-test-client-secret-my-apps))
+      serial: true
+      on_abort:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((slack-channel))
+                    text: |
+                        <!channel> ((project.name)) e2e-testing aborted
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_error:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((slack-channel))
+                    text: |
+                        <!channel> Task error when running e2e testing for ((project.name))
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_failure:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((slack-channel))
+                    text: |
+                        <!channel> e2e tests Failed for ((project.name))
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_success:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((slack-channel))
+                    text: |
+                        ((project.name)) e2e tests have successfully passed
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

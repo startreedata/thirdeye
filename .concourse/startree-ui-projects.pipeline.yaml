@@ -1,0 +1,157 @@
+---
+resource_types:
+    # Track changes to pull requests
+    - name: pull-request
+      type: docker-image
+      source:
+          repository: teliaoss/github-pr-resource
+    # Send Slack notifications
+    - name: slack
+      type: docker-image
+      source:
+          repository: cfcommunity/slack-notification-resource
+          tag: latest
+
+resources:
+    # PR
+    - name: ((project.resources.pull_request.name))
+      type: pull-request
+      icon: git
+      check_every: 30s
+      source:
+          repository: startreedata/startree-ui
+          access_token: ((github-token))
+          paths: ((project.resources.pull_request.paths))
+    # Merge
+    - name: ((project.resources.merge.name))
+      type: git
+      icon: github
+      check_every: 30s
+      source:
+          uri: ((git-uri))
+          branch: ((branch))
+          paths: ((project.resources.merge.paths))
+    # Slack
+    - name: slack
+      type: slack
+      icon: slack
+      source:
+          url: ((project.slack_url))
+
+jobs:
+    # PR job
+    - name: ((project.jobs.pull_request.name))
+      plan: ((project.jobs.pull_request.plan))
+      serial: false
+      on_abort:
+        in_parallel:
+          # Notify GitHub
+          - put: notify-aborted
+            resource: ((project.resources.pull_request.name))
+            params:
+                path: ((project.resources.pull_request.name))
+                base_context: startree-ci
+                context: ((project.id))
+                description: Pull request validation aborted
+                status: error
+          # Notify Slack
+          - put: slack
+            params:
+                channel: ((project.slack_channel))
+                text: |
+                    ((project.name)) pull request validation aborted
+                    ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_error:
+        in_parallel:
+              # Notify GitHub
+              - put: notify-error
+                resource: ((project.resources.pull_request.name))
+                params:
+                    path: ((project.resources.pull_request.name))
+                    base_context: startree-ci
+                    context: ((project.id))
+                    description: Pull request validation error
+                    status: error
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        <!channel> ((project.name)) pull request validation error
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_failure:
+        in_parallel:
+              # Notify GitHub
+              - put: notify-failure
+                resource: ((project.resources.pull_request.name))
+                params:
+                    path: ((project.resources.pull_request.name))
+                    base_context: startree-ci
+                    context: ((project.id))
+                    description: Pull request validation failed
+                    status: failure
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        <!channel> ((project.name)) pull request validation failed
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_success:
+        in_parallel:
+              # Notify GitHub
+              - put: notify-success
+                resource: ((project.resources.pull_request.name))
+                params:
+                    path: ((project.resources.pull_request.name))
+                    base_context: startree-ci
+                    context: ((project.id))
+                    description: Pull request validation successful
+                    status: success
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        ((project.name)) pull request validation successful
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+    # Merge job
+    - name: ((project.jobs.merge.name))
+      plan: ((project.jobs.merge.plan))
+      serial: true
+      on_abort:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        ((project.name)) pull request validation aborted
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_error:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        <!channel> Error building branch ((branch)) of ((project.name))
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_failure:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        <!channel> Failed to build branch ((branch)) of ((project.name))
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+      on_success:
+          do:
+              # Notify Slack
+              - put: slack
+                params:
+                    channel: ((project.slack_channel))
+                    text: |
+                        Successfully built branch ((branch)) of ((project.name))
+                        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

@@ -1,0 +1,88 @@
+---
+project:
+  id: thirdeye-ui
+  name: ThirdEye UI
+
+  slack_url: ((startree-ui-projects-slack-webhook-url))
+  slack_channel: ((startree-ui-projects-slack-channel))
+
+  resources:
+    # PR
+    pull_request:
+      name: thirdeye-ui-pr-src
+      paths:
+        - .concourse
+        - thirdeye-ui
+    # Merge
+    merge:
+      name: thirdeye-ui-merge-src
+      paths:
+        - thirdeye-ui
+    # Time trigger
+    test_e2e:
+      name: time-trigger
+      source:
+        location: America/Los_Angeles
+        start: 1AM
+        stop: 2AM
+
+  jobs:
+    pull_request:
+      name: thirdeye-ui-pr
+      plan:
+        - get: thirdeye-ui-pr-src
+          trigger: true
+          version: every
+        - put: notify-pending
+          resource: thirdeye-ui-pr-src
+          params:
+            base_context: startree-ci
+            context: thirdeye-ui
+            description: Pull request validation in progress
+            path: thirdeye-ui-pr-src
+            status: pending
+        - task: install-thirdeye-ui
+          file: thirdeye-ui-pr-src/.concourse/tasks/thirdeye-ui/install-project.task.yml
+          input_mapping:
+            ci-src: thirdeye-ui-pr-src
+        - in_parallel:
+            fail_fast: true
+            steps:
+              - task: build
+                file: thirdeye-ui-pr-src/.concourse/tasks/thirdeye-ui/build.task.yml
+                input_mapping:
+                  ci-src: thirdeye-ui-pr-src
+              - task: lint
+                file: thirdeye-ui-pr-src/.concourse/tasks/thirdeye-ui/lint.task.yml
+                input_mapping:
+                  ci-src: thirdeye-ui-pr-src
+              - task: test
+                file: thirdeye-ui-pr-src/.concourse/tasks/thirdeye-ui/test.task.yml
+                input_mapping:
+                  ci-src: thirdeye-ui-pr-src
+    merge:
+      name: thirdeye-ui-merge
+      plan:
+        - get: thirdeye-ui-merge-src
+          trigger: true
+        - task: install-project
+          file: thirdeye-ui-merge-src/.concourse/tasks/thirdeye-ui/install-project.task.yml
+          input_mapping:
+            ci-src: thirdeye-ui-merge-src
+        - in_parallel:
+            fail_fast: true
+            steps:
+              - task: build
+                file: thirdeye-ui-merge-src/.concourse/tasks/thirdeye-ui/build.task.yml
+                input_mapping:
+                  ci-src: thirdeye-ui-merge-src
+              - task: lint
+                file: thirdeye-ui-merge-src/.concourse/tasks/thirdeye-ui/lint.task.yml
+                input_mapping:
+                  ci-src: thirdeye-ui-merge-src
+              - task: test
+                file: thirdeye-ui-merge-src/.concourse/tasks/thirdeye-ui/test.task.yml
+                input_mapping:
+                  ci-src: thirdeye-ui-merge-src
+    test_e2e:
+      name: my-apps-ui-test-e2e

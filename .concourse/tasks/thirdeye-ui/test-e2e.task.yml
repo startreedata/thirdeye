@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: cypress/base
+
+inputs:
+  - name: ci-src
+  - name: ci-src/node_modules
+  - name: ci-src/thirdeye-ui/node_modules
+
+run:
+  dir: ci-src
+  path: .concourse/tasks/thirdeye-ui/test-e2e.task.sh

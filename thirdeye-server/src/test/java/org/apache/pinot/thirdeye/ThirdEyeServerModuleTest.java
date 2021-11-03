@@ -6,7 +6,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
-import org.apache.pinot.thirdeye.auth.JwtConfiguration;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.TestDatabase;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -22,10 +21,7 @@ public class ThirdEyeServerModuleTest {
     final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
-        .setAuthConfiguration(new AuthConfiguration()
-            .setJwtConfiguration(new JwtConfiguration()
-                .setSigningKey("abcd")
-                .setIssuer("issuer")))
+        .setAuthConfiguration(new AuthConfiguration())
         .setConfigPath("../config");
 
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(

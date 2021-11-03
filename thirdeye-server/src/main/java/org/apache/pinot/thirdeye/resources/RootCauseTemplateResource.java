@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -91,7 +93,7 @@ public class RootCauseTemplateResource {
   ) {
     ObjectMapper objMapper = new ObjectMapper();
     // TODO : revisit after oAuth refactor
-    final String username = "user";
+    final String username = NO_AUTH_USER;
     MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
     MetricConfigDTO metricConfigDTO = metricConfigManager.findById(metricEntity.getId());
     String templateName = DIM_ANALYSIS_TEMPLATE_NAME_PREFIX + metricConfigDTO.getAlias();

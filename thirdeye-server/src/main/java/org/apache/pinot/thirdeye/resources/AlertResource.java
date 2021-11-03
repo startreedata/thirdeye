@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
@@ -144,7 +145,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
   ) {
-
     ensureExists(startTime, "start");
 
     final AlertDTO dto = get(id);
@@ -170,7 +170,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertApi alert = request.getAlert();
     ensureExists(alert)
         .setOwner(new UserApi()
-            .setPrincipal(principal.getName()));
+        .setPrincipal(NO_AUTH_USER));
 
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
@@ -185,7 +185,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     alertDeleter.deleteAssociatedAnomalies(dto.getId());
-    log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal));
+    log.warn(String.format("Resetting alert id: %d by principal: %s", id, NO_AUTH_USER));
 
     return respondOk(toApi(dto));
   }

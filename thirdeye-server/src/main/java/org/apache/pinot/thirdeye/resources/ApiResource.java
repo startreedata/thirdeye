@@ -19,7 +19,7 @@ public class ApiResource {
   private final TaskResource taskResource;
 
   @Inject
-  public ApiResource( final ApplicationResource applicationResource,
+  public ApiResource(final ApplicationResource applicationResource,
       final DataSourceResource dataSourceResource,
       final DatasetResource datasetResource,
       final MetricResource metricResource,

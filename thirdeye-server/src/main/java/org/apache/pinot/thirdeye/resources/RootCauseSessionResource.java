@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.annotations.ApiOperation;
@@ -62,7 +64,7 @@ public class RootCauseSessionResource {
 
     final long timestamp = DateTime.now().getMillis();
     // TODO : revisit after oAuth refactor
-    final String username = "user";
+    final String username = NO_AUTH_USER;
 
     session.setUpdated(timestamp);
 

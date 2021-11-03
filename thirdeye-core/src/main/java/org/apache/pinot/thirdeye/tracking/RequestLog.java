@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.tracking;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -71,7 +73,7 @@ public class RequestLog {
    * @return principal name
    */
   private static String getPrincipal() {
-    return null;
+      return NO_AUTH_USER;
   }
 
   /**

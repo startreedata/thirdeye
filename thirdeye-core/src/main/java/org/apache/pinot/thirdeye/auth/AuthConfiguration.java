@@ -1,13 +1,8 @@
 package org.apache.pinot.thirdeye.auth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class AuthConfiguration {
 
   private boolean enabled = true;
-
-  @JsonProperty("jwt")
-  private JwtConfiguration jwtConfiguration;
 
   @JsonProperty("oauth")
   private OAuthConfig oAuthConfig;
@@ -18,16 +13,6 @@ public class AuthConfiguration {
 
   public AuthConfiguration setOAuthConfig(final OAuthConfig oAuthConfig) {
     this.oAuthConfig = oAuthConfig;
-    return this;
-  }
-
-  public JwtConfiguration getJwtConfiguration() {
-    return jwtConfiguration;
-  }
-
-  public AuthConfiguration setJwtConfiguration(
-      final JwtConfiguration jwtConfiguration) {
-    this.jwtConfiguration = jwtConfiguration;
     return this;
   }
 

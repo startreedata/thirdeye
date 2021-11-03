@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
@@ -144,7 +145,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       List<ApiT> list) {
 
     ensureExists(list, "Invalid request");
-
     return respondOk(list.stream()
         .peek(api1 -> validate(api1, null))
         .map(api -> createDto(principal, api))
@@ -188,7 +188,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
       deleteDto(dto);
-      log.warn(String.format("Deleted id: %d by principal: %s", id, principal));
+      log.warn(String.format("Deleted id: %d by principal: %s", id, NO_AUTH_USER));
 
       return respondOk(toApi(dto));
     }

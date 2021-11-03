@@ -141,44 +141,6 @@ the server should be accessible at http://localhost:8080
 ThirdEye Coordinator exposes documentation for most of apis under `/swagger`. By default, the server
 should be accessible at http://localhost:8080/swagger
 
-### Obtaining an auth token.
-
-You can get the `accessToken` by hitting the `/auth/login` API with any principal/password combination.
-The resulting token obtained in the body of the response can be used to authorize request.
-
-In the `Authorization` header. Something like this
-```
-Bearer Bearer ${base64encodedjwttoken}
-```  
-
-This bash snippet creates a command `localtoken` to output the header value.
-```shell script
-function localtoken {
-  token "http://localhost:8080" "admin" "password"
-}
-
-function token {
-  host=$1
-  principal=$2
-  password=$3
-
-  curl -X POST \
-    "${host}/api/auth/login" \
-    -H 'cache-control: no-cache' \
-    -H 'content-type: application/x-www-form-urlencoded' \
-    -d "principal=${principal}&password=${password}&grant_type=password"  2>/dev/null | python -c \
-    'import json,sys;print ("Bearer " + json.load(sys.stdin)["accessToken"])'
-}
-```
-Usage:
-```shell script
-$ localtoken 
-Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJwcmluY2lwYWwiOiJhZG1pbiIsImlzcyI6InRoaXJkZXllIiwiZXhwIjoxNjAyNjI4NTA1fQ.hKp-z-BJBrEPc-k_qVgqnitkPeCBvW2bTXGYIFJ5FNunLcQqDhvAj8NRG0Dvgb97YfvC1bxRsg9-S1VEsP6QZg
-
-# Create token and copy to clipboard (MacOS)
-$ localtoken | pbcopy
-```
-
 ### ThirdEye Release
 
 ThirdEye uses `maven-release-plugin` to do it's releases.

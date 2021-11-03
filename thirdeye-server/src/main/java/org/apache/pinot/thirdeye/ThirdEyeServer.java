@@ -116,7 +116,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     env.jersey().register(injector.getInstance(RootResource.class));
 
     // Expose dropwizard metrics in prometheus compatible format
-    if (configuration.getPrometheusConfiguration().isEnabled()) {
+    if(configuration.getPrometheusConfiguration().isEnabled()) {
       CollectorRegistry collectorRegistry = new CollectorRegistry();
       collectorRegistry.register(new DropwizardExports(env.metrics()));
       env.admin()

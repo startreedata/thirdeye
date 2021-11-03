@@ -82,7 +82,7 @@ public class RequestLogTest {
     Assert.assertEquals((long) stats.requestsPerMetric.get("A::1"), 1);
     Assert.assertEquals((long) stats.requestsPerMetric.get("A::2"), 1);
     Assert.assertEquals((long) stats.requestsPerMetric.get("B::1"), 1);
-    Assert.assertEquals((long) stats.requestsPerPrincipal.get(null), 3);
+    Assert.assertEquals((long) stats.requestsPerPrincipal.get(NO_AUTH_USER), 3);
 
     Assert.assertEquals(stats.successTotal, 2);
     Assert.assertEquals((long) stats.successPerDatasource.get("a"), 1);
@@ -91,12 +91,12 @@ public class RequestLogTest {
     Assert.assertEquals((long) stats.successPerDataset.get("B"), 1);
     Assert.assertEquals((long) stats.successPerMetric.get("A::1"), 1);
     Assert.assertEquals((long) stats.successPerMetric.get("B::1"), 1);
-    Assert.assertEquals((long) stats.successPerPrincipal.get(null), 2);
+    Assert.assertEquals((long) stats.successPerPrincipal.get(NO_AUTH_USER), 2);
 
     Assert.assertEquals(stats.failureTotal, 1);
     Assert.assertEquals((long) stats.failurePerDatasource.get("a"), 1);
     Assert.assertEquals((long) stats.failurePerDataset.get("A"), 1);
     Assert.assertEquals((long) stats.failurePerMetric.get("A::2"), 1);
-    Assert.assertEquals((long) stats.failurePerPrincipal.get(null), 1);
+    Assert.assertEquals((long) stats.failurePerPrincipal.get(NO_AUTH_USER), 1);
   }
 }

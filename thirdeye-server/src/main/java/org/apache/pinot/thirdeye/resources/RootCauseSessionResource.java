@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.annotations.ApiOperation;
@@ -16,7 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
@@ -62,7 +63,8 @@ public class RootCauseSessionResource {
     RootcauseSessionDTO session = this.mapper.readValue(jsonString, new TypeReference<RootcauseSessionDTO>() {});
 
     final long timestamp = DateTime.now().getMillis();
-    final String username = ThirdEyeAuthFilter.getCurrentPrincipal().getName();
+    // TODO : revisit after oAuth refactor
+    final String username = NO_AUTH_USER;
 
     session.setUpdated(timestamp);
 

@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
@@ -20,9 +19,8 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
 
   @Inject
   public AlertTemplateResource(
-      final AuthService authService,
       final AlertTemplateManager alertTemplateManager) {
-    super(authService, alertTemplateManager, ImmutableMap.of());
+    super(alertTemplateManager, ImmutableMap.of());
   }
 
   @Override

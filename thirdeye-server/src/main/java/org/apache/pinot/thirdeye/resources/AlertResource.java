@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
@@ -27,7 +28,6 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
 import org.apache.pinot.thirdeye.alert.AlertDeleter;
 import org.apache.pinot.thirdeye.alert.AlertEvaluator;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.AlertApiBeanMapper;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
@@ -66,9 +66,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
-      final AuthService authService,
       final AlertEvaluator alertEvaluator) {
-    super(authService, alertManager, ImmutableMap.of());
+    super(alertManager, ImmutableMap.of());
     this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
@@ -147,8 +146,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
   ) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
     ensureExists(startTime, "start");
 
     final AlertDTO dto = get(id);
@@ -167,15 +164,13 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
       final AlertEvaluationApi request
   ) throws ExecutionException {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
 
     final AlertApi alert = request.getAlert();
     ensureExists(alert)
         .setOwner(new UserApi()
-            .setPrincipal(principal.getName()));
+        .setPrincipal(NO_AUTH_USER));
 
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
@@ -188,10 +183,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response reset(
       @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
       @PathParam("id") final Long id) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
     final AlertDTO dto = get(id);
     alertDeleter.deleteAssociatedAnomalies(dto.getId());
-    log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal));
+    log.warn(String.format("Resetting alert id: %d by principal: %s", id, NO_AUTH_USER));
 
     return respondOk(toApi(dto));
   }

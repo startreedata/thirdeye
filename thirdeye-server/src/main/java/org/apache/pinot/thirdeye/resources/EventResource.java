@@ -12,7 +12,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.events.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
@@ -37,11 +36,10 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
 
   @Inject
   public EventResource(
-      final AuthService authService,
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final HolidayEventsLoader holidayEventsLoader) {
-    super(authService, eventManager, API_TO_BEAN_MAP);
+    super(eventManager, API_TO_BEAN_MAP);
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.holidayEventsLoader = holidayEventsLoader;
   }

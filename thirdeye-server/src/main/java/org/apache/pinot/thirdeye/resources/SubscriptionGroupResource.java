@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
@@ -33,9 +32,8 @@ public class SubscriptionGroupResource extends
 
   @Inject
   public SubscriptionGroupResource(
-      final SubscriptionGroupManager subscriptionGroupManager,
-      final AuthService authService) {
-    super(authService, subscriptionGroupManager, ImmutableMap.of());
+      final SubscriptionGroupManager subscriptionGroupManager) {
+    super(subscriptionGroupManager, ImmutableMap.of());
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 

@@ -23,7 +23,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
@@ -45,10 +44,9 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
 
   @Inject
   public DataSourceResource(
-      final AuthService authService,
       final DataSourceManager dataSourceManager,
       final DataSourceCache dataSourceCache) {
-    super(authService, dataSourceManager, ImmutableMap.of());
+    super(dataSourceManager, ImmutableMap.of());
     this.dataSourceCache = dataSourceCache;
   }
 
@@ -78,7 +76,6 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @FormParam("dataSourceName") String dataSourceName,
       @FormParam("datasetName") String datasetName) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
     ensureExists(dataSourceName, "dataSourceName is a required field");
     ensureExists(datasetName, "datasetName is a required field");
@@ -98,7 +95,6 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   public Response onboardAll(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @FormParam("name") String name) {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
 
     ensureExists(name, "name is a required field");
 
@@ -118,8 +114,6 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Produces(MediaType.APPLICATION_JSON)
   public Response clearDataSourceCache(
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) throws Exception {
-    final ThirdEyePrincipal principal = authService.authenticate(authHeader);
-
     dataSourceCache.clear();
     return Response.ok().build();
   }

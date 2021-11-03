@@ -12,7 +12,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
-import io.dropwizard.auth.Auth;
+import com.nimbusds.jwt.JWTClaimsSet;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -21,12 +21,14 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -127,8 +129,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll(
-      @Auth ThirdEyePrincipal principal,
-      @Context UriInfo uriInfo) {
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @Context UriInfo uriInfo
+  ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
         ? dtoManager.filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(queryParameters))
@@ -141,13 +144,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApiT> list) {
-
     ensureExists(list, "Invalid request");
+
     return respondOk(list.stream()
         .peek(api1 -> validate(api1, null))
-        .map(api -> createDto(principal, api))
+        .map(api -> createDto(new ThirdEyePrincipal(new JWTClaimsSet.Builder().subject(NO_AUTH_USER)
+            .build()), api))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(this::toApi)
@@ -159,10 +163,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApiT> list) {
     return respondOk(list.stream()
-        .map(o -> updateDto(principal, o))
+        .map(o -> updateDto(new ThirdEyePrincipal(new JWTClaimsSet.Builder().subject(NO_AUTH_USER)
+            .build()), o))
         .peek(dtoManager::update)
         .map(this::toApi)
         .collect(Collectors.toList()));
@@ -173,7 +178,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     return respondOk(toApi(get(id)));
   }
@@ -183,7 +188,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       @PathParam("id") Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
@@ -201,7 +206,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response deleteAll(
-      @Auth ThirdEyePrincipal principal) {
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) {
     dtoManager.findAll().forEach(this::deleteDto);
     return Response.ok().build();
   }

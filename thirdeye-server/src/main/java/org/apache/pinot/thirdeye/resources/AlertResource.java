@@ -9,7 +9,6 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
-import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.Map;
@@ -18,10 +17,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertCreater;
@@ -140,7 +141,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response runTask(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
@@ -160,17 +161,16 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response evaluate(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
       final AlertEvaluationApi request
   ) throws ExecutionException {
-
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
 
     final AlertApi alert = request.getAlert();
     ensureExists(alert)
         .setOwner(new UserApi()
-        .setPrincipal(NO_AUTH_USER));
+            .setPrincipal(NO_AUTH_USER));
 
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
@@ -181,7 +181,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     alertDeleter.deleteAssociatedAnomalies(dto.getId());

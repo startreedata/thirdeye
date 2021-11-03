@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
-import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
@@ -54,7 +53,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -66,7 +65,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @Auth ThirdEyePrincipal principal,
+      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }

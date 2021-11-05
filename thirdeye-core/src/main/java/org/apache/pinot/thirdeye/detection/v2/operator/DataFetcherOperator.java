@@ -13,6 +13,7 @@ import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
+import org.joda.time.Interval;
 
 public class DataFetcherOperator extends DetectionPipelineOperator {
 
@@ -52,7 +53,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final DataTable dataTable = dataFetcher.getDataTable();
+    final Interval detectionInterval = new Interval(startTime, endTime);
+    final DataTable dataTable = dataFetcher.getDataTable(detectionInterval);
     resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
   }
 

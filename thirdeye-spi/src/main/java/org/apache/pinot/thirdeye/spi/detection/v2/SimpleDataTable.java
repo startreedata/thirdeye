@@ -114,6 +114,24 @@ public class SimpleDataTable implements DataTable {
     return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 
+  public static DataTable fromDataFrame(DataFrame dataFrame) {
+    final List<String> columns = new ArrayList<>(dataFrame.getSeriesNames());
+    final List<ColumnType> columnTypes = new ArrayList<>();
+    for (String key : columns) {
+      columnTypes.add(ColumnType.seriesTypeToColumnType(dataFrame.getSeries().get(key).type()));
+    }
+    final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
+        columnTypes);
+    for (int rowNumber = 0; rowNumber < dataFrame.size(); rowNumber++) {
+      Object[] rowData = simpleDataTableBuilder.newRow();
+      for (int columnNumber = 0; columnNumber < columns.size(); columnNumber++) {
+        String columnKey = columns.get(columnNumber);
+        rowData[columnNumber] = dataFrame.get(columnKey).getObject(rowNumber);
+      }
+    }
+    return simpleDataTableBuilder.build();
+  }
+
   public static class SimpleDataTableBuilder {
 
     private final List<String> columns;

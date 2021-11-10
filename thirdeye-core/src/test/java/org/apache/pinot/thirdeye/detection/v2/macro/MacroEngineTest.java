@@ -33,6 +33,7 @@ public class MacroEngineTest {
   private static final long INPUT_START_TIME = 11111111L;
   private static final long INPUT_END_TIME = 22222222L;
   private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME, INPUT_END_TIME);
+  private static final String IDENTIFIER_QUOTE_STRING = "\"";
 
   private String clean(String sql) {
     return sql
@@ -153,6 +154,26 @@ public class MacroEngineTest {
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
 
+  @Test
+  public void testIdentifierQuotesAreConserved() {
+    // test if escaping quotes are kept, eg: __timeFilter("date") returns "date" >= ...
+    String macroArgument = IDENTIFIER_QUOTE_STRING + "date" + IDENTIFIER_QUOTE_STRING;
+    String inputQuery = String.format("select * from tableName where __timeFilter(%s)",
+        macroArgument);
+
+    String expectedQuery = String.format("select * from tableName where %s",
+        MOCK_MACRO_MANAGER.getTimeFilterExpression(macroArgument,
+            INPUT_START_TIME,
+            INPUT_END_TIME));
+    Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.TIME_COLUMN.toString(), macroArgument,
+        MacroMetadataKeys.MIN_TIME_MILLIS.toString(), String.valueOf(INPUT_START_TIME),
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), String.valueOf(INPUT_END_TIME)
+    );
+
+    prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
+  }
+
   private static class TestMacroManager implements MacroManager {
 
     public static final String TIME_GROUP_MOCK = "TIMEGROUP_MACRO_EXPANDED";
@@ -168,7 +189,7 @@ public class MacroEngineTest {
 
     @Override
     public SqlDialect getSqlDialect() {
-      return AnsiSqlDialect.DEFAULT;
+      return new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING));
     }
 
     @Override

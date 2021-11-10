@@ -47,7 +47,7 @@ public class MacroEngine {
   public ThirdEyeRequestV2 prepareRequest() throws SqlParseException {
     SqlNode rootNode = queryToNode(query);
     SqlNode appliedMacrosNode = applyMacros(rootNode);
-    String preparedQuery = nodeToString(appliedMacrosNode);
+    String preparedQuery = nodeToQuery(appliedMacrosNode);
 
     return new ThirdEyeRequestV2(tableName, preparedQuery, properties);
   }
@@ -66,7 +66,7 @@ public class MacroEngine {
     return rootNode.accept(new MacroVisitor());
   }
 
-  private String nodeToString(SqlNode node) {
+  private String nodeToQuery(SqlNode node) {
     return node.toSqlString(
         c -> c.withDialect(macroManager.getSqlDialect())
             .withQuoteAllIdentifiers(false)
@@ -75,7 +75,7 @@ public class MacroEngine {
 
   private List<String> paramsFromCall(SqlCall call) {
     return call.getOperandList().stream()
-        .map(this::nodeToString)
+        .map(this::nodeToQuery)
         .collect(Collectors.toList());
   }
 

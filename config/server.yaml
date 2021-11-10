@@ -27,6 +27,12 @@ logging:
 
 auth:
   enabled: false
+  oauth:
+    issuer: http://identity.startree.ai
+    keysUrl: file://<path to project dir>/config/jwks.json
+    cache:
+      size: 64
+      ttl: 60000
 
 database:
   # Assuming a local MySQL server running on the default port 3306

@@ -600,11 +600,10 @@
         <artifactId>converter-jackson</artifactId>
         <version>${retrofit2.version}</version>
       </dependency>
-      <!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
       <dependency>
-        <groupId>com.auth0</groupId>
-        <artifactId>java-jwt</artifactId>
-        <version>3.10.3</version>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>9.7</version>
       </dependency>
       <dependency>
         <groupId>io.prometheus</groupId>

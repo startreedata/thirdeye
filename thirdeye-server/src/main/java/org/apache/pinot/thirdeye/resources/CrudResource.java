@@ -12,6 +12,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import com.nimbusds.jwt.JWTClaimsSet;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -149,7 +150,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
     return respondOk(list.stream()
         .peek(api1 -> validate(api1, null))
-        .map(api -> createDto(new ThirdEyePrincipal(NO_AUTH_USER), api))
+        .map(api -> createDto(new ThirdEyePrincipal(new JWTClaimsSet.Builder().subject(NO_AUTH_USER)
+            .build()), api))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(this::toApi)
@@ -164,7 +166,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
       List<ApiT> list) {
     return respondOk(list.stream()
-        .map(o -> updateDto(new ThirdEyePrincipal(NO_AUTH_USER), o))
+        .map(o -> updateDto(new ThirdEyePrincipal(new JWTClaimsSet.Builder().subject(NO_AUTH_USER)
+            .build()), o))
         .peek(dtoManager::update)
         .map(this::toApi)
         .collect(Collectors.toList()));

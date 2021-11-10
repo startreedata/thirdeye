@@ -1,8 +1,13 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
 import java.text.SimpleDateFormat;
+import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.dialect.AnsiSqlDialect;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParser.Config;
+import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
+import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
 import org.joda.time.Period;
 
@@ -13,6 +18,14 @@ public class PinotMacroManager implements MacroManager {
 
   public static PinotMacroManager getInstance(){
     return INSTANCE;
+  }
+
+  @Override
+  public Config getSqlParserConfig() {
+    return SqlParser.config()
+        .withLex(Lex.MYSQL_ANSI)
+        .withConformance(SqlConformanceEnum.BABEL)
+        .withParserFactory(SqlBabelParserImpl.FACTORY);
   }
 
   @Override

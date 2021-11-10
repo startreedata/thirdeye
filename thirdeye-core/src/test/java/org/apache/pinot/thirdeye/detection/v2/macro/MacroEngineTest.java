@@ -3,7 +3,14 @@ package org.apache.pinot.thirdeye.detection.v2.macro;
 import com.google.common.collect.ImmutableMap;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.calcite.config.Lex;
+import org.apache.calcite.sql.SqlDialect;
+import org.apache.calcite.sql.dialect.AnsiSqlDialect;
 import org.apache.calcite.sql.parser.SqlParseException;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParser.Config;
+import org.apache.calcite.sql.parser.impl.SqlParserImpl;
+import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys;
@@ -150,6 +157,19 @@ public class MacroEngineTest {
 
     public static final String TIME_GROUP_MOCK = "TIMEGROUP_MACRO_EXPANDED";
     public static final String TIME_FILTER_MOCK = "TIME_FILTER_MACRO_EXPANDED";
+
+    @Override
+    public Config getSqlParserConfig() {
+      return SqlParser.config()
+          .withLex(Lex.MYSQL_ANSI)
+          .withConformance(SqlConformanceEnum.DEFAULT)
+          .withParserFactory(SqlParserImpl.FACTORY);
+    }
+
+    @Override
+    public SqlDialect getSqlDialect() {
+      return AnsiSqlDialect.DEFAULT;
+    }
 
     @Override
     public String getTimeFilterExpression(final String column, final long minTimeMillisIncluded,

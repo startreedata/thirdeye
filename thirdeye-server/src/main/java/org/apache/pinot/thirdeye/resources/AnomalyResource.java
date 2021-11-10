@@ -6,6 +6,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.badRequest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -88,7 +89,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   @POST
   @Timed
   public Response setFeedback(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id,
       AnomalyFeedbackApi api) {
     final MergedAnomalyResultDTO dto = get(id);

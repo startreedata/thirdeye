@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.serverError;
 
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.pinot.thirdeye.datalayer.dao.GenericPojoDao;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
@@ -38,13 +40,15 @@ public class EntityResource {
 
   @GET
   @Path("{id}")
-  public Response getRawEntity(@PathParam("id") Long id) {
+  public Response getRawEntity(
+      @Auth ThirdEyePrincipal principal,
+      @PathParam("id") Long id) {
     return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
   }
 
   @GET
   @Path("types")
-  public Response listEntities() {
+  public Response listEntities(@Auth ThirdEyePrincipal principal) {
     final Map<String, Long> entityCountMap = new TreeMap<>();
     final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
     for (Class<? extends AbstractDTO> beanClass : beanClasses) {
@@ -56,7 +60,9 @@ public class EntityResource {
 
   @GET
   @Path("types/{bean_class}/info")
-  public Response getEntityInfo(@PathParam("bean_class") String beanClass) {
+  public Response getEntityInfo(
+      @Auth ThirdEyePrincipal principal,
+      @PathParam("bean_class") String beanClass) {
     try {
       List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(beanClass));
       return Response.ok(indexedColumns).build();
@@ -69,6 +75,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}")
   public Response getEntity(
+      @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClassRef,
       @Context UriInfo uriInfo
   ) {

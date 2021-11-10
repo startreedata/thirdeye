@@ -7,6 +7,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -187,6 +189,7 @@ public class RootCauseMetricResource {
   @Path("/aggregate")
   @ApiOperation(value = "Returns an aggregate value for the specified metric and time range, and (optionally) offset.")
   public double getAggregate(
+      @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -236,6 +239,7 @@ public class RootCauseMetricResource {
   @Path("/aggregate/batch")
   @ApiOperation(value = "Returns a list of aggregate value for the specified metric and time range, and (optionally) offset.")
   public List<Double> getAggregateBatch(
+      @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -300,6 +304,7 @@ public class RootCauseMetricResource {
   @Path("/aggregate/chunk")
   @ApiOperation(value = "Returns a map of lists (keyed by urn) of aggregate value for the specified metrics and time range, and offsets.")
   public Map<String, Collection<Double>> getAggregateChunk(
+      @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urns", required = true) @QueryParam("urns") @NotNull List<String> urns,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -375,6 +380,7 @@ public class RootCauseMetricResource {
       "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
           + "Aligns time stamps if necessary and omits null values.")
   public Map<String, Map<String, Double>> getBreakdown(
+      @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true)
@@ -436,6 +442,7 @@ public class RootCauseMetricResource {
       "Returns a time series for the specified metric and time range, and (optionally) offset at an (optional)\n"
           + "time granularity. Aligns time stamps if necessary.")
   public Map<String, List<? extends Number>> getTimeSeries(
+      @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true)

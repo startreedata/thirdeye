@@ -6,6 +6,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.parseListParams;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,6 +27,7 @@ import org.apache.pinot.thirdeye.rca.RootCauseAnalysisService;
 import org.apache.pinot.thirdeye.rca.RootCauseEntityFormatter;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.RootCauseEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
@@ -92,6 +94,7 @@ public class RcaResource {
   @Path("/query")
   @ApiOperation(value = "Send query")
   public List<RootCauseEntity> query(
+      @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "framework name")
       @QueryParam("framework") String framework,
       @ApiParam(value = "start overall time window to consider for events")

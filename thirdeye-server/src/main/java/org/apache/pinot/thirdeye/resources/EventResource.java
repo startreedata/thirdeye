@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,6 +64,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
   @POST
   @Path("/holidays/load")
   public Response loadHolidays(
+      @Auth ThirdEyePrincipal principal,
       @FormParam("start_time") long startTime,
       @FormParam("end_time") long endTime
   ) {

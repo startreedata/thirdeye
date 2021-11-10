@@ -1,9 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
@@ -42,6 +42,7 @@ public class RootCauseSessionResource {
   @Path("/{sessionId}")
   @ApiOperation(value = "Get RootCauseSession by sessionId")
   public RootcauseSessionDTO get(
+      @Auth ThirdEyePrincipal principal,
       @PathParam("sessionId") Long sessionId) {
     if (sessionId == null) {
       throw new IllegalArgumentException("Must provide sessionId");
@@ -59,12 +60,11 @@ public class RootCauseSessionResource {
   @POST
   @Path("/")
   @ApiOperation(value = "Post a session")
-  public Long post(String jsonString) throws Exception {
+  public Long post(@Auth ThirdEyePrincipal principal, String jsonString) throws Exception {
     RootcauseSessionDTO session = this.mapper.readValue(jsonString, new TypeReference<RootcauseSessionDTO>() {});
 
     final long timestamp = DateTime.now().getMillis();
-    // TODO : revisit after oAuth refactor
-    final String username = NO_AUTH_USER;
+    final String username = principal.getName();
 
     session.setUpdated(timestamp);
 
@@ -94,6 +94,7 @@ public class RootCauseSessionResource {
   @Path("/query")
   @ApiOperation(value = "Query")
   public List<RootcauseSessionDTO> query(
+      @Auth ThirdEyePrincipal principal,
       @QueryParam("id") String idsString,
       @QueryParam("name") String namesString,
       @QueryParam("owner") String ownersString,

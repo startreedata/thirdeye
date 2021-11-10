@@ -1,11 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisModuleConfig;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
@@ -57,6 +57,7 @@ public class RootCauseTemplateResource {
   @Path("/search")
   @ApiOperation(value = "Get root cause template")
   public List<RootcauseTemplateDTO> get(
+      @Auth ThirdEyePrincipal principal,
       @QueryParam("metricId") Long metricId) {
     if (metricId == null) {
       throw new IllegalArgumentException("Must provide valid metricId");
@@ -83,6 +84,7 @@ public class RootCauseTemplateResource {
   @POST
   @Path("/saveDimensionAnalysis")
   public Long saveDimensionAnalysis(
+      @Auth ThirdEyePrincipal principal,
       @QueryParam("metricUrn") String metricUrn,
       @QueryParam("includedDimension") String dimensionStr,
       @QueryParam("excludedDimension") String excludeDimStr,
@@ -92,8 +94,7 @@ public class RootCauseTemplateResource {
       @QueryParam("dimensionDepth") int dimensionDepth
   ) {
     ObjectMapper objMapper = new ObjectMapper();
-    // TODO : revisit after oAuth refactor
-    final String username = NO_AUTH_USER;
+    final String username = principal.getName();
     MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
     MetricConfigDTO metricConfigDTO = metricConfigManager.findById(metricEntity.getId());
     String templateName = DIM_ANALYSIS_TEMPLATE_NAME_PREFIX + metricConfigDTO.getAlias();

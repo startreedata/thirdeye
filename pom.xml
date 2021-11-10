@@ -675,7 +675,7 @@
         <version>${guice.version}</version>
       </dependency>
 
-      <!-- datasource utils -->
+      <!-- macro dependencies -->
       <dependency>
         <groupId>org.apache.calcite</groupId>
         <artifactId>calcite-core</artifactId>

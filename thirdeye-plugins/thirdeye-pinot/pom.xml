@@ -95,6 +95,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
       <artifactId>calcite-babel</artifactId>
     </dependency>
 

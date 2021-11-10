@@ -15,7 +15,7 @@ public abstract class AbstractDataTableImpl implements DataTable{
   }
 
   @Override
-  public void updateProperties(final Map<String, String> metadata) {
+  public void addProperties(final Map<String, String> metadata) {
     this.properties.putAll(metadata);
   }
 }

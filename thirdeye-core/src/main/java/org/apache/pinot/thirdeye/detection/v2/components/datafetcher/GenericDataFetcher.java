@@ -63,7 +63,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
         new ThirdEyeRequestV2(tableName, query, ImmutableMap.of()) :
         new MacroEngine(macroManager, detectionInterval, tableName, query).prepareRequest();
     DataTable result = thirdEyeDataSource.fetchDataTable(request);
-    result.updateProperties(request.getProperties());
+    result.addProperties(request.getProperties());
     return result;
   }
 }

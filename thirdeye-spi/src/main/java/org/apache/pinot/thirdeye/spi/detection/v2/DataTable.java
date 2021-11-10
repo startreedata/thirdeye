@@ -44,6 +44,6 @@ public interface DataTable extends DetectionPipelineResult {
 
   Map<String, String> getProperties();
 
-  void updateProperties(Map<String, String> metadata);
+  void addProperties(Map<String, String> metadata);
 }
 

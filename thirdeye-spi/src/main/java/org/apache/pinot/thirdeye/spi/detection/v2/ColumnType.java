@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import java.sql.Types;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.spi.dataframe.Series;
 
 public class ColumnType {
 
@@ -56,6 +57,22 @@ public class ColumnType {
         return new ColumnType(ColumnDataType.STRING);
     }
     throw new UnsupportedOperationException("Unknown JDBC data type - " + columnType);
+  }
+
+  public static ColumnType seriesTypeToColumnType(final Series.SeriesType columnType) {
+    switch (columnType) {
+      case DOUBLE:
+        return new ColumnType(ColumnDataType.DOUBLE);
+      case LONG:
+        return new ColumnType(ColumnDataType.LONG);
+      case STRING:
+        return new ColumnType(ColumnDataType.STRING);
+      case BOOLEAN:
+        return new ColumnType(ColumnDataType.BOOLEAN);
+      case OBJECT:
+        throw new UnsupportedOperationException("Casting SeriesType to ColumnType not supported for "+ Series.SeriesType.OBJECT);
+    }
+    throw new UnsupportedOperationException("Unknown SeriesType data type - " + columnType);
   }
 
   public ColumnDataType getType() {

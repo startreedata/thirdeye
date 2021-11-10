@@ -1,0 +1,24 @@
+
+executionFrameworkSpec:
+  name: 'standalone'
+  segmentGenerationJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentGenerationJobRunner'
+  segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
+  segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
+jobType: SegmentCreationAndTarPush
+inputDirURI: 'examples/pageviews_with_missing_data/rawdata'
+includeFileNamePattern: 'glob:**/*.csv'
+outputDirURI: 'tmp/data/segments/pageviews_with_missing_data'
+overwriteOutput: true
+pinotFSSpecs:
+  - scheme: file
+    className: org.apache.pinot.spi.filesystem.LocalPinotFS
+recordReaderSpec:
+  dataFormat: 'csv'
+  className: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReader'
+  configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
+tableSpec:
+  tableName: 'pageviews_with_missing_data'
+  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews/schema'
+  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_missing_data'
+pinotClusterSpecs:
+  - controllerURI: 'http://${controllerHost}:${controllerPort}'

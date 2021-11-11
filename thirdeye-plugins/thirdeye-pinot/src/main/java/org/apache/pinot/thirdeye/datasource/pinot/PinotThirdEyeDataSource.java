@@ -54,7 +54,8 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
@@ -519,7 +520,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public MacroManager getMacroManager() {
-    return PinotMacroManager.getInstance();
+  public SqlLanguage getSqlLanguage() {
+    return PinotSqlLanguage.getInstance();
+  }
+
+  @Override
+  public SqlExpressionBuilder getSqlExpressionBuilder() {
+    return PinotSqlExpressionBuilder.getInstance();
   }
 }

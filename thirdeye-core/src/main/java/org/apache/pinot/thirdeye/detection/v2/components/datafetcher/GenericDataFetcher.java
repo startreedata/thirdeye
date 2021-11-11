@@ -7,7 +7,8 @@ import org.apache.pinot.thirdeye.detection.v2.macro.MacroEngine;
 import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 import org.apache.pinot.thirdeye.spi.detection.DataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.Interval;
@@ -58,10 +59,13 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
 
   @Override
   public DataTable getDataTable(Interval detectionInterval) throws Exception {
-    MacroManager macroManager = thirdEyeDataSource.getMacroManager();
-    final ThirdEyeRequestV2 request = (macroManager == null) ?
-        new ThirdEyeRequestV2(tableName, query, ImmutableMap.of()) :
-        new MacroEngine(macroManager, detectionInterval, tableName, query).prepareRequest();
+    SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
+    SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
+    boolean macrosSupported = sqlLanguage != null && sqlExpressionBuilder != null;
+    final ThirdEyeRequestV2 request = macrosSupported ?
+        new MacroEngine(sqlLanguage, sqlExpressionBuilder, detectionInterval, tableName, query)
+            .prepareRequest() :
+        new ThirdEyeRequestV2(tableName, query, ImmutableMap.of());
     DataTable result = thirdEyeDataSource.fetchDataTable(request);
     result.addProperties(request.getProperties());
     return result;

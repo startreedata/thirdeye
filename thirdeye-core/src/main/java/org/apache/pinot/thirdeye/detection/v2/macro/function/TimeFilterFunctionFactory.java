@@ -56,7 +56,8 @@ public class TimeFilterFunctionFactory implements MacroFunctionFactory {
       properties.put(MAX_TIME_MILLIS.toString(), String.valueOf(maxTimeMillis));
 
       // generate SQL expression
-      return context.getMacroManager().getTimeFilterExpression(timeColumn, minTimeMillis, maxTimeMillis);
+      return context.getSqlExpressionBuilder()
+          .getTimeFilterExpression(timeColumn, minTimeMillis, maxTimeMillis);
     };
   }
 }

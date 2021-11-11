@@ -15,7 +15,8 @@ import org.apache.calcite.sql.util.SqlVisitor;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroFunction;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroFunctionContext;
-import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,23 +25,22 @@ public class MacroEngine {
 
   private static final Logger LOG = LoggerFactory.getLogger(MacroEngine.class);
 
-  private final MacroManager macroManager;
-  private final Interval detectionInterval;
+  private final SqlLanguage sqlLanguage;
   private final String tableName;
   private final String query;
   private final Map<String, String> properties;
   private final MacroFunctionContext macroFunctionContext;
 
-  public MacroEngine(final MacroManager macroManager, final Interval detectionInterval,
+  public MacroEngine(final SqlLanguage sqlLanguage, final SqlExpressionBuilder sqlExpressionBuilder,
+      final Interval detectionInterval,
       String tableName, String query) {
-    this.macroManager = macroManager;
-    this.detectionInterval = detectionInterval;
+    this.sqlLanguage = sqlLanguage;
     this.tableName = tableName;
     this.query = query;
     this.properties = new HashMap<>();
     this.macroFunctionContext = new MacroFunctionContext()
-        .setMacroManager(this.macroManager)
-        .setDetectionInterval(this.detectionInterval)
+        .setSqlExpressionBuilder(sqlExpressionBuilder)
+        .setDetectionInterval(detectionInterval)
         .setProperties(this.properties);
   }
 
@@ -52,28 +52,28 @@ public class MacroEngine {
     return new ThirdEyeRequestV2(tableName, preparedQuery, properties);
   }
 
-  private SqlNode queryToNode(String sql) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sql, macroManager.getSqlParserConfig());
+  private SqlNode queryToNode(final String sql) throws SqlParseException {
+    SqlParser sqlParser = SqlParser.create(sql, sqlLanguage.getSqlParserConfig());
     return sqlParser.parseQuery();
   }
 
-  private SqlNode expressionToNode(String sqlExpression) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sqlExpression, macroManager.getSqlParserConfig());
+  private SqlNode expressionToNode(final String sqlExpression) throws SqlParseException {
+    SqlParser sqlParser = SqlParser.create(sqlExpression, sqlLanguage.getSqlParserConfig());
     return sqlParser.parseExpression();
   }
 
-  private SqlNode applyMacros(final SqlNode rootNode) {
+  private SqlNode applyMacros(SqlNode rootNode) {
     return rootNode.accept(new MacroVisitor());
   }
 
-  private String nodeToQuery(SqlNode node) {
+  private String nodeToQuery(final SqlNode node) {
     return node.toSqlString(
-        c -> c.withDialect(macroManager.getSqlDialect())
+        c -> c.withDialect(sqlLanguage.getSqlDialect())
             .withQuoteAllIdentifiers(false)
     ).getSql();
   }
 
-  private List<String> paramsFromCall(SqlCall call) {
+  private List<String> paramsFromCall(final SqlCall call) {
     return call.getOperandList().stream()
         .map(this::nodeToQuery)
         .collect(Collectors.toList());

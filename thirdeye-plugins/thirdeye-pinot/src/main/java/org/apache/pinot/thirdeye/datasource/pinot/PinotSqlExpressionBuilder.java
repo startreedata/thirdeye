@@ -1,37 +1,16 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
 import java.text.SimpleDateFormat;
-import org.apache.calcite.config.Lex;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.dialect.AnsiSqlDialect;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParser.Config;
-import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
-import org.apache.calcite.sql.validate.SqlConformanceEnum;
-import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import org.joda.time.Period;
 
-public class PinotMacroManager implements MacroManager {
-  private static final PinotMacroManager INSTANCE = new PinotMacroManager();
+public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
+  private static final PinotSqlExpressionBuilder INSTANCE = new PinotSqlExpressionBuilder();
 
-  private PinotMacroManager(){}
+  private PinotSqlExpressionBuilder(){}
 
-  public static PinotMacroManager getInstance(){
+  public static PinotSqlExpressionBuilder getInstance(){
     return INSTANCE;
-  }
-
-  @Override
-  public Config getSqlParserConfig() {
-    return SqlParser.config()
-        .withLex(Lex.MYSQL_ANSI)
-        .withConformance(SqlConformanceEnum.BABEL)
-        .withParserFactory(SqlBabelParserImpl.FACTORY);
-  }
-
-  @Override
-  public SqlDialect getSqlDialect() {
-    // fixme cyril not sure this dialect is correct - contribute fully correct dialect to calcite ?
-    return new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString("\""));
   }
 
   @Override

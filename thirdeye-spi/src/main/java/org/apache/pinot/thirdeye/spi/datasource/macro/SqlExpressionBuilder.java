@@ -1,25 +1,12 @@
 package org.apache.pinot.thirdeye.spi.datasource.macro;
 
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.parser.SqlParser;
 import org.joda.time.Period;
 
 /**
- * A provider of SQL parsers and SQL generation functions for a data source.
- * Used to resolve macro functions.
+ * A provider of SQL expression generation methods.
+ * Used to expand macro functions into valid SQL.
  */
-public interface MacroManager {
-
-  /**
-   * See pinot datasource implementation for reference.
-   * */
-  SqlParser.Config getSqlParserConfig();
-
-  /**
-   * @see <a href="https://github.com/apache/calcite/tree/master/core/src/main/java/org/apache/calcite/sql/dialect">Calcite dialect doc</a>
-   * */
-  SqlDialect getSqlDialect();
-
+public interface SqlExpressionBuilder {
   /**
    * Generates a SQL expression that test if a time column in milliseconds is between bounds.
    * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.

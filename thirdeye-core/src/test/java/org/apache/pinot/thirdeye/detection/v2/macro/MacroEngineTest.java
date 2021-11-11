@@ -12,8 +12,9 @@ import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import org.apache.pinot.thirdeye.spi.datasource.macro.MacroManager;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -29,7 +30,8 @@ import org.testng.annotations.Test;
 public class MacroEngineTest {
 
   private static final String TABLE_NAME = "table";
-  private static final MacroManager MOCK_MACRO_MANAGER = new TestMacroManager();
+  private static final SqlLanguage MOCK_SQL_LANGUAGE = new TestSqlLanguage();
+  private static final SqlExpressionBuilder MOCK_SQL_EXPRESSION_BUILDER = new TestSqlExpressionBuilder();
   private static final long INPUT_START_TIME = 11111111L;
   private static final long INPUT_END_TIME = 22222222L;
   private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME, INPUT_END_TIME);
@@ -46,7 +48,10 @@ public class MacroEngineTest {
 
   private void prepareRequestAndAssert(String inputQuery, String expectedQuery,
       Map<String, String> expectedProperties) {
-    MacroEngine macroEngine = new MacroEngine(MOCK_MACRO_MANAGER, INPUT_INTERVAL, TABLE_NAME,
+    MacroEngine macroEngine = new MacroEngine(MOCK_SQL_LANGUAGE,
+        MOCK_SQL_EXPRESSION_BUILDER,
+        INPUT_INTERVAL,
+        TABLE_NAME,
         inputQuery);
     try {
       ThirdEyeRequestV2 output = macroEngine.prepareRequest();
@@ -66,7 +71,7 @@ public class MacroEngineTest {
         macroArgument);
 
     String expectedQuery = String.format("select * from tableName where %s",
-        MOCK_MACRO_MANAGER.getTimeFilterExpression(macroArgument,
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
             INPUT_END_TIME));
     Map<String, String> expectedProperties = ImmutableMap.of(
@@ -87,7 +92,7 @@ public class MacroEngineTest {
         macroArgument);
 
     String expectedQuery = String.format("select * from tableName where %s",
-        MOCK_MACRO_MANAGER.getTimeFilterExpression(macroArgument,
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
             INPUT_END_TIME));
     Map<String, String> expectedProperties = ImmutableMap.of(
@@ -112,7 +117,7 @@ public class MacroEngineTest {
         granularityMacroArg);
 
     String expectedQuery = String.format("select %s from tableName",
-        MOCK_MACRO_MANAGER.getTimeGroupExpression(timeColumnMacroArg,
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
             granularityMacroArg));
 
@@ -136,10 +141,10 @@ public class MacroEngineTest {
         timeColumnFormatMacroArg,
         granularityMacroArg);
 
-    String expectedTimeGroupMacro = MOCK_MACRO_MANAGER.getTimeGroupExpression(timeColumnMacroArg,
+    String expectedTimeGroupMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg);
-    String expectedNestedMacro = MOCK_MACRO_MANAGER.getTimeFilterExpression(expectedTimeGroupMacro,
+    String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(expectedTimeGroupMacro,
         INPUT_START_TIME,
         INPUT_END_TIME);
     Map<String, String> expectedProperties = ImmutableMap.of(
@@ -162,7 +167,7 @@ public class MacroEngineTest {
         macroArgument);
 
     String expectedQuery = String.format("select * from tableName where %s",
-        MOCK_MACRO_MANAGER.getTimeFilterExpression(macroArgument,
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
             INPUT_END_TIME));
     Map<String, String> expectedProperties = ImmutableMap.of(
@@ -174,7 +179,7 @@ public class MacroEngineTest {
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
 
-  private static class TestMacroManager implements MacroManager {
+  private static class TestSqlLanguage implements SqlLanguage {
 
     public static final String TIME_GROUP_MOCK = "TIMEGROUP_MACRO_EXPANDED";
     public static final String TIME_FILTER_MOCK = "TIME_FILTER_MACRO_EXPANDED";
@@ -189,8 +194,15 @@ public class MacroEngineTest {
 
     @Override
     public SqlDialect getSqlDialect() {
-      return new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING));
+      return new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString(
+          IDENTIFIER_QUOTE_STRING));
     }
+  }
+
+  private static class TestSqlExpressionBuilder implements SqlExpressionBuilder {
+
+    public static final String TIME_GROUP_MOCK = "TIMEGROUP_MACRO_EXPANDED";
+    public static final String TIME_FILTER_MOCK = "TIME_FILTER_MACRO_EXPANDED";
 
     @Override
     public String getTimeFilterExpression(final String column, final long minTimeMillisIncluded,

@@ -5,17 +5,17 @@ import org.joda.time.Interval;
 
 public class MacroFunctionContext {
 
-  private MacroManager macroManager;
+  private SqlExpressionBuilder sqlExpressionBuilder;
   private Interval detectionInterval;
   private Map<String, String> properties;
 
-  public MacroManager getMacroManager() {
-    return macroManager;
+  public SqlExpressionBuilder getSqlExpressionBuilder() {
+    return sqlExpressionBuilder;
   }
 
-  public MacroFunctionContext setMacroManager(
-      final MacroManager macroManager) {
-    this.macroManager = macroManager;
+  public MacroFunctionContext setSqlExpressionBuilder(
+      final SqlExpressionBuilder sqlExpressionBuilder) {
+    this.sqlExpressionBuilder = sqlExpressionBuilder;
     return this;
   }
 

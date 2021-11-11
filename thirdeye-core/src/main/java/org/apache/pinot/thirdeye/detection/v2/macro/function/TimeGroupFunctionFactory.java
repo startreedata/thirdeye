@@ -31,7 +31,8 @@ public class TimeGroupFunctionFactory implements MacroFunctionFactory {
       context.getProperties().put(GRANULARITY.toString(), granularityText);
 
       //generate SQL expression
-      return context.getMacroManager().getTimeGroupExpression(timeColumn, timeColumnFormat, granularity);
+      return context.getSqlExpressionBuilder()
+          .getTimeGroupExpression(timeColumn, timeColumnFormat, granularity);
     };
   }
 }

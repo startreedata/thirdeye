@@ -88,6 +88,8 @@ public class ThirdEyeResultSetDataTable implements DataTable {
     }
     final ColumnDataType type = columnTypes.get(colIdx).getType();
     switch (type) {
+      case INT:
+        return thirdEyeResultSet.getInteger(rowIdx, colIdx - groupKeyLength);
       case LONG:
         return thirdEyeResultSet.getLong(rowIdx, colIdx - groupKeyLength);
       case DOUBLE:

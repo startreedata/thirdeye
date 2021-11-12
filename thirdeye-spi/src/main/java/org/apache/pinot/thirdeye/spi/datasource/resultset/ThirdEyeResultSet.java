@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.spi.datasource.resultset;
 
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
-import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 
 /**
  * An interface to mimic {@link org.apache.pinot.client.ResultSet}. Note that this class is used to
@@ -47,6 +46,8 @@ public interface ThirdEyeResultSet {
   double getDouble(int rowIdx);
 
   String getString(int rowIdx);
+
+  int getInteger(int rowIdx, int columnIdx);
 
   long getLong(int rowIdx, int columnIdx);
 

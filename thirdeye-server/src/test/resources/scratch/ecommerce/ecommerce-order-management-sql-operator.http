@@ -1,0 +1,94 @@
+### Threshold Alert
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "start": "1612483200000",
+  "end": "1614470400000",
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "THRESHOLD",
+            "component.timezone": "UTC",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "${metric}",
+            "component.dimensions": [],
+            "component.max": "${max}",
+            "component.min": "${min}",
+            "component.offset": "mo1m",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "eventsToTimeseries",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "eventsToTimeseries",
+          "type": "SqlExecution",
+          "params": {
+            "sql.queries": [
+              "select UNIX_MILLIS(timestamp_group) as ts, MEDIAN(CAST(UNIX_MILLIS(DATE_ADD(TIMESTAMP(0),transition_time)) AS DOUBLE))/(1000*3600) as metric_median_time,AVG(CAST(UNIX_MILLIS(DATE_ADD(TIMESTAMP(0),transition_time)) AS DOUBLE))/(1000*3600) as metric_avg_time, MAX(CAST(UNIX_MILLIS(DATE_ADD(TIMESTAMP(0),transition_time)) AS DOUBLE))/(1000*3600) as metric_max_time, COUNT(CASEWHEN(transition_time>INTERVAL ${sla_limit} ,1, null)) as metric_above_sla from ( select timestamp_group, order_id, MIN(CASEWHEN(event_type='${second_event}', ts, DATE_ADD(timestamp_group, INTERVAL 1 DAY))) - MIN(CASEWHEN( event_type='${first_event}', ts, null))  as transition_time from ( select event_type, order_id, TIMESTAMP(ts/1000) as ts, C1 as timestamp_group, TIMESTAMP(ts/1000)< DATE_ADD(C1, INTERVAL 1 DAY) and TIMESTAMP(ts/1000)> DATE_SUB(C1, INTERVAL ${window_lookback}) as is_in_timestamp_group from order_events_epoch,  unnest(ARRAY( select distinct TRUNC (TIMESTAMP(ts/1000), 'DD') from order_events_epoch))) where is_in_timestamp_group group by timestamp_group, order_id order by timestamp_group) where transition_time is not null and UNIX_MILLIS(timestamp_group)>=${startTime} group by timestamp_group order by timestamp_group;"
+            ]
+          },
+          "inputs": [
+            {
+              "targetProperty": "order_events_epoch",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputKey": "0",
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT \"${timeColumn}\" as ts, event_type, order_id FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} LIMIT 100000000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "order_events",
+      "metric": "metric_max_time",
+      "sla_limit": "1 DAY",
+      "second_event": "IN_PROGRESS",
+      "first_event": "PLACED",
+      "window_lookback": "15 DAY",
+      "lookback": "15",
+      "timeColumn": "timestamp",
+      "absoluteChange": "100000",
+      "offset": "wo1w",
+      "max": "70",
+      "min": "20"
+    }
+  }
+}

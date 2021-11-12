@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SqlExecutionOperator extends DetectionPipelineOperator {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionOperator.class);
+  public static final Logger LOG = LoggerFactory.getLogger(SqlExecutionOperator.class);
   private static final String JDBC_DRIVER_CLASSNAME = "jdbc.driver.classname";
   private static final String JDBC_CONNECTION = "jdbc.connection";
   private static final String SQL_QUERIES = "sql.queries";
@@ -35,11 +35,10 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     super();
   }
 
-
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    for (OutputBean outputBean : context.getPlanNode().getOutputs()) {
+    for (final OutputBean outputBean : context.getPlanNode().getOutputs()) {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
     if (planNode.getParams().containsKey(SQL_QUERIES)) {
@@ -60,40 +59,44 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     try {
       Class.forName(jdbcDriverClassName);
-    } catch (Exception e) {
-      LOGGER.error("ERROR: failed to load JDBC driver class {}.", jdbcDriverClassName, e);
+    } catch (final Exception e) {
+      LOG.error("ERROR: failed to load JDBC driver class {}.", jdbcDriverClassName, e);
       throw e;
     }
-    Connection c = DriverManager.getConnection(jdbcConnection);
-    LOGGER.debug("Successfully connected to JDBC connection: {} with driver class: {} ",
+    final Connection c = DriverManager.getConnection(jdbcConnection);
+    LOG.debug("Successfully connected to JDBC connection: {} with driver class: {} ",
         jdbcConnection,
         jdbcDriverClassName);
 
-    List<String> insertedTable = new ArrayList<>();
-    for (String tableName : inputMap.keySet()) {
-      DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
+    final List<String> insertedTable = new ArrayList<>();
+    for (final String tableName : inputMap.keySet()) {
+      final DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
       if (detectionPipelineResult instanceof DataTable) {
         insertInput(c, tableName, (DataTable) detectionPipelineResult);
         insertedTable.add(tableName);
       }
     }
+    runQueries(queries, c);
+
+    // Destroy database
+    LOG.debug("trying to drop all the tables to clean up the environment.");
+    for (final String tableName : insertedTable) {
+      destroyTable(c, tableName);
+    }
+  }
+
+  private void runQueries(final List<String> queries, final Connection c) throws SQLException {
     int i = 0;
-    for (String query : queries) {
+    for (final String query : queries) {
       try {
         final Statement stmt = c.createStatement();
         final ResultSet resultSet = stmt.executeQuery(query);
         final DataTable dataTableFromResultSet = getDataTableFromResultSet(resultSet);
         setOutput(Integer.toString(i++), dataTableFromResultSet);
-      } catch (SQLException e) {
-        LOGGER.error("Got exceptions when executing SQL query: {}", query, e);
+      } catch (final SQLException e) {
+        LOG.error("Got exceptions when executing SQL query: {}", query, e);
         throw e;
       }
-    }
-
-    // Destroy database
-    LOGGER.debug("trying to drop all the tables to clean up the environment.");
-    for (String tableName : insertedTable) {
-      destroyTable(c, tableName);
     }
   }
 
@@ -109,7 +112,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
         columnTypes);
     while (resultSet.next()) {
-      Object[] rowData = simpleDataTableBuilder.newRow();
+      final Object[] rowData = simpleDataTableBuilder.newRow();
       for (int i = 0; i < columnCount; i++) {
         final ColumnType columnType = columnTypes.get(i);
         if (columnType.isArray()) {
@@ -147,11 +150,11 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
   }
 
   private void destroyTable(final Connection c, final String tableName) throws SQLException {
-    String dropTableStatement = "DROP TABLE " + tableName + " IF EXISTS";
+    final String dropTableStatement = "DROP TABLE " + tableName + " IF EXISTS";
     try {
       c.prepareCall(dropTableStatement).execute();
-    } catch (SQLException e) {
-      LOGGER.error("Failed to drop table: {} with sql: {}",
+    } catch (final SQLException e) {
+      LOG.error("Failed to drop table: {} with sql: {}",
           tableName,
           dropTableStatement,
           e);
@@ -163,28 +166,17 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
       final DataTable dataTable) throws SQLException {
     // Drop the table in case.
     destroyTable(c, tableName);
+
     // Create the table.
-    final String tableCreationStatement = getTableCreationStatement(tableName,
-        dataTable.getColumns(),
-        dataTable.getColumnTypes());
-    try {
-      c.prepareCall(tableCreationStatement).execute();
-      LOGGER.debug("Trying to create table with sql: {}", tableCreationStatement);
-    } catch (SQLException e) {
-      LOGGER.error("Failed to create table: {} with sql: {}",
-          tableName,
-          tableCreationStatement,
-          e);
-      throw e;
-    }
+    createTable(c, tableName, dataTable);
 
     // Insert all rows into the table
     for (int rowIdx = 0; rowIdx < dataTable.getRowCount(); rowIdx++) {
       final String insertionStatement = getRowInsertionStatement(tableName, rowIdx, dataTable);
       try {
         c.prepareCall(insertionStatement).execute();
-      } catch (SQLException e) {
-        LOGGER.error("Failed to insert row idx: {}, insertion sql: {}",
+      } catch (final SQLException e) {
+        LOG.error("Failed to insert row idx: {}, insertion sql: {}",
             rowIdx,
             insertionStatement,
             e);
@@ -193,17 +185,44 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     }
   }
 
-  private String getRowInsertionStatement(final String tableName, final int rowIdx,
+  private void createTable(final Connection c, final String tableName, final DataTable dataTable)
+      throws SQLException {
+    final String tableCreationStatement = getTableCreationStatement(tableName,
+        dataTable.getColumns(),
+        dataTable.getColumnTypes());
+    try {
+      c.prepareCall(tableCreationStatement).execute();
+      LOG.debug("Trying to create table with sql: {}", tableCreationStatement);
+    } catch (final SQLException e) {
+      LOG.error("Failed to create table: {} with sql: {}",
+          tableName,
+          tableCreationStatement,
+          e);
+      throw e;
+    }
+  }
+
+  private String getRowInsertionStatement(final String tableName,
+      final int rowIdx,
       final DataTable dataTable) {
-    String insertionStatement = "INSERT INTO " + tableName + " VALUES (";
+    final StringBuilder sb = new StringBuilder(
+        "INSERT INTO " + tableName + " VALUES (");
     for (int colIdx = 0; colIdx < dataTable.getColumnCount(); colIdx++) {
-      insertionStatement += dataTable.getObject(rowIdx, colIdx);
+      final Object value = dataTable.getObject(rowIdx, colIdx);
+
+      // If string, then wrap with quotes
+      final String quoteWith = value instanceof String ? "'" : "";
+      sb
+          .append(quoteWith)
+          .append(value)
+          .append(quoteWith);
+
       if (colIdx < dataTable.getColumnCount() - 1) {
-        insertionStatement += ", ";
+        sb.append(", ");
       }
     }
-    insertionStatement += ")";
-    return insertionStatement;
+    sb.append(")");
+    return sb.toString();
   }
 
   private String getTableCreationStatement(final String tableName, final List<String> columns,

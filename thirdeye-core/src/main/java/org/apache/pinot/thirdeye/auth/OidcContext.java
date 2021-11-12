@@ -16,7 +16,7 @@ public class OidcContext implements SecurityContext {
   public OidcContext(final OAuthConfig config) {
     this.issuer = config.getIssuer();
     this.keysUrl = config.getKeysUrl();
-    Optional.of(config.getCache()).ifPresent(cache -> {
+    Optional.ofNullable(config.getCache()).ifPresent(cache -> {
       this.cacheSize = config.getCache().getSize();
       this.cacheTtl = config.getCache().getTtl();
     });

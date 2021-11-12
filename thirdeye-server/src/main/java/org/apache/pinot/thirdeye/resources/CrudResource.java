@@ -12,6 +12,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.statusResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
+import io.swagger.annotations.ApiParam;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -126,7 +127,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @Context UriInfo uriInfo
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
@@ -141,7 +142,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
     ensureExists(list, "Invalid request");
 
@@ -159,7 +160,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
     return respondOk(list.stream()
         .map(o -> updateDto(principal, o))
@@ -173,7 +174,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     return respondOk(toApi(get(id)));
   }
@@ -183,7 +184,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
@@ -200,7 +201,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Path("/all")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteAll(@Auth ThirdEyePrincipal principal) {
+  public Response deleteAll(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     dtoManager.findAll().forEach(this::deleteDto);
     return Response.ok().build();
   }

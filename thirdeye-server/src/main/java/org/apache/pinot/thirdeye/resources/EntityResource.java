@@ -5,6 +5,12 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.serverError;
 
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -28,7 +35,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = "Entity")
+@Api(tags = "Entity", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 public class EntityResource {
 
   private final GenericPojoDao genericPojoDao;
@@ -41,14 +49,14 @@ public class EntityResource {
   @GET
   @Path("{id}")
   public Response getRawEntity(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
   }
 
   @GET
   @Path("types")
-  public Response listEntities(@Auth ThirdEyePrincipal principal) {
+  public Response listEntities(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     final Map<String, Long> entityCountMap = new TreeMap<>();
     final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
     for (Class<? extends AbstractDTO> beanClass : beanClasses) {
@@ -61,7 +69,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}/info")
   public Response getEntityInfo(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClass) {
     try {
       List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(beanClass));
@@ -75,7 +83,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}")
   public Response getEntity(
-      @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClassRef,
       @Context UriInfo uriInfo
   ) {

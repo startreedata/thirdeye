@@ -170,7 +170,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertApi alert = request.getAlert();
     ensureExists(alert)
         .setOwner(new UserApi()
-        .setPrincipal(NO_AUTH_USER));
+            .setPrincipal(NO_AUTH_USER));
 
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }

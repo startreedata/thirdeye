@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.calcite.sql.SqlCall;
+import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.util.SqlShuttle;
 import org.apache.calcite.sql.util.SqlVisitor;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
@@ -53,12 +55,12 @@ public class MacroEngine {
   }
 
   private SqlNode queryToNode(final String sql) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sql, sqlLanguage.getSqlParserConfig());
+    SqlParser sqlParser = SqlParser.create(sql, (Config) sqlLanguage.getSqlParserConfig());
     return sqlParser.parseQuery();
   }
 
   private SqlNode expressionToNode(final String sqlExpression) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sqlExpression, sqlLanguage.getSqlParserConfig());
+    SqlParser sqlParser = SqlParser.create(sqlExpression, (Config) sqlLanguage.getSqlParserConfig());
     return sqlParser.parseExpression();
   }
 
@@ -68,7 +70,7 @@ public class MacroEngine {
 
   private String nodeToQuery(final SqlNode node) {
     return node.toSqlString(
-        c -> c.withDialect(sqlLanguage.getSqlDialect())
+        c -> c.withDialect((SqlDialect) sqlLanguage.getSqlDialect())
             .withQuoteAllIdentifiers(false)
     ).getSql();
   }

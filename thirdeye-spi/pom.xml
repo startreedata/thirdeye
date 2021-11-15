@@ -90,13 +90,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- datasource utils -->
-    <dependency>
-      <groupId>org.apache.calcite</groupId>
-      <artifactId>calcite-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.modelmapper</groupId>
       <artifactId>modelmapper</artifactId>

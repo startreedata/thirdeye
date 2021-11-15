@@ -5,13 +5,6 @@ import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import org.joda.time.Period;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
-  private static final PinotSqlExpressionBuilder INSTANCE = new PinotSqlExpressionBuilder();
-
-  private PinotSqlExpressionBuilder(){}
-
-  public static PinotSqlExpressionBuilder getInstance(){
-    return INSTANCE;
-  }
 
   @Override
   public String getTimeGroupExpression(String timeColumn, String timeColumnFormat, Period granularity) {

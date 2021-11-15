@@ -181,9 +181,6 @@ public class MacroEngineTest {
 
   private static class TestSqlLanguage implements SqlLanguage {
 
-    public static final String TIME_GROUP_MOCK = "TIMEGROUP_MACRO_EXPANDED";
-    public static final String TIME_FILTER_MOCK = "TIME_FILTER_MACRO_EXPANDED";
-
     @Override
     public Config getSqlParserConfig() {
       return SqlParser.config()

@@ -10,25 +10,24 @@ import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 
 public class PinotSqlLanguage implements SqlLanguage {
-  private static final PinotSqlLanguage INSTANCE = new PinotSqlLanguage();
 
-  private PinotSqlLanguage(){}
+  // Immutable
+  private static final Config SQL_PARSER_CONFIG = SqlParser.config()
+      .withLex(Lex.MYSQL_ANSI)
+        .withConformance(SqlConformanceEnum.BABEL)
+        .withParserFactory(SqlBabelParserImpl.FACTORY);
 
-  public static PinotSqlLanguage getInstance(){
-    return INSTANCE;
-  }
+  // Immutable
+  // fixme cyril not sure this dialect is correct - contribute fully correct dialect to calcite ?
+  private static final SqlDialect SQL_DIALECT = new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString("\""));
 
   @Override
   public Config getSqlParserConfig() {
-    return SqlParser.config()
-        .withLex(Lex.MYSQL_ANSI)
-        .withConformance(SqlConformanceEnum.BABEL)
-        .withParserFactory(SqlBabelParserImpl.FACTORY);
+    return SQL_PARSER_CONFIG;
   }
 
   @Override
   public SqlDialect getSqlDialect() {
-    // fixme cyril not sure this dialect is correct - contribute fully correct dialect to calcite ?
-    return new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString("\""));
+    return SQL_DIALECT;
   }
 }

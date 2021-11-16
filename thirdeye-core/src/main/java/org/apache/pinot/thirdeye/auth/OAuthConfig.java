@@ -1,10 +1,15 @@
 package org.apache.pinot.thirdeye.auth;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class OAuthConfig {
   private String keysUrl;
   private String clientId;
-  private String issuer;
-  private String audience;
+  private List<String> required = new ArrayList<>();
+  private Map<String, Object> exactMatch = new HashMap<>();
   private CacheConfig cache;
 
   public String getKeysUrl() {
@@ -25,21 +30,21 @@ public class OAuthConfig {
     return this;
   }
 
-  public String getIssuer() {
-    return issuer;
+  public List<String> getRequired() {
+    return required;
   }
 
-  public OAuthConfig setIssuer(final String issuer) {
-    this.issuer = issuer;
+  public OAuthConfig setRequired(final List<String> required) {
+    this.required = required;
     return this;
   }
 
-  public String getAudience() {
-    return audience;
+  public Map<String, Object> getExactMatch() {
+    return exactMatch;
   }
 
-  public OAuthConfig setAudience(final String audience) {
-    this.audience = audience;
+  public OAuthConfig setExactMatch(final Map<String, Object> exactMatch) {
+    this.exactMatch = exactMatch;
     return this;
   }
 

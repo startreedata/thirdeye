@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.detection.v2.macro;
 
+import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.util.SqlShuttle;
 import org.apache.calcite.sql.util.SqlVisitor;
+import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeFilterFunction;
+import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeGroupFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroFunction;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroFunctionContext;
@@ -26,12 +29,17 @@ import org.slf4j.LoggerFactory;
 public class MacroEngine {
 
   private static final Logger LOG = LoggerFactory.getLogger(MacroEngine.class);
+  private final static List<MacroFunction> CORE_MACROS = ImmutableList.of(
+      new TimeFilterFunction(),
+      new TimeGroupFunction()
+  );
 
   private final SqlLanguage sqlLanguage;
   private final String tableName;
   private final String query;
   private final Map<String, String> properties;
   private final MacroFunctionContext macroFunctionContext;
+  private final Map<String, MacroFunction> availableMacros = new HashMap<>();
 
   public MacroEngine(final SqlLanguage sqlLanguage, final SqlExpressionBuilder sqlExpressionBuilder,
       final Interval detectionInterval,
@@ -44,6 +52,9 @@ public class MacroEngine {
         .setSqlExpressionBuilder(sqlExpressionBuilder)
         .setDetectionInterval(detectionInterval)
         .setProperties(this.properties);
+    // possible to put datasource-specific macros here in the future
+    for (MacroFunction function: CORE_MACROS )
+      this.availableMacros.put(function.name(), function);
   }
 
   public ThirdEyeRequestV2 prepareRequest() throws SqlParseException {
@@ -60,7 +71,8 @@ public class MacroEngine {
   }
 
   private SqlNode expressionToNode(final String sqlExpression) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sqlExpression, (Config) sqlLanguage.getSqlParserConfig());
+    SqlParser sqlParser = SqlParser.create(sqlExpression,
+        (Config) sqlLanguage.getSqlParserConfig());
     return sqlParser.parseExpression();
   }
 
@@ -98,12 +110,10 @@ public class MacroEngine {
         // cannot be a macro function
         return call;
       }
-      MacroFunction macroFunction = MacroFunctionRegistry.getMacroFunction(
-          call.getOperator().getName(),
-          macroFunctionContext);
+      MacroFunction macroFunction = availableMacros.get(call.getOperator().getName());
       if (macroFunction != null) {
         List<String> macroParams = paramsFromCall(call);
-        String expandedMacro = macroFunction.expandMacro(macroParams);
+        String expandedMacro = macroFunction.expandMacro(macroParams, macroFunctionContext);
         try {
           return expressionToNode(expandedMacro);
         } catch (SqlParseException e) {

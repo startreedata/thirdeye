@@ -6,6 +6,15 @@ import org.joda.time.Period;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
+  public String getTimeFilterExpression(String column, long minTimeMillisIncluded,
+      long maxTimeMillisExcluded) {
+    return String.format("%s >= %s AND %s < %s",
+        column,
+        minTimeMillisIncluded,
+        column,
+        maxTimeMillisExcluded);
+  }
+
   @Override
   public String getTimeGroupExpression(String timeColumn, String timeColumnFormat, Period granularity) {
     return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",

@@ -4,5 +4,7 @@ import java.util.List;
 
 public interface MacroFunction {
 
-  String expandMacro(List<String> macroParams);
+  String name();
+
+  String expandMacro(List<String> macroParams, MacroFunctionContext context);
 }

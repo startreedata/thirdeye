@@ -84,6 +84,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private SqlExpressionBuilder sqlExpressionBuilder;
   private SqlLanguage sqlLanguage;
 
+  public PinotThirdEyeDataSource(
+      final SqlExpressionBuilder sqlExpressionBuilder,
+      final PinotSqlLanguage sqlLanguage) {
+    this.sqlExpressionBuilder = sqlExpressionBuilder;
+    this.sqlLanguage = sqlLanguage;
+  }
+
   /**
    * Definition of Pre-Aggregated Data: the data that has been pre-aggregated or pre-calculated and
    * should not be
@@ -171,10 +178,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     // TODO Refactor. remove inverse hierarchical dependency
     pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
     pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
-
-    // no DI use case for the moment
-    sqlExpressionBuilder = new PinotSqlExpressionBuilder();
-    sqlLanguage = new PinotSqlLanguage();
   }
 
   @Override

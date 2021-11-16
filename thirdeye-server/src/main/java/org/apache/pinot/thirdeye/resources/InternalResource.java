@@ -9,7 +9,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.google.inject.Inject;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,6 +29,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
@@ -31,6 +39,7 @@ import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -39,7 +48,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = "zzz Internal zzz")
+@Api(tags = "zzz Internal zzz", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 public class InternalResource {
 
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
@@ -79,19 +89,20 @@ public class InternalResource {
 
   @GET
   @Path("ping")
-  public Response ping() {
+  public Response ping(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     return Response.ok("pong").build();
   }
 
   @GET
   @Path("version")
-  public Response getVersion() {
+  public Response getVersion(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();
   }
 
   @POST
   @Path("email/send")
   public Response sendEmail(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("subscriptionGroupId") Long subscriptionGroupId
   ) throws Exception {
 
@@ -106,7 +117,10 @@ public class InternalResource {
   @GET
   @Path("email/html")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
-  public Response generateHtmlEmail(@QueryParam("alertId") Long alertId) {
+  public Response generateHtmlEmail(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @QueryParam("alertId") Long alertId
+  ) {
     ensureExists(alertId, "Query parameter required: alertId !");
     final Map<String, Object> templateData = buildTemplateData(alertId);
     final String templateName = EmailContentFormatter.TEMPLATE_MAP.get(
@@ -120,7 +134,10 @@ public class InternalResource {
   @Path("email/entity")
   @JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
   @Produces(MediaType.APPLICATION_JSON)
-  public Response generateEmailEntity(@QueryParam("alertId") Long alertId) {
+  public Response generateEmailEntity(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @QueryParam("alertId") Long alertId
+  ) {
     ensureExists(alertId, "Query parameter required: alertId !");
     return Response.ok(buildTemplateData(alertId)).build();
   }
@@ -148,7 +165,7 @@ public class InternalResource {
   @GET
   @Path("package-info")
   @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
-  public Response getPackageInfo() {
+  public Response getPackageInfo(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     return Response.ok(PACKAGE).build();
   }
 

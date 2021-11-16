@@ -7,7 +7,14 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.serverError;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -15,7 +22,6 @@ import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -35,7 +41,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 
-@Api(tags = "Data Source")
+@Api(tags = "Data Source", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
@@ -73,7 +80,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardDataset(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("dataSourceName") String dataSourceName,
       @FormParam("datasetName") String datasetName) {
 
@@ -93,7 +100,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardAll(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
@@ -112,8 +119,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Path("cache")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response clearDataSourceCache(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) throws Exception {
+  public Response clearDataSourceCache(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
     dataSourceCache.clear();
     return Response.ok().build();
   }
@@ -122,8 +128,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Path("status")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response status(@HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
-      @QueryParam("name") String name) {
+  public Response status(@QueryParam("name") String name) {
     ensureExists(name, "name is a required field");
     try {
       // throws ThirdEyeException on datasource not found in DB

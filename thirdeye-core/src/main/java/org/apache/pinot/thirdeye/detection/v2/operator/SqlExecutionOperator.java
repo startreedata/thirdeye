@@ -85,19 +85,23 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     }
   }
 
-  private void runQueries(final List<String> queries, final Connection c) throws SQLException {
+  private void runQueries(final List<String> queries, final Connection connection)
+      throws SQLException {
     int i = 0;
     for (final String query : queries) {
       try {
-        final Statement stmt = c.createStatement();
-        final ResultSet resultSet = stmt.executeQuery(query);
-        final DataTable dataTableFromResultSet = getDataTableFromResultSet(resultSet);
-        setOutput(Integer.toString(i++), dataTableFromResultSet);
+        setOutput(Integer.toString(i++), runQuery(query, connection));
       } catch (final SQLException e) {
         LOG.error("Got exceptions when executing SQL query: {}", query, e);
         throw e;
       }
     }
+  }
+
+  private DataTable runQuery(final String query, final Connection connection) throws SQLException {
+    final Statement stmt = connection.createStatement();
+    final ResultSet resultSet = stmt.executeQuery(query);
+    return getDataTableFromResultSet(resultSet);
   }
 
   private DataTable getDataTableFromResultSet(final ResultSet resultSet) throws SQLException {

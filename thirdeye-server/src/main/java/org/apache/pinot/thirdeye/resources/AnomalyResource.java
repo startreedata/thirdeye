@@ -6,7 +6,14 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.badRequest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.HeaderParam;
@@ -27,7 +34,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
-@Api(tags = "Anomaly")
+@Api(tags = "Anomaly", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResultDTO> {
@@ -88,7 +96,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   @POST
   @Timed
   public Response setFeedback(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id,
       AnomalyFeedbackApi api) {
     final MergedAnomalyResultDTO dto = get(id);

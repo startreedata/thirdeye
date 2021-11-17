@@ -6,9 +6,15 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.parseListParams;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,11 +27,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.pinot.thirdeye.rca.RootCauseAnalysisService;
 import org.apache.pinot.thirdeye.rca.RootCauseEntityFormatter;
 import org.apache.pinot.thirdeye.rootcause.RCAFramework;
 import org.apache.pinot.thirdeye.rootcause.RCAFrameworkExecutionResult;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.RootCauseEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.TimeRangeEntity;
@@ -33,7 +41,8 @@ import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(tags = "Root Cause Analysis")
+@Api(tags = "Root Cause Analysis", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaResource {
@@ -92,6 +101,7 @@ public class RcaResource {
   @Path("/query")
   @ApiOperation(value = "Send query")
   public List<RootCauseEntity> query(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "framework name")
       @QueryParam("framework") String framework,
       @ApiParam(value = "start overall time window to consider for events")
@@ -182,6 +192,7 @@ public class RcaResource {
   @Path("/raw")
   @ApiOperation(value = "Raw")
   public List<RootCauseEntity> raw(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("framework") String framework,
       @QueryParam("formatterDepth") Integer formatterDepth,
       @QueryParam("urns") List<String> urns) throws Exception {

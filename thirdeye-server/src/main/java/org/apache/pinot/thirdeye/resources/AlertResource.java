@@ -1,6 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
@@ -9,15 +8,21 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -44,7 +49,8 @@ import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(tags = "Alert")
+@Api(tags = "Alert", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
@@ -141,7 +147,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response runTask(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
@@ -161,7 +167,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response evaluate(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       final AlertEvaluationApi request
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
@@ -170,7 +176,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertApi alert = request.getAlert();
     ensureExists(alert)
         .setOwner(new UserApi()
-            .setPrincipal(NO_AUTH_USER));
+            .setPrincipal(principal.getName()));
 
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
@@ -181,11 +187,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) final String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     alertDeleter.deleteAssociatedAnomalies(dto.getId());
-    log.warn(String.format("Resetting alert id: %d by principal: %s", id, NO_AUTH_USER));
+    log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     return respondOk(toApi(dto));
   }

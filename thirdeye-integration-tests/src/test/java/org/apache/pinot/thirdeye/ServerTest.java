@@ -74,7 +74,8 @@ public class ServerTest {
         config("database.url", db.getDbConfig().getUrl()),
         config("database.user", db.getDbConfig().getUser()),
         config("database.password", db.getDbConfig().getPassword()),
-        config("database.driver", db.getDbConfig().getDriver())
+        config("database.driver", db.getDbConfig().getDriver()),
+        config("auth.enabled", "false")
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();

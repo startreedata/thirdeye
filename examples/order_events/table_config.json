@@ -1,0 +1,20 @@
+
+{
+  "tableName": "order_events",
+  "segmentsConfig" : {
+    "timeColumnName": "timestamp",
+    "timeType": "SECONDS",
+    "replication" : "1",
+    "schemaName" : "order_events"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

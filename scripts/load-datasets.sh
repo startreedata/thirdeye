@@ -47,3 +47,4 @@ function add_dataset() {
 add_dataset "examples/pageviews"
 add_dataset "examples/us_monthly_air_passengers_simplified"
 add_dataset "examples/pageviews_with_missing_data"
+add_dataset "examples/order_events"

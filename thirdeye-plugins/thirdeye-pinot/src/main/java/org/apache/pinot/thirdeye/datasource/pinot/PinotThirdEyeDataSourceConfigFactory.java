@@ -134,7 +134,9 @@ public class PinotThirdEyeDataSourceConfigFactory {
 
       // Adding separately to builder as brokerList is not a string
       final String brokerList = PinotThirdeyeDataSourceProperties.BROKER_LIST.getValue();
-      builder.put(brokerList, properties.get(brokerList));
+      if(properties.get(brokerList) != null) {
+        builder.put(brokerList, properties.get(brokerList));
+      }
       return builder.build();
     } else {
       return null;

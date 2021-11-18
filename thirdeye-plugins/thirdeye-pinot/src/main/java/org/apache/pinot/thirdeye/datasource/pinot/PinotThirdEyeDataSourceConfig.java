@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
 import com.google.common.base.MoreObjects;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,6 +32,7 @@ public class PinotThirdEyeDataSourceConfig {
   private String controllerHost;
   private int controllerPort;
   private String controllerConnectionScheme;
+  private List<String> brokerList;
   private String clusterName;
   private String brokerUrl;
   private String tag;
@@ -70,6 +72,15 @@ public class PinotThirdEyeDataSourceConfig {
   public PinotThirdEyeDataSourceConfig setControllerConnectionScheme(
       final String controllerConnectionScheme) {
     this.controllerConnectionScheme = controllerConnectionScheme;
+    return this;
+  }
+
+  public List<String> getBrokerList() {
+    return brokerList;
+  }
+
+  public PinotThirdEyeDataSourceConfig setBrokerList(final List<String> brokerList) {
+    this.brokerList = brokerList;
     return this;
   }
 

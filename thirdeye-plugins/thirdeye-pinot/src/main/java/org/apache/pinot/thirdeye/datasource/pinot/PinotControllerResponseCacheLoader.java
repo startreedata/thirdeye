@@ -20,6 +20,7 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +117,11 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    if (pinotThirdEyeDataSourceConfig.getBrokerUrl() != null
+    List<String> brokerList = pinotThirdEyeDataSourceConfig.getBrokerList();
+    if(brokerList != null && !brokerList.isEmpty()){
+      this.connections = fromHostList(brokerList.toArray(new String[brokerList.size()]));
+      LOG.info("Created PinotControllerResponseCacheLoader with brokers {}", pinotThirdEyeDataSourceConfig.getBrokerList());
+    } else if (pinotThirdEyeDataSourceConfig.getBrokerUrl() != null
         && pinotThirdEyeDataSourceConfig.getBrokerUrl().trim().length() > 0) {
       ZkClient zkClient = new ZkClient(pinotThirdEyeDataSourceConfig.getZookeeperUrl());
       zkClient.setZkSerializer(new ZNRecordSerializer());

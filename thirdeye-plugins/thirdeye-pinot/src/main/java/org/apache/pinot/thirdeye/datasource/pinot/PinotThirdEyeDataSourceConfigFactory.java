@@ -53,6 +53,7 @@ public class PinotThirdEyeDataSourceConfigFactory {
         .getString(processedProperties, PinotThirdeyeDataSourceProperties.CLUSTER_NAME.getValue());
 
     // brokerUrl, tag, and name are optional
+    List<String> brokerList = (List<String>) processedProperties.get(PinotThirdeyeDataSourceProperties.BROKER_LIST.getValue());
     String brokerUrl = MapUtils
         .getString(processedProperties, PinotThirdeyeDataSourceProperties.BROKER_URL.getValue());
     String tag = MapUtils
@@ -75,6 +76,9 @@ public class PinotThirdEyeDataSourceConfigFactory {
     }
     if (StringUtils.isNotBlank(controllerConnectionScheme)) {
       builder.setControllerConnectionScheme(controllerConnectionScheme);
+    }
+    if (brokerList != null) {
+      builder.setBrokerList(brokerList);
     }
 
     return builder.build();
@@ -128,6 +132,9 @@ public class PinotThirdEyeDataSourceConfigFactory {
         }
       }
 
+      // Adding separately to builder as brokerList is not a string
+      final String brokerList = PinotThirdeyeDataSourceProperties.BROKER_LIST.getValue();
+      builder.put(brokerList, properties.get(brokerList));
       return builder.build();
     } else {
       return null;
@@ -149,6 +156,7 @@ public class PinotThirdEyeDataSourceConfigFactory {
     private String controllerConnectionScheme = HTTP_SCHEME; // HTTP_SCHEME or HTTPS_SCHEME
     private String clusterName;
     private String brokerUrl;
+    private List<String> brokerList;
     private String tag;
     private String name;
 
@@ -174,6 +182,11 @@ public class PinotThirdEyeDataSourceConfigFactory {
 
     public Builder setBrokerUrl(String brokerUrl) {
       this.brokerUrl = brokerUrl;
+      return this;
+    }
+
+    public Builder setBrokerList(List<String> brokerList) {
+      this.brokerList = brokerList;
       return this;
     }
 
@@ -210,6 +223,7 @@ public class PinotThirdEyeDataSourceConfigFactory {
           .setZookeeperUrl(zookeeperUrl)
           .setClusterName(clusterName)
           .setBrokerUrl(brokerUrl)
+          .setBrokerList(brokerList)
           .setTag(tag)
           .setControllerConnectionScheme(controllerConnectionScheme).setName(name);
     }

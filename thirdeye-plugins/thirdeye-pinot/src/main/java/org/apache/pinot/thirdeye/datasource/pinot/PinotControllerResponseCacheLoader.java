@@ -117,30 +117,10 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    * @throws Exception when an error occurs connecting to the Pinot controller.
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    List<String> brokerList = pinotThirdEyeDataSourceConfig.getBrokerList();
-    if(brokerList != null && !brokerList.isEmpty()){
-      this.connections = fromHostList(brokerList.toArray(new String[brokerList.size()]));
-      LOG.info("Created PinotControllerResponseCacheLoader with brokers {}", pinotThirdEyeDataSourceConfig.getBrokerList());
-    } else if (pinotThirdEyeDataSourceConfig.getBrokerUrl() != null
-        && pinotThirdEyeDataSourceConfig.getBrokerUrl().trim().length() > 0) {
-      ZkClient zkClient = new ZkClient(pinotThirdEyeDataSourceConfig.getZookeeperUrl());
-      zkClient.setZkSerializer(new ZNRecordSerializer());
-      zkClient.waitUntilConnected(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-      ZKHelixAdmin helixAdmin = new ZKHelixAdmin(zkClient);
-      List<String> thirdeyeBrokerList = helixAdmin.getInstancesInClusterWithTag(
-          pinotThirdEyeDataSourceConfig.getClusterName(), pinotThirdEyeDataSourceConfig.getTag());
-
-      String[] thirdeyeBrokers = new String[thirdeyeBrokerList.size()];
-      for (int i = 0; i < thirdeyeBrokerList.size(); i++) {
-        String instanceName = thirdeyeBrokerList.get(i);
-        InstanceConfig instanceConfig =
-            helixAdmin
-                .getInstanceConfig(pinotThirdEyeDataSourceConfig.getClusterName(), instanceName);
-        thirdeyeBrokers[i] = instanceConfig.getHostName().replaceAll(BROKER_PREFIX, "") + ":"
-            + instanceConfig.getPort();
-      }
-      this.connections = fromHostList(thirdeyeBrokers);
-      LOG.info("Created PinotControllerResponseCacheLoader with brokers {}", thirdeyeBrokers);
+    final String brokerUrl = pinotThirdEyeDataSourceConfig.getBrokerUrl();
+    if (brokerUrl != null && brokerUrl.trim().length() > 0) {
+      this.connections = fromHostList(new String[]{brokerUrl});
+      LOG.info("Created PinotControllerResponseCacheLoader with brokers [{}]", brokerUrl);
     } else {
       this.connections = fromZookeeper(pinotThirdEyeDataSourceConfig);
       LOG.info("Created PinotControllerResponseCacheLoader with controller {}:{}",

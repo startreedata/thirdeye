@@ -1,0 +1,95 @@
+### Threshold Alert
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "start": "1612483200000",
+  "end": "1614470400000",
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "THRESHOLD",
+            "component.timezone": "UTC",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.timestamp": "ts",
+            "component.metric": "${metric}",
+            "component.dimensions": [],
+            "component.max": "${max}",
+            "component.min": "${min}",
+            "component.offset": "mo1m",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "eventsToTimeseries",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "eventsToTimeseries",
+          "type": "CalciteSqlExecution",
+          "params": {
+            "sql.queries": [
+              "with t as (select *, TIMESTAMP_MILLIS(ts) as dt from order_events_epoch) select UNIX_MILLIS(TIMESTAMPADD(${granularityUnit}, -${granularityNum}, window_end)) as ts, AVG(transition_time) / (1000) as ${metric} from ( select window_end, IF(event_type = ${firstType}, COALESCE(lead(ts) over(partition by order_id, window_end order by ts), UNIX_MILLIS(window_end)) - ts, null) as transition_time, max(CEIL(dt TO ${granularityUnit})) over (partition by order_id) as early_window_fence FROM TABLE(HOP(TABLE t, DESCRIPTOR(dt), INTERVAL '${granularityNum}' ${granularityUnit}, INTERVAL '${windowSizeNum}' ${windowSizeUnit})) where event_type in (${firstType}, ${secondType}) ) where window_end <= early_window_fence and transition_time is not null group by window_end order by window_end"
+            ]
+          },
+          "inputs": [
+            {
+              "targetProperty": "order_events_epoch",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputKey": "0",
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT \"${timeColumn}\" as ts, event_type, order_id FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${windowSizeNum}, 24, 60, 60, 1000)) AND ts < ${endTime} LIMIT 100000000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "granularityNum": "1",
+      "granularityUnit": "DAY",
+      "windowSizeNum": "7",
+      "windowSizeUnit": "DAY",
+      "firstType": "'PLACED'",
+      "secondType": "'IN_PROGRESS'",
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "order_events",
+      "metric": "metric",
+      "timeColumn": "timestamp",
+      "absoluteChange": "100000",
+      "offset": "wo1w",
+      "max": "70",
+      "min": "20"
+    }
+  }
+}

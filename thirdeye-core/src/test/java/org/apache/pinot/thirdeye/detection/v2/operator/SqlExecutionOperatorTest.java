@@ -16,8 +16,20 @@ import org.testng.annotations.Test;
 public class SqlExecutionOperatorTest {
 
   @Test
-  public void testSqlExecution() throws Exception {
-    final SqlExecutionOperator sqlExecutionOperator = new SqlExecutionOperator();
+  public void testSqlExecutionCalcite() throws Exception {
+    final DetectionPipelineOperator sqlExecutionOperator = new CalciteSqlExecutionOperator();
+
+    testSqlExecution(sqlExecutionOperator);
+  }
+
+  @Test
+  public void testSqlExecutionHSQLDB() throws Exception {
+    final DetectionPipelineOperator sqlExecutionOperator = new HyperSqlExecutionOperator();
+
+    testSqlExecution(sqlExecutionOperator);
+  }
+
+  private void testSqlExecution(final DetectionPipelineOperator sqlExecutionOperator) throws Exception {
     final long currentTimeMillis = System.currentTimeMillis();
     final String startTime = String.valueOf(currentTimeMillis);
     final String endTime = String.valueOf(currentTimeMillis + 1000L);
@@ -25,15 +37,15 @@ public class SqlExecutionOperatorTest {
         .setName("root")
         .setType("SqlExecution")
         .setParams(ImmutableMap.of("sql.queries", ImmutableList.of(
-            "SELECT ts as timestamp, met as value FROM baseline",
-            "SELECT ts as timestamp, met as value FROM current",
-            "SELECT ts, met FROM baseline UNION ALL SELECT ts, met FROM current"
-        ), "jdbc.connection", "jdbc:hsqldb:mem:SqlExecutionOperatorTest"))
+            "SELECT ts as timestamp_res, met as value_res FROM baseline_data",
+            "SELECT ts as timestamp_res, met as value_res FROM current_data",
+            "SELECT ts, met FROM baseline_data UNION ALL SELECT ts, met FROM current_data"
+        )))
         .setInputs(ImmutableList.of(
-            new InputBean().setTargetProperty("baseline")
+            new InputBean().setTargetProperty("baseline_data")
                 .setSourceProperty("baselineOutput")
                 .setSourcePlanNode("baselineDataFetcher"),
-            new InputBean().setTargetProperty("current")
+            new InputBean().setTargetProperty("current_data")
                 .setSourceProperty("currentOutput")
                 .setSourcePlanNode("currentDataFetcher")
         ))
@@ -45,12 +57,12 @@ public class SqlExecutionOperatorTest {
     final OperatorContext context = new OperatorContext().setStartTime(startTime)
         .setEndTime(endTime)
         .setPlanNode(planNodeBean)
-        .setInputsMap(ImmutableMap.of("baseline", new SimpleDataTable(
+        .setInputsMap(ImmutableMap.of("baseline_data", new SimpleDataTable(
             ImmutableList.of("ts", "met"),
             ImmutableList.of(new ColumnType(ColumnDataType.LONG),
                 new ColumnType(ColumnDataType.DOUBLE)),
             ImmutableList.of(new Object[]{123L, 0.123})
-        ), "current", new SimpleDataTable(
+        ), "current_data", new SimpleDataTable(
             ImmutableList.of("ts", "met"),
             ImmutableList.of(new ColumnType(ColumnDataType.LONG),
                 new ColumnType(ColumnDataType.DOUBLE)),
@@ -73,28 +85,28 @@ public class SqlExecutionOperatorTest {
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("timestamp")
+        .get("timestamp_res")
         .size(), 1);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_0")
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("value")
+        .get("value_res")
         .size(), 1);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_0")
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("timestamp")
+        .get("timestamp_res")
         .get(0), 123L);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_0")
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("value")
+        .get("value_res")
         .get(0), 0.123);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_1")
@@ -107,28 +119,28 @@ public class SqlExecutionOperatorTest {
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("timestamp")
+        .get("timestamp_res")
         .size(), 1);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_1")
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("value")
+        .get("value_res")
         .size(), 1);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_1")
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("timestamp")
+        .get("timestamp_res")
         .get(0), 456L);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("sql_1")
         .getDetectionResults()
         .get(0)
         .getRawData()
-        .get("value")
+        .get("value_res")
         .get(0), 0.456);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()
         .get("2")
@@ -179,4 +191,5 @@ public class SqlExecutionOperatorTest {
         .get("met")
         .get(1), 0.456);
   }
+
 }

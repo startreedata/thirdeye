@@ -248,4 +248,9 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     sb.append('}');
     return sb.toString();
   }
+
+  // todo cyril decide if this should be moved to interface
+  protected DataFrame getDataFrame() {
+    return dataFrame;
+  }
 }

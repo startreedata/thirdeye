@@ -111,6 +111,13 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   }
 
   private DataFrame generateDataFrame() {
+    // fixme cyril quickfix to avoid assumption on the dataframe format
+    // ThirdEyeDataFrameResultSet is the only implementation - condition is always true
+    if (thirdEyeResultSet instanceof ThirdEyeDataFrameResultSet) {
+      return ((ThirdEyeDataFrameResultSet) thirdEyeResultSet).getDataFrame();
+    }
+
+    // todo cyril below makes strong assumptions on the table format - incompatible with sql operators
     // Build the DataFrame
     List<String> columnNameWithDataType = new ArrayList<>();
     //   Always cast dimension values to STRING type

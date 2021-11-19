@@ -8,7 +8,6 @@ import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
-import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
 
@@ -57,6 +56,14 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
       return thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx);
     }
     return thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength);
+  }
+
+  @Override
+  public boolean getBoolean(int rowIdx, int colIdx) {
+    if (colIdx < groupKeyLength) {
+      return Boolean.parseBoolean(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
+    }
+    return Boolean.parseBoolean(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
   }
 
   @Override

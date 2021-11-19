@@ -103,4 +103,6 @@ config:
 
 # Optional: Enable for ingress
 traefik:
-  enabled: false
+  coordinator:
+    enabled: false
+  enabled: true

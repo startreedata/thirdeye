@@ -1,0 +1,16 @@
+{{- if .Values.traefik.coordinator.enabled -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ printf "%s-%s" (include "thirdeye.traefik.fullname" . ) "thirdeye-coordinator" | trunc -63 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .Release.Name }}-coordinator.{{ .Release.Namespace }}.{{ required "domain is required." .Values.domain }}`)
+      kind: Rule
+      services:
+        - name: {{ include "thirdeye.coordinator.headless" . }}
+          namespace: {{ .Release.Namespace }}
+          port: {{ .Values.coordinator.port }}
+{{- end }}

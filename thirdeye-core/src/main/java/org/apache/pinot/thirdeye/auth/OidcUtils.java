@@ -5,8 +5,6 @@ import com.google.common.cache.LoadingCache;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
@@ -14,15 +12,11 @@ import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 public class OidcUtils {
 
   public static JWTClaimsSet getExactMatchClaimSet(OidcContext context) {
-    // TODO make the claims set configurable
-    return new JWTClaimsSet.Builder()
-        .issuer(context.getIssuer())
-        .build();
+    return context.getExactMatchClaimsSet();
   }
 
   public static Set<String> getRequiredClaims(OidcContext context) {
-    // TODO make the set configurable
-    return new HashSet<>(Arrays.asList("sub"));
+    return context.getRequiredClaims();
   }
 
   public static LoadingCache<String, ThirdEyePrincipal> makeDefaultCache(OidcContext context) {

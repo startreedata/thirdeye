@@ -7,10 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
-public class PinotSqlDataTable implements DataTable {
+public class PinotSqlDataTable extends AbstractDataTableImpl {
 
   private ResultSet resultset;
 

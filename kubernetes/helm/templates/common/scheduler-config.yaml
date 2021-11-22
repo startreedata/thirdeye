@@ -34,10 +34,16 @@ data:
 
     auth:
       enabled: false
-      jwt:
-        signingKey: 9sz834jghfdglsE4sYNT4zfrU4JwLARcUhxd2
-        issuer: thirdeye
-        accessTokenExpiry: P1D # Duration: 1 day. Format: https://en.wikipedia.org/wiki/ISO_8601
+    #  oauth:
+    #    keysUrl: <keys url>
+    #    required:
+    #      - sub
+    #      - exp
+    #    exactMatch:
+    #      iss: <issuer url>
+    #    cache:
+    #      size: 64
+    #      ttl: 60000
 
     database:
       # Assuming a local MySQL server running on the default port 3306

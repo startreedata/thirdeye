@@ -41,5 +41,9 @@ public interface DataTable extends DetectionPipelineResult {
   long getLong(int rowIdx, int colIdx);
 
   double getDouble(int rowIdx, int colIdx);
+
+  Map<String, String> getProperties();
+
+  void addProperties(Map<String, String> metadata);
 }
 

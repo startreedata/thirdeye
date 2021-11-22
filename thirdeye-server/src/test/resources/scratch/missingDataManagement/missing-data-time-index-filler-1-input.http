@@ -50,7 +50,6 @@ Content-Type: application/json
           },
           "inputs": [
             {
-              "targetProperty": "baseline",
               "sourcePlanNode": "currentDataFetcher",
               "sourceProperty": "currentOutput"
             }

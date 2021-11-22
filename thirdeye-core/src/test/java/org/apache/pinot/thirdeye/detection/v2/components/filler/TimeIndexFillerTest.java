@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.components.filler;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -14,7 +16,6 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Assert;
 import org.testng.annotations.Test;
 
 public class TimeIndexFillerTest {
@@ -63,9 +64,9 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
@@ -101,9 +102,9 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
@@ -136,9 +137,9 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
@@ -169,9 +170,9 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
@@ -209,20 +210,22 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    assert output.getRowCount() == 7;
+    assertThat(output.getRowCount()).isEqualTo(7);
     // (met,OCTOBER_19_MILLIS) should be null
     Object october19Value = output.getObject(1, 1);
-    assert october19Value == null;
+    assertThat(october19Value).isNull();
     // (met,OCTOBER_23_MILLIS) should be filled with a zero
     Object october23Value = output.getObject(5, 1);
-    assert october23Value instanceof Double && (double) october23Value == ZERO_FILLER;
+    assertThat(october23Value).isInstanceOf(Double.class);
+    assertThat((double) october23Value).isEqualTo(ZERO_FILLER);
     // other days should have value METRIC_VALUE
     final DataTable finalOutput = output;
     Stream.of(0, 2, 3, 4, 6).forEach(rowIdx -> {
       Object value = finalOutput.getObject(rowIdx, 1);
-      assert value instanceof Double && (double) value == METRIC_VALUE;
+      assertThat(value).isInstanceOf(Double.class);
+      assertThat((double) value).isEqualTo(METRIC_VALUE);
     });
   }
 
@@ -256,14 +259,14 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
   public void testFillIndexWithTimePropertiesInDataTableGranularityInSpec() {
-    // test filling of data with granularity in config and time info obtained from the datatable properties
+    // test filling of data with time info obtained from the datatable properties and granularity in config
     final TimeIndexFillerSpec spec = new TimeIndexFillerSpec();
     spec.setMonitoringGranularity("1_DAYS");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
@@ -291,14 +294,14 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
   public void testFillIndexWithGranularityPropertiesInDataTableTimeInSpec() {
-    // test filling of data with time in config and granularity info obtained from the datatable properties
+    // test filling of data with granularity info obtained from the datatable properties and time in config
     final TimeIndexFillerSpec spec = new TimeIndexFillerSpec();
     spec.setMinTimeInference(TimeLimitInferenceStrategy.FROM_DETECTION_TIME_WITH_LOOKBACK.toString())
         .setMaxTimeInference(TimeLimitInferenceStrategy.FROM_DATA.toString())
@@ -341,9 +344,9 @@ public class TimeIndexFillerTest {
     try {
       output = timeIndexFiller.fillIndex(inputInterval, inputDataTable);
     } catch (Exception e) {
-      Assert.fail("Index filling failed: " + e);
+      fail("Index filling failed: " + e);
     }
-    Assert.assertEquals(expectedDataFrame, output.getDataFrame());
+    assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
@@ -353,7 +356,7 @@ public class TimeIndexFillerTest {
     final DateTime expected = DATE_PARSER.parseDateTime("2021-10-22 00:00:00.000 UTC");
     final DateTime output = TimeIndexFiller.getFirstIndexValue(inputMinTimeConstraint, inputPeriod);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -364,7 +367,7 @@ public class TimeIndexFillerTest {
     final DateTime expected = DATE_PARSER.parseDateTime("2021-10-23 00:00:00.000 UTC");
     final DateTime output = TimeIndexFiller.getFirstIndexValue(inputMinTimeConstraint, inputPeriod);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -375,7 +378,7 @@ public class TimeIndexFillerTest {
     final DateTime expected = DATE_PARSER.parseDateTime("2021-10-21 00:00:00.000 UTC");
     final DateTime output = TimeIndexFiller.getLastIndexValue(inputMinTimeConstraint, inputPeriod);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -386,7 +389,7 @@ public class TimeIndexFillerTest {
     final DateTime expected = DATE_PARSER.parseDateTime("2021-10-22 00:00:00.000 UTC");
     final DateTime output = TimeIndexFiller.getLastIndexValue(inputMinTimeConstraint, inputPeriod);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   // Tests of floorByPeriod
@@ -397,7 +400,7 @@ public class TimeIndexFillerTest {
     final Period oneYear = Period.years(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneYear);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -407,7 +410,7 @@ public class TimeIndexFillerTest {
     final Period twoYears = Period.years(2);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, twoYears);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -417,7 +420,7 @@ public class TimeIndexFillerTest {
     final Period oneMonth = Period.months(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneMonth);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -428,7 +431,7 @@ public class TimeIndexFillerTest {
     final Period twoMonths = Period.months(2);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, twoMonths);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -438,7 +441,7 @@ public class TimeIndexFillerTest {
     final Period oneWeek = Period.weeks(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneWeek);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -449,7 +452,7 @@ public class TimeIndexFillerTest {
     final Period twoWeeks = Period.weeks(2);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, twoWeeks);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -459,7 +462,7 @@ public class TimeIndexFillerTest {
     final Period oneDay = Period.days(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneDay);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -470,7 +473,7 @@ public class TimeIndexFillerTest {
     final Period twoDays = Period.days(2);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, twoDays);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -480,7 +483,7 @@ public class TimeIndexFillerTest {
     final Period oneHour = Period.hours(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneHour);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -490,7 +493,7 @@ public class TimeIndexFillerTest {
     final Period twoHours = Period.hours(2);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, twoHours);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -500,7 +503,7 @@ public class TimeIndexFillerTest {
     final Period oneMinute = Period.minutes(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneMinute);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -510,7 +513,7 @@ public class TimeIndexFillerTest {
     final Period fifteenMinutes = Period.minutes(15);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, fifteenMinutes);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -520,7 +523,7 @@ public class TimeIndexFillerTest {
     final Period oneSecond = Period.seconds(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneSecond);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -530,7 +533,7 @@ public class TimeIndexFillerTest {
     final Period thirtySeconds = Period.seconds(30);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, thirtySeconds);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -540,7 +543,7 @@ public class TimeIndexFillerTest {
     final Period oneMilli = Period.millis(1);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, oneMilli);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 
   @Test
@@ -550,6 +553,6 @@ public class TimeIndexFillerTest {
     final Period hundredMillis = Period.millis(100);
     final DateTime output = TimeIndexFiller.floorByPeriod(input, hundredMillis);
 
-    Assert.assertEquals(expected, output);
+    assertThat(output).isEqualTo(expected);
   }
 }

@@ -76,10 +76,11 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
       timeColumn = properties.getOrDefault(TIME_COLUMN.toString(), DEFAULT_TIMESTAMP);
     }
 
-    boolean granularityIsCustom = spec.getMonitoringGranularity() != null
-        && !NATIVE_GRANULARITY.equals(TimeGranularity.fromString(spec.getMonitoringGranularity()));
+    String granularitySpec = spec.getMonitoringGranularity();
+    boolean granularityIsCustom = granularitySpec != null
+        && !NATIVE_GRANULARITY.equals(TimeGranularity.fromString(granularitySpec));
     if (granularityIsCustom) {
-      granularity = TimeGranularity.fromString(spec.getMonitoringGranularity()).toPeriod();
+      granularity = TimeGranularity.fromString(granularitySpec).toPeriod();
     } else if (properties.containsKey(GRANULARITY.toString())) {
       granularity = parseIsoPeriod(properties.get(GRANULARITY.toString()));
     } else {
@@ -87,19 +88,19 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
           "monitoringGranularity is missing from spec and DataTable properties");
     }
 
-    boolean timeLimitsAreInProperties = properties.containsKey(MIN_TIME_MILLIS.toString())
+    nullReplacer = new NullReplacerRegistry().buildNullReplacer(
+        spec.getFillNullMethod().toUpperCase(), spec.getFillNullParams());
+
+    boolean allTimeLimitsAreInProperties = properties.containsKey(MIN_TIME_MILLIS.toString())
         && properties.containsKey(MAX_TIME_MILLIS.toString());
-    boolean timeLimitsIsCustom = spec.getLookback() != null || spec.getMinTimeInference() != null
-        || spec.getMaxTimeInference() != null;
-    if (timeLimitsAreInProperties && !timeLimitsIsCustom) {
+    boolean noTimeLimitIsCustom = spec.getLookback() == null && spec.getMinTimeInference() == null
+        && spec.getMaxTimeInference() == null;
+    if (allTimeLimitsAreInProperties && noTimeLimitIsCustom) {
       minTime = Long.parseLong(properties.get(MIN_TIME_MILLIS.toString()));
       maxTime = Long.parseLong(properties.get(MAX_TIME_MILLIS.toString()));
     } else {
       inferTimeLimits(detectionInterval, dataTable.getDataFrame());
     }
-
-    nullReplacer = new NullReplacerRegistry().buildNullReplacer(spec.getFillNullMethod()
-        .toUpperCase(), spec.getFillNullParams());
   }
 
   private void inferTimeLimits(final Interval detectionInterval, final DataFrame rawDataFrame) {

@@ -47,7 +47,6 @@ Content-Type: application/json
           "type": "TimeIndexFiller",
           "inputs": [
             {
-              "targetProperty": "current",
               "sourcePlanNode": "currentDataFetcher",
               "sourceProperty": "currentOutput"
             }
@@ -64,7 +63,6 @@ Content-Type: application/json
           "type": "TimeIndexFiller",
           "inputs": [
             {
-              "targetProperty": "baseline",
               "sourcePlanNode": "baselineDataFetcher",
               "sourceProperty": "baselineOutput"
             }

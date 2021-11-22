@@ -54,7 +54,6 @@ Content-Type: application/json
           },
           "inputs": [
             {
-              "targetProperty": "current",
               "sourcePlanNode": "currentDataFetcher",
               "sourceProperty": "currentOutput"
             }
@@ -78,7 +77,6 @@ Content-Type: application/json
           },
           "inputs": [
             {
-              "targetProperty": "baseline",
               "sourcePlanNode": "baselineDataFetcher",
               "sourceProperty": "baselineOutput"
             }

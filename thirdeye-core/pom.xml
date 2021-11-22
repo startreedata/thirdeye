@@ -48,6 +48,12 @@
       <artifactId>classgraph</artifactId>
     </dependency>
 
+    <!--macro dependencies -->
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+    </dependency>
+
     <!--UI dependencies -->
     <dependency>
       <groupId>com.github.jknack</groupId>

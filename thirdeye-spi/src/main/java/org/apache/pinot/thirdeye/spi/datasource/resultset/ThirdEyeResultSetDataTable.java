@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
-public class ThirdEyeResultSetDataTable implements DataTable {
+public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
 
   private final ThirdEyeResultSet thirdEyeResultSet;
   private List<String> columns = new ArrayList<>();

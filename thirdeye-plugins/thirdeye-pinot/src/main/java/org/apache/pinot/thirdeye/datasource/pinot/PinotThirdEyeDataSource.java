@@ -54,6 +54,8 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetDataTable;
 import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
@@ -79,6 +81,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
   private PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
   private ThirdEyeDataSourceContext context;
+  private SqlExpressionBuilder sqlExpressionBuilder;
+  private SqlLanguage sqlLanguage;
+
+  public PinotThirdEyeDataSource(
+      final SqlExpressionBuilder sqlExpressionBuilder,
+      final PinotSqlLanguage sqlLanguage) {
+    this.sqlExpressionBuilder = sqlExpressionBuilder;
+    this.sqlLanguage = sqlLanguage;
+  }
 
   /**
    * Definition of Pre-Aggregated Data: the data that has been pre-aggregated or pre-calculated and
@@ -515,5 +526,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     if (pinotResponseCacheLoader != null) {
       pinotResponseCacheLoader.close();
     }
+  }
+
+  @Override
+  public SqlLanguage getSqlLanguage() {
+    return sqlLanguage;
+  }
+
+  @Override
+  public SqlExpressionBuilder getSqlExpressionBuilder() {
+    return sqlExpressionBuilder;
   }
 }

@@ -167,8 +167,18 @@ public class ThirdEyeIntegrationTest {
   }
 
   @Test
+  public void testAuthorisedPingRequest() {
+    Response response = client.target(thirdEyeEndPoint("internal/ping-auth"))
+        .request()
+        .header(HttpHeaders.AUTHORIZATION, token)
+        .get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(response.getEntity().toString().equals("pong : test"));
+  }
+
+  @Test
   public void testUnauthorisedPingRequest() {
-    Response response = client.target(thirdEyeEndPoint("internal/ping"))
+    Response response = client.target(thirdEyeEndPoint("internal/ping-auth"))
         .request()
         .get();
     assertThat(response.getStatus()).isEqualTo(401);

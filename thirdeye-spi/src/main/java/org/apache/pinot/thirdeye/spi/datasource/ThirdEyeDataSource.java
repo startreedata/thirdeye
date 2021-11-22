@@ -22,6 +22,8 @@ package org.apache.pinot.thirdeye.spi.datasource;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
+import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 
 public interface ThirdEyeDataSource {
@@ -102,4 +104,12 @@ public interface ThirdEyeDataSource {
   }
 
   void close() throws Exception;
+
+  default SqlLanguage getSqlLanguage() {
+    return null;
+  }
+
+  default SqlExpressionBuilder getSqlExpressionBuilder() {
+    return null;
+  }
 }

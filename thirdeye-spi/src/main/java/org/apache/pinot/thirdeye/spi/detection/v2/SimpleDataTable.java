@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 
-public class SimpleDataTable implements DataTable {
+public class SimpleDataTable extends AbstractDataTableImpl {
 
   private final List<String> columns;
   private final List<ColumnType> columnTypes;

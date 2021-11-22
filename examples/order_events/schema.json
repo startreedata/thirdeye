@@ -1,0 +1,25 @@
+
+{
+  "schemaName": "order_events",
+  "dimensionFieldSpecs": [
+    {
+      "name": "order_id",
+      "dataType": "STRING"
+    },
+    {
+      "name": "customer_id",
+      "dataType": "STRING"
+    },
+    {
+      "name": "event_type",
+      "dataType": "STRING"
+    }
+  ],
+  "metricFieldSpecs": [],
+  "dateTimeFieldSpecs": [{
+    "name": "timestamp",
+    "dataType": "LONG",
+    "format" : "1:MILLISECONDS:EPOCH",
+    "granularity": "1:SECONDS"
+  }]
+}

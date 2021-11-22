@@ -1,0 +1,24 @@
+
+executionFrameworkSpec:
+  name: 'standalone'
+  segmentGenerationJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentGenerationJobRunner'
+  segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
+  segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
+jobType: SegmentCreationAndTarPush
+inputDirURI: 'examples/order_events/rawdata'
+includeFileNamePattern: 'glob:**/*.csv'
+outputDirURI: 'tmp/data/segments/order_events'
+overwriteOutput: true
+pinotFSSpecs:
+  - scheme: file
+    className: org.apache.pinot.spi.filesystem.LocalPinotFS
+recordReaderSpec:
+  dataFormat: 'csv'
+  className: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReader'
+  configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
+tableSpec:
+  tableName: 'order_events'
+  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/order_events/schema'
+  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/order_events'
+pinotClusterSpecs:
+  - controllerURI: 'http://${controllerHost}:${controllerPort}'

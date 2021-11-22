@@ -9,15 +9,13 @@ public class TimeIndexFillerSpec extends AbstractSpec {
 
   /**
    * Inference strategy for the min time constraint.
-   * Default is to look at the first value of the time index.
    */
-  private String minTimeInference = TimeLimitInferenceStrategy.FROM_DATA.toString();
+  private String minTimeInference;
 
   /**
    * Inference strategy for the max time constraint.
-   * Default is to consider the endTime of the detection.
    */
-  private String maxTimeInference = TimeLimitInferenceStrategy.FROM_DETECTION_TIME.toString();
+  private String maxTimeInference;
 
   /**
    * Method to use to fill null values in other columns.
@@ -34,7 +32,7 @@ public class TimeIndexFillerSpec extends AbstractSpec {
    * Period Java ISO8601 standard. Used when time inference uses a lookback time.
    * Eg minTime=startTime - lookback
    */
-  private String lookback = "";
+  private String lookback;
 
   public String getMinTimeInference() {
     return minTimeInference;

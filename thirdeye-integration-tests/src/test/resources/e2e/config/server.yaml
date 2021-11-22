@@ -28,7 +28,8 @@ logging:
 auth:
   enabled: true
   oauth:
-    issuer: http://identity.example.com
+    exactMatch:
+      iss: http://identity.example.com
 
 database:
   # Assuming a local MySQL server running on the default port 3306

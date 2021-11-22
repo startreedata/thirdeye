@@ -32,6 +32,8 @@ public class OidcJWTProcessorTest {
     Map<String, Object> claimsSet = new HashMap<>();
     claimsSet.put("iss", ISSUER);
     List<String> exactMatch = new ArrayList<>();
+    exactMatch.add("iss");
+    exactMatch.add("sub");
     context = new OidcContext(new OAuthConfig().setExactMatch(claimsSet)
         .setRequired(exactMatch));
     key = getJWK(RandomStringUtils.randomAlphanumeric(16));

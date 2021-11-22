@@ -1,7 +1,6 @@
 ### absolute change
-## no baselineMissingDataManager + february (left missing data) --> fails
-## no currentMissingDataManager + end of july (right missing data) --> fails
-## does not fail with the missingDataManagers
+## index filler without config - uses metadata passed by macros
+## same result than with the manual config
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -46,12 +45,6 @@ Content-Type: application/json
         {
           "name": "currentMissingDataManager",
           "type": "TimeIndexFiller",
-          "params": {
-            "component.monitoringGranularity": "1_DAYS",
-            "component.timestamp": "ts",
-            "component.minTimeInference": "FROM_DETECTION_TIME",
-            "component.maxTimeInference": "FROM_DETECTION_TIME"
-          },
           "inputs": [
             {
               "targetProperty": "current",
@@ -69,13 +62,6 @@ Content-Type: application/json
         {
           "name": "baselineMissingDataManager",
           "type": "TimeIndexFiller",
-          "params": {
-            "component.monitoringGranularity": "1_DAYS",
-            "component.timestamp": "ts",
-            "component.minTimeInference": "FROM_DETECTION_TIME_WITH_LOOKBACK",
-            "component.maxTimeInference": "FROM_DETECTION_TIME_WITH_LOOKBACK",
-            "component.lookback": "P7D"
-          },
           "inputs": [
             {
               "targetProperty": "baseline",
@@ -95,7 +81,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${offsetJava}, ${offsetJava}) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -110,7 +96,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -126,12 +112,12 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews_with_missing_data",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "timeColumnFormat": "yyyyMMdd",
       "absoluteChange": "100000",
       "offset": "wo1w",
-      "offsetDays": "7",
+      "offsetJava": "P7D",
       "pattern": "down"
     }
   }

@@ -11,14 +11,12 @@ import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
 
 public class PinotSqlLanguage implements SqlLanguage {
 
-  // Immutable
   private static final Config SQL_PARSER_CONFIG = SqlParser.config()
       .withLex(Lex.MYSQL_ANSI)
         .withConformance(SqlConformanceEnum.BABEL)
         .withParserFactory(SqlBabelParserImpl.FACTORY);
 
-  // Immutable
-  // fixme cyril not sure this dialect is correct - contribute fully correct dialect to calcite ?
+  // todo cyril this dialect may be incomplete
   private static final SqlDialect SQL_DIALECT = new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString("\""));
 
   @Override

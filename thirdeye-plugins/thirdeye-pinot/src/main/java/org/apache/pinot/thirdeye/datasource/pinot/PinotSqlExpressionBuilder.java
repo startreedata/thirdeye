@@ -32,7 +32,6 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
         return "1:SECONDS:EPOCH";
       default:
         new SimpleDateFormat(timeColumnFormat);
-        // FIXME CYRIL 1:DAYS is hardcoded ? Is this okay  - I think yes
         return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);
     }
   }

@@ -9,10 +9,11 @@ import static org.testng.AssertJUnit.assertNotNull;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
-import com.sun.tools.javac.util.List;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.BeforeClass;
@@ -30,8 +31,9 @@ public class OidcJWTProcessorTest {
   public void init() throws Exception {
     Map<String, Object> claimsSet = new HashMap<>();
     claimsSet.put("iss", ISSUER);
+    List<String> exactMatch = new ArrayList<>();
     context = new OidcContext(new OAuthConfig().setExactMatch(claimsSet)
-        .setRequired(List.of("iss", "sub")));
+        .setRequired(exactMatch));
     key = getJWK(RandomStringUtils.randomAlphanumeric(16));
     processor = new OidcJWTProcessor(Collections.singletonList(key), context);
   }

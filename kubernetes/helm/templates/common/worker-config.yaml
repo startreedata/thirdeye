@@ -34,6 +34,16 @@ data:
 
     auth:
       enabled: false
+    #  oauth:
+    #    keysUrl: <keys url>
+    #    required:
+    #      - sub
+    #      - exp
+    #    exactMatch:
+    #      iss: <issuer url>
+    #    cache:
+    #      size: 64
+    #      ttl: 60000
 
     database:
       # Assuming a local MySQL server running on the default port 3306

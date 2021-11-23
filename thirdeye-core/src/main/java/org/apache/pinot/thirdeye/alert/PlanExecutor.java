@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.alert;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -36,7 +37,8 @@ public class PlanExecutor {
     return alert.getTemplate() != null;
   }
 
-  private static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
+  @VisibleForTesting
+  static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
       final Map<ContextKey, DetectionPipelineResult> context, final PlanNode node)
       throws Exception {
     for (final InputBean input : node.getPlanNodeInputs()) {
@@ -58,7 +60,8 @@ public class PlanExecutor {
     }
   }
 
-  private static ContextKey key(final String name, final String key) {
+  @VisibleForTesting
+  static ContextKey key(final String name, final String key) {
     return new ContextKey(name, key);
   }
 

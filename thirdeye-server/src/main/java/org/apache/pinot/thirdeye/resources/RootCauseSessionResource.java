@@ -2,7 +2,15 @@ package org.apache.pinot.thirdeye.resources;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -14,9 +22,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
@@ -25,9 +34,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.joda.time.DateTime;
 
+@Api(authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RootCauseSessionResource {
+
   private final RootcauseSessionManager sessionDAO;
   private final ObjectMapper mapper;
 
@@ -41,6 +53,7 @@ public class RootCauseSessionResource {
   @Path("/{sessionId}")
   @ApiOperation(value = "Get RootCauseSession by sessionId")
   public RootcauseSessionDTO get(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("sessionId") Long sessionId) {
     if (sessionId == null) {
       throw new IllegalArgumentException("Must provide sessionId");
@@ -49,7 +62,8 @@ public class RootCauseSessionResource {
     RootcauseSessionDTO session = this.sessionDAO.findById(sessionId);
 
     if (session == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve session id %d", sessionId));
+      throw new IllegalArgumentException(String.format("Could not resolve session id %d",
+          sessionId));
     }
 
     return session;
@@ -58,11 +72,13 @@ public class RootCauseSessionResource {
   @POST
   @Path("/")
   @ApiOperation(value = "Post a session")
-  public Long post(String jsonString) throws Exception {
-    RootcauseSessionDTO session = this.mapper.readValue(jsonString, new TypeReference<RootcauseSessionDTO>() {});
+  public Long post(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal, String jsonString)
+      throws Exception {
+    RootcauseSessionDTO session = this.mapper.readValue(jsonString,
+        new TypeReference<RootcauseSessionDTO>() {});
 
     final long timestamp = DateTime.now().getMillis();
-    final String username = ThirdEyeAuthFilter.getCurrentPrincipal().getName();
+    final String username = principal.getName();
 
     session.setUpdated(timestamp);
 
@@ -70,16 +86,20 @@ public class RootCauseSessionResource {
       session.setCreated(timestamp);
       session.setOwner(username);
       session.setAnomalyId(extractAnomalyId(session.getAnomalyUrns()));
-
     } else {
       RootcauseSessionDTO existing = this.sessionDAO.findById(session.getId());
       if (existing == null) {
-        throw new IllegalArgumentException(String.format("Could not resolve session id %d", session.getId()));
+        throw new IllegalArgumentException(String.format("Could not resolve session id %d",
+            session.getId()));
       }
 
-      if (Objects.equals(existing.getPermissions(), RootcauseSessionDTO.PermissionType.READ.toString()) &&
-          !Objects.equals(existing.getOwner(),username)) {
-        throw new IllegalAccessException(String.format("No write permissions for '%s' on session id %d", username, existing.getId()));
+      if (Objects.equals(existing.getPermissions(),
+          RootcauseSessionDTO.PermissionType.READ.toString()) &&
+          !Objects.equals(existing.getOwner(), username)) {
+        throw new IllegalAccessException(String.format(
+            "No write permissions for '%s' on session id %d",
+            username,
+            existing.getId()));
       }
 
       session = merge(existing, session);
@@ -92,6 +112,7 @@ public class RootCauseSessionResource {
   @Path("/query")
   @ApiOperation(value = "Query")
   public List<RootcauseSessionDTO> query(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("id") String idsString,
       @QueryParam("name") String namesString,
       @QueryParam("owner") String ownersString,
@@ -154,7 +175,8 @@ public class RootCauseSessionResource {
       throw new IllegalArgumentException("Must provide at least one property");
     }
 
-    return this.sessionDAO.findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates.size()])));
+    return this.sessionDAO.findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates
+        .size()])));
   }
 
   /**
@@ -182,47 +204,61 @@ public class RootCauseSessionResource {
    * @return modified, existing session
    */
   private static RootcauseSessionDTO merge(RootcauseSessionDTO session, RootcauseSessionDTO other) {
-    if (other.getName() != null)
+    if (other.getName() != null) {
       session.setName(other.getName());
+    }
 
-    if (other.getText() != null)
+    if (other.getText() != null) {
       session.setText(other.getText());
+    }
 
-    if (other.getCompareMode() != null)
+    if (other.getCompareMode() != null) {
       session.setCompareMode(other.getCompareMode());
+    }
 
-    if (other.getGranularity() != null)
+    if (other.getGranularity() != null) {
       session.setGranularity(other.getGranularity());
+    }
 
-    if (other.getAnalysisRangeStart() != null)
+    if (other.getAnalysisRangeStart() != null) {
       session.setAnalysisRangeStart(other.getAnalysisRangeStart());
+    }
 
-    if (other.getAnalysisRangeEnd() != null)
+    if (other.getAnalysisRangeEnd() != null) {
       session.setAnalysisRangeEnd(other.getAnalysisRangeEnd());
+    }
 
-    if (other.getAnomalyRangeStart() != null)
+    if (other.getAnomalyRangeStart() != null) {
       session.setAnomalyRangeStart(other.getAnomalyRangeStart());
+    }
 
-    if (other.getAnomalyRangeEnd() != null)
+    if (other.getAnomalyRangeEnd() != null) {
       session.setAnomalyRangeEnd(other.getAnomalyRangeEnd());
+    }
 
-    if (other.getContextUrns() != null)
+    if (other.getContextUrns() != null) {
       session.setContextUrns(other.getContextUrns());
+    }
 
-    if (other.getSelectedUrns() != null)
+    if (other.getSelectedUrns() != null) {
       session.setSelectedUrns(other.getSelectedUrns());
+    }
 
-    if (other.getUpdated() != null)
+    if (other.getUpdated() != null) {
       session.setUpdated(other.getUpdated());
+    }
 
-    if (other.getPermissions() != null)
+    if (other.getPermissions() != null) {
       session.setPermissions(other.getPermissions());
+    }
 
-    if (other.getIsUserCustomizingRequest() != null)
+    if (other.getIsUserCustomizingRequest() != null) {
       session.setIsUserCustomizingRequest(other.getIsUserCustomizingRequest());
+    }
 
-    if (other.getCustomTableSettings() != null)
+    if (other.getCustomTableSettings() != null) {
       session.setCustomTableSettings(other.getCustomTableSettings());
+    }
 
     return session;
   }

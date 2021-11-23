@@ -36,7 +36,6 @@ import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppress
 import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -66,8 +65,7 @@ public class NotificationSchemeFactory {
       final ThirdEyeServerConfiguration configuration,
       final EntityGroupKeyContent entityGroupKeyContent,
       final MetricAnomaliesContent metricAnomaliesContent,
-      final MetricRegistry metricRegistry,
-      final EmailContentFormatter emailContentFormatter) {
+      final MetricRegistry metricRegistry) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
@@ -78,7 +76,6 @@ public class NotificationSchemeFactory {
         .setMetricAnomaliesContent(metricAnomaliesContent)
         .setMetricRegistry(metricRegistry)
         .setSmtpConfiguration(configuration.getAlerterConfigurations().getSmtpConfiguration())
-        .setEmailContentFormatter(emailContentFormatter)
     ;
     this.webhookAlertScheme = createWebhookAlertScheme();
     this.emailAlertScheme = createEmailAlertScheme();

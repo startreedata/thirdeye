@@ -39,8 +39,8 @@ public class DetectionAlertFilterRecipients {
   public DetectionAlertFilterRecipients(Collection<String> to, Collection<String> cc,
       Collection<String> bcc) {
     this.to = new HashSet<>(to);
-    this.cc = new HashSet<>(cc);
-    this.bcc = new HashSet<>(bcc);
+    this.cc = cc != null ? new HashSet<>(cc) : new HashSet<>();
+    this.bcc = bcc != null ? new HashSet<>(bcc) : new HashSet<>();
   }
 
   public DetectionAlertFilterRecipients(Set<String> to) {

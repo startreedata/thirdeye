@@ -1,55 +1,30 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package org.apache.pinot.thirdeye.spi;
 
-import com.google.common.base.MoreObjects;
+import com.nimbusds.jwt.JWTClaimsSet;
 import java.security.Principal;
 
 public class ThirdEyePrincipal implements Principal {
 
-  private final String name; // 'username@domainName'
-  private final String sessionKey;
+  private JWTClaimsSet claims;
 
-  public ThirdEyePrincipal(final String name) {
-    this(name, null);
+  public ThirdEyePrincipal() {
   }
 
-  public ThirdEyePrincipal(final String name, final String sessionKey) {
-    this.name = name;
-    this.sessionKey = sessionKey;
+  public ThirdEyePrincipal(final JWTClaimsSet claims) {
+    this.claims = claims;
   }
 
   @Override
   public String getName() {
-    return name;
+    return claims.getSubject();
   }
 
-  public String getSessionKey() {
-    return sessionKey;
+  public JWTClaimsSet getClaims() {
+    return claims;
   }
 
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("name", name)
-        .add("sessionKey", sessionKey)
-        .toString();
+  public ThirdEyePrincipal setClaims(final JWTClaimsSet claims) {
+    this.claims = claims;
+    return this;
   }
 }

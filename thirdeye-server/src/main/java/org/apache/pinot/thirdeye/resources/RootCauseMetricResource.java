@@ -7,8 +7,15 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,11 +32,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -61,6 +70,8 @@ import org.slf4j.LoggerFactory;
  *
  * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
  */
+@Api(authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RootCauseMetricResource {
@@ -187,6 +198,7 @@ public class RootCauseMetricResource {
   @Path("/aggregate")
   @ApiOperation(value = "Returns an aggregate value for the specified metric and time range, and (optionally) offset.")
   public double getAggregate(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -236,6 +248,7 @@ public class RootCauseMetricResource {
   @Path("/aggregate/batch")
   @ApiOperation(value = "Returns a list of aggregate value for the specified metric and time range, and (optionally) offset.")
   public List<Double> getAggregateBatch(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -300,6 +313,7 @@ public class RootCauseMetricResource {
   @Path("/aggregate/chunk")
   @ApiOperation(value = "Returns a map of lists (keyed by urn) of aggregate value for the specified metrics and time range, and offsets.")
   public Map<String, Collection<Double>> getAggregateChunk(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urns", required = true) @QueryParam("urns") @NotNull List<String> urns,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -375,6 +389,7 @@ public class RootCauseMetricResource {
       "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
           + "Aligns time stamps if necessary and omits null values.")
   public Map<String, Map<String, Double>> getBreakdown(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true)
@@ -436,6 +451,7 @@ public class RootCauseMetricResource {
       "Returns a time series for the specified metric and time range, and (optionally) offset at an (optional)\n"
           + "time granularity. Aligns time stamps if necessary.")
   public Map<String, List<? extends Number>> getTimeSeries(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true)

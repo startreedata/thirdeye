@@ -29,47 +29,40 @@ public class EmailEntity {
   private String subject;
   private HtmlEmail content;
 
-  public EmailEntity() {
-
-  }
-
-  public EmailEntity(String from, DetectionAlertFilterRecipients to, String subject,
-      HtmlEmail content) {
-    this.from = from;
-    this.to = to;
-    this.subject = subject;
-    this.content = content;
-  }
-
   public String getFrom() {
     return from;
   }
 
-  public void setFrom(String from) {
+  public EmailEntity setFrom(final String from) {
     this.from = from;
+    return this;
   }
 
   public DetectionAlertFilterRecipients getTo() {
     return to;
   }
 
-  public void setTo(DetectionAlertFilterRecipients to) {
+  public EmailEntity setTo(
+      final DetectionAlertFilterRecipients to) {
     this.to = to;
+    return this;
   }
 
   public String getSubject() {
     return subject;
   }
 
-  public void setSubject(String subject) {
+  public EmailEntity setSubject(final String subject) {
     this.subject = subject;
+    return this;
   }
 
   public HtmlEmail getContent() {
     return content;
   }
 
-  public void setContent(HtmlEmail content) {
+  public EmailEntity setContent(final HtmlEmail content) {
     this.content = content;
+    return this;
   }
 }

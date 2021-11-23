@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { JSONEditorV1 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -8,7 +9,6 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
-import { JSONEditor } from "../../components/json-editor/json-editor.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -123,7 +123,7 @@ export const DatasourcesViewPage: FunctionComponent = () => {
 
                 {/* Datasource JSON viewer */}
                 <Grid item sm={12}>
-                    <JSONEditor
+                    <JSONEditorV1
                         readOnly
                         value={
                             (uiDatasource?.datasource as unknown) as Record<

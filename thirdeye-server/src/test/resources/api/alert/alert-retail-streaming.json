@@ -1,0 +1,82 @@
+{
+  "name": "sample-alert-v2",
+  "description": "Sample description payload for testing",
+  "cron": "0 0/1 * 1/1 * ? *",
+  "template": {
+    "nodes": [
+      {
+        "name": "root",
+        "type": "AnomalyDetector",
+        "params": {
+          "type": "THRESHOLD",
+          "component.timezone": "US/Pacific",
+          "component.monitoringGranularity": "1_DAYS",
+          "component.timestamp": "ts",
+          "component.metric": "met",
+          "component.dimensions": [],
+          "component.max": "${max}",
+          "component.min": "${min}",
+          "component.offset": "mo1m",
+          "component.pattern": "down",
+          "anomaly.metric": "${metric}"
+        },
+        "inputs": [
+          {
+            "targetProperty": "current",
+            "sourcePlanNode": "currentSqlExecution",
+            "sourceProperty": "sqlOutput"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "currentSqlExecution",
+        "type": "SqlExecution",
+        "params": {
+          "sql.queries": [
+            "SELECT transitionTimeFormatted as ts, transition, SUM(duration) as met FROM (SELECT CONCAT(a.status, ' to ', b.status) AS transition,((b.epochMillis) - MOD(b.epochMillis, 3600000)) AS transitionTimeFormatted,(b.epochMillis - a.epochMillis)    AS duration FROM mytable a INNER JOIN mytable b ON a.orderNo = b.orderNo AND a.orderLineNo = b.orderLineNo WHERE (a.status = 'ORDERED' AND b.status = 'PROCESSING')) AS t GROUP BY transitionTimeFormatted, transition"
+          ]
+        },
+        "inputs": [
+          {
+            "targetProperty": "myTable",
+            "sourcePlanNode": "currentDataFetcher",
+            "sourceProperty": "currentOutput"
+          }
+        ],
+        "outputs": [
+          {
+            "outputKey": "0",
+            "outputName": "sqlOutput"
+          }
+        ]
+      },
+      {
+        "name": "currentDataFetcher",
+        "type": "DataFetcher",
+        "params": {
+          "component.dataSource": "${dataSource}",
+          "component.query": "SELECT * from retailOrderLines"
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "outputKey": "current",
+            "outputName": "currentOutput"
+          }
+        ]
+      }
+    ]
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "metric": "sum(views)",
+    "monitoringGranularity": "1:DAYS",
+    "timeColumn": "date",
+    "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+    "max": "850000",
+    "min": "300000"
+  },
+  "lastTimestamp": 0
+}

@@ -30,7 +30,6 @@ module.exports = {
             {
                 test: /\.(ts|tsx)$/,
                 loader: "ts-loader",
-                exclude: /node_modules/, // Just the source code
             },
             // .css and .scss files to be handled by sass-loader
             {
@@ -43,7 +42,6 @@ module.exports = {
             {
                 test: /\.svg$/,
                 use: ["@svgr/webpack", "url-loader"],
-                exclude: /node_modules/, // Just the source code
             },
             // Font files to be handled by file-loader
             {
@@ -57,7 +55,6 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: /node_modules/, // Just the source code
             },
         ],
     },

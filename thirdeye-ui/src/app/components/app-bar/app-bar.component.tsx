@@ -1,5 +1,4 @@
-import { Menu, MenuItem } from "@material-ui/core";
-import { Add, ExitToApp, Home, LockOpen } from "@material-ui/icons";
+import { ExitToApp, Home, LockOpen } from "@material-ui/icons";
 import {
     NavBarLinkIconV1,
     NavBarLinkTextV1,
@@ -8,73 +7,27 @@ import {
     NavBarSecondaryContainerV1,
     NavBarV1,
 } from "@startree-ui/platform-ui";
-import React, { FunctionComponent, MouseEvent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
 import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import {
     AppRoute,
-    getAlertsCreatePath,
     getAlertsPath,
     getAnomaliesAllPath,
     getBasePath,
     getConfigurationPath,
-    getDatasetsOnboardPath,
-    getDatasourcesCreatePath,
     getLoginPath,
     getLogoutPath,
-    getMetricsCreatePath,
-    getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
 import { useAuth } from "../auth-provider/auth-provider.component";
 
 export const AppBar: FunctionComponent = () => {
-    const [
-        shortcutOptionsAnchorElement,
-        setShortcutOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
-
     const { authDisabled, authenticated } = useAuth();
-    const history = useHistory();
     const location = useLocation();
     const { t } = useTranslation();
-
-    const handleShortcutOptionsClick = (
-        event: MouseEvent<HTMLElement>
-    ): void => {
-        setShortcutOptionsAnchorElement(event.currentTarget);
-    };
-
-    const handleShortcutOptionsClose = (): void => {
-        setShortcutOptionsAnchorElement(null);
-    };
-
-    const handleCreateAlert = (): void => {
-        history.push(getAlertsCreatePath());
-        handleShortcutOptionsClose();
-    };
-
-    const handleCreateSubscriptionGroup = (): void => {
-        history.push(getSubscriptionGroupsCreatePath());
-        handleShortcutOptionsClose();
-    };
-
-    const handleCreateMetric = (): void => {
-        history.push(getMetricsCreatePath());
-        handleShortcutOptionsClose();
-    };
-
-    const handleOnBoardDataset = (): void => {
-        history.push(getDatasetsOnboardPath());
-        handleShortcutOptionsClose();
-    };
-
-    const handleCreateDatasource = (): void => {
-        history.push(getDatasourcesCreatePath());
-        handleShortcutOptionsClose();
-    };
 
     const isRouteCurrent = (route: string): boolean => {
         return location.pathname.indexOf(route) === 0;
@@ -131,61 +84,6 @@ export const AppBar: FunctionComponent = () => {
                         {t("label.configuration")}
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
-
-                {(authDisabled || authenticated) && (
-                    <>
-                        <span onClick={handleShortcutOptionsClick}>
-                            <NavBarLinkV1>
-                                <NavBarLinkIconV1>
-                                    <Add />
-                                </NavBarLinkIconV1>
-                                <NavBarLinkTextV1>Add New</NavBarLinkTextV1>
-                            </NavBarLinkV1>
-                        </span>
-
-                        {/* Shortcut options */}
-                        <Menu
-                            anchorEl={shortcutOptionsAnchorElement}
-                            open={Boolean(shortcutOptionsAnchorElement)}
-                            onClose={handleShortcutOptionsClose}
-                        >
-                            {/* Create alert */}
-                            <MenuItem onClick={handleCreateAlert}>
-                                {t("label.create-entity", {
-                                    entity: t("label.alert"),
-                                })}
-                            </MenuItem>
-
-                            {/* Create subscription group */}
-                            <MenuItem onClick={handleCreateSubscriptionGroup}>
-                                {t("label.create-entity", {
-                                    entity: t("label.subscription-group"),
-                                })}
-                            </MenuItem>
-
-                            {/* Create metric */}
-                            <MenuItem onClick={handleCreateMetric}>
-                                {t("label.create-entity", {
-                                    entity: t("label.metric"),
-                                })}
-                            </MenuItem>
-
-                            {/* Create dataset */}
-                            <MenuItem onClick={handleOnBoardDataset}>
-                                {t("label.onboard-entity", {
-                                    entity: t("label.dataset"),
-                                })}
-                            </MenuItem>
-
-                            {/* Create datasource */}
-                            <MenuItem onClick={handleCreateDatasource}>
-                                {t("label.create-entity", {
-                                    entity: t("label.datasource"),
-                                })}
-                            </MenuItem>
-                        </Menu>
-                    </>
-                )}
             </NavBarPrimaryContainerV1>
             <NavBarSecondaryContainerV1>
                 {/* Login */}

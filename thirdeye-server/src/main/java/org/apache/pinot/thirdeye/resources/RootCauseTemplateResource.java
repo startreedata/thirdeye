@@ -4,7 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,8 +24,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import org.apache.pinot.thirdeye.auth.ThirdEyeAuthFilter;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisModuleConfig;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
@@ -25,6 +34,8 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 
+@Api(authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RootCauseTemplateResource {
@@ -56,6 +67,7 @@ public class RootCauseTemplateResource {
   @Path("/search")
   @ApiOperation(value = "Get root cause template")
   public List<RootcauseTemplateDTO> get(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("metricId") Long metricId) {
     if (metricId == null) {
       throw new IllegalArgumentException("Must provide valid metricId");
@@ -82,6 +94,7 @@ public class RootCauseTemplateResource {
   @POST
   @Path("/saveDimensionAnalysis")
   public Long saveDimensionAnalysis(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("metricUrn") String metricUrn,
       @QueryParam("includedDimension") String dimensionStr,
       @QueryParam("excludedDimension") String excludeDimStr,
@@ -91,7 +104,7 @@ public class RootCauseTemplateResource {
       @QueryParam("dimensionDepth") int dimensionDepth
   ) {
     ObjectMapper objMapper = new ObjectMapper();
-    final String username = ThirdEyeAuthFilter.getCurrentPrincipal().getName();
+    final String username = principal.getName();
     MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
     MetricConfigDTO metricConfigDTO = metricConfigManager.findById(metricEntity.getId());
     String templateName = DIM_ANALYSIS_TEMPLATE_NAME_PREFIX + metricConfigDTO.getAlias();

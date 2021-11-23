@@ -8,6 +8,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
+import { JSONEditorV1 } from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,7 +17,6 @@ import { createDefaultDatasource } from "../../utils/datasources/datasources.uti
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
-import { JSONEditor } from "../json-editor/json-editor.component";
 import {
     DatasourceWizardProps,
     DatasourceWizardStep,
@@ -178,7 +178,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                     <>
                         {/* Datasource configuration editor */}
                         <Grid item sm={12}>
-                            <JSONEditor
+                            <JSONEditorV1
                                 error={datasourceConfigurationError}
                                 helperText={datasourceConfigurationHelperText}
                                 value={
@@ -199,7 +199,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                     <>
                         {/* Datasource information */}
                         <Grid item sm={12}>
-                            <JSONEditor
+                            <JSONEditorV1
                                 readOnly
                                 value={
                                     (newDatasource as unknown) as Record<

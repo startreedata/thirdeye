@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
@@ -18,7 +17,7 @@ import org.testng.annotations.Test;
 
 public class DataSourceResourceTest {
 
-  private String dataSourceName = "test";
+  private final String dataSourceName = "test";
   private ThirdEyeDataSource dataSource;
   private DataSourceCache dataSourceCache;
   private DataSourceResource dataSourceResource;
@@ -27,7 +26,7 @@ public class DataSourceResourceTest {
   void setup() {
     this.dataSource = mock(ThirdEyeDataSource.class);
     this.dataSourceCache = mock(DataSourceCache.class);
-    this.dataSourceResource = new DataSourceResource(mock(AuthService.class), mock(
+    this.dataSourceResource = new DataSourceResource(mock(
         DataSourceManager.class), dataSourceCache);
   }
 
@@ -35,7 +34,7 @@ public class DataSourceResourceTest {
   public void statusHealthyTest() {
     when(dataSource.validate()).thenReturn(true);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(dataSource);
-    StatusApi response = (StatusApi) dataSourceResource.status(null, dataSourceName)
+    StatusApi response = (StatusApi) dataSourceResource.status(dataSourceName)
         .getEntity();
     Assert.assertNotNull(response);
     Assert.assertEquals(response.getCode(), ThirdEyeStatus.HEALTHY);
@@ -45,19 +44,19 @@ public class DataSourceResourceTest {
   public void validationFailureTest() {
     when(dataSource.validate()).thenReturn(false);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(dataSource);
-    Assert.expectThrows(InternalServerErrorException.class, () -> dataSourceResource.status(null, dataSourceName));
+    Assert.expectThrows(InternalServerErrorException.class, () -> dataSourceResource.status(dataSourceName));
   }
 
   @Test
   public void dataSourceNotFoundTest() {
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(null);
-    Assert.expectThrows(InternalServerErrorException.class, () -> dataSourceResource.status(null, dataSourceName));
+    Assert.expectThrows(InternalServerErrorException.class, () -> dataSourceResource.status(dataSourceName));
   }
 
   @Test
   public void dataSourceExceptionTest() {
     when(dataSourceCache.getDataSource(dataSourceName)).thenThrow(new ThirdEyeException(
         ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, dataSourceName));
-    Assert.expectThrows(BadRequestException.class, () -> dataSourceResource.status(null, dataSourceName));
+    Assert.expectThrows(BadRequestException.class, () -> dataSourceResource.status(dataSourceName));
   }
 }

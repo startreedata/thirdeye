@@ -3,16 +3,23 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.events.HolidayEventsLoader;
 import org.apache.pinot.thirdeye.events.HolidayEventsLoaderConfiguration;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
@@ -22,7 +29,8 @@ import org.apache.pinot.thirdeye.spi.api.EventApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.EventManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EventDTO;
 
-@Api(tags = "Event")
+@Api(tags = "Event", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class EventResource extends CrudResource<EventApi, EventDTO>{
@@ -37,11 +45,10 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
 
   @Inject
   public EventResource(
-      final AuthService authService,
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final HolidayEventsLoader holidayEventsLoader) {
-    super(authService, eventManager, API_TO_BEAN_MAP);
+    super(eventManager, API_TO_BEAN_MAP);
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.holidayEventsLoader = holidayEventsLoader;
   }
@@ -65,6 +72,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
   @POST
   @Path("/holidays/load")
   public Response loadHolidays(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("start_time") long startTime,
       @FormParam("end_time") long endTime
   ) {

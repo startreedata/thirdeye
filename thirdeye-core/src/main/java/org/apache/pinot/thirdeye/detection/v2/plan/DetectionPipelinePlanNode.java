@@ -22,13 +22,11 @@ package org.apache.pinot.thirdeye.detection.v2.plan;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
-import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

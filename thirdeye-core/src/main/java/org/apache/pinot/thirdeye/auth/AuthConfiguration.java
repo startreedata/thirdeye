@@ -6,16 +6,15 @@ public class AuthConfiguration {
 
   private boolean enabled = true;
 
-  @JsonProperty("jwt")
-  private JwtConfiguration jwtConfiguration;
+  @JsonProperty("oauth")
+  private OAuthConfig oAuthConfig;
 
-  public JwtConfiguration getJwtConfiguration() {
-    return jwtConfiguration;
+  public OAuthConfig getOAuthConfig() {
+    return oAuthConfig;
   }
 
-  public AuthConfiguration setJwtConfiguration(
-      final JwtConfiguration jwtConfiguration) {
-    this.jwtConfiguration = jwtConfiguration;
+  public AuthConfiguration setOAuthConfig(final OAuthConfig oAuthConfig) {
+    this.oAuthConfig = oAuthConfig;
     return this;
   }
 

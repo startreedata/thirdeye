@@ -20,25 +20,34 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
+import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(tags = "Root Cause Analysis")
+@Api(tags = "Root Cause Analysis", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class DimensionAnalysisResource {
@@ -60,6 +69,7 @@ public class DimensionAnalysisResource {
   @Path("anomaly/{id}")
   @ApiOperation("Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "internal id of the anomaly")
       @PathParam("id") long id) {
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(
@@ -73,6 +83,7 @@ public class DimensionAnalysisResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response buildSummary(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam(METRIC_URN) String metricUrn,
       @QueryParam("dataset") String dataset,
       @QueryParam("metric") String metric,

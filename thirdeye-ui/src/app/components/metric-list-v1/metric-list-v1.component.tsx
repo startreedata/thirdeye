@@ -69,20 +69,28 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         history.push(getMetricsViewPath(id));
     };
 
-    const renderLink = ({ rowData }: { rowData: UiMetric }): ReactElement => {
+    const renderLink = (
+        cellValue: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
         return (
-            <Link onClick={() => handleMetricViewDetailsById(rowData.id)}>
-                {rowData.name}
+            <Link
+                onClick={() =>
+                    handleMetricViewDetailsById(
+                        ((data as unknown) as UiMetric).id
+                    )
+                }
+            >
+                {cellValue}
             </Link>
         );
     };
 
-    const renderMetricStatus = ({
-        rowData,
-    }: {
-        rowData: UiMetric;
-    }): ReactElement => {
-        const { active } = rowData;
+    const renderMetricStatus = (
+        _: Record<string, unknown>,
+        data: Record<string, unknown>
+    ): ReactElement => {
+        const active = ((data as unknown) as UiMetric).active;
 
         return (
             <>
@@ -109,52 +117,52 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         {
             key: "name",
             dataKey: "name",
-            title: t("label.name"),
-            width: 0,
-            flexGrow: 1.5,
+            header: t("label.name"),
+            minWidth: 0,
+            flex: 1.5,
             sortable: true,
-            cellRenderer: renderLink,
+            customCellRenderer: renderLink,
         },
         {
             key: "datasetName",
             dataKey: "datasetName",
             sortable: true,
-            title: t("label.dataset"),
-            width: 0,
-            flexGrow: 1.5,
+            header: t("label.dataset"),
+            minWidth: 0,
+            flex: 1.5,
         },
         {
             key: "active",
             dataKey: "active",
             sortable: true,
-            title: t("label.active"),
-            width: 0,
-            flexGrow: 0.5,
-            cellRenderer: renderMetricStatus,
+            header: t("label.active"),
+            minWidth: 0,
+            flex: 0.5,
+            customCellRenderer: renderMetricStatus,
         },
         {
             key: "aggregationColumn",
             dataKey: "aggregationColumn",
             sortable: true,
-            title: t("label.aggregation-column"),
-            width: 0,
-            flexGrow: 1,
+            header: t("label.aggregation-column"),
+            minWidth: 0,
+            flex: 1,
         },
         {
             key: "aggregationFunction",
             dataKey: "aggregationFunction",
             sortable: true,
-            title: t("label.aggregation-function"),
-            width: 0,
-            flexGrow: 1,
+            header: t("label.aggregation-function"),
+            minWidth: 0,
+            flex: 1,
         },
         {
             key: "viewCount",
             dataKey: "viewCount",
             sortable: true,
-            title: t("label.views"),
-            width: 0,
-            flexGrow: 1,
+            header: t("label.views"),
+            minWidth: 0,
+            flex: 1,
         },
     ];
 
@@ -162,12 +170,16 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1
-                    disableBorder
+                    hideBorder
                     columns={metricColumns}
-                    data={props.metrics}
+                    data={
+                        (props.metrics as unknown) as Record<string, unknown>[]
+                    }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
-                    selection={selectedMetric}
+                    searchPlaceholder={t("label.search-entity", {
+                        entity: t("label.metrics"),
+                    })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>

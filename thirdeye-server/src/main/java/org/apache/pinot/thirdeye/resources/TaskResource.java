@@ -2,26 +2,32 @@ package org.apache.pinot.thirdeye.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.SecurityDefinition;
+import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.auth.AuthService;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 
-@Api(tags = "Task")
+@Api(tags = "Task", authorizations = {@Authorization(value = "oauth")})
+@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
@@ -32,8 +38,8 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       .build();
 
   @Inject
-  public TaskResource(final AuthService authService, final TaskManager taskManager) {
-    super(authService, taskManager, API_TO_BEAN_MAP);
+  public TaskResource(final TaskManager taskManager) {
+    super(taskManager, API_TO_BEAN_MAP);
   }
 
   // Operation not supported to prevent create of tasks
@@ -54,7 +60,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -66,7 +72,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader,
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }

@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 
-public class SimpleDataTable implements DataTable {
+public class SimpleDataTable extends AbstractDataTableImpl {
 
   private final List<String> columns;
   private final List<ColumnType> columnTypes;
@@ -112,6 +112,24 @@ public class SimpleDataTable implements DataTable {
   @Override
   public List<DetectionResult> getDetectionResults() {
     return ImmutableList.of(DetectionResult.from(getDataFrame()));
+  }
+
+  public static DataTable fromDataFrame(DataFrame dataFrame) {
+    final List<String> columns = new ArrayList<>(dataFrame.getSeriesNames());
+    final List<ColumnType> columnTypes = new ArrayList<>();
+    for (String key : columns) {
+      columnTypes.add(ColumnType.seriesTypeToColumnType(dataFrame.getSeries().get(key).type()));
+    }
+    final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
+        columnTypes);
+    for (int rowNumber = 0; rowNumber < dataFrame.size(); rowNumber++) {
+      Object[] rowData = simpleDataTableBuilder.newRow();
+      for (int columnNumber = 0; columnNumber < columns.size(); columnNumber++) {
+        String columnKey = columns.get(columnNumber);
+        rowData[columnNumber] = dataFrame.get(columnKey).getObject(rowNumber);
+      }
+    }
+    return simpleDataTableBuilder.build();
   }
 
   public static class SimpleDataTableBuilder {

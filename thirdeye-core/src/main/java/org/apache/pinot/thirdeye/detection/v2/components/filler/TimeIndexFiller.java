@@ -2,9 +2,14 @@ package org.apache.pinot.thirdeye.detection.v2.components.filler;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
+import static org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice.NATIVE_GRANULARITY;
+import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
+import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
+import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
+import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.TIME_COLUMN;
+import static org.apache.pinot.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.v2.spec.TimeIndexFillerSpec;
@@ -13,7 +18,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries.Builder;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.IndexFiller;
 import org.apache.pinot.thirdeye.spi.detection.NullReplacer;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
@@ -36,47 +40,92 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     FROM_DETECTION_TIME_WITH_LOOKBACK,
   }
 
-  private static final NullReplacer WITH_ZERO_NULL_REPLACER = new NullReplacerRegistry().buildNullReplacer("FILL_WITH_ZEROES", new HashMap<>());
+  private static final NullReplacer WITH_ZERO_NULL_REPLACER = new NullReplacerRegistry().buildNullReplacer(
+      "FILL_WITH_ZEROES",
+      new HashMap<>());
 
-  private TimeGranularity timeGranularity;
+  private static final TimeLimitInferenceStrategy DEFAULT_MIN_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DATA;
+  private static final TimeLimitInferenceStrategy DEFAULT_MAX_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DETECTION_TIME;
+  private static final Period DEFAULT_LOOKBACK = Period.ZERO;
+
+  private Period granularity;
   private String timeColumn;
-  /**
-   * Inference strategy for the min time constraint.
-   */
-  private TimeLimitInferenceStrategy minTimeInference;
-  /**
-   * Inference strategy for the max time constraint.
-   */
-  private TimeLimitInferenceStrategy maxTimeInference;
-  /**
-   * Period in milliseconds. Used when time limit inference uses a lookback time.
-   */
-  private Period lookback;
+
   /**
    * Replacer of null values in metric/dimensions columns.
    */
   private NullReplacer nullReplacer;
 
+  private TimeIndexFillerSpec spec;
+
+  private long minTime;
+  private long maxTime;
+
   @Override
   public void init(final TimeIndexFillerSpec spec) {
-    timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    // TODO CYRIL if granularity not set, infer it - it is min(ts[n]-ts[n-1]) when n big enough
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.equals(timeGranularity),
-        "NATIVE_GRANULARITY not supported in v2 interface - set `monitoringGranularity` parameter");
+    // save the spec - resolve at runtime, once DataTable properties are available
+    this.spec = spec;
+  }
 
-    lookback = spec.getLookback().equals("") ? Period.ZERO
-        : Period.parse(spec.getLookback(), ISOPeriodFormat.standard());
-    checkArgument(isSingleUnitOrZero(lookback), "lookback period cannot use multiple units");
-    minTimeInference = TimeLimitInferenceStrategy.valueOf(spec.getMinTimeInference().toUpperCase());
-    checkArgument(isValidInferenceConfig(maxTimeInference, lookback),
+  private void initWithRuntimeInfo(final Interval detectionInterval, final DataTable dataTable) {
+    // principle: custom config takes precedence over dataTable properties. If both config and properties are not set: use default config.
+    Map<String, String> properties = dataTable.getProperties();
+    if (spec.getTimestamp() != null && !spec.getTimestamp().equals(DEFAULT_TIMESTAMP)) {
+      timeColumn = spec.getTimestamp();
+    } else {
+      timeColumn = properties.getOrDefault(TIME_COLUMN.toString(), DEFAULT_TIMESTAMP);
+    }
+
+    String granularitySpec = spec.getMonitoringGranularity();
+    boolean granularityIsCustom = granularitySpec != null
+        && !NATIVE_GRANULARITY.equals(TimeGranularity.fromString(granularitySpec));
+    if (granularityIsCustom) {
+      granularity = TimeGranularity.fromString(granularitySpec).toPeriod();
+    } else if (properties.containsKey(GRANULARITY.toString())) {
+      granularity = parseIsoPeriod(properties.get(GRANULARITY.toString()));
+    } else {
+      throw new IllegalArgumentException(
+          "monitoringGranularity is missing from spec and DataTable properties");
+    }
+
+    nullReplacer = new NullReplacerRegistry().buildNullReplacer(
+        spec.getFillNullMethod().toUpperCase(), spec.getFillNullParams());
+
+    boolean allTimeLimitsAreInProperties = properties.containsKey(MIN_TIME_MILLIS.toString())
+        && properties.containsKey(MAX_TIME_MILLIS.toString());
+    boolean noTimeLimitIsCustom = spec.getLookback() == null && spec.getMinTimeInference() == null
+        && spec.getMaxTimeInference() == null;
+    if (allTimeLimitsAreInProperties && noTimeLimitIsCustom) {
+      minTime = Long.parseLong(properties.get(MIN_TIME_MILLIS.toString()));
+      maxTime = Long.parseLong(properties.get(MAX_TIME_MILLIS.toString()));
+    } else {
+      inferTimeLimits(detectionInterval, dataTable.getDataFrame());
+    }
+  }
+
+  private void inferTimeLimits(final Interval detectionInterval, final DataFrame rawDataFrame) {
+    Period lookback = spec.getLookback() != null ?
+        Period.parse(spec.getLookback(), ISOPeriodFormat.standard()) :
+        DEFAULT_LOOKBACK;
+    TimeLimitInferenceStrategy minTimeInference = spec.getMinTimeInference() != null ?
+        TimeLimitInferenceStrategy.valueOf(spec.getMinTimeInference().toUpperCase()) :
+        DEFAULT_MIN_TIME_INFERENCE_STRATEGY;
+    checkArgument(isValidInferenceConfig(minTimeInference, lookback),
         "minTime inference based on lookback requires a valid `lookback` parameter");
-    maxTimeInference = TimeLimitInferenceStrategy.valueOf(spec.getMaxTimeInference().toUpperCase());
+    TimeLimitInferenceStrategy maxTimeInference = spec.getMaxTimeInference() != null ?
+        TimeLimitInferenceStrategy.valueOf(spec.getMaxTimeInference().toUpperCase()) :
+        DEFAULT_MAX_TIME_INFERENCE_STRATEGY;
     checkArgument(isValidInferenceConfig(maxTimeInference, lookback),
         "maxTime inference based on lookback requires a valid `lookback` parameter");
 
-    timeColumn = spec.getTimestamp();
-    nullReplacer = new NullReplacerRegistry().buildNullReplacer(spec.getFillNullMethod()
-        .toUpperCase(), spec.getFillNullParams());
+    minTime = inferMinTime(detectionInterval.getStart(),
+        rawDataFrame.get(timeColumn),
+        minTimeInference,
+        lookback);
+    maxTime = inferMaxTime(detectionInterval.getEnd(),
+        rawDataFrame.get(timeColumn),
+        maxTimeInference,
+        lookback);
   }
 
   private static boolean isValidInferenceConfig(TimeLimitInferenceStrategy strategy,
@@ -85,12 +134,19 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         || !lookback.equals(Period.ZERO);
   }
 
+  private static Period parseIsoPeriod(String periodString) {
+    return Period.parse(periodString, ISOPeriodFormat.standard());
+  }
+
   @Override
-  public DataTable fillIndex(Interval detectionInterval, final DataTable dataTable) throws Exception {
+  public DataTable fillIndex(Interval detectionInterval, final DataTable dataTable)
+      throws Exception {
+    initWithRuntimeInfo(detectionInterval, dataTable);
+
     DataFrame rawData = dataTable.getDataFrame();
     checkArgument(rawData.contains(timeColumn),
         "'" + timeColumn + "' column not found in DataFrame");
-    DataFrame correctIndex = generateCorrectIndex(detectionInterval, rawData);
+    DataFrame correctIndex = generateCorrectIndex();
     DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
     DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
@@ -110,15 +166,11 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     );
   }
 
-  private DataFrame generateCorrectIndex(final Interval detectionInterval,
-      final DataFrame rawDataFrame) {
-    long inferredMinTime = inferMinTime(detectionInterval.getStart(), rawDataFrame);
-    long inferredMaxTime = inferMaxTime(detectionInterval.getEnd(), rawDataFrame);
+  private DataFrame generateCorrectIndex() {
 
-    Period timePeriod = timeGranularity.toPeriod();
-    DateTime firstIndexValue = getFirstIndexValue(inferredMinTime, timePeriod);
-    DateTime lastIndexValue = getLastIndexValue(inferredMaxTime, timePeriod);
-    Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, timePeriod);
+    DateTime firstIndexValue = getFirstIndexValue(minTime, granularity);
+    DateTime lastIndexValue = getLastIndexValue(maxTime, granularity);
+    Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(timeColumn, correctIndexSeries);
 
@@ -140,23 +192,25 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     return filledData;
   }
 
-  private long inferMinTime(final DateTime start, final DataFrame rawDataFrame) {
+  private long inferMinTime(final DateTime start, final Series timeColumnSeries,
+      final TimeLimitInferenceStrategy minTimeInference, final Period lookback) {
     if (minTimeInference == TimeLimitInferenceStrategy.FROM_DATA) {
-      return rawDataFrame.get(timeColumn).getLong(0);
+      return timeColumnSeries.getLong(0);
     }
-    return inferWithDetectionTime(minTimeInference, start);
+    return inferWithDetectionTime(minTimeInference, start, lookback);
   }
 
-  private long inferMaxTime(final DateTime end, final DataFrame rawDataFrame) {
+  private long inferMaxTime(final DateTime end, final Series timeColumnSeries,
+      final TimeLimitInferenceStrategy maxTimeInference, final Period lookback) {
     if (maxTimeInference == TimeLimitInferenceStrategy.FROM_DATA) {
       // +1 to have an exclusive limit, like with other strategies
-      return rawDataFrame.get(timeColumn).getLong(rawDataFrame.size() - 1) + 1;
+      return timeColumnSeries.getLong(timeColumnSeries.size() - 1) + 1;
     }
-    return inferWithDetectionTime(maxTimeInference, end);
+    return inferWithDetectionTime(maxTimeInference, end, lookback);
   }
 
   private long inferWithDetectionTime(final TimeLimitInferenceStrategy inferenceStrategy,
-      final DateTime time) {
+      final DateTime time, final Period lookback) {
     switch (inferenceStrategy) {
       case FROM_DETECTION_TIME:
         return time.getMillis();
@@ -246,12 +300,6 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     return dt.millisOfSecond()
         .roundCeilingCopy()
         .minusMillis(dt.getMillisOfSecond() % period.getMillis());
-  }
-
-  private static boolean isSingleUnitOrZero(final Period lookback) {
-    // TODO CYRIL refactor to a IsoDateUtils class
-    return lookback.equals(Period.ZERO)
-        || Arrays.stream(lookback.getValues()).filter(v -> v == 0).count() == 7;
   }
 
   private static class NullReplacerRegistry {

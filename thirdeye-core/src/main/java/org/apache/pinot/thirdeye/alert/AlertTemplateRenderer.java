@@ -147,9 +147,11 @@ public class AlertTemplateRenderer {
   private String findTimeFormat(final AlertTemplateDTO template) {
     for (PlanNodeBean node : template.getNodes()) {
       final Map<String, Object> params = node.getParams();
-      final Object value = params.get(K_TIME_FORMAT);
-      if (value != null) {
-        return value.toString();
+      if (params != null) {
+        final Object value = params.get(K_TIME_FORMAT);
+        if (value != null) {
+          return value.toString();
+        }
       }
     }
 

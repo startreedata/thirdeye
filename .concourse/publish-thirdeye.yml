@@ -13,32 +13,13 @@ resource_types:
 resources:
 - name: ci-src
   type: git
+  icon: github
   source:
     uri: ((git-uri))
-    branch: ((git-branch))
     private_key: ((ssh-private-key))
-    paths:
-      - .concourse
-
-- name: chart-src
-  type: git
-  source:
-    uri: ((git-uri))
     branch: ((git-branch))
-    private_key: ((ssh-private-key))
-    paths:
-      - kubernetes/helm
-
-- name: chart-version
-  type: semver
-  source:
-    driver: git
-    uri: ((git-uri))
-    branch: versions-((git-branch))
-    private_key: |
-      ((ssh-private-key))
-
-    file: thirdeye-helm-version
+    path:
+    - .concourse
 
 - name: thirdeye-docker-image
   type: docker-image
@@ -137,7 +118,7 @@ jobs:
       build: ui-src/thirdeye-ui
       tag_file: version/version
       tag_as_latest: ((docker-tag-as-latest))
-    get_params:
+    get_params: 
       skip_download: true
   on_success:
     put: slack
@@ -152,62 +133,4 @@ jobs:
       channel: ((slack-channel))
       text: |
         <!channel> Failed to build branch ((git-branch)) of Thirdeye UI
-        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-
-- name: publish-helm-chart
-  serial: true
-  plan:
-    - get: ci-src
-    - get: chart-version
-      params:
-        pre: ((version-pre))
-    - get: chart-src
-      trigger: true
-    - task: build-helm-chart
-      file: ci-src/.concourse/tasks/build-helm-chart/build-helm-chart.yml
-      input_mapping:
-        version: chart-version
-      params:
-        CHART_DIR: kubernetes/helm
-    - task: publish-helm-chart
-      file: ci-src/.concourse/tasks/publish-helm-chart/publish-helm-chart.yml
-      params:
-        CHART_PREFIX: thirdeye
-    - put: chart-version
-      params:
-        file: chart-version/version
-  on_failure:
-    put: slack
-    params:
-      channel: ((slack-channel))
-      text: |
-        <!channel> Failed to publish a new Thirdeye helm chart from ((git-branch)) branch.
-        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-
-- name: prepare-helm-chart-release
-  plan:
-    - get: ci-src
-    - get: chart-version
-      passed: ["publish-helm-chart"]
-      params:
-        bump: final
-    - get: chart-src
-      passed: ["publish-helm-chart"]
-    - task: build-helm-chart
-      file: ci-src/.concourse/tasks/build-helm-chart/build-helm-chart.yml
-      input_mapping:
-        version: chart-version
-      params:
-        CHART_DIR: kubernetes/helm
-    - put: chart-version
-      params:
-        bump: patch
-        pre: build
-        pre_without_version: true
-  on_failure:
-    put: slack
-    params:
-      channel: ((slack-channel))
-      text: |
-        <!channel> Failed to prepare the Thirdeye Helm chart release from branch ((git-branch)).
         ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

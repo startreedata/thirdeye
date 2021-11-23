@@ -1,0 +1,322 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thirdeye-config
+data:
+  server.yaml: |
+    ######################################################
+    # ThirdEye Coordinator helm config
+    ######################################################
+
+    server:
+      type: simple
+      applicationContextPath: /
+      adminContextPath: /admin
+
+      connector:
+        type: http
+        port: {{ .Values.coordinator.port }}
+        idleTimeout: 620s
+    #   SSL connector is disabled since APP Engine only allows exposing a single port.
+    #   A sample keystore and password is added so that this can be tested locally.
+    #   However, the settings currently don't work on GAE
+    #    - type: https
+    #      port: 8443
+    #      keyStorePath: conf/keystore.jks
+    #      keyStorePassword: password
+
+    logging:
+      level: INFO
+      loggers:
+        org.apache.pinot.thirdeye: DEBUG
+        org.apache.zookeeper: WARN
+
+    auth:
+      enabled: false
+    #  oauth:
+    #    keysUrl: <keys url>
+    #    required:
+    #      - sub
+    #      - exp
+    #    exactMatch:
+    #      iss: <issuer url>
+    #    cache:
+    #      size: 64
+    #      ttl: 60000
+
+    database:
+      # Assuming a local MySQL server running on the default port 3306
+      url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&useSSL=false
+      user: {{ .Values.mysql.mysqlUser }}
+      password: {{ .Values.mysql.mysqlPassword }}
+      driver: com.mysql.jdbc.Driver
+
+    swagger:
+      # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
+      enabled: true
+
+      # package to scan for jersey resources
+      resourcePackage: org.apache.pinot.thirdeye.resources
+
+    # Start the Task Driver. This module runs the detection and notification tasks
+    taskDriver:
+      enabled: {{ not .Values.worker.enabled }}
+      id: 0 # must be a non-negative integer unique per instance/worker
+
+
+    mockEvents:
+      enabled: false
+      generators:
+        - type: HOLIDAY
+          arrivalType: exponential
+          arrivalMean: 86400000
+          durationType: fixed
+          durationMean: 86400000
+          seed: 0
+          namePrefixes: [First, Second, Third, Last, Funky, Happy, Sad, Glorious, Jolly, Unity, Pinot's]
+          nameSuffixes: [day, day, days, celebration, rememberance, occurrence, moment]
+        - type: INFORMED
+          arrivalType: exponential
+          arrivalMean: 43200000
+          durationType: exponential
+          durationMean: 3600000
+          seed: 1
+          namePrefixes: [Login, Web, Search, Catalog, Integration, Network, Backup, Ingress, Proxy, Failure, Pinot, ThirdEye]
+          nameSuffixes: [backend, frontend, v1.1, v1.2, v1.3, v2.0, v3, v4, v5, storage, topic, container, database]
+        - type: CM
+          arrivalType: exponential
+          arrivalMean: 21600000
+          durationType: fixed
+          durationMean: 1800000
+          seed: 2
+          namePrefixes: [Database, Web, Search, Catalog, Integration, Network, Backup, Ingress, Proxy, Failure, Pinot, ThirdEye]
+        - type: CUSTOM
+          arrivalType: exponential
+          arrivalMean: 432000000
+          durationType: exponential
+          durationMean: 86400000
+          seed: 3
+          namePrefixes: [Marketing, Onboarding, Vaction, Outreach, InDay]
+          nameSuffixes: [integration, campaign, meeting]
+        - type: LIX
+          arrivalType: exponential
+          arrivalMean: 259200000
+          durationType: exponential
+          durationMean: 604800000
+          seed: 4
+          namePrefixes: [System, Model, Campaign, Welcome, Pinot, ThirdEye]
+          nameSuffixes: [tuning, bugfix, rollout, test]
+
+    ui:
+      externalUrl: {{ .Values.ui.publicUrl }}
+
+    # Prometheus compatible metrics will be exposed at /admin/prometheus
+    prometheus:
+      enabled: {{ .Values.coordinator.prometheus.enabled | quote }}
+
+    notifications:
+      smtp:
+        host: ${SMTP_HOST}
+        port: ${SMTP_PORT}
+        user: ${SMTP_USER}
+        password: ${SMTP_PASSWORD}
+    #  jira:
+    #    user: <REPLACE_ME>
+    #    password: <REPLACE_ME>
+    #    url: <REPLACE_ME>
+    #    defaultProject: <REPLACE_ME>
+    #    issueTypeId: 19
+    failureFromAddress: "thirdeye@localhost"
+    failureToAddress: "thirdeye@localhost"
+    phantomJsPath: "/usr/local/bin/jstf"
+
+    scheduler:
+      # Run the Quartz Scheduler.
+      # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
+      enabled: {{ not .Values.scheduler.enabled }}
+
+      detectionPipeline: true
+      detectionAlert: true
+
+      holidayEvents:
+        enabled: {{ not .Values.config.holidayLoaderKey | ternary "false" "true" }}
+        calendars:
+          - en.australian#holiday@group.v.calendar.google.com
+          - en.austrian#holiday@group.v.calendar.google.com
+          - en.brazilian#holiday@group.v.calendar.google.com
+          - en.canadian#holiday@group.v.calendar.google.com
+          - en.china#holiday@group.v.calendar.google.com
+          - en.christian#holiday@group.v.calendar.google.com
+          - en.danish#holiday@group.v.calendar.google.com
+          - en.dutch#holiday@group.v.calendar.google.com
+          - en.finnish#holiday@group.v.calendar.google.com
+          - en.french#holiday@group.v.calendar.google.com
+          - en.german#holiday@group.v.calendar.google.com
+          - en.greek#holiday@group.v.calendar.google.com
+          - en.hong_kong#holiday@group.v.calendar.google.com
+          - en.indian#holiday@group.v.calendar.google.com
+          - en.indonesian#holiday@group.v.calendar.google.com
+          - en.irish#holiday@group.v.calendar.google.com
+          - en.islamic#holiday@group.v.calendar.google.com
+          - en.italian#holiday@group.v.calendar.google.com
+          - en.japanese#holiday@group.v.calendar.google.com
+          - en.jewish#holiday@group.v.calendar.google.com
+          - en.malaysia#holiday@group.v.calendar.google.com
+          - en.mexican#holiday@group.v.calendar.google.com
+          - en.new_zealand#holiday@group.v.calendar.google.com
+          - en.norwegian#holiday@group.v.calendar.google.com
+          - en.philippines#holiday@group.v.calendar.google.com
+          - en.polish#holiday@group.v.calendar.google.com
+          - en.portuguese#holiday@group.v.calendar.google.com
+          - en.russian#holiday@group.v.calendar.google.com
+          - en.singapore#holiday@group.v.calendar.google.com
+          - en.sa#holiday@group.v.calendar.google.com
+          - en.south_korea#holiday@group.v.calendar.google.com
+          - en.spain#holiday@group.v.calendar.google.com
+          - en.swedish#holiday@group.v.calendar.google.com
+          - en.taiwan#holiday@group.v.calendar.google.com
+          - en.uk#holiday@group.v.calendar.google.com
+          - en.usa#holiday@group.v.calendar.google.com
+          - en.vietnamese#holiday@group.v.calendar.google.com
+        holidayLoadRange: 2592000000
+        runFrequency: 1  # in Days
+
+    rca:
+      frameworks:
+        identity:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.NullPipeline
+
+        metricRelated:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.MetricMappingPipeline
+
+        metricAnalysis:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.MetricAnalysisPipeline
+
+        metricBreakdown:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.MetricBreakdownPipeline
+
+        metricComponentAnalysis:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
+            properties:
+              excludeDimensions: [ "environment", "continent" ]
+              parallelism: 5
+              k: 5
+
+        eventExperiment:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            properties:
+              strategy: COMPOUND
+              k: 500
+              eventType: LIX
+
+        eventHoliday:
+          - outputName: METRIC_RELATED
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.MetricAnalysisPipeline
+
+          - outputName: OUTPUT
+            inputNames: [ INPUT, METRIC_RELATED ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            properties:
+              strategy: COMPOUND
+              k: 500
+              eventType: HOLIDAY
+
+        eventCustom:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            properties:
+              strategy: COMPOUND
+              k: 500
+              eventType: CUSTOM
+
+        eventAnomaly:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventsPipeline
+            properties:
+              strategyClass: org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventsPipeline$TimeRangeScoreStrategy
+              strategyProperties:
+                type: HYPERBOLA
+              k: 500
+
+        eventIssue:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.EmptyPipeline
+
+        eventChange:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            properties:
+              strategy: COMPOUND
+              k: 500
+              eventType: CM
+
+        eventDeployment:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            properties:
+              strategy: COMPOUND
+              k: 500
+              eventType: INFORMED
+
+        eventAC:
+          - outputName: OUTPUT
+            inputNames: [ INPUT ]
+            className: org.apache.pinot.thirdeye.rootcause.impl.EmptyPipeline
+
+    cache:
+      useInMemoryCache: true
+      useCentralizedCache: false
+
+      centralizedCacheSettings:
+        # TTL (time-to-live) for documents in seconds
+        ttl: 3600
+        # if inserting data points individually, max number of threads to spawn to parallel insert at a time
+        maxParallelInserts: 10
+        # which store to use
+        cacheDataStoreName: 'couchbase'
+        cacheDataSources:
+          couchbase:
+            className: org.apache.pinot.thirdeye.detection.cache.CouchbaseCacheDAO
+            config:
+              useCertificateBasedAuthentication: false
+              # at least 1 host needed
+              hosts:
+                - 'host1' # ex. http://localhost:8091
+                - 'host2' # ex. http://localhost:8092
+                - 'host3' # ex. http://localhost:8093
+                - 'host4' # and so on...
+              bucketName: 'your_bucket_name'
+              # if using certificate-based authentication, authUsername and authPassword values don't matter and won't be used
+              authUsername: 'your_bucket_user_username'
+              authPassword: 'your_bucket_user_password'
+              enableDnsSrv: false
+              # certificate based authentication is only available in Couchbase enterprise edition.
+              keyStoreFilePath: 'key/store/path/keystore_file' # e.g. '/var/identity.p12'
+              # if your keystore has a password, enter it here. by default, Java uses 'work_around_jdk-6879539' to enable empty passwords for certificates.
+              keyStorePassword: 'work_around_jdk-6879539'
+              trustStoreFilePath: 'trust/store/path/truststore_file' # e.g. '/etc/riddler/cacerts'
+              trustStorePassword: ''
+          # add your store of choice here
+
+  {{- if .Values.config.holidayLoaderKey }}
+  holiday-loader-key.json: {{ .Values.config.holidayLoaderKey | toPrettyJson }}
+  {{- end }}

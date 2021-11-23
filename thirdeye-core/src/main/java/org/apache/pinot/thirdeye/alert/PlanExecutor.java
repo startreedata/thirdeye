@@ -18,7 +18,6 @@ import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 public class PlanExecutor {
 
   public static final String ROOT_OPERATOR_KEY = "root";
-  private static final String CONTEXT_KEY_SPLIT = "\t\t\t\t";
 
   private final PlanNodeFactory planNodeFactory;
 
@@ -38,10 +37,10 @@ public class PlanExecutor {
   }
 
   private static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
-      final Map<String, DetectionPipelineResult> context, final PlanNode node)
+      final Map<ContextKey, DetectionPipelineResult> context, final PlanNode node)
       throws Exception {
     for (final InputBean input : node.getPlanNodeInputs()) {
-      final String contextKey = getContextKey(input.getSourcePlanNode(), input.getSourceProperty());
+      final ContextKey contextKey = key(input.getSourcePlanNode(), input.getSourceProperty());
       if (!context.containsKey(contextKey)) {
         final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
         executePlanNode(pipelinePlanNodes, context, inputPlanNode);
@@ -55,25 +54,17 @@ public class PlanExecutor {
     operator.execute();
     final Map<String, DetectionPipelineResult> outputs = operator.getOutputs();
     for (final Entry<String, DetectionPipelineResult> output : outputs.entrySet()) {
-      context.put(getContextKey(node.getName(), output.getKey()), output.getValue());
+      context.put(key(node.getName(), output.getKey()), output.getValue());
     }
   }
 
-  private static String getContextKey(final String name, final String key) {
-    return String.format("%s" + CONTEXT_KEY_SPLIT + "%s", name, key);
-  }
-
-  private static String getOutputKeyFromContextKey(final String contextKey) {
-    return contextKey.split(CONTEXT_KEY_SPLIT)[1];
-  }
-
-  private static String getNodeFromContextKey(final String contextKey) {
-    return contextKey.split(CONTEXT_KEY_SPLIT)[0];
+  private static ContextKey key(final String name, final String key) {
+    return new ContextKey(name, key);
   }
 
   private static Map<String, DetectionPipelineResult> runPipelineInternal(
       final Map<String, PlanNode> pipelinePlanNodes) throws Exception {
-    final Map<String, DetectionPipelineResult> context = new HashMap<>();
+    final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
 
     /* Execute the DAG */
     final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
@@ -84,12 +75,12 @@ public class PlanExecutor {
   }
 
   private static Map<String, DetectionPipelineResult> getOutput(
-      final Map<String, DetectionPipelineResult> context,
+      final Map<ContextKey, DetectionPipelineResult> context,
       final PlanNode rootNode) {
     final Map<String, DetectionPipelineResult> results = new HashMap<>();
-    for (final String contextKey : context.keySet()) {
-      if (getNodeFromContextKey(contextKey).equals(rootNode.getName())) {
-        results.put(getOutputKeyFromContextKey(contextKey), context.get(contextKey));
+    for (final ContextKey contextKey : context.keySet()) {
+      if (contextKey.getNodeName().equals(rootNode.getName())) {
+        results.put(contextKey.getKey(), context.get(contextKey));
       }
     }
     return results;
@@ -99,8 +90,6 @@ public class PlanExecutor {
    * Main interface for running the pipeline.
    *
    * @param nodes The pipeline DAG as a list of nodes
-   * @param startTime
-   * @param endTime
    * @return The result map
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */

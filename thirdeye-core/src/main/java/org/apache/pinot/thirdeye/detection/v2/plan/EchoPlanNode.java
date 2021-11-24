@@ -43,8 +43,8 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   public Operator run() throws Exception {
     final EchoOperator operator = new EchoOperator();
     operator.init(new OperatorContext()
-        .setStartTime(getParams().getOrDefault("startTime", String.valueOf(this.startTime)).toString())
-        .setEndTime(getParams().getOrDefault("endTime", String.valueOf(this.endTime)).toString())
+        .setStartTime(String.valueOf(this.startTime))
+        .setEndTime(String.valueOf(this.endTime))
         .setTimeFormat(getParams().getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT).toString())
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)

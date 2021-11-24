@@ -14,9 +14,9 @@ Content-Type: application/json
           "type": "SqlExecution",
           "params": {
             "sql.queries": [
-              "SELECT ts as timestamp, met as value FROM baseline WHERE ts BETWEEN 20200715 AND 20200720",
-              "SELECT ts as timestamp, met as value FROM current WHERE ts BETWEEN 20200715 AND 20200720",
-              "SELECT ts, avg(met) as met FROM (SELECT ts, met FROM baseline UNION ALL SELECT ts, met FROM current) WHERE ts BETWEEN 20200715 AND 20200720 GROUP BY ts ORDER BY ts"
+              "SELECT ts as timestamp, met as value FROM baseline WHERE ts BETWEEN 20210715 AND 20210720",
+              "SELECT ts as timestamp, met as value FROM current WHERE ts BETWEEN 20210715 AND 20210720",
+              "SELECT ts, avg(met) as met FROM (SELECT ts, met FROM baseline UNION ALL SELECT ts, met FROM current) WHERE ts BETWEEN 20210715 AND 20210720 GROUP BY ts ORDER BY ts"
             ]
           },
           "inputs": [
@@ -42,8 +42,8 @@ Content-Type: application/json
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000"
+            "component.dataSource": "pinotQuickStartLocal",
+            "component.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20210202 AND \"date\" <= 20210723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -57,8 +57,8 @@ Content-Type: application/json
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.dataSource": "pinotQuickStartLocal",
-            "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000"
+            "component.dataSource": "pinotQuickStartLocal",
+            "component.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20210209 AND \"date\" <= 20210730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000"
           },
           "inputs": [],
           "outputs": [

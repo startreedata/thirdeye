@@ -34,9 +34,10 @@ import org.modelmapper.convention.MatchingStrategies;
 public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
+  public static final String DEFAULT_TIMESTAMP = "timestamp";
 
   private String timezone = DEFAULT_TIMEZONE;
-  private String timestamp = "timestamp";
+  private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = "value";
   private List<String> dimensions = Collections.emptyList();
   private String monitoringGranularity = MetricSlice

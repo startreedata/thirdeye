@@ -1,10 +1,6 @@
 ### HoltWinters alert
-## uses the default limit inference strategies:
-## minTime: FROM_DATA
-## maxTime: FROM_DETECTION TIME
-## no baselineMissingDataManager + february (left missing data) --> fails
-## no currentMissingDataManager + end of july (right missing data) --> fails
-## does not fail with the missingDataManagers
+## index filler without config - uses metadata passed by macros
+## same result than with the manual config
 POST http://localhost:8080/api/alerts/evaluate
 accept: application/json
 Content-Type: application/json
@@ -44,10 +40,6 @@ Content-Type: application/json
         {
           "name": "missingDataManager",
           "type": "TimeIndexFiller",
-          "params": {
-            "component.monitoringGranularity": "1_DAYS",
-            "component.timestamp": "ts"
-          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -66,7 +58,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -82,10 +74,10 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews_with_missing_data",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
-      "lookback": "5",
+      "timeColumnFormat": "yyyyMMdd",
+      "lookback": "P5D",
       "pattern": "DOWN",
       "sensitivity": "1"
     }

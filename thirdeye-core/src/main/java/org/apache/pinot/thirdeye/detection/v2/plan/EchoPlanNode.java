@@ -1,37 +1,32 @@
 package org.apache.pinot.thirdeye.detection.v2.plan;
 
-import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
-
-import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detection.v2.operator.DataFetcherOperator;
+import org.apache.pinot.thirdeye.detection.v2.operator.EchoOperator;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
 
-public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
+public class EchoPlanNode extends DetectionPipelinePlanNode {
 
-  private DataSourceCache dataSourceCache = null;
+  public static final String TYPE = "Echo";
 
-  public DataFetcherPlanNode() {
+  public EchoPlanNode() {
     super();
   }
 
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.dataSourceCache = (DataSourceCache) planNodeContext.getProperties()
-        .get(DATA_SOURCE_CACHE_REF_KEY);
   }
 
   @Override
   void setNestedProperties(final Map<String, Object> properties) {
+    // inject detector to nested property if possible
   }
 
   @Override
   public String getType() {
-    return "DataFetcher";
+    return TYPE;
   }
 
   @Override
@@ -46,14 +41,14 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Operator run() throws Exception {
-    final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    dataFetcherOperator.init(new OperatorContext()
+    final EchoOperator operator = new EchoOperator();
+    operator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))
         .setEndTime(String.valueOf(this.endTime))
         .setTimeFormat(getParams().getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT).toString())
+        .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
     );
-    return dataFetcherOperator;
+    return operator;
   }
 }

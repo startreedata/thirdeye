@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
 
 import com.codahale.metrics.annotation.Timed;
@@ -21,7 +22,6 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AuthApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
-
 @Singleton
 @Api(tags = "Auth", authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
@@ -41,7 +41,8 @@ public class AuthResource {
     final String principal = thirdEyePrincipal.getName();
     return new AuthApi()
         .setUser(new UserApi()
-            .setPrincipal(principal));
+            .setPrincipal(principal))
+        .setAccessToken(NO_AUTH_USER);
   }
 
   @Timed

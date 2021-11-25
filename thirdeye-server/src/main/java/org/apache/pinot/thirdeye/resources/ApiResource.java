@@ -5,6 +5,7 @@ import javax.ws.rs.Path;
 
 public class ApiResource {
 
+  private final AuthResource authResource;
   private final ApplicationResource applicationResource;
   private final DataSourceResource dataSourceResource;
   private final DatasetResource datasetResource;
@@ -19,7 +20,8 @@ public class ApiResource {
   private final TaskResource taskResource;
 
   @Inject
-  public ApiResource(final ApplicationResource applicationResource,
+  public ApiResource(final AuthResource authResource,
+      final ApplicationResource applicationResource,
       final DataSourceResource dataSourceResource,
       final DatasetResource datasetResource,
       final MetricResource metricResource,
@@ -31,6 +33,7 @@ public class ApiResource {
       final RcaResource rcaResource,
       final EventResource eventResource,
       final TaskResource taskResource) {
+    this.authResource = authResource;
     this.applicationResource = applicationResource;
     this.dataSourceResource = dataSourceResource;
     this.datasetResource = datasetResource;
@@ -43,6 +46,11 @@ public class ApiResource {
     this.rcaResource = rcaResource;
     this.eventResource = eventResource;
     this.taskResource = taskResource;
+  }
+
+  @Path("auth")
+  public AuthResource getAuthResource() {
+    return authResource;
   }
 
   @Path("applications")

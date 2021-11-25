@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.AuthApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
+
 @Singleton
 @Api(tags = "Auth", authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))

@@ -168,19 +168,19 @@ public class ThirdEyeIntegrationTest {
 
   @Test
   public void testAuthorisedPingRequest() {
-    Response response = client.target(thirdEyeEndPoint("internal/ping-auth"))
+    Response response = client.target(thirdEyeEndPoint("api/auth/login"))
         .request()
         .header(HttpHeaders.AUTHORIZATION, token)
-        .get();
+        .post(null);
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(response.getEntity().toString().equals("pong : test"));
+
   }
 
   @Test
   public void testUnauthorisedPingRequest() {
-    Response response = client.target(thirdEyeEndPoint("internal/ping-auth"))
+    Response response = client.target(thirdEyeEndPoint("api/auth/login"))
         .request()
-        .get();
+        .post(null);
     assertThat(response.getStatus()).isEqualTo(401);
   }
 

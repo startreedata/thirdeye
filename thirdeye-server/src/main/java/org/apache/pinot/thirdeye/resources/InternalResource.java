@@ -94,12 +94,6 @@ public class InternalResource {
   }
 
   @GET
-  @Path("ping-auth")
-  public Response pingAuth(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    return Response.ok(String.format("pong : %s", principal.getName())).build();
-  }
-
-  @GET
   @Path("version")
   public Response getVersion(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();

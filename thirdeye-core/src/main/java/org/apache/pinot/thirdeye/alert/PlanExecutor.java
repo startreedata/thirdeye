@@ -66,18 +66,6 @@ public class PlanExecutor {
     return new ContextKey(name, key);
   }
 
-  private static Map<String, DetectionPipelineResult> runPipelineInternal(
-      final Map<String, PlanNode> pipelinePlanNodes) throws Exception {
-    final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
-
-    /* Execute the DAG */
-    final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
-    executePlanNode(pipelinePlanNodes, context, rootNode);
-
-    /* Return the output */
-    return getOutput(context, rootNode);
-  }
-
   private static Map<String, DetectionPipelineResult> getOutput(
       final Map<ContextKey, DetectionPipelineResult> context,
       final PlanNode rootNode) {
@@ -93,25 +81,44 @@ public class PlanExecutor {
   /**
    * Main interface for running the pipeline.
    *
-   * @param nodes The pipeline DAG as a list of nodes
+   * @param planNodeBeans The pipeline DAG as a list of nodes
    * @return The result map
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
-  public Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> nodes,
-      final long startTime, final long endTime)
+  public Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> planNodeBeans,
+      final long startTime,
+      final long endTime)
       throws Exception {
-    final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
-    for (final PlanNodeBean operator : nodes) {
-      final String operatorName = operator.getName();
-      final PlanNode planNode = planNodeFactory.get(
-          operatorName,
-          pipelinePlanNodes,
-          operator,
-          startTime,
-          endTime);
+    /* map of all the plan nodes constructed from beans(persisted objects) */
+    final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
+        planNodeBeans,
+        startTime,
+        endTime);
 
-      pipelinePlanNodes.put(operatorName, planNode);
+    /* The context stores all the outputs from all the nodes */
+    final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
+
+    /* Execute the DAG */
+    final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
+    executePlanNode(pipelinePlanNodes, context, rootNode);
+
+    /* Return the output */
+    return getOutput(context, rootNode);
+  }
+
+  private Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
+      final long startTime, final long endTime) {
+    final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
+    for (final PlanNodeBean planNodeBean : planNodeBeans) {
+      final PlanNode planNode = planNodeFactory.build(
+          planNodeBean,
+          startTime,
+          endTime,
+          pipelinePlanNodes
+      );
+
+      pipelinePlanNodes.put(planNodeBean.getName(), planNode);
     }
-    return runPipelineInternal(pipelinePlanNodes);
+    return pipelinePlanNodes;
   }
 }

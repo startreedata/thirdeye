@@ -78,11 +78,10 @@ public class PlanNodeFactory {
         System.currentTimeMillis() - startTimeMs);
   }
 
-  public PlanNode get(final String name,
-      final Map<String, PlanNode> pipelinePlanNodes,
-      final PlanNodeBean planNodeBean,
+  public PlanNode build(final PlanNodeBean planNodeBean,
       final long startTime,
-      final long endTime) {
+      final long endTime,
+      final Map<String, PlanNode> pipelinePlanNodes) {
     final String typeKey = planNodeBean.getType();
     final Class<? extends PlanNode> planNodeClass = planNodeTypeToClassMap.get(typeKey);
     if (planNodeClass == null) {
@@ -92,11 +91,11 @@ public class PlanNodeFactory {
       final Constructor<?> constructor = planNodeClass.getConstructor();
       final PlanNode planNode = (PlanNode) constructor.newInstance();
       planNode.init(new PlanNodeContext()
-          .setName(name)
-          .setPipelinePlanNodes(pipelinePlanNodes)
-          .setDetectionPlanApi(planNodeBean)
+          .setName(planNodeBean.getName())
+          .setPlanNodeBean(planNodeBean)
           .setStartTime(startTime)
           .setEndTime(endTime)
+          .setPipelinePlanNodes(pipelinePlanNodes)
           .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)));
       return planNode;
     } catch (final Exception e) {

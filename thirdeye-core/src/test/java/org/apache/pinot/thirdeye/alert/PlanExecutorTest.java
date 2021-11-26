@@ -23,7 +23,7 @@ public class PlanExecutorTest {
     final String nodeName = "root";
     node.init(new PlanNodeContext()
         .setName(nodeName)
-        .setDetectionPlanApi(new PlanNodeBean()
+        .setPlanNodeBean(new PlanNodeBean()
             .setInputs(Collections.emptyList())
             .setParams(ImmutableMap.of(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
         )

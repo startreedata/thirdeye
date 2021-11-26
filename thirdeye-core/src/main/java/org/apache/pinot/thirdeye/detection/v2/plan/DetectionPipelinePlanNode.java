@@ -52,7 +52,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     this.name = planNodeContext.getName();
     this.pipelinePlanNodes = planNodeContext.getPipelinePlanNodes();
-    this.planNodeBean = planNodeContext.getDetectionPlanApi();
+    this.planNodeBean = planNodeContext.getPlanNodeBean();
     this.startTime = planNodeContext.getStartTime();
     this.endTime = planNodeContext.getEndTime();
   }

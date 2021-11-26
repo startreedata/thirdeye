@@ -30,11 +30,11 @@ public class PlanNodeContext {
     return this;
   }
 
-  public PlanNodeBean getDetectionPlanApi() {
+  public PlanNodeBean getPlanNodeBean() {
     return planNodeBean;
   }
 
-  public PlanNodeContext setDetectionPlanApi(final PlanNodeBean planNodeBean) {
+  public PlanNodeContext setPlanNodeBean(final PlanNodeBean planNodeBean) {
     this.planNodeBean = planNodeBean;
     return this;
   }

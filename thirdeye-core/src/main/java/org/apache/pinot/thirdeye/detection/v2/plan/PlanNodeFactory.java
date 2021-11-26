@@ -45,24 +45,24 @@ public class PlanNodeFactory {
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public PlanNodeFactory(DataSourceCache dataSourceCache) {
+  public PlanNodeFactory(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
     initPlanNodeTypeToClassMap();
   }
 
   private void initPlanNodeTypeToClassMap() {
-    long startTimeMs = System.currentTimeMillis();
-    Reflections reflections = new Reflections(V2_DETECTION_PLAN_PACKAGE_NAME);
-    Set<Class<? extends PlanNode>> classes = reflections.getSubTypesOf(PlanNode.class);
-    for (Class<? extends PlanNode> planNodeClass : classes) {
+    final long startTimeMs = System.currentTimeMillis();
+    final Reflections reflections = new Reflections(V2_DETECTION_PLAN_PACKAGE_NAME);
+    final Set<Class<? extends PlanNode>> classes = reflections.getSubTypesOf(PlanNode.class);
+    for (final Class<? extends PlanNode> planNodeClass : classes) {
       if (Modifier.isAbstract(planNodeClass.getModifiers())) {
         continue;
       }
-      String typeKey;
+      final String typeKey;
       try {
-        PlanNode planNodeInstance = planNodeClass.newInstance();
+        final PlanNode planNodeInstance = planNodeClass.newInstance();
         typeKey = planNodeInstance.getType();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Unable to init PlanNode Class - " + planNodeClass, e);
       }
       if (!planNodeTypeToClassMap.containsKey(typeKey)) {
@@ -78,17 +78,19 @@ public class PlanNodeFactory {
         System.currentTimeMillis() - startTimeMs);
   }
 
-  public PlanNode get(String name,
-      Map<String, PlanNode> pipelinePlanNodes,
-      PlanNodeBean planNodeBean, long startTime, long endTime) {
-    String typeKey = planNodeBean.getType();
-    Class<? extends PlanNode> planNodeClass = planNodeTypeToClassMap.get(typeKey);
+  public PlanNode get(final String name,
+      final Map<String, PlanNode> pipelinePlanNodes,
+      final PlanNodeBean planNodeBean,
+      final long startTime,
+      final long endTime) {
+    final String typeKey = planNodeBean.getType();
+    final Class<? extends PlanNode> planNodeClass = planNodeTypeToClassMap.get(typeKey);
     if (planNodeClass == null) {
       throw new UnsupportedOperationException("Not supported type - " + typeKey);
     }
     try {
       final Constructor<?> constructor = planNodeClass.getConstructor();
-      PlanNode planNode = (PlanNode) constructor.newInstance();
+      final PlanNode planNode = (PlanNode) constructor.newInstance();
       planNode.init(new PlanNodeContext()
           .setName(name)
           .setPipelinePlanNodes(pipelinePlanNodes)
@@ -97,7 +99,7 @@ public class PlanNodeFactory {
           .setEndTime(endTime)
           .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)));
       return planNode;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new IllegalArgumentException("Failed to initialize the plan node: type - " + typeKey,
           e);
     }

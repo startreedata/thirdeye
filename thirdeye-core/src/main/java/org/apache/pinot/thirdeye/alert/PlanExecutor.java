@@ -39,7 +39,8 @@ public class PlanExecutor {
 
   @VisibleForTesting
   static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
-      final Map<ContextKey, DetectionPipelineResult> context, final PlanNode node)
+      final Map<ContextKey, DetectionPipelineResult> context,
+      final PlanNode node)
       throws Exception {
     for (final InputBean input : node.getPlanNodeInputs()) {
       final ContextKey contextKey = key(input.getSourcePlanNode(), input.getSourceProperty());

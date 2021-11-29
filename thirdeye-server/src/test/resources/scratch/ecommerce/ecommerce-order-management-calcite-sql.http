@@ -38,8 +38,9 @@ Content-Type: application/json
         },
         {
           "name": "eventsToTimeseries",
-          "type": "CalciteSqlExecution",
+          "type": "SqlExecution",
           "params": {
+            "sql.engine": "calcite",
             "sql.queries": [
               "with t as (select *, TIMESTAMP_MILLIS(ts) as dt from order_events_epoch) select UNIX_MILLIS(TIMESTAMPADD(${granularityUnit}, -${granularityNum}, window_end)) as ts, AVG(transition_time) / (1000) as ${metric} from ( select window_end, IF(event_type = ${firstType}, COALESCE(lead(ts) over(partition by order_id, window_end order by ts), UNIX_MILLIS(window_end)) - ts, null) as transition_time, max(CEIL(dt TO ${granularityUnit})) over (partition by order_id) as early_window_fence FROM TABLE(HOP(TABLE t, DESCRIPTOR(dt), INTERVAL '${granularityNum}' ${granularityUnit}, INTERVAL '${windowSizeNum}' ${windowSizeUnit})) where event_type in (${firstType}, ${secondType}) ) where window_end <= early_window_fence and transition_time is not null group by window_end order by window_end"
             ]

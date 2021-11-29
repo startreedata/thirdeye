@@ -1,6 +1,6 @@
 package org.apache.pinot.thirdeye.dataframe.calcite;
 
-import static org.apache.pinot.thirdeye.detection.v2.operator.HyperSqlExecutionOperator.getDataTableFromResultSet;
+import static org.apache.pinot.thirdeye.detection.v2.operator.SqlExecutionOperator.getDataTableFromResultSet;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Connection;

@@ -13,9 +13,8 @@ public enum DataFrameFieldType {
   STRING(String.class, SeriesType.STRING),
   BOOLEAN(Primitive.BOOLEAN, SeriesType.BOOLEAN),
   LONG(Primitive.LONG, SeriesType.LONG),
-  DOUBLE(Primitive.DOUBLE, SeriesType.DOUBLE),
-  // object converted to string - DATE, TIME, TIMESTAMP have no specific management
-  OBJECT(Object.class, SeriesType.STRING);
+  DOUBLE(Primitive.DOUBLE, SeriesType.DOUBLE);
+  // DATE, TIME, TIMESTAMP, OBJECT  - no implementation - expect casting to string
 
   private final Class clazz;
   private final SeriesType seriesType;

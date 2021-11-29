@@ -1,16 +1,18 @@
-package org.apache.pinot.thirdeye.detection.v2.operator;
+package org.apache.pinot.thirdeye.detection.v2.sql;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.stream.Collectors;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.pinot.thirdeye.dataframe.calcite.DataFrameSchema;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 
 /**
  * Perform SQL on a DataFrame with Calcite.
@@ -21,45 +23,41 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
  * available.
  * Window and analytical functions are supported.
  */
-public class CalciteSqlExecutionOperator extends AbstractSqlExecutionOperator {
+public class CalciteDataTableToSqlAdapter implements DataTableToSqlAdapter {
 
   private static final String DATAFRAME_DATABASE = "calcite_dataframes";
+  private static final Properties DEFAULT_JDBC_PROPERTIES = new Properties();
 
-  public CalciteSqlExecutionOperator() {
-    super();
+  static {
+    DEFAULT_JDBC_PROPERTIES.putAll(ImmutableMap.of(
+        "unquotedCasing", "UNCHANGED",
+        "fun", "bigquery"));
   }
 
+  private final Properties properties = new Properties(DEFAULT_JDBC_PROPERTIES);
+
   @Override
-  protected String getDefaultJdbcConnection() {
+  public String jdbcConnection() {
     return "jdbc:calcite:";
   }
 
   @Override
-  protected String getDefaultJdbcDriverClassName() {
+  public String jdbcDriverClassName() {
     return "org.apache.calcite.jdbc.Driver";
   }
 
   @Override
-  protected Map<String, String> getDefaultJdbcProperties() {
-
-    return ImmutableMap.of(
-        "unquotedCasing", "UNCHANGED",
-        "fun", "bigquery"
-    );
+  public Properties jdbcProperties() {
+    return properties;
   }
 
   @Override
-  protected void initTables(final Connection connection) throws SQLException {
-    CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
-    Map<String, DataFrame> dataframes = new HashMap<>();
-    for (String tableName : inputMap.keySet()) {
-      DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
-      if (detectionPipelineResult instanceof DataTable) {
-        DataFrame tableDf = ((DataTable) detectionPipelineResult).getDataFrame();
-        dataframes.put(tableName, tableDf);
-      }
-    }
+  public void loadTables(final Connection connection, final Map<String, DataTable> dataTables)
+      throws SQLException {
+    Map<String, DataFrame> dataframes = dataTables.entrySet()
+        .stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getDataFrame()));
     DataFrameSchema schema = new DataFrameSchema(dataframes);
+    CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
     SchemaPlus rootSchema = calciteConnection.getRootSchema();
     rootSchema.add(DATAFRAME_DATABASE, schema);
     // equivalent to "use [DATAFRAME_DATABASE]";
@@ -67,12 +65,7 @@ public class CalciteSqlExecutionOperator extends AbstractSqlExecutionOperator {
   }
 
   @Override
-  protected void tearDown(final Connection connection) {
+  public void tearDown(final Connection connection) {
     // nothing to do - GC should be enough
-  }
-
-  @Override
-  public String getOperatorName() {
-    return "CalciteSqlExecutionOperator";
   }
 }

@@ -7,51 +7,35 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import org.apache.pinot.thirdeye.detection.v2.sql.DataTableToSqlAdapterFactory;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
+import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractSqlExecutionOperator extends DetectionPipelineOperator {
+public class SqlExecutionOperator extends DetectionPipelineOperator {
 
+  private static final Logger LOG = LoggerFactory.getLogger(SqlExecutionOperator.class);
+  private static final String SQL_ENGINE = "sql.engine";
   private static final String SQL_QUERIES = "sql.queries";
-  private static final String JDBC_DRIVER_CLASSNAME = "jdbc.driver.classname";
-  private static final String JDBC_CONNECTION = "jdbc.connection";
   /**
    * User can pass jdbc parameters.
    * In Map<String, String> format.
    * See https://calcite.apache.org/docs/adapter.html#jdbc-connect-string-parameters
    */
   private static final String JDBC_CONNECTION_PARAMS = "jdbc.parameters";
+  private static final String DEFAULT_SQL_ENGINE = "HYPERSQL";
 
-  protected final Logger LOG = LoggerFactory.getLogger(getClass());
-
-  private final Properties properties = new Properties();
   private final List<String> queries = new ArrayList<>();
-  private String jdbcConnection;
-  private String jdbcDriverClassName;
-
-  protected abstract String getDefaultJdbcConnection();
-
-  protected abstract String getDefaultJdbcDriverClassName();
-
-  protected abstract Map<String, String> getDefaultJdbcProperties();
-
-  /**
-   * Put the inputs DataTable in the SQL system
-   */
-  protected abstract void initTables(final Connection connection) throws SQLException;
-
-  /**
-   * Clean the SQL environment
-   */
-  protected abstract void tearDown(final Connection connection) throws SQLException;
+  private DataTableToSqlAdapter dataTableToSqlAdapter;
 
   @Override
   public void init(final OperatorContext context) {
@@ -66,14 +50,11 @@ public abstract class AbstractSqlExecutionOperator extends DetectionPipelineOper
           "Missing property '" + SQL_QUERIES + "' in SqlExecutionOperator");
     }
 
-    jdbcConnection = planNode.getParams().getOrDefault(JDBC_CONNECTION, getDefaultJdbcConnection()).toString();
-    jdbcDriverClassName = planNode.getParams().getOrDefault(JDBC_DRIVER_CLASSNAME, getDefaultJdbcDriverClassName()).toString();
-
-    // custom jdbc properties are combined with default properties
-    properties.putAll(getDefaultJdbcProperties());
+    dataTableToSqlAdapter = DataTableToSqlAdapterFactory.create(planNode.getParams()
+        .getOrDefault(SQL_ENGINE, DEFAULT_SQL_ENGINE).toString());
     if (planNode.getParams().containsKey(JDBC_CONNECTION_PARAMS)) {
-      properties.putAll((Map<String, String>) planNode.getParams()
-          .get(JDBC_CONNECTION_PARAMS));
+      dataTableToSqlAdapter.jdbcProperties()
+          .putAll((Map<String, String>) planNode.getParams().get(JDBC_CONNECTION_PARAMS));
     }
   }
 
@@ -82,22 +63,41 @@ public abstract class AbstractSqlExecutionOperator extends DetectionPipelineOper
     Connection connection = getConnection();
     initTables(connection);
     runQueries(connection);
-    tearDown(connection);
+    dataTableToSqlAdapter.tearDown(connection);
   }
 
   private Connection getConnection() throws ClassNotFoundException, SQLException {
     try {
-      Class.forName(jdbcDriverClassName);
+      Class.forName(dataTableToSqlAdapter.jdbcDriverClassName());
     } catch (final Exception e) {
-      LOG.error("ERROR: failed to load JDBC driver class {}.", jdbcDriverClassName, e);
+      LOG.error("ERROR: failed to load JDBC driver class {}.",
+          dataTableToSqlAdapter.jdbcDriverClassName(),
+          e);
       throw e;
     }
-    final Connection connection = DriverManager.getConnection(jdbcConnection, properties);
+    final Connection connection = DriverManager.getConnection(dataTableToSqlAdapter.jdbcConnection(),
+        dataTableToSqlAdapter.jdbcProperties());
     LOG.debug("Successfully connected to JDBC connection: {} with driver class: {} ",
-        jdbcConnection,
-        jdbcDriverClassName);
+        dataTableToSqlAdapter.jdbcConnection(),
+        dataTableToSqlAdapter.jdbcDriverClassName());
 
     return connection;
+  }
+
+  private void initTables(final Connection connection) throws SQLException {
+    Map<String, DataTable> datatables = new HashMap<>();
+    for (String tableName : inputMap.keySet()) {
+      DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
+      if (detectionPipelineResult instanceof DataTable) {
+        datatables.put(tableName, (DataTable) detectionPipelineResult);
+      }
+    }
+    try {
+      dataTableToSqlAdapter.loadTables(connection, datatables);
+    } catch (final SQLException e) {
+      LOG.error("Failed to load tables");
+      throw e;
+    }
   }
 
   private void runQueries(final Connection connection) throws SQLException {
@@ -138,8 +138,7 @@ public abstract class AbstractSqlExecutionOperator extends DetectionPipelineOper
           rowData[i] = resultSet.getArray(i + 1);
           continue;
         }
-        ColumnType.ColumnDataType columnDataType = columnType.getType();
-        switch (columnDataType) {
+        switch (columnType.getType()) {
           case INT:
             rowData[i] = resultSet.getInt(i + 1);
             continue;
@@ -168,5 +167,10 @@ public abstract class AbstractSqlExecutionOperator extends DetectionPipelineOper
       }
     }
     return simpleDataTableBuilder.build();
+  }
+
+  @Override
+  public String getOperatorName() {
+    return "SqlExecutionOperator";
   }
 }

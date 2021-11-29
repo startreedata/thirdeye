@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
@@ -16,31 +17,42 @@ import org.testng.annotations.Test;
 public class SqlExecutionOperatorTest {
 
   @Test
-  public void testSqlExecutionCalcite() throws Exception {
-    final DetectionPipelineOperator sqlExecutionOperator = new CalciteSqlExecutionOperator();
-
-    testSqlExecution(sqlExecutionOperator);
+  public void testSqlExecutionDefaultAdapter() throws Exception {
+    testSqlExecution(new HashMap<>());
   }
 
   @Test
-  public void testSqlExecutionHSQLDB() throws Exception {
-    final DetectionPipelineOperator sqlExecutionOperator = new HyperSqlExecutionOperator();
-
-    testSqlExecution(sqlExecutionOperator);
+  public void testSqlExecutionHyperSQLAdapter() throws Exception {
+    testSqlExecution(ImmutableMap.of(
+        "sql.engine", "HyperSql"
+    ));
   }
 
-  private void testSqlExecution(final DetectionPipelineOperator sqlExecutionOperator) throws Exception {
+  @Test
+  public void testSqlExecutionCalciteAdapter() throws Exception {
+    testSqlExecution(ImmutableMap.of(
+        "sql.engine", "Calcite"
+    ));
+  }
+
+  private void testSqlExecution(Map<String, Object> customParams) throws Exception {
+    Map<String, Object> params = new HashMap<>();
+    params.put("sql.queries", ImmutableList.of(
+        "SELECT ts as timestamp_res, met as value_res FROM baseline_data",
+        "SELECT ts as timestamp_res, met as value_res FROM current_data",
+        "SELECT ts, met FROM baseline_data UNION ALL SELECT ts, met FROM current_data"
+    ));
+    // put custom params
+    params.putAll(customParams);
+
+    final DetectionPipelineOperator sqlExecutionOperator = new SqlExecutionOperator();
     final long currentTimeMillis = System.currentTimeMillis();
     final String startTime = String.valueOf(currentTimeMillis);
     final String endTime = String.valueOf(currentTimeMillis + 1000L);
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("SqlExecution")
-        .setParams(ImmutableMap.of("sql.queries", ImmutableList.of(
-            "SELECT ts as timestamp_res, met as value_res FROM baseline_data",
-            "SELECT ts as timestamp_res, met as value_res FROM current_data",
-            "SELECT ts, met FROM baseline_data UNION ALL SELECT ts, met FROM current_data"
-        )))
+        .setParams(params)
         .setInputs(ImmutableList.of(
             new InputBean().setTargetProperty("baseline_data")
                 .setSourceProperty("baselineOutput")
@@ -191,5 +203,4 @@ public class SqlExecutionOperatorTest {
         .get("met")
         .get(1), 0.456);
   }
-
 }

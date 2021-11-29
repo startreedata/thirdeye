@@ -1,54 +1,52 @@
-package org.apache.pinot.thirdeye.detection.v2.operator;
+package org.apache.pinot.thirdeye.detection.v2.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Connecting to a temporary HyperSQL workspace with all the inputs data as tables and perform SQL
- * operations on top.
- */
-public class HyperSqlExecutionOperator extends AbstractSqlExecutionOperator {
+public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
+
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   private final List<String> insertedTable = new ArrayList<>();
 
-  public HyperSqlExecutionOperator() {
-    super();
-  }
+  private final Properties properties = new Properties();
 
   @Override
-  protected String getDefaultJdbcConnection() {
+  public String jdbcConnection() {
     return "jdbc:hsqldb:mem";
   }
 
   @Override
-  protected String getDefaultJdbcDriverClassName() {
+  public String jdbcDriverClassName() {
     return "org.hsqldb.jdbc.JDBCDriver";
   }
 
   @Override
-  protected HashMap<String, String> getDefaultJdbcProperties() {
-    return new HashMap<>();
+  public Properties jdbcProperties() {
+    return properties;
   }
 
   @Override
-  protected void initTables(final Connection connection) throws SQLException {
-    for (final String tableName : inputMap.keySet()) {
-      final DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
-      if (detectionPipelineResult instanceof DataTable) {
-        insertInput(connection, tableName, (DataTable) detectionPipelineResult);
-        insertedTable.add(tableName);
-      }
+  public void loadTables(final Connection connection, final Map<String, DataTable> dataTables)
+      throws SQLException {
+    for (final Entry<String, DataTable> entry : dataTables.entrySet()) {
+      insertInput(connection, entry.getKey(), entry.getValue());
+      insertedTable.add(entry.getKey());
     }
   }
 
   @Override
-  protected void tearDown(final Connection connection) throws SQLException {
+  public void tearDown(final Connection connection) throws SQLException {
     // Destroy database
     LOG.debug("trying to drop all the tables to clean up the environment.");
     for (final String tableName : insertedTable) {
@@ -160,10 +158,5 @@ public class HyperSqlExecutionOperator extends AbstractSqlExecutionOperator {
         return "VARBINARY(128)";
     }
     return columnType.getType().toString();
-  }
-
-  @Override
-  public String getOperatorName() {
-    return "HyperSqlExecutionOperator";
   }
 }

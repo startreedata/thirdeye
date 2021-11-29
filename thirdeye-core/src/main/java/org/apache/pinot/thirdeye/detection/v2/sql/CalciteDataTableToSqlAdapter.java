@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.pinot.thirdeye.dataframe.calcite.DataFrameSchema;
-import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 
 /**
  * Perform SQL on a DataFrame with Calcite.

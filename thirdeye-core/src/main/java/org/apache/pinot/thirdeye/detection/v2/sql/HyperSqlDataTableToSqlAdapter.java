@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

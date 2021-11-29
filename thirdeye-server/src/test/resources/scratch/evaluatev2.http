@@ -29,18 +29,33 @@ Content-Type: application/json
           "inputs": [
             {
               "targetProperty": "current",
-              "sourcePlanNode": "currentDataFetcher",
+              "sourcePlanNode": "missingDataManager",
               "sourceProperty": "currentOutput"
             }
           ],
           "outputs": []
         },
         {
+          "name": "missingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -56,9 +71,9 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "timeColumnFormat": "yyyyMMdd",
       "max": "850000",
       "min": "300000"
     }
@@ -97,18 +112,33 @@ Content-Type: application/json
           "inputs": [
             {
               "targetProperty": "current",
-              "sourcePlanNode": "currentDataFetcher",
+              "sourcePlanNode": "missingDataManager",
               "sourceProperty": "currentOutput"
             }
           ],
           "outputs": []
         },
         {
+          "name": "missingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -124,10 +154,10 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
-      "lookback": "7",
+      "timeColumnFormat": "yyyyMMdd",
+      "lookback": "P7D",
       "pattern": "DOWN",
       "sensitivity": "1"
     }
@@ -167,23 +197,38 @@ Content-Type: application/json
           "inputs": [
             {
               "targetProperty": "baseline",
-              "sourcePlanNode": "baselineDataFetcher",
+              "sourcePlanNode": "baselineMissingDataManager",
               "sourceProperty": "baselineOutput"
             },
             {
               "targetProperty": "current",
-              "sourcePlanNode": "currentDataFetcher",
+              "sourcePlanNode": "currentMissingDataManager",
               "sourceProperty": "currentOutput"
             }
           ],
           "outputs": []
         },
         {
+          "name": "baselineMissingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "baselineDataFetcher",
+              "sourceProperty": "baselineOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "baselineOutput"
+            }
+          ]
+        },
+        {
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -194,11 +239,26 @@ Content-Type: application/json
           ]
         },
         {
+          "name": "currentMissingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -214,17 +274,17 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "timeColumnFormat": "yyyyMMdd",
       "absoluteChange": "100000",
       "offset": "wo1w",
-      "offsetDays": "7",
+      "lookback": "P1W",
       "pattern": "down"
     }
   },
-  "start": "1581321600000",
-  "end": "1595228400000"
+  "start": "1612170000000",
+  "end": "1626771600000"
 }
 
 ### Mean Variance
@@ -249,7 +309,7 @@ Content-Type: application/json
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.dimensions": [],
-            "component.lookback": "${lookback}",
+            "component.lookback": "${lookbackDetector}",
             "component.sensitivity": "${sensitivity}",
             "anomaly.metric": "${metric}"
           },
@@ -263,11 +323,26 @@ Content-Type: application/json
           "outputs": []
         },
         {
+          "name": "currentMissingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${lookback}, 24, 60, 60, 1000)) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -283,10 +358,11 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
-      "lookback": "12",
+      "timeColumnFormat": "yyyyMMdd",
+      "lookback": "P12D",
+      "lookbackDetector": "12",
       "sensitivity": "1"
     }
   },
@@ -325,23 +401,38 @@ Content-Type: application/json
           "inputs": [
             {
               "targetProperty": "baseline",
-              "sourcePlanNode": "baselineDataFetcher",
+              "sourcePlanNode": "baselineMissingDataManager",
               "sourceProperty": "baselineOutput"
             },
             {
               "targetProperty": "current",
-              "sourcePlanNode": "currentDataFetcher",
+              "sourcePlanNode": "currentMissingDataManager",
               "sourceProperty": "currentOutput"
             }
           ],
           "outputs": []
         },
         {
+          "name": "baselineMissingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "baselineDataFetcher",
+              "sourceProperty": "baselineOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "baselineOutput"
+            }
+          ]
+        },
+        {
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ADD(${startTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) AND ts < ADD(${endTime}, MULT(-${offsetDays}, 24, 60, 60, 1000)) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -352,11 +443,26 @@ Content-Type: application/json
           ]
         },
         {
+          "name": "currentMissingDataManager",
+          "type": "TimeIndexFiller",
+          "inputs": [
+            {
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -372,15 +478,15 @@ Content-Type: application/json
       "dataSource": "pinotQuickStartLocal",
       "dataset": "pageviews",
       "metric": "sum(views)",
-      "monitoringGranularity": "1:DAYS",
+      "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "timeColumnFormat": "yyyyMMdd",
       "percentageChange": "0.1",
       "offset": "wo1w",
-      "offsetDays": "7",
+      "lookback": "P7D",
       "pattern": "down"
     }
   },
-  "start": "1581321600000",
-  "end": "1595228400000"
+  "start": "1613376000000",
+  "end": "1627714800000"
 }

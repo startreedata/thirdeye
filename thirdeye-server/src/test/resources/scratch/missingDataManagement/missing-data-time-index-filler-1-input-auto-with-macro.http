@@ -48,7 +48,6 @@ Content-Type: application/json
           ],
           "outputs": [
             {
-              "outputKey": "filler",
               "outputName": "currentOutput"
             }
           ]

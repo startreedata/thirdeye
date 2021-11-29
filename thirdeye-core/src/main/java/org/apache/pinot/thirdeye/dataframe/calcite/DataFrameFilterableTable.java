@@ -19,7 +19,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Table based on a DataFrame. Implement simple equal filtering.
+ * Table based on a DataFrame. Implements simple equal filtering.
  *
  * <p>It implements the {@link FilterableTable} interface, so Calcite gets
  * data by calling the {@link #scan(DataContext, List)} method.
@@ -55,7 +55,7 @@ public class DataFrameFilterableTable extends DataFrameTable
 
   /**
    * Push down equal filter for STRING, LONG and DOUBLE.
-   * */
+   */
   private static boolean addFilter(RexNode filter, @Nullable Object[] filterValues) {
 
     if (filter.isA(SqlKind.AND)) {

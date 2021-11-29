@@ -26,7 +26,8 @@ public class DataFrameEnumerator implements Enumerator<Object[]> {
     this(dataFrame, cancelFlag, null);
   }
 
-  public DataFrameEnumerator(DataFrame dataFrame, AtomicBoolean cancelFlag, @Nullable Object @Nullable [] filterValues) {
+  public DataFrameEnumerator(DataFrame dataFrame, AtomicBoolean cancelFlag,
+      @Nullable Object @Nullable [] filterValues) {
     this.cancelFlag = cancelFlag;
     this.filterValues = filterValues == null ? null
         : ImmutableNullableList.copyOf(filterValues);
@@ -43,6 +44,9 @@ public class DataFrameEnumerator implements Enumerator<Object[]> {
   public boolean moveNext() {
     outer:
     for (; ; ) {
+      if (cancelFlag.get()) {
+        return false;
+      }
       currentIndex++;
       if (currentIndex == dataFrame.size()) {
         return false;
@@ -76,5 +80,4 @@ public class DataFrameEnumerator implements Enumerator<Object[]> {
   public void close() {
     //nothing to do
   }
-
 }

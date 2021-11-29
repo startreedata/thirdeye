@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.v2.plan;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -82,11 +84,9 @@ public class PlanNodeFactory {
       final long startTime,
       final long endTime,
       final Map<String, PlanNode> pipelinePlanNodes) {
-    final String typeKey = planNodeBean.getType();
-    final Class<? extends PlanNode> planNodeClass = planNodeTypeToClassMap.get(typeKey);
-    if (planNodeClass == null) {
-      throw new UnsupportedOperationException("Not supported type - " + typeKey);
-    }
+    final String typeKey = requireNonNull(planNodeBean.getType(), "node type is null");
+    final Class<? extends PlanNode> planNodeClass =
+        requireNonNull(planNodeTypeToClassMap.get(typeKey), "Unknown node type: " + typeKey);
     try {
       final Constructor<?> constructor = planNodeClass.getConstructor();
       final PlanNode planNode = (PlanNode) constructor.newInstance();

@@ -1,5 +1,8 @@
 package org.apache.pinot.thirdeye.alert;
 
+import static java.util.Collections.emptyList;
+import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -42,7 +45,7 @@ public class PlanExecutor {
       final Map<ContextKey, DetectionPipelineResult> context,
       final PlanNode node)
       throws Exception {
-    for (final InputBean input : node.getPlanNodeInputs()) {
+    for (final InputBean input : optional(node.getPlanNodeInputs()).orElse(emptyList())) {
       final ContextKey contextKey = key(input.getSourcePlanNode(), input.getSourceProperty());
       if (!context.containsKey(contextKey)) {
         final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
@@ -67,11 +70,10 @@ public class PlanExecutor {
   }
 
   private static Map<String, DetectionPipelineResult> getOutput(
-      final Map<ContextKey, DetectionPipelineResult> context,
-      final PlanNode rootNode) {
+      final Map<ContextKey, DetectionPipelineResult> context, final String nodeName) {
     final Map<String, DetectionPipelineResult> results = new HashMap<>();
     for (final ContextKey contextKey : context.keySet()) {
-      if (contextKey.getNodeName().equals(rootNode.getName())) {
+      if (contextKey.getNodeName().equals(nodeName)) {
         results.put(contextKey.getKey(), context.get(contextKey));
       }
     }
@@ -103,10 +105,11 @@ public class PlanExecutor {
     executePlanNode(pipelinePlanNodes, context, rootNode);
 
     /* Return the output */
-    return getOutput(context, rootNode);
+    return getOutput(context, rootNode.getName());
   }
 
-  private Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
+  @VisibleForTesting
+  Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
       final long startTime, final long endTime) {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean planNodeBean : planNodeBeans) {

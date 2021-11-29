@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.detection.v2.operator.CombinerOperator;
+import org.apache.pinot.thirdeye.detection.v2.operator.CombinerOperator.CombinerResult;
 import org.apache.pinot.thirdeye.detection.v2.operator.EchoOperator;
 import org.apache.pinot.thirdeye.detection.v2.operator.EchoOperator.EchoResult;
 import org.apache.pinot.thirdeye.detection.v2.plan.CombinerPlanNode;
@@ -68,13 +70,16 @@ public class PlanExecutorTest {
 
   @Test
   public void testExecuteSingleForkJoin() throws Exception {
+    final PlanNodeBean echoNode = new PlanNodeBean()
+        .setName("echo")
+        .setType(EchoPlanNode.TYPE)
+        .setParams(ImmutableMap.of(
+            EchoOperator.DEFAULT_INPUT_KEY, "defaultInput"
+        ));
+
     final PlanNodeBean enumeratorNode = new PlanNodeBean()
         .setName("enumerator")
         .setType(EnumeratorPlanNode.TYPE);
-
-    final PlanNodeBean echoNode = new PlanNodeBean()
-        .setName("echo")
-        .setType(EchoPlanNode.TYPE);
 
     final PlanNodeBean combinerNode = new PlanNodeBean()
         .setName("combiner")
@@ -104,5 +109,17 @@ public class PlanExecutorTest {
         context,
         pipelinePlanNodes.get("root")
     );
+
+    assertThat(context.size()).isEqualTo(1);
+
+    final DetectionPipelineResult detectionPipelineResult = context.get(PlanExecutor.key("root",
+        CombinerOperator.DEFAULT_OUTPUT_KEY));
+
+    assertThat(detectionPipelineResult).isInstanceOf(CombinerResult.class);
+
+    final CombinerResult combinerResult = (CombinerResult) detectionPipelineResult;
+    final Map<String, DetectionPipelineResult> outputMap = combinerResult.getResults();
+
+    assertThat(outputMap).isNotNull();
   }
 }

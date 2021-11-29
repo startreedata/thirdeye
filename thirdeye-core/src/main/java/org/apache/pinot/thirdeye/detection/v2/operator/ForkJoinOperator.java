@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.detection.v2.operator.EnumeratorOperator.EnumeratorResult;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -16,11 +22,13 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   public static final String K_ENUMERATOR = "enumerator";
   public static final String K_ROOT = "root";
   public static final String K_COMBINER = "combiner";
+  private static final int PARALLELISM = 5;
 
   private Map<String, Object> properties;
   private PlanNode enumerator;
   private PlanNode root;
   private PlanNode combiner;
+  private ExecutorService executorService;
 
   @Override
   public void init(final OperatorContext context) {
@@ -29,6 +37,8 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     enumerator = (PlanNode) properties.get("enumerator");
     root = (PlanNode) properties.get("root");
     combiner = (PlanNode) properties.get("combiner");
+
+    executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
   @Override
@@ -38,7 +48,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final Map<String, DetectionPipelineResult> outputs = op.getOutputs();
     final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
     final List<Map<Object, Object>> results = enumeratorResult.getResults();
-    final List<Callable> callables = new ArrayList<>();
+    final List<Callable<Map<String, DetectionPipelineResult>>> callables = new ArrayList<>();
 
     for (final Map<Object, Object> result : results) {
       final PlanNode rootClone = deepClone(root);
@@ -49,10 +59,10 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
         return operator.getOutputs();
       }));
     }
-    final List<Map<String, Object>> allResults = executeAll(callables);
+    final List<Map<String, DetectionPipelineResult>> allResults = executeAll(callables);
 
     final Operator combinerOp = combiner.run();
-    combinerOp.setInput("allResults", new ForkJoinResult(allResults));
+    combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, new ForkJoinResult(allResults));
     combinerOp.execute();
 
     resultMap.putAll(combinerOp.getOutputs());
@@ -62,12 +72,28 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   }
 
-  private List<Map<String, Object>> executeAll(final List<Callable> l) {
-    return null;
+  private List<Map<String, DetectionPipelineResult>> executeAll(
+      final List<Callable<Map<String, DetectionPipelineResult>>> callables) {
+
+    final List<Future<Map<String, DetectionPipelineResult>>> futures = callables.stream()
+        .map(c -> executorService.submit(c))
+        .collect(Collectors.toList());
+    try {
+      executorService.awaitTermination(10, TimeUnit.SECONDS);
+
+      final List<Map<String, DetectionPipelineResult>> results = new ArrayList<>();
+      for (final Future<Map<String, DetectionPipelineResult>> future : futures) {
+        results.add(future.get());
+      }
+      return results;
+    } catch (final InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private PlanNode deepClone(final PlanNode root) {
-    return null;
+    // TODO spyne implement
+    return root;
   }
 
   @Override
@@ -77,9 +103,9 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   public static class ForkJoinResult implements DetectionPipelineResult {
 
-    private final List<Map<String, Object>> results;
+    private final List<Map<String, DetectionPipelineResult>> results;
 
-    public ForkJoinResult(final List<Map<String, Object>> results) {
+    public ForkJoinResult(final List<Map<String, DetectionPipelineResult>> results) {
       this.results = results;
     }
 
@@ -88,7 +114,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
       return null;
     }
 
-    public List<Map<String, Object>> getResults() {
+    public List<Map<String, DetectionPipelineResult>> getResults() {
       return results;
     }
   }

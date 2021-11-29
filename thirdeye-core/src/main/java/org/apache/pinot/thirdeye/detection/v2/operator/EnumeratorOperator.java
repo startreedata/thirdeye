@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
@@ -23,7 +24,11 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(new ArrayList<>()));
+    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(Arrays.asList(
+        ImmutableMap.of("key", 1),
+        ImmutableMap.of("key", 2),
+        ImmutableMap.of("key", 3)
+    )));
   }
 
   @Override

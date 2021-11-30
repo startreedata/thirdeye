@@ -3,18 +3,13 @@ package org.apache.pinot.thirdeye.detection.v2.macro;
 import com.google.common.collect.ImmutableMap;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.calcite.config.Lex;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.dialect.AnsiSqlDialect;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParser.Config;
-import org.apache.calcite.sql.parser.impl.SqlParserImpl;
-import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import org.apache.pinot.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
+import org.apache.pinot.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
+import org.apache.pinot.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -182,17 +177,20 @@ public class MacroEngineTest {
   private static class TestSqlLanguage implements SqlLanguage {
 
     @Override
-    public Config getSqlParserConfig() {
-      return SqlParser.config()
-          .withLex(Lex.MYSQL_ANSI)
-          .withConformance(SqlConformanceEnum.DEFAULT)
-          .withParserFactory(SqlParserImpl.FACTORY);
+    public ThirdEyeSqlParserConfig getSqlParserConfig() {
+      return new ThirdEyeSqlParserConfig.Builder()
+          .withLex("MYSQL_ANSI")
+          .withConformance("DEFAULT")
+          .withParserFactory("SqlParserImpl")
+          .build();
     }
 
     @Override
-    public SqlDialect getSqlDialect() {
-      return new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString(
-          IDENTIFIER_QUOTE_STRING));
+    public ThirdeyeSqlDialect getSqlDialect() {
+      return new ThirdeyeSqlDialect.Builder()
+          .withBaseDialect("AnsiSqlDialect")
+          .withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING)
+          .build();
     }
   }
 

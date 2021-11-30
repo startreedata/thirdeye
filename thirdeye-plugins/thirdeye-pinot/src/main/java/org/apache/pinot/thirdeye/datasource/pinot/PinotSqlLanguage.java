@@ -1,31 +1,30 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
-import org.apache.calcite.config.Lex;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.dialect.AnsiSqlDialect;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParser.Config;
-import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
-import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.pinot.thirdeye.spi.datasource.macro.SqlLanguage;
+import org.apache.pinot.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
+import org.apache.pinot.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 
 public class PinotSqlLanguage implements SqlLanguage {
 
-  private static final Config SQL_PARSER_CONFIG = SqlParser.config()
-      .withLex(Lex.MYSQL_ANSI)
-        .withConformance(SqlConformanceEnum.BABEL)
-        .withParserFactory(SqlBabelParserImpl.FACTORY);
+  private static final ThirdEyeSqlParserConfig SQL_PARSER_CONFIG = new ThirdEyeSqlParserConfig.Builder()
+      .withLex("MYSQL_ANSI")
+      .withConformance("BABEL")
+      .withParserFactory("SqlBabelParserImpl")
+      .build();
 
   // todo cyril this dialect may be incomplete
-  private static final SqlDialect SQL_DIALECT = new SqlDialect(AnsiSqlDialect.DEFAULT_CONTEXT.withIdentifierQuoteString("\""));
+  private static final ThirdeyeSqlDialect SQL_DIALECT = new ThirdeyeSqlDialect.Builder()
+      .withBaseDialect("AnsiSqlDialect")
+      .withIdentifierQuoteString("\"")
+      .build();
 
   @Override
-  public Config getSqlParserConfig() {
+  public ThirdEyeSqlParserConfig getSqlParserConfig() {
     return SQL_PARSER_CONFIG;
   }
 
   @Override
-  public SqlDialect getSqlDialect() {
+  public ThirdeyeSqlDialect getSqlDialect() {
     return SQL_DIALECT;
   }
 }

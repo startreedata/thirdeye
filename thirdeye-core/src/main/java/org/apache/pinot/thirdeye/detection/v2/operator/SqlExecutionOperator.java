@@ -7,33 +7,35 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.pinot.thirdeye.detection.v2.sql.DataTableToSqlAdapterFactory;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Connecting to a temporary SQL workspace with all the inputs data as tables and perform SQL
- * operations on top.
- */
 public class SqlExecutionOperator extends DetectionPipelineOperator {
 
-  public static final Logger LOG = LoggerFactory.getLogger(SqlExecutionOperator.class);
-  private static final String JDBC_DRIVER_CLASSNAME = "jdbc.driver.classname";
-  private static final String JDBC_CONNECTION = "jdbc.connection";
+  private static final Logger LOG = LoggerFactory.getLogger(SqlExecutionOperator.class);
+  private static final String SQL_ENGINE = "sql.engine";
   private static final String SQL_QUERIES = "sql.queries";
-  private String jdbcDriverClassName = "org.hsqldb.jdbc.JDBCDriver";
-  private String jdbcConnection = "jdbc:hsqldb:mem";
-  private List<String> queries;
+  /**
+   * User can pass jdbc parameters.
+   * In Map<String, String> format.
+   * See https://calcite.apache.org/docs/adapter.html#jdbc-connect-string-parameters
+   */
+  private static final String JDBC_CONNECTION_PARAMS = "jdbc.parameters";
+  private static final String DEFAULT_SQL_ENGINE = "HYPERSQL";
 
-  public SqlExecutionOperator() {
-    super();
-  }
+  private final List<String> queries = new ArrayList<>();
+  private DataTableToSqlAdapter dataTableToSqlAdapter;
 
   @Override
   public void init(final OperatorContext context) {
@@ -42,55 +44,68 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
     if (planNode.getParams().containsKey(SQL_QUERIES)) {
-      queries = (List<String>) planNode.getParams().get(SQL_QUERIES);
+      queries.addAll((List<String>) planNode.getParams().get(SQL_QUERIES));
     } else {
       throw new IllegalArgumentException(
           "Missing property '" + SQL_QUERIES + "' in SqlExecutionOperator");
     }
-    if (planNode.getParams().containsKey(JDBC_DRIVER_CLASSNAME)) {
-      jdbcDriverClassName = planNode.getParams().get(JDBC_DRIVER_CLASSNAME).toString();
-    }
-    if (planNode.getParams().containsKey(JDBC_CONNECTION)) {
-      jdbcConnection = planNode.getParams().get(JDBC_CONNECTION).toString();
+
+    dataTableToSqlAdapter = DataTableToSqlAdapterFactory.create(planNode.getParams()
+        .getOrDefault(SQL_ENGINE, DEFAULT_SQL_ENGINE).toString());
+    if (planNode.getParams().containsKey(JDBC_CONNECTION_PARAMS)) {
+      dataTableToSqlAdapter.jdbcProperties()
+          .putAll((Map<String, String>) planNode.getParams().get(JDBC_CONNECTION_PARAMS));
     }
   }
 
   @Override
-  public void execute() throws Exception {
+  public final void execute() throws Exception {
+    Connection connection = getConnection();
+    initTables(connection);
+    runQueries(connection);
+    dataTableToSqlAdapter.tearDown(connection);
+  }
+
+  private Connection getConnection() throws ClassNotFoundException, SQLException {
     try {
-      Class.forName(jdbcDriverClassName);
+      Class.forName(dataTableToSqlAdapter.jdbcDriverClassName());
     } catch (final Exception e) {
-      LOG.error("ERROR: failed to load JDBC driver class {}.", jdbcDriverClassName, e);
+      LOG.error("ERROR: failed to load JDBC driver class {}.",
+          dataTableToSqlAdapter.jdbcDriverClassName(),
+          e);
       throw e;
     }
-    final Connection c = DriverManager.getConnection(jdbcConnection);
+    final Connection connection = DriverManager.getConnection(dataTableToSqlAdapter.jdbcConnection(),
+        dataTableToSqlAdapter.jdbcProperties());
     LOG.debug("Successfully connected to JDBC connection: {} with driver class: {} ",
-        jdbcConnection,
-        jdbcDriverClassName);
+        dataTableToSqlAdapter.jdbcConnection(),
+        dataTableToSqlAdapter.jdbcDriverClassName());
 
-    final List<String> insertedTable = new ArrayList<>();
-    for (final String tableName : inputMap.keySet()) {
-      final DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
+    return connection;
+  }
+
+  private void initTables(final Connection connection) throws SQLException {
+    Map<String, DataTable> datatables = new HashMap<>();
+    for (String tableName : inputMap.keySet()) {
+      DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
       if (detectionPipelineResult instanceof DataTable) {
-        insertInput(c, tableName, (DataTable) detectionPipelineResult);
-        insertedTable.add(tableName);
+        datatables.put(tableName, (DataTable) detectionPipelineResult);
       }
     }
-    runQueries(queries, c);
-
-    // Destroy database
-    LOG.debug("trying to drop all the tables to clean up the environment.");
-    for (final String tableName : insertedTable) {
-      destroyTable(c, tableName);
+    try {
+      dataTableToSqlAdapter.loadTables(connection, datatables);
+    } catch (final SQLException e) {
+      LOG.error("Failed to load tables");
+      throw e;
     }
   }
 
-  private void runQueries(final List<String> queries, final Connection connection)
-      throws SQLException {
+  private void runQueries(final Connection connection) throws SQLException {
     int i = 0;
     for (final String query : queries) {
       try {
-        setOutput(Integer.toString(i++), runQuery(query, connection));
+        DataTable dataTable = runQuery(query, connection);
+        setOutput(Integer.toString(i++), dataTable);
       } catch (final SQLException e) {
         LOG.error("Got exceptions when executing SQL query: {}", query, e);
         throw e;
@@ -104,7 +119,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     return getDataTableFromResultSet(resultSet);
   }
 
-  private DataTable getDataTableFromResultSet(final ResultSet resultSet) throws SQLException {
+  public static DataTable getDataTableFromResultSet(final ResultSet resultSet) throws SQLException {
     final List<String> columns = new ArrayList<>();
     final List<ColumnType> columnTypes = new ArrayList<>();
     final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -137,6 +152,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
             rowData[i] = resultSet.getString(i + 1);
             continue;
           case DATE:
+            // todo cyril datetime is parsed as date - precision loss - use timestamp instead?
             rowData[i] = resultSet.getDate(i + 1);
             continue;
           case BOOLEAN:
@@ -151,112 +167,6 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
       }
     }
     return simpleDataTableBuilder.build();
-  }
-
-  private void destroyTable(final Connection c, final String tableName) throws SQLException {
-    final String dropTableStatement = "DROP TABLE " + tableName + " IF EXISTS";
-    try {
-      c.prepareCall(dropTableStatement).execute();
-    } catch (final SQLException e) {
-      LOG.error("Failed to drop table: {} with sql: {}",
-          tableName,
-          dropTableStatement,
-          e);
-      throw e;
-    }
-  }
-
-  private void insertInput(final Connection c, final String tableName,
-      final DataTable dataTable) throws SQLException {
-    // Drop the table in case.
-    destroyTable(c, tableName);
-
-    // Create the table.
-    createTable(c, tableName, dataTable);
-
-    // Insert all rows into the table
-    for (int rowIdx = 0; rowIdx < dataTable.getRowCount(); rowIdx++) {
-      final String insertionStatement = getRowInsertionStatement(tableName, rowIdx, dataTable);
-      try {
-        c.prepareCall(insertionStatement).execute();
-      } catch (final SQLException e) {
-        LOG.error("Failed to insert row idx: {}, insertion sql: {}",
-            rowIdx,
-            insertionStatement,
-            e);
-        throw e;
-      }
-    }
-  }
-
-  private void createTable(final Connection c, final String tableName, final DataTable dataTable)
-      throws SQLException {
-    final String tableCreationStatement = getTableCreationStatement(tableName,
-        dataTable.getColumns(),
-        dataTable.getColumnTypes());
-    try {
-      c.prepareCall(tableCreationStatement).execute();
-      LOG.debug("Trying to create table with sql: {}", tableCreationStatement);
-    } catch (final SQLException e) {
-      LOG.error("Failed to create table: {} with sql: {}",
-          tableName,
-          tableCreationStatement,
-          e);
-      throw e;
-    }
-  }
-
-  private String getRowInsertionStatement(final String tableName,
-      final int rowIdx,
-      final DataTable dataTable) {
-    final StringBuilder sb = new StringBuilder(
-        "INSERT INTO " + tableName + " VALUES (");
-    for (int colIdx = 0; colIdx < dataTable.getColumnCount(); colIdx++) {
-      final Object value = dataTable.getObject(rowIdx, colIdx);
-
-      // If string, then wrap with quotes
-      final String quoteWith = value instanceof String ? "'" : "";
-      sb
-          .append(quoteWith)
-          .append(value)
-          .append(quoteWith);
-
-      if (colIdx < dataTable.getColumnCount() - 1) {
-        sb.append(", ");
-      }
-    }
-    sb.append(")");
-    return sb.toString();
-  }
-
-  private String getTableCreationStatement(final String tableName, final List<String> columns,
-      final List<ColumnType> columnTypes) {
-    String tableCreationStatement = "CREATE TABLE " + tableName + " (";
-    for (int i = 0; i < columns.size(); i++) {
-      tableCreationStatement += columns.get(i) + " " + getColumnType(columnTypes.get(i));
-      if (i < columns.size() - 1) {
-        tableCreationStatement += ", ";
-      }
-    }
-    tableCreationStatement += ")";
-    return tableCreationStatement;
-  }
-
-  private String getColumnType(final ColumnType columnType) {
-    switch (columnType.getType()) {
-      case INT:
-      case LONG:
-        return "BIGINT";
-      case FLOAT:
-      case DOUBLE:
-        return "DOUBLE";
-      case STRING:
-        return "VARCHAR(128)";
-      case BYTES:
-      case OBJECT:
-        return "VARBINARY(128)";
-    }
-    return columnType.getType().toString();
   }
 
   @Override

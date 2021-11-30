@@ -78,23 +78,23 @@ mvn install -pl '!thirdeye-integration-tests'
 
 ### Running ThirdEye from Distribution
 
-ThirdEye builds a tarball and creates an installed dir post build.
-```
-# cd to the distribution dir
-cd thirdeye-distribution/target/thirdeye-distribution-1.0.0-SNAPSHOT-dist/thirdeye-distribution-1.0.0-SNAPSHOT
-```
-
-ThirdEye has 3 main components all of which start from a single launcher
+ThirdEye builds a tarball and creates an installed dir post build.  
+ThirdEye has 3 main components all of which start from a single launcher  
 - **Coordinator**: This is the API server which exposes a swagger endpoint that will be used in this guide
 - **Scheduler**: This is the component that runs the cron jobs and automated pipelines
 - **Worker**: This is the component that does all the hard work: running detection tasks and generating anomalies.
-
 ```
-# WIP: This section needs to be refactored.
-#
+# cd to the distribution dir
+cd thirdeye-distribution/target/thirdeye-distribution-1.0.0-SNAPSHOT-dist/thirdeye-distribution-1.0.0-SNAPSHOT
+
 # Run the coordinator
 # To run a scheduler, enable scheduler.enabled: true inside the configuration
 # To run a worker, enable taskDriver.enabled: true inside the configuration
+
+# To load plugins, export the plugin directory
+export THIRDEYE_PLUGINS_DIR="${PWD}/plugins"
+
+# Run the server
 bin/thirdeye.sh server
 ```
 

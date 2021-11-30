@@ -10,7 +10,7 @@ public interface SqlLanguage {
    * See pinot datasource implementation for reference.
    * The object returned will be cast to a Calcite SqlParser.Config.
    */
-  Object getSqlParserConfig();
+  ThirdEyeSqlParserConfig getSqlParserConfig();
 
   /**
    * @see <a href="https://github.com/apache/calcite/tree/master/core/src/main/java/org/apache/calcite/sql/dialect">Calcite
@@ -18,5 +18,5 @@ public interface SqlLanguage {
    * See pinot datasource implementation for reference.
    * The object returned will be cast to a Calcite SqlDialect.
    */
-  Object getSqlDialect();
+  ThirdeyeSqlDialect getSqlDialect();
 }

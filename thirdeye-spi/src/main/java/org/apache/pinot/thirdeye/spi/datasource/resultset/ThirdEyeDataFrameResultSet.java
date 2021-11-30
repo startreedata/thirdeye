@@ -147,7 +147,9 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
           label = label.split(" as")[1].trim().replace("\"", "");
         }
         if (label.contains("(")) {
-          label = label.substring(label.indexOf("(") + 1, label.indexOf(")")).trim().replace("\"", "");
+          label = label.substring(label.indexOf("(") + 1, label.indexOf(")"))
+              .trim()
+              .replace("\"", "");
         }
         if (columnName.equalsIgnoreCase(label)) {
           return ColumnType.jdbcTypeToColumnType(resultSet.getMetaData().getColumnType(i));

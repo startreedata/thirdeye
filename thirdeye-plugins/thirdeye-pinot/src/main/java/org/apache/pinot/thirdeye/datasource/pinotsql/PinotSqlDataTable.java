@@ -103,6 +103,11 @@ public class PinotSqlDataTable extends AbstractDataTableImpl {
   }
 
   @Override
+  public boolean getBoolean(final int rowIdx, final int colIdx) {
+    return Boolean.parseBoolean(getString(rowIdx, colIdx));
+  }
+
+  @Override
   public String getString(final int rowIdx, final int colIdx) {
     return getObject(rowIdx, colIdx).toString();
   }

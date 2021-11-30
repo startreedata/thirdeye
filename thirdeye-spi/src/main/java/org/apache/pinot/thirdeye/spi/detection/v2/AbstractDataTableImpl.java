@@ -5,8 +5,9 @@ import java.util.Map;
 
 /**
  * Abstract DataTable with properties management implemented.
- * */
-public abstract class AbstractDataTableImpl implements DataTable{
+ */
+public abstract class AbstractDataTableImpl implements DataTable {
+
   private final Map<String, String> properties = new HashMap<>();
 
   @Override

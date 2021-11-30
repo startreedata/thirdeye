@@ -1,0 +1,22 @@
+[
+  {
+    "name": "us_monthly_air_passengers_simplified-holtwinters-usingtemplate",
+    "description": "Sample description payload for testing",
+    "cron": "0 0/1 * 1/1 * ? *",
+    "template": {
+      "name": "holtwinters-template"
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "us_monthly_air_passengers_simplified",
+      "metric": "sum(passenger_count)",
+      "monitoringGranularity": "1:DAYS",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "alpha": -1,
+      "lookback": "7",
+      "pattern": "DOWN",
+      "sensitivity": "2"
+    }
+  }
+]

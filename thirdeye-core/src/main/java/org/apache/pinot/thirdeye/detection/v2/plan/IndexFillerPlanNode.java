@@ -17,7 +17,7 @@ public class IndexFillerPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final TimeIndexFillerOperator timeIndexFillerOperator = new TimeIndexFillerOperator();
     timeIndexFillerOperator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))

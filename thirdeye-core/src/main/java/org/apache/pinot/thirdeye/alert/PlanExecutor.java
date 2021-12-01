@@ -56,7 +56,7 @@ public class PlanExecutor {
       }
       node.setInput(input.getTargetProperty(), context.get(contextKey));
     }
-    final Operator operator = node.run();
+    final Operator operator = node.buildOperator();
     operator.execute();
     final Map<String, DetectionPipelineResult> outputs = operator.getOutputs();
     for (final Entry<String, DetectionPipelineResult> output : outputs.entrySet()) {

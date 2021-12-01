@@ -45,7 +45,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     dataFetcherOperator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))

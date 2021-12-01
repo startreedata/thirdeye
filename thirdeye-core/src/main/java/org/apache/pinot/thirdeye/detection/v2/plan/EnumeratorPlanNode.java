@@ -45,7 +45,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final EnumeratorOperator operator = new EnumeratorOperator();
     operator.init(new OperatorContext()
         .setStartTime(params

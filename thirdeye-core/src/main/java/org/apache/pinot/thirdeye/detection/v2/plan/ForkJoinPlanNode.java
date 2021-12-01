@@ -51,7 +51,7 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final PlanNode enumerator = getPlanNode(K_ENUMERATOR);
     final PlanNode root = getPlanNode(K_ROOT);
     final PlanNode combiner = getPlanNode(K_COMBINER);

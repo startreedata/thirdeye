@@ -43,7 +43,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Operator op = enumerator.run();
+    final Operator op = enumerator.buildOperator();
     op.execute();
     final Map<String, DetectionPipelineResult> outputs = op.getOutputs();
     final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
@@ -54,14 +54,14 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
       final PlanNode rootClone = deepClone(root);
       setContext(rootClone, properties);
       callables.add((() -> {
-        final Operator operator = rootClone.run();
+        final Operator operator = rootClone.buildOperator();
         operator.execute();
         return operator.getOutputs();
       }));
     }
     final List<Map<String, DetectionPipelineResult>> allResults = executeAll(callables);
 
-    final Operator combinerOp = combiner.run();
+    final Operator combinerOp = combiner.buildOperator();
     combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, new ForkJoinResult(allResults));
     combinerOp.execute();
 

@@ -56,7 +56,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final AnomalyDetectorOperator anomalyDetectorOperator = new AnomalyDetectorOperator();
     anomalyDetectorOperator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))

@@ -53,7 +53,6 @@ public interface PlanNode {
    *
    * @return execution operator.
    */
-  Operator run()
-      throws Exception;
+  Operator buildOperator() throws Exception;
 
 }

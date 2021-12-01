@@ -48,7 +48,7 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final EventTriggerOperator eventTriggerOperator = new EventTriggerOperator();
     eventTriggerOperator.init(new OperatorContext()
         .setInputsMap(inputsMap)

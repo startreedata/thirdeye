@@ -40,7 +40,7 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final EchoOperator operator = new EchoOperator();
     operator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))

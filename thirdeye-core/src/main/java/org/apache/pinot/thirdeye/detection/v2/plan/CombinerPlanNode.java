@@ -45,7 +45,7 @@ public class CombinerPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final CombinerOperator operator = new CombinerOperator();
     operator.init(new OperatorContext()
         .setStartTime(params

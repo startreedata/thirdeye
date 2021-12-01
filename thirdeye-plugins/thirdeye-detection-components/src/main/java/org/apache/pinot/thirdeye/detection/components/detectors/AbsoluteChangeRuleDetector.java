@@ -49,7 +49,6 @@ import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
@@ -82,7 +81,6 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   private TimeGranularity timeGranularity;
   private Period monitoringGranularityPeriod;
   private AbsoluteChangeRuleDetectorSpec spec;
-  private TimeConverter timeConverter;
 
   @Override
   public void init(final AbsoluteChangeRuleDetectorSpec spec) {
@@ -124,7 +122,7 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
       final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
 
       final DataFrame df = new DataFrame();
-      df.addSeries(DataFrame.COL_TIME, timeConverter.convertSeries(currentDf.get(spec.getTimestamp())));
+      df.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
       df.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
       df.addSeries(DataFrame.COL_VALUE, baselineDf.get(spec.getMetric()));
 
@@ -252,10 +250,5 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     final Series series = map((DoubleFunction) values -> values[0] + change,
         dfBase.getDoubles(DataFrame.COL_VALUE));
     dfBase.addSeries(colBound, series);
-  }
-
-  @Override
-  public void setTimeConverter(TimeConverter timeConverter) {
-    this.timeConverter = timeConverter;
   }
 }

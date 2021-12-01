@@ -47,7 +47,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    detector.setTimeConverter(timeConverter);
     for (final Interval interval : getMonitoringWindows()) {
       final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
       final DetectionPipelineResult detectionResult = detector

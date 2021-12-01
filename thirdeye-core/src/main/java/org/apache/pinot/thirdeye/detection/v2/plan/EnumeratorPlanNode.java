@@ -25,11 +25,6 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  void setNestedProperties(final Map<String, Object> properties) {
-    // inject detector to nested property if possible
-  }
-
-  @Override
   public String getType() {
     return TYPE;
   }

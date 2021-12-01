@@ -18,10 +18,6 @@ public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  void setNestedProperties(final Map<String, Object> properties) {
-  }
-
-  @Override
   public String getType() {
     return "SqlExecution";
   }

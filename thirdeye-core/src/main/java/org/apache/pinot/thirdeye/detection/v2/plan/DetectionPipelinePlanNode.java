@@ -57,11 +57,6 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     this.endTime = planNodeContext.getEndTime();
   }
 
-  /**
-   * @param properties Used to set properties during plan execution.
-   */
-  abstract void setNestedProperties(Map<String, Object> properties);
-
   public PlanNodeBean getDetectionPlanApi() {
     return planNodeBean;
   }

@@ -31,11 +31,6 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  void setNestedProperties(final Map<String, Object> properties) {
-
-  }
-
-  @Override
   public String getType() {
     return TYPE;
   }

@@ -72,8 +72,7 @@ public abstract class DetectionPipelineOperator implements Operator {
   @Override
   public void init(final OperatorContext context) {
     planNode = context.getPlanNode();
-    timeFormat = context.getTimeFormat();
-    timeConverter = DefaultTimeConverter.get(timeFormat);
+    timeConverter = DefaultTimeConverter.get(OperatorContext.DEFAULT_TIME_FORMAT);
     startTime = optional(context.getStartTime()).map(timeConverter::convert).orElse(-1L);
     endTime = optional(context.getEndTime()).map(timeConverter::convert).orElse(-1L);
     checkArgument(startTime <= endTime, "start time cannot be greater than end time");

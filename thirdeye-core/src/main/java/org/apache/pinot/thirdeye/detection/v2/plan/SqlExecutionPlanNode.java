@@ -18,17 +18,8 @@ public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  void setNestedProperties(final Map<String, Object> properties) {
-  }
-
-  @Override
   public String getType() {
     return "SqlExecution";
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override
@@ -37,7 +28,7 @@ public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final SqlExecutionOperator sqlExecutionOperator = new SqlExecutionOperator();
     sqlExecutionOperator.init(new OperatorContext()
         .setPlanNode(planNodeBean)

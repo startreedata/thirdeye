@@ -1,0 +1,21 @@
+[
+  {
+    "name": "my-sg",
+    "cron": "*/1 * * * * ?",
+    "alerts": [
+      {
+        "id": 15263
+      }
+    ],
+    "notificationSchemes": {
+      "email": {
+        "to": [
+          "pyne.suvodeep@gmail.com"
+        ]
+      },
+      "webhook": {
+        "url": "http://localhost:8080/internal/webhook"
+      }
+    }
+  }
+]

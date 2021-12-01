@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.respondOk;
 
 import com.codahale.metrics.annotation.Timed;
@@ -41,7 +42,8 @@ public class AuthResource {
     final String principal = thirdEyePrincipal.getName();
     return new AuthApi()
         .setUser(new UserApi()
-            .setPrincipal(principal));
+            .setPrincipal(principal))
+        .setAccessToken(NO_AUTH_USER);
   }
 
   @Timed

@@ -41,7 +41,6 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
@@ -67,7 +66,6 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   private TimeGranularity timeGranularity;
   private ThresholdRuleDetectorSpec spec;
   private Period monitoringGranularityPeriod;
-  private TimeConverter timeConverter;
 
   @Override
   public void init(final ThresholdRuleDetectorSpec spec) {
@@ -99,7 +97,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     final List<DetectionResult> detectionResults = new ArrayList<>();
     for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
-      currentDf.addSeries(DataFrame.COL_TIME, timeConverter.convertSeries(currentDf.get(spec.getTimestamp())));
+      currentDf.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
       currentDf.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
 
       final DetectionResult detectionResult = runDetectionOnSingleDataTable(interval, currentDf);
@@ -204,10 +202,5 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
       df.mapInPlace(DoubleSeries.MIN, DataFrame.COL_VALUE, DataFrame.COL_UPPER_BOUND,
           DataFrame.COL_VALUE);
     }
-  }
-
-  @Override
-  public void setTimeConverter(TimeConverter timeConverter) {
-    this.timeConverter = timeConverter;
   }
 }

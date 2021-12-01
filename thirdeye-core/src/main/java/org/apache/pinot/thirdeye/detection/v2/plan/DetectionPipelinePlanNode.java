@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.detection.v2.plan;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,32 +40,27 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelinePlanNode.class);
 
-  protected String name = null;
-  protected Map<String, PlanNode> pipelinePlanNodes = null;
   protected PlanNodeBean planNodeBean = null;
   protected long startTime = -1;
   protected long endTime = -1;
   protected Map<String, DetectionPipelineResult> inputsMap = new HashMap<>();
+
+  private PlanNodeContext context;
 
   protected DetectionPipelinePlanNode() {
   }
 
   @Override
   public void init(final PlanNodeContext planNodeContext) {
-    this.name = planNodeContext.getName();
-    this.pipelinePlanNodes = planNodeContext.getPipelinePlanNodes();
-    this.planNodeBean = planNodeContext.getDetectionPlanApi();
+    this.context = planNodeContext;
+
+    this.planNodeBean = planNodeContext.getPlanNodeBean();
     this.startTime = planNodeContext.getStartTime();
     this.endTime = planNodeContext.getEndTime();
   }
 
-  /**
-   * @param properties Used to set properties during plan execution.
-   */
-  abstract void setNestedProperties(Map<String, Object> properties);
-
-  public PlanNodeBean getDetectionPlanApi() {
-    return planNodeBean;
+  private PlanNodeContext getContext() {
+    return requireNonNull(context, "node not initialized! " + getClass().getSimpleName());
   }
 
   public long getStartTime() {
@@ -90,6 +87,6 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
 
   @Override
   public String getName() {
-    return name;
+    return getContext().getName();
   }
 }

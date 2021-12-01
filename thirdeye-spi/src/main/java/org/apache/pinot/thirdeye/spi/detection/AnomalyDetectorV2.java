@@ -21,12 +21,4 @@ public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent
    */
   DetectionPipelineResult runDetection(Interval interval, Map<String, DataTable> timeSeriesMap)
       throws DetectorException;
-
-  /**
-   * Set TimeConverter to allow AnomalyDetectorV2 change the timeSeries from any format to millis
-   * epoch LongSeries.
-   *
-   * @param timeConverter
-   */
-  void setTimeConverter(TimeConverter timeConverter);
 }

@@ -8,7 +8,6 @@ import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 public class OperatorContext {
   public static final String DEFAULT_TIME_FORMAT = TimeFormat.EPOCH + ":" + TimeUnit.MILLISECONDS;
 
-  private String timeFormat = DEFAULT_TIME_FORMAT;
   private String startTime;
   private String endTime;
   private PlanNodeBean planNode;
@@ -57,15 +56,6 @@ public class OperatorContext {
 
   public OperatorContext setInputsMap(final Map<String, DetectionPipelineResult> inputsMap) {
     this.inputsMap = inputsMap;
-    return this;
-  }
-
-  public String getTimeFormat() {
-    return timeFormat;
-  }
-
-  public OperatorContext setTimeFormat(final String timeFormat) {
-    this.timeFormat = timeFormat;
     return this;
   }
 }

@@ -1,12 +1,9 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static java.util.Collections.singletonList;
-
 import java.util.List;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
-import org.joda.time.Interval;
 
 public class EchoOperator extends DetectionPipelineOperator {
 
@@ -26,10 +23,6 @@ public class EchoOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     final String echoText = getPlanNode().getParams().get(DEFAULT_INPUT_KEY).toString();
     setOutput(DEFAULT_OUTPUT_KEY, new EchoResult(echoText));
-  }
-
-  private List<Interval> getMonitoringWindows() {
-    return singletonList(new Interval(startTime, endTime));
   }
 
   @Override
@@ -54,5 +47,4 @@ public class EchoOperator extends DetectionPipelineOperator {
       return text;
     }
   }
-
 }

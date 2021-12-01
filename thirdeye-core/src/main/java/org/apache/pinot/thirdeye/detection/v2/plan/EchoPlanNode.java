@@ -20,18 +20,8 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  void setNestedProperties(final Map<String, Object> properties) {
-    // inject detector to nested property if possible
-  }
-
-  @Override
   public String getType() {
     return TYPE;
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override
@@ -40,12 +30,11 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Operator run() throws Exception {
+  public Operator buildOperator() throws Exception {
     final EchoOperator operator = new EchoOperator();
     operator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))
         .setEndTime(String.valueOf(this.endTime))
-        .setTimeFormat(getParams().getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT).toString())
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

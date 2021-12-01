@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.macro;
 
+import static org.apache.pinot.thirdeye.detection.v2.macro.SqlLanguageTranslator.translate;
+
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +14,6 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.util.SqlShuttle;
 import org.apache.calcite.sql.util.SqlVisitor;
 import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeFilterFunction;
@@ -34,7 +35,8 @@ public class MacroEngine {
       new TimeGroupFunction()
   );
 
-  private final SqlLanguage sqlLanguage;
+  private final SqlParser.Config sqlParserConfig;
+  private final SqlDialect sqlDialect;
   private final String tableName;
   private final String query;
   private final Map<String, String> properties;
@@ -44,7 +46,8 @@ public class MacroEngine {
   public MacroEngine(final SqlLanguage sqlLanguage, final SqlExpressionBuilder sqlExpressionBuilder,
       final Interval detectionInterval,
       String tableName, String query) {
-    this.sqlLanguage = sqlLanguage;
+    this.sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
+    this.sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
     this.tableName = tableName;
     this.query = query;
     this.properties = new HashMap<>();
@@ -66,13 +69,13 @@ public class MacroEngine {
   }
 
   private SqlNode queryToNode(final String sql) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sql, (Config) sqlLanguage.getSqlParserConfig());
+    SqlParser sqlParser = SqlParser.create(sql, sqlParserConfig);
     return sqlParser.parseQuery();
   }
 
   private SqlNode expressionToNode(final String sqlExpression) throws SqlParseException {
     SqlParser sqlParser = SqlParser.create(sqlExpression,
-        (Config) sqlLanguage.getSqlParserConfig());
+        sqlParserConfig);
     return sqlParser.parseExpression();
   }
 
@@ -82,7 +85,7 @@ public class MacroEngine {
 
   private String nodeToQuery(final SqlNode node) {
     return node.toSqlString(
-        c -> c.withDialect((SqlDialect) sqlLanguage.getSqlDialect())
+        c -> c.withDialect(sqlDialect)
             .withQuoteAllIdentifiers(false)
     ).getSql();
   }

@@ -21,7 +21,6 @@ public interface PlanNode {
    * @return unique PlanNode name
    */
   String getName();
-
   /**
    *
    * @return PlanNode type
@@ -53,7 +52,6 @@ public interface PlanNode {
    *
    * @return execution operator.
    */
-  Operator run()
-      throws Exception;
+  Operator buildOperator() throws Exception;
 
 }

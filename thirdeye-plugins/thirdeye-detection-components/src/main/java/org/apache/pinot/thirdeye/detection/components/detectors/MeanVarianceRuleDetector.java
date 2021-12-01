@@ -62,6 +62,7 @@ import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,7 +190,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     // getting data (window + earliest lookback) all at once.
     LOG.info("Getting data for" + slice);
     final DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
-    return runDetectionOnSingleDataTable(window, dfInput);
+    return runDetectionOnSingleDataTable(dfInput, window);
   }
 
   @Override
@@ -209,7 +210,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
           .setIndex(COL_TIME);
       currentDf.addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(interval, currentDf);
+      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
       detectionResults.add(detectionResult);
     }
     return new GroupedDetectionResults(detectionResults);
@@ -226,8 +227,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         null);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final Interval window,
-      final DataFrame dfInput) {
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+      final ReadableInterval window) {
     final DataFrame dfCurr = new DataFrame(dfInput).renameSeries(COL_VALUE, COL_CURR);
     final DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis());
 

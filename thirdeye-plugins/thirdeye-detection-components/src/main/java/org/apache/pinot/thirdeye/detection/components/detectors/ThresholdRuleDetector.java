@@ -51,6 +51,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.ReadableInterval;
 
 /**
  * Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.
@@ -100,7 +101,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
       currentDf.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
       currentDf.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(interval, currentDf);
+      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
       detectionResults.add(detectionResult);
     }
     return new GroupedDetectionResults(detectionResults);
@@ -140,39 +141,40 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
         .get(slice)
         .renameSeries(DataFrame.COL_VALUE, DataFrame.COL_CURRENT);
 
-    return runDetectionOnSingleDataTable(window, df);
+    return runDetectionOnSingleDataTable(df, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final Interval window, final DataFrame df) {
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+      final ReadableInterval window) {
 
     // defaults
-    df.addSeries(COL_TOO_HIGH, BooleanSeries.fillValues(df.size(), false));
-    df.addSeries(COL_TOO_LOW, BooleanSeries.fillValues(df.size(), false));
+    dfInput.addSeries(COL_TOO_HIGH, BooleanSeries.fillValues(dfInput.size(), false));
+    dfInput.addSeries(COL_TOO_LOW, BooleanSeries.fillValues(dfInput.size(), false));
 
     // max
     if (!Double.isNaN(spec.getMax())) {
-      df.addSeries(COL_TOO_HIGH, df.getDoubles(DataFrame.COL_CURRENT).gt(spec.getMax()));
+      dfInput.addSeries(COL_TOO_HIGH, dfInput.getDoubles(DataFrame.COL_CURRENT).gt(spec.getMax()));
     }
 
     // min
     if (!Double.isNaN(spec.getMin())) {
-      df.addSeries(COL_TOO_LOW, df.getDoubles(DataFrame.COL_CURRENT).lt(spec.getMin()));
+      dfInput.addSeries(COL_TOO_LOW, dfInput.getDoubles(DataFrame.COL_CURRENT).lt(spec.getMin()));
     }
-    df.mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
+    dfInput.mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
     final MetricSlice slice = MetricSlice
         .from(-1, window.getStartMillis(), window.getEndMillis(), null,
             timeGranularity);
 
-    addBaselineAndBoundaries(df);
+    addBaselineAndBoundaries(dfInput);
 
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        df,
+        dfInput,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(dfInput));
   }
 
   @Override

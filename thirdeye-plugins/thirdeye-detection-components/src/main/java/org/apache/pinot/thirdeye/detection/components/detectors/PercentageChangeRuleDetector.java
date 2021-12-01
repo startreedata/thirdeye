@@ -227,30 +227,30 @@ public class PercentageChangeRuleDetector implements
     return runDetectionOnSingleDataTable(mergedDf, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame df,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
       final ReadableInterval window) {
     // calculate percentage change
-    df.addSeries(COL_CHANGE, map((Series.DoubleFunction) this::percentageChangeLambda,
-        df.getDoubles(COL_CURRENT),
-        df.get(DataFrame.COL_VALUE))
+    dfInput.addSeries(COL_CHANGE, map((DoubleFunction) this::percentageChangeLambda,
+        dfInput.getDoubles(COL_CURRENT),
+        dfInput.get(COL_VALUE))
     );
 
     // defaults
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    dfInput.addSeries(COL_ANOMALY, BooleanSeries.fillValues(dfInput.size(), false));
 
     // relative change
     if (!Double.isNaN(percentageChange)) {
       // consistent with pattern
       if (pattern.equals(UP_OR_DOWN)) {
-        df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
+        dfInput.addSeries(COL_PATTERN, BooleanSeries.fillValues(dfInput.size(), true));
       } else {
-        df.addSeries(COL_PATTERN,
-            pattern.equals(UP) ? df.getDoubles(COL_CHANGE).gt(0)
-                : df.getDoubles(COL_CHANGE).lt(0));
+        dfInput.addSeries(COL_PATTERN,
+            pattern.equals(UP) ? dfInput.getDoubles(COL_CHANGE).gt(0)
+                : dfInput.getDoubles(COL_CHANGE).lt(0));
       }
-      df.addSeries(COL_CHANGE_VIOLATION,
-          df.getDoubles(COL_CHANGE).abs().gte(percentageChange));
-      df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
+      dfInput.addSeries(COL_CHANGE_VIOLATION,
+          dfInput.getDoubles(COL_CHANGE).abs().gte(percentageChange));
+      dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
     }
 
     final MetricSlice slice = MetricSlice.from(-1,
@@ -259,15 +259,15 @@ public class PercentageChangeRuleDetector implements
             ArrayListMultimap.create() ,
             timeGranularity);
 
-    addPercentageChangeBoundaries(df);
+    addPercentageChangeBoundaries(dfInput);
 
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        df,
+        dfInput,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(dfInput));
   }
 
   private double percentageChangeLambda(final double[] values) {

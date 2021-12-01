@@ -21,7 +21,6 @@ public interface PlanNode {
    * @return unique PlanNode name
    */
   String getName();
-
   /**
    *
    * @return PlanNode type

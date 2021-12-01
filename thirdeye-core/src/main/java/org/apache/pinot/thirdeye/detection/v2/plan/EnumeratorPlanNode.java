@@ -30,11 +30,6 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
   public Map<String, Object> getParams() {
     return params;
   }

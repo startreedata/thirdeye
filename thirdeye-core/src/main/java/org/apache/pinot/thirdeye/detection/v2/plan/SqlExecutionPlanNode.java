@@ -23,11 +23,6 @@ public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
   public Map<String, Object> getParams() {
     return planNodeBean.getParams();
   }

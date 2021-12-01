@@ -41,8 +41,6 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
     dataFetcherOperator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))
         .setEndTime(String.valueOf(this.endTime))
-        .setTimeFormat(getParams().getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT)
-            .toString())
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
     );

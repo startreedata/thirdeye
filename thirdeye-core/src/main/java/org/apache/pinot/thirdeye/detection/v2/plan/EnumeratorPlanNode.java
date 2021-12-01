@@ -44,9 +44,6 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
         .setEndTime(params
             .getOrDefault("endTime", String.valueOf(this.endTime))
             .toString())
-        .setTimeFormat(params
-            .getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT)
-            .toString())
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

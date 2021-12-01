@@ -54,9 +54,6 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
         .setEndTime(getParams()
             .getOrDefault("endTime", String.valueOf(endTime))
             .toString())
-        .setTimeFormat(getParams()
-            .getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT)
-            .toString())
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(

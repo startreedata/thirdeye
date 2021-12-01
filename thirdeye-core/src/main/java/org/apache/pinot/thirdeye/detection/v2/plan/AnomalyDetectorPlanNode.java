@@ -35,9 +35,6 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
     anomalyDetectorOperator.init(new OperatorContext()
         .setStartTime(String.valueOf(this.startTime))
         .setEndTime(String.valueOf(this.endTime))
-        .setTimeFormat(getParams()
-            .getOrDefault("timeFormat", OperatorContext.DEFAULT_TIME_FORMAT)
-            .toString())
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

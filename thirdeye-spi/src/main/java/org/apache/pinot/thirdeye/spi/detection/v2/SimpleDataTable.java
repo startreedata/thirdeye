@@ -52,6 +52,8 @@ public class SimpleDataTable extends AbstractDataTableImpl {
           df.addSeries(columns.get(colIdx).toLowerCase(), getDoublesForColumn(colIdx));
           break;
         case BOOLEAN:
+          df.addSeries(columns.get(colIdx).toLowerCase(), getBooleansForColumn(colIdx));
+          break;
         case DATE:
         case STRING:
           df.addSeries(columns.get(colIdx).toLowerCase(), getStringsForColumn(colIdx));
@@ -63,6 +65,14 @@ public class SimpleDataTable extends AbstractDataTableImpl {
       }
     }
     return df;
+  }
+
+  private boolean[] getBooleansForColumn(final int colIdx) {
+    boolean[] booleans = new boolean[getRowCount()];
+    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+      booleans[rowId] = getBoolean(rowId, colIdx);
+    }
+    return booleans;
   }
 
   private String[] getStringsForColumn(final int colIdx) {
@@ -87,6 +97,11 @@ public class SimpleDataTable extends AbstractDataTableImpl {
       longs[rowId] = getLong(rowId, colIdx);
     }
     return longs;
+  }
+
+  @Override
+  public boolean getBoolean(final int rowIdx, final int colIdx) {
+    return Boolean.parseBoolean((dataCache.get(rowIdx))[colIdx].toString());
   }
 
   @Override

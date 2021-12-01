@@ -177,25 +177,25 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     return runDetectionOnSingleDataTable(df, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame df,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
       final ReadableInterval window) {
     // calculate absolute change
-    df.addSeries(COL_DIFF, df.getDoubles(COL_CURRENT).subtract(df.get(DataFrame.COL_VALUE)));
+    dfInput.addSeries(COL_DIFF, dfInput.getDoubles(COL_CURRENT).subtract(dfInput.get(DataFrame.COL_VALUE)));
 
     // defaults
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    dfInput.addSeries(COL_ANOMALY, BooleanSeries.fillValues(dfInput.size(), false));
     // absolute change
     if (!Double.isNaN(absoluteChange)) {
       // consistent with pattern
       if (pattern.equals(Pattern.UP_OR_DOWN)) {
-        df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
+        dfInput.addSeries(COL_PATTERN, BooleanSeries.fillValues(dfInput.size(), true));
       } else {
-        df.addSeries(COL_PATTERN, pattern.equals(Pattern.UP)
-            ? df.getDoubles(COL_DIFF).gt(0)
-            : df.getDoubles(COL_DIFF).lt(0));
+        dfInput.addSeries(COL_PATTERN, pattern.equals(Pattern.UP)
+            ? dfInput.getDoubles(COL_DIFF).gt(0)
+            : dfInput.getDoubles(COL_DIFF).lt(0));
       }
-      df.addSeries(COL_DIFF_VIOLATION, df.getDoubles(COL_DIFF).abs().gte(absoluteChange));
-      df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+      dfInput.addSeries(COL_DIFF_VIOLATION, dfInput.getDoubles(COL_DIFF).abs().gte(absoluteChange));
+      dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
     }
 
     // make anomalies
@@ -205,15 +205,15 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
         ArrayListMultimap.create(),
         timeGranularity);
 
-    addAbsoluteChangeBoundaries(df);
+    addAbsoluteChangeBoundaries(dfInput);
 
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        df,
+        dfInput,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(dfInput));
   }
 
   @Override

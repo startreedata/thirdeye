@@ -72,6 +72,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -286,7 +287,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
           .setIndex(COL_TIME);
       currentDf.addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(interval, currentDf);
+      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
       detectionResults.add(detectionResult);
     }
     return new GroupedDetectionResults(detectionResults);
@@ -331,11 +332,11 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         window.getEndMillis(),
         datasetConfig);
 
-    return runDetectionOnSingleDataTable(window, dfInput);
+    return runDetectionOnSingleDataTable(dfInput, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final Interval window,
-      final DataFrame dfInput) {
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+      final ReadableInterval window) {
     // Kernel smoothing
     if (smoothing) {
       final int kernelSize = (int) (

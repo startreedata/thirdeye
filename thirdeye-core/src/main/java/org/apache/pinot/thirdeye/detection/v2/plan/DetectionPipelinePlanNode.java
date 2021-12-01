@@ -57,10 +57,6 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     this.endTime = planNodeContext.getEndTime();
   }
 
-  public PlanNodeBean getDetectionPlanApi() {
-    return planNodeBean;
-  }
-
   public long getStartTime() {
     return startTime;
   }

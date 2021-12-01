@@ -9,7 +9,7 @@ public class DataTableToSqlAdapterFactory {
     switch (sqlEngine.toUpperCase(Locale.ENGLISH)) {
       case "CALCITE":
         return new CalciteDataTableToSqlAdapter();
-      case "HYPERSQL":
+      case "HYPERSQL": case "HSQLDB":
         return new HyperSqlDataTableToSqlAdapter();
       default:
         throw new IllegalArgumentException(String.format("Unknown SQL engine: %s", sqlEngine));

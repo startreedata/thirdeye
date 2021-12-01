@@ -25,59 +25,58 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import jersey.repackaged.com.google.common.collect.ImmutableList;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class PlanNodeFactory {
 
-  public static final String V2_DETECTION_PLAN_PACKAGE_NAME = "org.apache.pinot.thirdeye.detection.v2.plan";
   public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
-  protected static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
-  private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap = new HashMap<>();
+  private static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
+
+  /* List of plan node classes that are built in with thirdeye */
+  private static final List<Class<? extends PlanNode>> BUILT_IN_PLAN_NODE_CLASSES = ImmutableList.of(
+      AnomalyDetectorPlanNode.class,
+      CombinerPlanNode.class,
+      DataFetcherPlanNode.class,
+      EchoPlanNode.class,
+      EnumeratorPlanNode.class,
+      EventTriggerPlanNode.class,
+      ForkJoinPlanNode.class,
+      IndexFillerPlanNode.class,
+      SqlExecutionPlanNode.class
+  );
+  /**
+   * Contains the list of built in as well as node/operators coming from plugins.
+   * TODO spyne implement loading nodes from plugins
+   */
+  private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
   private final DataSourceCache dataSourceCache;
 
   @Inject
   public PlanNodeFactory(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    initPlanNodeTypeToClassMap();
+    this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
   }
 
-  private void initPlanNodeTypeToClassMap() {
-    final long startTimeMs = System.currentTimeMillis();
-    final Reflections reflections = new Reflections(V2_DETECTION_PLAN_PACKAGE_NAME);
-    final Set<Class<? extends PlanNode>> classes = reflections.getSubTypesOf(PlanNode.class);
-    for (final Class<? extends PlanNode> planNodeClass : classes) {
-      if (Modifier.isAbstract(planNodeClass.getModifiers())) {
-        continue;
-      }
-      final String typeKey;
+  private Map<String, Class<? extends PlanNode>> buildPlanNodeTypeToClassMap() {
+    final HashMap<String, Class<? extends PlanNode>> stringClassHashMap = new HashMap<>();
+    for (Class<? extends PlanNode> c : BUILT_IN_PLAN_NODE_CLASSES) {
       try {
-        final PlanNode planNodeInstance = planNodeClass.newInstance();
-        typeKey = planNodeInstance.getType();
-      } catch (final Exception e) {
-        throw new RuntimeException("Unable to init PlanNode Class - " + planNodeClass, e);
-      }
-      if (!planNodeTypeToClassMap.containsKey(typeKey)) {
-        planNodeTypeToClassMap.put(typeKey, planNodeClass);
-      } else {
-        LOG.error("Found duplicated type key: {}", typeKey);
-        throw new RuntimeException("Found duplicated type key - " + typeKey);
+        stringClassHashMap.put(c.newInstance().getType(), c);
+      } catch (InstantiationException | IllegalAccessException e) {
+        throw new RuntimeException("Failed to initialize PlanNode: " + c.getSimpleName(), e);
       }
     }
-    LOG.info("Initialized planNodeTypeToClassNameMap with {} functions: {} in {}ms",
-        planNodeTypeToClassMap.size(),
-        planNodeTypeToClassMap.keySet(),
-        System.currentTimeMillis() - startTimeMs);
+    return stringClassHashMap;
   }
 
   public PlanNode build(final PlanNodeBean planNodeBean,
@@ -102,9 +101,5 @@ public class PlanNodeFactory {
       throw new IllegalArgumentException("Failed to initialize the plan node: type - " + typeKey,
           e);
     }
-  }
-
-  public Map<String, Class<? extends PlanNode>> getAllPlanNodes() {
-    return planNodeTypeToClassMap;
   }
 }

@@ -61,13 +61,6 @@ public class DataCubeSummaryCalculator {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String HTML_STRING_ENCODING = "UTF-8";
 
-  private static final String NUMERATOR_GROUP_NAME = "numerator";
-  private static final String DENOMINATOR_GROUP_NAME = "denominator";
-  // Only match string like "id123/id456" but not "id123*100/id456"
-  // The 1st metric id will be put into numerator group and the 2nd metric id will be in denominator group
-  private static final String SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER =
-      "^id(?<" + NUMERATOR_GROUP_NAME + ">\\d*)\\/id(?<" + DENOMINATOR_GROUP_NAME + ">\\d*)$";
-
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
@@ -85,49 +78,8 @@ public class DataCubeSummaryCalculator {
     this.dataSourceCache = dataSourceCache;
   }
 
-  /**
-   * Returns if the given metric is a simple ratio metric such as "A/B" where A and B is a metric.
-   *
-   * @param metricConfigDTO the config of a metric.
-   * @return true if the given metric is a simple ratio metric.
-   */
-  private static boolean isSimpleRatioMetric(MetricConfigDTO metricConfigDTO) {
-    if (metricConfigDTO != null) {
-      String metricExpression = metricConfigDTO.getDerivedMetricExpression();
-      if (!Strings.isNullOrEmpty(metricExpression)) {
-        Pattern pattern = Pattern.compile(SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER);
-        Matcher matcher = pattern.matcher(metricExpression);
-        return matcher.matches();
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Parse numerator and denominator id from a given metric expression string.
-   *
-   * @param derivedMetricExpression the given metric expression.
-   * @return the parsed result, which is stored in MatchedRatioMetricsResult.
-   */
-  private static MatchedRatioMetricsResult parseNumeratorDenominatorId(
-      String derivedMetricExpression) {
-    if (Strings.isNullOrEmpty(derivedMetricExpression)) {
-      return new MatchedRatioMetricsResult(false, -1, -1);
-    }
-
-    Pattern pattern = Pattern.compile(SIMPLE_RATIO_METRIC_EXPRESSION_ID_PARSER);
-    Matcher matcher = pattern.matcher(derivedMetricExpression);
-    if (matcher.find()) {
-      // Extract numerator and denominator id
-      long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
-      long denominatorId = Long.parseLong(matcher.group(DENOMINATOR_GROUP_NAME));
-      return new MatchedRatioMetricsResult(true, numeratorId, denominatorId);
-    } else {
-      return new MatchedRatioMetricsResult(false, -1, -1);
-    }
-  }
-
   private static DimensionAnalysisResultApi notAvailable() {
+    //fixme cyril return something less confusing
     return new DimensionAnalysisResultApi()
         .setBaselineTotal(0d)
         .setCurrentTotal(0d)
@@ -188,44 +140,27 @@ public class DataCubeSummaryCalculator {
       dimensionNames.removeAll(cleanDimensionStrings(excludedDimensions));
       Dimensions filteredDimensions = new Dimensions(dimensionNames);
 
-      Multimap<String, String> filterSetMap = parserFilterJsonPayload(filterJsonPayload);
+      Multimap<String, String> filterSetMap = parseFilterJsonPayload(filterJsonPayload);
       List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
       DateTimeZone dateTimeZone = DateTimeZone.forID(timeZone);
 
-      //fixme cyril introduce internal class to reduce above
-      // Non simple ratio metrics fixme rename class to make it clear it's the default use case
-      if (!isSimpleRatioMetric(metricConfigDTO)) {
-        response = runAdditiveCubeAlgorithm(
-            dateTimeZone,
-            datasetName,
-            metricName,
-            currentStartInclusive,
-            currentEndExclusive,
-            baselineStartInclusive,
-            baselineEndExclusive,
-            filteredDimensions,
-            filterSetMap,
-            summarySize,
-            depth,
-            hierarchies,
-            doOneSideError);
-      } else {  // Simple ratio metric such as "A/B". On the contrary, "A*100/B" is not a simple ratio metric.
-        //fixme cyril ask spyne if derived metric requires custom care
-        response = runRatioCubeAlgorithm(
-            dateTimeZone,
-            datasetName,
-            metricConfigDTO,
-            currentStartInclusive,
-            currentEndExclusive,
-            baselineStartInclusive,
-            baselineEndExclusive,
-            filteredDimensions,
-            filterSetMap,
-            summarySize,
-            depth,
-            hierarchies,
-            doOneSideError);
-      }
+      CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
+          metricConfigDTO,
+          dateTimeZone,
+          datasetName,
+          metricName,
+          currentStartInclusive,
+          currentEndExclusive,
+          baselineStartInclusive,
+          baselineEndExclusive,
+          filteredDimensions,
+          filterSetMap,
+          summarySize,
+          depth,
+          hierarchies,
+          doOneSideError
+      );
+      response = cubeAlgorithmRunner.run();
     } catch (Exception e) {
       LOG.error("Exception while generating difference summary", e);
       response = notAvailable().setMetric(new MetricApi()
@@ -257,10 +192,10 @@ public class DataCubeSummaryCalculator {
     return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<List<List<String>>>() {});
   }
 
-  private Multimap<String, String> parserFilterJsonPayload(String filterJsonPayload)
+  private Multimap<String, String> parseFilterJsonPayload(String filterJsonPayload)
       throws UnsupportedEncodingException {
     return StringUtils.isBlank(filterJsonPayload) ?
-        ArrayListMultimap.create():
+        ArrayListMultimap.create() :
         ThirdEyeUtils.convertToMultiMap(URLDecoder.decode(filterJsonPayload, HTML_STRING_ENCODING));
   }
 
@@ -274,115 +209,132 @@ public class DataCubeSummaryCalculator {
     return metricConfigDTO;
   }
 
-  /**
-   * Executes cube algorithm for the given additive metric.
-   *
-   * @param dateTimeZone time zone of the data.
-   * @param dataset dataset name.
-   * @param metric metric name.
-   * @param currentStartInclusive timestamp of current start.
-   * @param currentEndExclusive timestamp of current end.
-   * @param baselineStartInclusive timestamp of baseline start.
-   * @param baselineEndExclusive timestamp of baseline end.
-   * @param dimensions ordered dimensions to be drilled down by the algorithm.
-   * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only
-   *     analyze a subset of data.
-   * @param summarySize the size of the summary result.
-   * @param depth the depth of the dimensions to be analyzed.
-   * @param hierarchies the hierarchy among the dimensions.
-   * @param doOneSideError flag to toggle if we only want one side results.
-   * @return the summary result of cube algorithm.
-   */
-  private DimensionAnalysisResultApi runAdditiveCubeAlgorithm(DateTimeZone dateTimeZone,
-      String dataset,
-      String metric,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
-      Dimensions dimensions,
-      Multimap<String, String> dataFilters,
-      int summarySize,
-      int depth,
-      List<List<String>> hierarchies,
-      boolean doOneSideError) throws Exception {
+  private class CubeAlgorithmRunner {
 
-    final CostFunction costFunction = new BalancedCostFunction();
-    final AdditiveDBClient cubeDbClient = new AdditiveDBClient(
-        dataSourceCache,
-        thirdEyeCacheRegistry);
-    final MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(cubeDbClient,
-        costFunction,
-        dateTimeZone);
+    private static final String NUMERATOR_GROUP_NAME = "numerator";
+    private static final String DENOMINATOR_GROUP_NAME = "denominator";
+    // Only match string like "id123/id456" but not "id123*100/id456"
+    // The 1st metric id will be put into numerator group and the 2nd metric id will be in denominator group
+    private final Pattern SIMPLE_RATIO_METRIC_EXPRESSION_PARSER = Pattern.compile(
+        "^id(?<" + NUMERATOR_GROUP_NAME + ">\\d*)\\/id(?<" + DENOMINATOR_GROUP_NAME + ">\\d*)$");
 
-    return mdSummary.buildSummary(dataset,
-        metric,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        dimensions,
-        dataFilters,
-        summarySize,
-        depth,
-        hierarchies,
-        doOneSideError);
-  }
+    private final MetricConfigDTO metricConfigDTO;
+    private final DateTimeZone dateTimeZone;
+    private final String dataset;
+    private final String metric;
+    private final long currentStartInclusive;
+    private final long currentEndExclusive;
+    private final long baselineStartInclusive;
+    private final long baselineEndExclusive;
+    private final Dimensions dimensions;
+    private final Multimap<String, String> dataFilters;
+    private final int summarySize;
+    private final int depth;
+    private final List<List<String>> hierarchies;
+    private final boolean doOneSideError;
 
-  /**
-   * Executes cube algorithm for the given ratio metric.
-   *
-   * @param dateTimeZone time zone of the data.
-   * @param dataset dataset name.
-   * @param metricConfigDTO the metric config of the ratio metric.
-   * @param currentStartInclusive timestamp of current start.
-   * @param currentEndExclusive timestamp of current end.
-   * @param baselineStartInclusive timestamp of baseline start.
-   * @param baselineEndExclusive timestamp of baseline end.
-   * @param dimensions ordered dimensions to be drilled down by the algorithm.
-   * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only
-   *     analyze a subset of data.
-   * @param summarySize the size of the summary result.
-   * @param depth the depth of the dimensions to be analyzed.
-   * @param hierarchies the hierarchy among the dimensions.
-   * @param doOneSideError flag to toggle if we only want one side results.
-   * @return the summary result of cube algorithm.
-   */
-  private DimensionAnalysisResultApi runRatioCubeAlgorithm(DateTimeZone dateTimeZone,
-      String dataset,
-      MetricConfigDTO metricConfigDTO,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
-      Dimensions dimensions,
-      Multimap<String, String> dataFilters,
-      int summarySize,
-      int depth,
-      List<List<String>> hierarchies,
-      boolean doOneSideError) throws Exception {
-    Preconditions.checkNotNull(metricConfigDTO);
+    /**
+     * Cube Algorithm Runner. Select the relevant algorithm based on the config and run it.
+     *
+     * @param dateTimeZone time zone of the data.
+     * @param dataset dataset name.
+     * @param metricConfigDTO the metric config of the ratio metric.
+     * @param currentStartInclusive timestamp of current start.
+     * @param currentEndExclusive timestamp of current end.
+     * @param baselineStartInclusive timestamp of baseline start.
+     * @param baselineEndExclusive timestamp of baseline end.
+     * @param dimensions ordered dimensions to be drilled down by the algorithm.
+     * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only
+     *     analyze a subset of data.
+     * @param summarySize the size of the summary result.
+     * @param depth the depth of the dimensions to be analyzed.
+     * @param hierarchies the hierarchy among the dimensions.
+     * @param doOneSideError flag to toggle if we only want one side results.
+     * @return the summary result of cube algorithm.
+     */
+    public CubeAlgorithmRunner(
+        final MetricConfigDTO metricConfigDTO, final DateTimeZone dateTimeZone,
+        final String dataset,
+        final String metric, final long currentStartInclusive, final long currentEndExclusive,
+        final long baselineStartInclusive, final long baselineEndExclusive,
+        final Dimensions dimensions,
+        final Multimap<String, String> dataFilters, final int summarySize, final int depth,
+        final List<List<String>> hierarchies, final boolean doOneSideError) {
+      this.metricConfigDTO = metricConfigDTO;
+      this.dateTimeZone = dateTimeZone;
+      this.dataset = dataset;
+      this.metric = metric;
+      this.currentStartInclusive = currentStartInclusive;
+      this.currentEndExclusive = currentEndExclusive;
+      this.baselineStartInclusive = baselineStartInclusive;
+      this.baselineEndExclusive = baselineEndExclusive;
+      this.dimensions = dimensions;
+      this.dataFilters = dataFilters;
+      this.summarySize = summarySize;
+      this.depth = depth;
+      this.hierarchies = hierarchies;
+      this.doOneSideError = doOneSideError;
+    }
 
-    // Construct regular expression parser
-    String derivedMetricExpression = metricConfigDTO.getDerivedMetricExpression();
-    MatchedRatioMetricsResult matchedRatioMetricsResult = parseNumeratorDenominatorId(
-        derivedMetricExpression);
+    public DimensionAnalysisResultApi run() throws Exception {
+      if (isSimpleRatioMetric()) {
+        return runRatioCubeAlgorithm();
+      }
+      return runAdditiveCubeAlgorithm();
+    }
 
-    if (matchedRatioMetricsResult.hasFound) {
+    /**
+     * Executes cube algorithm for the given additive metric.
+     */
+    private DimensionAnalysisResultApi runAdditiveCubeAlgorithm() throws Exception {
+      final CostFunction costFunction = new BalancedCostFunction();
+      final AdditiveDBClient cubeDbClient = new AdditiveDBClient(
+          dataSourceCache,
+          thirdEyeCacheRegistry);
+      final MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(
+          cubeDbClient,
+          costFunction,
+          dateTimeZone);
+
+      return mdSummary.buildSummary(
+          dataset,
+          metric,
+          currentStartInclusive,
+          currentEndExclusive,
+          baselineStartInclusive,
+          baselineEndExclusive,
+          dimensions,
+          dataFilters,
+          summarySize,
+          depth,
+          hierarchies,
+          doOneSideError);
+    }
+
+    /**
+     * Executes cube algorithm for a given ratio metric.
+     */
+    private DimensionAnalysisResultApi runRatioCubeAlgorithm()
+        throws Exception {
+      Preconditions.checkArgument(isSimpleRatioMetric());
+
+      String derivedMetric = metricConfigDTO.getDerivedMetricExpression();
+      Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetric);
       // Extract numerator and denominator id
-      long numeratorId = matchedRatioMetricsResult.numeratorId;
-      long denominatorId = matchedRatioMetricsResult.denominatorId;
+      long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
+      long denominatorId = Long.parseLong(matcher.group(DENOMINATOR_GROUP_NAME));
+
       // Get numerator and denominator's metric name
       String numeratorMetric = metricConfigManager.findById(numeratorId).getName();
       String denominatorMetric = metricConfigManager.findById(denominatorId).getName();
       // Generate cube result
       CostFunction costFunction = new RatioCostFunction();
-      RatioDBClient dbClient = new RatioDBClient(dataSourceCache,
-          thirdEyeCacheRegistry);
+      RatioDBClient dbClient = new RatioDBClient(dataSourceCache, thirdEyeCacheRegistry);
       MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient,
           costFunction, dateTimeZone);
 
-      return mdSummary.buildRatioSummary(dataset,
+      return mdSummary.buildRatioSummary(
+          dataset,
           numeratorMetric,
           denominatorMetric,
           currentStartInclusive,
@@ -395,15 +347,21 @@ public class DataCubeSummaryCalculator {
           depth,
           hierarchies,
           doOneSideError);
-    } else { // parser should find ids because of the guard of the if-condition.
-      LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO
-          .getName());
-      return notAvailable()
-          .setMetric(new MetricApi().setName(metricConfigDTO.getName())
-              .setDataset(new DatasetApi().setName(dataset))
-          );
+    }
+
+    /**
+     * Returns true if the derived metric is a simple ratio metric such as "A/B" where A and B is a
+     * metric.
+     */
+    private boolean isSimpleRatioMetric() {
+      if (metricConfigDTO != null) {
+        String derivedMetric = metricConfigDTO.getDerivedMetricExpression();
+        if (!Strings.isNullOrEmpty(derivedMetric)) {
+          Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetric);
+          return matcher.matches();
+        }
+      }
+      return false;
     }
   }
-
-
 }

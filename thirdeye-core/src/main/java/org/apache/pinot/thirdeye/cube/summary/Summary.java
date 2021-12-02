@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -92,7 +94,8 @@ public class Summary {
     this.leafRowInserter = basicRowInserter;
   }
 
-  public static void buildGainerLoserGroup(final DimensionAnalysisResultApi dimensionAnalysisResultApi,
+  public static void buildGainerLoserGroup(
+      final DimensionAnalysisResultApi dimensionAnalysisResultApi,
       List<DimNameValueCostEntry> costSet) {
     for (DimNameValueCostEntry dimNameValueCostEntry : costSet) {
       if (Double.compare(dimNameValueCostEntry.getCost(), 0d) <= 0) {
@@ -115,7 +118,8 @@ public class Summary {
   }
 
   public static SummaryGainerLoserResponseRow buildGainerLoserRow(
-      final DimensionAnalysisResultApi dimensionAnalysisResultApi, DimNameValueCostEntry costEntry) {
+      final DimensionAnalysisResultApi dimensionAnalysisResultApi,
+      DimNameValueCostEntry costEntry) {
     SummaryGainerLoserResponseRow row = new SummaryGainerLoserResponseRow();
     row.setBaselineValue(costEntry.getBaselineValue());
     row.setCurrentValue(costEntry.getCurrentValue());
@@ -386,9 +390,7 @@ public class Summary {
 
   public DimensionAnalysisResultApi computeSummary(int answerSize, boolean doOneSideError,
       int userLevelCount) {
-    if (answerSize <= 0) {
-      answerSize = 1;
-    }
+    checkArgument(answerSize >= 1, String.format("answerSize is %s. Answer size must be >= 1", answerSize));
     if (userLevelCount <= 0 || userLevelCount > this.maxLevelCount) {
       userLevelCount = this.maxLevelCount;
     }

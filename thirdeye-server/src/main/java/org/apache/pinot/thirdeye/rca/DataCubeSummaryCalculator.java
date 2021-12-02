@@ -2,21 +2,23 @@ package org.apache.pinot.thirdeye.rca;
 
 import static java.util.Collections.singletonList;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
@@ -25,7 +27,6 @@ import org.apache.pinot.thirdeye.cube.cost.RatioCostFunction;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalRatioSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummary;
-import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummaryCLITool;
 import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
 import org.apache.pinot.thirdeye.cube.summary.Summary;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -48,16 +49,16 @@ import org.slf4j.LoggerFactory;
 public class DataCubeSummaryCalculator {
 
   public static final String DEFAULT_TIMEZONE_ID = "UTC";
-  public static final String DEFAULT_DEPTH = "3";
   public static final String DEFAULT_HIERARCHIES = "[]";
   public static final String DEFAULT_ONE_SIDE_ERROR = "false";
-  public static final String DEFAULT_EXCLUDED_DIMENSIONS = "";
-  private static final int DEFAULT_HIGHLIGHT_CUBE_SUMMARY_SIZE = 4;
-  private static final int DEFAULT_HIGHLIGHT_CUBE_DEPTH = 3;
+  public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
+  public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
+  private static final List<String> DEFAULT_DIMENSIONS = ImmutableList.of();
+  private static final List<String> DEFAULT_EXCLUDED_DIMENSIONS = ImmutableList.of();
+  private static final String DEFAULT_FILTER_JSON_PAYLOAD = "";
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final String JAVASCRIPT_NULL_STRING = "undefined";
   private static final String HTML_STRING_ENCODING = "UTF-8";
 
   private static final String NUMERATOR_GROUP_NAME = "numerator";
@@ -90,7 +91,7 @@ public class DataCubeSummaryCalculator {
    * @param metricConfigDTO the config of a metric.
    * @return true if the given metric is a simple ratio metric.
    */
-  static boolean isSimpleRatioMetric(MetricConfigDTO metricConfigDTO) {
+  private static boolean isSimpleRatioMetric(MetricConfigDTO metricConfigDTO) {
     if (metricConfigDTO != null) {
       String metricExpression = metricConfigDTO.getDerivedMetricExpression();
       if (!Strings.isNullOrEmpty(metricExpression)) {
@@ -108,7 +109,8 @@ public class DataCubeSummaryCalculator {
    * @param derivedMetricExpression the given metric expression.
    * @return the parsed result, which is stored in MatchedRatioMetricsResult.
    */
-  static MatchedRatioMetricsResult parseNumeratorDenominatorId(String derivedMetricExpression) {
+  private static MatchedRatioMetricsResult parseNumeratorDenominatorId(
+      String derivedMetricExpression) {
     if (Strings.isNullOrEmpty(derivedMetricExpression)) {
       return new MatchedRatioMetricsResult(false, -1, -1);
     }
@@ -143,138 +145,81 @@ public class DataCubeSummaryCalculator {
         anomalyDTO.getEndTime(),
         anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7),
         anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7),
-        joptsimple.internal.Strings.EMPTY,
-        joptsimple.internal.Strings.EMPTY,
-        DEFAULT_HIGHLIGHT_CUBE_SUMMARY_SIZE,
-        DEFAULT_HIGHLIGHT_CUBE_DEPTH,
+        DEFAULT_DIMENSIONS,
+        DEFAULT_FILTER_JSON_PAYLOAD,
+        Integer.parseInt(DEFAULT_CUBE_SUMMARY_SIZE_STRING),
+        Integer.parseInt(DEFAULT_CUBE_DEPTH_STRING),
         DEFAULT_HIERARCHIES,
         false,
         DEFAULT_EXCLUDED_DIMENSIONS,
         DEFAULT_TIMEZONE_ID);
   }
 
-  public DimensionAnalysisResultApi compute(
-      String metricUrn,
+  public DimensionAnalysisResultApi compute(String metricUrn,
       String dataset,
       String metric,
       long currentStartInclusive,
       long currentEndExclusive,
       long baselineStartInclusive,
       long baselineEndExclusive,
-      String groupByDimensions,
+      List<String> dimensions,
       String filterJsonPayload,
       int summarySize,
       int depth,
       String hierarchiesPayload,
       boolean doOneSideError,
-      String excludedDimensions,
-      String timeZone
-  ) {
-    return buildDataCubeSummary(metricUrn,
-        metric,
-        dataset,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        groupByDimensions,
-        filterJsonPayload,
-        summarySize,
-        depth,
-        hierarchiesPayload,
-        doOneSideError,
-        excludedDimensions,
-        timeZone);
-  }
-
-  private DimensionAnalysisResultApi buildDataCubeSummary(String metricUrn,
-      String dataset,
-      String metric,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
-      String groupByDimensions,
-      String filterJsonPayload,
-      int summarySize,
-      int depth,
-      String hierarchiesPayload,
-      boolean doOneSideError,
-      String excludedDimensions,
+      List<String> excludedDimensions,
       String timeZone) {
-    if (summarySize < 1) {
-      summarySize = 1;
-    }
 
     String metricName = metric;
     String datasetName = dataset;
-    DimensionAnalysisResultApi response = null;
+    DimensionAnalysisResultApi response;
     try {
+      //fixme cyril relies on dataset if metricUrn is null ...
       MetricConfigDTO metricConfigDTO = fetchMetricConfig(metricUrn, metric, dataset);
       if (metricConfigDTO != null) {
         metricName = metricConfigDTO.getName();
+        //...fixme cyril then get datasets !
         datasetName = metricConfigDTO.getDataset();
       }
 
-      Dimensions dimensions;
-      if (StringUtils.isBlank(groupByDimensions) || JAVASCRIPT_NULL_STRING
-          .equals(groupByDimensions)) {
-        DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
-        List<String> dimensionNames = new ArrayList<>();
-        if (datasetConfigDTO != null) {
-          dimensionNames = datasetConfigDTO.getDimensions();
-        }
-        dimensions = MultiDimensionalSummaryCLITool
-            .sanitizeDimensions(new Dimensions(dimensionNames));
-      } else {
-        dimensions = new Dimensions(Arrays.asList(groupByDimensions.trim().split(",")));
-      }
+      List<String> dimensionNames = dimensions.isEmpty() ? getDimensionsFromDataset(datasetName)
+          : cleanDimensionStrings(dimensions);
+      dimensionNames.removeAll(cleanDimensionStrings(excludedDimensions));
+      Dimensions filteredDimensions = new Dimensions(dimensionNames);
 
-      if (!Strings.isNullOrEmpty(excludedDimensions)) {
-        List<String> dimensionsToBeRemoved = Arrays.asList(excludedDimensions.trim().split(","));
-        dimensions = MultiDimensionalSummaryCLITool
-            .removeDimensions(dimensions, dimensionsToBeRemoved);
-      }
-
-      Multimap<String, String> filterSetMap;
-      if (StringUtils.isBlank(filterJsonPayload) || JAVASCRIPT_NULL_STRING
-          .equals(filterJsonPayload)) {
-        filterSetMap = ArrayListMultimap.create();
-      } else {
-        filterJsonPayload = URLDecoder.decode(filterJsonPayload, HTML_STRING_ENCODING);
-        filterSetMap = ThirdEyeUtils.convertToMultiMap(filterJsonPayload);
-      }
-
-      List<List<String>> hierarchies = OBJECT_MAPPER.readValue(hierarchiesPayload,
-          new TypeReference<List<List<String>>>() {
-          });
-
+      Multimap<String, String> filterSetMap = parserFilterJsonPayload(filterJsonPayload);
+      List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
       DateTimeZone dateTimeZone = DateTimeZone.forID(timeZone);
 
-      // Non simple ratio metrics
+      //fixme cyril introduce internal class to reduce above
+      // Non simple ratio metrics fixme rename class to make it clear it's the default use case
       if (!isSimpleRatioMetric(metricConfigDTO)) {
-        response = runAdditiveCubeAlgorithm(dateTimeZone,
+        response = runAdditiveCubeAlgorithm(
+            dateTimeZone,
             datasetName,
             metricName,
             currentStartInclusive,
             currentEndExclusive,
             baselineStartInclusive,
             baselineEndExclusive,
-            dimensions,
+            filteredDimensions,
             filterSetMap,
             summarySize,
             depth,
             hierarchies,
             doOneSideError);
       } else {  // Simple ratio metric such as "A/B". On the contrary, "A*100/B" is not a simple ratio metric.
-        response = runRatioCubeAlgorithm(dateTimeZone,
+        //fixme cyril ask spyne if derived metric requires custom care
+        response = runRatioCubeAlgorithm(
+            dateTimeZone,
             datasetName,
             metricConfigDTO,
             currentStartInclusive,
             currentEndExclusive,
             baselineStartInclusive,
             baselineEndExclusive,
-            dimensions,
+            filteredDimensions,
             filterSetMap,
             summarySize,
             depth,
@@ -283,20 +228,40 @@ public class DataCubeSummaryCalculator {
       }
     } catch (Exception e) {
       LOG.error("Exception while generating difference summary", e);
-      if (metricUrn != null) {
-        response = notAvailable()
-            .setMetric(new MetricApi().setUrn(metricUrn));
-      } else {
-        response = notAvailable()
-        .setMetric(new MetricApi()
-            .setName(metricName)
-            .setDataset(new DatasetApi().setName(datasetName))
-        );
-
-      }
+      response = notAvailable().setMetric(new MetricApi()
+          .setUrn(metricUrn)
+          .setName(metricName)
+          .setDataset(new DatasetApi().setName(datasetName)));
     }
 
     return response;
+  }
+
+  private List<String> cleanDimensionStrings(List<String> dimensions) {
+    return dimensions.stream().map(String::trim).collect(Collectors.toList());
+  }
+
+  private List<String> getDimensionsFromDataset(String datasetName) {
+    // fixme cyril need to find by dataset+datasource --> rewrite this in datasetConfigManager interface
+    // fixme cyril refacto error management
+    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
+    if (datasetConfigDTO != null) {
+      return datasetConfigDTO.getDimensions();
+    }
+    throw new IllegalArgumentException(String.format("Unknown dataset %s. Cannot get dimensions.",
+        datasetName));
+  }
+
+  private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
+      throws JsonProcessingException {
+    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<List<List<String>>>() {});
+  }
+
+  private Multimap<String, String> parserFilterJsonPayload(String filterJsonPayload)
+      throws UnsupportedEncodingException {
+    return StringUtils.isBlank(filterJsonPayload) ?
+        ArrayListMultimap.create():
+        ThirdEyeUtils.convertToMultiMap(URLDecoder.decode(filterJsonPayload, HTML_STRING_ENCODING));
   }
 
   private MetricConfigDTO fetchMetricConfig(String metricUrn, String metric, String dataset) {
@@ -434,10 +399,11 @@ public class DataCubeSummaryCalculator {
       LOG.error("Unable to parser numerator and denominator metric for metric" + metricConfigDTO
           .getName());
       return notAvailable()
-      .setMetric(new MetricApi()
-          .setName(metricConfigDTO.getName())
-          .setDataset(new DatasetApi().setName(dataset))
-      );
+          .setMetric(new MetricApi().setName(metricConfigDTO.getName())
+              .setDataset(new DatasetApi().setName(dataset))
+          );
     }
   }
+
+
 }

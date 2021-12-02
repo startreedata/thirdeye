@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_DEPTH;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_EXCLUDED_DIMENSIONS;
+import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_DEPTH_STRING;
+import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_SUMMARY_SIZE_STRING;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
@@ -29,6 +29,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.List;
+import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -77,6 +79,7 @@ public class DimensionAnalysisResource {
 
     // In the highlights api we retrieve only the top 3 results across 3 dimensions.
     // TODO: polish the results to make it more meaningful
+    // TODO CYRIL metricUrn is null with new version --> so can't get data
     return Response.ok(dataCubeSummaryCalculator.compute(anomalyDTO)).build();
   }
 
@@ -91,13 +94,13 @@ public class DimensionAnalysisResource {
       @QueryParam(CURRENT_END) long currentEndExclusive,
       @QueryParam(BASELINE_START) long baselineStartInclusive,
       @QueryParam(BASELINE_END) long baselineEndExclusive,
-      @QueryParam("dimensions") String groupByDimensions,
+      @QueryParam("dimensions") List<String> dimensions,
+      @QueryParam(CUBE_EXCLUDED_DIMENSIONS) List<String> excludedDimensions,
       @QueryParam("filters") String filterJsonPayload,
-      @QueryParam(CUBE_SUMMARY_SIZE) int summarySize,
-      @QueryParam(CUBE_DEPTH) @DefaultValue(DEFAULT_DEPTH) int depth,
+      @QueryParam(CUBE_SUMMARY_SIZE) @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
+      @QueryParam(CUBE_DEPTH) @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
       @QueryParam(CUBE_DIM_HIERARCHIES) @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload,
       @QueryParam(CUBE_ONE_SIDE_ERROR) @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @QueryParam(CUBE_EXCLUDED_DIMENSIONS) @DefaultValue(DEFAULT_EXCLUDED_DIMENSIONS) String excludedDimensions,
       @QueryParam(TIME_ZONE) @DefaultValue(DEFAULT_TIMEZONE_ID) String timeZone) {
     final DimensionAnalysisResultApi response = dataCubeSummaryCalculator.compute(metricUrn,
         metric,
@@ -106,7 +109,7 @@ public class DimensionAnalysisResource {
         currentEndExclusive,
         baselineStartInclusive,
         baselineEndExclusive,
-        groupByDimensions,
+        dimensions,
         filterJsonPayload,
         summarySize,
         depth,

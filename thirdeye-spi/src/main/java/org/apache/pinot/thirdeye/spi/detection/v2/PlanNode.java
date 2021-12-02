@@ -11,38 +11,35 @@ public interface PlanNode {
 
   /**
    * Initialize PlanNode with Context.
-   *
-   * @param planNodeContext
    */
   void init(PlanNodeContext planNodeContext);
 
   /**
-   *
+   * @return PlanNodeContext context using which this object was created.
+   */
+  PlanNodeContext getContext();
+
+  /**
    * @return unique PlanNode name
    */
   String getName();
+
   /**
-   *
    * @return PlanNode type
    */
   String getType();
 
   /**
    * Set one Input from the other Operator
-   *
-   * @param key
-   * @param obj
    */
   void setInput(String key, DetectionPipelineResult obj);
 
   /**
-   *
    * @return All Inputs set
    */
   List<InputBean> getPlanNodeInputs();
 
   /**
-   *
    * @return all params
    */
   Map<String, Object> getParams();
@@ -53,5 +50,4 @@ public interface PlanNode {
    * @return execution operator.
    */
   Operator buildOperator() throws Exception;
-
 }

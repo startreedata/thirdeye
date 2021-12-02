@@ -59,7 +59,8 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     this.endTime = planNodeContext.getEndTime();
   }
 
-  private PlanNodeContext getContext() {
+  @Override
+  public PlanNodeContext getContext() {
     return requireNonNull(context, "node not initialized! " + getClass().getSimpleName());
   }
 

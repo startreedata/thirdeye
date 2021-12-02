@@ -1,6 +1,7 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -9,13 +10,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.detection.v2.operator.EnumeratorOperator.EnumeratorResult;
+import org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.Operator;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.PlanNode;
+import org.apache.pinot.thirdeye.spi.detection.v2.PlanNodeContext;
 
 public class ForkJoinOperator extends DetectionPipelineOperator {
 
@@ -51,8 +55,15 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final List<Callable<Map<String, DetectionPipelineResult>>> callables = new ArrayList<>();
 
     for (final Map<Object, Object> result : results) {
-      final PlanNode rootClone = deepClone(root);
-      setContext(rootClone, properties);
+      /* Clone all nodes for execution */
+      final Map<String, PlanNode> clonedPipelinePlanNodes = clonePipelinePlanNodes(root
+          .getContext()
+          .getPipelinePlanNodes());
+
+      /* Get the new root node in the cloned DAG */
+      final PlanNode rootClone = clonedPipelinePlanNodes.get(root.getName());
+
+      /* Create a callable for parallel execution */
       callables.add((() -> {
         final Operator operator = rootClone.buildOperator();
         operator.execute();
@@ -68,8 +79,16 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     resultMap.putAll(combinerOp.getOutputs());
   }
 
-  private void setContext(final PlanNode rootClone, final Map<String, Object> properties) {
-
+  private Map<String, PlanNode> clonePipelinePlanNodes(
+      final Map<String, PlanNode> pipelinePlanNodes) {
+    final Map<String, PlanNode> clonedPipelinePlanNodes = new HashMap<>();
+    for (Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
+      final PlanNode planNode = deepCloneWithNewContext(key.getValue(),
+          properties,
+          clonedPipelinePlanNodes);
+      clonedPipelinePlanNodes.put(key.getKey(), planNode);
+    }
+    return clonedPipelinePlanNodes;
   }
 
   private List<Map<String, DetectionPipelineResult>> executeAll(
@@ -79,21 +98,39 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
         .map(c -> executorService.submit(c))
         .collect(Collectors.toList());
     try {
-      executorService.awaitTermination(10, TimeUnit.SECONDS);
 
       final List<Map<String, DetectionPipelineResult>> results = new ArrayList<>();
       for (final Future<Map<String, DetectionPipelineResult>> future : futures) {
-        results.add(future.get());
+        results.add(future.get(10, TimeUnit.SECONDS));
       }
+
       return results;
-    } catch (final InterruptedException | ExecutionException e) {
+    } catch (final InterruptedException | ExecutionException | TimeoutException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private PlanNode deepClone(final PlanNode root) {
-    // TODO spyne implement
-    return root;
+  private PlanNode deepCloneWithNewContext(final PlanNode sourceNode,
+      final Map<String, Object> properties,
+      final Map<String, PlanNode> clonedPipelinePlanNodes) {
+    try {
+      /* Cloned context should contain the new nodes */
+      final PlanNodeContext clonedContext = cloneContext(sourceNode.getContext())
+          .setPipelinePlanNodes(clonedPipelinePlanNodes);
+
+      return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException("Failed to clone PlanNode: " + sourceNode.getName(), e);
+    }
+  }
+
+  private PlanNodeContext cloneContext(final PlanNodeContext context) {
+    return new PlanNodeContext()
+        .setName(context.getName())
+        .setPlanNodeBean(context.getPlanNodeBean())
+        .setProperties(context.getProperties())
+        .setStartTime(context.getStartTime())
+        .setEndTime(context.getEndTime());
   }
 
   @Override

@@ -425,11 +425,8 @@ public class RootCauseMetricResource {
         String.format("Anomaly ID: %d", id));
     long detectionConfigId = anomalyDTO.getDetectionConfigId();
     AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    // fixme cyril refator renderAlert to use long millis instead of Date
-    Date unusedDate = Date.from(Instant.ofEpochMilli(0));
-    AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-        unusedDate,
-        unusedDate);
+    //startTime/endTime not important
+    AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO, 0L, 0L);
     RcaMetadataDTO rcaMetadataDTO = templateWithProperties.getRca();
     String metric = Objects.requireNonNull(rcaMetadataDTO.getMetric(),
         "rca$metric not found in alert config.");

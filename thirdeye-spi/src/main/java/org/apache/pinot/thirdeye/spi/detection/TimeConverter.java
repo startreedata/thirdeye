@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.spi.detection;
 
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
+import org.apache.pinot.thirdeye.spi.dataframe.Series.ObjectFunction;
 
 public interface TimeConverter {
 
@@ -25,5 +26,7 @@ public interface TimeConverter {
    *
    * @return milliseconds epoch long series.
    */
-  LongSeries convertSeries(Series series);
+  default LongSeries convertSeries(final Series series) {
+    return series.map((ObjectFunction) values -> convert(String.valueOf(values[0]))).getLongs();
+  }
 }

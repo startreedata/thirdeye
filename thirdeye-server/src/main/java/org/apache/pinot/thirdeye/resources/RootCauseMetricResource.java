@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -397,19 +398,11 @@ public class RootCauseMetricResource {
       @ApiParam(value = "end time (in millis)", required = true)
       @QueryParam("end") @NotNull long end,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") String offset,
+      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
-      @QueryParam("timezone") String timezone,
+      @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
       @QueryParam("limit") Integer limit) throws Exception {
-
-    if (StringUtils.isBlank(offset)) {
-      offset = OFFSET_DEFAULT;
-    }
-
-    if (StringUtils.isBlank(timezone)) {
-      timezone = TIMEZONE_DEFAULT;
-    }
 
     if (limit == null) {
       limit = LIMIT_DEFAULT;
@@ -459,19 +452,11 @@ public class RootCauseMetricResource {
       @ApiParam(value = "end time (in millis)", required = true)
       @QueryParam("end") @NotNull long end,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") String offset,
+      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
-      @QueryParam("timezone") String timezone,
+      @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus an 'OTHER' rollup element")
       @QueryParam("granularity") String granularityString) throws Exception {
-
-    if (StringUtils.isBlank(offset)) {
-      offset = OFFSET_DEFAULT;
-    }
-
-    if (StringUtils.isBlank(timezone)) {
-      timezone = TIMEZONE_DEFAULT;
-    }
 
     if (StringUtils.isBlank(granularityString)) {
       granularityString = GRANULARITY_DEFAULT;

@@ -16,12 +16,15 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,22 +34,31 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
@@ -98,16 +110,25 @@ public class RootCauseMetricResource {
   private final TimeSeriesLoader timeSeriesLoader;
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
+  private final MergedAnomalyResultManager mergedAnomalyDAO;
+  private final AlertManager alertDAO;
+  private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
-  public RootCauseMetricResource(AggregationLoader aggregationLoader,
-      TimeSeriesLoader timeSeriesLoader,
-      MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO) {
+  public RootCauseMetricResource(final AggregationLoader aggregationLoader,
+      final TimeSeriesLoader timeSeriesLoader,
+      final MetricConfigManager metricDAO,
+      final DatasetConfigManager datasetDAO,
+      final MergedAnomalyResultManager mergedAnomalyDAO,
+      final AlertManager alertDAO,
+      final AlertTemplateRenderer alertTemplateRenderer) {
     this.aggregationLoader = aggregationLoader;
     this.timeSeriesLoader = timeSeriesLoader;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
+    this.mergedAnomalyDAO = mergedAnomalyDAO;
+    this.alertDAO = alertDAO;
+    this.alertTemplateRenderer = alertTemplateRenderer;
 
     this.executor = Executors.newCachedThreadPool();
   }
@@ -370,6 +391,66 @@ public class RootCauseMetricResource {
   }
 
   /**
+   * Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.
+   * Aligns time stamps if necessary and omits null values.
+   *
+   * @param id anomaly id
+   * @param offset offset identifier (e.g. "current", "wo2w")
+   * @param timezone timezone identifier (e.g. "America/Los_Angeles")
+   * @param limit limit results to the top k elements, plus a rollup element
+   * @return aggregate value, or NaN if data not available
+   * @throws Exception on catch-all execution failure
+   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+   */
+  @GET
+  @Path("/breakdown/anomaly/{id}")
+  @ApiOperation(value =
+      "Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.\n"
+          + "Aligns time stamps if necessary and omits null values.")
+  public Response getAnomalyBreakdown(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
+      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
+      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
+      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
+      @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
+      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
+      @QueryParam("limit") Integer limit) throws Exception {
+
+    if (limit == null) {
+      limit = LIMIT_DEFAULT;
+    }
+
+    final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(id),
+        String.format("Anomaly ID: %d", id));
+    long detectionConfigId = anomalyDTO.getDetectionConfigId();
+    AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
+    // fixme cyril refator renderAlert to use long millis instead of Date
+    Date unusedDate = Date.from(Instant.ofEpochMilli(0));
+    AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
+        unusedDate,
+        unusedDate);
+    RcaMetadataDTO rcaMetadataDTO = templateWithProperties.getRca();
+    String metric = Objects.requireNonNull(rcaMetadataDTO.getMetric(),
+        "rca$metric not found in alert config.");
+    String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
+        "rca$dataset not found in alert config.");
+    // fixme cyril add datasource constraints
+    MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
+    String urn = MetricEntity.TYPE.formatURN(metricConfigDTO.getId());
+
+    final Map<String, Map<String, Double>> breakdown = computeBreakdown(urn,
+        anomalyDTO.getStartTime(),
+        anomalyDTO.getEndTime(),
+        offset,
+        timezone,
+        limit,
+        //todo cyril deprecate native granularity?
+        MetricSlice.NATIVE_GRANULARITY);
+    return Response.ok(breakdown).build();
+  }
+
+  /**
    * Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally)
    * offset.
    * Aligns time stamps if necessary and omits null values.
@@ -389,7 +470,7 @@ public class RootCauseMetricResource {
   @ApiOperation(value =
       "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
           + "Aligns time stamps if necessary and omits null values.")
-  public Map<String, Map<String, Double>> getBreakdown(
+  public Response getBreakdown(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
@@ -407,8 +488,21 @@ public class RootCauseMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
+    final TimeGranularity granularity = MetricSlice.NATIVE_GRANULARITY;
 
-    MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end), timezone);
+    return Response.ok(computeBreakdown(urn, start, end, offset, timezone, limit, granularity))
+        .build();
+  }
+
+  private Map<String, Map<String, Double>> computeBreakdown(
+      final String urn,
+      final long start,
+      final long end,
+      final String offset,
+      final String timezone,
+      final int limit,
+      final TimeGranularity granularity) throws Exception {
+    MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end, granularity), timezone);
     Baseline range = parseOffset(offset, timezone);
 
     List<MetricSlice> slices = range.scatter(baseSlice);

@@ -6,8 +6,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 
 public class OperatorContext {
-  public static final String DEFAULT_TIME_FORMAT = TimeFormat.EPOCH + ":" + TimeUnit.MILLISECONDS;
-
   private String startTime;
   private String endTime;
   private PlanNodeBean planNode;

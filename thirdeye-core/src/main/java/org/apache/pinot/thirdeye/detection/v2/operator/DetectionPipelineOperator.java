@@ -24,7 +24,8 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.v2.utils.DefaultTimeConverter;
+import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.detection.v2.utils.EpochTimeConverter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
@@ -42,12 +43,11 @@ public abstract class DetectionPipelineOperator implements Operator {
 
   protected static final String PROP_TYPE = "type";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
+  private static final TimeConverter TIME_CONVERTER = new EpochTimeConverter(TimeUnit.MILLISECONDS.toString());
 
   protected PlanNodeBean planNode;
   protected long startTime;
   protected long endTime;
-  protected TimeConverter timeConverter;
-  protected String timeFormat = OperatorContext.DEFAULT_TIME_FORMAT;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
   protected Map<String, String> outputKeyMap = new HashMap<>();
@@ -72,9 +72,8 @@ public abstract class DetectionPipelineOperator implements Operator {
   @Override
   public void init(final OperatorContext context) {
     planNode = context.getPlanNode();
-    timeConverter = DefaultTimeConverter.get(OperatorContext.DEFAULT_TIME_FORMAT);
-    startTime = optional(context.getStartTime()).map(timeConverter::convert).orElse(-1L);
-    endTime = optional(context.getEndTime()).map(timeConverter::convert).orElse(-1L);
+    startTime = optional(context.getStartTime()).map(TIME_CONVERTER::convert).orElse(-1L);
+    endTime = optional(context.getEndTime()).map(TIME_CONVERTER::convert).orElse(-1L);
     checkArgument(startTime <= endTime, "start time cannot be greater than end time");
 
     resultMap = new HashMap<>();
@@ -105,10 +104,6 @@ public abstract class DetectionPipelineOperator implements Operator {
 
   public long getEndTime() {
     return endTime;
-  }
-
-  public String getTimeFormat() {
-    return timeFormat;
   }
 
   protected void setOutput(String key, final DetectionPipelineResult output) {

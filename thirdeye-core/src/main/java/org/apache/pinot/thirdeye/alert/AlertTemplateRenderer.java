@@ -127,10 +127,12 @@ public class AlertTemplateRenderer {
     properties.put("startTime", startTimeMillis);
     properties.put("endTime", endTimeMillis);
     // add source metadata to each node
-    template.getNodes().stream()
-        .filter(node -> node.getType().equals(AnomalyDetectorPlanNode.TYPE))
-        .forEach(node -> node.getParams()
-            .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
+    if (template.getNodes() != null) {
+      template.getNodes().stream()
+          .filter(node -> node.getType().equals(AnomalyDetectorPlanNode.TYPE))
+          .forEach(node -> node.getParams()
+              .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
+    }
 
     final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
     return GroovyTemplateUtils.applyContextToTemplate(jsonString,

@@ -90,14 +90,21 @@ public class AlertEvaluator {
     return null;
   }
 
+/**
+ * For compatibility with Heatmap, legacy pipeline can contain template:rca field
+ * template name and template node is specific to v2.
+ *
+ * todo cyril remove compatibility with v1 later
+ */
   public boolean isV2Evaluation(final AlertApi alert) {
     if (alert.getId() != null) {
-      AlertDTO dto = ensureExists(alertManager.findById(alert.getId()));
-      return dto.getTemplate() != null;
+      AlertDTO alertDTO = ensureExists(alertManager.findById(alert.getId()));
+      return PlanExecutor.isV2Alert(alertDTO);
     }
-    return optional(alert)
-        .map(AlertApi::getTemplate)
-        .isPresent();
+    if (alert.getTemplate() == null) {
+      return false;
+    }
+    return alert.getTemplate().getName() != null || alert.getTemplate().getNodes() != null;
   }
 
   private DetectionPipelineResultV1 runPipeline(final AlertEvaluationApi request)

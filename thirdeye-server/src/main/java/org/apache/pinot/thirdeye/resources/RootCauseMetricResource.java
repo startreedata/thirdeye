@@ -412,6 +412,8 @@ public class RootCauseMetricResource {
       @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
       @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
+      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
+      @QueryParam("filters") List<String> filters,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
       @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
@@ -434,7 +436,7 @@ public class RootCauseMetricResource {
         "rca$dataset not found in alert config.");
     // fixme cyril add datasource constraints
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
-    String urn = MetricEntity.TYPE.formatURN(metricConfigDTO.getId());
+    String urn = MetricEntity.TYPE.formatURN(metricConfigDTO.getId(), filters);
 
     final Map<String, Map<String, Double>> breakdown = computeBreakdown(urn,
         anomalyDTO.getStartTime(),

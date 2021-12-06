@@ -31,13 +31,19 @@ public class PlanExecutor {
   }
 
   /**
-   * template is not populated for the legacy detection pipeline.
+   * For compatibility with Heatmap, legacy pipeline can contain template:rca field
+   * template name and template node is specific to v2.
+   *
+   * todo cyril remove compatibility with v1 later
    *
    * @param alert the alert DTO
    * @return true if this is a v2 alert.
    */
   public static boolean isV2Alert(final AlertDTO alert) {
-    return alert.getTemplate() != null;
+    if (alert.getTemplate() == null) {
+      return false;
+    }
+    return alert.getTemplate().getName() != null || alert.getTemplate().getNodes() != null;
   }
 
   @VisibleForTesting

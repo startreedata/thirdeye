@@ -615,11 +615,11 @@ public class RootCauseMetricResource {
     for (final MetricSlice slice : slices) {
       futures.put(slice, this.executor.submit(() -> {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
-        return df.isEmpty() ?
-            new DataFrame()
-                .addSeries(DataFrame.COL_TIME, slice.getStart())
-                .addSeries(DataFrame.COL_VALUE, Double.NaN) :
-            df;
+        if (df.isEmpty()) {
+          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStart())
+              .addSeries(DataFrame.COL_VALUE, Double.NaN);
+        }
+        return df;
       }));
     }
 

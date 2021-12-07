@@ -546,11 +546,9 @@ public class RootCauseMetricResource {
       @ApiParam(value = "limit results to the top k elements, plus an 'OTHER' rollup element")
       @QueryParam("granularity") String granularityString) throws Exception {
 
-    if (StringUtils.isBlank(granularityString)) {
-      granularityString = GRANULARITY_DEFAULT;
-    }
-
-    TimeGranularity granularity = TimeGranularity.fromString(granularityString);
+    TimeGranularity granularity = StringUtils.isBlank(granularityString) ?
+        findMetricGranularity(urn) :
+        TimeGranularity.fromString(granularityString);
     MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity).alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
@@ -578,12 +576,7 @@ public class RootCauseMetricResource {
     if (data.size() <= 1) {
       return data;
     }
-    TimeGranularity granularity = findMetricGranularity(slice.getMetricId());
-
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())
-        && slice.getGranularity().toMillis() >= granularity.toMillis()) {
-      granularity = slice.getGranularity();
-    }
+    TimeGranularity granularity = slice.getGranularity();
 
     DateTimeZone tz = DateTimeZone.forID(timezone);
     long start = data.getLongs(DataFrame.COL_TIME).min().longValue();

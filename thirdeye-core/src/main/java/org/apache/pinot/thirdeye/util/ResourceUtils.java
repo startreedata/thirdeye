@@ -125,24 +125,6 @@ public class ResourceUtils {
     );
   }
 
-  /**
-   * Return a list of parameters.
-   * Support both multi-entity notations:
-   * <br/><b>(1) comma-delimited:</b> {@code "urns=thirdeye:metric:123,thirdeye:metric:124"}
-   * <br/><b>(2) multi-param</b> {@code "urns=thirdeye:metric:123&urns=thirdeye:metric:124"}
-   *
-   * @param params input of params
-   * @return list of params
-   */
-  public static List<String> parseListParams(List<String> params) {
-    if (params == null){
-      return Collections.emptyList();
-    }
-    if (params.size() != 1)
-      return params;
-    return Arrays.asList(params.get(0).split(","));
-  }
-
   public static List<Map<String, Object>> resultSetToMap(final ResultSet rs) throws SQLException {
     List<Map<String, Object>> list = new ArrayList<>();
     ResultSetMetaData rsmd = rs.getMetaData();

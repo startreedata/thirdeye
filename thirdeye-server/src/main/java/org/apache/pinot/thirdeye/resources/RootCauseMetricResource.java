@@ -279,7 +279,6 @@ public class RootCauseMetricResource {
       timezone = TIMEZONE_DEFAULT;
     }
 
-    offsets = ResourceUtils.parseListParams(offsets);
     List<MetricSlice> slices = new ArrayList<>();
 
     Map<String, MetricSlice> offsetToBaseSlice = new HashMap<>();
@@ -345,8 +344,6 @@ public class RootCauseMetricResource {
       timezone = TIMEZONE_DEFAULT;
     }
 
-    urns = ResourceUtils.parseListParams(urns);
-    offsets = ResourceUtils.parseListParams(offsets);
     List<MetricSlice> slices = new ArrayList<>();
 
     Map<Pair<String, String>, MetricSlice> offsetToBaseSlice = new HashMap<>();

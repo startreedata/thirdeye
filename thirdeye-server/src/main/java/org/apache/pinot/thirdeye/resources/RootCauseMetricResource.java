@@ -304,7 +304,6 @@ public class RootCauseMetricResource {
     // Pick the results
     for (String offset : offsets) {
       DataFrame result = offsetToRange.get(offset).gather(offsetToBaseSlice.get(offset), data);
-      // todo cyril I think result cannot be empty
       if (result.isEmpty()) {
         aggregateValues.add(Double.NaN);
       } else {

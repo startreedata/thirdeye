@@ -27,7 +27,6 @@ public interface AggregationLoader {
 
   String COL_DIMENSION_NAME = "dimName";
   String COL_DIMENSION_VALUE = "dimValue";
-  String COL_VALUE = DataFrame.COL_VALUE;
 
   /**
    * Returns a de-aggregation data frame for a given slice with 3 columns:

@@ -111,6 +111,8 @@ $ npm run start
 
 This will build and deploy the project using [webpack-dev-server](https://github.com/webpack/webpack-dev-server) at http://localhost:7004.
 
+Note that configuration for the proxy to the `/api` endpoints is located in `webpack.config.dev.js` under `devServer.proxy`.
+
 ## Supported Browsers
 
 StarTree ThirdEye UI is tested on latest, stable release of [Chrome](https://www.google.com/chrome), [Firefox](https://www.mozilla.org/firefox), [Safari](https://www.apple.com/safari) and [Edge](https://www.microsoft.com/edge).

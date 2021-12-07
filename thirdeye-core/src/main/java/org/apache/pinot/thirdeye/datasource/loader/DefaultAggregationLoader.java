@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.StringSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -93,7 +94,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     DataFrame dfAll = DataFrame
         .builder(COL_DIMENSION_NAME + ":STRING", COL_DIMENSION_VALUE + ":STRING",
-            COL_VALUE + ":DOUBLE").build()
+            DataFrame.COL_VALUE + ":DOUBLE").build()
         .setIndex(COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
 
     Map<String, RequestContainer> requests = new HashMap<>();
@@ -124,11 +125,15 @@ public class DefaultAggregationLoader implements AggregationLoader {
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))
           .addSeries(COL_DIMENSION_VALUE, dfRaw.get(dimension))
-          .addSeries(COL_VALUE, dfRaw.get(COL_VALUE));
+          .addSeries(DataFrame.COL_VALUE, dfRaw.get(DataFrame.COL_VALUE));
       results.add(dfResult);
     }
 
-    return dfAll.append(results);
+    final DataFrame breakdown = dfAll.append(results);
+    // add time column containing start time of slice
+    return breakdown.addSeries(DataFrame.COL_TIME,
+            LongSeries.fillValues(breakdown.size(), slice.getStart()))
+        .setIndex(DataFrame.COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
   }
 
   @Override
@@ -154,7 +159,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     for (String dimName : dimensions) {
       cols.add(dimName + ":STRING");
     }
-    cols.add(COL_VALUE + ":DOUBLE");
+    cols.add(DataFrame.COL_VALUE + ":DOUBLE");
 
     DataFrame dfEmpty = DataFrame.builder(cols).build().setIndex(dimensions);
 
@@ -169,6 +174,12 @@ public class DefaultAggregationLoader implements AggregationLoader {
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = dataSourceCache
         .getQueryResult(rc.getRequest());
-    return DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+    final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+
+    // fill in timestamps
+    return aggregate
+        .dropSeries(DataFrame.COL_TIME)
+        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(aggregate.size(), slice.getStart()))
+        .setIndex(DataFrame.COL_TIME);
   }
 }

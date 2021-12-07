@@ -16,11 +16,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +39,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
@@ -91,8 +88,6 @@ public class RootCauseMetricResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
 
-  private static final String COL_TIME = TimeSeriesLoader.COL_TIME;
-  private static final String COL_VALUE = TimeSeriesLoader.COL_VALUE;
   private static final String COL_DIMENSION_NAME = AggregationLoader.COL_DIMENSION_NAME;
   private static final String COL_DIMENSION_VALUE = AggregationLoader.COL_DIMENSION_VALUE;
 
@@ -142,8 +137,8 @@ public class RootCauseMetricResource {
    */
   private static Map<String, List<? extends Number>> makeTimeSeriesMap(DataFrame data) {
     Map<String, List<? extends Number>> output = new HashMap<>();
-    output.put(COL_TIME, data.getLongs(COL_TIME).toList());
-    output.put(COL_VALUE, data.getDoubles(COL_VALUE).toList());
+    output.put(DataFrame.COL_TIME, data.getLongs(DataFrame.COL_TIME).toList());
+    output.put(DataFrame.COL_VALUE, data.getDoubles(DataFrame.COL_VALUE).toList());
     return output;
   }
 
@@ -167,7 +162,7 @@ public class RootCauseMetricResource {
     for (int i = 0; i < dataBreakdown.size(); i++) {
       final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
       final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
-      final double value = dataBreakdown.getDouble(COL_VALUE, i);
+      final double value = dataBreakdown.getDouble(DataFrame.COL_VALUE, i);
 
       // cell
       if (!output.containsKey(dimName)) {
@@ -181,7 +176,7 @@ public class RootCauseMetricResource {
 
     // add rollup column
     if (!dataAggregate.isEmpty()) {
-      double total = dataAggregate.getDouble(COL_VALUE, 0);
+      double total = dataAggregate.getDouble(DataFrame.COL_VALUE, 0);
       for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
         if (entry.getValue() < total) {
           output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
@@ -235,7 +230,8 @@ public class RootCauseMetricResource {
       timezone = TIMEZONE_DEFAULT;
     }
 
-    MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end), timezone);
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+        .alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
@@ -248,7 +244,7 @@ public class RootCauseMetricResource {
     if (result.isEmpty()) {
       return Double.NaN;
     }
-    return result.getDouble(COL_VALUE, 0);
+    return result.getDouble(DataFrame.COL_VALUE, 0);
   }
 
   /**
@@ -289,7 +285,8 @@ public class RootCauseMetricResource {
     Map<String, MetricSlice> offsetToBaseSlice = new HashMap<>();
     Map<String, Baseline> offsetToRange = new HashMap<>();
     for (String offset : offsets) {
-      MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end), timezone);
+      MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+          .alignedOn(timezone);
       offsetToBaseSlice.put(offset, baseSlice);
 
       Baseline range = parseOffset(offset, timezone);
@@ -307,10 +304,11 @@ public class RootCauseMetricResource {
     // Pick the results
     for (String offset : offsets) {
       DataFrame result = offsetToRange.get(offset).gather(offsetToBaseSlice.get(offset), data);
+      // todo cyril I think result cannot be empty
       if (result.isEmpty()) {
         aggregateValues.add(Double.NaN);
       } else {
-        aggregateValues.add(result.getDouble(COL_VALUE, 0));
+        aggregateValues.add(result.getDouble(DataFrame.COL_VALUE, 0));
       }
     }
     return aggregateValues;
@@ -358,7 +356,8 @@ public class RootCauseMetricResource {
       for (String offset : offsets) {
         Pair<String, String> key = Pair.of(urn, offset);
 
-        MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end), timezone);
+        MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+            .alignedOn(timezone);
         offsetToBaseSlice.put(key, baseSlice);
 
         Baseline range = parseOffset(offset, timezone);
@@ -382,7 +381,7 @@ public class RootCauseMetricResource {
         if (result.isEmpty()) {
           aggregateValues.put(urn, Double.NaN);
         } else {
-          aggregateValues.put(urn, result.getDouble(COL_VALUE, 0));
+          aggregateValues.put(urn, result.getDouble(DataFrame.COL_VALUE, 0));
         }
       }
     }
@@ -434,7 +433,6 @@ public class RootCauseMetricResource {
         "rca$metric not found in alert config.");
     String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
         "rca$dataset not found in alert config.");
-    // fixme cyril add datasource constraints
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
     String urn = MetricEntity.TYPE.formatURN(metricConfigDTO.getId(), filters);
 
@@ -443,9 +441,7 @@ public class RootCauseMetricResource {
         anomalyDTO.getEndTime(),
         offset,
         timezone,
-        limit,
-        //todo cyril deprecate native granularity?
-        MetricSlice.NATIVE_GRANULARITY);
+        limit);
     return Response.ok(breakdown).build();
   }
 
@@ -487,9 +483,8 @@ public class RootCauseMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
-    final TimeGranularity granularity = MetricSlice.NATIVE_GRANULARITY;
 
-    return Response.ok(computeBreakdown(urn, start, end, offset, timezone, limit, granularity))
+    return Response.ok(computeBreakdown(urn, start, end, offset, timezone, limit))
         .build();
   }
 
@@ -499,9 +494,10 @@ public class RootCauseMetricResource {
       final long end,
       final String offset,
       final String timezone,
-      final int limit,
-      final TimeGranularity granularity) throws Exception {
-    MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end, granularity), timezone);
+      final int limit) throws Exception {
+
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+        .alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
@@ -556,7 +552,7 @@ public class RootCauseMetricResource {
     }
 
     TimeGranularity granularity = TimeGranularity.fromString(granularityString);
-    MetricSlice baseSlice = alignSlice(makeSlice(urn, start, end, granularity), timezone);
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity).alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
     List<MetricSlice> slices = new ArrayList<>(range.scatter(baseSlice));
@@ -583,20 +579,15 @@ public class RootCauseMetricResource {
     if (data.size() <= 1) {
       return data;
     }
-    final MetricConfigDTO metric = ensureExists(metricDAO.findById(slice.getMetricId()),
-        String.format("metric id: %d", slice.getMetricId()));
+    TimeGranularity granularity = findMetricGranularity(slice.getMetricId());
 
-    final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
-        String.format("dataset name: %s", metric.getDataset()));
-
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
     if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())
         && slice.getGranularity().toMillis() >= granularity.toMillis()) {
       granularity = slice.getGranularity();
     }
 
     DateTimeZone tz = DateTimeZone.forID(timezone);
-    long start = data.getLongs(COL_TIME).min().longValue();
+    long start = data.getLongs(DataFrame.COL_TIME).min().longValue();
     long end = slice.getEnd();
     Period stepSize = granularity.toPeriod();
 
@@ -607,11 +598,10 @@ public class RootCauseMetricResource {
       current = current.plus(stepSize);
     }
 
-    LongSeries sExpected = LongSeries.buildFrom(ArrayUtils.toPrimitive(timestamps.toArray(new Long[timestamps
-        .size()])));
-    DataFrame dfExpected = new DataFrame(COL_TIME, sExpected);
+    LongSeries sExpected = LongSeries.buildFrom(timestamps.stream().mapToLong(l -> l).toArray());
+    DataFrame dfExpected = new DataFrame(DataFrame.COL_TIME, sExpected);
 
-    return data.joinOuter(dfExpected).sortedBy(COL_TIME);
+    return data.joinOuter(dfExpected).sortedBy(DataFrame.COL_TIME);
   }
 
   /**
@@ -622,29 +612,19 @@ public class RootCauseMetricResource {
    * @throws Exception on catch-all execution failure
    */
   private Map<MetricSlice, DataFrame> fetchAggregates(List<MetricSlice> slices) throws Exception {
-    Map<MetricSlice, Future<Double>> futures = new HashMap<>();
-
+    Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
     for (final MetricSlice slice : slices) {
       futures.put(slice, this.executor.submit(() -> {
-        DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
-        if (df.isEmpty()) {
-          return Double.NaN;
-        }
-        return df.getDouble(COL_VALUE, 0);
+        final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
+        return df.isEmpty() ?
+            new DataFrame()
+                .addSeries(DataFrame.COL_TIME, slice.getStart())
+                .addSeries(DataFrame.COL_VALUE, Double.NaN) :
+            df;
       }));
     }
 
-    Map<MetricSlice, DataFrame> output = new HashMap<>();
-    for (Map.Entry<MetricSlice, Future<Double>> entry : futures.entrySet()) {
-      MetricSlice slice = entry.getKey();
-      double value = entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
-
-      DataFrame data = new DataFrame(COL_TIME, LongSeries.buildFrom(slice.getStart()))
-          .addSeries(COL_VALUE, value);
-      output.put(slice, data);
-    }
-
-    return output;
+    return collectFutures(futures);
   }
 
   /**
@@ -659,23 +639,11 @@ public class RootCauseMetricResource {
   private Map<MetricSlice, DataFrame> fetchBreakdowns(List<MetricSlice> slices, final int limit)
       throws Exception {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
-
     for (final MetricSlice slice : slices) {
       futures.put(slice, this.executor.submit(() -> aggregationLoader.loadBreakdown(slice, limit)));
     }
 
-    Map<MetricSlice, DataFrame> output = new HashMap<>();
-    for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
-      MetricSlice slice = entry.getKey();
-      DataFrame value = entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
-
-      DataFrame data = new DataFrame(value)
-          .addSeries(COL_TIME, LongSeries.fillValues(value.size(), slice.getStart()))
-          .setIndex(COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
-      output.put(slice, data);
-    }
-
-    return output;
+    return collectFutures(futures);
   }
 
   /**
@@ -687,11 +655,16 @@ public class RootCauseMetricResource {
    */
   private Map<MetricSlice, DataFrame> fetchTimeSeries(List<MetricSlice> slices) throws Exception {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
-
     for (final MetricSlice slice : slices) {
       futures.put(slice, this.executor.submit(() -> timeSeriesLoader.load(slice)));
     }
 
+    return collectFutures(futures);
+  }
+
+  private Map<MetricSlice, DataFrame> collectFutures(
+      final Map<MetricSlice, Future<DataFrame>> futures)
+      throws Exception {
     Map<MetricSlice, DataFrame> output = new HashMap<>();
     for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
       output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
@@ -700,42 +673,17 @@ public class RootCauseMetricResource {
     return output;
   }
 
-  /**
-   * Aligns a metric slice based on its granularity, or the dataset granularity.
-   *
-   * @param slice metric slice
-   * @return aligned metric slice
-   */
-  // TODO refactor as util. similar to dataframe utils
-  private MetricSlice alignSlice(MetricSlice slice, String timezone) {
-    final MetricConfigDTO metric = ensureExists(metricDAO.findById(slice.getMetricId()),
-        String.format("metric id: %d", slice.getMetricId()));
+  private TimeGranularity findMetricGranularity(final String urn) {
+    MetricEntity metricEntity = MetricEntity.fromURN(urn);
+    return findMetricGranularity(metricEntity.getId());
+  }
 
+  private TimeGranularity findMetricGranularity(final Long metricId) {
+    final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
+        String.format("metric id: %d", metricId));
     final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
         String.format("dataset name: %s", metric.getDataset()));
 
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())) {
-      granularity = slice.getGranularity();
-    }
-
-    // align to time buckets and request time zone
-    final long offset = DateTimeZone.forID(timezone).getOffset(slice.getStart());
-    final long granularityMillis = granularity.toMillis();
-    final long start = ((slice.getStart() + offset + granularityMillis - 1) / granularityMillis)
-        * granularityMillis
-        - offset; // round up the start time to time granularity boundary of the requested time zone
-    final long end = start + (slice.getEnd() - slice.getStart());
-
-    return slice.withStart(start).withEnd(end).withGranularity(granularity);
-  }
-
-  private MetricSlice makeSlice(String urn, long start, long end) {
-    return makeSlice(urn, start, end, MetricSlice.NATIVE_GRANULARITY);
-  }
-
-  private MetricSlice makeSlice(String urn, long start, long end, TimeGranularity granularity) {
-    MetricEntity metric = MetricEntity.fromURN(urn);
-    return MetricSlice.from(metric.getId(), start, end, metric.getFilters(), granularity);
+    return dataset.bucketTimeGranularity();
   }
 }

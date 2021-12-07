@@ -27,9 +27,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
  */
 public interface TimeSeriesLoader {
 
-  String COL_TIME = DataFrame.COL_TIME;
-  String COL_VALUE = DataFrame.COL_VALUE;
-
   /**
    * Returns the metric time series for a given time range and filter set, with a specified
    * time granularity. If the underlying time series resolution does not correspond to the desired

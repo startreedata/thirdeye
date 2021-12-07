@@ -25,7 +25,9 @@ import com.google.common.collect.Multimap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * Selector for time series and aggregate values of a specific metric, independent of
@@ -66,6 +68,11 @@ public final class MetricSlice {
     return new MetricSlice(metricId, start, end, filters, granularity);
   }
 
+  public static MetricSlice fromUrn(String urn, long start, long end, TimeGranularity granularity) {
+    MetricEntity metric = MetricEntity.fromURN(urn);
+    return new MetricSlice(metric.getId(), start, end, metric.getFilters(), granularity);
+  }
+
   public long getMetricId() {
     return metricId;
   }
@@ -100,6 +107,25 @@ public final class MetricSlice {
 
   public MetricSlice withGranularity(TimeGranularity granularity) {
     return new MetricSlice(metricId, start, end, filters, granularity);
+  }
+
+  /**
+   * Returns a new MetricSlice aligned on the timezone.
+   *
+   * @return aligned metric slice
+   */
+  public MetricSlice alignedOn(String timezone) {
+    // align to time buckets and request time zone
+    final long offset = DateTimeZone.forID(timezone).getOffset(start);
+    final long granularityMillis = granularity.toMillis();
+    // fixme cyril this looks like a round down
+    final long alignedStart = ((start + offset + granularityMillis - 1) / granularityMillis)
+        * granularityMillis
+        - offset; // round up the start time to time granularity boundary of the requested time zone
+    // fixme cyril this method looks incorrect if utc offset changes between start and end
+    final long alignedEnd = alignedStart + (end - start);
+
+    return new MetricSlice(metricId, alignedStart, alignedEnd, filters, granularity);
   }
 
   /**

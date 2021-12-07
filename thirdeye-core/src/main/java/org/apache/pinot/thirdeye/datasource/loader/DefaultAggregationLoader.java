@@ -131,8 +131,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     final DataFrame breakdown = dfAll.append(results);
     // add time column containing start time of slice
-    return breakdown.addSeries(DataFrame.COL_TIME,
-            LongSeries.fillValues(breakdown.size(), slice.getStart()))
+    return breakdown
+        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(breakdown.size(), slice.getStart()))
         .setIndex(DataFrame.COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
   }
 
@@ -178,7 +178,6 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // fill in timestamps
     return aggregate
-        .dropSeries(DataFrame.COL_TIME)
         .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(aggregate.size(), slice.getStart()))
         .setIndex(DataFrame.COL_TIME);
   }

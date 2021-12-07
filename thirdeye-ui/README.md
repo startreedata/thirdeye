@@ -111,7 +111,7 @@ $ npm run start
 
 This will build and deploy the project using [webpack-dev-server](https://github.com/webpack/webpack-dev-server) at http://localhost:7004.
 
-Note that configuration for the proxy to the `/api` endpoints is located in `webpack.config.dev.js` under `devServer.proxy`.
+Note that configuration for the proxy to the `/api` endpoint is located in `webpack.config.dev.js` under `devServer.proxy`.
 
 ## Supported Browsers
 

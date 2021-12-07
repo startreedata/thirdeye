@@ -217,20 +217,14 @@ public class RootCauseMetricResource {
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
-      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")") @QueryParam("offset") String offset,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") String timezone)
+      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")") @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
+      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
-    if (StringUtils.isBlank(offset)) {
-      offset = OFFSET_DEFAULT;
-    }
 
-    if (StringUtils.isBlank(timezone)) {
-      timezone = TIMEZONE_DEFAULT;
-    }
-
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
     MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-        .alignedOn(timezone);
-    Baseline range = parseOffset(offset, timezone);
+        .alignedOn(dateTimeZone);
+    Baseline range = parseOffset(offset, dateTimeZone);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -269,23 +263,19 @@ public class RootCauseMetricResource {
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "A list of offset identifier separated by comma (e.g. \"current\", \"wo2w\")") @QueryParam("offsets") List<String> offsets,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") String timezone)
+      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
     List<Double> aggregateValues = new ArrayList<>();
-
-    if (StringUtils.isBlank(timezone)) {
-      timezone = TIMEZONE_DEFAULT;
-    }
-
     List<MetricSlice> slices = new ArrayList<>();
     Map<String, MetricSlice> offsetToBaseSlice = new HashMap<>();
     Map<String, Baseline> offsetToRange = new HashMap<>();
     for (String offset : offsets) {
       MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-          .alignedOn(timezone);
+          .alignedOn(dateTimeZone);
       offsetToBaseSlice.put(offset, baseSlice);
 
-      Baseline range = parseOffset(offset, timezone);
+      Baseline range = parseOffset(offset, dateTimeZone);
       offsetToRange.put(offset, range);
 
       List<MetricSlice> currentSlices = range.scatter(baseSlice);
@@ -322,7 +312,7 @@ public class RootCauseMetricResource {
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
    * @return map of lists (keyed by urn) of aggregate values, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/aggregate/chunk")
@@ -333,16 +323,11 @@ public class RootCauseMetricResource {
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "A list of offset identifier separated by comma (e.g. \"current\", \"wo2w\")") @QueryParam("offsets") List<String> offsets,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") String timezone)
+      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
     ListMultimap<String, Double> aggregateValues = ArrayListMultimap.create();
-
-    if (StringUtils.isBlank(timezone)) {
-      timezone = TIMEZONE_DEFAULT;
-    }
-
     List<MetricSlice> slices = new ArrayList<>();
-
     Map<Pair<String, String>, MetricSlice> offsetToBaseSlice = new HashMap<>();
     Map<Pair<String, String>, Baseline> tupleToRange = new HashMap<>();
     for (String urn : urns) {
@@ -350,10 +335,10 @@ public class RootCauseMetricResource {
         Pair<String, String> key = Pair.of(urn, offset);
 
         MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-            .alignedOn(timezone);
+            .alignedOn(dateTimeZone);
         offsetToBaseSlice.put(key, baseSlice);
 
-        Baseline range = parseOffset(offset, timezone);
+        Baseline range = parseOffset(offset, dateTimeZone);
         tupleToRange.put(key, range);
 
         List<MetricSlice> currentSlices = range.scatter(baseSlice);
@@ -414,6 +399,7 @@ public class RootCauseMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
 
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(id),
         String.format("Anomaly ID: %d", id));
@@ -433,7 +419,7 @@ public class RootCauseMetricResource {
         anomalyDTO.getStartTime(),
         anomalyDTO.getEndTime(),
         offset,
-        timezone,
+        dateTimeZone,
         limit);
     return Response.ok(breakdown).build();
   }
@@ -451,7 +437,7 @@ public class RootCauseMetricResource {
    * @param limit limit results to the top k elements, plus a rollup element
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/breakdown")
@@ -476,8 +462,9 @@ public class RootCauseMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
 
-    return Response.ok(computeBreakdown(urn, start, end, offset, timezone, limit))
+    return Response.ok(computeBreakdown(urn, start, end, offset, dateTimeZone, limit))
         .build();
   }
 
@@ -486,7 +473,7 @@ public class RootCauseMetricResource {
       final long start,
       final long end,
       final String offset,
-      final String timezone,
+      final DateTimeZone timezone,
       final int limit) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
@@ -518,7 +505,7 @@ public class RootCauseMetricResource {
    * @param granularityString time granularity (e.g. "5_MINUTES", "1_HOURS")
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/timeseries")
@@ -543,8 +530,9 @@ public class RootCauseMetricResource {
     TimeGranularity granularity = StringUtils.isBlank(granularityString) ?
         findMetricGranularity(urn) :
         TimeGranularity.fromString(granularityString);
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity).alignedOn(timezone);
-    Baseline range = parseOffset(offset, timezone);
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity).alignedOn(dateTimeZone);
+    Baseline range = parseOffset(offset, dateTimeZone);
 
     List<MetricSlice> slices = new ArrayList<>(range.scatter(baseSlice));
     logSlices(baseSlice, slices);
@@ -552,7 +540,7 @@ public class RootCauseMetricResource {
     Map<MetricSlice, DataFrame> data = fetchTimeSeries(slices);
     DataFrame rawResult = range.gather(baseSlice, data);
 
-    DataFrame imputedResult = this.imputeExpectedTimestamps(rawResult, baseSlice, timezone);
+    DataFrame imputedResult = this.imputeExpectedTimestamps(rawResult, baseSlice, dateTimeZone);
 
     return makeTimeSeriesMap(imputedResult);
   }
@@ -566,18 +554,17 @@ public class RootCauseMetricResource {
    * @param slice metric slice
    * @return time series dataframe with nulls for expected but missing data
    */
-  private DataFrame imputeExpectedTimestamps(DataFrame data, MetricSlice slice, String timezone) {
+  private DataFrame imputeExpectedTimestamps(DataFrame data, MetricSlice slice, DateTimeZone timezone) {
     if (data.size() <= 1) {
       return data;
     }
     TimeGranularity granularity = slice.getGranularity();
 
-    DateTimeZone tz = DateTimeZone.forID(timezone);
     long start = data.getLongs(DataFrame.COL_TIME).min().longValue();
     long end = slice.getEnd();
     Period stepSize = granularity.toPeriod();
 
-    DateTime current = new DateTime(start, tz);
+    DateTime current = new DateTime(start, timezone);
     List<Long> timestamps = new ArrayList<>();
     while (current.getMillis() < end) {
       timestamps.add(current.getMillis());
@@ -588,6 +575,11 @@ public class RootCauseMetricResource {
     DataFrame dfExpected = new DataFrame(DataFrame.COL_TIME, sExpected);
 
     return data.joinOuter(dfExpected).sortedBy(DataFrame.COL_TIME);
+  }
+
+  private DateTimeZone parseTimeZone(
+      @DefaultValue(TIMEZONE_DEFAULT) @QueryParam("timezone") @ApiParam("timezone identifier (e.g. \"America/Los_Angeles\")") final String timezone) {
+    return DateTimeZone.forID(timezone);
   }
 
   /**

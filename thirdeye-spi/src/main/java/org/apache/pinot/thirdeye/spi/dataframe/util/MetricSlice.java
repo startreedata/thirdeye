@@ -114,9 +114,9 @@ public final class MetricSlice {
    *
    * @return aligned metric slice
    */
-  public MetricSlice alignedOn(String timezone) {
+  public MetricSlice alignedOn(DateTimeZone timezone) {
     // align to time buckets and request time zone
-    final long offset = DateTimeZone.forID(timezone).getOffset(start);
+    final long offset = timezone.getOffset(start);
     final long granularityMillis = granularity.toMillis();
     // fixme cyril this looks like a round down
     final long alignedStart = ((start + offset + granularityMillis - 1) / granularityMillis)

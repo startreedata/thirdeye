@@ -65,9 +65,14 @@ public class BaselineParsingUtils {
    * @return Baseline instance
    * @throws IllegalArgumentException if the offset cannot be parsed
    */
+  @Deprecated
   public static Baseline parseOffset(String offset, String timeZoneString) {
     DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
 
+    return parseOffset(offset, timeZone);
+  }
+
+  public static Baseline parseOffset(final String offset, final DateTimeZone timeZone) {
     Matcher mCurrent = PATTERN_CURRENT.matcher(offset);
     if (mCurrent.find()) {
       return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM, 1, 0, timeZone);

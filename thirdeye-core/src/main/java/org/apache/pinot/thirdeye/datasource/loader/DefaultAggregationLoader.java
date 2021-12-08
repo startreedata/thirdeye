@@ -25,8 +25,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -48,7 +50,10 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultAggregationLoader.class);
 
+  private static final String COL_DIMENSION_NAME = "dimName";
+  private static final String COL_DIMENSION_VALUE = "dimValue";
   private static final long TIMEOUT = 600000;
+  private static final String ROLLUP_NAME = "OTHER";
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
@@ -180,5 +185,50 @@ public class DefaultAggregationLoader implements AggregationLoader {
     return aggregate
         .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(aggregate.size(), slice.getStart()))
         .setIndex(DataFrame.COL_TIME);
+  }
+
+  /**
+   * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
+   * breakdown results dataframe.
+   *
+   * @param dataBreakdown (transformed) breakdown query results
+   * @param dataAggregate (transformed) aggregate query results
+   * @return map of maps of value (keyed by dimension name, keyed by dimension value)
+   */
+  public static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown,
+      DataFrame dataAggregate) {
+    Map<String, Map<String, Double>> output = new TreeMap<>();
+
+    dataBreakdown = dataBreakdown.dropNull();
+    dataAggregate = dataAggregate.dropNull();
+
+    Map<String, Double> dimensionTotals = new HashMap<>();
+
+    for (int i = 0; i < dataBreakdown.size(); i++) {
+      final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
+      final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
+      final double value = dataBreakdown.getDouble(DataFrame.COL_VALUE, i);
+
+      // cell
+      if (!output.containsKey(dimName)) {
+        output.put(dimName, new HashMap<>());
+      }
+      output.get(dimName).put(dimValue, value);
+
+      // total
+      dimensionTotals.put(dimName, MapUtils.getDoubleValue(dimensionTotals, dimName, 0) + value);
+    }
+
+    // add rollup column
+    if (!dataAggregate.isEmpty()) {
+      double total = dataAggregate.getDouble(DataFrame.COL_VALUE, 0);
+      for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
+        if (entry.getValue() < total) {
+          output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
+        }
+      }
+    }
+
+    return output;
   }
 }

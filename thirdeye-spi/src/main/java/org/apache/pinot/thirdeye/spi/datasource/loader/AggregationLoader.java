@@ -25,9 +25,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 
 public interface AggregationLoader {
 
-  String COL_DIMENSION_NAME = "dimName";
-  String COL_DIMENSION_VALUE = "dimValue";
-
   /**
    * Returns a de-aggregation data frame for a given slice with 3 columns:
    * dimension name, dimension value, and metric value.

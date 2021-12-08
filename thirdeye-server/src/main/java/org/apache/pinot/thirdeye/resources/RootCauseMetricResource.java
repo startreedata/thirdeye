@@ -3,8 +3,6 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils.parseOffset;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -17,13 +15,11 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -38,10 +34,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
+import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
@@ -77,7 +72,7 @@ import org.slf4j.LoggerFactory;
  * The endpoint parses metric urns and a unified set of "offsets", i.e. time-warped baseline of the
  * specified metric. It further aligns queried time stamps to sensibly match the raw dataset.</p>
  *
- * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+ * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
  */
 @Api(authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
@@ -86,11 +81,6 @@ import org.slf4j.LoggerFactory;
 public class RootCauseMetricResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
-
-  private static final String COL_DIMENSION_NAME = AggregationLoader.COL_DIMENSION_NAME;
-  private static final String COL_DIMENSION_VALUE = AggregationLoader.COL_DIMENSION_VALUE;
-
-  private static final String ROLLUP_NAME = "OTHER";
 
   private static final long TIMEOUT = 600000;
 
@@ -127,75 +117,6 @@ public class RootCauseMetricResource {
   }
 
   /**
-   * Returns a map of time series (keyed by series name) derived from the timeseries results
-   * dataframe.
-   *
-   * @param data (transformed) query results
-   * @return map of lists of double or long (keyed by series name)
-   */
-  private static Map<String, List<? extends Number>> makeTimeSeriesMap(DataFrame data) {
-    Map<String, List<? extends Number>> output = new HashMap<>();
-    output.put(DataFrame.COL_TIME, data.getLongs(DataFrame.COL_TIME).toList());
-    output.put(DataFrame.COL_VALUE, data.getDoubles(DataFrame.COL_VALUE).toList());
-    return output;
-  }
-
-  /**
-   * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
-   * breakdown results dataframe.
-   *
-   * @param dataBreakdown (transformed) breakdown query results
-   * @param dataAggregate (transformed) aggregate query results
-   * @return map of maps of value (keyed by dimension name, keyed by dimension value)
-   */
-  private static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown,
-      DataFrame dataAggregate) {
-    Map<String, Map<String, Double>> output = new TreeMap<>();
-
-    dataBreakdown = dataBreakdown.dropNull();
-    dataAggregate = dataAggregate.dropNull();
-
-    Map<String, Double> dimensionTotals = new HashMap<>();
-
-    for (int i = 0; i < dataBreakdown.size(); i++) {
-      final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
-      final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
-      final double value = dataBreakdown.getDouble(DataFrame.COL_VALUE, i);
-
-      // cell
-      if (!output.containsKey(dimName)) {
-        output.put(dimName, new HashMap<>());
-      }
-      output.get(dimName).put(dimValue, value);
-
-      // total
-      dimensionTotals.put(dimName, MapUtils.getDoubleValue(dimensionTotals, dimName, 0) + value);
-    }
-
-    // add rollup column
-    if (!dataAggregate.isEmpty()) {
-      double total = dataAggregate.getDouble(DataFrame.COL_VALUE, 0);
-      for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
-        if (entry.getValue() < total) {
-          output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
-        }
-      }
-    }
-
-    return output;
-  }
-
-  private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
-    final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
-    LOG.info("{} - {} (base)",
-        formatter.print(baseSlice.getStart()),
-        formatter.print(baseSlice.getEnd()));
-    for (MetricSlice slice : slices) {
-      LOG.info("{} - {}", formatter.print(slice.getStart()), formatter.print(slice.getEnd()));
-    }
-  }
-
-  /**
    * Returns an aggregate value for the specified metric and time range, and (optionally) offset.
    * Aligns time stamps if necessary and returns NaN if no data is available for the given time
    * range.
@@ -222,21 +143,8 @@ public class RootCauseMetricResource {
       throws Exception {
 
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-        .alignedOn(dateTimeZone);
-    Baseline range = parseOffset(offset, dateTimeZone);
 
-    List<MetricSlice> slices = range.scatter(baseSlice);
-    logSlices(baseSlice, slices);
-
-    Map<MetricSlice, DataFrame> data = fetchAggregates(slices);
-
-    DataFrame result = range.gather(baseSlice, data);
-
-    if (result.isEmpty()) {
-      return Double.NaN;
-    }
-    return result.getDouble(DataFrame.COL_VALUE, 0);
+    return getSingleAggregate(urn, start, end, offset, dateTimeZone);
   }
 
   /**
@@ -266,37 +174,7 @@ public class RootCauseMetricResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    List<Double> aggregateValues = new ArrayList<>();
-    List<MetricSlice> slices = new ArrayList<>();
-    Map<String, MetricSlice> offsetToBaseSlice = new HashMap<>();
-    Map<String, Baseline> offsetToRange = new HashMap<>();
-    for (String offset : offsets) {
-      MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-          .alignedOn(dateTimeZone);
-      offsetToBaseSlice.put(offset, baseSlice);
-
-      Baseline range = parseOffset(offset, dateTimeZone);
-      offsetToRange.put(offset, range);
-
-      List<MetricSlice> currentSlices = range.scatter(baseSlice);
-
-      slices.addAll(currentSlices);
-      logSlices(baseSlice, currentSlices);
-    }
-
-    // Fetch all aggregates
-    Map<MetricSlice, DataFrame> data = fetchAggregates(slices);
-
-    // Pick the results
-    for (String offset : offsets) {
-      DataFrame result = offsetToRange.get(offset).gather(offsetToBaseSlice.get(offset), data);
-      if (result.isEmpty()) {
-        aggregateValues.add(Double.NaN);
-      } else {
-        aggregateValues.add(result.getDouble(DataFrame.COL_VALUE, 0));
-      }
-    }
-    return aggregateValues;
+    return getAggregatesForOffsets(urn, start, end, offsets, dateTimeZone);
   }
 
   /**
@@ -317,7 +195,7 @@ public class RootCauseMetricResource {
   @GET
   @Path("/aggregate/chunk")
   @ApiOperation(value = "Returns a map of lists (keyed by urn) of aggregate value for the specified metrics and time range, and offsets.")
-  public Map<String, Collection<Double>> getAggregateChunk(
+  public Map<String, List<Double>> getAggregateChunk(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urns", required = true) @QueryParam("urns") @NotNull List<String> urns,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
@@ -326,45 +204,11 @@ public class RootCauseMetricResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    ListMultimap<String, Double> aggregateValues = ArrayListMultimap.create();
-    List<MetricSlice> slices = new ArrayList<>();
-    Map<Pair<String, String>, MetricSlice> offsetToBaseSlice = new HashMap<>();
-    Map<Pair<String, String>, Baseline> tupleToRange = new HashMap<>();
+    Map<String, List<Double>> output = new HashMap<>();
     for (String urn : urns) {
-      for (String offset : offsets) {
-        Pair<String, String> key = Pair.of(urn, offset);
-
-        MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-            .alignedOn(dateTimeZone);
-        offsetToBaseSlice.put(key, baseSlice);
-
-        Baseline range = parseOffset(offset, dateTimeZone);
-        tupleToRange.put(key, range);
-
-        List<MetricSlice> currentSlices = range.scatter(baseSlice);
-
-        slices.addAll(currentSlices);
-        logSlices(baseSlice, currentSlices);
-      }
+      output.put(urn, getAggregatesForOffsets(urn, start, end, offsets, dateTimeZone));
     }
-
-    // Fetch all aggregates
-    Map<MetricSlice, DataFrame> data = fetchAggregates(slices);
-
-    // Pick the results
-    for (String urn : urns) {
-      for (String offset : offsets) {
-        Pair<String, String> key = Pair.of(urn, offset);
-        DataFrame result = tupleToRange.get(key).gather(offsetToBaseSlice.get(key), data);
-        if (result.isEmpty()) {
-          aggregateValues.put(urn, Double.NaN);
-        } else {
-          aggregateValues.put(urn, result.getDouble(DataFrame.COL_VALUE, 0));
-        }
-      }
-    }
-
-    return aggregateValues.asMap();
+    return output;
   }
 
   /**
@@ -489,7 +333,7 @@ public class RootCauseMetricResource {
     DataFrame resultBreakdown = range.gather(baseSlice, dataBreakdown);
     DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
 
-    return makeBreakdownMap(resultBreakdown, resultAggregate);
+    return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
   }
 
   /**
@@ -526,14 +370,14 @@ public class RootCauseMetricResource {
       @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus an 'OTHER' rollup element")
       @QueryParam("granularity") String granularityString) throws Exception {
-
+    
+    DateTimeZone dateTimeZone = parseTimeZone(timezone);
     TimeGranularity granularity = StringUtils.isBlank(granularityString) ?
         findMetricGranularity(urn) :
         TimeGranularity.fromString(granularityString);
-    DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity).alignedOn(dateTimeZone);
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity)
+        .alignedOn(dateTimeZone);
     Baseline range = parseOffset(offset, dateTimeZone);
-
     List<MetricSlice> slices = new ArrayList<>(range.scatter(baseSlice));
     logSlices(baseSlice, slices);
 
@@ -554,7 +398,8 @@ public class RootCauseMetricResource {
    * @param slice metric slice
    * @return time series dataframe with nulls for expected but missing data
    */
-  private DataFrame imputeExpectedTimestamps(DataFrame data, MetricSlice slice, DateTimeZone timezone) {
+  private DataFrame imputeExpectedTimestamps(DataFrame data, MetricSlice slice,
+      DateTimeZone timezone) {
     if (data.size() <= 1) {
       return data;
     }
@@ -579,6 +424,57 @@ public class RootCauseMetricResource {
 
   private DateTimeZone parseTimeZone(final String timezone) {
     return DateTimeZone.forID(timezone);
+  }
+
+  /**
+   * Returns a map of time series (keyed by series name) derived from the timeseries results
+   * dataframe.
+   *
+   * @param data (transformed) query results
+   * @return map of lists of double or long (keyed by series name)
+   */
+  private static Map<String, List<? extends Number>> makeTimeSeriesMap(DataFrame data) {
+    Map<String, List<? extends Number>> output = new HashMap<>();
+    output.put(DataFrame.COL_TIME, data.getLongs(DataFrame.COL_TIME).toList());
+    output.put(DataFrame.COL_VALUE, data.getDoubles(DataFrame.COL_VALUE).toList());
+    return output;
+  }
+
+  private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
+    final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
+    LOG.info("{} - {} (base)",
+        formatter.print(baseSlice.getStart()),
+        formatter.print(baseSlice.getEnd()));
+    for (MetricSlice slice : slices) {
+      LOG.info("{} - {}", formatter.print(slice.getStart()), formatter.print(slice.getEnd()));
+    }
+  }
+
+  private double getSingleAggregate(final String urn, final long start, final long end,
+      final String offset,
+      final DateTimeZone dateTimeZone) throws Exception {
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+        .alignedOn(dateTimeZone);
+    Baseline range = parseOffset(offset, dateTimeZone);
+    List<MetricSlice> slices = range.scatter(baseSlice);
+    logSlices(baseSlice, slices);
+    Map<MetricSlice, DataFrame> data = fetchAggregates(slices);
+    DataFrame result = range.gather(baseSlice, data);
+    if (result.isEmpty()) {
+      return Double.NaN;
+    }
+    return result.getDouble(DataFrame.COL_VALUE, 0);
+  }
+
+  // todo cyril rename this and above
+  private List<Double> getAggregatesForOffsets(final String urn, final long start, final long end,
+      final List<String> offsets, final DateTimeZone dateTimeZone) throws Exception {
+    List<Double> aggregateValues = new ArrayList<>();
+    for (String offset : offsets) {
+      double value = getSingleAggregate(urn, start, end, offset, dateTimeZone);
+      aggregateValues.add(value);
+    }
+    return aggregateValues;
   }
 
   /**

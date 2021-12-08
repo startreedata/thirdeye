@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -163,7 +164,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     dfInput.mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
     final MetricSlice slice = MetricSlice
-        .from(-1, window.getStartMillis(), window.getEndMillis(), null,
+        .from(-1, window.getStartMillis(), window.getEndMillis(), (Multimap<String, String>) null,
             timeGranularity);
 
     addBaselineAndBoundaries(dfInput);

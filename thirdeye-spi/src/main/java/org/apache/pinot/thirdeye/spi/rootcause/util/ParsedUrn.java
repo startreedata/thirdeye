@@ -21,6 +21,7 @@ package org.apache.pinot.thirdeye.spi.rootcause.util;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -95,13 +96,21 @@ public final class ParsedUrn {
 
   /**
    * Return FilterPredicates as filters multimap.
-   *
+   * @deprecated Prefer manipulating FilterPredicate directly with getPredicates()
    * @return filter multimap from predicates
    */
   // TODO use FilterPredicates throughout RCA framework
+  @Deprecated
   public Multimap<String, String> toFilters() {
+    return toFilters(this.predicates);
+  }
+
+  /**
+   * Prefer manipulating FilterPredicate directly with getPredicates()
+   * */
+  public static Multimap<String, String> toFilters(Collection<FilterPredicate> predicates) {
     Multimap<String, String> filters = TreeMultimap.create();
-    for (FilterPredicate predicate : this.predicates) {
+    for (FilterPredicate predicate : predicates) {
       if (!OPERATOR_TO_FILTER.containsKey(predicate.operator)) {
         throw new IllegalArgumentException(String
             .format("Operator '%s' could not be translated to filter prefix", predicate.operator));

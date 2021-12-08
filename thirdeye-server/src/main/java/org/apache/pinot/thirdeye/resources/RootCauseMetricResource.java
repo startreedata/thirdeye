@@ -133,7 +133,7 @@ public class RootCauseMetricResource {
   @GET
   @Path("/aggregate")
   @ApiOperation(value = "Returns an aggregate value for the specified metric and time range, and (optionally) offset.")
-  public double getAggregate(
+  public Response getAggregate(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
@@ -143,8 +143,9 @@ public class RootCauseMetricResource {
       throws Exception {
 
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
+    double aggregate = computeAggregate(urn, start, end, offset, dateTimeZone);
 
-    return getSingleAggregate(urn, start, end, offset, dateTimeZone);
+    return Response.ok(aggregate).build();
   }
 
   /**
@@ -165,7 +166,7 @@ public class RootCauseMetricResource {
   @GET
   @Path("/aggregate/batch")
   @ApiOperation(value = "Returns a list of aggregate value for the specified metric and time range, and (optionally) offset.")
-  public List<Double> getAggregateBatch(
+  public Response getAggregateBatch(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
@@ -174,7 +175,9 @@ public class RootCauseMetricResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    return getAggregatesForOffsets(urn, start, end, offsets, dateTimeZone);
+    List<Double> aggregates = computeAggregatesForOffsets(urn, start, end, offsets, dateTimeZone);
+
+    return Response.ok(aggregates).build();
   }
 
   /**
@@ -195,7 +198,7 @@ public class RootCauseMetricResource {
   @GET
   @Path("/aggregate/chunk")
   @ApiOperation(value = "Returns a map of lists (keyed by urn) of aggregate value for the specified metrics and time range, and offsets.")
-  public Map<String, List<Double>> getAggregateChunk(
+  public Response getAggregateChunk(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urns", required = true) @QueryParam("urns") @NotNull List<String> urns,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
@@ -204,11 +207,12 @@ public class RootCauseMetricResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    Map<String, List<Double>> output = new HashMap<>();
+    Map<String, List<Double>> urnToAggregates = new HashMap<>();
     for (String urn : urns) {
-      output.put(urn, getAggregatesForOffsets(urn, start, end, offsets, dateTimeZone));
+      urnToAggregates.put(urn, computeAggregatesForOffsets(urn, start, end, offsets, dateTimeZone));
     }
-    return output;
+
+    return Response.ok(urnToAggregates).build();
   }
 
   /**
@@ -310,30 +314,6 @@ public class RootCauseMetricResource {
 
     return Response.ok(computeBreakdown(urn, start, end, offset, dateTimeZone, limit))
         .build();
-  }
-
-  private Map<String, Map<String, Double>> computeBreakdown(
-      final String urn,
-      final long start,
-      final long end,
-      final String offset,
-      final DateTimeZone timezone,
-      final int limit) throws Exception {
-
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
-        .alignedOn(timezone);
-    Baseline range = parseOffset(offset, timezone);
-
-    List<MetricSlice> slices = range.scatter(baseSlice);
-    logSlices(baseSlice, slices);
-
-    Map<MetricSlice, DataFrame> dataBreakdown = fetchBreakdowns(slices, limit);
-    Map<MetricSlice, DataFrame> dataAggregate = fetchAggregates(slices);
-
-    DataFrame resultBreakdown = range.gather(baseSlice, dataBreakdown);
-    DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
-
-    return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
   }
 
   /**
@@ -450,7 +430,31 @@ public class RootCauseMetricResource {
     }
   }
 
-  private double getSingleAggregate(final String urn, final long start, final long end,
+  private Map<String, Map<String, Double>> computeBreakdown(
+      final String urn,
+      final long start,
+      final long end,
+      final String offset,
+      final DateTimeZone timezone,
+      final int limit) throws Exception {
+
+    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+        .alignedOn(timezone);
+    Baseline range = parseOffset(offset, timezone);
+
+    List<MetricSlice> slices = range.scatter(baseSlice);
+    logSlices(baseSlice, slices);
+
+    Map<MetricSlice, DataFrame> dataBreakdown = fetchBreakdowns(slices, limit);
+    Map<MetricSlice, DataFrame> dataAggregate = fetchAggregates(slices);
+
+    DataFrame resultBreakdown = range.gather(baseSlice, dataBreakdown);
+    DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
+
+    return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
+  }
+
+  private double computeAggregate(final String urn, final long start, final long end,
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
     MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
@@ -466,12 +470,11 @@ public class RootCauseMetricResource {
     return result.getDouble(DataFrame.COL_VALUE, 0);
   }
 
-  // todo cyril rename this and above
-  private List<Double> getAggregatesForOffsets(final String urn, final long start, final long end,
+  private List<Double> computeAggregatesForOffsets(final String urn, final long start, final long end,
       final List<String> offsets, final DateTimeZone dateTimeZone) throws Exception {
     List<Double> aggregateValues = new ArrayList<>();
     for (String offset : offsets) {
-      double value = getSingleAggregate(urn, start, end, offset, dateTimeZone);
+      double value = computeAggregate(urn, start, end, offset, dateTimeZone);
       aggregateValues.add(value);
     }
     return aggregateValues;

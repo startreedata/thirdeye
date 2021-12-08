@@ -577,8 +577,7 @@ public class RootCauseMetricResource {
     return data.joinOuter(dfExpected).sortedBy(DataFrame.COL_TIME);
   }
 
-  private DateTimeZone parseTimeZone(
-      @DefaultValue(TIMEZONE_DEFAULT) @QueryParam("timezone") @ApiParam("timezone identifier (e.g. \"America/Los_Angeles\")") final String timezone) {
+  private DateTimeZone parseTimeZone(final String timezone) {
     return DateTimeZone.forID(timezone);
   }
 

@@ -81,9 +81,7 @@ import org.slf4j.LoggerFactory;
 public class RootCauseMetricResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
-
   private static final long TIMEOUT = 600000;
-
   private static final String OFFSET_DEFAULT = "current";
   private static final String TIMEZONE_DEFAULT = "UTC";
   private static final int LIMIT_DEFAULT = 100;
@@ -255,7 +253,8 @@ public class RootCauseMetricResource {
     AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
     //startTime/endTime not important
     AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO, 0L, 0L);
-    RcaMetadataDTO rcaMetadataDTO = templateWithProperties.getRca();
+    RcaMetadataDTO rcaMetadataDTO = Objects.requireNonNull(templateWithProperties.getRca(),
+        "rca not found in alert config.");
     String metric = Objects.requireNonNull(rcaMetadataDTO.getMetric(),
         "rca$metric not found in alert config.");
     String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
@@ -311,9 +310,14 @@ public class RootCauseMetricResource {
       limit = LIMIT_DEFAULT;
     }
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
+    final Map<String, Map<String, Double>> breakdown = computeBreakdown(urn,
+        start,
+        end,
+        offset,
+        dateTimeZone,
+        limit);
 
-    return Response.ok(computeBreakdown(urn, start, end, offset, dateTimeZone, limit))
-        .build();
+    return Response.ok(breakdown).build();
   }
 
   /**

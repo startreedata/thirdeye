@@ -71,10 +71,6 @@ public class DefaultAggregationLoader implements AggregationLoader {
     this.dataSourceCache = dataSourceCache;
   }
 
-  private static long makeTimeout(long deadline) {
-    return Math.max(deadline - System.currentTimeMillis(), 0);
-  }
-
   @Override
   public DataFrame loadBreakdown(MetricSlice slice, int limit) throws Exception {
     final long metricId = slice.getMetricId();
@@ -119,13 +115,11 @@ public class DefaultAggregationLoader implements AggregationLoader {
     }
 
     // collect responses
-    final long deadline = System.currentTimeMillis() + TIMEOUT;
-
     List<DataFrame> results = new ArrayList<>();
     for (String dimension : dimensions) {
       RequestContainer rc = requests.get(dimension);
       ThirdEyeResponse res = responses.get(dimension)
-          .get(makeTimeout(deadline), TimeUnit.MILLISECONDS);
+          .get(TIMEOUT, TimeUnit.MILLISECONDS);
       DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))

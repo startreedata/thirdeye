@@ -106,7 +106,7 @@ public final class ParsedUrn {
   }
 
   /**
-   * Prefer manipulating FilterPredicate directly with getPredicates()
+   * For transition to FilterPredicate only. Prefer manipulating FilterPredicate directly.
    * */
   public static Multimap<String, String> toFilters(Collection<FilterPredicate> predicates) {
     Multimap<String, String> filters = TreeMultimap.create();

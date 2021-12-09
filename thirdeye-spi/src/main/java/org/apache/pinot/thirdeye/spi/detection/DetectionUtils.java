@@ -408,11 +408,6 @@ public class DetectionUtils {
         && !detectionConfig.getDataQualityProperties().isEmpty();
   }
 
-  public static long makeTimeout(final long deadline) {
-    final long diff = deadline - System.currentTimeMillis();
-    return diff > 0 ? diff : 0;
-  }
-
   public static Predicate AND(final Collection<Predicate> predicates) {
     return Predicate.AND(predicates.toArray(new Predicate[predicates.size()]));
   }

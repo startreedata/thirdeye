@@ -34,11 +34,14 @@ data:
 
     auth:
       enabled: false
-    #  oauth:
+    {{- if .Values.platformURL }}
+      infoURL: {{ .Values.platformURL }}/api/info
+    {{- end }}
+      oauth:
     #    keysUrl: <keys url>
-    #    required:
-    #      - sub
-    #      - exp
+        required:
+          - sub
+          - exp
     #    exactMatch:
     #      iss: <issuer url>
     #    cache:

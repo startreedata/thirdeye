@@ -8,6 +8,7 @@ public class AuthConfiguration {
 
   @JsonProperty("oauth")
   private OAuthConfig oAuthConfig;
+  private String infoURL;
 
   public OAuthConfig getOAuthConfig() {
     return oAuthConfig;
@@ -24,6 +25,15 @@ public class AuthConfiguration {
 
   public AuthConfiguration setEnabled(final boolean enabled) {
     this.enabled = enabled;
+    return this;
+  }
+
+  public String getInfoURL() {
+    return infoURL;
+  }
+
+  public AuthConfiguration setInfoURL(final String infoURL) {
+    this.infoURL = infoURL;
     return this;
   }
 }

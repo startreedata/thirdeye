@@ -39,7 +39,7 @@ public class DatasetConfigManagerImpl extends AbstractManagerImpl<DatasetConfigD
   @Override
   public DatasetConfigDTO findByDataset(String dataset) {
     Predicate predicate = Predicate.EQ("dataset", dataset);
-    List<DatasetConfigDTO> list = genericPojoDao.get(predicate, DatasetConfigDTO.class);
+    List<DatasetConfigDTO> list = findByPredicate(predicate);
     if (list.size() == 1) {
       return list.iterator().next();
     }

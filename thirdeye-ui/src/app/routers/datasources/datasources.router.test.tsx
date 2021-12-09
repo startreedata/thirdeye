@@ -1,7 +1,7 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { LoadingIndicator } from "../../components/loading-indicator/loading-indicator.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { DatasourcesRouter } from "./datasources.router";
 
@@ -35,12 +35,9 @@ jest.mock("../../utils/routes/routes.util", () => ({
     getDatasourcesPath: jest.fn().mockReturnValue("testDatasourcesPath"),
 }));
 
-jest.mock(
-    "../../components/loading-indicator/loading-indicator.component",
-    () => ({
-        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
-    })
-);
+jest.mock("@startree-ui/platform-ui", () => ({
+    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
+}));
 
 jest.mock(
     "../../pages/datasources-all-page/datasources-all-page.component",
@@ -91,7 +88,7 @@ describe("Datasources Router", () => {
             </MemoryRouter>
         );
 
-        expect(LoadingIndicator).toHaveBeenCalled();
+        expect(AppLoadingIndicatorV1).toHaveBeenCalled();
     });
 
     it("should set appropriate router breadcrumbs", () => {

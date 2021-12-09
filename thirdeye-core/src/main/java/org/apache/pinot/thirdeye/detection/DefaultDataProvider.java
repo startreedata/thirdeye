@@ -37,7 +37,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pinot.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import org.apache.pinot.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -129,16 +128,9 @@ public class DefaultDataProvider implements DataProvider {
             () -> aggregationLoader.loadAggregate(slice, dimensions, limit)));
       }
 
-      final long deadline = System.currentTimeMillis() + TIMEOUT;
       Map<MetricSlice, DataFrame> output = new HashMap<>();
-      for (MetricSlice slice : slices) {
-        DataFrame result = futures.get(slice)
-            .get(DetectionUtils.makeTimeout(deadline), TimeUnit.MILLISECONDS);
-        // fill in time stamps
-        result.dropSeries(DataFrame.COL_TIME).addSeries(
-            DataFrame.COL_TIME, LongSeries.fillValues(result.size(), slice.getStart())).setIndex(
-            DataFrame.COL_TIME);
-        output.put(slice, result);
+      for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
+        output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
       }
       return output;
     } catch (Exception e) {

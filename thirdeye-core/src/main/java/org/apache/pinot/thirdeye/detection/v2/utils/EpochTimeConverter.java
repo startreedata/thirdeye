@@ -1,8 +1,9 @@
 package org.apache.pinot.thirdeye.detection.v2.utils;
 
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.spi.detection.TimeConverter;
 
-public class EpochTimeConverter extends DefaultTimeConverter {
+public class EpochTimeConverter implements TimeConverter {
 
   private final TimeUnit timeUnit;
 

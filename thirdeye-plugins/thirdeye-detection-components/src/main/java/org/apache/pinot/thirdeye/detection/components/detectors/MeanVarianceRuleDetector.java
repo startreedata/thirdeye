@@ -29,6 +29,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -251,7 +252,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final MetricSlice slice = MetricSlice.from(-1,
         window.getStartMillis(),
         window.getEndMillis(),
-        null,
+        (Multimap<String, String>) null,
         timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,

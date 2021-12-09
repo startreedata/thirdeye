@@ -13,6 +13,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   private Date updated;
   private UserApi owner;
   private List<PlanNodeApi> nodes;
+  private RcaMetadataApi rca;
 
   public Long getId() {
     return id;
@@ -84,6 +85,15 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   public AlertTemplateApi setNodes(
       final List<PlanNodeApi> nodes) {
     this.nodes = nodes;
+    return this;
+  }
+
+  public RcaMetadataApi getRca() {
+    return rca;
+  }
+
+  public AlertTemplateApi setRca(final RcaMetadataApi rca) {
+    this.rca = rca;
     return this;
   }
 }

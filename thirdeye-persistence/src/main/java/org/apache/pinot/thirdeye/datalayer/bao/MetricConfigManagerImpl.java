@@ -63,9 +63,8 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
   public MetricConfigDTO findByMetricAndDataset(String metricName, String dataset) {
     Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
     Predicate metricNamePredicate = Predicate.EQ("name", metricName);
-    List<MetricConfigDTO> list = genericPojoDao
-        .get(Predicate.AND(datasetPredicate, metricNamePredicate),
-            MetricConfigDTO.class);
+    Predicate predicate = Predicate.AND(datasetPredicate, metricNamePredicate);
+    List<MetricConfigDTO> list = findByPredicate(predicate);
     if (CollectionUtils.isNotEmpty(list)) {
       return list.get(0);
     }

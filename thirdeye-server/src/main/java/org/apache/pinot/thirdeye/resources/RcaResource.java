@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.resources;
 
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
-import static org.apache.pinot.thirdeye.util.ResourceUtils.parseListParams;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -162,8 +161,6 @@ public class RcaResource {
     ensure(baselineEnd - baselineStart <= BASELINE_RANGE_MAX,
         String.format("Baseline range cannot be longer than %d", BASELINE_RANGE_MAX));
 
-    urns = parseListParams(urns);
-
     // validate window size
     long anomalyWindow = anomalyEnd - anomalyStart;
     long baselineWindow = baselineEnd - baselineStart;
@@ -206,9 +203,6 @@ public class RcaResource {
     if (formatterDepth == null) {
       formatterDepth = DEFAULT_FORMATTER_DEPTH;
     }
-
-    // parse urns arg
-    urns = parseListParams(urns);
 
     // format input
     Set<Entity> input = new HashSet<>();

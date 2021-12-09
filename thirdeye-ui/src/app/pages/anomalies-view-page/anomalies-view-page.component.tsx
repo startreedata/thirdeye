@@ -12,7 +12,8 @@ import { PageContents } from "../../components/page-contents/page-contents.compo
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
-import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
@@ -28,6 +29,7 @@ import {
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
+    const { anomaly, getAnomaly } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [
         alertEvaluation,
@@ -47,39 +49,32 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly
-        fetchAnomaly();
+        isValidNumberId(params.id) && getAnomaly(toNumber(params.id));
     }, [timeRangeDuration]);
+
+    useEffect(() => {
+        !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
+    }, [anomaly]);
 
     useEffect(() => {
         // Fetched anomaly changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [uiAnomaly]);
+    }, [anomaly]);
 
-    const fetchAnomaly = (): void => {
+    if (!isValidNumberId(params.id)) {
+        // Invalid id
+        enqueueSnackbar(
+            t("message.invalid-id", {
+                entity: t("label.anomaly"),
+                id: params.id,
+            }),
+            getErrorSnackbarOption()
+        );
+
         setUiAnomaly(null);
-        let fetchedUiAnomaly = {} as UiAnomaly;
 
-        if (!isValidNumberId(params.id)) {
-            // Invalid id
-            enqueueSnackbar(
-                t("message.invalid-id", {
-                    entity: t("label.anomaly"),
-                    id: params.id,
-                }),
-                getErrorSnackbarOption()
-            );
-
-            setUiAnomaly(fetchedUiAnomaly);
-
-            return;
-        }
-
-        getAnomaly(toNumber(params.id))
-            .then((anomaly) => {
-                fetchedUiAnomaly = getUiAnomaly(anomaly);
-            })
-            .finally(() => setUiAnomaly(fetchedUiAnomaly));
-    };
+        return;
+    }
 
     const fetchAlertEvaluation = (): void => {
         setAlertEvaluation(null);

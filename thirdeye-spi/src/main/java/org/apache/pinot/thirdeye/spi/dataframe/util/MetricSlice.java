@@ -22,10 +22,14 @@ package org.apache.pinot.thirdeye.spi.dataframe.util;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
+import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -63,14 +67,19 @@ public final class MetricSlice {
     return new MetricSlice(metricId, start, end, filters, NATIVE_GRANULARITY);
   }
 
+  /**
+   * Filters in format dim1=val1, dim2!=val2
+   * */
+  public static MetricSlice from(long metricId, long start, long end,
+      List<String> filters, TimeGranularity granularity) {
+    List<FilterPredicate> predicates = filters.stream().map(EntityUtils::extractFilterPredicate).collect(Collectors.toList());
+    Multimap<String, String> filtersMap = ParsedUrn.toFilters(predicates);
+    return new MetricSlice(metricId, start, end, filtersMap, granularity);
+  }
+
   public static MetricSlice from(long metricId, long start, long end,
       Multimap<String, String> filters, TimeGranularity granularity) {
     return new MetricSlice(metricId, start, end, filters, granularity);
-  }
-
-  public static MetricSlice fromUrn(String urn, long start, long end, TimeGranularity granularity) {
-    MetricEntity metric = MetricEntity.fromURN(urn);
-    return new MetricSlice(metric.getId(), start, end, metric.getFilters(), granularity);
   }
 
   public long getMetricId() {

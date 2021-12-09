@@ -57,6 +57,7 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -141,7 +142,11 @@ public class RootCauseMetricResource {
       throws Exception {
 
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    double aggregate = computeAggregate(urn, start, end, offset, dateTimeZone);
+    MetricEntity metricEntity = MetricEntity.fromURN(urn);
+    long metricId = metricEntity.getId();
+    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
+
+    double aggregate = computeAggregate(metricId, filters, start, end, offset, dateTimeZone);
 
     return Response.ok(aggregate).build();
   }
@@ -173,7 +178,11 @@ public class RootCauseMetricResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    List<Double> aggregates = computeAggregatesForOffsets(urn, start, end, offsets, dateTimeZone);
+    MetricEntity metricEntity = MetricEntity.fromURN(urn);
+    long metricId = metricEntity.getId();
+    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
+
+    List<Double> aggregates = computeAggregatesForOffsets(metricId, filters, start, end, offsets, dateTimeZone);
 
     return Response.ok(aggregates).build();
   }
@@ -205,9 +214,13 @@ public class RootCauseMetricResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
+
     Map<String, List<Double>> urnToAggregates = new HashMap<>();
     for (String urn : urns) {
-      urnToAggregates.put(urn, computeAggregatesForOffsets(urn, start, end, offsets, dateTimeZone));
+      MetricEntity metricEntity = MetricEntity.fromURN(urn);
+      long metricId = metricEntity.getId();
+      List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
+      urnToAggregates.put(urn, computeAggregatesForOffsets(metricId, filters, start, end, offsets, dateTimeZone));
     }
 
     return Response.ok(urnToAggregates).build();
@@ -260,9 +273,9 @@ public class RootCauseMetricResource {
     String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
         "rca$dataset not found in alert config.");
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
-    String urn = MetricEntity.TYPE.formatURN(metricConfigDTO.getId(), filters);
 
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(urn,
+    final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricConfigDTO.getId(),
+        filters,
         anomalyDTO.getStartTime(),
         anomalyDTO.getEndTime(),
         offset,
@@ -291,6 +304,7 @@ public class RootCauseMetricResource {
   @ApiOperation(value =
       "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
           + "Aligns time stamps if necessary and omits null values.")
+  @Deprecated
   public Response getBreakdown(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
@@ -310,7 +324,12 @@ public class RootCauseMetricResource {
       limit = LIMIT_DEFAULT;
     }
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(urn,
+    MetricEntity metricEntity = MetricEntity.fromURN(urn);
+    long metricId = metricEntity.getId();
+    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
+
+    final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricId,
+        filters,
         start,
         end,
         offset,
@@ -354,12 +373,16 @@ public class RootCauseMetricResource {
       @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus an 'OTHER' rollup element")
       @QueryParam("granularity") String granularityString) throws Exception {
-    
+
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
+    MetricEntity metricEntity = MetricEntity.fromURN(urn);
+    long metricId = metricEntity.getId();
+    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
+
     TimeGranularity granularity = StringUtils.isBlank(granularityString) ?
-        findMetricGranularity(urn) :
+        findMetricGranularity(metricId) :
         TimeGranularity.fromString(granularityString);
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, granularity)
+    MetricSlice baseSlice = MetricSlice.from(metricId, start, end, filters, granularity)
         .alignedOn(dateTimeZone);
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = new ArrayList<>(range.scatter(baseSlice));
@@ -435,14 +458,15 @@ public class RootCauseMetricResource {
   }
 
   private Map<String, Map<String, Double>> computeBreakdown(
-      final String urn,
+      final long id,
+      final List<String> filters,
       final long start,
       final long end,
       final String offset,
       final DateTimeZone timezone,
       final int limit) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+    MetricSlice baseSlice = MetricSlice.from(id, start, end, filters, findMetricGranularity(id))
         .alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
@@ -458,10 +482,10 @@ public class RootCauseMetricResource {
     return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
   }
 
-  private double computeAggregate(final String urn, final long start, final long end,
+  private double computeAggregate(final long metricId, final List<String> filters, final long start, final long end,
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
-    MetricSlice baseSlice = MetricSlice.fromUrn(urn, start, end, findMetricGranularity(urn))
+    MetricSlice baseSlice = MetricSlice.from(metricId, start, end, filters, findMetricGranularity(metricId))
         .alignedOn(dateTimeZone);
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = range.scatter(baseSlice);
@@ -474,11 +498,12 @@ public class RootCauseMetricResource {
     return result.getDouble(DataFrame.COL_VALUE, 0);
   }
 
-  private List<Double> computeAggregatesForOffsets(final String urn, final long start, final long end,
+  private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters, final long start,
+      final long end,
       final List<String> offsets, final DateTimeZone dateTimeZone) throws Exception {
     List<Double> aggregateValues = new ArrayList<>();
     for (String offset : offsets) {
-      double value = computeAggregate(urn, start, end, offset, dateTimeZone);
+      double value = computeAggregate(metricId, filters, start, end, offset, dateTimeZone);
       aggregateValues.add(value);
     }
     return aggregateValues;
@@ -551,11 +576,6 @@ public class RootCauseMetricResource {
     }
 
     return output;
-  }
-
-  private TimeGranularity findMetricGranularity(final String urn) {
-    MetricEntity metricEntity = MetricEntity.fromURN(urn);
-    return findMetricGranularity(metricEntity.getId());
   }
 
   private TimeGranularity findMetricGranularity(final Long metricId) {

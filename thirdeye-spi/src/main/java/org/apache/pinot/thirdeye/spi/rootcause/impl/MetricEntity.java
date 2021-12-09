@@ -90,11 +90,11 @@ public class MetricEntity extends Entity {
   }
 
   public static MetricEntity fromMetric(double score, long id, Multimap<String, String> filters) {
-    return fromMetric(score, new ArrayList<Entity>(), id, filters);
+    return fromMetric(score, new ArrayList<>(), id, filters);
   }
 
   public static MetricEntity fromMetric(double score, long id) {
-    return fromMetric(score, new ArrayList<Entity>(), id, TreeMultimap.create());
+    return fromMetric(score, new ArrayList<>(), id, TreeMultimap.create());
   }
 
   public static MetricEntity fromMetric(Map<String, Collection<String>> filterMaps, long id) {

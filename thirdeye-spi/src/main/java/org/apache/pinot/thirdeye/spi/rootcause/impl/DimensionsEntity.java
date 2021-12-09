@@ -29,7 +29,7 @@ import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 
 /**
  * DimensionsEntity represents a dimension cut of the data without being bound
- * to a specific entity, such as a metric. The the DimensionsEntity holds (uri encoded)
+ * to a specific entity, such as a metric. The DimensionsEntity holds (uri encoded)
  * tuples of keys and values, e.g. 'thirdeye:dimensions:key1=value1:key2=value2'.
  *
  * <br/><b>NOTE:</b> it is the successor of DimensionEntity

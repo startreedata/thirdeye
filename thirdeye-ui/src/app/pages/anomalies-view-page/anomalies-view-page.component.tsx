@@ -72,8 +72,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         );
 
         setUiAnomaly(null);
-
-        return;
     }
 
     const fetchAlertEvaluation = (): void => {

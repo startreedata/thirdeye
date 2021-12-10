@@ -149,7 +149,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final DataFrame inputDf = fetchData(metricEntity,
         trainStart.getMillis(),
         window.getEndMillis());
-    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis());
+    DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis());
     resultDF = resultDF.joinLeft(inputDf.renameSeries(
         COL_VALUE, COL_CURR), COL_TIME);
 
@@ -231,8 +231,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    final DataFrame baselineDf = computePredictionInterval(inputDf, window.getStartMillis());
-
+    final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
         // rename current which is still called "value" to "current"
         .renameSeries(COL_VALUE, COL_CURR)
@@ -246,6 +245,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return getDetectionResultTemp(window, inputDf);
   }
 
+  // todo cyril move this up to Operator
   private DetectionResult getDetectionResultTemp(final ReadableInterval interval, final DataFrame inputDf) {
     final MetricSlice slice = MetricSlice.from(-1,
         interval.getStartMillis(),
@@ -272,7 +272,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
           dfInput.getDoubles(COL_DIFF).lt(0);
     }
 
-  private DataFrame computePredictionInterval(final DataFrame inputDF, final long windowStartTime) {
+  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
 
     final DataFrame resultDF = new DataFrame();
     //filter the data inside window for current values.

@@ -20,10 +20,13 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
+import com.google.common.collect.Multimap;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -246,7 +249,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     final DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
         datasetConfig);
-    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis(),
+    DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis(),
         datasetConfig.getTimezone());
     resultDF = resultDF.joinLeft(inputDf.renameSeries(
         DataFrame.COL_VALUE, COL_CURR), DataFrame.COL_TIME);
@@ -282,6 +285,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     final List<DetectionResult> detectionResults = new ArrayList<>();
     for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
+      // todo cyril this is translate to generic col names
       currentDf
           .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
           .setIndex(COL_TIME);
@@ -335,58 +339,73 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     return runDetectionOnSingleDataTable(dfInput, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     // Kernel smoothing
     if (smoothing) {
-      final int kernelSize = (int) (
-          KERNEL_PERIOD / monitoringGranularityPeriod.toStandardDuration().getMillis()
-      );
-      if (kernelSize > 1) {
-        final int kernelOffset = kernelSize / 2;
-        final double[] values = dfInput.getDoubles(DataFrame.COL_VALUE).values();
-        for (int i = 0; i <= values.length - kernelSize; i++) {
-          values[i + kernelOffset] = AlgorithmUtils.robustMean(dfInput.getDoubles(
-              DataFrame.COL_VALUE)
-              .slice(i, i + kernelSize), kernelSize).getDouble(kernelSize - 1);
-        }
-        dfInput.addSeries(DataFrame.COL_VALUE, values);
-      }
+      smoothInputDf(inputDf);
     }
-
-    final DataFrame dfCurr = new DataFrame(dfInput).renameSeries(DataFrame.COL_VALUE, COL_CURR);
-    DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis(),
+    DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis(),
         spec.getTimezone());
-    final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, DataFrame.COL_VALUE, COL_ERROR);
-    df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(DataFrame.COL_VALUE)));
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    inputDf
+        // rename current which is still called "value" to "current"
+        .renameSeries(COL_VALUE, COL_CURR)
+        // left join baseline values
+        .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURR).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_PATTERN, patternMatch(inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    // Filter pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
-    } else {
-      df.addSeries(COL_PATTERN, pattern.equals(Pattern.UP)
-          ? df.getDoubles(COL_DIFF).gt(0)
-          : df.getDoubles(COL_DIFF).lt(0));
+    return getDetectionResultTemp(window, inputDf);
+  }
+
+  /**
+   * In place smoothing of inputDF
+   * */
+  // fixme cyril - kept this logic, but not very good because original values are lost
+  // fixme cyril this will be confusing when anomaly is displayed
+  private void smoothInputDf(final DataFrame inputDf) {
+    final int kernelSize = (int) (
+        KERNEL_PERIOD / monitoringGranularityPeriod.toStandardDuration().getMillis()
+    );
+    if (kernelSize > 1) {
+      final int kernelOffset = kernelSize / 2;
+      final double[] values = inputDf.getDoubles(DataFrame.COL_VALUE).values();
+      for (int i = 0; i <= values.length - kernelSize; i++) {
+        values[i + kernelOffset] = AlgorithmUtils.robustMean(inputDf.getDoubles(DataFrame.COL_VALUE)
+            .slice(i, i + kernelSize), kernelSize).getDouble(kernelSize - 1);
+      }
+      inputDf.addSeries(DataFrame.COL_VALUE, values);
     }
-    df.addSeries(COL_DIFF_VIOLATION, df.getDoubles(COL_DIFF).abs().gte(df.getDoubles(COL_ERROR)));
-    df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+  }
 
-    // Anomalies
+  // todo cyril move this up to Operator
+  private DetectionResult getDetectionResultTemp(final ReadableInterval interval, final DataFrame inputDf) {
     final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        null);
+        interval.getStartMillis(),
+        interval.getEndMillis(),
+        (Multimap<String, String>) null,
+        timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
-        df,
+        inputDf,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-    dfBase = dfBase
-        .joinRight(df.retainSeries(DataFrame.COL_TIME, COL_CURR), DataFrame.COL_TIME)
-        .sortedBy(DataFrame.COL_TIME);
-    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(dfBase));
+
+    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+  }
+
+  // todo cyril move this as static - it's used by other detectors
+  private BooleanSeries patternMatch(final DataFrame dfInput) {
+    // series of boolean that are true if the anomaly direction matches the pattern
+    if (pattern.equals(Pattern.UP_OR_DOWN)) {
+      return BooleanSeries.fillValues(dfInput.size(), true);
+    }
+    return pattern.equals(Pattern.UP) ?
+        dfInput.getDoubles(COL_DIFF).gt(0) :
+        dfInput.getDoubles(COL_DIFF).lt(0);
   }
 
   /**
@@ -562,7 +581,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param windowStartTime prediction start time
    * @return DataFrame with timestamp, baseline, error bound
    */
-  private DataFrame computePredictionInterval(final DataFrame inputDF, final long windowStartTime,
+  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime,
       final String timezone) {
 
     final DataFrame resultDF = new DataFrame();

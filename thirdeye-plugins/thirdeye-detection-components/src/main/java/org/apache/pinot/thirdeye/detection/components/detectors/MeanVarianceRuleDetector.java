@@ -206,6 +206,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final List<DetectionResult> detectionResults = new ArrayList<>();
     for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
+      // todo cyril this is translate to generic col names
       currentDf
           .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
           .setIndex(COL_TIME);
@@ -230,28 +231,37 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
       final ReadableInterval window) {
-    final DataFrame dfCurr = new DataFrame(dfInput).renameSeries(COL_VALUE, COL_CURR);
-    final DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis());
+    final DataFrame baselineDf = computePredictionInterval(dfInput, window.getStartMillis());
 
-    final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, COL_VALUE, COL_ERROR);
-    df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(COL_VALUE)));
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    dfInput
+        // rename current which is still called "value" to "current"
+        .renameSeries(COL_VALUE, COL_CURR)
+        // add baseline "value" which corresponds to "baseline" fixme cyril just use "current" and "baseline"
+        .addSeries(COL_VALUE, baselineDf.getDoubles(COL_VALUE))
+        .addSeries(COL_ERROR, baselineDf.getDoubles(COL_ERROR))
+        .addSeries(COL_DIFF, dfInput.getDoubles(COL_CURR).subtract(dfInput.get(COL_VALUE)))
+        .addSeries(COL_ANOMALY, BooleanSeries.fillValues(dfInput.size(), false));
 
     // Filter pattern
     if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
+      dfInput.addSeries(COL_PATTERN, BooleanSeries.fillValues(dfInput.size(), true));
     } else {
-      df.addSeries(COL_PATTERN, pattern.equals(Pattern.UP) ? df.getDoubles(COL_DIFF).gt(0) :
-          df.getDoubles(COL_DIFF).lt(0));
+      dfInput.addSeries(COL_PATTERN, pattern.equals(Pattern.UP) ? dfInput.getDoubles(COL_DIFF).gt(0) :
+          dfInput.getDoubles(COL_DIFF).lt(0));
     }
-    df.addSeries(COL_DIFF_VIOLATION, df.getDoubles(COL_DIFF).abs().gte(df.getDoubles(COL_ERROR)));
-    df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+    dfInput.addSeries(COL_DIFF_VIOLATION, dfInput.getDoubles(COL_DIFF).abs().gte(dfInput.getDoubles(COL_ERROR)));
+    dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     // Anomalies
 
+    return getDetectionResultTemp(window, baselineDf, dfInput);
+  }
+
+  private DetectionResult getDetectionResultTemp(final ReadableInterval interval, final DataFrame dfBase,
+      final DataFrame df) {
     final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
+        interval.getStartMillis(),
+        interval.getEndMillis(),
         (Multimap<String, String>) null,
         timeGranularity);
 
@@ -260,8 +270,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
+    df.retainSeries(COL_TIME, COL_CURR);
     final DataFrame result = dfBase
-        .joinRight(df.retainSeries(COL_TIME, COL_CURR), COL_TIME)
+        .joinRight(df, COL_TIME)
         .sortedBy(DataFrame.COL_TIME);
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(result));
   }

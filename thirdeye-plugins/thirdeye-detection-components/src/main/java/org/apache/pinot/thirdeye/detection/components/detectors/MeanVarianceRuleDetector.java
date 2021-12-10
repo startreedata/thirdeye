@@ -229,36 +229,24 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         null);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    final DataFrame baselineDf = computePredictionInterval(dfInput, window.getStartMillis());
+    final DataFrame baselineDf = computePredictionInterval(inputDf, window.getStartMillis());
 
-    dfInput
+    inputDf
         // rename current which is still called "value" to "current"
         .renameSeries(COL_VALUE, COL_CURR)
-        // add baseline "value" which corresponds to "baseline" fixme cyril just use "current" and "baseline"
-        .addSeries(COL_VALUE, baselineDf.getDoubles(COL_VALUE))
-        .addSeries(COL_ERROR, baselineDf.getDoubles(COL_ERROR))
-        .addSeries(COL_DIFF, dfInput.getDoubles(COL_CURR).subtract(dfInput.get(COL_VALUE)))
-        .addSeries(COL_ANOMALY, BooleanSeries.fillValues(dfInput.size(), false));
+        // left join baseline values
+        .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURR).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_PATTERN, patternMatch(inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    // Filter pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      dfInput.addSeries(COL_PATTERN, BooleanSeries.fillValues(dfInput.size(), true));
-    } else {
-      dfInput.addSeries(COL_PATTERN, pattern.equals(Pattern.UP) ? dfInput.getDoubles(COL_DIFF).gt(0) :
-          dfInput.getDoubles(COL_DIFF).lt(0));
-    }
-    dfInput.addSeries(COL_DIFF_VIOLATION, dfInput.getDoubles(COL_DIFF).abs().gte(dfInput.getDoubles(COL_ERROR)));
-    dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
-
-    // Anomalies
-
-    return getDetectionResultTemp(window, baselineDf, dfInput);
+    return getDetectionResultTemp(window, inputDf);
   }
 
-  private DetectionResult getDetectionResultTemp(final ReadableInterval interval, final DataFrame dfBase,
-      final DataFrame df) {
+  private DetectionResult getDetectionResultTemp(final ReadableInterval interval, final DataFrame inputDf) {
     final MetricSlice slice = MetricSlice.from(-1,
         interval.getStartMillis(),
         interval.getEndMillis(),
@@ -266,16 +254,23 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
-        df,
+        inputDf,
         COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-    df.retainSeries(COL_TIME, COL_CURR);
-    final DataFrame result = dfBase
-        .joinRight(df, COL_TIME)
-        .sortedBy(DataFrame.COL_TIME);
-    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(result));
+
+    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
+
+  private BooleanSeries patternMatch(final DataFrame dfInput) {
+    // series of boolean that are true if the anomaly direction matches the pattern
+    if (pattern.equals(Pattern.UP_OR_DOWN)) {
+      return BooleanSeries.fillValues(dfInput.size(), true);
+    }
+    return pattern.equals(Pattern.UP) ?
+          dfInput.getDoubles(COL_DIFF).gt(0) :
+          dfInput.getDoubles(COL_DIFF).lt(0);
+    }
 
   private DataFrame computePredictionInterval(final DataFrame inputDF, final long windowStartTime) {
 

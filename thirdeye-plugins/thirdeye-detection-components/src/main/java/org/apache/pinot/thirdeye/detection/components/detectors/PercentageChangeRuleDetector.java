@@ -242,7 +242,6 @@ public class PercentageChangeRuleDetector implements
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
         .addSeries(COL_CHANGE_VIOLATION, inputDf.getDoubles(COL_CHANGE).abs().gte(percentageChange))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
-
     addBoundaries(inputDf);
 
     return getDetectionResultTemp(inputDf, window);

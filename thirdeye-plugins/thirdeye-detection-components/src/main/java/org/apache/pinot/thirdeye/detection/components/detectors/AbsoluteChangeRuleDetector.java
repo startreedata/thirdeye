@@ -22,12 +22,17 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
-import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
-import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
@@ -38,7 +43,6 @@ import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedD
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -86,7 +90,7 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   @Override
   public void init(final AbsoluteChangeRuleDetectorSpec spec) {
     this.spec = spec;
-
+    checkArgument(!Double.isNaN(spec.getAbsoluteChange()), "Absolute change is not set.");
     absoluteChange = spec.getAbsoluteChange();
     final String timezone = spec.getTimezone();
     final String offset = spec.getOffset();
@@ -178,27 +182,21 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     return runDetectionOnSingleDataTable(df, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     // calculate absolute change
-    dfInput.addSeries(COL_DIFF, dfInput.getDoubles(COL_CURRENT).subtract(dfInput.get(DataFrame.COL_VALUE)));
+    inputDf
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(DataFrame.COL_VALUE)))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(absoluteChange))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+    addBoundaries(inputDf);
 
-    // defaults
-    dfInput.addSeries(COL_ANOMALY, BooleanSeries.fillValues(dfInput.size(), false));
-    // absolute change
-    if (!Double.isNaN(absoluteChange)) {
-      // consistent with pattern
-      if (pattern.equals(Pattern.UP_OR_DOWN)) {
-        dfInput.addSeries(COL_PATTERN, BooleanSeries.fillValues(dfInput.size(), true));
-      } else {
-        dfInput.addSeries(COL_PATTERN, pattern.equals(Pattern.UP)
-            ? dfInput.getDoubles(COL_DIFF).gt(0)
-            : dfInput.getDoubles(COL_DIFF).lt(0));
-      }
-      dfInput.addSeries(COL_DIFF_VIOLATION, dfInput.getDoubles(COL_DIFF).abs().gte(absoluteChange));
-      dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
-    }
+    return getDetectionResultTemp(inputDf, window);
+  }
 
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
+      final ReadableInterval window) {
     // make anomalies
     final MetricSlice slice = MetricSlice.from(-1,
         window.getStartMillis(),
@@ -206,49 +204,33 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
         ArrayListMultimap.create(),
         timeGranularity);
 
-    addAbsoluteChangeBoundaries(dfInput);
-
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        dfInput,
+        inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(dfInput));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
-    addAbsoluteChangeBoundaries(df);
+    addBoundaries(df);
     return TimeSeries.fromDataFrame(df);
   }
 
-  private void addAbsoluteChangeBoundaries(final DataFrame dfBase) {
-    if (!Double.isNaN(absoluteChange)) {
-      switch (pattern) {
-        case UP:
-          fillAbsoluteChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, absoluteChange);
-          dfBase.addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.zeros(dfBase.size()));
-          break;
-        case DOWN:
-          dfBase.addSeries(
-              DataFrame.COL_UPPER_BOUND, DoubleSeries.fillValues(dfBase.size(), POSITIVE_INFINITY));
-          fillAbsoluteChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, -absoluteChange);
-          break;
-        case UP_OR_DOWN:
-          fillAbsoluteChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, absoluteChange);
-          fillAbsoluteChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, -absoluteChange);
-          break;
-        default:
-          throw new IllegalArgumentException();
-      }
+  private void addBoundaries(final DataFrame inputDf) {
+    //default bounds
+    DoubleSeries upperBound = DoubleSeries.fillValues(inputDf.size(), POSITIVE_INFINITY);
+    //fixme cyril this not consistent with threshold rule detector default values
+    DoubleSeries lowerBound = DoubleSeries.zeros(inputDf.size());
+    if (pattern == UP || pattern == UP_OR_DOWN) {
+      upperBound = inputDf.getDoubles(DataFrame.COL_VALUE).add(absoluteChange);
     }
-  }
-
-  private void fillAbsoluteChangeBound(final DataFrame dfBase, final String colBound,
-      final double change) {
-    final Series series = map((DoubleFunction) values -> values[0] + change,
-        dfBase.getDoubles(DataFrame.COL_VALUE));
-    dfBase.addSeries(colBound, series);
+    if (pattern == DOWN || pattern == UP_OR_DOWN) {
+      lowerBound = inputDf.getDoubles(DataFrame.COL_VALUE).add(-absoluteChange);
+    }
+    inputDf.addSeries(COL_UPPER_BOUND, upperBound);
+    inputDf.addSeries(COL_LOWER_BOUND, lowerBound);
   }
 }

@@ -23,11 +23,7 @@ export const useGetEvaluation = (): GetEvaluation => {
     const getEvaluation = (
         evaluationParams: UseGetEvaluationParams
     ): Promise<AlertEvaluation | undefined> => {
-        return makeRequest(
-            `${BASE_URL_ALERTS}/evaluate`,
-            evaluationParams,
-            "param"
-        );
+        return makeRequest(`${BASE_URL_ALERTS}/evaluate`, evaluationParams);
     };
 
     return { evaluation: data, getEvaluation, status, errorMessage };

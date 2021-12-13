@@ -11,8 +11,6 @@ public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent
   String KEY_CURRENT = "current";
   String KEY_BASELINE = "baseline";
 
-  String COL_ANOMALY = "anomaly";
-
   /**
    * Run detection for a given interval with provided baseline and current DataTable. Then returns
    * the detection result.

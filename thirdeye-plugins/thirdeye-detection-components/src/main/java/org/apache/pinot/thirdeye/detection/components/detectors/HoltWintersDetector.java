@@ -49,9 +49,6 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DimensionInfo;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -246,7 +243,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     final DateTime trainStart = getTrainingStartTime(window.getStart());
 
     final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
-        .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
+            .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
         .getDatasetForMetricId()
         .get(metricEntity.getId());
 
@@ -280,23 +277,14 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
-
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
-    final Map<DimensionInfo, DataTable> currentDataTableMap = DataTableUtils.splitDataTable(
-        current);
-    final List<DetectionResult> detectionResults = new ArrayList<>();
-    for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
-      final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
-      // todo cyril this is translate to generic col names
-      currentDf
-          .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
-          .setIndex(COL_TIME)
-          .addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
+    final DataFrame currentDf = current.getDataFrame();
+    currentDf
+        .renameSeries(spec.getTimestamp(), COL_TIME)
+        .renameSeries(spec.getMetric(), COL_VALUE)
+        .setIndex(COL_TIME);
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
-      detectionResults.add(detectionResult);
-    }
-    return new GroupedDetectionResults(detectionResults);
+    return runDetectionOnSingleDataTable(currentDf, interval);
   }
 
   private void setMonitoringGranularityPeriod() {
@@ -326,7 +314,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     final DateTime trainStart = getTrainingStartTime(windowStart);
 
     final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
-        .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
+            .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
         .getDatasetForMetricId()
         .get(metricEntity.getId());
     monitoringGranularityPeriod = DetectionUtils
@@ -356,7 +344,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
         .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
-        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+        .addSeries(COL_DIFF_VIOLATION,
+            inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return getDetectionResultTemp(window, inputDf);
@@ -364,7 +353,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   /**
    * In place smoothing of inputDF
-   * */
+   */
   // fixme cyril - kept this logic, but not very good because original values are lost
   // fixme cyril this will be confusing when anomaly is displayed
   private void smoothInputDf(final DataFrame inputDf) {
@@ -383,7 +372,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   // todo cyril move this up to Operator
-  private DetectionResult getDetectionResultTemp(final ReadableInterval window, final DataFrame inputDf) {
+  private DetectionResult getDetectionResultTemp(final ReadableInterval window,
+      final DataFrame inputDf) {
     final MetricSlice slice = MetricSlice.from(-1,
         window.getStartMillis(),
         window.getEndMillis(),
@@ -395,7 +385,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+    return DetectionResult.from(anomalyResults,
+        TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
   /**

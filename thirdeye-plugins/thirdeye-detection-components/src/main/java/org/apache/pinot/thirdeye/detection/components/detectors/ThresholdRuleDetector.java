@@ -30,12 +30,8 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 
 import com.google.common.collect.ArrayListMultimap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DimensionInfo;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -99,23 +95,14 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
-
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
-    final Map<DimensionInfo, DataTable> currentDataTableMap = DataTableUtils.splitDataTable(
-        current);
-    final List<DetectionResult> detectionResults = new ArrayList<>();
-    for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
-      // todo cyril this is translate to generic col names
-      final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
-      currentDf
-          .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
-          .setIndex(COL_TIME)
-          .addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
+    final DataFrame currentDf = current.getDataFrame();
+    currentDf
+        .renameSeries(spec.getTimestamp(), COL_TIME)
+        .renameSeries(spec.getMetric(), COL_VALUE)
+        .setIndex(COL_TIME);
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
-      detectionResults.add(detectionResult);
-    }
-    return new GroupedDetectionResults(detectionResults);
+    return runDetectionOnSingleDataTable(currentDf, interval);
   }
 
   private void setMonitoringGranularityPeriod() {

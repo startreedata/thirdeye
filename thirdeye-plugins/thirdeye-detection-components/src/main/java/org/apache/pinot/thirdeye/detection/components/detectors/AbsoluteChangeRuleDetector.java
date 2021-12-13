@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
-import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
@@ -42,8 +41,6 @@ import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DimensionInfo;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedDetectionResults;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -115,26 +112,18 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   public DetectionPipelineResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap) throws DetectorException {
     setMonitoringGranularityPeriod();
-    final DataTable baseline = timeSeriesMap.get(KEY_BASELINE);
-    final DataTable current = timeSeriesMap.get(KEY_CURRENT);
-    final Map<DimensionInfo, DataTable> baselineDataTableMap = splitDataTable(baseline);
-    final Map<DimensionInfo, DataTable> currentDataTableMap = splitDataTable(current);
+    final DataTable baseline = requireNonNull(timeSeriesMap.get(KEY_BASELINE), "baseline is null");
+    final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
+    final DataFrame baselineDf = baseline.getDataFrame();
+    final DataFrame currentDf = current.getDataFrame();
 
-    final List<DetectionResult> detectionResults = new ArrayList<>();
-    for (DimensionInfo dimensionInfo : baselineDataTableMap.keySet()) {
+    currentDf
+        .renameSeries(spec.getTimestamp(), COL_TIME)
+        .renameSeries(spec.getMetric(), COL_CURRENT)
+        .setIndex(COL_TIME)
+        .addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
 
-      final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
-      final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
-
-      final DataFrame df = new DataFrame();
-      df.addSeries(COL_TIME, currentDf.get(spec.getTimestamp()));
-      df.addSeries(COL_CURRENT, currentDf.get(spec.getMetric()));
-      df.addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
-
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(df, window);
-      detectionResults.add(detectionResult);
-    }
-    return new GroupedDetectionResults(detectionResults);
+    return runDetectionOnSingleDataTable(currentDf, window);
   }
 
   private void setMonitoringGranularityPeriod() {

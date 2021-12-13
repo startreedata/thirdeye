@@ -3,8 +3,8 @@ import React from "react";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { LogoutPage } from "./logout-page.component";
 
-jest.mock("../../components/auth-provider/auth-provider.component", () => ({
-    useAuth: jest.fn().mockImplementation(() => ({
+jest.mock("@startree-ui/platform-ui", () => ({
+    useAuthProviderV1: jest.fn().mockImplementation(() => ({
         logout: mockLogout,
     })),
 }));

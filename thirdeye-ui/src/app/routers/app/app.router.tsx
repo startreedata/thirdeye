@@ -1,7 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import {
+    AppLoadingIndicatorV1,
+    useAuthProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Switch } from "react-router-dom";
-import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 
 const AlertsRouter = lazy(() =>
@@ -35,7 +37,7 @@ const GeneralUnauthenticatedRouter = lazy(() =>
 );
 
 export const AppRouter: FunctionComponent = () => {
-    const { authDisabled, authenticated } = useAuth();
+    const { authDisabled, authenticated } = useAuthProviderV1();
 
     if (authDisabled || authenticated) {
         return (

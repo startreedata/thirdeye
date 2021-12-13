@@ -96,37 +96,6 @@ public class DetectionUtils {
     return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
   }
 
-  /**
-   * Helper for creating a list of anomalies from a boolean series.
-   *
-   * @param slice metric slice
-   * @param df time series with COL_TIME and at least one boolean value series
-   * @param seriesName name of the value series
-   * @param monitoringGranularityPeriod the monitoring granularity period
-   * @param dataset dataset config for the metric
-   * @return list of anomalies
-   */
-  @Deprecated
-  public static List<MergedAnomalyResultDTO> makeAnomalies(final MetricSlice slice,
-      final DataFrame df,
-      final String seriesName,
-      final Period monitoringGranularityPeriod,
-      final DatasetConfigDTO dataset) {
-    return buildAnomalies(slice,
-        df,
-        seriesName,
-        optional(dataset).map(DatasetConfigDTO::getTimezone).orElse(null),
-        monitoringGranularityPeriod
-    );
-  }
-
-  @Deprecated
-  public static List<MergedAnomalyResultDTO> makeAnomalies(final MetricSlice slice,
-      final DataFrame df,
-      final String seriesName) {
-    return makeAnomalies(slice, df, seriesName, null, null);
-  }
-
   public static List<MergedAnomalyResultDTO> buildAnomalies(final MetricSlice slice,
       final DataFrame df,
       final String seriesName,

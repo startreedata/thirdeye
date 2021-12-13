@@ -240,7 +240,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         // left join baseline values
         .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
         .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURR).subtract(inputDf.get(COL_VALUE)))
-        .addSeries(COL_PATTERN, patternMatch(inputDf))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
         .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
@@ -263,7 +263,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
-  private BooleanSeries patternMatch(final DataFrame dfInput) {
+  //todo cyril move this as utils/shared method
+  public static BooleanSeries patternMatch(final Pattern pattern, final DataFrame dfInput) {
     // series of boolean that are true if the anomaly direction matches the pattern
     if (pattern.equals(Pattern.UP_OR_DOWN)) {
       return BooleanSeries.fillValues(dfInput.size(), true);

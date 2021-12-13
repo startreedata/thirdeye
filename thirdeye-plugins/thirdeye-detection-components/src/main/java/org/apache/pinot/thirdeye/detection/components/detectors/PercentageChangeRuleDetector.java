@@ -22,16 +22,20 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.aggregateByPeriod;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.filterIncompleteAggregation;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.valueOf;
@@ -47,6 +51,7 @@ import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedD
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -99,6 +104,7 @@ public class PercentageChangeRuleDetector implements
   @Override
   public void init(final PercentageChangeRuleDetectorSpec spec) {
     this.spec = spec;
+    checkArgument(!Double.isNaN(spec.getPercentageChange()), "Percentage change is not set.");
     percentageChange = spec.getPercentageChange();
     baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
     pattern = valueOf(spec.getPattern().toUpperCase());
@@ -139,9 +145,9 @@ public class PercentageChangeRuleDetector implements
 
       // todo cyril this is mixing translate to generic col names + detection logic
       final DataFrame df = new DataFrame();
-      df.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
-      df.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
-      df.addSeries(DataFrame.COL_VALUE, baselineDf.get(spec.getMetric()));
+      df.addSeries(COL_TIME, currentDf.get(spec.getTimestamp()));
+      df.addSeries(COL_CURRENT, currentDf.get(spec.getMetric()));
+      df.addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
 
       final DetectionResult detectionResult = runDetectionOnSingleDataTable(df, window);
       detectionResults.add(detectionResult);
@@ -228,35 +234,18 @@ public class PercentageChangeRuleDetector implements
     return runDetectionOnSingleDataTable(mergedDf, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    // calculate percentage change
-    dfInput.addSeries(COL_CHANGE, map((DoubleFunction) this::percentageChangeLambda,
-        dfInput.getDoubles(COL_CURRENT),
-        dfInput.get(COL_VALUE))
-    );
+    inputDf
+        // calculate percentage change
+        .addSeries(COL_CHANGE, percentageChanges(inputDf))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
+        .addSeries(COL_CHANGE_VIOLATION, inputDf.getDoubles(COL_CHANGE).abs().gte(percentageChange))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
 
-    // defaults
-    dfInput.addSeries(COL_ANOMALY, BooleanSeries.fillValues(dfInput.size(), false));
+    addBoundaries(inputDf);
 
-    // relative change
-    if (!Double.isNaN(percentageChange)) {
-      // consistent with pattern
-      if (pattern.equals(UP_OR_DOWN)) {
-        dfInput.addSeries(COL_PATTERN, BooleanSeries.fillValues(dfInput.size(), true));
-      } else {
-        dfInput.addSeries(COL_PATTERN,
-            pattern.equals(UP) ? dfInput.getDoubles(COL_CHANGE).gt(0)
-                : dfInput.getDoubles(COL_CHANGE).lt(0));
-      }
-      dfInput.addSeries(COL_CHANGE_VIOLATION,
-          dfInput.getDoubles(COL_CHANGE).abs().gte(percentageChange));
-      dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
-    }
-
-    addPercentageChangeBoundaries(dfInput);
-
-    return getDetectionResultTemp(dfInput, window);
+    return getDetectionResultTemp(inputDf, window);
   }
 
   private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
@@ -275,6 +264,12 @@ public class PercentageChangeRuleDetector implements
     return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
+  private Series percentageChanges(final DataFrame inputDf) {
+    return map((DoubleFunction) this::percentageChangeLambda,
+        inputDf.getDoubles(COL_CURRENT),
+        inputDf.getDoubles(COL_VALUE));
+  }
+
   private double percentageChangeLambda(final double[] values) {
     final double first = values[0];
     final double second = values[1];
@@ -289,36 +284,22 @@ public class PercentageChangeRuleDetector implements
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
-    addPercentageChangeBoundaries(df);
+    addBoundaries(df);
     return TimeSeries.fromDataFrame(df);
   }
 
-  private void addPercentageChangeBoundaries(final DataFrame dfBase) {
-    if (!Double.isNaN(percentageChange)) {
-      switch (pattern) {
-        case UP:
-          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + percentageChange);
-          dfBase.addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.zeros(dfBase.size()));
-          break;
-        case DOWN:
-          dfBase.addSeries(
-              DataFrame.COL_UPPER_BOUND, DoubleSeries.fillValues(dfBase.size(), POSITIVE_INFINITY));
-          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - percentageChange);
-          break;
-        case UP_OR_DOWN:
-          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + percentageChange);
-          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - percentageChange);
-          break;
-        default:
-          throw new IllegalArgumentException();
-      }
+  private void addBoundaries(final DataFrame inputDf) {
+    //default bounds
+    DoubleSeries upperBound = DoubleSeries.fillValues(inputDf.size(), POSITIVE_INFINITY);
+    //fixme cyril this not consistent with threshold rule detector default values
+    DoubleSeries lowerBound = DoubleSeries.zeros(inputDf.size());
+    if (pattern == UP || pattern == UP_OR_DOWN) {
+      upperBound = inputDf.getDoubles(COL_VALUE).multiply(1 + percentageChange);
     }
-  }
-
-  private void fillPercentageChangeBound(final DataFrame dfBase, final String colBound,
-      final double multiplier) {
-    dfBase.addSeries(colBound,
-        map((DoubleFunction) values -> values[0] * multiplier, dfBase.getDoubles(
-            DataFrame.COL_VALUE)));
+    if (pattern == DOWN || pattern == UP_OR_DOWN) {
+      lowerBound = inputDf.getDoubles(COL_VALUE).multiply(1 - percentageChange);
+    }
+    inputDf.addSeries(COL_UPPER_BOUND, upperBound);
+    inputDf.addSeries(COL_LOWER_BOUND, lowerBound);
   }
 }

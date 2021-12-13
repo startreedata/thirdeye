@@ -20,6 +20,7 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
@@ -354,7 +355,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         // left join baseline values
         .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
         .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
-        .addSeries(COL_PATTERN, patternMatch(inputDf))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
         .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
@@ -395,17 +396,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         monitoringGranularityPeriod);
 
     return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
-  }
-
-  // todo cyril move this as static - it's used by other detectors
-  private BooleanSeries patternMatch(final DataFrame dfInput) {
-    // series of boolean that are true if the anomaly direction matches the pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      return BooleanSeries.fillValues(dfInput.size(), true);
-    }
-    return pattern.equals(Pattern.UP) ?
-        dfInput.getDoubles(COL_DIFF).gt(0) :
-        dfInput.getDoubles(COL_DIFF).lt(0);
   }
 
   /**

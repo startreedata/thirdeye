@@ -106,7 +106,7 @@ public class DetectionUtils {
 
     final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     final LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
-    final BooleanSeries isAnomalySeries = df.getBooleans(AnomalyDetectorV2.COL_ANOMALY);
+    final BooleanSeries isAnomalySeries = df.getBooleans(DataFrame.COL_ANOMALY);
     final DoubleSeries currentSeries = df.contains(DataFrame.COL_CURRENT)
         ? df.getDoubles(DataFrame.COL_CURRENT)
         : null;

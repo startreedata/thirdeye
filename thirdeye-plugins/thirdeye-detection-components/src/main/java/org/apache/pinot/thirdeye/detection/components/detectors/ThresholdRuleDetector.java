@@ -223,11 +223,15 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
       resultDF.addSeries(COL_LOWER_BOUND, DoubleSeries.fillValues(resultDF.size(), spec.getMin()));
       // set baseline value as the lower bound when actual value across below the mark
       resultDF.mapInPlace(DoubleSeries.MAX, COL_VALUE, COL_LOWER_BOUND, COL_VALUE);
+    } else {
+      resultDF.addSeries(COL_LOWER_BOUND, DoubleSeries.nulls(resultDF.size()));
     }
     if (!Double.isNaN(spec.getMax())) {
       resultDF.addSeries(COL_UPPER_BOUND, DoubleSeries.fillValues(resultDF.size(), spec.getMax()));
       // set baseline value as the upper bound when actual value across above the mark
       resultDF.mapInPlace(DoubleSeries.MIN, COL_VALUE, COL_UPPER_BOUND, COL_VALUE);
+    } else {
+      resultDF.addSeries(COL_UPPER_BOUND, DoubleSeries.nulls(resultDF.size()));
     }
     return resultDF;
   }

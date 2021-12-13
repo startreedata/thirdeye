@@ -29,6 +29,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,6 +135,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
+    // todo cyril - not used - may be broken - logic should be the same for all detectors
     final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
     final Interval window = new Interval(slice.getStart(), slice.getEnd());
     final DateTime trainStart;
@@ -195,7 +197,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   @Override
-  public DetectionPipelineResult runDetection(final Interval interval,
+  public DetectionPipelineResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
@@ -209,10 +211,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       // todo cyril this is translate to generic col names
       currentDf
           .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
-          .setIndex(COL_TIME);
-      currentDf.addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
+          .setIndex(COL_TIME)
+          .addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
+      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, window);
       detectionResults.add(detectionResult);
     }
     return new GroupedDetectionResults(detectionResults);
@@ -250,7 +252,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final MetricSlice slice = MetricSlice.from(-1,
         interval.getStartMillis(),
         interval.getEndMillis(),
-        (Multimap<String, String>) null,
+        ArrayListMultimap.create(),
         timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,

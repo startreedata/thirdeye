@@ -98,7 +98,6 @@ public class DetectionUtils {
 
   public static List<MergedAnomalyResultDTO> buildAnomalies(final MetricSlice slice,
       final DataFrame df,
-      final String seriesName,
       final String datasetTimezone,
       final Period monitoringGranularityPeriod) {
     if (df.isEmpty()) {
@@ -107,7 +106,7 @@ public class DetectionUtils {
 
     final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     final LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
-    final BooleanSeries isAnomalySeries = df.getBooleans(seriesName);
+    final BooleanSeries isAnomalySeries = df.getBooleans(AnomalyDetectorV2.COL_ANOMALY);
     final DoubleSeries currentSeries = df.contains(DataFrame.COL_CURRENT)
         ? df.getDoubles(DataFrame.COL_CURRENT)
         : null;

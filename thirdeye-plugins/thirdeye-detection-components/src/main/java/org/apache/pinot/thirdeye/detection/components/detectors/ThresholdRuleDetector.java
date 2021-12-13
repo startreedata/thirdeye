@@ -190,7 +190,6 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
 
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
         inputDf,
-        COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

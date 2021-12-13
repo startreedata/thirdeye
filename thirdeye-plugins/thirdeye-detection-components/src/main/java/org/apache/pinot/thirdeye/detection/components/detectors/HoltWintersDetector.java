@@ -28,7 +28,6 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -391,7 +390,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
         inputDf,
-        COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

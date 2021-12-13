@@ -46,7 +46,6 @@ import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedD
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -116,7 +115,8 @@ public class PercentageChangeRuleDetector implements
   }
 
   @Override
-  public void init(final PercentageChangeRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
+  public void init(final PercentageChangeRuleDetectorSpec spec,
+      final InputDataFetcher dataFetcher) {
     init(spec);
     this.dataFetcher = dataFetcher;
   }
@@ -136,6 +136,7 @@ public class PercentageChangeRuleDetector implements
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
       final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
 
+      // todo cyril this is mixing translate to generic col names + detection logic
       final DataFrame df = new DataFrame();
       df.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
       df.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
@@ -182,8 +183,8 @@ public class PercentageChangeRuleDetector implements
 
     final InputData data = dataFetcher
         .fetchData(new InputDataSpec().withTimeseriesSlices(slices)
-        .withMetricIdsForDataset(singletonList(slice.getMetricId()))
-        .withMetricIds(singletonList(me.getId())));
+            .withMetricIdsForDataset(singletonList(slice.getMetricId()))
+            .withMetricIds(singletonList(me.getId())));
 
     DataFrame dfBase = baseline.gather(slice, data.getTimeseries());
     DataFrame dfCurr = data.getTimeseries().get(slice);
@@ -223,7 +224,6 @@ public class PercentageChangeRuleDetector implements
     // Inner Join the current and baseline series
     final DataFrame mergedDf = new DataFrame(dfCurr).addSeries(dfBase);
 
-
     return runDetectionOnSingleDataTable(mergedDf, window);
   }
 
@@ -253,21 +253,25 @@ public class PercentageChangeRuleDetector implements
       dfInput.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
     }
 
-    final MetricSlice slice = MetricSlice.from(-1,
-            window.getStartMillis(),
-            window.getEndMillis(),
-            ArrayListMultimap.create() ,
-            timeGranularity);
-
     addPercentageChangeBoundaries(dfInput);
 
+    return getDetectionResultTemp(dfInput, window);
+  }
+
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
+      final ReadableInterval window) {
+    final MetricSlice slice = MetricSlice.from(-1,
+        window.getStartMillis(),
+        window.getEndMillis(),
+        ArrayListMultimap.create(),
+        timeGranularity);
+
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        dfInput,
-        COL_ANOMALY,
+        inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(dfInput));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
   private double percentageChangeLambda(final double[] values) {
@@ -310,7 +314,8 @@ public class PercentageChangeRuleDetector implements
     }
   }
 
-  private void fillPercentageChangeBound(final DataFrame dfBase, final String colBound, final double multiplier) {
+  private void fillPercentageChangeBound(final DataFrame dfBase, final String colBound,
+      final double multiplier) {
     dfBase.addSeries(colBound,
         map((DoubleFunction) values -> values[0] * multiplier, dfBase.getDoubles(
             DataFrame.COL_VALUE)));

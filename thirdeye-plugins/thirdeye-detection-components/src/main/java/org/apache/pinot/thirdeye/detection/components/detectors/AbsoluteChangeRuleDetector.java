@@ -209,7 +209,6 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
 
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
         dfInput,
-        COL_ANOMALY,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

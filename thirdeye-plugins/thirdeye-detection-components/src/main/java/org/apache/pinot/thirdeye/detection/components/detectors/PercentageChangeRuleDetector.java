@@ -26,7 +26,10 @@ import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVaria
 import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
@@ -86,10 +89,6 @@ public class PercentageChangeRuleDetector implements
     AnomalyDetector<PercentageChangeRuleDetectorSpec>,
     AnomalyDetectorV2<PercentageChangeRuleDetectorSpec>,
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
-
-  private static final String COL_CHANGE = "change";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_CHANGE_VIOLATION = "change_violation";
 
   private double percentageChange;
   private InputDataFetcher dataFetcher;
@@ -238,10 +237,10 @@ public class PercentageChangeRuleDetector implements
       final ReadableInterval window) {
     inputDf
         // calculate percentage change
-        .addSeries(COL_CHANGE, percentageChanges(inputDf))
+        .addSeries(COL_DIFF, percentageChanges(inputDf))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
-        .addSeries(COL_CHANGE_VIOLATION, inputDf.getDoubles(COL_CHANGE).abs().gte(percentageChange))
-        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(percentageChange))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
     addBoundaries(inputDf);
 
     return getDetectionResultTemp(inputDf, window);

@@ -22,7 +22,10 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
@@ -79,9 +82,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
   private static final String COL_CURR = "current";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_DIFF = "diff";
-  private static final String COL_DIFF_VIOLATION = "diff_violation";
   private static final String COL_ERROR = "error";
   private static final String COL_CHANGE = "change";
 

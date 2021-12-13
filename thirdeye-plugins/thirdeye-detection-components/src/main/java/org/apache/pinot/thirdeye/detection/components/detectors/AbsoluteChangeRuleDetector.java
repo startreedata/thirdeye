@@ -26,7 +26,10 @@ import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVaria
 import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
@@ -74,10 +77,6 @@ import org.joda.time.ReadableInterval;
 public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChangeRuleDetectorSpec>,
     AnomalyDetectorV2<AbsoluteChangeRuleDetectorSpec>,
     BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
-
-  private static final String COL_CHANGE = "diff";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_CHANGE_VIOLATION = "change_violation";
 
   private double absoluteChange;
   private InputDataFetcher dataFetcher;
@@ -187,10 +186,10 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
       final ReadableInterval window) {
     // calculate absolute change
     inputDf
-        .addSeries(COL_CHANGE, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
-        .addSeries(COL_CHANGE_VIOLATION, inputDf.getDoubles(COL_CHANGE).abs().gte(absoluteChange))
-        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(absoluteChange))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
     addBoundaries(inputDf);
 
     return getDetectionResultTemp(inputDf, window);

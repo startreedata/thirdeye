@@ -22,8 +22,10 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ERROR;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
@@ -78,8 +80,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
-  private static final String COL_CURR = "current";
-  private static final String COL_ERROR = "error";
   private static final String COL_CHANGE = "change";
 
   private InputDataFetcher dataFetcher;
@@ -150,7 +150,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         window.getEndMillis());
     DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis());
     resultDF = resultDF.joinLeft(inputDf.renameSeries(
-        COL_VALUE, COL_CURR), COL_TIME);
+        COL_VALUE, COL_CURRENT), COL_TIME);
 
     // Exclude the end because baseline calculation should not contain the end
     if (resultDF.size() > 1) {
@@ -224,10 +224,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
         // rename current which is still called "value" to "current"
-        .renameSeries(COL_VALUE, COL_CURR)
+        .renameSeries(COL_VALUE, COL_CURRENT)
         // left join baseline values
         .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
-        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURR).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
         .addSeries(COL_DIFF_VIOLATION,
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
@@ -355,14 +355,14 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       df = df.append(originalDF.slice(indexStart, indexEnd));
     }
     // calculate percentage change
-    df.addSeries(COL_CURR, df.getDoubles(COL_VALUE).shift(-1));
+    df.addSeries(COL_CURRENT, df.getDoubles(COL_VALUE).shift(-1));
     df.addSeries(COL_CHANGE, map((DoubleFunction) values -> {
       if (Double.compare(values[1], 0.0) == 0) {
         // divide by zero handling
         return 0.0;
       }
       return (values[0] - values[1]) / values[1];
-    }, df.getDoubles(COL_CURR), df.get(COL_VALUE)));
+    }, df.getDoubles(COL_CURRENT), df.get(COL_VALUE)));
     return df;
   }
 

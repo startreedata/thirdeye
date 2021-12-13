@@ -21,7 +21,11 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
@@ -29,7 +33,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,9 +82,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
   private static final String COL_CURR = "current";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_DIFF = "diff";
-  private static final String COL_DIFF_VIOLATION = "diff_violation";
   private static final String COL_ERROR = "error";
   private static final String COL_CHANGE = "change";
 
@@ -134,6 +135,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
+    // todo cyril - not used - may be broken - logic should be the same for all detectors
     final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
     final Interval window = new Interval(slice.getStart(), slice.getEnd());
     final DateTime trainStart;
@@ -149,7 +151,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final DataFrame inputDf = fetchData(metricEntity,
         trainStart.getMillis(),
         window.getEndMillis());
-    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis());
+    DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis());
     resultDF = resultDF.joinLeft(inputDf.renameSeries(
         COL_VALUE, COL_CURR), COL_TIME);
 
@@ -195,7 +197,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   @Override
-  public DetectionPipelineResult runDetection(final Interval interval,
+  public DetectionPipelineResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
@@ -206,12 +208,13 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final List<DetectionResult> detectionResults = new ArrayList<>();
     for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
+      // todo cyril this is translate to generic col names
       currentDf
           .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
-          .setIndex(COL_TIME);
-      currentDf.addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
+          .setIndex(COL_TIME)
+          .addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
+      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, window);
       detectionResults.add(detectionResult);
     }
     return new GroupedDetectionResults(detectionResults);
@@ -228,45 +231,50 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         null);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    final DataFrame dfCurr = new DataFrame(dfInput).renameSeries(COL_VALUE, COL_CURR);
-    final DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis());
+    final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
+    inputDf
+        // rename current which is still called "value" to "current"
+        .renameSeries(COL_VALUE, COL_CURR)
+        // left join baseline values
+        .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURR).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, COL_VALUE, COL_ERROR);
-    df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(COL_VALUE)));
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    return getDetectionResultTemp(window, inputDf);
+  }
 
-    // Filter pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
-    } else {
-      df.addSeries(COL_PATTERN, pattern.equals(Pattern.UP) ? df.getDoubles(COL_DIFF).gt(0) :
-          df.getDoubles(COL_DIFF).lt(0));
-    }
-    df.addSeries(COL_DIFF_VIOLATION, df.getDoubles(COL_DIFF).abs().gte(df.getDoubles(COL_ERROR)));
-    df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
-
-    // Anomalies
-
+  // todo cyril move this up to Operator
+  private DetectionResult getDetectionResultTemp(final ReadableInterval interval, final DataFrame inputDf) {
     final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        (Multimap<String, String>) null,
+        interval.getStartMillis(),
+        interval.getEndMillis(),
+        ArrayListMultimap.create(),
         timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
-        df,
-        COL_ANOMALY,
+        inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-    final DataFrame result = dfBase
-        .joinRight(df.retainSeries(COL_TIME, COL_CURR), COL_TIME)
-        .sortedBy(DataFrame.COL_TIME);
-    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(result));
+
+    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
-  private DataFrame computePredictionInterval(final DataFrame inputDF, final long windowStartTime) {
+  //todo cyril move this as utils/shared method
+  public static BooleanSeries patternMatch(final Pattern pattern, final DataFrame dfInput) {
+    // series of boolean that are true if the anomaly direction matches the pattern
+    if (pattern.equals(Pattern.UP_OR_DOWN)) {
+      return BooleanSeries.fillValues(dfInput.size(), true);
+    }
+    return pattern.equals(Pattern.UP) ?
+          dfInput.getDoubles(COL_DIFF).gt(0) :
+          dfInput.getDoubles(COL_DIFF).lt(0);
+    }
+
+  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
 
     final DataFrame resultDF = new DataFrame();
     //filter the data inside window for current values.

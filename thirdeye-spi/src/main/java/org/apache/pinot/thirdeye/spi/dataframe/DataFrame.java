@@ -57,6 +57,11 @@ public class DataFrame {
   public static final String COL_CURRENT = "current";
   public static final String COL_UPPER_BOUND = "upper_bound";
   public static final String COL_LOWER_BOUND = "lower_bound";
+  public static final String COL_ANOMALY = "anomaly";
+  public static final String COL_PATTERN = "pattern";
+  public static final String COL_DIFF = "diff";
+  public static final String COL_DIFF_VIOLATION = "diff_violation";
+
 
   public static final String COLUMN_JOIN_KEY = "join_key";
 

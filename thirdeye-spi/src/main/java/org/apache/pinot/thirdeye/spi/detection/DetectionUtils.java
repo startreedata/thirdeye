@@ -96,40 +96,8 @@ public class DetectionUtils {
     return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
   }
 
-  /**
-   * Helper for creating a list of anomalies from a boolean series.
-   *
-   * @param slice metric slice
-   * @param df time series with COL_TIME and at least one boolean value series
-   * @param seriesName name of the value series
-   * @param monitoringGranularityPeriod the monitoring granularity period
-   * @param dataset dataset config for the metric
-   * @return list of anomalies
-   */
-  @Deprecated
-  public static List<MergedAnomalyResultDTO> makeAnomalies(final MetricSlice slice,
-      final DataFrame df,
-      final String seriesName,
-      final Period monitoringGranularityPeriod,
-      final DatasetConfigDTO dataset) {
-    return buildAnomalies(slice,
-        df,
-        seriesName,
-        optional(dataset).map(DatasetConfigDTO::getTimezone).orElse(null),
-        monitoringGranularityPeriod
-    );
-  }
-
-  @Deprecated
-  public static List<MergedAnomalyResultDTO> makeAnomalies(final MetricSlice slice,
-      final DataFrame df,
-      final String seriesName) {
-    return makeAnomalies(slice, df, seriesName, null, null);
-  }
-
   public static List<MergedAnomalyResultDTO> buildAnomalies(final MetricSlice slice,
       final DataFrame df,
-      final String seriesName,
       final String datasetTimezone,
       final Period monitoringGranularityPeriod) {
     if (df.isEmpty()) {
@@ -138,7 +106,7 @@ public class DetectionUtils {
 
     final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
     final LongSeries sTime = df.getLongs(DataFrame.COL_TIME);
-    final BooleanSeries isAnomalySeries = df.getBooleans(seriesName);
+    final BooleanSeries isAnomalySeries = df.getBooleans(DataFrame.COL_ANOMALY);
     final DoubleSeries currentSeries = df.contains(DataFrame.COL_CURRENT)
         ? df.getDoubles(DataFrame.COL_CURRENT)
         : null;

@@ -29,6 +29,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
@@ -74,9 +75,9 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     AnomalyDetectorV2<AbsoluteChangeRuleDetectorSpec>,
     BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
 
-  private static final String COL_DIFF = "diff";
+  private static final String COL_CHANGE = "diff";
   private static final String COL_PATTERN = "pattern";
-  private static final String COL_DIFF_VIOLATION = "diff_violation";
+  private static final String COL_CHANGE_VIOLATION = "change_violation";
 
   private double absoluteChange;
   private InputDataFetcher dataFetcher;
@@ -127,9 +128,9 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
       final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
 
       final DataFrame df = new DataFrame();
-      df.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
-      df.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
-      df.addSeries(DataFrame.COL_VALUE, baselineDf.get(spec.getMetric()));
+      df.addSeries(COL_TIME, currentDf.get(spec.getTimestamp()));
+      df.addSeries(COL_CURRENT, currentDf.get(spec.getMetric()));
+      df.addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
 
       final DetectionResult detectionResult = runDetectionOnSingleDataTable(df, window);
       detectionResults.add(detectionResult);
@@ -174,7 +175,7 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     final DataFrame dfCurr = data
         .getTimeseries()
         .get(slice)
-        .renameSeries(DataFrame.COL_VALUE, COL_CURRENT);
+        .renameSeries(COL_VALUE, COL_CURRENT);
     final DataFrame dfBase = baseline.gather(slice, data.getTimeseries());
 
     // join curr and base
@@ -186,10 +187,10 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
       final ReadableInterval window) {
     // calculate absolute change
     inputDf
-        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(DataFrame.COL_VALUE)))
+        .addSeries(COL_CHANGE, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
-        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(absoluteChange))
-        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+        .addSeries(COL_CHANGE_VIOLATION, inputDf.getDoubles(COL_CHANGE).abs().gte(absoluteChange))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
     addBoundaries(inputDf);
 
     return getDetectionResultTemp(inputDf, window);
@@ -225,10 +226,10 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     //fixme cyril this not consistent with threshold rule detector default values
     DoubleSeries lowerBound = DoubleSeries.zeros(inputDf.size());
     if (pattern == UP || pattern == UP_OR_DOWN) {
-      upperBound = inputDf.getDoubles(DataFrame.COL_VALUE).add(absoluteChange);
+      upperBound = inputDf.getDoubles(COL_VALUE).add(absoluteChange);
     }
     if (pattern == DOWN || pattern == UP_OR_DOWN) {
-      lowerBound = inputDf.getDoubles(DataFrame.COL_VALUE).add(-absoluteChange);
+      lowerBound = inputDf.getDoubles(COL_VALUE).add(-absoluteChange);
     }
     inputDf.addSeries(COL_UPPER_BOUND, upperBound);
     inputDf.addSeries(COL_LOWER_BOUND, lowerBound);

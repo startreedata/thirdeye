@@ -32,4 +32,5 @@ set -x && \
   ./kubectl create ns te-helm-test && \
   ./helm install thirdeye internal/startree-thirdeye --version 0.0.0-build.6 -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
-  wait_service
+  wait_service && \
+  ./helm test thirdeye -n te-helm-test

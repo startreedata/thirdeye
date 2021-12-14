@@ -22,7 +22,7 @@ set -x && \
     --name $ENVIRONMENT_NAME \
     --resource-group $ENVIRONMENT_NAME && \
   set -x && \
-#  ./kubectl delete ns te-helm-test && \
+  ./kubectl delete ns te-helm-test && \
   echo "pausing for 10s after cleanup" && \
   sleep 10s && \
   ./helm repo add internal ${STARTREE_HELM_REPOSITORY_URL} \

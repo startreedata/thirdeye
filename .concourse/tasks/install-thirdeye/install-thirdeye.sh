@@ -7,7 +7,6 @@ wait_service() {
 }
 
 set -x && \
-  HELM_CHART_VERSION=`cat chart-version/version` && \
   ENVIRONMENT_NAME=`cat environment/metadata | jq '.name' -r` && \
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
   chmod +x ./kubectl && \

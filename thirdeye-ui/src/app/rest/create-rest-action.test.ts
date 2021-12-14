@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react-hooks";
+import axios from "axios";
 import { ActionStatus } from "./actions.interfaces";
 import { useHTTPAction } from "./create-rest-action";
 
@@ -12,9 +13,9 @@ const mockError = {
 
 describe("Create Rest Action (useHTTPAction)", () => {
     it("should return initial default values", () => {
-        const { result } = renderHook(() => useHTTPAction());
+        const { result } = renderHook(() => useHTTPAction(axios.get));
 
-        expect(result.current.data).toBeUndefined();
+        expect(result.current.data).toBeNull();
         expect(result.current.makeRequest).toBeDefined();
         expect(result.current.status).toEqual(ActionStatus.Initial);
         expect(result.current.errorMessage).toEqual("");
@@ -58,14 +59,14 @@ describe("Create Rest Action (useHTTPAction)", () => {
             await waitFor(() => result.current.status === ActionStatus.Initial);
 
             // When REST call is in progress
-            expect(result.current.data).toBeUndefined();
+            expect(result.current.data).toBeNull();
             expect(result.current.makeRequest).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Working);
             expect(result.current.errorMessage).toEqual("");
 
             return promise.then(() => {
                 // When REST call is completed
-                expect(result.current.data).toEqual(mockResponse.data);
+                expect(result.current.data).toEqual(mockResponse);
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Done);
                 expect(result.current.errorMessage).toEqual("");
@@ -88,14 +89,14 @@ describe("Create Rest Action (useHTTPAction)", () => {
             await waitFor(() => result.current.status === ActionStatus.Initial);
 
             // When REST call is in progress
-            expect(result.current.data).toBeUndefined();
+            expect(result.current.data).toBeNull();
             expect(result.current.makeRequest).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Working);
             expect(result.current.errorMessage).toEqual("");
 
             return promise.then(() => {
                 // When REST call is completed
-                expect(result.current.data).toBeUndefined();
+                expect(result.current.data).toBeNull();
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Error);
                 expect(result.current.errorMessage).toEqual("testError");

@@ -1,16 +1,7 @@
-import axios from "axios";
 import { useHTTPAction } from "../create-rest-action";
 import { AlertEvaluation } from "../dto/alert.interfaces";
-import { GetEvaluation } from "./alerts.interfaces";
-import { BASE_URL_ALERTS } from "./alerts.rest";
-
-export interface UseGetEvaluationParams {
-    alert: {
-        id: number;
-    };
-    start: number;
-    end: number;
-}
+import { GetEvaluation, UseGetEvaluationParams } from "./alerts.interfaces";
+import { getAlertEvaluation } from "./alerts.rest";
 
 export const useGetEvaluation = (): GetEvaluation => {
     const {
@@ -18,12 +9,12 @@ export const useGetEvaluation = (): GetEvaluation => {
         makeRequest,
         status,
         errorMessage,
-    } = useHTTPAction<AlertEvaluation>(axios.post);
+    } = useHTTPAction<AlertEvaluation>(getAlertEvaluation);
 
     const getEvaluation = (
         evaluationParams: UseGetEvaluationParams
     ): Promise<AlertEvaluation | undefined> => {
-        return makeRequest(`${BASE_URL_ALERTS}/evaluate`, evaluationParams);
+        return makeRequest(evaluationParams);
     };
 
     return { evaluation: data, getEvaluation, status, errorMessage };

@@ -1,41 +1,39 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import "axios/index";
 import { useCallback, useState } from "react";
 import { ActionStatus } from "./actions.interfaces";
 
-export interface UseHTTPActionHook<DataResponseType> {
-    data?: DataResponseType;
+interface FetchFunction<DataResponseType> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    makeRequest: (
-        url: string,
-        ...options: any
-    ) => Promise<DataResponseType | undefined>;
+    (...options: any[]): Promise<DataResponseType>;
+}
+
+export interface UseHTTPActionHook<DataResponseType> {
+    data: DataResponseType | null;
+    makeRequest: FetchFunction<DataResponseType | undefined>;
     status: ActionStatus;
     errorMessage: string;
 }
 
 function useHTTPAction<DataResponseType>(
-    fetchFunction = axios.get
+    fetchFunction: FetchFunction<DataResponseType>
 ): UseHTTPActionHook<DataResponseType> {
-    const [data, setData] = useState<DataResponseType>();
-    const [status, setStatus] = useState(ActionStatus.Initial);
+    const [data, setData] = useState<DataResponseType | null>(null);
+    const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
     const [errorMessage, setErrorMessage] = useState("");
 
-    const makeRequest = useCallback(async (url: string, ...options) => {
+    const makeRequest = useCallback(async (...options) => {
         setStatus(ActionStatus.Working);
         try {
-            const fetchedData: AxiosResponse<DataResponseType> = await fetchFunction(
-                url,
-                ...options
-            );
-            setData(fetchedData.data);
+            const fetchedData = await fetchFunction(...options);
+            setData(fetchedData);
             setStatus(ActionStatus.Done);
             setErrorMessage("");
 
-            return fetchedData.data;
+            return fetchedData;
         } catch (error) {
             const axiosError = error as AxiosError;
-            setData(undefined);
+            setData(null);
             setStatus(ActionStatus.Error);
             setErrorMessage(
                 axiosError &&

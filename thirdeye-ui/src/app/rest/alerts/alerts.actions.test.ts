@@ -23,7 +23,7 @@ describe("Alerts Actions", () => {
         it("should return initial default values", () => {
             const { result } = renderHook(() => useGetEvaluation());
 
-            expect(result.current.evaluation).toBeUndefined();
+            expect(result.current.evaluation).toBeNull();
             expect(result.current.getEvaluation).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Initial);
             expect(result.current.errorMessage).toEqual("");
@@ -42,7 +42,7 @@ describe("Alerts Actions", () => {
                 );
 
                 // When REST call is in progress
-                expect(result.current.evaluation).toBeUndefined();
+                expect(result.current.evaluation).toBeNull();
                 expect(result.current.getEvaluation).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Working);
                 expect(result.current.errorMessage).toEqual("");

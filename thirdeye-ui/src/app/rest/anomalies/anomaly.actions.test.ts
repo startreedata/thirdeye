@@ -15,7 +15,7 @@ describe("Anomaly Actions", () => {
         it("should return initial default values", () => {
             const { result } = renderHook(() => useGetAnomaly());
 
-            expect(result.current.anomaly).toBeUndefined();
+            expect(result.current.anomaly).toBeNull();
             expect(result.current.getAnomaly).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Initial);
             expect(result.current.errorMessage).toEqual("");
@@ -33,7 +33,7 @@ describe("Anomaly Actions", () => {
                 );
 
                 // When REST call is in progress
-                expect(result.current.anomaly).toBeUndefined();
+                expect(result.current.anomaly).toBeNull();
                 expect(result.current.getAnomaly).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Working);
                 expect(result.current.errorMessage).toEqual("");

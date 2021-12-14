@@ -1,9 +1,16 @@
 import { ActionHook } from "../actions.interfaces";
 import { AlertEvaluation } from "../dto/alert.interfaces";
-import { UseGetEvaluationParams } from "./alerts.actions";
+
+export interface UseGetEvaluationParams {
+    alert: {
+        id: number;
+    };
+    start: number;
+    end: number;
+}
 
 export interface GetEvaluation extends ActionHook {
-    evaluation?: AlertEvaluation;
+    evaluation: AlertEvaluation | null;
     getEvaluation: (
         evaluationParams: UseGetEvaluationParams
     ) => Promise<AlertEvaluation | undefined>;

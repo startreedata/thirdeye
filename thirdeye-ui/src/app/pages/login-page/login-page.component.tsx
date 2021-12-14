@@ -11,6 +11,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { getErrorSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");
@@ -38,7 +39,8 @@ export const LoginPage: FunctionComponent = () => {
             enqueueSnackbar(
                 t("message.authentication-error", {
                     exceptionCode: exceptionCode,
-                })
+                }),
+                getErrorSnackbarOption()
             );
         }
     }, [exceptionCode]);

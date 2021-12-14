@@ -8,9 +8,9 @@ import { AlertWizard } from "../../components/alert-wizard/alert-wizard.componen
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
     getAlert,
-    getAlertEvaluation,
     getAllAlerts,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
@@ -31,6 +31,7 @@ import {
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdatePage: FunctionComponent = () => {
+    const { getEvaluation } = useGetEvaluation();
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState<Alert>();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
@@ -199,17 +200,16 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const fetchAlertEvaluation = async (
         alert: Alert
     ): Promise<AlertEvaluation> => {
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-        try {
-            fetchedAlertEvaluation = await getAlertEvaluation(
-                createAlertEvaluation(
-                    alert,
-                    timeRangeDuration.startTime,
-                    timeRangeDuration.endTime
-                )
-            );
-        } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+        const fetchedAlertEvaluation = await getEvaluation(
+            createAlertEvaluation(
+                alert,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        );
+
+        if (fetchedAlertEvaluation === undefined) {
+            return {} as AlertEvaluation;
         }
 
         return fetchedAlertEvaluation;

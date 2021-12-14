@@ -9,21 +9,27 @@ describe("Get Client ID Util (getClientIdFromUrl)", () => {
         expect(getClientIdFromUrl("")).toBeNull();
     });
 
+    it("should return null if url is missing http", () => {
+        expect(getClientIdFromUrl("localhost:1755")).toBeNull();
+    });
+
+    it("should return null if passed localhost with http", () => {
+        expect(getClientIdFromUrl("http://localhost:1755")).toBeNull();
+    });
+
+    it("should return {namespace}-{deploymentId} for a production url", () => {
+        expect(
+            getClientIdFromUrl(
+                "http://thirdeye-tv592d4w.te.192.168.64.37.nip.io:30000"
+            )
+        ).toEqual("te-thirdeye-tv592d4w");
+    });
+
     it("should return expected client id if passed valid url", () => {
         expect(
             getClientIdFromUrl(
                 "http://third-eye.aws.startree-dev.startree.cloud"
             )
-        ).toEqual("third-eye");
-    });
-
-    it("should return null if url is missing http", () => {
-        expect(getClientIdFromUrl("localhost:1755")).toBeNull();
-    });
-
-    it("should return localhost if passed localhost with http", () => {
-        expect(getClientIdFromUrl("http://localhost:1755")).toEqual(
-            "localhost:1755"
-        );
+        ).toEqual("aws-third-eye");
     });
 });

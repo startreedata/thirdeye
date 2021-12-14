@@ -1,18 +1,28 @@
 /**
- * The client id expected to be the first subdomain of the url passed i.e.
- * http://client-id.aws.startree-dev.startree.cloud
+ * The format of the url when deployed is expected to be:
+ *
+ * {deployment id}.{namespace}.{platform domain}:30000
+ *
+ * Client ID is expected to be: {namespace}-{deploymentId}
+ *
+ * http://thirdeye-tv592d4w.te.192.168.64.37.nip.io:30000 => te-thirdeye-tv592d4w
+ *
  *
  * @example
  * getClientIdFromUrl(window.location.href)
  *
  * @example
- * getClientIdFromUrl("http://hello.world.com") => "hello"
+ * getClientIdFromUrl("http://hello.world.com") => null
  *
  * @example
- * getClientIdFromUrl("http://localhost:1755") => "localhost:1755"
+ * getClientIdFromUrl("http://localhost:1755") => null
  *
  * @example
  * getClientIdFromUrl("localhost:1755") => null
+ *
+ * @example
+ * getClientIdFromUrl("http://thirdeye-tv592d4w.te.192.168.64.37.nip.io:30000")
+ * => te-thirdeye-tv592d4w
  *
  * @param {string} url - Get the client id from this url
  */
@@ -33,5 +43,9 @@ export const getClientIdFromUrl = (url: string): string | null => {
 
     const splitBySubDomain = host.split(".");
 
-    return splitBySubDomain[0];
+    if (splitBySubDomain.length > 2) {
+        return `${splitBySubDomain[1]}-${splitBySubDomain[0]}`;
+    }
+
+    return null;
 };

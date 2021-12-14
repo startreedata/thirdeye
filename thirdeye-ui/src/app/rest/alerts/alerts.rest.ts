@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Alert, AlertEvaluation } from "../dto/alert.interfaces";
 
-export const BASE_URL_ALERTS = "/api/alerts";
+const BASE_URL_ALERTS = "/api/alerts";
 
 export const getAlert = async (id: number): Promise<Alert> => {
     const response = await axios.get(`${BASE_URL_ALERTS}/${id}`);

@@ -75,7 +75,6 @@
     <guice.version>4.2.3</guice.version>
     <handlebars.version>4.0.4</handlebars.version>
     <hsqldb.version>2.3.4</hsqldb.version>
-    <httpclient.version>4.5.2</httpclient.version>
     <jackson.version>2.10.2</jackson.version>
     <jetty.version>9.4.21.v20190926</jetty.version>
     <jfreechart.version>1.0.19</jfreechart.version>
@@ -406,6 +405,12 @@
         <artifactId>avro</artifactId>
         <version>${avro.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.9</version>
+      </dependency>
+
       <!-- This helps map pojos from one model to another. API <> DTO, etc -->
       <dependency>
         <groupId>org.mapstruct</groupId>

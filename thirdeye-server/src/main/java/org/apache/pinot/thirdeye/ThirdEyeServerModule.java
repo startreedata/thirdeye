@@ -50,6 +50,9 @@ public class ThirdEyeServerModule extends AbstractModule {
       } else {
         HashMap<String, Object> oidcConfig = (HashMap<String, Object>) info.get(OIDC_CONFIG_KEY);
         authConfig.setEnabled(true);
+        if(authConfig.getOAuthConfig() == null) {
+          authConfig.setOAuthConfig(new OAuthConfig());
+        }
         OAuthConfig oauth = authConfig.getOAuthConfig();
         Optional.ofNullable(oidcConfig.get(ISSUER_KEY))
           .ifPresent(iss -> oauth.getExactMatch().put("iss", iss.toString()));

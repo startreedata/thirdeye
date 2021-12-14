@@ -4,6 +4,7 @@ import static org.apache.pinot.thirdeye.auth.OidcUtils.getAuthInfo;
 
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
+import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,7 +30,7 @@ public class AuthInfoResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
     if(infoURL == null || infoURL.isEmpty()){
-      return Response.ok().build();
+      return Response.ok(Collections.EMPTY_MAP).build();
     }
     return Response.ok(getAuthInfo(infoURL)).build();
   }

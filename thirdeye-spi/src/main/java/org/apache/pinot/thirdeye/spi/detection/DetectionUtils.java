@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.Multimap;
@@ -43,8 +45,10 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
+import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
+import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
@@ -96,6 +100,18 @@ public class DetectionUtils {
     return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
   }
 
+  // todo cyril can be moved to core once v1 is removed
+  public static DetectionResult buildDetectionResultFromDetectorDf(final DataFrame inputDf,
+      final String timeZone, final Period monitoringGranularityPeriod) {
+    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomaliesFromDetectorDf(
+        inputDf,
+        timeZone,
+        monitoringGranularityPeriod);
+
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+  }
+
+  // todo cyril can be moved to core once v1 is removed
   public static List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df,
       final String datasetTimezone,
       final Period monitoringGranularityPeriod) {

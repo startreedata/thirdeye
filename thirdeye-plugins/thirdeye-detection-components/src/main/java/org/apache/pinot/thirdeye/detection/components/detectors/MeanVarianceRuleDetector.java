@@ -34,6 +34,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +47,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
@@ -60,7 +60,6 @@ import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -130,6 +129,16 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   @Override
+  public String getTimeZone() {
+    return spec.getTimezone();
+  }
+
+  @Override
+  public Period getMonitoringGranularityPeriod() {
+    return monitoringGranularityPeriod;
+  }
+
+  @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     // todo cyril - not used - may be broken - logic should be the same for all detectors
     final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
@@ -189,11 +198,13 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     // getting data (window + earliest lookback) all at once.
     LOG.info("Getting data for" + slice);
     final DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
-    return runDetectionOnSingleDataTable(dfInput, window);
+    final DataFrame detectionDf = runDetectionOnSingleDataTable(dfInput, window);
+
+    return buildDetectionResultFromDetectorDf(detectionDf, spec.getTimezone(), monitoringGranularityPeriod);
   }
 
   @Override
-  public DetectionPipelineResult runDetection(final Interval window,
+  public DataFrame runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
@@ -218,7 +229,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         null);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private DataFrame runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
@@ -232,17 +243,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return getDetectionResultTemp(inputDf);
-  }
-
-  // todo cyril move this up to Operator
-  private DetectionResult getDetectionResultTemp(final DataFrame inputDf) {
-    final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomaliesFromDetectorDf(inputDf,
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
-
-    return DetectionResult.from(anomalyResults,
-        TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+    return inputDf;
   }
 
   //todo cyril move this as utils/shared method

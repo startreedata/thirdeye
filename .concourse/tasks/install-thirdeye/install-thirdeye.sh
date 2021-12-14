@@ -33,4 +33,4 @@ set -x && \
   ./helm install thirdeye internal/startree-thirdeye --version 0.0.0-build.6 -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
   wait_service && \
-  ./helm test thirdeye -n te-helm-test
+  ./helm test thirdeye -n te-helm-test --filter "!name=thirdeye-mysql-test"

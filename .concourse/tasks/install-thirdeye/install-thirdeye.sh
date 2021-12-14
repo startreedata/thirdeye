@@ -30,6 +30,6 @@ set -x && \
     --password ${STARTREE_HELM_PASSWORD} && \
   ./helm repo update && \
   ./kubectl create ns te-helm-test && \
-  ./helm install thirdeye internal/startree-thirdeye -n te-helm-test && \
+  ./helm install thirdeye internal/startree-thirdeye -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
   wait_service

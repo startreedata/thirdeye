@@ -37,7 +37,6 @@ import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 
-import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -181,20 +180,12 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
     addBoundaries(inputDf);
 
-    return getDetectionResultTemp(inputDf, window);
+    return getDetectionResultTemp(inputDf);
   }
 
-  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
-      final ReadableInterval window) {
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf) {
     // make anomalies
-    final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        ArrayListMultimap.create(),
-        timeGranularity);
-
-    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        inputDf,
+    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomaliesFromDetectorDf(inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

@@ -30,11 +30,8 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 
-import com.google.common.collect.ArrayListMultimap;
-import java.sql.Time;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -167,19 +164,11 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
         .addSeries(COL_TOO_LOW, valueTooLow(inputDf.getDoubles(COL_CURRENT)))
         .mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
-    return getDetectionResultTemp(inputDf, window);
+    return getDetectionResultTemp(inputDf);
   }
 
-  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
-      final ReadableInterval window) {
-    final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        ArrayListMultimap.create(),
-        timeGranularity);
-
-    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        inputDf,
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf) {
+    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomaliesFromDetectorDf(inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

@@ -32,7 +32,6 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
-import com.google.common.collect.ArrayListMultimap;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -348,7 +347,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return getDetectionResultTemp(window, inputDf);
+    return getDetectionResultTemp(inputDf);
   }
 
   /**
@@ -372,16 +371,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   // todo cyril move this up to Operator
-  private DetectionResult getDetectionResultTemp(final ReadableInterval window,
-      final DataFrame inputDf) {
-    final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        ArrayListMultimap.create(),
-        timeGranularity);
-
-    final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
-        inputDf,
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf) {
+    final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomaliesFromDetectorDf(inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

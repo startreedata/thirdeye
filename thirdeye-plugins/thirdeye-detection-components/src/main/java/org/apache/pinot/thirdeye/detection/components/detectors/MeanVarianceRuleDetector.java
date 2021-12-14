@@ -35,7 +35,6 @@ import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 
-import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -233,20 +232,12 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return getDetectionResultTemp(window, inputDf);
+    return getDetectionResultTemp(inputDf);
   }
 
   // todo cyril move this up to Operator
-  private DetectionResult getDetectionResultTemp(final ReadableInterval interval,
-      final DataFrame inputDf) {
-    final MetricSlice slice = MetricSlice.from(-1,
-        interval.getStartMillis(),
-        interval.getEndMillis(),
-        ArrayListMultimap.create(),
-        timeGranularity);
-
-    final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
-        inputDf,
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf) {
+    final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomaliesFromDetectorDf(inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 

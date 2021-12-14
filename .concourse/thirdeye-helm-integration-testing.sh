@@ -12,5 +12,5 @@ set -x
 fly \
   -t $CONCOURSE_TEAM \
   set-pipeline \
-  -p thirdeye-helm-integation-testing \
+  -p thirdeye-helm-integration-testing \
   -c $DIR/thirdeye.yml

@@ -3,12 +3,18 @@ resource_types:
     type: registry-image
     source: {repository: concourse/pool-resource, tag: 1.1.3}
 
+  - name: azure-blobstore
+    type: docker-image
+    source:
+      repository: pcfabr/azure-blobstore-resource
+
 resources:
   - name: ci-src
     type: git
     source:
       uri: ((git-uri))
       branch: ((git-branch))
+      private_key: ((ssh-private-key))
       paths:
         - .concourse
 

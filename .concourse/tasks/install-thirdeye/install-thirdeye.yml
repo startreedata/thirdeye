@@ -19,19 +19,9 @@ params:
   AZURE_CLIENT_ID: ((azure-client-id))
   AZURE_CLIENT_SECRET: ((azure-client-secret))
   AZURE_TENANT_ID: ((azure-tenant-id))
-  GITHUB_USERNAME: ((github-username))
-  GITHUB_TOKEN: ((github-token))
-  GITHUB_EMAIL: ((github-email))
-  HELM_REPO_BRANCH: ((helm-branch))
-  STARTREE_DOCKER_REGISTRY_URL: ((docker-registry))
-  STARTREE_DOCKER_REGISTRY_USERNAME: ((artifactory-username))
-  STARTREE_DOCKER_REGISTRY_PASSWORD: ((artifactory-password))
-  STARTREE_DOCKER_REGISTRY_EMAIL: ((artifactory-email))
   STARTREE_HELM_REPOSITORY_URL: ((helm-repository-url))
   STARTREE_HELM_USERNAME: ((artifactory-username))
   STARTREE_HELM_PASSWORD: ((artifactory-password))
-  VERSION_FILE: version/startree-platform-((git-branch))
-  SECURITY_ENABLED: false
 
 run:
   path: ci-src/.concourse/tasks/install-thirdeye/install-thirdeye.sh

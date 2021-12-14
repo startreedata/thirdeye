@@ -127,7 +127,7 @@ public class RootCauseMetricResource {
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/aggregate")
@@ -182,7 +182,12 @@ public class RootCauseMetricResource {
     long metricId = metricEntity.getId();
     List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
 
-    List<Double> aggregates = computeAggregatesForOffsets(metricId, filters, start, end, offsets, dateTimeZone);
+    List<Double> aggregates = computeAggregatesForOffsets(metricId,
+        filters,
+        start,
+        end,
+        offsets,
+        dateTimeZone);
 
     return Response.ok(aggregates).build();
   }
@@ -220,7 +225,8 @@ public class RootCauseMetricResource {
       MetricEntity metricEntity = MetricEntity.fromURN(urn);
       long metricId = metricEntity.getId();
       List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
-      urnToAggregates.put(urn, computeAggregatesForOffsets(metricId, filters, start, end, offsets, dateTimeZone));
+      urnToAggregates.put(urn,
+          computeAggregatesForOffsets(metricId, filters, start, end, offsets, dateTimeZone));
     }
 
     return Response.ok(urnToAggregates).build();
@@ -236,7 +242,7 @@ public class RootCauseMetricResource {
    * @param limit limit results to the top k elements, plus a rollup element
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
+   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/breakdown/anomaly/{id}")
@@ -359,7 +365,7 @@ public class RootCauseMetricResource {
   @ApiOperation(value =
       "Returns a time series for the specified metric and time range, and (optionally) offset at an (optional)\n"
           + "time granularity. Aligns time stamps if necessary.")
-  public Map<String, List<? extends Number>> getTimeSeries(
+  public Response getTimeSeries(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true)
       @QueryParam("urn") @NotNull String urn,
@@ -379,54 +385,15 @@ public class RootCauseMetricResource {
     long metricId = metricEntity.getId();
     List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
 
-    TimeGranularity granularity = StringUtils.isBlank(granularityString) ?
-        findMetricGranularity(metricId) :
-        TimeGranularity.fromString(granularityString);
-    MetricSlice baseSlice = MetricSlice.from(metricId, start, end, filters, granularity)
-        .alignedOn(dateTimeZone);
-    Baseline range = parseOffset(offset, dateTimeZone);
-    List<MetricSlice> slices = new ArrayList<>(range.scatter(baseSlice));
-    logSlices(baseSlice, slices);
+    final Map<String, List<? extends Number>> timeseries = computeTimeseries(metricId,
+        filters,
+        start,
+        end,
+        offset,
+        granularityString,
+        dateTimeZone);
 
-    Map<MetricSlice, DataFrame> data = fetchTimeSeries(slices);
-    DataFrame rawResult = range.gather(baseSlice, data);
-
-    DataFrame imputedResult = this.imputeExpectedTimestamps(rawResult, baseSlice, dateTimeZone);
-
-    return makeTimeSeriesMap(imputedResult);
-  }
-
-  /**
-   * Generates expected timestamps for the underlying time series and merges them with the
-   * actual time series. This allows the front end to distinguish between un-expected and
-   * missing data.
-   *
-   * @param data time series dataframe
-   * @param slice metric slice
-   * @return time series dataframe with nulls for expected but missing data
-   */
-  private DataFrame imputeExpectedTimestamps(DataFrame data, MetricSlice slice,
-      DateTimeZone timezone) {
-    if (data.size() <= 1) {
-      return data;
-    }
-    TimeGranularity granularity = slice.getGranularity();
-
-    long start = data.getLongs(DataFrame.COL_TIME).min().longValue();
-    long end = slice.getEnd();
-    Period stepSize = granularity.toPeriod();
-
-    DateTime current = new DateTime(start, timezone);
-    List<Long> timestamps = new ArrayList<>();
-    while (current.getMillis() < end) {
-      timestamps.add(current.getMillis());
-      current = current.plus(stepSize);
-    }
-
-    LongSeries sExpected = LongSeries.buildFrom(timestamps.stream().mapToLong(l -> l).toArray());
-    DataFrame dfExpected = new DataFrame(DataFrame.COL_TIME, sExpected);
-
-    return data.joinOuter(dfExpected).sortedBy(DataFrame.COL_TIME);
+    return Response.ok(timeseries).build();
   }
 
   private DateTimeZone parseTimeZone(final String timezone) {
@@ -449,16 +416,72 @@ public class RootCauseMetricResource {
 
   private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
     final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
-    LOG.info("{} - {} (base)",
+    LOG.info("RCA metric analysis - Base slice: {} - {}",
         formatter.print(baseSlice.getStart()),
         formatter.print(baseSlice.getEnd()));
-    for (MetricSlice slice : slices) {
-      LOG.info("{} - {}", formatter.print(slice.getStart()), formatter.print(slice.getEnd()));
+    for (int i = 0; i < slices.size(); i++) {
+      LOG.info("RCA metric analysis - Offset Slice {}:  {} - {}",
+          i,
+          formatter.print(slices.get(i).getStart()),
+          formatter.print(slices.get(i).getEnd()));
     }
   }
 
+  private Map<String, List<? extends Number>> computeTimeseries(final long metricId,
+      final List<String> filters, final long start, final long end, final String offset,
+      final String granularityString, final DateTimeZone dateTimeZone
+  ) throws Exception {
+    TimeGranularity granularity = StringUtils.isBlank(granularityString) ?
+        findMetricGranularity(metricId) :
+        TimeGranularity.fromString(granularityString);
+    MetricSlice baseSlice = MetricSlice.from(metricId, start, end, filters, granularity)
+        .alignedOn(dateTimeZone);
+    Baseline range = parseOffset(offset, dateTimeZone);
+    List<MetricSlice> slices = range.scatter(baseSlice);
+    logSlices(baseSlice, slices);
+
+    Map<MetricSlice, DataFrame> data = fetchTimeSeries(slices);
+    DataFrame rawResult = range.gather(baseSlice, data);
+    DataFrame imputedResult = fillIndex(rawResult, baseSlice, dateTimeZone);
+
+    return makeTimeSeriesMap(imputedResult);
+  }
+
+  /**
+   * Generates expected timestamps for the underlying time series and merges them with the
+   * actual time series. This allows the front end to distinguish between un-expected and
+   * missing data.
+   * This allows to fill missing data points with null values.
+   *
+   * @param data time series dataframe
+   * @param slice metric slice
+   * @return time series dataframe with nulls for expected but missing data
+   */
+  private DataFrame fillIndex(DataFrame data, MetricSlice slice,
+      DateTimeZone timezone) {
+    if (data.size() <= 1) {
+      return data;
+    }
+    TimeGranularity granularity = slice.getGranularity();
+
+    long startMillis = data.getLongs(DataFrame.COL_TIME).min().longValue();
+    long endMillis = slice.getEnd();
+    Period stepSize = granularity.toPeriod();
+    DateTime startDt = new DateTime(startMillis, timezone);
+    List<Long> expectedTimestamps = new ArrayList<>();
+    while (startDt.getMillis() < endMillis) {
+      expectedTimestamps.add(startDt.getMillis());
+      startDt = startDt.plus(stepSize);
+    }
+
+    DataFrame expectedTimestampsDf = new DataFrame(DataFrame.COL_TIME,
+        LongSeries.buildFrom(expectedTimestamps.stream().mapToLong(l -> l).toArray()));
+
+    return data.joinOuter(expectedTimestampsDf).sortedBy(DataFrame.COL_TIME);
+  }
+
   private Map<String, Map<String, Double>> computeBreakdown(
-      final long id,
+      final long metricId,
       final List<String> filters,
       final long start,
       final long end,
@@ -466,7 +489,11 @@ public class RootCauseMetricResource {
       final DateTimeZone timezone,
       final int limit) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.from(id, start, end, filters, findMetricGranularity(id))
+    MetricSlice baseSlice = MetricSlice.from(metricId,
+            start,
+            end,
+            filters,
+            findMetricGranularity(metricId))
         .alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
@@ -482,10 +509,15 @@ public class RootCauseMetricResource {
     return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
   }
 
-  private double computeAggregate(final long metricId, final List<String> filters, final long start, final long end,
+  private double computeAggregate(final long metricId, final List<String> filters, final long start,
+      final long end,
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
-    MetricSlice baseSlice = MetricSlice.from(metricId, start, end, filters, findMetricGranularity(metricId))
+    MetricSlice baseSlice = MetricSlice.from(metricId,
+            start,
+            end,
+            filters,
+            findMetricGranularity(metricId))
         .alignedOn(dateTimeZone);
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = range.scatter(baseSlice);
@@ -498,7 +530,8 @@ public class RootCauseMetricResource {
     return result.getDouble(DataFrame.COL_VALUE, 0);
   }
 
-  private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters, final long start,
+  private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters,
+      final long start,
       final long end,
       final List<String> offsets, final DateTimeZone dateTimeZone) throws Exception {
     List<Double> aggregateValues = new ArrayList<>();

@@ -114,7 +114,7 @@ public class TimeSeriesCacheBuilder {
     Map<MetricSlice, DataFrame> output = new HashMap<>();
 
     try {
-      long ts = System.currentTimeMillis();
+      long ts = System.nanoTime();
 
       // if the time series slice is already in cache, return directly
       if (cacheConfig.useInMemoryCache()) {
@@ -144,15 +144,12 @@ public class TimeSeriesCacheBuilder {
         }
       }
       //LOG.info("Fetching {} slices of timeseries, {} cache hit, {} cache miss", slices.size(), output.size(), futures.size());
-      final long deadline = System.currentTimeMillis() + TIMEOUT;
       for (MetricSlice slice : slices) {
         if (!output.containsKey(slice)) {
-          output.put(slice,
-              futures.get(slice).get(DetectionUtils.makeTimeout(deadline), TimeUnit.MILLISECONDS));
+          output.put(slice, futures.get(slice).get(TIMEOUT, TimeUnit.MILLISECONDS));
         }
       }
-      LOG.info("Fetching {} slices used {} milliseconds", slices.size(),
-          System.currentTimeMillis() - ts);
+      LOG.info("Fetching {} slices used {} milliseconds", slices.size(), (System.nanoTime() - ts) / 1000000);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

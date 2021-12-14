@@ -20,10 +20,19 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
+import com.google.common.collect.ArrayListMultimap;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,10 +97,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     AnomalyDetectorV2<HoltWintersDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
-  private static final String COL_CURR = "current";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_DIFF = "diff";
-  private static final String COL_DIFF_VIOLATION = "diff_violation";
   private static final String COL_ERROR = "error";
   private static final long KERNEL_PERIOD = 3600000L;
 
@@ -235,6 +240,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
+    // todo cyril - not used - may be broken
     final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
     final Interval window = new Interval(slice.getStart(), slice.getEnd());
     final DateTime trainStart = getTrainingStartTime(window.getStart());
@@ -246,10 +252,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     final DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
         datasetConfig);
-    DataFrame resultDF = computePredictionInterval(inputDf, window.getStartMillis(),
+    DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis(),
         datasetConfig.getTimezone());
-    resultDF = resultDF.joinLeft(inputDf.renameSeries(
-        DataFrame.COL_VALUE, COL_CURR), DataFrame.COL_TIME);
+    resultDF = resultDF.joinLeft(inputDf.renameSeries(COL_VALUE, COL_CURRENT), COL_TIME);
 
     // Exclude the end because baseline calculation should not contain the end
     if (resultDF.size() > 1) {
@@ -282,10 +287,11 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     final List<DetectionResult> detectionResults = new ArrayList<>();
     for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
+      // todo cyril this is translate to generic col names
       currentDf
           .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
-          .setIndex(COL_TIME);
-      currentDf.addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
+          .setIndex(COL_TIME)
+          .addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
 
       final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
       detectionResults.add(detectionResult);
@@ -335,58 +341,61 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     return runDetectionOnSingleDataTable(dfInput, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame dfInput,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     // Kernel smoothing
     if (smoothing) {
-      final int kernelSize = (int) (
-          KERNEL_PERIOD / monitoringGranularityPeriod.toStandardDuration().getMillis()
-      );
-      if (kernelSize > 1) {
-        final int kernelOffset = kernelSize / 2;
-        final double[] values = dfInput.getDoubles(DataFrame.COL_VALUE).values();
-        for (int i = 0; i <= values.length - kernelSize; i++) {
-          values[i + kernelOffset] = AlgorithmUtils.robustMean(dfInput.getDoubles(
-              DataFrame.COL_VALUE)
-              .slice(i, i + kernelSize), kernelSize).getDouble(kernelSize - 1);
-        }
-        dfInput.addSeries(DataFrame.COL_VALUE, values);
-      }
+      smoothInputDf(inputDf);
     }
-
-    final DataFrame dfCurr = new DataFrame(dfInput).renameSeries(DataFrame.COL_VALUE, COL_CURR);
-    DataFrame dfBase = computePredictionInterval(dfInput, window.getStartMillis(),
+    DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis(),
         spec.getTimezone());
-    final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase, DataFrame.COL_VALUE, COL_ERROR);
-    df.addSeries(COL_DIFF, df.getDoubles(COL_CURR).subtract(df.get(DataFrame.COL_VALUE)));
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    inputDf
+        // rename current which is still called "value" to "current"
+        .renameSeries(COL_VALUE, COL_CURRENT)
+        // left join baseline values
+        .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    // Filter pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
-    } else {
-      df.addSeries(COL_PATTERN, pattern.equals(Pattern.UP)
-          ? df.getDoubles(COL_DIFF).gt(0)
-          : df.getDoubles(COL_DIFF).lt(0));
+    return getDetectionResultTemp(window, inputDf);
+  }
+
+  /**
+   * In place smoothing of inputDF
+   * */
+  // fixme cyril - kept this logic, but not very good because original values are lost
+  // fixme cyril this will be confusing when anomaly is displayed
+  private void smoothInputDf(final DataFrame inputDf) {
+    final int kernelSize = (int) (
+        KERNEL_PERIOD / monitoringGranularityPeriod.toStandardDuration().getMillis()
+    );
+    if (kernelSize > 1) {
+      final int kernelOffset = kernelSize / 2;
+      final double[] values = inputDf.getDoubles(COL_VALUE).values();
+      for (int i = 0; i <= values.length - kernelSize; i++) {
+        values[i + kernelOffset] = AlgorithmUtils.robustMean(inputDf.getDoubles(COL_VALUE)
+            .slice(i, i + kernelSize), kernelSize).getDouble(kernelSize - 1);
+      }
+      inputDf.addSeries(COL_VALUE, values);
     }
-    df.addSeries(COL_DIFF_VIOLATION, df.getDoubles(COL_DIFF).abs().gte(df.getDoubles(COL_ERROR)));
-    df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+  }
 
-    // Anomalies
+  // todo cyril move this up to Operator
+  private DetectionResult getDetectionResultTemp(final ReadableInterval window, final DataFrame inputDf) {
     final MetricSlice slice = MetricSlice.from(-1,
         window.getStartMillis(),
         window.getEndMillis(),
-        null);
+        ArrayListMultimap.create(),
+        timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalyResults = DetectionUtils.buildAnomalies(slice,
-        df,
-        COL_ANOMALY,
+        inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-    dfBase = dfBase
-        .joinRight(df.retainSeries(DataFrame.COL_TIME, COL_CURR), DataFrame.COL_TIME)
-        .sortedBy(DataFrame.COL_TIME);
-    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(dfBase));
+
+    return DetectionResult.from(anomalyResults, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
   /**
@@ -416,7 +425,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
       final Period monitoringGranularityPeriod =
           DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig);
-      final long latestDataTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
+      final long latestDataTimeStamp = df.getLong(COL_TIME, df.size() - 1);
       df = DetectionUtils.aggregateByPeriod(df,
           new DateTime(start, DateTimeZone.forID(datasetConfig.getTimezone())),
           monitoringGranularityPeriod, metricConfig.getDefaultAggFunction());
@@ -435,9 +444,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @return DataFrame containing lookback number of data
    */
   private DataFrame getLookbackDF(final DataFrame originalDF, final Long time) {
-    final LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
+    final LongSeries longSeries = (LongSeries) originalDF.get(COL_TIME);
     final int indexFinish = longSeries.find(time);
-    DataFrame df = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build();
+    DataFrame df = DataFrame.builder(COL_TIME, COL_VALUE).build();
 
     if (indexFinish != -1) {
       final int indexStart = Math.max(0, indexFinish - lookback);
@@ -454,10 +463,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @return DataFrame containing same time of daily data for lookback number of days
    */
   private DataFrame getDailyDF(final DataFrame originalDF, final Long time, final String timezone) {
-    final LongSeries longSeries = (LongSeries) originalDF.get(DataFrame.COL_TIME);
+    final LongSeries longSeries = (LongSeries) originalDF.get(COL_TIME);
     final long start = longSeries.getLong(0);
     DateTime dt = new DateTime(time).withZone(DateTimeZone.forID(timezone));
-    DataFrame df = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build();
+    DataFrame df = DataFrame.builder(COL_TIME, COL_VALUE).build();
 
     for (int i = 0; i < lookback; i++) {
       DateTime subDt = dt.minusDays(1);
@@ -482,10 +491,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
           df = df.append(originalDF.slice(index, index + 1));
         } else {
           // If not found value up to 4 weeks, insert the last value
-          final double lastVal = (originalDF.get(DataFrame.COL_VALUE))
+          final double lastVal = (originalDF.get(COL_VALUE))
               .getDouble(longSeries.find(dt.getMillis()));
           final DateTime nextDt = dt.minusDays(1);
-          final DataFrame appendDf = DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE)
+          final DataFrame appendDf = DataFrame.builder(COL_TIME, COL_VALUE)
               .append(nextDt, lastVal).build();
           df = df.append(appendDf);
         }
@@ -562,12 +571,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param windowStartTime prediction start time
    * @return DataFrame with timestamp, baseline, error bound
    */
-  private DataFrame computePredictionInterval(final DataFrame inputDF, final long windowStartTime,
+  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime,
       final String timezone) {
 
     final DataFrame resultDF = new DataFrame();
     final DataFrame forecastDF = inputDF
-        .filter((LongConditional) values -> values[0] >= windowStartTime, DataFrame.COL_TIME)
+        .filter((LongConditional) values -> values[0] >= windowStartTime, COL_TIME)
         .dropNull();
 
     final int size = forecastDF.size();
@@ -586,9 +595,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
           && !monitoringGranularity.endsWith(TimeGranularity.MONTHS)
           && !monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-        trainingDF = getDailyDF(inputDF, forecastDF.getLong(DataFrame.COL_TIME, k), timezone);
+        trainingDF = getDailyDF(inputDF, forecastDF.getLong(COL_TIME, k), timezone);
       } else {
-        trainingDF = getLookbackDF(inputDF, forecastDF.getLong(DataFrame.COL_TIME, k));
+        trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
       }
 
       // We need at least 2 periods of data
@@ -596,9 +605,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         continue;
       }
 
-      resultTimeArray[k] = forecastDF.getLong(DataFrame.COL_TIME, k);
+      resultTimeArray[k] = forecastDF.getLong(COL_TIME, k);
 
-      final double[] y = trainingDF.getDoubles(DataFrame.COL_VALUE).values();
+      final double[] y = trainingDF.getDoubles(COL_VALUE).values();
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
@@ -623,11 +632,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       lowerBoundArray[k] = predicted - error;
     }
 
-    resultDF.addSeries(DataFrame.COL_TIME, LongSeries.buildFrom(resultTimeArray)).setIndex(
-        DataFrame.COL_TIME);
-    resultDF.addSeries(DataFrame.COL_VALUE, DoubleSeries.buildFrom(baselineArray));
-    resultDF.addSeries(DataFrame.COL_UPPER_BOUND, DoubleSeries.buildFrom(upperBoundArray));
-    resultDF.addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.buildFrom(lowerBoundArray));
+    resultDF.addSeries(COL_TIME, LongSeries.buildFrom(resultTimeArray)).setIndex(COL_TIME);
+    resultDF.addSeries(COL_VALUE, DoubleSeries.buildFrom(baselineArray));
+    resultDF.addSeries(COL_UPPER_BOUND, DoubleSeries.buildFrom(upperBoundArray));
+    resultDF.addSeries(COL_LOWER_BOUND, DoubleSeries.buildFrom(lowerBoundArray));
     resultDF.addSeries(COL_ERROR, DoubleSeries.buildFrom(errorArray));
     return resultDF;
   }

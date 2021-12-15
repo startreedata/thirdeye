@@ -83,7 +83,7 @@
     <mysql.connector.version>5.1.44</mysql.connector.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <parsii.version>1.5</parsii.version>
-    <pinot.version>0.7.1</pinot.version>
+    <pinot.version>0.9.1</pinot.version>
     <quartz.version>2.2.1</quartz.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger-annotation.version>1.5.22</swagger-annotation.version>

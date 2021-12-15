@@ -45,5 +45,5 @@ set -x && \
   ./helm install thirdeye internal/startree-thirdeye --version $HELM_VERSION -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
   sleep 10s && \
-  wait_service http://$(kubectl get service thirdeye-startree-thirdeye-coordinator --output jsonpath='{.status.loadBalancer.ingress[0].hostname}'):8080 && \
+  wait_service http://$(./kubectl get service thirdeye-startree-thirdeye-coordinator -n te-helm-test --output jsonpath='{.status.loadBalancer.ingress[0].hostname}'):8080 && \
   ./helm test thirdeye -n te-helm-test --filter "!name=thirdeye-mysql-test"

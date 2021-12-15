@@ -32,7 +32,7 @@ set -x && \
   sleep 10s && \
   ./kubectl create ns te-helm-test && \
   echo HELM_VERSION && \
-  ./helm install thirdeye internal/startree-thirdeye --version HELM_VERSION -n te-helm-test --devel && \
+  ./helm install thirdeye internal/startree-thirdeye --version $HELM_VERSION -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
   wait_service && \
   ./helm test thirdeye -n te-helm-test --filter "!name=thirdeye-mysql-test"

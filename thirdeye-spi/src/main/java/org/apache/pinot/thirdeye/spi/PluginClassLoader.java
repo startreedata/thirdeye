@@ -29,6 +29,7 @@ import java.net.URLClassLoader;
  * using the system classloader thereby trimming access to all system classes.
  *
  * Only the classes in SHARED_PACKAGES are visible to the plugin.
+ *
  */
 public class PluginClassLoader extends URLClassLoader {
 

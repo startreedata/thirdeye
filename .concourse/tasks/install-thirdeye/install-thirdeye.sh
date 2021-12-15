@@ -8,8 +8,7 @@ wait_service() {
 
 set -x && \
   ENVIRONMENT_NAME=`cat environment/metadata | jq '.name' -r` && \
-  ls helm-version && \
-  HELM_VERSION=`cat helm-version` && \
+  HELM_VERSION=`cat helm-version/version` && \
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
   chmod +x ./kubectl && \
   curl https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz -O && tar -zxvf helm-*.tar.gz --strip-components=1 && \

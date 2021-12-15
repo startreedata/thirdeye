@@ -22,10 +22,16 @@ package org.apache.pinot.thirdeye.spi.dataframe.util;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
+import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * Selector for time series and aggregate values of a specific metric, independent of
@@ -59,6 +65,16 @@ public final class MetricSlice {
   public static MetricSlice from(long metricId, long start, long end,
       Multimap<String, String> filters) {
     return new MetricSlice(metricId, start, end, filters, NATIVE_GRANULARITY);
+  }
+
+  /**
+   * Filters in format dim1=val1, dim2!=val2
+   * */
+  public static MetricSlice from(long metricId, long start, long end,
+      List<String> filters, TimeGranularity granularity) {
+    List<FilterPredicate> predicates = filters.stream().map(EntityUtils::extractFilterPredicate).collect(Collectors.toList());
+    Multimap<String, String> filtersMap = ParsedUrn.toFilters(predicates);
+    return new MetricSlice(metricId, start, end, filtersMap, granularity);
   }
 
   public static MetricSlice from(long metricId, long start, long end,
@@ -100,6 +116,25 @@ public final class MetricSlice {
 
   public MetricSlice withGranularity(TimeGranularity granularity) {
     return new MetricSlice(metricId, start, end, filters, granularity);
+  }
+
+  /**
+   * Returns a new MetricSlice aligned on the timezone.
+   *
+   * @return aligned metric slice
+   */
+  public MetricSlice alignedOn(DateTimeZone timezone) {
+    // align to time buckets and request time zone
+    final long offset = timezone.getOffset(start);
+    final long granularityMillis = granularity.toMillis();
+    // fixme cyril this looks like a round down
+    final long alignedStart = ((start + offset + granularityMillis - 1) / granularityMillis)
+        * granularityMillis
+        - offset; // round up the start time to time granularity boundary of the requested time zone
+    // fixme cyril this method looks incorrect if utc offset changes between start and end
+    final long alignedEnd = alignedStart + (end - start);
+
+    return new MetricSlice(metricId, alignedStart, alignedEnd, filters, granularity);
   }
 
   /**

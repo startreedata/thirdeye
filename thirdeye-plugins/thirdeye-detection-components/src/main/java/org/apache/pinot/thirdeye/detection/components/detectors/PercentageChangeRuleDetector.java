@@ -22,15 +22,23 @@ package org.apache.pinot.thirdeye.detection.components.detectors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.aggregateByPeriod;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.filterIncompleteAggregation;
+import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.valueOf;
@@ -82,10 +90,6 @@ public class PercentageChangeRuleDetector implements
     AnomalyDetectorV2<PercentageChangeRuleDetectorSpec>,
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
 
-  private static final String COL_CHANGE = "change";
-  private static final String COL_PATTERN = "pattern";
-  private static final String COL_CHANGE_VIOLATION = "change_violation";
-
   private double percentageChange;
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
@@ -99,6 +103,7 @@ public class PercentageChangeRuleDetector implements
   @Override
   public void init(final PercentageChangeRuleDetectorSpec spec) {
     this.spec = spec;
+    checkArgument(!Double.isNaN(spec.getPercentageChange()), "Percentage change is not set.");
     percentageChange = spec.getPercentageChange();
     baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
     pattern = valueOf(spec.getPattern().toUpperCase());
@@ -116,7 +121,8 @@ public class PercentageChangeRuleDetector implements
   }
 
   @Override
-  public void init(final PercentageChangeRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
+  public void init(final PercentageChangeRuleDetectorSpec spec,
+      final InputDataFetcher dataFetcher) {
     init(spec);
     this.dataFetcher = dataFetcher;
   }
@@ -136,10 +142,11 @@ public class PercentageChangeRuleDetector implements
       final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
       final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
 
+      // todo cyril this is mixing translate to generic col names + detection logic
       final DataFrame df = new DataFrame();
-      df.addSeries(DataFrame.COL_TIME, currentDf.get(spec.getTimestamp()));
-      df.addSeries(DataFrame.COL_CURRENT, currentDf.get(spec.getMetric()));
-      df.addSeries(DataFrame.COL_VALUE, baselineDf.get(spec.getMetric()));
+      df.addSeries(COL_TIME, currentDf.get(spec.getTimestamp()));
+      df.addSeries(COL_CURRENT, currentDf.get(spec.getMetric()));
+      df.addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
 
       final DetectionResult detectionResult = runDetectionOnSingleDataTable(df, window);
       detectionResults.add(detectionResult);
@@ -182,8 +189,8 @@ public class PercentageChangeRuleDetector implements
 
     final InputData data = dataFetcher
         .fetchData(new InputDataSpec().withTimeseriesSlices(slices)
-        .withMetricIdsForDataset(singletonList(slice.getMetricId()))
-        .withMetricIds(singletonList(me.getId())));
+            .withMetricIdsForDataset(singletonList(slice.getMetricId()))
+            .withMetricIds(singletonList(me.getId())));
 
     DataFrame dfBase = baseline.gather(slice, data.getTimeseries());
     DataFrame dfCurr = data.getTimeseries().get(slice);
@@ -223,51 +230,42 @@ public class PercentageChangeRuleDetector implements
     // Inner Join the current and baseline series
     final DataFrame mergedDf = new DataFrame(dfCurr).addSeries(dfBase);
 
-
     return runDetectionOnSingleDataTable(mergedDf, window);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame df,
+  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    // calculate percentage change
-    df.addSeries(COL_CHANGE, map((Series.DoubleFunction) this::percentageChangeLambda,
-        df.getDoubles(COL_CURRENT),
-        df.get(DataFrame.COL_VALUE))
-    );
+    inputDf
+        // calculate percentage change
+        .addSeries(COL_DIFF, percentageChanges(inputDf))
+        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(percentageChange))
+        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+    addBoundaries(inputDf);
 
-    // defaults
-    df.addSeries(COL_ANOMALY, BooleanSeries.fillValues(df.size(), false));
+    return getDetectionResultTemp(inputDf, window);
+  }
 
-    // relative change
-    if (!Double.isNaN(percentageChange)) {
-      // consistent with pattern
-      if (pattern.equals(UP_OR_DOWN)) {
-        df.addSeries(COL_PATTERN, BooleanSeries.fillValues(df.size(), true));
-      } else {
-        df.addSeries(COL_PATTERN,
-            pattern.equals(UP) ? df.getDoubles(COL_CHANGE).gt(0)
-                : df.getDoubles(COL_CHANGE).lt(0));
-      }
-      df.addSeries(COL_CHANGE_VIOLATION,
-          df.getDoubles(COL_CHANGE).abs().gte(percentageChange));
-      df.mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_CHANGE_VIOLATION);
-    }
-
+  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
+      final ReadableInterval window) {
     final MetricSlice slice = MetricSlice.from(-1,
-            window.getStartMillis(),
-            window.getEndMillis(),
-            ArrayListMultimap.create() ,
-            timeGranularity);
-
-    addPercentageChangeBoundaries(df);
+        window.getStartMillis(),
+        window.getEndMillis(),
+        ArrayListMultimap.create(),
+        timeGranularity);
 
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        df,
-        COL_ANOMALY,
+        inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(df));
+    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+  }
+
+  private Series percentageChanges(final DataFrame inputDf) {
+    return map((DoubleFunction) this::percentageChangeLambda,
+        inputDf.getDoubles(COL_CURRENT),
+        inputDf.getDoubles(COL_VALUE));
   }
 
   private double percentageChangeLambda(final double[] values) {
@@ -284,35 +282,22 @@ public class PercentageChangeRuleDetector implements
   @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
-    addPercentageChangeBoundaries(df);
+    addBoundaries(df);
     return TimeSeries.fromDataFrame(df);
   }
 
-  private void addPercentageChangeBoundaries(final DataFrame dfBase) {
-    if (!Double.isNaN(percentageChange)) {
-      switch (pattern) {
-        case UP:
-          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + percentageChange);
-          dfBase.addSeries(DataFrame.COL_LOWER_BOUND, DoubleSeries.zeros(dfBase.size()));
-          break;
-        case DOWN:
-          dfBase.addSeries(
-              DataFrame.COL_UPPER_BOUND, DoubleSeries.fillValues(dfBase.size(), POSITIVE_INFINITY));
-          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - percentageChange);
-          break;
-        case UP_OR_DOWN:
-          fillPercentageChangeBound(dfBase, DataFrame.COL_UPPER_BOUND, 1 + percentageChange);
-          fillPercentageChangeBound(dfBase, DataFrame.COL_LOWER_BOUND, 1 - percentageChange);
-          break;
-        default:
-          throw new IllegalArgumentException();
-      }
+  private void addBoundaries(final DataFrame inputDf) {
+    //default bounds
+    DoubleSeries upperBound = DoubleSeries.fillValues(inputDf.size(), POSITIVE_INFINITY);
+    //fixme cyril this not consistent with threshold rule detector default values
+    DoubleSeries lowerBound = DoubleSeries.zeros(inputDf.size());
+    if (pattern == UP || pattern == UP_OR_DOWN) {
+      upperBound = inputDf.getDoubles(COL_VALUE).multiply(1 + percentageChange);
     }
-  }
-
-  private void fillPercentageChangeBound(final DataFrame dfBase, final String colBound, final double multiplier) {
-    dfBase.addSeries(colBound,
-        map((DoubleFunction) values -> values[0] * multiplier, dfBase.getDoubles(
-            DataFrame.COL_VALUE)));
+    if (pattern == DOWN || pattern == UP_OR_DOWN) {
+      lowerBound = inputDf.getDoubles(COL_VALUE).multiply(1 - percentageChange);
+    }
+    inputDf.addSeries(COL_UPPER_BOUND, upperBound);
+    inputDf.addSeries(COL_LOWER_BOUND, lowerBound);
   }
 }

@@ -36,6 +36,8 @@ public interface DataTable extends DetectionPipelineResult {
 
   Object getObject(int rowIdx, int colIdx);
 
+  boolean getBoolean(int rowIdx, int colIdx);
+
   String getString(int rowIdx, int colIdx);
 
   long getLong(int rowIdx, int colIdx);

@@ -138,7 +138,6 @@ public class CallGraphPipeline extends Pipeline {
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
-
   @Override
   public PipelineResult run(PipelineContext pipelineContext) {
     Set<DimensionsEntity> dimensions = filterDimensions(
@@ -202,13 +201,10 @@ public class CallGraphPipeline extends Pipeline {
           .getQueryResultAsync(rcBaseLatency.getRequest());
 
       // fetch responses
-      final long timeoutTimestamp = System.currentTimeMillis() + TIMEOUT;
-      DataFrame dfCurrCount = getResponse(resCurrCount, rcCurrCount, explore, timeoutTimestamp);
-      DataFrame dfCurrLatency = getResponse(resCurrLatency, rcCurrLatency, explore,
-          timeoutTimestamp);
-      DataFrame dfBaseCount = getResponse(resBaseCount, rcBaseCount, explore, timeoutTimestamp);
-      DataFrame dfBaseLatency = getResponse(resBaseLatency, rcBaseLatency, explore,
-          timeoutTimestamp);
+      DataFrame dfCurrCount = getResponse(resCurrCount, rcCurrCount, explore);
+      DataFrame dfCurrLatency = getResponse(resCurrLatency, rcCurrLatency, explore);
+      DataFrame dfBaseCount = getResponse(resBaseCount, rcBaseCount, explore);
+      DataFrame dfBaseLatency = getResponse(resBaseLatency, rcBaseLatency, explore);
 
       // prepare data
       DataFrame dfCurr = alignResults(dfCurrCount, dfCurrLatency).sortedBy(COL_COUNT);
@@ -377,30 +373,18 @@ public class CallGraphPipeline extends Pipeline {
   }
 
   /**
-   * Returns the time remaining until a given timestamp (in the future).
-   *
-   * @param timestamp timeout timestamp
-   * @return remaining time (in millis)
-   */
-  private static long makeTimeout(long timestamp) {
-    long delta = timestamp - System.currentTimeMillis();
-    return delta >= 0 ? delta : 0;
-  }
-
-  /**
    * Retrieves and processes a raw aggregation response. drops time column and sets index.
    *
    * @param response thirdeye response
    * @param container request container
    * @param dimensions dimensions to serve as index
-   * @param timeoutTimestamp timestamp for ultimate timeout
    * @return response as formatted dataframe
    */
   private DataFrame getResponse(Future<ThirdEyeResponse> response,
       RequestContainer container,
-      List<String> dimensions, long timeoutTimestamp) throws Exception {
+      List<String> dimensions) throws Exception {
     return DataFrameUtils
-        .evaluateResponse(response.get(makeTimeout(timeoutTimestamp), TimeUnit.MILLISECONDS),
+        .evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS),
             container, thirdEyeCacheRegistry)
         .dropSeries(COL_TIME)
         .setIndex(dimensions);

@@ -22,6 +22,11 @@ package org.apache.pinot.thirdeye.spi.datasource.resultset;
 public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 
   @Override
+  public boolean getBoolean(final int rowIndex) {
+    return getBoolean(rowIndex, 0);
+  }
+
+  @Override
   public long getLong(final int rowIndex) {
     return getLong(rowIndex, 0);
   }
@@ -39,6 +44,11 @@ public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
   @Override
   public int getInteger(final int rowIndex, final int columnIndex) {
     return Integer.parseInt(getString(rowIndex, columnIndex));
+  }
+
+  @Override
+  public boolean getBoolean(final int rowIndex, final int columnIndex) {
+    return Boolean.parseBoolean(getString(rowIndex, columnIndex));
   }
 
   @Override

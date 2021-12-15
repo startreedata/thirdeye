@@ -28,12 +28,9 @@ jest.mock("../../components/page-contents/page-contents.component", () => ({
     PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
-jest.mock(
-    "../../components/loading-indicator/loading-indicator.component",
-    () => ({
-        LoadingIndicator: jest.fn().mockReturnValue("testLoadingIndicator"),
-    })
-);
+jest.mock("@startree-ui/platform-ui", () => ({
+    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
+}));
 
 describe("Logout Page", () => {
     it("should set appropriate page breadcrumbs", async () => {
@@ -72,7 +69,7 @@ describe("Logout Page", () => {
             render(<LogoutPage />);
         });
 
-        expect(screen.getByText("testLoadingIndicator")).toBeInTheDocument();
+        expect(screen.getByText("testLoadingIndicatorV1")).toBeInTheDocument();
     });
 });
 

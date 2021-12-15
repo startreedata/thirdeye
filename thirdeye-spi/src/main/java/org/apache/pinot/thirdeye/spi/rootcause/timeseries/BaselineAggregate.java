@@ -284,9 +284,8 @@ public class BaselineAggregate implements Baseline {
       }
 
       String colName = String.valueOf(s.getStart());
-      DataFrame df = new DataFrame(entry.getValue());
 
-      DataFrame dfTransform = new DataFrame(df);
+      DataFrame dfTransform = new DataFrame(entry.getValue());
       dfTransform
           .addSeries(COL_TIME, this.toVirtualSeries(s.getStart(), dfTransform.getLongs(COL_TIME)));
       dfTransform = eliminateDuplicates(dfTransform);

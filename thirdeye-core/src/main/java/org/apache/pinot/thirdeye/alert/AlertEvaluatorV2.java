@@ -96,8 +96,8 @@ public class AlertEvaluatorV2 {
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
           request.getAlert(),
-          request.getStart(),
-          request.getEnd());
+          request.getStart().getTime(),
+          request.getEnd().getTime());
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()

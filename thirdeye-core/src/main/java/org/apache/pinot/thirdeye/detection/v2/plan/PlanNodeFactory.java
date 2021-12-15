@@ -67,6 +67,16 @@ public class PlanNodeFactory {
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
   }
 
+  public static PlanNode build(
+      final Class<? extends PlanNode> planNodeClass,
+      final PlanNodeContext context
+  ) throws ReflectiveOperationException {
+    final Constructor<?> constructor = planNodeClass.getConstructor();
+    final PlanNode planNode = (PlanNode) constructor.newInstance();
+    planNode.init(context);
+    return planNode;
+  }
+
   private Map<String, Class<? extends PlanNode>> buildPlanNodeTypeToClassMap() {
     final HashMap<String, Class<? extends PlanNode>> stringClassHashMap = new HashMap<>();
     for (Class<? extends PlanNode> c : BUILT_IN_PLAN_NODE_CLASSES) {
@@ -83,23 +93,21 @@ public class PlanNodeFactory {
       final long startTime,
       final long endTime,
       final Map<String, PlanNode> pipelinePlanNodes) {
-    final String typeKey = requireNonNull(planNodeBean.getType(), "node type is null");
-    final Class<? extends PlanNode> planNodeClass =
-        requireNonNull(planNodeTypeToClassMap.get(typeKey), "Unknown node type: " + typeKey);
+    final PlanNodeContext context = new PlanNodeContext()
+        .setName(planNodeBean.getName())
+        .setPlanNodeBean(planNodeBean)
+        .setStartTime(startTime)
+        .setEndTime(endTime)
+        .setPipelinePlanNodes(pipelinePlanNodes)
+        .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache));
+
+    final String type = requireNonNull(planNodeBean.getType(), "node type is null");
+    final Class<? extends PlanNode> planNodeClass = requireNonNull(planNodeTypeToClassMap.get(type),
+        "Unknown node type: " + type);
     try {
-      final Constructor<?> constructor = planNodeClass.getConstructor();
-      final PlanNode planNode = (PlanNode) constructor.newInstance();
-      planNode.init(new PlanNodeContext()
-          .setName(planNodeBean.getName())
-          .setPlanNodeBean(planNodeBean)
-          .setStartTime(startTime)
-          .setEndTime(endTime)
-          .setPipelinePlanNodes(pipelinePlanNodes)
-          .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)));
-      return planNode;
+      return build(planNodeClass, context);
     } catch (final Exception e) {
-      throw new IllegalArgumentException("Failed to initialize the plan node: type - " + typeKey,
-          e);
+      throw new IllegalArgumentException("Failed to initialize the plan node: type - " + type, e);
     }
   }
 }

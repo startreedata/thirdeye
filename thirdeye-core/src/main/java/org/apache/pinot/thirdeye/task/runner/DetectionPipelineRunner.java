@@ -56,8 +56,8 @@ public class DetectionPipelineRunner {
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
         alert,
-        new Date(start),
-        new Date(end));
+        start,
+        end);
 
     final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),

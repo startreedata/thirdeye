@@ -8,9 +8,12 @@ import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
-import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetDataTable.class);
 
   private final ThirdEyeResultSet thirdEyeResultSet;
   private List<String> columns = new ArrayList<>();
@@ -60,6 +63,14 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   }
 
   @Override
+  public boolean getBoolean(int rowIdx, int colIdx) {
+    if (colIdx < groupKeyLength) {
+      return Boolean.parseBoolean(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
+    }
+    return Boolean.parseBoolean(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
+  }
+
+  @Override
   public long getLong(int rowIdx, int colIdx) {
     if (colIdx < groupKeyLength) {
       return Long.parseLong(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
@@ -89,6 +100,8 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     }
     final ColumnDataType type = columnTypes.get(colIdx).getType();
     switch (type) {
+      case BOOLEAN:
+        return thirdEyeResultSet.getBoolean(rowIdx, colIdx - groupKeyLength);
       case INT:
         return thirdEyeResultSet.getInteger(rowIdx, colIdx - groupKeyLength);
       case LONG:
@@ -104,49 +117,28 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   }
 
   private DataFrame generateDataFrame() {
-    // Build the DataFrame
     List<String> columnNameWithDataType = new ArrayList<>();
-    //   Always cast dimension values to STRING type
-
     for (int i = 0; i < getColumnCount(); i++) {
       columnNameWithDataType.add(getColumns().get(i));
     }
+
     DataFrame.Builder dfBuilder = DataFrame.builder(columnNameWithDataType);
-
-    int totalColumnCount = getColumnCount();
-    int groupByColumnCount = groupKeyLength;
-    int metricColumnCount = totalColumnCount - groupByColumnCount;
-
-    outer:
     for (int rowIdx = 0; rowIdx < getRowCount(); rowIdx++) {
-      Object[] columnsOfTheRow = new Object[totalColumnCount];
-      // GroupBy column value(i.e., dimension values)
-      for (int groupByColumnIdx = 1; groupByColumnIdx <= groupByColumnCount; groupByColumnIdx++) {
-        String valueString = null;
+      Object[] row = new Object[getColumnCount()];
+      for (int columnIdx = 0; columnIdx < getColumnCount(); columnIdx++) {
+        Object value = null;
         try {
-          valueString = thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, groupByColumnIdx - 1);
+          value = getObject(rowIdx, columnIdx);
         } catch (Exception e) {
-          // Do nothing and subsequently insert a null value to the current series.
+          // will add a null
+          LOG.error("Could not get value of position {},{}. Replacing by null. Error: {}",
+              rowIdx, columnIdx, e);
         }
-        columnsOfTheRow[groupByColumnIdx - 1] = valueString;
+        row[columnIdx] = value;
       }
-      // Metric column's value
-      for (int metricColumnIdx = 1; metricColumnIdx <= metricColumnCount; metricColumnIdx++) {
-        Double metricVal = null;
-        try {
-          metricVal = thirdEyeResultSet.getDouble(rowIdx, metricColumnIdx - 1);
-          if (metricVal == null) {
-            break outer;
-          }
-        } catch (Exception e) {
-          // Do nothing and subsequently insert a null value to the current series.
-        }
-        columnsOfTheRow[metricColumnIdx + groupByColumnCount - 1] = metricVal;
-      }
-      dfBuilder.append(columnsOfTheRow);
+      dfBuilder.append(row);
     }
-    DataFrame dataFrame = dfBuilder.build().dropNull();
-    return dataFrame;
+    return dfBuilder.build();
   }
 
   @Override

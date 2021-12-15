@@ -3,7 +3,17 @@
 wait_service() {
   attempt_counter=0
   max_attempts=600
-  sleep 10
+
+  until $(curl --output /dev/null --silent --head --fail $1); do
+      if [ ${attempt_counter} -eq ${max_attempts} ];then
+        echo "Max attempts reached"
+        return 1
+      fi
+
+      printf '.'
+      attempt_counter=$(($attempt_counter+1))
+      sleep 5
+  done
 }
 
 set -x && \
@@ -34,5 +44,5 @@ set -x && \
   echo HELM_VERSION && \
   ./helm install thirdeye internal/startree-thirdeye --version $HELM_VERSION -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
-  wait_service && \
+  wait_service http://thirdeye-startree-thirdeye-coordinator:8080/internal/ping && \
   ./helm test thirdeye -n te-helm-test --filter "!name=thirdeye-mysql-test"

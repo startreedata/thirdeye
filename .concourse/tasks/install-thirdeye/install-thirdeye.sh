@@ -22,13 +22,13 @@ set -x && \
     --name $ENVIRONMENT_NAME \
     --resource-group $ENVIRONMENT_NAME && \
   set -x && \
-  ./kubectl delete ns te-helm-test && \
-  echo "pausing for 10s after cleanup" && \
-  sleep 10s && \
   ./helm repo add internal ${STARTREE_HELM_REPOSITORY_URL} \
     --username ${STARTREE_HELM_USERNAME} \
     --password ${STARTREE_HELM_PASSWORD} && \
   ./helm repo update && \
+  ./kubectl delete ns te-helm-test && \
+  echo "pausing for 10s after cleanup" && \
+  sleep 10s && \
   ./kubectl create ns te-helm-test && \
   ./helm install thirdeye internal/startree-thirdeye --version 0.0.0-build.6 -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \

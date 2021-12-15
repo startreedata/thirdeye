@@ -15,26 +15,7 @@ public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent
 
   /**
    * Run detection for a given interval with provided baseline and current DataTable.
-   * Returns a DataFrame with columns:
-   * {@value DataFrame#COL_TIME}: timestamp in epoch milliseconds,
-   * {@value DataFrame#COL_ANOMALY}: boolean series: whether the observation is an anomaly,
-   * {@value DataFrame#COL_CURRENT}: current value,
-   * {@value DataFrame#COL_VALUE}: baseline value,
-   * {@value DataFrame#COL_UPPER_BOUND}: baseline upper bound,
-   * {@value DataFrame#COL_LOWER_BOUND}: baseline lower bound.
    */
-  DataFrame runDetection(Interval interval, Map<String, DataTable> timeSeriesMap)
+  AnomalyDetectorV2Result runDetection(Interval interval, Map<String, DataTable> timeSeriesMap)
       throws DetectorException;
-
-  /**
-   * Returns the TimeZone string of the detector.
-   * Used to infer the end time of the anomaly if the last point is an anomaly.
-   */
-  String getTimeZone();
-
-  /**
-   * Returns the monitoring granularity of the detector.
-   * Used to infer the end time of the anomaly if the last point is an anomaly.
-   */
-  Period getMonitoringGranularityPeriod();
 }

@@ -26,6 +26,14 @@ resources:
       pool: startree-platform/azure
       private_key: ((ssh-private-key))
 
+  - name: thirdeye-helm-version
+    type: semver
+    source:
+      driver: git
+      uri: ((git-uri))
+      branch: versions-((git-branch))
+      file: startree-thirdeye-helm-chart-version
+
 jobs:
 - name: run-integration-tests
   serial_groups: ["integration-test"]
@@ -33,12 +41,14 @@ jobs:
     - put: environment-azure
       params:
         acquire: true
+    - get: thirdeye-helm-version
     - get: ci-src
       trigger: true
     - task: install-thirdeye
       file: ci-src/.concourse/tasks/install-thirdeye/install-thirdeye.yml
       input_mapping:
         environment: environment-azure
+        helm-version: thirdeye-helm-version
       params:
         VERSION_FILE: version/version
   ensure:

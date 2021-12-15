@@ -9,6 +9,7 @@ image_resource:
 
 inputs:
 - name: ci-src
+- name: helm-version
 - name: environment
 
 outputs:

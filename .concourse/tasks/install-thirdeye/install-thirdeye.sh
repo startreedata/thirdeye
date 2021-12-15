@@ -8,6 +8,7 @@ wait_service() {
 
 set -x && \
   ENVIRONMENT_NAME=`cat environment/metadata | jq '.name' -r` && \
+  HELM_VERSION=`cat helm-version` && \
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
   chmod +x ./kubectl && \
   curl https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz -O && tar -zxvf helm-*.tar.gz --strip-components=1 && \
@@ -30,7 +31,8 @@ set -x && \
   echo "pausing for 10s after cleanup" && \
   sleep 10s && \
   ./kubectl create ns te-helm-test && \
-  ./helm install thirdeye internal/startree-thirdeye --version 0.0.0-build.6 -n te-helm-test --devel && \
+  echo HELM_VERSION && \
+  ./helm install thirdeye internal/startree-thirdeye --version HELM_VERSION -n te-helm-test --devel && \
   echo "Waiting for Services availability" && \
   wait_service && \
   ./helm test thirdeye -n te-helm-test --filter "!name=thirdeye-mysql-test"

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;

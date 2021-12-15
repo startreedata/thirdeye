@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -57,6 +58,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -123,17 +125,7 @@ public class PercentageChangeRuleDetector implements
   }
 
   @Override
-  public String getTimeZone() {
-    return spec.getTimezone();
-  }
-
-  @Override
-  public Period getMonitoringGranularityPeriod() {
-    return monitoringGranularityPeriod;
-  }
-
-  @Override
-  public DataFrame runDetection(final Interval window,
+  public AnomalyDetectorV2Result runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap) throws DetectorException {
     setMonitoringGranularityPeriod();
     final DataTable baseline = requireNonNull(timeSeriesMap.get(KEY_BASELINE), "baseline is null");
@@ -224,12 +216,12 @@ public class PercentageChangeRuleDetector implements
 
     // Inner Join the current and baseline series
     final DataFrame mergedDf = new DataFrame(dfCurr).addSeries(dfBase);
-    final DataFrame detectionDf = runDetectionOnSingleDataTable(mergedDf, window);
+    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(mergedDf, window);
 
-    return buildDetectionResultFromDetectorDf(detectionDf, spec.getTimezone(), monitoringGranularityPeriod);
+    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(), spec.getTimezone(), monitoringGranularityPeriod);
   }
 
-  private DataFrame runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     inputDf
         // calculate percentage change
@@ -239,7 +231,8 @@ public class PercentageChangeRuleDetector implements
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
     addBoundaries(inputDf);
 
-    return inputDf;
+    return
+        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
   }
 
   private Series percentageChanges(final DataFrame inputDf) {

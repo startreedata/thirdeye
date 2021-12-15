@@ -32,6 +32,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
 
 import java.util.Map;
+import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -39,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -88,17 +90,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   }
 
   @Override
-  public String getTimeZone() {
-    return spec.getTimezone();
-  }
-
-  @Override
-  public Period getMonitoringGranularityPeriod() {
-    return monitoringGranularityPeriod;
-  }
-
-  @Override
-  public DataFrame runDetection(final Interval interval,
+  public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
@@ -143,9 +135,11 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     spec.setTimezone(datasetConfig.getTimezone());
 
     final DataFrame df = data.getTimeseries().get(slice);
-    final DataFrame detectionDf = runDetectionOnSingleDataTable(df, window);
+    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(df, window);
 
-    return buildDetectionResultFromDetectorDf(detectionDf, spec.getTimezone(), monitoringGranularityPeriod);
+    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
+        spec.getTimezone(),
+        monitoringGranularityPeriod);
   }
 
   private BooleanSeries valueTooHigh(DoubleSeries values) {
@@ -162,7 +156,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     return values.lt(spec.getMin());
   }
 
-  private DataFrame runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     DataFrame baselineDf = computeBaseline(inputDf);
     inputDf
@@ -173,7 +167,9 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
         .addSeries(COL_TOO_LOW, valueTooLow(inputDf.getDoubles(COL_CURRENT)))
         .mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
-    return inputDf;
+    return new SimpleAnomalyDetectorV2Result(inputDf,
+        spec.getTimezone(),
+        monitoringGranularityPeriod);
   }
 
   @Override

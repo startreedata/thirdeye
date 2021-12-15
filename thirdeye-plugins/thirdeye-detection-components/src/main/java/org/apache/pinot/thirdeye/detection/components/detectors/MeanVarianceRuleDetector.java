@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -49,6 +50,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -129,16 +131,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   @Override
-  public String getTimeZone() {
-    return spec.getTimezone();
-  }
-
-  @Override
-  public Period getMonitoringGranularityPeriod() {
-    return monitoringGranularityPeriod;
-  }
-
-  @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     // todo cyril - not used - may be broken - logic should be the same for all detectors
     final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
@@ -198,13 +190,15 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     // getting data (window + earliest lookback) all at once.
     LOG.info("Getting data for" + slice);
     final DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
-    final DataFrame detectionDf = runDetectionOnSingleDataTable(dfInput, window);
+    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(dfInput, window);
 
-    return buildDetectionResultFromDetectorDf(detectionDf, spec.getTimezone(), monitoringGranularityPeriod);
+    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
+            spec.getTimezone(),
+            monitoringGranularityPeriod);
   }
 
   @Override
-  public DataFrame runDetection(final Interval window,
+  public AnomalyDetectorV2Result runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
@@ -229,7 +223,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         null);
   }
 
-  private DataFrame runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
@@ -243,7 +237,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return inputDf;
+    return new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
   }
 
   //todo cyril move this as utils/shared method

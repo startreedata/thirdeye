@@ -49,6 +49,7 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -60,6 +61,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -234,16 +236,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   @Override
-  public String getTimeZone() {
-    return spec.getTimezone();
-  }
-
-  @Override
-  public Period getMonitoringGranularityPeriod() {
-    return monitoringGranularityPeriod;
-  }
-
-  @Override
   public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
     // todo cyril - not used - may be broken
     final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
@@ -281,7 +273,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   @Override
-  public DataFrame runDetection(final Interval interval,
+  public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
@@ -334,12 +326,14 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         window.getEndMillis(),
         datasetConfig);
 
-    final DataFrame detectionDf = runDetectionOnSingleDataTable(dfInput, window);
+    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(dfInput, window);
 
-    return buildDetectionResultFromDetectorDf(detectionDf, spec.getTimezone(), monitoringGranularityPeriod);
+    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
+        spec.getTimezone(),
+        monitoringGranularityPeriod);
   }
 
-  private DataFrame runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     // Kernel smoothing
     if (smoothing) {
@@ -358,7 +352,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return inputDf;
+    return
+        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
   }
 
   /**

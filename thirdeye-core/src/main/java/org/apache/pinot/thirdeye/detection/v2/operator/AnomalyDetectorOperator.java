@@ -14,6 +14,7 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -51,12 +52,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     for (final Interval interval : getMonitoringWindows()) {
       final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-      final DataFrame detectorDf = detector
+      final AnomalyDetectorV2Result detectorResult = detector
           .runDetection(interval, timeSeriesMap);
 
-      DetectionPipelineResult detectionResult = buildDetectionResultFromDetectorDf(detectorDf,
-          detector.getTimeZone(),
-          detector.getMonitoringGranularityPeriod());
+      DetectionPipelineResult detectionResult = buildDetectionResultFromDetectorDf(
+          detectorResult.getDataFrame(),
+          detectorResult.getTimeZone(),
+          detectorResult.getMonitoringGranularityPeriod());
 
       addMetadata(detectionResult);
 

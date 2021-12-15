@@ -52,8 +52,7 @@
   </modules>
 
   <properties>
-    <jdk.version>1.8</jdk.version>
-    <javac.version>9+181-r4173-1</javac.version>
+    <jdk.version>11</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--  Dependency Versions -->
@@ -144,6 +143,14 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <generateBackupPoms>false</generateBackupPoms>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -153,8 +160,7 @@
           <version>3.8.0</version>
           <configuration>
             <showWarnings>true</showWarnings>
-            <source>${jdk.version}</source>
-            <target>${jdk.version}</target>
+            <release>${jdk.version}</release>
             <annotationProcessorPaths>
               <path>
                 <groupId>org.mapstruct</groupId>
@@ -196,6 +202,10 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
           <configuration>
+            <!-- See https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/ -->
+            <argLine>
+              --illegal-access=permit
+            </argLine>
             <threadCount>1</threadCount>
             <systemPropertyVariables>
               <projectVersion>${project.version}</projectVersion>
@@ -775,28 +785,6 @@
   </dependencyManagement>
 
   <profiles>
-    <profile>
-      <id>jdk8</id>
-      <activation>
-        <jdk>1.8</jdk>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <fork>true</fork>
-              <compilerArgs combine.children="append">
-                <arg>
-                  -J-Xbootclasspath/p:${settings.localRepository}/com/google/errorprone/javac/${javac.version}/javac-${javac.version}.jar
-                </arg>
-              </compilerArgs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <id>bigquery</id>
       <properties>

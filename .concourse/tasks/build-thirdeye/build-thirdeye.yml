@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: daniellavoie/ci-java-8
-    tag: latest
+    repository: maven
+    tag: 3.6.3-adoptopenjdk-11
 
 caches:
   - path: src/m2

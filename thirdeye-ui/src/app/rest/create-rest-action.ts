@@ -16,7 +16,7 @@ export interface UseHTTPActionHook<DataResponseType> {
 }
 
 function useHTTPAction<DataResponseType>(
-    fetchFunction: FetchFunction<DataResponseType>
+    restFunction: FetchFunction<DataResponseType>
 ): UseHTTPActionHook<DataResponseType> {
     const [data, setData] = useState<DataResponseType | null>(null);
     const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
@@ -25,7 +25,7 @@ function useHTTPAction<DataResponseType>(
     const makeRequest = useCallback(async (...options) => {
         setStatus(ActionStatus.Working);
         try {
-            const fetchedData = await fetchFunction(...options);
+            const fetchedData = await restFunction(...options);
             setData(fetchedData);
             setStatus(ActionStatus.Done);
             setErrorMessage("");

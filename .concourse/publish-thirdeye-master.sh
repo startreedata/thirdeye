@@ -9,5 +9,5 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" && \
   fly \
 	-t $CONCOURSE_TEAM \
 	set-pipeline \
-	-p publish-thirdeye-master \
+	-p publish-thirdeye-j11 \
 	-c $DIR/publish-thirdeye.yml

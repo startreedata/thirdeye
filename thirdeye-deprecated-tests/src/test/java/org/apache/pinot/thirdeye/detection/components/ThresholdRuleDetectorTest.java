@@ -80,7 +80,7 @@ public class ThresholdRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS"); //todo cyril factorize this
+    spec.setMonitoringGranularity("1_DAYS");
     double minValue = 50.;
     double maxValue = 600.;
     spec.setMin(minValue);
@@ -141,7 +141,7 @@ public class ThresholdRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS"); //todo cyril factorize this
+    spec.setMonitoringGranularity("1_DAYS");
     // min max not set - not relevant for test
     ThresholdRuleDetector detector = new ThresholdRuleDetector();
     detector.init(spec);

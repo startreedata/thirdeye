@@ -30,7 +30,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.time.DayOfWeek;
@@ -328,9 +328,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(dfInput, window);
 
-    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
+    return buildDetectionResult(detectorResult);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

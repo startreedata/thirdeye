@@ -29,7 +29,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
@@ -137,9 +137,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     final DataFrame df = data.getTimeseries().get(slice);
     final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(df, window);
 
-    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
+    return buildDetectionResult(detectorResult);
   }
 
   private BooleanSeries valueTooHigh(DoubleSeries values) {

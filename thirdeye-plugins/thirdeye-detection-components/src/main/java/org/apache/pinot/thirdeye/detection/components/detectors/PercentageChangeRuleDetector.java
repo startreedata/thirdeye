@@ -36,7 +36,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFI
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.aggregateByPeriod;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.filterIncompleteAggregation;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
@@ -218,7 +218,7 @@ public class PercentageChangeRuleDetector implements
     final DataFrame mergedDf = new DataFrame(dfCurr).addSeries(dfBase);
     final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(mergedDf, window);
 
-    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(), spec.getTimezone(), monitoringGranularityPeriod);
+    return buildDetectionResult(detectorResult);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

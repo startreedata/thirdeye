@@ -33,7 +33,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
@@ -170,9 +170,7 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
     final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase);
     final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(df, window);
 
-    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
+    return buildDetectionResult(detectorResult);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

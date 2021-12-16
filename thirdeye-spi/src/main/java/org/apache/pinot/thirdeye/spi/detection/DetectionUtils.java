@@ -101,14 +101,15 @@ public class DetectionUtils {
   }
 
   // todo cyril can be moved to core once v1 is removed
-  public static DetectionResult buildDetectionResultFromDetectorDf(final DataFrame inputDf,
-      final String timeZone, final Period monitoringGranularityPeriod) {
+  public static DetectionResult buildDetectionResult(
+      final AnomalyDetectorV2Result detectorV2Result) {
     final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomaliesFromDetectorDf(
-        inputDf,
-        timeZone,
-        monitoringGranularityPeriod);
+        detectorV2Result.getDataFrame(),
+        detectorV2Result.getTimeZone(),
+        detectorV2Result.getMonitoringGranularityPeriod());
 
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+    return DetectionResult.from(anomalies,
+        TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
   }
 
   // todo cyril can be moved to core once v1 is removed

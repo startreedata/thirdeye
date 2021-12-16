@@ -34,7 +34,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -192,9 +192,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
     final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(dfInput, window);
 
-    return buildDetectionResultFromDetectorDf(detectorResult.getDataFrame(),
-            spec.getTimezone(),
-            monitoringGranularityPeriod);
+    return buildDetectionResult(detectorResult);
   }
 
   @Override

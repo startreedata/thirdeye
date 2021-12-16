@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResultFromDetectorDf;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Collection;
@@ -54,10 +54,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       final AnomalyDetectorV2Result detectorResult = detector
           .runDetection(interval, timeSeriesMap);
 
-      DetectionPipelineResult detectionResult = buildDetectionResultFromDetectorDf(
-          detectorResult.getDataFrame(),
-          detectorResult.getTimeZone(),
-          detectorResult.getMonitoringGranularityPeriod());
+      DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
 
       addMetadata(detectionResult);
 

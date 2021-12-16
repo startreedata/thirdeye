@@ -16,6 +16,9 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.DayOfWeek;
@@ -26,31 +29,283 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
+import org.apache.pinot.thirdeye.detection.components.detectors.AbsoluteChangeRuleDetector;
+import org.apache.pinot.thirdeye.detection.components.detectors.AbsoluteChangeRuleDetectorSpec;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetector;
 import org.apache.pinot.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorSpec;
+import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
+import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
+import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
+import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 public class PercentageChangeRuleDetectorTest {
 
+  private static final long JANUARY_1_2021 = 1609459200000L;
+  private static final long JANUARY_2_2021 = 1609545600000L;
+  private static final long JANUARY_3_2021 = 1609632000000L;
+  private static final long JANUARY_4_2021 = 1609718400000L;
+  private static final long JANUARY_5_2021 = 1609804800000L;
+
+  @Deprecated
   private DataProvider provider;
+  @Deprecated
   private DataFrame data;
 
+  @Test
+  public void testNoAnomalies() throws DetectorException {
+    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
+    DataFrame baselineDf = new DataFrame()
+        .addSeries(DataFrame.COL_VALUE, 99., 199., 299., 399., 499.);
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+
+    PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
+    spec.setMonitoringGranularity("1_DAYS");
+    double percentageChange = 0.2;
+    spec.setPercentageChange(percentageChange);
+    PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    //assert time fields
+    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
+    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
+        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
+
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    LongSeries outputTimeSeries = outputDf.getLongs(DataFrame.COL_TIME);
+    LongSeries expectedTimeSeries = currentDf.getLongs(DataFrame.COL_TIME);
+    assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
+
+    DoubleSeries outputValueSeries = outputDf.getDoubles(DataFrame.COL_VALUE);
+    DoubleSeries expectedValueSeries = baselineDf.getDoubles(DataFrame.COL_VALUE);
+    assertThat(outputValueSeries).isEqualTo(expectedValueSeries);
+
+    DoubleSeries outputCurrentSeries = outputDf.getDoubles(DataFrame.COL_CURRENT);
+    DoubleSeries expectedCurrentSeries = currentDf.getDoubles(DataFrame.COL_VALUE);
+    assertThat(outputCurrentSeries).isEqualTo(expectedCurrentSeries);
+
+    DoubleSeries outputUpperBoundSeries = outputDf.getDoubles(DataFrame.COL_UPPER_BOUND);
+    DoubleSeries expectedUpperBoundSeries = baselineDf.getDoubles(COL_VALUE)
+        .multiply(1 + percentageChange);
+    assertThat(outputUpperBoundSeries).isEqualTo(expectedUpperBoundSeries);
+
+    DoubleSeries outputLowerBoundSeries = outputDf.getDoubles(DataFrame.COL_LOWER_BOUND);
+    DoubleSeries expectedLowerBoundSeries = baselineDf.getDoubles(COL_VALUE)
+        .multiply(1 - percentageChange);
+    assertThat(outputLowerBoundSeries).isEqualTo(expectedLowerBoundSeries);
+
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries expectedAnomalySeries = BooleanSeries.fillValues(currentDf.size(), false);
+    assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  @Test
+  @Ignore
+  //fixme cyril this test should pass - change the current behavior
+  public void testDetectionRunsOnIntervalOnly() throws DetectorException {
+    // test anomaly analysis is only conducted on the interval
+    // notice the interval is smaller than the dataframe data
+    Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
+    DataFrame baselineDf = new DataFrame()
+        .addSeries(DataFrame.COL_VALUE, 99., 199., 299., 399., 499.);
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+
+    PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
+    spec.setMonitoringGranularity("1_DAYS");
+    double percentageChange = 0.2;
+    spec.setPercentageChange(percentageChange);
+    PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    DataFrame outputDf = output.getDataFrame();
+    LongSeries outputTimeSeries = outputDf.getLongs(DataFrame.COL_TIME);
+    LongSeries expectedTimeSeries = LongSeries.buildFrom(JANUARY_3_2021,
+        JANUARY_4_2021,
+        JANUARY_5_2021);
+    assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
+  }
+
+  @Test
+  public void testAnomaliesUpAndDown() throws DetectorException {
+    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
+    DataFrame baselineDf = new DataFrame()
+        .addSeries(DataFrame.COL_VALUE, 130, 199., 299., 310., 390);
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+
+    PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
+    spec.setMonitoringGranularity("1_DAYS");
+    double percentageChange = 0.2;
+    spec.setPercentageChange(percentageChange);
+    PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    //assert time fields
+    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
+    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
+        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
+
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries expectedAnomalySeries = BooleanSeries.buildFrom(
+        BooleanSeries.TRUE,
+        BooleanSeries.FALSE,
+        BooleanSeries.FALSE,
+        BooleanSeries.TRUE,
+        BooleanSeries.TRUE);
+    assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  @Test
+  public void testAnomaliesUpOnly() throws DetectorException {
+    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
+    DataFrame baselineDf = new DataFrame()
+        .addSeries(DataFrame.COL_VALUE, 130, 199., 299., 320., 400);
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+
+    PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
+    spec.setMonitoringGranularity("1_DAYS");
+    spec.setPattern("UP");
+    double percentageChange = 0.2;
+    spec.setPercentageChange(percentageChange);
+    PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    //assert time fields
+    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
+    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
+        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
+
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries expectedAnomalySeries = BooleanSeries.buildFrom(
+        BooleanSeries.FALSE, // change is down
+        BooleanSeries.FALSE,
+        BooleanSeries.FALSE,
+        BooleanSeries.TRUE, // change is up
+        BooleanSeries.TRUE); // change is up
+    assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  @Test
+  public void testAnomaliesDownOnly() throws DetectorException {
+    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
+    DataFrame baselineDf = new DataFrame()
+        .addSeries(DataFrame.COL_VALUE, 130, 199., 299., 320., 400);
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+
+    PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
+    spec.setMonitoringGranularity("1_DAYS");
+    spec.setPattern("DOWN");
+    double percentageChange = 0.2;
+    spec.setPercentageChange(percentageChange);
+    PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    //assert time fields
+    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
+    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
+        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
+
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries expectedAnomalySeries = BooleanSeries.buildFrom(
+        BooleanSeries.TRUE, // change is down
+        BooleanSeries.FALSE,
+        BooleanSeries.FALSE,
+        BooleanSeries.FALSE, // change is up
+        BooleanSeries.FALSE); // change is up
+    assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  @Deprecated
   @BeforeMethod
   public void beforeMethod() throws Exception {
     try (Reader dataReader = new InputStreamReader(
@@ -105,6 +360,7 @@ public class PercentageChangeRuleDetectorTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO));
   }
 
+  @Deprecated
   @Test
   public void testWeekOverWeekChange() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -126,6 +382,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.zeros(ts.size()));
   }
 
+  @Deprecated
   @Test
   public void testThreeWeekMedianChange() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -152,6 +409,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.zeros(ts.size()));
   }
 
+  @Deprecated
   @Test
   public void testThreeWeekMedianChangeDown() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -173,6 +431,7 @@ public class PercentageChangeRuleDetectorTest {
         DoubleSeries.fillValues(ts.size(), Double.POSITIVE_INFINITY));
   }
 
+  @Deprecated
   @Test
   public void testThreeWeekMedianChangeUporDown() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -200,6 +459,7 @@ public class PercentageChangeRuleDetectorTest {
     checkPercentageLowerBounds(result.getTimeseries(), percentageChange);
   }
 
+  @Deprecated
   @Test
   public void testMonthlyDetectionPercentage() throws DetectorException {
     AnomalyDetector percentageRule = new PercentageChangeRuleDetector();
@@ -217,6 +477,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1551312000000L);
   }
 
+  @Deprecated
   @Test
   public void testZeroDivide() throws DetectorException {
     AnomalyDetector percentageRule = new PercentageChangeRuleDetector();
@@ -232,6 +493,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1551488400000L);
   }
 
+  @Deprecated
   @Test
   public void testWeeklyDetection() throws DetectorException {
     AnomalyDetector<PercentageChangeRuleDetectorSpec> percentageRule = new PercentageChangeRuleDetector();

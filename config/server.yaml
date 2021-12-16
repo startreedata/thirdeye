@@ -26,11 +26,10 @@ logging:
     org.apache.zookeeper: WARN
 
 auth:
+  enabled: false
 #  Uncomment the below line and provide the platform auth info url to enable authentication.
-#  It will override the enabled flag to set it true.
 #  It will replace keysUrl and exactMatch issuer(iss) value with the value from info payload.
 #  infoURL: http://<startree-platform domain>/api/info
-  enabled: false
   oauth:
 #    keysUrl: <Keys URL>
     required:

@@ -18,20 +18,20 @@ import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthInfoResource {
-  private String infoURL;
+  private AuthConfiguration authConfig;
 
   @Inject
   public AuthInfoResource(AuthConfiguration authConfig){
-    Optional.ofNullable(authConfig.getInfoURL()).ifPresent(url -> this.infoURL = url.trim());
+    this.authConfig = authConfig;
   }
 
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    if(infoURL == null || infoURL.isEmpty()){
+    if(!authConfig.isEnabled() || authConfig.getInfoURL() == null || authConfig.getInfoURL().trim().isEmpty()){
       return Response.ok(Collections.EMPTY_MAP).build();
     }
-    return Response.ok(getAuthInfo(infoURL)).build();
+    return Response.ok(getAuthInfo(authConfig.getInfoURL().trim())).build();
   }
 }

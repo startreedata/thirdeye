@@ -43,21 +43,20 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Provides
   public AuthConfiguration getAuthConfiguration() {
     AuthConfiguration authConfig = configuration.getAuthConfiguration();
-    if (authConfig.getInfoURL() != null && !authConfig.getInfoURL().trim().isEmpty()) {
-      HashMap<String, Object> info = OidcUtils.getAuthInfo(authConfig.getInfoURL());
-      if (info == null || info.get(ISSUER_URL_KEY).toString().isEmpty()) {
-        authConfig.setEnabled(false);
-      } else {
-        HashMap<String, Object> oidcConfig = (HashMap<String, Object>) info.get(OIDC_CONFIG_KEY);
-        authConfig.setEnabled(true);
-        if(authConfig.getOAuthConfig() == null) {
-          authConfig.setOAuthConfig(new OAuthConfig());
+    if(authConfig.isEnabled()){
+      if (authConfig.getInfoURL() != null && !authConfig.getInfoURL().trim().isEmpty()) {
+        HashMap<String, Object> info = OidcUtils.getAuthInfo(authConfig.getInfoURL());
+        if (info != null && info.get(ISSUER_URL_KEY) !=null && !info.get(ISSUER_URL_KEY).toString().isEmpty()) {
+          HashMap<String, Object> oidcConfig = (HashMap<String, Object>) info.get(OIDC_CONFIG_KEY);
+          if(authConfig.getOAuthConfig() == null) {
+            authConfig.setOAuthConfig(new OAuthConfig());
+          }
+          OAuthConfig oauth = authConfig.getOAuthConfig();
+          Optional.ofNullable(oidcConfig.get(ISSUER_KEY))
+            .ifPresent(iss -> oauth.getExactMatch().put("iss", iss.toString()));
+          Optional.ofNullable(oidcConfig.get(JWKS_KEY))
+            .ifPresent(jwkUrl -> oauth.setKeysUrl(jwkUrl.toString()));
         }
-        OAuthConfig oauth = authConfig.getOAuthConfig();
-        Optional.ofNullable(oidcConfig.get(ISSUER_KEY))
-          .ifPresent(iss -> oauth.getExactMatch().put("iss", iss.toString()));
-        Optional.ofNullable(oidcConfig.get(JWKS_KEY))
-          .ifPresent(jwkUrl -> oauth.setKeysUrl(jwkUrl.toString()));
       }
     }
     return authConfig;

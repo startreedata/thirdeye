@@ -18,7 +18,7 @@ import { TimeRangeProvider } from "./components/time-range/time-range-provider/t
 import { appHistory } from "./utils/history/history.util";
 import { initLocale } from "./utils/locale/locale.util";
 import { AppRoute } from "./utils/routes/routes.util";
-import { getClientIdFromUrl } from "./utils/url/client-id.util";
+// import { getClientIdFromUrl } from "./utils/url/client-id.util";
 
 // Initialize locale
 initLocale();
@@ -37,9 +37,7 @@ ReactDOM.render(
             <Router history={appHistory}>
                 <SnackbarProvider>
                     <AuthProviderV1
-                        clientId={
-                            getClientIdFromUrl(window.location.href) || ""
-                        }
+                        clientId="apps-manager-ui"
                         redirectMethod={AuthRedirectMethodV1.Post}
                         redirectPathBlacklist={[
                             AppRoute.LOGIN,

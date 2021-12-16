@@ -26,10 +26,10 @@ logging:
     org.apache.zookeeper: WARN
 
 auth:
-  enabled: false
+  enabled: true
 #  Uncomment the below line and provide the platform auth info url to enable authentication.
 #  It will replace keysUrl and exactMatch issuer(iss) value with the value from info payload.
-#  infoURL: http://<startree-platform domain>/api/info
+  infoURL: http://192.168.64.40.nip.io:30000/api/info
   oauth:
 #    keysUrl: <Keys URL>
     required:

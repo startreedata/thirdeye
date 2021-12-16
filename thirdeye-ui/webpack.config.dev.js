@@ -111,7 +111,7 @@ module.exports = {
     devServer: {
         contentBase: outputPath,
         compress: true,
-        port: 7004,
+        port: 7005,
         // Route all requests to index.html so that app gets to handle all copy pasted deep links
         historyApiFallback: {
             disableDotRule: true,
@@ -120,7 +120,7 @@ module.exports = {
         proxy: [
             {
                 context: "/api",
-                target: "http://13.93.137.231:8081/",
+                target: "http://localhost:8080/",
                 changeOrigin: true,
             },
         ],

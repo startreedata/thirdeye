@@ -24,26 +24,23 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
+import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ERROR;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 
-import com.google.common.collect.ArrayListMultimap;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DimensionInfo;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedDetectionResults;
+import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -54,7 +51,6 @@ import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -69,7 +65,6 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
 
   private static final String COL_TOO_HIGH = "tooHigh";
   private static final String COL_TOO_LOW = "tooLow";
-  private static final String COL_ERROR = "error";
 
   private InputDataFetcher dataFetcher;
   private TimeGranularity timeGranularity;
@@ -95,27 +90,18 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   }
 
   @Override
-  public DetectionPipelineResult runDetection(final Interval interval,
+  public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     setMonitoringGranularityPeriod();
-
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
-    final Map<DimensionInfo, DataTable> currentDataTableMap = DataTableUtils.splitDataTable(
-        current);
-    final List<DetectionResult> detectionResults = new ArrayList<>();
-    for (final DimensionInfo dimensionInfo : currentDataTableMap.keySet()) {
-      // todo cyril this is translate to generic col names
-      final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
-      currentDf
-          .addSeries(COL_TIME, currentDf.get(spec.getTimestamp()))
-          .setIndex(COL_TIME)
-          .addSeries(COL_VALUE, currentDf.get(spec.getMetric()));
+    final DataFrame currentDf = current.getDataFrame();
+    currentDf
+        .renameSeries(spec.getTimestamp(), COL_TIME)
+        .renameSeries(spec.getMetric(), COL_VALUE)
+        .setIndex(COL_TIME);
 
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(currentDf, interval);
-      detectionResults.add(detectionResult);
-    }
-    return new GroupedDetectionResults(detectionResults);
+    return runDetectionOnSingleDataTable(currentDf, interval);
   }
 
   private void setMonitoringGranularityPeriod() {
@@ -149,8 +135,9 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     spec.setTimezone(datasetConfig.getTimezone());
 
     final DataFrame df = data.getTimeseries().get(slice);
+    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(df, window);
 
-    return runDetectionOnSingleDataTable(df, window);
+    return buildDetectionResult(detectorResult);
   }
 
   private BooleanSeries valueTooHigh(DoubleSeries values) {
@@ -167,7 +154,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     return values.lt(spec.getMin());
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     DataFrame baselineDf = computeBaseline(inputDf);
     inputDf
@@ -178,23 +165,9 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
         .addSeries(COL_TOO_LOW, valueTooLow(inputDf.getDoubles(COL_CURRENT)))
         .mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
-    return getDetectionResultTemp(inputDf, window);
-  }
-
-  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
-      final ReadableInterval window) {
-    final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        ArrayListMultimap.create(),
-        timeGranularity);
-
-    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        inputDf,
+    return new SimpleAnomalyDetectorV2Result(inputDf,
         spec.getTimezone(),
         monitoringGranularityPeriod);
-
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
   }
 
   @Override

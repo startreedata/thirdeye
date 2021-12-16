@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: daniellavoie/ci-java-8
+    repository: repo.startreedata.io/external-docker-registry/ci-java-11
     tag: latest
 
 caches:

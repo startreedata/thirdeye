@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
-import static org.apache.pinot.thirdeye.detection.components.detectors.results.DataTableUtils.splitDataTable;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
@@ -34,24 +33,23 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 
-import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.DimensionInfo;
-import org.apache.pinot.thirdeye.detection.components.detectors.results.GroupedDetectionResults;
+import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -64,7 +62,6 @@ import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
@@ -112,29 +109,21 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
   }
 
   @Override
-  public DetectionPipelineResult runDetection(final Interval window,
+  public AnomalyDetectorV2Result runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap) throws DetectorException {
     setMonitoringGranularityPeriod();
-    final DataTable baseline = timeSeriesMap.get(KEY_BASELINE);
-    final DataTable current = timeSeriesMap.get(KEY_CURRENT);
-    final Map<DimensionInfo, DataTable> baselineDataTableMap = splitDataTable(baseline);
-    final Map<DimensionInfo, DataTable> currentDataTableMap = splitDataTable(current);
+    final DataTable baseline = requireNonNull(timeSeriesMap.get(KEY_BASELINE), "baseline is null");
+    final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
+    final DataFrame baselineDf = baseline.getDataFrame();
+    final DataFrame currentDf = current.getDataFrame();
 
-    final List<DetectionResult> detectionResults = new ArrayList<>();
-    for (DimensionInfo dimensionInfo : baselineDataTableMap.keySet()) {
+    currentDf
+        .renameSeries(spec.getTimestamp(), COL_TIME)
+        .renameSeries(spec.getMetric(), COL_CURRENT)
+        .setIndex(COL_TIME)
+        .addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
 
-      final DataFrame currentDf = currentDataTableMap.get(dimensionInfo).getDataFrame();
-      final DataFrame baselineDf = baselineDataTableMap.get(dimensionInfo).getDataFrame();
-
-      final DataFrame df = new DataFrame();
-      df.addSeries(COL_TIME, currentDf.get(spec.getTimestamp()));
-      df.addSeries(COL_CURRENT, currentDf.get(spec.getMetric()));
-      df.addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
-
-      final DetectionResult detectionResult = runDetectionOnSingleDataTable(df, window);
-      detectionResults.add(detectionResult);
-    }
-    return new GroupedDetectionResults(detectionResults);
+    return runDetectionOnSingleDataTable(currentDf, window);
   }
 
   private void setMonitoringGranularityPeriod() {
@@ -179,10 +168,12 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
 
     // join curr and base
     final DataFrame df = new DataFrame(dfCurr).addSeries(dfBase);
-    return runDetectionOnSingleDataTable(df, window);
+    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(df, window);
+
+    return buildDetectionResult(detectorResult);
   }
 
-  private DetectionResult runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     // calculate absolute change
     inputDf
@@ -192,24 +183,8 @@ public class AbsoluteChangeRuleDetector implements AnomalyDetector<AbsoluteChang
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
     addBoundaries(inputDf);
 
-    return getDetectionResultTemp(inputDf, window);
-  }
-
-  private DetectionResult getDetectionResultTemp(final DataFrame inputDf,
-      final ReadableInterval window) {
-    // make anomalies
-    final MetricSlice slice = MetricSlice.from(-1,
-        window.getStartMillis(),
-        window.getEndMillis(),
-        ArrayListMultimap.create(),
-        timeGranularity);
-
-    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomalies(slice,
-        inputDf,
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
-
-    return DetectionResult.from(anomalies, TimeSeries.fromDataFrame(inputDf.sortedBy(COL_TIME)));
+    return
+        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
   }
 
   @Override

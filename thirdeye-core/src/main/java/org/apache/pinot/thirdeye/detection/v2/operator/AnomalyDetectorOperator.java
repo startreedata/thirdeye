@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.Collection;
@@ -12,6 +13,7 @@ import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -49,8 +51,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     for (final Interval interval : getMonitoringWindows()) {
       final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-      final DetectionPipelineResult detectionResult = detector
+      final AnomalyDetectorV2Result detectorResult = detector
           .runDetection(interval, timeSeriesMap);
+
+      DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
 
       addMetadata(detectionResult);
 
@@ -74,7 +78,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .map(DetectionResult::getAnomalies)
             .flatMap(Collection::stream)
             .forEach(anomaly -> anomaly.setSource(anomalySource)));
-
   }
 
   private List<Interval> getMonitoringWindows() {

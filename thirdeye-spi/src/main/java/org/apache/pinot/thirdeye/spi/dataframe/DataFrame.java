@@ -59,6 +59,7 @@ public class DataFrame {
   public static final String COL_LOWER_BOUND = "lower_bound";
   public static final String COL_ANOMALY = "anomaly";
   public static final String COL_PATTERN = "pattern";
+  public static final String COL_ERROR = "error";
   public static final String COL_DIFF = "diff";
   public static final String COL_DIFF_VIOLATION = "diff_violation";
 

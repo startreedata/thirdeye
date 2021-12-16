@@ -85,6 +85,7 @@ public class ServerTest {
   }
 
   private void setupPluginsDirAbsolutePath() {
+    // fixme cyril dependency on distribution - prevents parallel testing
     final String projectBuildDirectory = requireNonNull(System.getProperty("projectBuildDirectory"),
         "project build dir not set");
     final String projectVersion = requireNonNull(System.getProperty("projectVersion"),

@@ -27,14 +27,16 @@ logging:
 
 auth:
   enabled: false
-#  infoURL: http://startree.ai/api/info
+#  Uncomment the below line and provide the platform auth info url to enable authentication.
+#  It will replace keysUrl and exactMatch issuer(iss) value with the value from info payload.
+#  infoURL: http://<startree-platform domain>/api/info
   oauth:
-    keysUrl: file://<path to project dir>/config/jwks.json
+#    keysUrl: <Keys URL>
     required:
       - sub
       - exp
-    exactMatch:
-      iss: http://identity.startree.ai
+#    exactMatch:
+#      iss: <dex server url>
     cache:
       size: 64
       ttl: 60000

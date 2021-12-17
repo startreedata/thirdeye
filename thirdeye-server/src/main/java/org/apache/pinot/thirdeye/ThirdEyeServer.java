@@ -127,7 +127,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
 
-    registerAuthFilter(env, injector, configuration.getAuthConfiguration());
+    registerAuthFilter(env, injector);
 
     // Enable CORS. Opens up the API server to respond to requests from all external domains.
     addCorsFilter(env);
@@ -204,13 +204,12 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
   }
 
-  private void registerAuthFilter(final Environment environment, final Injector injector,
-      AuthConfiguration config) {
+  private void registerAuthFilter(final Environment environment, final Injector injector) {
     try {
-      if(!config.isEnabled()){
+      if(!injector.getInstance(AuthConfiguration.class).isEnabled()){
         environment.jersey().register(injector.getInstance(AuthDisabledRequestFilter.class));
       }
-      environment.jersey().register(new AuthDynamicFeature(buildAuthFilter(injector, config)));
+      environment.jersey().register(new AuthDynamicFeature(buildAuthFilter(injector)));
       environment.jersey().register(RolesAllowedDynamicFeature.class);
       environment.jersey().register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
     } catch (Exception e) {
@@ -218,8 +217,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     }
   }
 
-  private AuthFilter buildAuthFilter(final Injector injector, AuthConfiguration config) {
-    final Authenticator authenticator = config.isEnabled()
+  private AuthFilter buildAuthFilter(final Injector injector) {
+    final Authenticator authenticator = injector.getInstance(AuthConfiguration.class).isEnabled()
         ? injector.getInstance(ThirdEyeAuthenticator.class)
         : injector.getInstance(ThirdEyeAuthenticatorDisabled.class);
     return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()

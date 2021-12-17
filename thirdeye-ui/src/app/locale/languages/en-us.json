@@ -113,6 +113,7 @@
         "predicted": "Predicted",
         "deviation": "Deviation",
         "baseline": "Baseline",
+        "change": "Change",
         "upper-bound": "Upper bound",
         "lower-bound": "Lower bound",
         "upper-and-lower-bound": "Upper and Lower bound",

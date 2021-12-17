@@ -1,9 +1,13 @@
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, isEmpty, isNil } from "lodash";
+import { cloneDeep, isEmpty, isNil, map } from "lodash";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
+import {
+    UiAnomaly,
+    UiAnomalyBreakdown,
+} from "../../rest/dto/ui-anomaly.interfaces";
 import { formatDateAndTime, formatDuration } from "../date-time/date-time.util";
 import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
@@ -148,6 +152,30 @@ export const filterAnomalies = (
     }
 
     return filteredUiAnomalies;
+};
+
+export const getUiAnomalyBreakdown = (
+    anomalyBreakdown: AnomalyBreakdown
+): UiAnomalyBreakdown[] | undefined => {
+    const defaultValue: UiAnomalyBreakdown[] = [];
+
+    if (!anomalyBreakdown) {
+        return defaultValue;
+    }
+
+    return map(anomalyBreakdown, (val, key) => ({
+        label: key,
+        treeMapData: [
+            { id: key, size: 0, parent: null },
+            ...map(val, (value, k) => {
+                return {
+                    id: k,
+                    size: value,
+                    parent: key,
+                };
+            }),
+        ],
+    }));
 };
 
 export const filterAnomaliesByTime = (

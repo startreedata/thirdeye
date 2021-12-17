@@ -6,6 +6,7 @@ import {
     NavBarPrimaryContainerV1,
     NavBarSecondaryContainerV1,
     NavBarV1,
+    useAuthProviderV1,
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,10 +23,9 @@ import {
     getLoginPath,
     getLogoutPath,
 } from "../../utils/routes/routes.util";
-import { useAuth } from "../auth-provider/auth-provider.component";
 
 export const AppBar: FunctionComponent = () => {
-    const { authDisabled, authenticated } = useAuth();
+    const { authDisabled, authenticated } = useAuthProviderV1();
     const location = useLocation();
     const { t } = useTranslation();
 

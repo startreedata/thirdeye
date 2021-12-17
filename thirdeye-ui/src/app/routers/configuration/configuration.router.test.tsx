@@ -1,4 +1,3 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
@@ -35,17 +34,6 @@ jest.mock("../../utils/routes/routes.util", () => ({
     getConfigurationPath: jest.fn().mockReturnValue("testConfigurationPath"),
 }));
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
-}));
-
-jest.mock(
-    "../../pages/configuration-page/configuration-page.component",
-    () => ({
-        ConfigurationPage: jest.fn().mockReturnValue("testConfigurationPage"),
-    })
-);
-
 jest.mock("../subscription-groups/subscription-groups.router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
@@ -64,16 +52,6 @@ jest.mock(
 );
 
 describe("Configuration Router", () => {
-    it("should have rendered loading indicator while loading", () => {
-        render(
-            <MemoryRouter>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        expect(AppLoadingIndicatorV1).toHaveBeenCalled();
-    });
-
     it("should set appropriate router breadcrumbs", () => {
         render(
             <MemoryRouter>
@@ -105,7 +83,7 @@ describe("Configuration Router", () => {
         );
 
         await expect(
-            screen.findByText("testConfigurationPage")
+            screen.findByText("testSubscriptionGroupsRouter")
         ).resolves.toBeInTheDocument();
     });
 

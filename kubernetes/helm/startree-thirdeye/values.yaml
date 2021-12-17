@@ -87,6 +87,20 @@ smtp:
   secretKeyRef:
     name: smtp-credentials
 
+auth:
+  enabled: false
+#  infoURL: <platform url>/api/info
+  oauth:
+#    keysUrl: <keys url>
+    required:
+     - sub
+     - exp
+#    exactMatch:
+#      iss: <issuer url>
+#    cache:
+#      size: 64
+#      ttl: 60000
+
 # Do not remove me.
 config:
   description: placeholder for common configs accross coordinator and worker

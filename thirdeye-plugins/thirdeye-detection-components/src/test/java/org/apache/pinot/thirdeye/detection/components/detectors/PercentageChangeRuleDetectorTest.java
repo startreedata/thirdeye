@@ -17,7 +17,6 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 public class PercentageChangeRuleDetectorTest {
@@ -90,8 +89,6 @@ public class PercentageChangeRuleDetectorTest {
   }
 
   @Test
-  @Ignore
-  //fixme cyril this test should pass - change the current behavior
   public void testDetectionRunsOnIntervalOnly() throws DetectorException {
     // test anomaly analysis is only conducted on the interval
     // notice the interval is smaller than the dataframe data
@@ -106,24 +103,22 @@ public class PercentageChangeRuleDetectorTest {
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
     DataFrame baselineDf = new DataFrame()
-        .addSeries(DataFrame.COL_VALUE, 99., 199., 299., 399., 499.);
+        .addSeries(DataFrame.COL_VALUE, 10., 10., 10., 10., 10.);
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
     spec.setMonitoringGranularity("1_DAYS");
-    double percentageChange = 0.2;
+    double percentageChange = 0.01;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
-    LongSeries outputTimeSeries = outputDf.getLongs(DataFrame.COL_TIME);
-    LongSeries expectedTimeSeries = LongSeries.buildFrom(JANUARY_3_2021,
-        JANUARY_4_2021,
-        JANUARY_5_2021);
-    assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
+    BooleanSeries outputTimeSeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    assertThat(outputTimeSeries.sliceTo(2)).isEqualTo(BooleanSeries.fillValues( 2, BooleanSeries.FALSE));
+    assertThat(outputTimeSeries.sliceFrom(2)).isEqualTo(BooleanSeries.fillValues(3, BooleanSeries.TRUE));
   }
 
   @Test

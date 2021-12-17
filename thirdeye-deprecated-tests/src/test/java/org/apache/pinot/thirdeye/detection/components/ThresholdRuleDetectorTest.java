@@ -157,7 +157,6 @@ public class ThresholdRuleDetectorTest {
 
   @Test
   public void testAnomaliesUpAndDown() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()

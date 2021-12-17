@@ -161,12 +161,13 @@ public class AbsoluteChangeRuleDetectorTest {
     LongSeries expectedTimeSeries = LongSeries.buildFrom(JANUARY_3_2021,
         JANUARY_4_2021,
         JANUARY_5_2021);
+    // fixme cyril test that out of frame anomaly value is null is better
     assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
   }
 
   @Test
   public void testAnomaliesUpAndDown() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test pattern UP_AND_DOWN works
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -210,7 +211,6 @@ public class AbsoluteChangeRuleDetectorTest {
 
   @Test
   public void testAnomaliesUpOnly() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -255,7 +255,6 @@ public class AbsoluteChangeRuleDetectorTest {
 
   @Test
   public void testAnomaliesDownOnly() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()

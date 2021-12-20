@@ -5,7 +5,7 @@ TEST_NAMESPACE="te-helm-test"
 TE_CHART_NAME="startree-thirdeye"
 
 ping_server() {
-  echo "http://$(./kubectl get service ${DEPLOYMENT_NAME}-startree-thirdeye-coordinator -n ${TEST_NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].hostname}'):8080"
+  echo "http://$(./kubectl get service ${DEPLOYMENT_NAME}-startree-thirdeye-coordinator -n ${TEST_NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].ip}'):8080"
 }
 
 wait_service() {

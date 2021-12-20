@@ -2,6 +2,7 @@ export interface TreemapProps {
     showTooltip?: boolean;
     name: string;
     treemapData: TreemapData[];
+    onDimensionClickHandler?: (treeMapNodeId: string) => void;
 }
 
 export interface TreemapData {

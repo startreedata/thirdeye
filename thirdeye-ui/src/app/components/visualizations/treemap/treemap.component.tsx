@@ -102,6 +102,16 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
             });
     };
 
+    const handleMouseClick = (
+        node: HierarchyRectangularNode<HierarchyNode<TreemapData>> | undefined
+    ): void => {
+        if (!node || !node.data.id) {
+            return;
+        }
+        props.onDimensionClickHandler &&
+            props.onDimensionClickHandler(node.data.id);
+    };
+
     return (
         <TooltipWithBounds
             left={tooltipLeft}
@@ -145,9 +155,17 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
 
                                     return (
                                         <Group
+                                            className={
+                                                props.onDimensionClickHandler
+                                                    ? treemapClasses.clickable
+                                                    : undefined
+                                            }
                                             key={`node-${i}`}
                                             left={node.x0 + margin.left}
                                             top={node.y0 + margin.top}
+                                            onClick={() =>
+                                                handleMouseClick(node)
+                                            }
                                             onMouseLeave={handleMouseLeave}
                                             onMouseMove={() =>
                                                 handleMouseMove(node)

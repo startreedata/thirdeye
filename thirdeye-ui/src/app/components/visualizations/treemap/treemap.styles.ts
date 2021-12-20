@@ -4,4 +4,7 @@ export const useTreemapStyles = makeStyles(() => ({
     heading: {
         fontSize: "13px",
     },
+    clickable: {
+        cursor: "pointer",
+    },
 }));

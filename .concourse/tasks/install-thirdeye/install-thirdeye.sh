@@ -1,10 +1,17 @@
 #!/bin/bash
 
+DEPLOYMENT_NAME="thirdeye"
+TEST_NAMESPACE="te-helm-test"
+TE_CHART_NAME="startree-thirdeye"
+
+ping_server() {
+  echo "http://$(kubectl get service ${DEPLOYMENT_NAME}-startree-thirdeye-coordinator -n ${TEST_NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].hostname}'):8080"
+}
+
 wait_service() {
   attempt_counter=0
   max_attempts=600
-
-  until $(curl --output /dev/null --silent --head --fail $1); do
+  until [ $(curl -o /dev/null -s -w "%{http_code}\n" "$(ping_server)") == "200" ]; do
       if [ ${attempt_counter} -eq ${max_attempts} ];then
         echo "Max attempts reached"
         return 1
@@ -37,13 +44,13 @@ set -x && \
     --username ${STARTREE_HELM_USERNAME} \
     --password ${STARTREE_HELM_PASSWORD} && \
   ./helm repo update && \
-  ./kubectl delete ns te-helm-test && \
+  ./kubectl delete ns ${TEST_NAMESPACE} && \
   echo "pausing for 10s after cleanup" && \
   sleep 10s && \
-  ./kubectl create ns te-helm-test && \
+  ./kubectl create ns ${TEST_NAMESPACE} && \
   echo HELM_VERSION && \
-  ./helm install thirdeye internal/startree-thirdeye --version $HELM_VERSION -n te-helm-test --devel && \
+  ./helm install ${DEPLOYMENT_NAME} internal/${TE_CHART_NAME} --version $HELM_VERSION -n ${TEST_NAMESPACE} --devel && \
   echo "Waiting for Services availability" && \
   sleep 10s && \
-  wait_service http://$(./kubectl get service thirdeye-startree-thirdeye-coordinator -n te-helm-test --output jsonpath='{.status.loadBalancer.ingress[0].hostname}'):8080 && \
-  ./helm test thirdeye -n te-helm-test --filter "!name=thirdeye-mysql-test"
+  wait_service && \
+  ./helm test ${DEPLOYMENT_NAME} -n ${TEST_NAMESPACE} --filter "!name=thirdeye-mysql-test"

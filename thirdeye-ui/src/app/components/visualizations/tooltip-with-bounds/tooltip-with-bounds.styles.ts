@@ -8,5 +8,6 @@ export const useTooltipWithBoundsStyles = makeStyles((theme) => ({
     tooltip: {
         color: `${theme.palette.primary.contrastText} !important`,
         backgroundColor: `${Palette.COLOR_BACKGROUND_TOOLTIP} !important`,
+        zIndex: 999,
     },
 }));

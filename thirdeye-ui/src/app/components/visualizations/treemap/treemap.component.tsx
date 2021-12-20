@@ -12,7 +12,9 @@ import {
     Text,
     useTooltip,
 } from "@visx/visx";
+import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 import React, { FunctionComponent } from "react";
+import { getShortText } from "../../../utils/anomalies/anomalies.util";
 import { DimensionHeatmapTooltip } from "../dimensions-heatmap/dimensions-heatmap.component";
 import { DimensionHeatmapTooltipPoint } from "../dimensions-heatmap/dimentions-heatmap.interfaces";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
@@ -52,7 +54,6 @@ export const Treemap: FunctionComponent<TreemapProps> = (
 const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
     width,
     height,
-    showTooltip: showToolTip,
     ...props
 }: TreemapPropsInternal) => {
     const xMax = Math.abs(width) - margin.left - margin.right;
@@ -85,17 +86,20 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
         hideTooltip();
     };
 
-    const handleMouseMove = (node): void => {
-        showTooltip({
-            tooltipLeft: node?.x0,
-            tooltipTop: node?.y0,
-            tooltipData: {
-                name: node.data.id,
-                baseline: 100,
-                current: 100,
-                change: 100,
-            },
-        });
+    const handleMouseMove = (
+        node: HierarchyRectangularNode<HierarchyNode<TreemapData>> | undefined
+    ): void => {
+        node &&
+            showTooltip({
+                tooltipLeft: node?.x0,
+                tooltipTop: node?.y0,
+                tooltipData: {
+                    name: node.data.id || "",
+                    baseline: 100,
+                    current: 100,
+                    change: 100,
+                },
+            });
     };
 
     return (
@@ -152,27 +156,21 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
                                             {node.depth === 1 && (
                                                 <>
                                                     {rect}
-                                                    {Math.abs(nodeWidth) > 40 &&
-                                                        Math.abs(nodeHeight) >
-                                                            40 && (
-                                                            <Text
-                                                                className={
-                                                                    treemapClasses.heading
-                                                                }
-                                                                textAnchor="middle"
-                                                                verticalAnchor="middle"
-                                                                x={
-                                                                    nodeWidth /
-                                                                    2
-                                                                }
-                                                                y={
-                                                                    nodeHeight /
-                                                                    2
-                                                                }
-                                                            >
-                                                                {node.data.id}
-                                                            </Text>
+                                                    <Text
+                                                        className={
+                                                            treemapClasses.heading
+                                                        }
+                                                        textAnchor="middle"
+                                                        verticalAnchor="middle"
+                                                        x={nodeWidth / 2}
+                                                        y={nodeHeight / 2}
+                                                    >
+                                                        {getShortText(
+                                                            node.data.id || "",
+                                                            nodeWidth,
+                                                            nodeHeight
                                                         )}
+                                                    </Text>
                                                 </>
                                             )}
                                         </Group>

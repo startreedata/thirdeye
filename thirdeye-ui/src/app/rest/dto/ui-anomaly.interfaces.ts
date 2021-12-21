@@ -1,5 +1,3 @@
-import { TreemapData } from "../../components/visualizations/treemap/treemap.interfaces";
-
 export interface UiAnomaly {
     id: number;
     name: string;
@@ -12,9 +10,4 @@ export interface UiAnomaly {
     duration: string;
     startTime: string;
     endTime: string;
-}
-
-export interface UiAnomalyBreakdown {
-    label: string;
-    treeMapData: TreemapData[];
 }

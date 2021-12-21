@@ -1,15 +1,10 @@
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    Divider,
-    Grid,
-} from "@material-ui/core";
+import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -17,19 +12,13 @@ import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
-import { Treemap } from "../../components/visualizations/treemap/treemap.component";
 import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
 import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import {
-    UiAnomaly,
-    UiAnomalyBreakdown,
-} from "../../rest/dto/ui-anomaly.interfaces";
-import { getAnomalyMetricBreakdown } from "../../rest/rca/rca.rest";
+import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
     getUiAnomaly,
-    getUiAnomalyBreakdown,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
@@ -41,9 +30,6 @@ import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [uiAnomalyBreakdown, setUiAnomalyBreakdown] = useState<
-        UiAnomalyBreakdown[] | undefined
-    >([]);
     const [
         alertEvaluation,
         setAlertEvaluation,
@@ -73,7 +59,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const fetchAnomaly = (): void => {
         setUiAnomaly(null);
         let fetchedUiAnomaly = {} as UiAnomaly;
-        let fetchedUiAnomalyBreakdown = [] as UiAnomalyBreakdown[] | undefined;
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
@@ -95,16 +80,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 fetchedUiAnomaly = getUiAnomaly(anomaly);
             })
             .finally(() => setUiAnomaly(fetchedUiAnomaly));
-
-        getAnomalyMetricBreakdown(toNumber(params.id), {
-            timezone: "UTC",
-        })
-            .then((anomalyBreakdown) => {
-                fetchedUiAnomalyBreakdown = getUiAnomalyBreakdown(
-                    anomalyBreakdown
-                );
-            })
-            .finally(() => setUiAnomalyBreakdown(fetchedUiAnomalyBreakdown));
     };
 
     const fetchAlertEvaluation = (): void => {
@@ -175,22 +150,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     <Card variant="outlined">
                         <CardHeader
-                            title="Heatmap"
+                            title="Heatmap of Change in Contribution"
                             titleTypographyProps={{ variant: "h5" }}
                         />
                         <CardContent>
-                            {uiAnomalyBreakdown &&
-                                React.Children.toArray(
-                                    uiAnomalyBreakdown.map((data) => (
-                                        <>
-                                            <Divider />
-                                            <Treemap
-                                                name={data.label}
-                                                treemapData={data.treeMapData}
-                                            />
-                                        </>
-                                    ))
-                                )}
+                            <AnomalyBreakdownComparisonHeatmap
+                                anomalyId={toNumber(params.id)}
+                            />
                         </CardContent>
                     </Card>
                 </Grid>

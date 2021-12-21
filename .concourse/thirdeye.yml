@@ -35,20 +35,26 @@ resources:
       file: startree-thirdeye-helm-chart-version
 
 jobs:
-- name: run-integration-tests
+- name: helm-deployment-validation
   serial_groups: ["integration-test"]
   plan:
     - put: environment-azure
       params:
         acquire: true
     - get: thirdeye-helm-version
-    - get: ci-src
       trigger: true
+    - get: ci-src
     - task: install-thirdeye
       file: ci-src/.concourse/tasks/install-thirdeye/install-thirdeye.yml
       input_mapping:
         environment: environment-azure
         helm-version: thirdeye-helm-version
+      params:
+        VERSION_FILE: version/version
+    - task: helm-test
+      file: ci-src/.concourse/tasks/helm-test/helm-test-thirdeye.yml
+      input_mapping:
+        environment: environment-azure
       params:
         VERSION_FILE: version/version
   ensure:

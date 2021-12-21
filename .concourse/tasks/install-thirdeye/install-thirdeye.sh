@@ -51,6 +51,4 @@ set -x && \
   echo HELM_VERSION && \
   ./helm install ${DEPLOYMENT_NAME} internal/${TE_CHART_NAME} --version $HELM_VERSION -n ${TEST_NAMESPACE} --devel && \
   echo "Waiting for Services availability" && \
-  sleep 10s && \
-  wait_service && \
-  ./helm test ${DEPLOYMENT_NAME} -n ${TEST_NAMESPACE} --filter "!name=thirdeye-mysql-test"
+  wait_service

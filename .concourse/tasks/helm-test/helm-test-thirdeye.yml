@@ -1,0 +1,27 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: mcr.microsoft.com/azure-cli
+    tag: latest
+
+inputs:
+  - name: ci-src
+  - name: environment
+
+outputs:
+  - name: build
+  - name: version
+
+params:
+  AZURE_CLIENT_ID: ((azure-client-id))
+  AZURE_CLIENT_SECRET: ((azure-client-secret))
+  AZURE_TENANT_ID: ((azure-tenant-id))
+  STARTREE_HELM_REPOSITORY_URL: ((helm-repository-url))
+  STARTREE_HELM_USERNAME: ((artifactory-username))
+  STARTREE_HELM_PASSWORD: ((artifactory-password))
+
+run:
+  path: ci-src/.concourse/tasks/helm-test/helm-test-thirdeye.sh

@@ -3,10 +3,17 @@ import React from "react";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { LogoutPage } from "./logout-page.component";
 
-jest.mock("../../components/auth-provider/auth-provider.component", () => ({
-    useAuth: jest.fn().mockImplementation(() => ({
+jest.mock("@startree-ui/platform-ui", () => ({
+    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+        string,
+        unknown
+    >),
+    useAuthProviderV1: jest.fn().mockImplementation(() => ({
         logout: mockLogout,
     })),
+    AppLoadingIndicatorV1: jest
+        .fn()
+        .mockReturnValue("testAppLoadingIndicatorV1"),
 }));
 
 jest.mock(
@@ -26,10 +33,6 @@ jest.mock("react-i18next", () => ({
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
     PageContents: jest.fn().mockImplementation((props) => props.children),
-}));
-
-jest.mock("@startree-ui/platform-ui", () => ({
-    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
 }));
 
 describe("Logout Page", () => {
@@ -69,7 +72,9 @@ describe("Logout Page", () => {
             render(<LogoutPage />);
         });
 
-        expect(screen.getByText("testLoadingIndicatorV1")).toBeInTheDocument();
+        expect(
+            screen.getByText("testAppLoadingIndicatorV1")
+        ).toBeInTheDocument();
     });
 });
 

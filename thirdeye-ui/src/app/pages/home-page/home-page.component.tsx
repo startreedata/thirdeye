@@ -1,10 +1,10 @@
 import { Grid, useTheme } from "@material-ui/core";
 import {
-    ButtonTileIconV1,
-    ButtonTileTextV1,
-    ButtonTileV1,
     DimensionV1,
     PageV1,
+    TileButtonIconV1,
+    TileButtonTextV1,
+    TileButtonV1,
 } from "@startree-ui/platform-ui";
 import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -52,100 +52,100 @@ export const HomePage: FunctionComponent = () => {
                     >
                         {/* Alerts */}
                         <Grid item>
-                            <ButtonTileV1 href={getAlertsPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getAlertsPath()}>
+                                <TileButtonIconV1>
                                     <AlertIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.alerts")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
 
                         {/* Anomalies */}
                         <Grid item>
-                            <ButtonTileV1 href={getAnomaliesPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getAnomaliesPath()}>
+                                <TileButtonIconV1>
                                     <AnomalyIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.anomalies")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
 
                         {/* Configuration */}
                         <Grid item>
-                            <ButtonTileV1 href={getConfigurationPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getConfigurationPath()}>
+                                <TileButtonIconV1>
                                     <ConfigurationIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.configuration")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
 
                         {/* Subscription groups */}
                         <Grid item>
-                            <ButtonTileV1 href={getSubscriptionGroupsPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getSubscriptionGroupsPath()}>
+                                <TileButtonIconV1>
                                     <SubscriptionGroupIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.subscription-groups")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
 
                         {/* Datasets */}
                         <Grid item>
-                            <ButtonTileV1 href={getDatasetsPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getDatasetsPath()}>
+                                <TileButtonIconV1>
                                     <SubscriptionGroupIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.datasets")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
 
                         {/* Datasources */}
                         <Grid item>
-                            <ButtonTileV1 href={getDatasourcesPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getDatasourcesPath()}>
+                                <TileButtonIconV1>
                                     <SubscriptionGroupIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.datasources")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
 
                         {/* Metrics */}
                         <Grid item>
-                            <ButtonTileV1 href={getMetricsPath()}>
-                                <ButtonTileIconV1>
+                            <TileButtonV1 href={getMetricsPath()}>
+                                <TileButtonIconV1>
                                     <MetricIcon
                                         fill={theme.palette.primary.main}
                                     />
-                                </ButtonTileIconV1>
-                                <ButtonTileTextV1>
+                                </TileButtonIconV1>
+                                <TileButtonTextV1>
                                     {t("label.metrics")}
-                                </ButtonTileTextV1>
-                            </ButtonTileV1>
+                                </TileButtonTextV1>
+                            </TileButtonV1>
                         </Grid>
                     </Grid>
                 </Grid>

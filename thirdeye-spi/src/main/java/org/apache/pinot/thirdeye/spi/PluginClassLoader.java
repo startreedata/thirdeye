@@ -19,6 +19,8 @@
 package org.apache.pinot.thirdeye.spi;
 
 import com.google.common.collect.ImmutableList;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -27,8 +29,11 @@ import java.net.URLClassLoader;
  * using the system classloader thereby trimming access to all system classes.
  *
  * Only the classes in SHARED_PACKAGES are visible to the plugin.
+ *
  */
 public class PluginClassLoader extends URLClassLoader {
+
+  private static final ClassLoader PLATFORM_CLASS_LOADER = platformClassLoaderIfExists();
 
   public static final ImmutableList<String> SHARED_PACKAGES = ImmutableList.<String>builder()
       .add("org.apache.pinot.thirdeye.spi")
@@ -41,13 +46,37 @@ public class PluginClassLoader extends URLClassLoader {
 
   private final ClassLoader parentClassLoader;
 
-  public PluginClassLoader(URL[] urls, ClassLoader parentClassLoader) {
-    super(urls, null);
+  public PluginClassLoader(final URL[] urls, final ClassLoader parentClassLoader) {
+    super(urls, PLATFORM_CLASS_LOADER);
     this.parentClassLoader = parentClassLoader;
   }
 
+  /**
+   * For Java 8 or earlier, sending 'null' as the parent classloader works fine for loading
+   * classes using the app classloader. For java 9 and above, this is done using a different API.
+   *
+   * This approach is also used in other codebases.
+   * https://github.com/prestodb/presto/blob/master/presto-main/src/main/java/com/facebook/presto/server/PluginClassLoader.java
+   *
+   * @return platform class loader if available.
+   */
+  @SuppressWarnings("JavaReflectionMemberAccess")
+  private static ClassLoader platformClassLoaderIfExists() {
+    try {
+      // Return the platform class loader if available
+      // For Java 8 and earlier, this method is not available and
+      final Method method = ClassLoader.class.getMethod("getPlatformClassLoader");
+      return (ClassLoader) method.invoke(null);
+    } catch (final NoSuchMethodException ignored) {
+      // use null class loader on Java 8
+      return null;
+    } catch (final IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Override
-  protected Class<?> loadClass(String name, boolean resolve)
+  protected Class<?> loadClass(final String name, final boolean resolve)
       throws ClassNotFoundException {
     // has the class loaded already?
     Class<?> loadedClass = findLoadedClass(name);

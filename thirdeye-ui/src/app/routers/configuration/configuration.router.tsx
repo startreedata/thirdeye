@@ -1,11 +1,5 @@
 import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
+import React, { FunctionComponent, lazy, Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
@@ -42,7 +36,6 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const ConfigurationRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
     const history = useHistory();
     const { t } = useTranslation();
@@ -54,12 +47,7 @@ export const ConfigurationRouter: FunctionComponent = () => {
                 onClick: () => history.push(getConfigurationPath()),
             },
         ]);
-        setLoading(false);
     }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>

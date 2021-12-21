@@ -185,7 +185,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                                         <>
                                             <Divider />
                                             <Treemap
-                                                showTooltip
                                                 name={data.label}
                                                 treemapData={data.treeMapData}
                                             />

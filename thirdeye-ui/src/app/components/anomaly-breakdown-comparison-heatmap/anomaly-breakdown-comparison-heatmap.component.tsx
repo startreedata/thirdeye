@@ -13,6 +13,7 @@ import {
     SummarizeDataFunctionParams,
     SummaryData,
 } from "./anomaly-breakdown-comparison-heatmap.interfaces";
+import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
 function summarizeDimensionValueData(
     dimensionValueData: SummarizeDataFunctionParams
@@ -138,6 +139,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             <Divider />
                             <Treemap<AnomalyBreakdownComparisonData>
                                 name={data.column}
+                                tooltipElement={DimensionHeatmapTooltip}
                                 treemapData={formatTreemapData(data)}
                             />
                         </>

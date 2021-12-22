@@ -23,10 +23,10 @@ import { DialogType } from "../../components/dialogs/dialog-provider/dialog-prov
 import { AlertCardV1 } from "../../components/entity-cards/alert-card-v1/alert-card-v1.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
     deleteAlert,
     getAlert,
-    getAlertEvaluation,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
@@ -49,6 +49,7 @@ import {
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
+    const { evaluation, getEvaluation } = useGetEvaluation();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -75,9 +76,28 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [timeRangeDuration]);
 
     useEffect(() => {
+        !!evaluation && setAlertEvaluation(evaluation);
+    }, [evaluation]);
+
+    useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
         fetchAlertEvaluation();
     }, [uiAlert]);
+
+    const fetchAlertEvaluation = (): void => {
+        if (!uiAlert || !uiAlert.alert) {
+            setAlertEvaluation(null);
+
+            return;
+        }
+        getEvaluation(
+            createAlertEvaluation(
+                uiAlert.alert,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        );
+    };
 
     const fetchAlert = (): void => {
         setUiAlert(null);
@@ -121,29 +141,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                 setUiAlert(fetchedUiAlert);
                 setSubscriptionGroups(fetchedSubscriptionGroups);
             });
-    };
-
-    const fetchAlertEvaluation = (): void => {
-        setAlertEvaluation(null);
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-
-        if (!uiAlert || !uiAlert.alert) {
-            setAlertEvaluation(fetchedAlertEvaluation);
-
-            return;
-        }
-
-        getAlertEvaluation(
-            createAlertEvaluation(
-                uiAlert.alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
-        )
-            .then((alertEvaluation) => {
-                fetchedAlertEvaluation = alertEvaluation;
-            })
-            .finally(() => setAlertEvaluation(fetchedAlertEvaluation));
     };
 
     const handleAlertChange = (uiAlert: UiAlert): void => {

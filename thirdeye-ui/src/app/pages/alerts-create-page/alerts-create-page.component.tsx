@@ -7,11 +7,8 @@ import { AlertWizard } from "../../components/alert-wizard/alert-wizard.componen
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
-import {
-    createAlert,
-    getAlertEvaluation,
-    getAllAlerts,
-} from "../../rest/alerts/alerts.rest";
+import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
+import { createAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
@@ -24,6 +21,7 @@ import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
+    const { getEvaluation } = useGetEvaluation();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { enqueueSnackbar } = useSnackbar();
@@ -135,17 +133,16 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const fetchAlertEvaluation = async (
         alert: Alert
     ): Promise<AlertEvaluation> => {
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-        try {
-            fetchedAlertEvaluation = await getAlertEvaluation(
-                createAlertEvaluation(
-                    alert,
-                    timeRangeDuration.startTime,
-                    timeRangeDuration.endTime
-                )
-            );
-        } catch (error) {
-            // Empty
+        const fetchedAlertEvaluation = await getEvaluation(
+            createAlertEvaluation(
+                alert,
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            )
+        );
+
+        if (fetchedAlertEvaluation === undefined) {
+            return {} as AlertEvaluation;
         }
 
         return fetchedAlertEvaluation;

@@ -1,5 +1,8 @@
+import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+
 export interface AnomalyBreakdownComparisonHeatmapProps {
     anomalyId: number;
+    comparisonOffset?: AnomalyBreakdownAPIOffsetValues;
 }
 
 export interface SummaryData {

@@ -49,9 +49,10 @@ function formatTreemapData(
     ];
 }
 
-export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = (
-    props: AnomalyBreakdownComparisonHeatmapProps
-) => {
+export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = ({
+    anomalyId,
+    comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+}: AnomalyBreakdownComparisonHeatmapProps) => {
     const [
         anomalyBreakdownCurrent,
         setAnomalyBreakdownCurrent,
@@ -113,19 +114,19 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         setAnomalyBreakdownCurrent(null);
         setAnomalyBreakdownComparison(null);
 
-        getAnomalyMetricBreakdown(props.anomalyId, {
+        getAnomalyMetricBreakdown(anomalyId, {
             timezone: "UTC",
         }).then((anomalyBreakdown) => {
             setAnomalyBreakdownCurrent(anomalyBreakdown);
         });
 
-        getAnomalyMetricBreakdown(props.anomalyId, {
+        getAnomalyMetricBreakdown(anomalyId, {
             timezone: "UTC",
-            offset: AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+            offset: comparisonOffset,
         }).then((anomalyBreakdown) => {
             setAnomalyBreakdownComparison(anomalyBreakdown);
         });
-    }, [props.anomalyId]);
+    }, [anomalyId, comparisonOffset]);
 
     return (
         <>

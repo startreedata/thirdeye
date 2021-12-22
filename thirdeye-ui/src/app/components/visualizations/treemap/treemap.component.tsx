@@ -13,11 +13,10 @@ import {
     useTooltip,
 } from "@visx/visx";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
-import React, { FunctionComponent, MouseEvent } from "react";
+import React, { MouseEvent } from "react";
 import { getShortText } from "../../../utils/anomalies/anomalies.util";
-import { DimensionHeatmapTooltip } from "../dimensions-heatmap/dimensions-heatmap.component";
-import { DimensionHeatmapTooltipPoint } from "../dimensions-heatmap/dimentions-heatmap.interfaces";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
+import { GenericTreemapTooltip } from "./generic-treemap-tooltip";
 import {
     TreemapData,
     TreemapProps,
@@ -25,6 +24,7 @@ import {
 } from "./treemap.interfaces";
 import { useTreemapStyles } from "./treemap.styles";
 
+const DEFAULT_TREEMAP_HEIGHT = 60;
 const RIGHT_BOUNDS_PADDING = 30;
 const margin = {
     left: 10,
@@ -33,26 +33,27 @@ const margin = {
     bottom: 0,
 };
 
-export const Treemap: FunctionComponent<TreemapProps> = (
-    props: TreemapProps
-) => {
+function Treemap<Data>({
+    height = DEFAULT_TREEMAP_HEIGHT,
+    tooltipElement = GenericTreemapTooltip,
+    ...props
+}: TreemapProps<Data>): JSX.Element {
     const {
         tooltipTop,
         tooltipLeft,
         tooltipData,
         showTooltip,
         hideTooltip,
-    } = useTooltip<DimensionHeatmapTooltipPoint>();
+    } = useTooltip<TreemapData<Data>>();
 
     return (
         <TooltipWithBounds
             left={tooltipLeft}
             open={Boolean(tooltipData)}
-            title={
-                <DimensionHeatmapTooltip
-                    dimensionHeatmapTooltipPoint={tooltipData}
-                />
-            }
+            title={React.createElement<TreemapData<Data>>(
+                tooltipElement,
+                tooltipData
+            )}
             top={tooltipTop}
         >
             <Grid container alignItems="center">
@@ -64,7 +65,7 @@ export const Treemap: FunctionComponent<TreemapProps> = (
                         {({ width }) => (
                             <TreemapInternal
                                 {...props}
-                                height={60}
+                                height={height}
                                 hideTooltip={hideTooltip}
                                 showTooltip={showTooltip}
                                 width={width}
@@ -75,19 +76,19 @@ export const Treemap: FunctionComponent<TreemapProps> = (
             </Grid>
         </TooltipWithBounds>
     );
-};
+}
 
-const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
+function TreemapInternal<Data>({
     width,
     height,
     ...props
-}: TreemapPropsInternal) => {
+}: TreemapPropsInternal<Data>): JSX.Element {
     const xMax = Math.abs(width) - margin.left - margin.right;
     const yMax = Math.abs(height) - margin.top - margin.bottom;
     const treemapClasses = useTreemapStyles();
     const theme = useTheme();
 
-    const data = stratify<TreemapData>()
+    const data: HierarchyNode<TreemapData<Data>> = stratify<TreemapData<Data>>()
         .id((d) => d.id)
         .parentId((d) => d.parent)(props.treemapData)
         .sum((d) => Math.abs(d.size) || 0);
@@ -107,11 +108,17 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
 
     const handleMouseMove = (
         event: MouseEvent<SVGGElement>,
-        node: HierarchyRectangularNode<HierarchyNode<TreemapData>> | undefined
+        node:
+            | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
+            | undefined
     ): void => {
         const clickedOnRect = event.target as SVGGElement;
 
-        if (!node || !clickedOnRect.ownerSVGElement) {
+        if (
+            !node ||
+            !clickedOnRect.ownerSVGElement ||
+            !node.data.data.extraData
+        ) {
             return;
         }
 
@@ -122,17 +129,14 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
         props.showTooltip({
             tooltipLeft: Math.min(rightBound, event.nativeEvent.offsetX),
             tooltipTop: event.nativeEvent.offsetY,
-            tooltipData: {
-                name: node.data.id || "",
-                baseline: 100,
-                current: 100,
-                change: 100,
-            },
+            tooltipData: node.data.data,
         });
     };
 
     const handleMouseClick = (
-        node: HierarchyRectangularNode<HierarchyNode<TreemapData>> | undefined
+        node:
+            | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
+            | undefined
     ): void => {
         if (!node || !node.data.id) {
             return;
@@ -143,7 +147,7 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
 
     return (
         <svg height={height} width={width}>
-            <VisxTreemap<typeof data>
+            <VisxTreemap<HierarchyNode<TreemapData<Data>>>
                 round
                 root={root}
                 size={[xMax, yMax]}
@@ -216,4 +220,6 @@ const TreemapInternal: FunctionComponent<TreemapPropsInternal> = ({
             </VisxTreemap>
         </svg>
     );
-};
+}
+
+export { Treemap };

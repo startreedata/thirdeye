@@ -1,29 +1,29 @@
-export interface TreemapProps {
+import React from "react";
+
+export interface TreemapProps<Data> {
     name: string;
-    treemapData: TreemapData[];
+    treemapData: TreemapData<Data>[];
     onDimensionClickHandler?: (treeMapNodeId: string) => void;
+    height?: number;
+    tooltipElement?: React.FunctionComponent<TreemapData<Data>>;
 }
 
-export interface TreemapData {
+export interface TreemapData<Data> {
     id: string;
     parent: string | null;
     size: number;
+    extraData?: Data;
 }
 
-type ShowTooltipParams = {
+type ShowTooltipParams<Data> = {
     tooltipLeft: number;
     tooltipTop: number;
-    tooltipData: {
-        name: string;
-        baseline: number;
-        current: number;
-        change: number;
-    };
+    tooltipData: Data;
 };
 
-export type TreemapPropsInternal = {
+export type TreemapPropsInternal<Data> = {
     width: number;
     height: number;
-    showTooltip: (params: ShowTooltipParams) => void;
+    showTooltip: (params: ShowTooltipParams<TreemapData<Data>>) => void;
     hideTooltip: () => void;
-} & TreemapProps;
+} & TreemapProps<Data>;

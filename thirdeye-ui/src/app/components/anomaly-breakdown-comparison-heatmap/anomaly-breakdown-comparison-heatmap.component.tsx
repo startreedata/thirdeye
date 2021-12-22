@@ -36,7 +36,7 @@ function summarizeDimensionValueData(
 
 function formatTreemapData(
     dimensionData: AnomalyBreakdownComparisonDataByDimensionColumn
-): TreemapData[] {
+): TreemapData<AnomalyBreakdownComparisonData>[] {
     return [
         { id: dimensionData.column, size: 0, parent: null },
         ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
@@ -44,6 +44,7 @@ function formatTreemapData(
                 id: k,
                 size: comparisonData.current,
                 parent: dimensionData.column,
+                extraData: comparisonData,
             };
         }),
     ];
@@ -135,7 +136,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                     breakdownComparisonData.map((data) => (
                         <>
                             <Divider />
-                            <Treemap
+                            <Treemap<AnomalyBreakdownComparisonData>
                                 name={data.column}
                                 treemapData={formatTreemapData(data)}
                             />

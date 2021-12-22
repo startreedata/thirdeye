@@ -1,12 +1,5 @@
-import { TreemapData } from "../../components/visualizations/treemap/treemap.interfaces";
-
 export interface AnomaliesViewPageParams {
     id: string;
-}
-
-export interface UiAnomalyBreakdown {
-    label: string;
-    treeMapData: TreemapData[];
 }
 
 export enum AnomalyBreakdownAPIOffsetValues {

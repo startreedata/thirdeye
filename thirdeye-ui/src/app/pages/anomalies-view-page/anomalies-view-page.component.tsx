@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -148,17 +148,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Card variant="outlined">
-                        <CardHeader
-                            title="Heatmap of Change in Contribution"
-                            titleTypographyProps={{ variant: "h5" }}
-                        />
-                        <CardContent>
-                            <AnomalyBreakdownComparisonHeatmap
-                                anomalyId={toNumber(params.id)}
-                            />
-                        </CardContent>
-                    </Card>
+                    <AnomalyBreakdownComparisonHeatmap
+                        anomalyId={toNumber(params.id)}
+                    />
                 </Grid>
             </Grid>
         </PageContents>

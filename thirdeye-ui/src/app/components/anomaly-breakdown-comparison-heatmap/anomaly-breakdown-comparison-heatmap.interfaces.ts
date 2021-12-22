@@ -9,6 +9,7 @@ export interface SummaryData {
     [key: string]: {
         count: number;
         percentage: number;
+        totalCount: number;
     };
 }
 
@@ -22,6 +23,8 @@ export interface AnomalyBreakdownComparisonData {
     comparison: number;
     comparisonPercentage: number;
     percentageDiff: number;
+    currentTotalCount: number;
+    comparisonTotalCount: number;
 }
 
 export interface AnomalyBreakdownComparisonDataByDimensionColumn {

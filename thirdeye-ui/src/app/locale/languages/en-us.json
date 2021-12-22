@@ -143,7 +143,12 @@
         "minimize": "Minimize",
         "maximize": "Maximize",
 
-        "authentication-error": "Authentication Error"
+        "authentication-error": "Authentication Error",
+
+        "metric-value": "Metric Value",
+        "%-contribution": "% Contribution",
+        "comparison": "Comparison",
+        "difference": "Difference"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

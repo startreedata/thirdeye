@@ -3,14 +3,14 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { formatLargeNumber } from "../../../utils/number/number.util";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
-import { useAlertEvaluationTimeSeriesTooltipStyles } from "../../visualizations/alert-evaluation-time-series/alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.styles";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
 import { AnomalyBreakdownComparisonData } from "../anomaly-breakdown-comparison-heatmap.interfaces";
+import { useDimensionHeatmapTooltipStyles } from "./dimension-heatmap-tooltip.styles";
 
 export const DimensionHeatmapTooltip: FunctionComponent<
     TreemapData<AnomalyBreakdownComparisonData>
 > = (props: TreemapData<AnomalyBreakdownComparisonData>) => {
-    const alertEvaluationTimeSeriesTooltipClasses = useAlertEvaluationTimeSeriesTooltipStyles();
+    const dimensionHeatmapTooltipStyles = useDimensionHeatmapTooltipStyles();
     const { t } = useTranslation();
 
     if (!props.extraData) {
@@ -19,26 +19,21 @@ export const DimensionHeatmapTooltip: FunctionComponent<
 
     return (
         <>
-            <Grid
-                container
-                className={
-                    alertEvaluationTimeSeriesTooltipClasses.alertEvaluationTimeSeriesTooltip
-                }
-                direction="column"
-                spacing={0}
-            >
+            <Grid container direction="column" spacing={0}>
                 {/* Name of the Dimension */}
-                <Grid
-                    item
-                    className={alertEvaluationTimeSeriesTooltipClasses.time}
-                >
+                <Grid item>
                     <Grid
                         container
                         alignItems="center"
                         justify="center"
                         spacing={0}
                     >
-                        <Grid item>
+                        <Grid
+                            item
+                            className={
+                                dimensionHeatmapTooltipStyles.spaceBottom
+                            }
+                        >
                             <Typography variant="overline">
                                 {props.id}
                             </Typography>
@@ -46,98 +41,149 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                     </Grid>
                 </Grid>
 
-                {/* Current */}
-                {isFinite(props.extraData.current) && (
-                    <Grid
-                        item
-                        className={
-                            alertEvaluationTimeSeriesTooltipClasses.nameValueContents
-                        }
-                    >
-                        {/* Name */}
-                        <Typography
-                            className={
-                                alertEvaluationTimeSeriesTooltipClasses.name
-                            }
-                            variant="subtitle2"
-                        >
-                            {t("label.current")}
-                        </Typography>
-
-                        {/* Value */}
-                        <Typography
-                            className={
-                                alertEvaluationTimeSeriesTooltipClasses.value
-                            }
-                            variant="overline"
-                        >
-                            {formatLargeNumber(props.extraData.current)}
-                        </Typography>
-                    </Grid>
-                )}
-
-                {/* Baseline */}
-                {isFinite(props.extraData.comparison) && (
-                    <Grid
-                        item
-                        className={
-                            alertEvaluationTimeSeriesTooltipClasses.nameValueContents
-                        }
-                    >
-                        {/* Name */}
-                        <Typography
-                            className={
-                                alertEvaluationTimeSeriesTooltipClasses.name
-                            }
-                            variant="subtitle2"
-                        >
-                            {t("label.baseline")}
-                        </Typography>
-
-                        {/* Value */}
-                        <Typography
-                            className={
-                                alertEvaluationTimeSeriesTooltipClasses.value
-                            }
-                            variant="overline"
-                        >
-                            {formatLargeNumber(props.extraData.comparison)}
-                        </Typography>
-                    </Grid>
-                )}
-
-                {/* Change*/}
-                {isFinite(props.extraData.percentageDiff) && (
-                    <Grid
-                        item
-                        className={
-                            alertEvaluationTimeSeriesTooltipClasses.nameValueContents
-                        }
-                    >
-                        {/* Name */}
-                        <Typography
-                            className={
-                                alertEvaluationTimeSeriesTooltipClasses.name
-                            }
-                            variant="subtitle2"
-                        >
-                            Contribution Diff
-                        </Typography>
-
-                        {/* Value */}
-                        <Typography
-                            className={
-                                alertEvaluationTimeSeriesTooltipClasses.value
-                            }
-                            variant="overline"
-                        >
-                            {formatLargeNumber(
-                                props.extraData.percentageDiff * 100
-                            )}
-                            %
-                        </Typography>
-                    </Grid>
-                )}
+                <Grid
+                    item
+                    className={dimensionHeatmapTooltipStyles.spaceBottom}
+                    xs={12}
+                >
+                    <table>
+                        <thead>
+                            <tr>
+                                <th
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCell
+                                    }
+                                />
+                                <th
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCell
+                                    }
+                                >
+                                    {t("label.metric-value")}{" "}
+                                    <small
+                                        className={
+                                            dimensionHeatmapTooltipStyles.smallText
+                                        }
+                                    >
+                                        (of total)
+                                    </small>
+                                </th>
+                                <th
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCell
+                                    }
+                                >
+                                    {t("label.%-contribution")}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellLabel
+                                    }
+                                >
+                                    {t("label.current")}
+                                </th>
+                                <td
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellData
+                                    }
+                                >
+                                    {formatLargeNumber(props.extraData.current)}
+                                    <small
+                                        className={
+                                            dimensionHeatmapTooltipStyles.smallText
+                                        }
+                                    >
+                                        {" "}
+                                        (of{" "}
+                                        {formatLargeNumber(
+                                            props.extraData.currentTotalCount
+                                        )}
+                                        )
+                                    </small>
+                                </td>
+                                <td
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellData
+                                    }
+                                >
+                                    {formatLargeNumber(
+                                        props.extraData.currentPercentage * 100
+                                    )}
+                                    %
+                                </td>
+                            </tr>
+                            <tr>
+                                <th
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellLabel
+                                    }
+                                >
+                                    {t("label.comparison")}
+                                </th>
+                                <td
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellData
+                                    }
+                                >
+                                    {formatLargeNumber(
+                                        props.extraData.comparison
+                                    )}
+                                    <small
+                                        className={
+                                            dimensionHeatmapTooltipStyles.smallText
+                                        }
+                                    >
+                                        {" "}
+                                        (of{" "}
+                                        {formatLargeNumber(
+                                            props.extraData.comparisonTotalCount
+                                        )}
+                                        )
+                                    </small>
+                                </td>
+                                <td
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellData
+                                    }
+                                >
+                                    {formatLargeNumber(
+                                        props.extraData.comparisonPercentage *
+                                            100
+                                    )}
+                                    %
+                                </td>
+                            </tr>
+                            <tr>
+                                <th
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellLabel
+                                    }
+                                >
+                                    {t("label.difference")}
+                                </th>
+                                <td
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellData
+                                    }
+                                />
+                                <td
+                                    className={
+                                        dimensionHeatmapTooltipStyles.tableCellData
+                                    }
+                                >
+                                    {formatLargeNumber(
+                                        props.extraData.percentageDiff * 100
+                                    )}
+                                    %
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </Grid>
 
                 <SafariMuiGridFix />
             </Grid>

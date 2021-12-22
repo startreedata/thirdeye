@@ -1,4 +1,4 @@
-import { Divider } from "@material-ui/core";
+import { Card, CardContent, CardHeader, Divider } from "@material-ui/core";
 import { map } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
@@ -29,6 +29,7 @@ function summarizeDimensionValueData(
         summarized[dimension] = {
             count: dimensionValueData[dimension],
             percentage: dimensionValueData[dimension] / totalCount,
+            totalCount,
         };
     });
 
@@ -100,6 +101,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                         percentageDiff:
                             currentDimensionValuesData[dimension].percentage -
                             comparisonDimensionValuesData[dimension].percentage,
+                        currentTotalCount:
+                            currentDimensionValuesData[dimension].totalCount,
+                        comparisonTotalCount:
+                            comparisonDimensionValuesData[dimension].totalCount,
                     };
                 }
             );
@@ -131,20 +136,26 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     }, [anomalyId, comparisonOffset]);
 
     return (
-        <>
-            {breakdownComparisonData &&
-                React.Children.toArray(
-                    breakdownComparisonData.map((data) => (
-                        <>
-                            <Divider />
-                            <Treemap<AnomalyBreakdownComparisonData>
-                                name={data.column}
-                                tooltipElement={DimensionHeatmapTooltip}
-                                treemapData={formatTreemapData(data)}
-                            />
-                        </>
-                    ))
-                )}
-        </>
+        <Card variant="outlined">
+            <CardHeader
+                title="Heatmap of Change in Contribution"
+                titleTypographyProps={{ variant: "h5" }}
+            />
+            <CardContent>
+                {breakdownComparisonData &&
+                    React.Children.toArray(
+                        breakdownComparisonData.map((data) => (
+                            <>
+                                <Divider />
+                                <Treemap<AnomalyBreakdownComparisonData>
+                                    name={data.column}
+                                    tooltipElement={DimensionHeatmapTooltip}
+                                    treemapData={formatTreemapData(data)}
+                                />
+                            </>
+                        ))
+                    )}
+            </CardContent>
+        </Card>
     );
 };

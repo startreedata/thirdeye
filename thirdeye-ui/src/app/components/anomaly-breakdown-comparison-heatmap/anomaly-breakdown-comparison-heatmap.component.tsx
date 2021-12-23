@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import { map } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
 import { getAnomalyMetricBreakdown } from "../../rest/rca/rca.rest";
@@ -90,6 +91,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
     >(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!anomalyBreakdownCurrent || !anomalyBreakdownComparison) {
@@ -174,7 +176,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                         </Grid>
                         <Grid item xs={6}>
                             <div>
-                                <strong>Current</strong> Date Range
+                                <strong>
+                                    &quot;{t("label.current")}&quot;
+                                </strong>{" "}
+                                Data Date Range
                             </div>
                             <div>
                                 {formatDateAndTime(anomaly.startTime)}
@@ -184,7 +189,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                         </Grid>
                         <Grid item xs={6}>
                             <div>
-                                <strong>Comparison</strong>
+                                <strong>
+                                    &quot;{t("label.comparison")}&quot;
+                                </strong>
                                 <span>
                                     {" "}
                                     Data Date Range (

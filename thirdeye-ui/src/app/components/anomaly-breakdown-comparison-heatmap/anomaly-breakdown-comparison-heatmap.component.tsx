@@ -1,9 +1,17 @@
-import { Card, CardContent, CardHeader, Divider } from "@material-ui/core";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    Divider,
+    Grid,
+    Typography,
+} from "@material-ui/core";
 import { map } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
 import { getAnomalyMetricBreakdown } from "../../rest/rca/rca.rest";
+import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
@@ -14,6 +22,20 @@ import {
     SummaryData,
 } from "./anomaly-breakdown-comparison-heatmap.interfaces";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
+
+const WEEK_IN_MILLISECONDS = 604800000;
+const OFFSET_TO_MILLISECONDS = {
+    [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
+    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: WEEK_IN_MILLISECONDS,
+    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2 * WEEK_IN_MILLISECONDS,
+    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3 * WEEK_IN_MILLISECONDS,
+};
+const OFFSET_TO_HUMAN_READABLE = {
+    [AnomalyBreakdownAPIOffsetValues.CURRENT]: "",
+    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: "One Week Ago",
+    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: "Two Weeks Ago",
+    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: "Three Weeks Ago",
+};
 
 function summarizeDimensionValueData(
     dimensionValueData: SummarizeDataFunctionParams
@@ -55,6 +77,7 @@ function formatTreemapData(
 export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = ({
     anomalyId,
     comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+    anomaly,
 }: AnomalyBreakdownComparisonHeatmapProps) => {
     const [
         anomalyBreakdownCurrent,
@@ -141,6 +164,49 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                 title="Heatmap of Change in Contribution"
                 titleTypographyProps={{ variant: "h5" }}
             />
+            {anomaly && (
+                <CardContent>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Typography variant="h6">
+                                Tooltip Reference
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div>
+                                <strong>Current</strong> Date Range
+                            </div>
+                            <div>
+                                {formatDateAndTime(anomaly.startTime)}
+                                <strong> to </strong>
+                                {formatDateAndTime(anomaly.endTime)}
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div>
+                                <strong>Comparison</strong>
+                                <span>
+                                    {" "}
+                                    Data Date Range (
+                                    {OFFSET_TO_HUMAN_READABLE[comparisonOffset]}
+                                    )
+                                </span>
+                            </div>
+                            <div>
+                                {formatDateAndTime(
+                                    anomaly.startTime -
+                                        OFFSET_TO_MILLISECONDS[comparisonOffset]
+                                )}
+                                <strong> to </strong>
+                                {formatDateAndTime(
+                                    anomaly.endTime -
+                                        OFFSET_TO_MILLISECONDS[comparisonOffset]
+                                )}
+                            </div>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            )}
             <CardContent>
                 {breakdownComparisonData &&
                     React.Children.toArray(

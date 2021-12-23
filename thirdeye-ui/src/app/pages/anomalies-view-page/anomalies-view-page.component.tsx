@@ -139,6 +139,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
                 <Grid item xs={12}>
                     <AnomalyBreakdownComparisonHeatmap
+                        anomaly={anomaly}
                         anomalyId={toNumber(params.id)}
                     />
                 </Grid>

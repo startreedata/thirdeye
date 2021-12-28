@@ -1,4 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -7,7 +12,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { getDataset, updateDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
@@ -124,17 +129,22 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            {dataset && (
-                <DatasetWizard
-                    dataset={dataset}
-                    datasources={datasources}
-                    onFinish={onDatasetWizardFinish}
-                />
-            )}
+        <PageV1>
+            <PageHeader title={t("label.update")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {dataset && (
+                        <DatasetWizard
+                            dataset={dataset}
+                            datasources={datasources}
+                            onFinish={onDatasetWizardFinish}
+                        />
+                    )}
 
-            {/* No data available message */}
-            {!dataset && <NoDataIndicator />}
-        </PageContents>
+                    {/* No data available message */}
+                    {!dataset && <NoDataIndicator />}
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

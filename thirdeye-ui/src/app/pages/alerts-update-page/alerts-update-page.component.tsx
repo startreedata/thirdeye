@@ -1,4 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { assign, isEmpty, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -6,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
@@ -250,17 +255,22 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            <AlertWizard
-                alert={alert}
-                getAlertEvaluation={fetchAlertEvaluation}
-                getAllAlerts={fetchAllAlerts}
-                getAllSubscriptionGroups={fetchAllSubscriptionGroups}
-                onFinish={onAlertWizardFinish}
-                onSubscriptionGroupWizardFinish={
-                    onSubscriptionGroupWizardFinish
-                }
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader title={t("label.update")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <AlertWizard
+                        alert={alert}
+                        getAlertEvaluation={fetchAlertEvaluation}
+                        getAllAlerts={fetchAllAlerts}
+                        getAllSubscriptionGroups={fetchAllSubscriptionGroups}
+                        onFinish={onAlertWizardFinish}
+                        onSubscriptionGroupWizardFinish={
+                            onSubscriptionGroupWizardFinish
+                        }
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

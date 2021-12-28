@@ -1,3 +1,5 @@
+import { Grid } from "@material-ui/core";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -7,7 +9,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
@@ -107,17 +109,18 @@ export const DatasetsViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            title={uiDataset ? uiDataset.name : ""}
-        >
-            {/* Dataset */}
-            <DatasetCard
-                uiDataset={uiDataset}
-                onDelete={handleDatasetDelete}
-                onEdit={handleDatasetEdit}
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader hideTimeRange title={uiDataset ? uiDataset.name : ""} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {/* Dataset */}
+                    <DatasetCard
+                        uiDataset={uiDataset}
+                        onDelete={handleDatasetDelete}
+                        onEdit={handleDatasetEdit}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

@@ -1,10 +1,12 @@
+import { Grid } from "@material-ui/core";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { createDatasource } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
@@ -50,8 +52,13 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents centered title={t("label.create")}>
-            <DatasourceWizard onFinish={onDatasourceWizardFinish} />
-        </PageContents>
+        <PageV1>
+            <PageHeader title={t("label.create")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <DatasourceWizard onFinish={onDatasourceWizardFinish} />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

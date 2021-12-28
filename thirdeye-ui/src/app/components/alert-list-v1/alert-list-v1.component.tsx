@@ -1,6 +1,4 @@
-import { Button, Grid, Link, Paper, useTheme } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
+import { Button, Grid, Link } from "@material-ui/core";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -17,11 +15,9 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
-import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
-import { TimeRangeSelectorV1 } from "../time-range/time-range-selector/time-range-selector-v1/time-range-selector-v1.component";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
-import { useAlertListV1Styles } from "./alert-list-v1.styles";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     props: AlertListV1Props
@@ -33,15 +29,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
     const history = useHistory();
 
-    const {
-        timeRangeDuration,
-        recentCustomTimeRangeDurations,
-        setTimeRangeDuration,
-    } = useTimeRange();
-
     const { t } = useTranslation();
-    const theme = useTheme();
-    const { timeRangeContainer } = useAlertListV1Styles();
 
     const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
         return data?.map((alert, index) => ({
@@ -89,25 +77,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     ): ReactElement => {
         const active = ((data as unknown) as UiAlert).active;
 
-        return (
-            <>
-                {/* Active */}
-                {active && (
-                    <CheckIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.success.main}
-                    />
-                )}
-
-                {/* Inactive */}
-                {!active && (
-                    <CloseIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.error.main}
-                    />
-                )}
-            </>
-        );
+        return <ActiveIndicator active={active} />;
     };
 
     const isActionButtonDisable = !(
@@ -155,17 +125,6 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
 
     return (
         <Grid item xs={12}>
-            <Paper className={timeRangeContainer} elevation={0}>
-                <PageContentsCardV1>
-                    <TimeRangeSelectorV1
-                        recentCustomTimeRangeDurations={
-                            recentCustomTimeRangeDurations
-                        }
-                        timeRangeDuration={timeRangeDuration}
-                        onChange={setTimeRangeDuration}
-                    />
-                </PageContentsCardV1>
-            </Paper>
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1
                     hideBorder

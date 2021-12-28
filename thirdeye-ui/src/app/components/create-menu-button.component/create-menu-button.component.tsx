@@ -1,7 +1,6 @@
 import {
     DropdownButtonTypeV1,
     DropdownButtonV1,
-    PageHeaderActionsV1,
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -102,15 +101,13 @@ export const CreateMenuButton: FunctionComponent = () => {
     };
 
     return (
-        <PageHeaderActionsV1>
-            <DropdownButtonV1
-                color="primary"
-                dropdownMenuItems={shortcutCreateMenuItems}
-                type={DropdownButtonTypeV1.Regular}
-                onClick={handleShortcutCreateOnclick}
-            >
-                {t("label.create")}
-            </DropdownButtonV1>
-        </PageHeaderActionsV1>
+        <DropdownButtonV1
+            color="primary"
+            dropdownMenuItems={shortcutCreateMenuItems}
+            type={DropdownButtonTypeV1.Regular}
+            onClick={handleShortcutCreateOnclick}
+        >
+            {t("label.create")}
+        </DropdownButtonV1>
     );
 };

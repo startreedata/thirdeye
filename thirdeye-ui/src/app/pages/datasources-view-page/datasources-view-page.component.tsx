@@ -1,5 +1,9 @@
 import { Grid } from "@material-ui/core";
-import { JSONEditorV1 } from "@startree-ui/platform-ui";
+import {
+    JSONEditorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -9,7 +13,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteDatasource,
@@ -111,8 +115,9 @@ export const DatasourcesViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents centered title={uiDatasource ? uiDatasource.name : ""}>
-            <Grid container>
+        <PageV1>
+            <PageHeader title={uiDatasource ? uiDatasource.name : ""} />
+            <PageContentsGridV1>
                 {/* Datasource */}
                 <Grid item xs={12}>
                     <DatasourceCard
@@ -133,7 +138,7 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                         }
                     />
                 </Grid>
-            </Grid>
-        </PageContents>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

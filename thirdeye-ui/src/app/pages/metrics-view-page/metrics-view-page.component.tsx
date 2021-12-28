@@ -1,3 +1,5 @@
+import { Grid } from "@material-ui/core";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -7,7 +9,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
@@ -94,17 +96,18 @@ export const MetricsViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            title={uiMetric ? uiMetric.name : ""}
-        >
-            {/* Metric */}
-            <MetricCard
-                metric={uiMetric}
-                onDelete={handleMetricDelete}
-                onEdit={handleMetricEdit}
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader hideTimeRange title={uiMetric ? uiMetric.name : ""} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {/* Metric */}
+                    <MetricCard
+                        metric={uiMetric}
+                        onDelete={handleMetricDelete}
+                        onEdit={handleMetricEdit}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

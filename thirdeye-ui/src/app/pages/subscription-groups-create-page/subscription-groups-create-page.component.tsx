@@ -1,10 +1,15 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
@@ -65,11 +70,16 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered hideTimeRange title={t("label.create")}>
-            <SubscriptionGroupWizard
-                alerts={alerts}
-                onFinish={onSubscriptionGroupWizardFinish}
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader hideTimeRange title={t("label.create")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <SubscriptionGroupWizard
+                        alerts={alerts}
+                        onFinish={onSubscriptionGroupWizardFinish}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

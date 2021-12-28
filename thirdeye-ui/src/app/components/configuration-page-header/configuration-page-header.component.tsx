@@ -1,4 +1,5 @@
 import {
+    PageHeaderActionsV1,
     PageHeaderTabsV1,
     PageHeaderTabV1,
     PageHeaderTextV1,
@@ -18,7 +19,10 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
     return (
         <PageHeaderV1>
             <PageHeaderTextV1>{t("label.configuration")}</PageHeaderTextV1>
-            <CreateMenuButton />
+            <PageHeaderActionsV1>
+                <CreateMenuButton />
+            </PageHeaderActionsV1>
+
             <PageHeaderTabsV1 selectedIndex={props.selectedIndex}>
                 <PageHeaderTabV1 href={AppRoute.SUBSCRIPTION_GROUPS}>
                     {t("label.subscription-groups")}

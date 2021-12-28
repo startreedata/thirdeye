@@ -1,11 +1,16 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
@@ -77,11 +82,16 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered hideTimeRange title={t("label.onboard")}>
-            <DatasetWizard
-                datasources={datasources}
-                onFinish={onDatasetWizardFinish}
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader hideTimeRange title={t("label.onboard")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <DatasetWizard
+                        datasources={datasources}
+                        onFinish={onDatasetWizardFinish}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

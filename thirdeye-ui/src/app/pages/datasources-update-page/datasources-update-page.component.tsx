@@ -1,4 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { assign, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -6,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     getDatasource,
     updateDatasource,
@@ -117,13 +122,18 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            {datasource && (
-                <DatasourceWizard
-                    datasource={omitNonUpdatableData(datasource)}
-                    onFinish={onDatasourceWizardFinish}
-                />
-            )}
-        </PageContents>
+        <PageV1>
+            <PageHeader title={t("label.update")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {datasource && (
+                        <DatasourceWizard
+                            datasource={omitNonUpdatableData(datasource)}
+                            onFinish={onDatasourceWizardFinish}
+                        />
+                    )}
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

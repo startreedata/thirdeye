@@ -44,9 +44,12 @@ import org.testng.annotations.Test;
 
 public class AbsoluteChangeRuleDetectorTest {
 
+  @Deprecated
   private DataProvider provider;
+  @Deprecated
   private DataFrame data;
 
+  @Deprecated
   @BeforeMethod
   public void beforeMethod() throws Exception {
     try (Reader dataReader = new InputStreamReader(
@@ -79,6 +82,7 @@ public class AbsoluteChangeRuleDetectorTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO));
   }
 
+  @Deprecated
   @Test
   public void testWeekOverWeekDifference() {
     AbsoluteChangeRuleDetector detector = new AbsoluteChangeRuleDetector();

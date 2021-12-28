@@ -44,8 +44,10 @@ import org.testng.annotations.Test;
 
 public class ThresholdRuleDetectorTest {
 
+  @Deprecated
   private DataProvider testDataProvider;
 
+  @Deprecated
   @BeforeMethod
   public void beforeMethod() {
     Map<MetricSlice, DataFrame> timeSeries = new HashMap<>();
@@ -88,6 +90,7 @@ public class ThresholdRuleDetectorTest {
         .setTimeseries(timeSeries);
   }
 
+  @Deprecated
   @Test
   public void testThresholdAlgorithmRun() throws DetectorException {
     AnomalyDetector thresholdAlgorithm = new ThresholdRuleDetector();
@@ -111,6 +114,7 @@ public class ThresholdRuleDetectorTest {
         new double[]{100, 100L, 200L, 500L, 500L});
   }
 
+  @Deprecated
   @Test
   public void testMonthlyDetectionThreshold() throws DetectorException {
     AnomalyDetector thresholdRule = new ThresholdRuleDetector();
@@ -126,6 +130,7 @@ public class ThresholdRuleDetectorTest {
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1548892800000L);
   }
 
+  @Deprecated
   @Test
   public void testMonthlyDetectionThresholdMax() throws DetectorException {
     AnomalyDetector thresholdRule = new ThresholdRuleDetector();

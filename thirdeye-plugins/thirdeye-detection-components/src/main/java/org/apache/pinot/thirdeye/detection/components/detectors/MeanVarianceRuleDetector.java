@@ -31,9 +31,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
-import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 
 import java.util.ArrayList;
@@ -80,8 +78,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
-  private static final String COL_CHANGE = "change";
-
   private InputDataFetcher dataFetcher;
   private Pattern pattern;
   private String monitoringGranularity;
@@ -115,13 +111,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
     }
 
-    //Lookback spec validation
-    //Minimum lookback set to 9. That's 8 change data points.
-    if (lookback < 9) {
-      throw new IllegalArgumentException(String.format(
-          "Lookback of %d is too small. Please increase to greater than 9.",
-          lookback));
-    }
+    checkArgument(lookback >= 5,
+        String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
   }
 
   @Override
@@ -235,7 +226,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
+    return new SimpleAnomalyDetectorV2Result(inputDf,
+        spec.getTimezone(),
+        monitoringGranularityPeriod);
   }
 
   //todo cyril move this as utils/shared method
@@ -263,27 +256,18 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final double[] lowerBoundArray = new double[size];
     final long[] resultTimeArray = new long[size];
     final double[] errorArray = new double[size];
-    final double[] std = new double[size];
-    final double[] mean = new double[size];
 
-    //get the trainingDF for each week, which is the number of lookback to 1 week before the each week predict start time
+    // todo cyril compute mean and std in a single pass
+    // https://nestedsoftware.com/2018/03/20/calculating-a-moving-average-on-streaming-data-5a7k.22879.html
+    // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
     for (int k = 0; k < size; k++) {
-      final DataFrame trainingDF;
-      trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
-      checkArgument(trainingDF.size() > 0,
-          "Data length not sufficient for lookback");
-
-      //the get historical WoW mean and std.
-      std[k] = trainingDF.getDoubles(COL_CHANGE).std().value();
-      mean[k] = trainingDF.getDoubles(COL_CHANGE).mean().value();
-
+      final DataFrame lookbackDf = getLookbackDf(inputDF, forecastDF.getLong(COL_TIME, k));
+      double mean = lookbackDf.getDoubles(COL_VALUE).mean().value();
+      double std = lookbackDf.getDoubles(COL_VALUE).std().value();
       //calculate baseline, error , upper and lower bound for prediction window.
       resultTimeArray[k] = forecastDF.getLong(COL_TIME, k);
-      baselineArray[k] =
-          trainingDF.getDouble(COL_VALUE, trainingDF.size() - 1) * (1 + mean[k]);
-      errorArray[k] =
-          trainingDF.getDouble(COL_VALUE, trainingDF.size() - 1) * sigma(
-              sensitivity) * std[k];
+      baselineArray[k] = mean;
+      errorArray[k] = sigma(sensitivity) * std;
       upperBoundArray[k] = baselineArray[k] + errorArray[k];
       lowerBoundArray[k] = baselineArray[k] - errorArray[k];
     }
@@ -299,6 +283,20 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .addSeries(COL_ERROR, DoubleSeries.buildFrom(errorArray));
 
     return resultDF;
+  }
+
+  private DataFrame getLookbackDf(final DataFrame inputDF, final long endTimeMillis) {
+    final int indexEnd = inputDF.getLongs(COL_TIME).find(endTimeMillis);
+    checkArgument(indexEnd != -1,
+        "Could not find index of endTime. endTime should exist in inputDf. This should not happen.");
+
+    DataFrame loobackDf = DataFrame.builder(COL_TIME, COL_VALUE).build();
+    final int indexStart = indexEnd - lookback;
+    checkArgument(indexStart >= 0,
+        "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
+            + indexStart);
+    loobackDf = loobackDf.append(inputDF.slice(indexStart, indexEnd));
+    return loobackDf;
   }
 
   /**
@@ -317,37 +315,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     LOG.info("Getting data for" + sliceData);
     final InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
     return data.getTimeseries().get(sliceData);
-  }
-
-  /**
-   * Returns a data frame containing lookback number of data before prediction time
-   *
-   * @param originalDF the original dataframe
-   * @param time the prediction time, in unix timestamp
-   * @return DataFrame containing lookback number of data
-   */
-  private DataFrame getLookbackDF(final DataFrame originalDF, final Long time) {
-    final LongSeries longSeries = (LongSeries) originalDF.get(COL_TIME);
-    final int indexEnd = longSeries.find(time);
-    DataFrame df = DataFrame.builder(COL_TIME, COL_VALUE).build();
-
-    if (indexEnd != -1) {
-      final int indexStart = indexEnd - lookback;
-      checkArgument(indexStart >= 0,
-          "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
-              + indexStart);
-      df = df.append(originalDF.slice(indexStart, indexEnd));
-    }
-    // calculate percentage change
-    df.addSeries(COL_CURRENT, df.getDoubles(COL_VALUE).shift(-1));
-    df.addSeries(COL_CHANGE, map((DoubleFunction) values -> {
-      if (Double.compare(values[1], 0.0) == 0) {
-        // divide by zero handling
-        return 0.0;
-      }
-      return (values[0] - values[1]) / values[1];
-    }, df.getDoubles(COL_CURRENT), df.get(COL_VALUE)));
-    return df;
   }
 
   // Check whether monitoring timeGranularity is multiple days

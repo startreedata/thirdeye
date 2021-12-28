@@ -50,8 +50,10 @@ import org.testng.annotations.Test;
  */
 public class HoltWintersDetectorTest {
 
+  @Deprecated
   private DataProvider provider;
 
+  @Deprecated
   @BeforeTest
   public void setUp() throws Exception {
     DataFrame dailyData;
@@ -100,6 +102,7 @@ public class HoltWintersDetectorTest {
         .setDatasets(Arrays.asList(hourlyDatasetConfig, dailyDatasetConfig));
   }
 
+  @Deprecated
   @Test
   public void testComputePredictedTimeSeriesDaily() {
     HoltWintersDetector detector = new HoltWintersDetector();
@@ -115,6 +118,7 @@ public class HoltWintersDetectorTest {
     Assert.assertEquals(timeSeries.getPredictedBaseline().size(), 29);
   }
 
+  @Deprecated
   @Test
   public void testRunDetectionDaily() {
     HoltWintersDetector detector = new HoltWintersDetector();
@@ -129,6 +133,7 @@ public class HoltWintersDetectorTest {
     Assert.assertEquals(anomalies.size(), 6);
   }
 
+  @Deprecated
   @Test
   public void testComputePredictedTimeSeriesHourly() {
     HoltWintersDetector detector = new HoltWintersDetector();
@@ -146,6 +151,7 @@ public class HoltWintersDetectorTest {
     Assert.assertEquals(timeSeries.getPredictedBaseline().size(), 167);
   }
 
+  @Deprecated
   @Test
   public void testRunDetectionHourly() {
     HoltWintersDetector detector = new HoltWintersDetector();

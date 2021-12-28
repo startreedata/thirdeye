@@ -62,6 +62,7 @@ public class DataFrame {
   public static final String COL_ERROR = "error";
   public static final String COL_DIFF = "diff";
   public static final String COL_DIFF_VIOLATION = "diff_violation";
+  public static final String COL_IN_WINDOW = "is_in_window";
 
 
   public static final String COLUMN_JOIN_KEY = "join_key";

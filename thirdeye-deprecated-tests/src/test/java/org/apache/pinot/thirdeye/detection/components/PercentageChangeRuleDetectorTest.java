@@ -48,9 +48,12 @@ import org.testng.annotations.Test;
 
 public class PercentageChangeRuleDetectorTest {
 
+  @Deprecated
   private DataProvider provider;
+  @Deprecated
   private DataFrame data;
 
+  @Deprecated
   @BeforeMethod
   public void beforeMethod() throws Exception {
     try (Reader dataReader = new InputStreamReader(
@@ -105,6 +108,7 @@ public class PercentageChangeRuleDetectorTest {
         .setDatasets(Collections.singletonList(datasetConfigDTO));
   }
 
+  @Deprecated
   @Test
   public void testWeekOverWeekChange() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -126,6 +130,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.zeros(ts.size()));
   }
 
+  @Deprecated
   @Test
   public void testThreeWeekMedianChange() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -152,6 +157,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(ts.getPredictedLowerBound(), DoubleSeries.zeros(ts.size()));
   }
 
+  @Deprecated
   @Test
   public void testThreeWeekMedianChangeDown() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -173,6 +179,7 @@ public class PercentageChangeRuleDetectorTest {
         DoubleSeries.fillValues(ts.size(), Double.POSITIVE_INFINITY));
   }
 
+  @Deprecated
   @Test
   public void testThreeWeekMedianChangeUporDown() {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -200,6 +207,7 @@ public class PercentageChangeRuleDetectorTest {
     checkPercentageLowerBounds(result.getTimeseries(), percentageChange);
   }
 
+  @Deprecated
   @Test
   public void testMonthlyDetectionPercentage() throws DetectorException {
     AnomalyDetector percentageRule = new PercentageChangeRuleDetector();
@@ -217,6 +225,7 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1551312000000L);
   }
 
+  @Deprecated
   @Test
   public void testZeroDivide() throws DetectorException {
     AnomalyDetector percentageRule = new PercentageChangeRuleDetector();
@@ -230,23 +239,6 @@ public class PercentageChangeRuleDetectorTest {
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertEquals(anomalies.get(0).getStartTime(), 1551484800000L);
     Assert.assertEquals(anomalies.get(0).getEndTime(), 1551488400000L);
-  }
-
-  @Test
-  public void testWeeklyDetection() throws DetectorException {
-    AnomalyDetector<PercentageChangeRuleDetectorSpec> percentageRule = new PercentageChangeRuleDetector();
-    PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setWeekStart(DayOfWeek.TUESDAY.toString());
-    spec.setPercentageChange(0.01);
-    spec.setOffset("wo1w");
-    spec.setMonitoringGranularity("1_WEEKS");
-    percentageRule.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    List<MergedAnomalyResultDTO> anomalies = percentageRule
-        .runDetection(new Interval(1562025600000L, 1562630400000L, DateTimeZone.UTC),
-            "thirdeye:metric:1").getAnomalies();
-    Assert.assertEquals(anomalies.size(), 1);
-    Assert.assertEquals(anomalies.get(0).getStartTime(), 1561420800000L);
-    Assert.assertEquals(anomalies.get(0).getEndTime(), 1562025600000L);
   }
 
   private void checkPercentageUpperBounds(TimeSeries ts, double percentageChange) {

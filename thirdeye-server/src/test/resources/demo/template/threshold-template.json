@@ -1,0 +1,52 @@
+{
+  "name": "threshold-template",
+  "description": "Threshold Template",
+  "cron": "0 0/1 * 1/1 * ? * ",
+  "nodes": [
+    {
+      "name": "root",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.min": "${min}",
+        "component.monitoringGranularity": "2_HOURS",
+        "component.metric": "met",
+        "component.max": "${max}",
+        "component.timestamp": "ts",
+        "anomaly.metric": "${metric}",
+        "component.timezone": "US/Pacific",
+        "type": "THRESHOLD",
+        "component.dimensions": [],
+        "component.offset": "mo1m",
+        "component.pattern": "down"
+      },
+      "inputs": [
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "currentOutput"
+        }
+      ]
+    }
+  ],
+  "rca": {
+    "datasource": "${dataSource}",
+    "dataset": "${dataset}",
+    "metric": "${metricColumn}"
+  }
+}

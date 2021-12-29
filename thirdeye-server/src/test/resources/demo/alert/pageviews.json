@@ -1,0 +1,114 @@
+{
+  "name": "pageviews",
+  "description": "This is a sample detection",
+  "cron": "0 */1 * * * ?",
+  "template": {
+    "rca": {
+      "datasource": "${dataSource}",
+      "dataset": "${dataset}",
+      "metric": "views"
+    },
+    "nodes": [
+      {
+        "name": "root",
+        "type": "AnomalyDetector",
+        "params": {
+          "type": "PERCENTAGE_CHANGE",
+          "component.timezone": "US/Pacific",
+          "component.monitoringGranularity": "1_DAYS",
+          "component.timestamp": "ts",
+          "component.metric": "met",
+          "component.percentageChange": "${percentageChange}",
+          "component.offset": "${offset}",
+          "component.pattern": "${pattern}",
+          "anomaly.metric": "${metric}"
+        },
+        "inputs": [
+          {
+            "targetProperty": "baseline",
+            "sourcePlanNode": "baselineMissingDataManager",
+            "sourceProperty": "baselineOutput"
+          },
+          {
+            "targetProperty": "current",
+            "sourcePlanNode": "currentMissingDataManager",
+            "sourceProperty": "currentOutput"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "baselineMissingDataManager",
+        "type": "TimeIndexFiller",
+        "inputs": [
+          {
+            "sourcePlanNode": "baselineDataFetcher",
+            "sourceProperty": "baselineOutput"
+          }
+        ],
+        "outputs": [
+          {
+            "outputName": "baselineOutput"
+          }
+        ]
+      },
+      {
+        "name": "baselineDataFetcher",
+        "type": "DataFetcher",
+        "params": {
+          "component.dataSource": "${dataSource}",
+          "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "outputKey": "pinot",
+            "outputName": "baselineOutput"
+          }
+        ]
+      },
+      {
+        "name": "currentMissingDataManager",
+        "type": "TimeIndexFiller",
+        "inputs": [
+          {
+            "sourcePlanNode": "currentDataFetcher",
+            "sourceProperty": "currentOutput"
+          }
+        ],
+        "outputs": [
+          {
+            "outputName": "currentOutput"
+          }
+        ]
+      },
+      {
+        "name": "currentDataFetcher",
+        "type": "DataFetcher",
+        "params": {
+          "component.dataSource": "${dataSource}",
+          "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "outputKey": "pinot",
+            "outputName": "currentOutput"
+          }
+        ]
+      }
+    ]
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartAzure",
+    "dataset": "pageviews",
+    "metric": "sum(views)",
+    "monitoringGranularity": "P1D",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "percentageChange": "0.2",
+    "offset": "wo1w",
+    "lookback": "P7D",
+    "pattern": "up_or_down"
+  }
+}

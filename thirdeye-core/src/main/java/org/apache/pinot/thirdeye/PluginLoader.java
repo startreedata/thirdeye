@@ -19,7 +19,6 @@ import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.PluginClassLoader;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 import org.apache.pinot.thirdeye.spi.notification.NotificationServiceFactory;
@@ -93,9 +92,6 @@ public class PluginLoader {
     log.info("Installing plugin: " + plugin.getClass().getName());
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
       dataSourcesLoader.addThirdEyeDataSourceFactory(f);
-    }
-    for (AnomalyDetectorFactory f : plugin.getAnomalyDetectorFactories()) {
-      detectionRegistry.addAnomalyDetectorFactory(f);
     }
     for (AnomalyDetectorV2Factory f : plugin.getAnomalyDetectorV2Factories()) {
       detectionRegistry.addAnomalyDetectorV2Factory(f);

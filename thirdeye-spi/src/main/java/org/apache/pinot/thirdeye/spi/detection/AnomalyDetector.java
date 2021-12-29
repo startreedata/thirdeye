@@ -22,6 +22,7 @@ package org.apache.pinot.thirdeye.spi.detection;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.joda.time.Interval;
 
+@Deprecated
 public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T> {
 
   /**

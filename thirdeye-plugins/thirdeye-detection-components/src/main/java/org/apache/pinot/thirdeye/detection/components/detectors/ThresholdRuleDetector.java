@@ -29,7 +29,6 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 
 import java.util.Map;
 import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
@@ -37,21 +36,16 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
@@ -59,15 +53,13 @@ import org.joda.time.ReadableInterval;
 /**
  * Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.
  */
-public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec>,
-    AnomalyDetectorV2<ThresholdRuleDetectorSpec>,
+public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDetectorSpec>,
     BaselineProvider<ThresholdRuleDetectorSpec> {
 
   private static final String COL_TOO_HIGH = "tooHigh";
   private static final String COL_TOO_LOW = "tooLow";
 
   private InputDataFetcher dataFetcher;
-  private TimeGranularity timeGranularity;
   private ThresholdRuleDetectorSpec spec;
   private Period monitoringGranularityPeriod;
 
@@ -75,12 +67,8 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   public void init(final ThresholdRuleDetectorSpec spec) {
     this.spec = spec;
 
+    // todo cyril refactor this
     final String monitoringGranularity = spec.getMonitoringGranularity();
-    if (monitoringGranularity.equals("1_MONTHS")) {
-      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
-    } else {
-      timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    }
   }
 
   @Override
@@ -113,31 +101,6 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
         spec.getMonitoringGranularity(),
         null);
-  }
-
-  @Override
-  public DetectionResult runDetection(final Interval window, final String metricUrn) {
-    final MetricEntity me = MetricEntity.fromURN(metricUrn);
-    final long endTime = window.getEndMillis();
-    final MetricSlice slice = MetricSlice
-        .from(me.getId(), window.getStartMillis(), endTime, me.getFilters(), timeGranularity);
-
-    final InputData data = dataFetcher.fetchData(new InputDataSpec()
-        .withTimeseriesSlices(singletonList(slice))
-        .withMetricIdsForDataset(singletonList(me.getId()))
-    );
-
-    final DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity(),
-        datasetConfig);
-
-    // Hack. To be removed when deprecating v1 pipeline
-    spec.setTimezone(datasetConfig.getTimezone());
-
-    final DataFrame df = data.getTimeseries().get(slice);
-    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(df, window);
-
-    return buildDetectionResult(detectorResult);
   }
 
   private BooleanSeries valueTooHigh(DoubleSeries values) {

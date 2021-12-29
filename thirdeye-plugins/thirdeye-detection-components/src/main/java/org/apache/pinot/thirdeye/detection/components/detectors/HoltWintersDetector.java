@@ -30,16 +30,13 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
-import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
@@ -59,7 +56,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
@@ -68,7 +64,6 @@ import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
@@ -90,7 +85,6 @@ import org.slf4j.LoggerFactory;
  * https://otexts.com/fpp2/holt-winters.html
  */
 public class HoltWintersDetector implements BaselineProvider<HoltWintersDetectorSpec>,
-    AnomalyDetector<HoltWintersDetectorSpec>,
     AnomalyDetectorV2<HoltWintersDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
@@ -107,7 +101,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private boolean smoothing;
   private String monitoringGranularity;
   private TimeGranularity timeGranularity;
-  private DayOfWeek weekStart;
   private HoltWintersDetectorSpec spec;
   private Period monitoringGranularityPeriod;
   private int lookback = 60;
@@ -222,9 +215,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     } else {
       timeGranularity = TimeGranularity.fromString(monitoringGranularity);
     }
-    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      weekStart = DayOfWeek.valueOf(spec.getWeekStart());
-    }
     optional(spec.getLookback())
         .ifPresent(lookback -> this.lookback = lookback);
   }
@@ -296,39 +286,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
         spec.getMonitoringGranularity(),
         null);
-  }
-
-  @Override
-  public DetectionResult runDetection(final Interval window, final String metricUrn) {
-    final MetricEntity metricEntity = MetricEntity.fromURN(metricUrn);
-    DateTime windowStart = window.getStart();
-    // align start day to the user specified week start
-    if (Objects.nonNull(weekStart)) {
-      windowStart = window
-          .getStart()
-          .withTimeAtStartOfDay()
-          .withDayOfWeek(weekStart.getValue())
-          .minusWeeks(1);
-    }
-
-    final DateTime trainStart = getTrainingStartTime(windowStart);
-
-    final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
-            .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
-        .getDatasetForMetricId()
-        .get(metricEntity.getId());
-    monitoringGranularityPeriod = DetectionUtils
-        .getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig);
-    spec.setTimezone(datasetConfig.getTimezone());
-
-    final DataFrame dfInput = fetchData(metricEntity,
-        trainStart.getMillis(),
-        window.getEndMillis(),
-        datasetConfig);
-
-    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(dfInput, window);
-
-    return buildDetectionResult(detectorResult);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

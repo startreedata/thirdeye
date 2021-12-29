@@ -32,10 +32,8 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -45,8 +43,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
@@ -55,7 +51,6 @@ import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.InputData;
 import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
@@ -72,8 +67,7 @@ import org.slf4j.LoggerFactory;
  * History mean and standard deviation based forecasting and detection.
  * Forecast using history mean and standard deviation.
  */
-public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRuleDetectorSpec>,
-    AnomalyDetectorV2<MeanVarianceRuleDetectorSpec>,
+public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceRuleDetectorSpec>,
     BaselineProvider<MeanVarianceRuleDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
@@ -149,41 +143,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     }
 
     return TimeSeries.fromDataFrame(resultDF);
-  }
-
-  @Override
-  public DetectionResult runDetection(final Interval window, final String metricUrn) {
-    final MetricEntity me = MetricEntity.fromURN(metricUrn);
-    final DateTime fetchStart;
-    //get historical data
-    if (isMultiDayGranularity()) {
-      fetchStart = window.getStart().minusDays(timeGranularity.getSize() * lookback);
-    } else if (monitoringGranularity.equals("1_MONTHS")) {
-      fetchStart = window.getStart().minusMonths(lookback);
-    } else {
-      fetchStart = window.getStart().minusWeeks(lookback);
-    }
-
-    final MetricSlice slice = MetricSlice.from(me.getId(),
-        fetchStart.getMillis(),
-        window.getEndMillis(),
-        me.getFilters(),
-        timeGranularity);
-    final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
-            .withMetricIdsForDataset(Collections.singleton(me.getId()))).getDatasetForMetricId()
-        .get(me.getId());
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
-        timeGranularity.toAggregationGranularityString(),
-        datasetConfig);
-    spec.setTimezone(datasetConfig.getTimezone());
-
-    // getting data (window + earliest lookback) all at once.
-    LOG.info("Getting data for" + slice);
-    final DataFrame dfInput = fetchData(me, fetchStart.getMillis(), window.getEndMillis());
-    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(dfInput, window);
-
-    return buildDetectionResult(detectorResult);
   }
 
   @Override

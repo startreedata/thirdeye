@@ -52,9 +52,6 @@ public class ThirdEyeServerDebug {
     // Load the default data sources.
     // If there are duplicate additions, this will throw an error.
     final DetectionComponentsPlugin detectionComponentsPlugin = new DetectionComponentsPlugin();
-    detectionComponentsPlugin
-        .getAnomalyDetectorFactories()
-        .forEach(detectionRegistry::addAnomalyDetectorFactory);
 
     detectionComponentsPlugin
         .getAnomalyDetectorV2Factories()

@@ -15,12 +15,14 @@ import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.spi.Plugin;
 import org.apache.pinot.thirdeye.spi.PluginClassLoader;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
+import org.apache.pinot.thirdeye.spi.notification.NotificationServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,7 @@ public class PluginLoader {
 
   private final DataSourcesLoader dataSourcesLoader;
   private final DetectionRegistry detectionRegistry;
+  private final NotificationServiceRegistry notificationServiceRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -48,9 +51,11 @@ public class PluginLoader {
   public PluginLoader(
       final DataSourcesLoader dataSourcesLoader,
       final DetectionRegistry detectionRegistry,
+      final NotificationServiceRegistry notificationServiceRegistry,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
+    this.notificationServiceRegistry = notificationServiceRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -97,6 +102,9 @@ public class PluginLoader {
     }
     for (EventTriggerFactory f : plugin.getEventTriggerFactories()) {
       detectionRegistry.addEventTriggerFactory(f);
+    }
+    for (NotificationServiceFactory f : plugin.getNotificationServiceFactories()) {
+      notificationServiceRegistry.addNotificationServiceFactory(f);
     }
   }
 

@@ -17,6 +17,7 @@
     <module>thirdeye-detection-components</module>
     <module>thirdeye-pinot</module>
     <module>thirdeye-kafka</module>
+    <module>thirdeye-notifications</module>
   </modules>
 
   <dependencies>

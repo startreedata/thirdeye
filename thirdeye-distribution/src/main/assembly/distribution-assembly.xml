@@ -72,6 +72,10 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-kafka/target/thirdeye-kafka-${project.version}-dist</directory>
       <outputDirectory>plugins/kafka/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notifications/target/thirdeye-notifications-${project.version}-dist</directory>
+      <outputDirectory>plugins/notifications-default/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

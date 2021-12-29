@@ -29,7 +29,6 @@
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
     <module>thirdeye-server</module>
-    <module>thirdeye-notifications</module>
 
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>

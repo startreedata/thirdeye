@@ -32,6 +32,7 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -54,6 +55,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
+  private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
@@ -62,10 +64,13 @@ public class NotificationTaskRunner implements TaskRunner {
   private final Counter notificationTaskCounter;
 
   @Inject
-  public NotificationTaskRunner(final NotificationSchemeFactory notificationSchemeFactory,
+  public NotificationTaskRunner(
+      final NotificationServiceRegistry notificationServiceRegistry,
+      final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final MetricRegistry metricRegistry) {
+    this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;

@@ -276,6 +276,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+    // fixme cyril implement this for e2e tests
     throw new UnsupportedOperationException();
   }
 

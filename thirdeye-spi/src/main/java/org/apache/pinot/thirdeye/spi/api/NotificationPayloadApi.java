@@ -6,7 +6,7 @@ import com.google.common.base.Objects;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class WebhookApi implements ThirdEyeApi {
+public class NotificationPayloadApi implements ThirdEyeApi {
   private SubscriptionGroupApi subscriptionGroup;
   private List<AnomalyReportApi> anomalyReports;
 
@@ -14,7 +14,7 @@ public class WebhookApi implements ThirdEyeApi {
     return subscriptionGroup;
   }
 
-  public WebhookApi setSubscriptionGroup(
+  public NotificationPayloadApi setSubscriptionGroup(
       final SubscriptionGroupApi subscriptionGroup) {
     this.subscriptionGroup = subscriptionGroup;
     return this;
@@ -24,7 +24,7 @@ public class WebhookApi implements ThirdEyeApi {
     return anomalyReports;
   }
 
-  public WebhookApi setAnomalyReports(final List<AnomalyReportApi> anomalyReports) {
+  public NotificationPayloadApi setAnomalyReports(final List<AnomalyReportApi> anomalyReports) {
     this.anomalyReports = anomalyReports;
     return this;
   }
@@ -37,7 +37,7 @@ public class WebhookApi implements ThirdEyeApi {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final WebhookApi that = (WebhookApi) o;
+    final NotificationPayloadApi that = (NotificationPayloadApi) o;
     return Objects.equal(subscriptionGroup, that.subscriptionGroup)
         && Objects.equal(anomalyReports, that.anomalyReports);
   }

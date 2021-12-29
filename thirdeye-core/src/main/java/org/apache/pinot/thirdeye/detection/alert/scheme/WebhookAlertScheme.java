@@ -18,7 +18,7 @@ import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
 import org.apache.pinot.thirdeye.notification.commons.WebhookService;
 import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
-import org.apache.pinot.thirdeye.spi.api.WebhookApi;
+import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
@@ -69,7 +69,11 @@ public class WebhookAlertScheme extends NotificationScheme {
       if (webhook != null) {
         final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(result.getValue());
         anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
-        final WebhookApi entity = processResults(subscriptionGroupDTO, anomalyResults);
+
+        final NotificationPayloadApi entity = new NotificationPayloadApi()
+            .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroupDTO))
+            .setAnomalyReports(toAnomalyReports(anomalyResults));
+
         if (sendWebhook(webhook.getUrl(), entity, webhook.getHashKey())) {
           webhookAlertsSuccessCounter.inc();
         } else {
@@ -79,7 +83,7 @@ public class WebhookAlertScheme extends NotificationScheme {
     }
   }
 
-  private boolean sendWebhook(final String url, final WebhookApi entity, final String key) {
+  private boolean sendWebhook(final String url, final NotificationPayloadApi entity, final String key) {
     final Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(url.substring(0, url.lastIndexOf('/') + 1))
         .addConverterFactory(JacksonConverterFactory.create())
@@ -100,25 +104,17 @@ public class WebhookAlertScheme extends NotificationScheme {
           url,
           response.code(),
           response.message());
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG.error("Webhook failure!");
     }
     return false;
   }
 
-  private WebhookApi processResults(final SubscriptionGroupDTO subscriptionGroup,
-      final List<MergedAnomalyResultDTO> anomalyResults) {
-    return getWebhookApi(anomalyResults, subscriptionGroup);
-  }
-
-  public WebhookApi getWebhookApi(final List<MergedAnomalyResultDTO> anomalies,
-      SubscriptionGroupDTO subsConfig) {
-    WebhookApi api = ApiBeanMapper.toWebhookApi(anomalies, subsConfig);
-    List<AnomalyReportApi> results = api.getAnomalyReports();
-    return api.setAnomalyReports(results.stream()
-        .map(result -> result.setUrl(getDashboardUrl(result.getAnomaly().getId())))
-        .collect(
-            Collectors.toList()));
+  private List<AnomalyReportApi> toAnomalyReports(final List<MergedAnomalyResultDTO> anomalies) {
+    return anomalies.stream()
+        .map(dto -> new AnomalyReportApi().setAnomaly(ApiBeanMapper.toApi(dto)))
+        .map(r -> r.setUrl(getDashboardUrl(r.getAnomaly().getId())))
+        .collect(Collectors.toList());
   }
 
   private String getDashboardUrl(final Long id) {

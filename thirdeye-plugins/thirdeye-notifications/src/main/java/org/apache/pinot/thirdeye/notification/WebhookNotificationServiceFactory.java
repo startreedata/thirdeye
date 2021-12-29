@@ -13,6 +13,8 @@ public class WebhookNotificationServiceFactory implements NotificationServiceFac
 
   @Override
   public NotificationService build(final Map<String, String> properties) {
-    return new WebhookNotificationService();
+    final WebhookNotificationService instance = new WebhookNotificationService();
+    instance.init(properties);
+    return instance;
   }
 }

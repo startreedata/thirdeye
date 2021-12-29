@@ -11,6 +11,7 @@ public class NotificationSchemeContext {
   private NotificationContent entityGroupKeyContent;
   private MetricRegistry metricRegistry;
   private SmtpConfiguration smtpConfiguration;
+  private NotificationServiceRegistry notificationServiceRegistry;
 
   public String getUiPublicUrl() {
     return uiPublicUrl;
@@ -57,6 +58,16 @@ public class NotificationSchemeContext {
   public NotificationSchemeContext setSmtpConfiguration(
       final SmtpConfiguration smtpConfiguration) {
     this.smtpConfiguration = smtpConfiguration;
+    return this;
+  }
+
+  public NotificationServiceRegistry getNotificationServiceRegistry() {
+    return notificationServiceRegistry;
+  }
+
+  public NotificationSchemeContext setNotificationServiceRegistry(
+      final NotificationServiceRegistry notificationServiceRegistry) {
+    this.notificationServiceRegistry = notificationServiceRegistry;
     return this;
   }
 }

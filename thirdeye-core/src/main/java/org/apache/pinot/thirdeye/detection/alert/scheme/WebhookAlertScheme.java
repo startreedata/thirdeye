@@ -2,11 +2,9 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
-import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 
-import com.codahale.metrics.Counter;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,19 +14,15 @@ import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotificatio
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
-import org.apache.pinot.thirdeye.notification.commons.WebhookService;
 import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
 import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
+import org.apache.pinot.thirdeye.spi.notification.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @AlertScheme(type = "WEBHOOK")
 @Singleton
@@ -37,15 +31,9 @@ public class WebhookAlertScheme extends NotificationScheme {
   private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
   private static final String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
 
-  private Counter webhookAlertsFailedCounter;
-  private Counter webhookAlertsSuccessCounter;
-
   @Override
   public void init(final NotificationSchemeContext context) {
     super.init(context);
-
-    webhookAlertsFailedCounter = metricRegistry.counter("webhookAlertsFailedCounter");
-    webhookAlertsSuccessCounter = metricRegistry.counter("webhookAlertsSuccessCounter");
   }
 
   @Override
@@ -74,41 +62,16 @@ public class WebhookAlertScheme extends NotificationScheme {
             .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroupDTO))
             .setAnomalyReports(toAnomalyReports(anomalyResults));
 
-        if (sendWebhook(webhook.getUrl(), entity, webhook.getHashKey())) {
-          webhookAlertsSuccessCounter.inc();
-        } else {
-          webhookAlertsFailedCounter.inc();
-        }
+        final NotificationService webhookNotificationService = context.getNotificationServiceRegistry()
+            .get("webhook", ImmutableMap.of(
+                "url", webhook.getUrl(),
+                "hashKey", webhook.getHashKey()
+            ));
+        webhookNotificationService.notify(entity);
       }
     }
   }
 
-  private boolean sendWebhook(final String url, final NotificationPayloadApi entity, final String key) {
-    final Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(url.substring(0, url.lastIndexOf('/') + 1))
-        .addConverterFactory(JacksonConverterFactory.create())
-        .build();
-    final Call<Void> serviceCall;
-    final WebhookService service = retrofit.create(WebhookService.class);
-    if (key == null || key.isEmpty()) {
-      serviceCall = service.sendWebhook(url, entity);
-    } else {
-      serviceCall = service.sendWebhook(url, hmacSHA512(entity, key), entity);
-    }
-    try {
-      final Response<Void> response = serviceCall.execute();
-      if (response.isSuccessful()) {
-        return true;
-      }
-      LOG.warn("Webhook failed for url {} with code {} : {}",
-          url,
-          response.code(),
-          response.message());
-    } catch (final IOException e) {
-      LOG.error("Webhook failure!");
-    }
-    return false;
-  }
 
   private List<AnomalyReportApi> toAnomalyReports(final List<MergedAnomalyResultDTO> anomalies) {
     return anomalies.stream()

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
@@ -52,7 +53,8 @@ public class NotificationSchemeFactoryTest {
         new ThirdEyeServerConfiguration(),
         mock(EntityGroupKeyContent.class),
         mock(MetricAnomaliesContent.class),
-        new MetricRegistry());
+        new MetricRegistry(),
+        mock(NotificationServiceRegistry.class));
   }
 
   @AfterClass(alwaysRun = true)

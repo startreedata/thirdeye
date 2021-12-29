@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.notification.commons;
+package org.apache.pinot.thirdeye.notification;
 
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import retrofit2.Call;

@@ -126,7 +126,8 @@ public class SendAlertTest {
         null,
         mock(EntityGroupKeyContent.class),
         mock(MetricAnomaliesContent.class),
-        new MetricRegistry());
+        new MetricRegistry(),
+        mock(NotificationServiceRegistry.class));
     this.taskRunner = new NotificationTaskRunner(
         mock(NotificationServiceRegistry.class),
         notificationSchemeFactory,

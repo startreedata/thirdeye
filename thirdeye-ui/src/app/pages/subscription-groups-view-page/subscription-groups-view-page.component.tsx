@@ -194,7 +194,6 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
-                hideTimeRange
                 title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
             />
             <PageContentsGridV1>

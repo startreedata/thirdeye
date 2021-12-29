@@ -29,16 +29,18 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
 
             <PageHeaderActionsV1>
                 {/* Time range selector */}
-                <TimeRangeSelector
-                    hideTimeRange={props.hideTimeRange || !screenWidthSmUp}
-                    hideTimeRangeSelectorButton={props.hideTimeRange}
-                    recentCustomTimeRangeDurations={
-                        recentCustomTimeRangeDurations
-                    }
-                    timeRangeDuration={timeRangeDuration}
-                    onChange={setTimeRangeDuration}
-                    onRefresh={refreshTimeRange}
-                />
+                {props.showTimeRange && (
+                    <TimeRangeSelector
+                        hideTimeRange={!screenWidthSmUp}
+                        recentCustomTimeRangeDurations={
+                            recentCustomTimeRangeDurations
+                        }
+                        timeRangeDuration={timeRangeDuration}
+                        onChange={setTimeRangeDuration}
+                        onRefresh={refreshTimeRange}
+                    />
+                )}
+
                 {/* Create options button */}
                 <CreateMenuButton />
             </PageHeaderActionsV1>

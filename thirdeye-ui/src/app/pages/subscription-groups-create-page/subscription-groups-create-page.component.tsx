@@ -71,7 +71,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader hideTimeRange title={t("label.create")} />
+            <PageHeader title={t("label.create")} />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <SubscriptionGroupWizard

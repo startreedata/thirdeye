@@ -84,7 +84,8 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.anomalies")} />
+            <PageHeader showTimeRange title={t("label.anomalies")} />
+
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {/* Anomaly list */}

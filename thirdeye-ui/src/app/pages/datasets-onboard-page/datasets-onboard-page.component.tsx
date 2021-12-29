@@ -83,7 +83,7 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader hideTimeRange title={t("label.onboard")} />
+            <PageHeader title={t("label.onboard")} />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <DatasetWizard

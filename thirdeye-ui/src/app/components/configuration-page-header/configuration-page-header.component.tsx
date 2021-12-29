@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@material-ui/core";
 import {
     PageHeaderActionsV1,
     PageHeaderTabsV1,
@@ -7,8 +8,11 @@ import {
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { theme } from "../../utils/material-ui/theme.util";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
+import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
 
 export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderProps> = (
@@ -16,10 +20,31 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
 ) => {
     const { t } = useTranslation();
 
+    const {
+        timeRangeDuration,
+        recentCustomTimeRangeDurations,
+        setTimeRangeDuration,
+        refreshTimeRange,
+    } = useTimeRange();
+
+    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
     return (
         <PageHeaderV1>
             <PageHeaderTextV1>{t("label.configuration")}</PageHeaderTextV1>
             <PageHeaderActionsV1>
+                {/* Time range selector */}
+                <TimeRangeSelector
+                    hideTimeRange={!screenWidthSmUp}
+                    recentCustomTimeRangeDurations={
+                        recentCustomTimeRangeDurations
+                    }
+                    timeRangeDuration={timeRangeDuration}
+                    onChange={setTimeRangeDuration}
+                    onRefresh={refreshTimeRange}
+                />
+
+                {/* Create options button */}
                 <CreateMenuButton />
             </PageHeaderActionsV1>
 

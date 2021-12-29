@@ -1,4 +1,4 @@
 export interface PageHeaderProps {
     title: string;
-    hideTimeRange?: boolean;
+    showTimeRange?: boolean;
 }

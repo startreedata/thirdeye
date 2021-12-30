@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.notification;
+package org.apache.pinot.thirdeye.notification.webhook;
 
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import retrofit2.Call;

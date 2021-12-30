@@ -1,6 +1,4 @@
-package org.apache.pinot.thirdeye.notification;
-
-import static java.util.Objects.requireNonNull;
+package org.apache.pinot.thirdeye.notification.webhook;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
@@ -27,35 +24,34 @@ public class WebhookNotificationService implements NotificationService {
   private static final String HMAC_SHA512 = "HmacSHA512";
   private static final String AUTH_TYPE = "Thirdeye-HMAC-SHA512";
 
-  private String url;
-  private String hashKey;
-  private WebhookService service;
+  private final String url;
+  private final String hashKey;
+  private final WebhookService service;
 
-  public static String hmacSHA512(Object entity, String key) {
-    Mac sha512Hmac;
-    final byte[] byteKey = key.getBytes(StandardCharsets.UTF_8);
-    try {
-      sha512Hmac = Mac.getInstance(HMAC_SHA512);
-      SecretKeySpec keySpec = new SecretKeySpec(byteKey, HMAC_SHA512);
-      sha512Hmac.init(keySpec);
-      byte[] macData = sha512Hmac.doFinal(new ObjectMapper().writeValueAsBytes(entity));
-      return String.format("%s %s", AUTH_TYPE, Base64.getEncoder().encodeToString(macData));
-    } catch (NoSuchAlgorithmException | InvalidKeyException | JsonProcessingException e) {
-      LOG.error("Signature generation failure!", e);
-      return null;
-    }
-  }
-
-  @Override
-  public void init(final Map<String, String> properties) {
-    url = requireNonNull(properties.get("url"), "url property required");
-    hashKey = properties.get("hashKey");
+  public WebhookNotificationService(final WebhookConfiguration webhookConfiguration) {
+    url = webhookConfiguration.getUrl();
+    hashKey = webhookConfiguration.getHashKey();
 
     final Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(url.substring(0, url.lastIndexOf('/') + 1))
         .addConverterFactory(JacksonConverterFactory.create())
         .build();
     service = retrofit.create(WebhookService.class);
+  }
+
+  public static String hmacSHA512(final Object entity, final String key) {
+    final Mac sha512Hmac;
+    final byte[] byteKey = key.getBytes(StandardCharsets.UTF_8);
+    try {
+      sha512Hmac = Mac.getInstance(HMAC_SHA512);
+      final SecretKeySpec keySpec = new SecretKeySpec(byteKey, HMAC_SHA512);
+      sha512Hmac.init(keySpec);
+      final byte[] macData = sha512Hmac.doFinal(new ObjectMapper().writeValueAsBytes(entity));
+      return String.format("%s %s", AUTH_TYPE, Base64.getEncoder().encodeToString(macData));
+    } catch (final NoSuchAlgorithmException | InvalidKeyException | JsonProcessingException e) {
+      LOG.error("Signature generation failure!", e);
+      return null;
+    }
   }
 
   @Override

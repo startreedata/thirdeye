@@ -448,7 +448,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
-    throw new UnsupportedOperationException();
+    return this.delegate.fetchDataTable(request);
   }
 
   @Override

@@ -1,25 +1,88 @@
 {
   "alert": {
-    "name": "alert-test-1d",
-    "description": "Percentage drop",
-    "nodes": {
-      "detection_rule_1": {
-        "type": "DETECTION",
-        "subType": "PERCENTAGE_RULE",
-        "metric": {
-          "name": "purchases",
-          "dataset": {
-            "name": "business"
-          }
+    "name": "pageviews",
+    "description": "This is a sample detection",
+    "cron": "0 */1 * * * ?",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "component.percentageChange": "${percentageChange}",
+            "component.monitoringGranularity": "1_DAYS",
+            "component.metric": "met",
+            "component.timestamp": "ts",
+            "anomaly.metric": "${metric}",
+            "component.timezone": "US/Pacific",
+            "anomaly.source": "pageviews/root",
+            "type": "PERCENTAGE_CHANGE",
+            "component.offset": "${offset}",
+            "component.pattern": "${pattern}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "baseline",
+              "sourcePlanNode": "baselineDataFetcher",
+              "sourceProperty": "baselineOutput"
+            },
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": []
         },
-        "params": {
-          "offset": "wo1w",
-          "percentageChange": 0.1,
-          "pattern": "down"
+        {
+          "name": "baselineDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "baselineOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
         }
+      ],
+      "rca": {
+        "datasource": "${dataSource}",
+        "dataset": "${dataset}",
+        "metric": "purchases"
       }
     },
-    "lastTimestamp": 0
+    "templateProperties": {
+      "dataSource": "mock1",
+      "dataset": "business",
+      "metric": "sum(purchases)",
+      "monitoringGranularity": "P1D",
+      "timeColumn": "date",
+      "timeColumnFormat": "yyyyMMdd",
+      "percentageChange": "0.2",
+      "offset": "wo1w",
+      "lookback": "P7D",
+      "pattern": "up_or_down"
+    }
   },
   "start": 1577865600000,
   "end": 1590994800000

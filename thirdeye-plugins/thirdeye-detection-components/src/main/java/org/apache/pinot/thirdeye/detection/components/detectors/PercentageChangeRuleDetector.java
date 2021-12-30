@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.components.detectors.AbsoluteChangeRuleDetector.windowMatch;
 import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
@@ -37,28 +36,18 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.DoubleFunction;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.map;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.aggregateByPeriod;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.buildDetectionResult;
-import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.filterIncompleteAggregation;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 import static org.apache.pinot.thirdeye.spi.detection.Pattern.valueOf;
 
-import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
@@ -66,17 +55,10 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
-import org.apache.pinot.thirdeye.spi.detection.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
@@ -85,7 +67,6 @@ import org.joda.time.ReadableInterval;
  * Computes a multi-week aggregate baseline and compares the current value based on relative change.
  */
 public class PercentageChangeRuleDetector implements
-    AnomalyDetector<PercentageChangeRuleDetectorSpec>,
     AnomalyDetectorV2<PercentageChangeRuleDetectorSpec>,
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
 
@@ -93,9 +74,8 @@ public class PercentageChangeRuleDetector implements
   private InputDataFetcher dataFetcher;
   private Baseline baseline;
   private Pattern pattern;
+  // todo cyril refactor this
   private String monitoringGranularity;
-  private TimeGranularity timeGranularity;
-  private DayOfWeek weekStart;
   private PercentageChangeRuleDetectorSpec spec;
   private Period monitoringGranularityPeriod;
 
@@ -108,15 +88,6 @@ public class PercentageChangeRuleDetector implements
     pattern = valueOf(spec.getPattern().toUpperCase());
 
     monitoringGranularity = spec.getMonitoringGranularity();
-    if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
-        .endsWith(TimeGranularity.WEEKS)) {
-      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
-    } else {
-      timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    }
-    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      weekStart = DayOfWeek.valueOf(spec.getWeekStart());
-    }
   }
 
   @Override
@@ -151,76 +122,6 @@ public class PercentageChangeRuleDetector implements
 
     monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity(),
         null);
-  }
-
-  @Override
-  public DetectionResult runDetection(final Interval window, final String metricUrn) {
-    DateTime windowStart = window.getStart();
-
-    // align start day to the user specified week start
-    if (Objects.nonNull(weekStart)) {
-      windowStart = window
-          .getStart()
-          .withTimeAtStartOfDay()
-          .withDayOfWeek(weekStart.getValue())
-          .minusWeeks(1);
-    }
-
-    final MetricEntity me = MetricEntity.fromURN(metricUrn);
-    final MetricSlice slice = MetricSlice.from(me.getId(),
-        windowStart.getMillis(),
-        window.getEndMillis(),
-        me.getFilters(),
-        timeGranularity);
-
-    final List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
-    slices.add(slice);
-
-    final InputData data = dataFetcher
-        .fetchData(new InputDataSpec().withTimeseriesSlices(slices)
-            .withMetricIdsForDataset(singletonList(slice.getMetricId()))
-            .withMetricIds(singletonList(me.getId())));
-
-    DataFrame dfBase = baseline.gather(slice, data.getTimeseries());
-    DataFrame dfCurr = data.getTimeseries().get(slice);
-
-    final DatasetConfigDTO datasetConfig = data.getDatasetForMetricId().get(me.getId());
-    monitoringGranularityPeriod = DetectionUtils
-        .getMonitoringGranularityPeriod(spec.getMonitoringGranularity(), datasetConfig);
-    // Hack. To be removed when deprecating v1 pipeline
-    spec.setTimezone(datasetConfig.getTimezone());
-
-    // aggregate data to specified weekly granularity
-    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      final long latestDataTimeStamp = dfCurr.getLong(COL_TIME, dfCurr.size() - 1);
-
-      final MetricConfigDTO metricConfig = data.getMetrics().get(me.getId());
-      final MetricAggFunction defaultAggFunction = metricConfig.getDefaultAggFunction();
-
-      dfCurr = aggregateByPeriod(dfCurr,
-          windowStart,
-          monitoringGranularityPeriod,
-          defaultAggFunction);
-
-      dfCurr = filterIncompleteAggregation(dfCurr,
-          latestDataTimeStamp,
-          datasetConfig.bucketTimeGranularity(),
-          monitoringGranularityPeriod);
-
-      dfBase = aggregateByPeriod(dfBase,
-          windowStart,
-          monitoringGranularityPeriod,
-          defaultAggFunction);
-    }
-
-    // Renaming the metric column so that the join doesn't overwrite.
-    dfCurr.renameSeries(COL_VALUE, COL_CURRENT);
-
-    // Inner Join the current and baseline series
-    final DataFrame mergedDf = new DataFrame(dfCurr).addSeries(dfBase);
-    final AnomalyDetectorV2Result detectorResult = runDetectionOnSingleDataTable(mergedDf, window);
-
-    return buildDetectionResult(detectorResult);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

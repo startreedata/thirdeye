@@ -38,7 +38,6 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
@@ -78,7 +77,6 @@ public class DetectionRegistry {
   private static final String KEY_CLASS_NAME = "className";
   private static final String KEY_ANNOTATION = "annotation";
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
-  private static final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
   private static final Map<String, AnomalyDetectorV2Factory> anomalyDetectorV2FactoryMap = new HashMap<>();
   private static final Map<String, EventTriggerFactory> triggerFactoryMap = new HashMap<>();
 
@@ -167,10 +165,6 @@ public class DetectionRegistry {
     }
   }
 
-  public void addAnomalyDetectorFactory(final AnomalyDetectorFactory f) {
-    anomalyDetectorFactoryMap.put(f.name(), f);
-  }
-
   public void addAnomalyDetectorV2Factory(final AnomalyDetectorV2Factory f) {
     anomalyDetectorV2FactoryMap.put(f.name(), f);
   }
@@ -179,12 +173,12 @@ public class DetectionRegistry {
     triggerFactoryMap.put(f.name(), f);
   }
 
+  @Deprecated
+  // always returns null - legacy detector not available anymore
+  // todo cyril remove once DetectionPipeline is removed
   public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
       AnomalyDetectorFactoryContext context) {
-    if (anomalyDetectorFactoryMap.containsKey(factoryName)) {
-      return anomalyDetectorFactoryMap.get(factoryName).build(context);
-    }
     return null;
   }
 
@@ -230,9 +224,7 @@ public class DetectionRegistry {
 
   private void validate(final String type) {
     requireNonNull(type, "type is null");
-    checkArgument(
-        REGISTRY_MAP.containsKey(type) || anomalyDetectorFactoryMap.containsKey(type),
-        type + " not found in registry");
+    checkArgument(REGISTRY_MAP.containsKey(type), type + " not found in registry");
   }
 
   /**
@@ -251,9 +243,6 @@ public class DetectionRegistry {
 
   public boolean isBaselineProvider(String type) {
     validate(type);
-    if (anomalyDetectorFactoryMap.containsKey(type)) {
-      return anomalyDetectorFactoryMap.get(type).isBaselineProvider();
-    }
     return MapUtils.getBooleanValue(REGISTRY_MAP.get(type), KEY_IS_BASELINE_PROVIDER);
   }
 

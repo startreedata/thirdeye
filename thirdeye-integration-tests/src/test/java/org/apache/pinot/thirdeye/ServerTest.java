@@ -163,7 +163,6 @@ public class ServerTest {
         .post(Entity.json(entity));
 
     assertThat(response.getStatus()).isEqualTo(200);
-
     final AlertEvaluationApi alertEvaluationApi = response.readEntity(AlertEvaluationApi.class);
     assertThat(alertEvaluationApi).isNotNull();
   }

@@ -95,7 +95,7 @@ function TreemapInternal<Data>({
 
     const colorScale = scaleLinear<string>({
         domain: [0, Math.max(...props.treemapData.map((d) => d.size || 0))],
-        range: [theme.palette.error.light, theme.palette.success.light],
+        range: [theme.palette.success.light, theme.palette.error.light],
     });
 
     const root = hierarchy(data).sort(
@@ -138,11 +138,21 @@ function TreemapInternal<Data>({
             | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
             | undefined
     ): void => {
-        if (!node || !node.data.id) {
+        if (
+            !node ||
+            (node.data.id && node?.data?.id.toLowerCase() === "other")
+        ) {
             return;
         }
+        let key = "";
+        if (node.data.data.parent) {
+            key = node.data.data.parent.toString();
+        }
         props.onDimensionClickHandler &&
-            props.onDimensionClickHandler(node.data.id);
+            props.onDimensionClickHandler({
+                key,
+                value: node.data.id || "",
+            });
     };
 
     return (

@@ -1,11 +1,13 @@
 import React from "react";
+import { AnomalyFilterOptions } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
 export interface TreemapProps<Data> {
     name: string;
     treemapData: TreemapData<Data>[];
-    onDimensionClickHandler?: (treeMapNodeId: string) => void;
+    onDimensionClickHandler?: (treeMapNode: AnomalyFilterOptions) => void;
     height?: number;
     tooltipElement?: React.FunctionComponent<TreemapData<Data>>;
+    colorChangeFactor?: string;
 }
 
 export interface TreemapData<Data> {

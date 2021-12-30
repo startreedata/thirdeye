@@ -7,6 +7,6 @@ export interface AnomalyBreakdown {
 export interface AnomalyBreakdownRequest {
     offset?: string;
     timezone?: string;
-    filters?: string;
+    filters?: string[];
     limit?: string;
 }

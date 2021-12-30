@@ -87,6 +87,10 @@ smtp:
   secretKeyRef:
     name: smtp-credentials
 
+tls:
+  enabled: false
+  password: password
+
 auth:
   enabled: false
 #  infoURL: <platform url>/api/info

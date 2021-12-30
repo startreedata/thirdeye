@@ -10,21 +10,20 @@ data:
     ######################################################
 
     server:
-      type: simple
+      type: default
       applicationContextPath: /
       adminContextPath: /admin
 
-      connector:
-        type: http
-        port: {{ .Values.coordinator.port }}
-        idleTimeout: 620s
-    #   SSL connector is disabled since APP Engine only allows exposing a single port.
-    #   A sample keystore and password is added so that this can be tested locally.
-    #   However, the settings currently don't work on GAE
-    #    - type: https
-    #      port: 8443
-    #      keyStorePath: conf/keystore.jks
-    #      keyStorePassword: password
+      applicationConnectors:
+        - type: http
+          port: {{ .Values.coordinator.port }}
+          idleTimeout: 620s
+        {{- if .Values.tls.enabled }}
+        - type: https
+          port: 443
+          keyStorePath: /opt/thirdeye/server/keystore/keystore
+          keyStorePassword: {{ .Values.tls.password }}
+        {{- end }}
 
     logging:
       level: INFO

@@ -1,4 +1,13 @@
-import { Chip, Divider, Grid, TextField, Typography } from "@material-ui/core";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    Chip,
+    Divider,
+    Grid,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { isEmpty, isString, map, pull } from "lodash";
@@ -7,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
 import { getAnomalyMetricBreakdown } from "../../rest/rca/rca.rest";
+import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
@@ -24,12 +34,25 @@ const OPTIONS_LIMIT = 10;
 const filterOptions = createFilterOptions({
     limit: OPTIONS_LIMIT,
 });
+const WEEK_IN_MILLISECONDS = 604800000;
+const OFFSET_TO_MILLISECONDS = {
+    [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
+    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: WEEK_IN_MILLISECONDS,
+    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2 * WEEK_IN_MILLISECONDS,
+    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3 * WEEK_IN_MILLISECONDS,
+};
+const OFFSET_TO_HUMAN_READABLE = {
+    [AnomalyBreakdownAPIOffsetValues.CURRENT]: "",
+    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: "One Week Ago",
+    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: "Two Weeks Ago",
+    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: "Three Weeks Ago",
+};
 
 function summarizeDimensionValueData(
     dimensionValueData: SummarizeDataFunctionParams
 ): SummaryData {
     const summarized: SummaryData = {};
-    if (!dimensionValueData) {
+    if (isEmpty(dimensionValueData)) {
         return summarized;
     }
 
@@ -43,6 +66,7 @@ function summarizeDimensionValueData(
         summarized[dimension] = {
             count: dimensionValueData[dimension],
             percentage: dimensionValueData[dimension] / totalCount,
+            totalCount,
         };
     });
 
@@ -68,6 +92,7 @@ function formatTreemapData(
 export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = ({
     anomalyId,
     comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+    anomaly,
 }: AnomalyBreakdownComparisonHeatmapProps) => {
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
@@ -144,6 +169,11 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                 ?.percentage || 0) -
                             (comparisonDimensionValuesData[dimension]
                                 ?.percentage || 0),
+                        currentTotalCount:
+                            currentDimensionValuesData[dimension]?.totalCount,
+                        comparisonTotalCount:
+                            comparisonDimensionValuesData[dimension]
+                                ?.totalCount,
                     };
                 }
             );
@@ -208,81 +238,140 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     };
 
     return (
-        <>
-            <Grid container className={classes.filtersContainer} xs={12}>
-                {anomalyFilterOptions && (
-                    <Grid item xs={6}>
-                        <Autocomplete
-                            freeSolo
-                            multiple
-                            filterOptions={filterOptions}
-                            getOptionLabel={(option: any) =>
-                                isString(option.value) ? option.value : ""
-                            }
-                            groupBy={(option: any) =>
-                                isString(option.key) ? option.key : ""
-                            }
-                            options={anomalyFilterOptions || []}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    fullWidth
-                                    label={t("label.filter-by")}
-                                    placeholder={t(
-                                        "message.anomaly-filter-search"
-                                    )}
-                                    variant="outlined"
-                                />
-                            )}
-                            renderTags={() =>
-                                anomalyFilters.map(
-                                    (option: AnomalyFilterOptions, index) => (
-                                        <Chip
-                                            className="filter-chip"
-                                            key={`${index}_${option.value}`}
-                                            label={option.value}
-                                            onDelete={() =>
-                                                handleNodeClick(option)
-                                            }
-                                        />
+        <Card variant="outlined">
+            <CardHeader
+                title="Heatmap of Change in Contribution"
+                titleTypographyProps={{ variant: "h5" }}
+            />
+            {anomaly && (
+                <CardContent>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Typography variant="h6">
+                                Tooltip Reference
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div>
+                                <strong>
+                                    &quot;{t("label.current")}&quot;
+                                </strong>{" "}
+                                Data Date Range
+                            </div>
+                            <div>
+                                {formatDateAndTime(anomaly.startTime)}
+                                <strong> to </strong>
+                                {formatDateAndTime(anomaly.endTime)}
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div>
+                                <strong>
+                                    &quot;{t("label.comparison")}&quot;
+                                </strong>
+                                <span>
+                                    {" "}
+                                    Data Date Range (
+                                    {OFFSET_TO_HUMAN_READABLE[comparisonOffset]}
                                     )
-                                )
-                            }
-                            value={anomalyFilters}
-                            onChange={(e, options) =>
-                                handleOnChangeFilter(
-                                    options as AnomalyFilterOptions[]
-                                )
-                            }
-                        />
+                                </span>
+                            </div>
+                            <div>
+                                {formatDateAndTime(
+                                    anomaly.startTime -
+                                        OFFSET_TO_MILLISECONDS[comparisonOffset]
+                                )}
+                                <strong> to </strong>
+                                {formatDateAndTime(
+                                    anomaly.endTime -
+                                        OFFSET_TO_MILLISECONDS[comparisonOffset]
+                                )}
+                            </div>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            )}
+            <CardContent>
+                <Grid container className={classes.filtersContainer} xs={12}>
+                    {anomalyFilterOptions && (
+                        <Grid item xs={6}>
+                            <Autocomplete
+                                freeSolo
+                                multiple
+                                filterOptions={filterOptions}
+                                getOptionLabel={(option: any) =>
+                                    isString(option.value) ? option.value : ""
+                                }
+                                groupBy={(option: any) =>
+                                    isString(option.key) ? option.key : ""
+                                }
+                                options={anomalyFilterOptions || []}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        fullWidth
+                                        label={t("label.filter-by")}
+                                        placeholder={t(
+                                            "message.anomaly-filter-search"
+                                        )}
+                                        variant="outlined"
+                                    />
+                                )}
+                                renderTags={() =>
+                                    anomalyFilters.map(
+                                        (
+                                            option: AnomalyFilterOptions,
+                                            index
+                                        ) => (
+                                            <Chip
+                                                className="filter-chip"
+                                                key={`${index}_${option.value}`}
+                                                label={option.value}
+                                                onDelete={() =>
+                                                    handleNodeClick(option)
+                                                }
+                                            />
+                                        )
+                                    )
+                                }
+                                value={anomalyFilters}
+                                onChange={(_e, options) =>
+                                    handleOnChangeFilter(
+                                        options as AnomalyFilterOptions[]
+                                    )
+                                }
+                            />
+                        </Grid>
+                    )}
+                </Grid>
+                {loading ? (
+                    <AppLoadingIndicatorV1 />
+                ) : !isEmpty(breakdownComparisonData) ? (
+                    React.Children.toArray(
+                        breakdownComparisonData &&
+                            breakdownComparisonData.map((data) => (
+                                <>
+                                    <Divider />
+                                    <Treemap<AnomalyBreakdownComparisonData>
+                                        colorChangeFactor="percentageDiff"
+                                        name={data.column}
+                                        tooltipElement={DimensionHeatmapTooltip}
+                                        treemapData={formatTreemapData(data)}
+                                        onDimensionClickHandler={
+                                            handleNodeClick
+                                        }
+                                    />
+                                </>
+                            ))
+                    )
+                ) : (
+                    <Grid xs={12}>
+                        <Typography variant="body1">
+                            {t("message.no-data")}
+                        </Typography>
                     </Grid>
                 )}
-            </Grid>
-            {loading ? (
-                <AppLoadingIndicatorV1 />
-            ) : !isEmpty(breakdownComparisonData) ? (
-                React.Children.toArray(
-                    breakdownComparisonData &&
-                        breakdownComparisonData.map((data) => (
-                            <>
-                                <Divider />
-                                <Treemap<AnomalyBreakdownComparisonData>
-                                    colorChangeFactor="percentageDiff"
-                                    name={data.column}
-                                    tooltipElement={DimensionHeatmapTooltip}
-                                    treemapData={formatTreemapData(data)}
-                                    onDimensionClickHandler={handleNodeClick}
-                                />
-                            </>
-                        ))
-                )
-            ) : (
-                <Grid xs={12}>
-                    <Typography variant="body1">
-                        {t("message.no-data")}
-                    </Typography>
-                </Grid>
-            )}
-        </>
+            </CardContent>
+        </Card>
     );
 };

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -12,8 +12,9 @@ import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-
 import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
-import { getAlertEvaluation } from "../../rest/alerts/alerts.rest";
-import { deleteAnomaly, getAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
+import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
@@ -29,6 +30,8 @@ import {
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
+    const { evaluation, getEvaluation } = useGetEvaluation();
+    const { anomaly, getAnomaly } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [
         alertEvaluation,
@@ -48,61 +51,48 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly
-        fetchAnomaly();
+        isValidNumberId(params.id) && getAnomaly(toNumber(params.id));
     }, [timeRangeDuration]);
 
     useEffect(() => {
-        // Fetched anomaly changed, fetch alert evaluation
+        !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
+    }, [anomaly]);
+
+    useEffect(() => {
+        !!evaluation && setAlertEvaluation(evaluation);
+    }, [evaluation]);
+
+    useEffect(() => {
+        // Fetched alert changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [uiAnomaly]);
+    }, [anomaly]);
 
-    const fetchAnomaly = (): void => {
+    if (!isValidNumberId(params.id)) {
+        // Invalid id
+        enqueueSnackbar(
+            t("message.invalid-id", {
+                entity: t("label.anomaly"),
+                id: params.id,
+            }),
+            getErrorSnackbarOption()
+        );
+
         setUiAnomaly(null);
-        let fetchedUiAnomaly = {} as UiAnomaly;
-
-        if (!isValidNumberId(params.id)) {
-            // Invalid id
-            enqueueSnackbar(
-                t("message.invalid-id", {
-                    entity: t("label.anomaly"),
-                    id: params.id,
-                }),
-                getErrorSnackbarOption()
-            );
-
-            setUiAnomaly(fetchedUiAnomaly);
-
-            return;
-        }
-
-        getAnomaly(toNumber(params.id))
-            .then((anomaly) => {
-                fetchedUiAnomaly = getUiAnomaly(anomaly);
-            })
-            .finally(() => setUiAnomaly(fetchedUiAnomaly));
-    };
+    }
 
     const fetchAlertEvaluation = (): void => {
-        setAlertEvaluation(null);
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-
-        if (!uiAnomaly) {
-            setAlertEvaluation(fetchedAlertEvaluation);
+        if (!anomaly || !anomaly.alert) {
+            setAlertEvaluation(null);
 
             return;
         }
-
-        getAlertEvaluation(
+        getEvaluation(
             createAlertEvaluation(
-                uiAnomaly.alertId,
+                anomaly.alert.id,
                 timeRangeDuration.startTime,
                 timeRangeDuration.endTime
             )
-        )
-            .then((alertEvaluation) => {
-                fetchedAlertEvaluation = alertEvaluation;
-            })
-            .finally(() => setAlertEvaluation(fetchedAlertEvaluation));
+        );
     };
 
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
@@ -148,17 +138,10 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Card variant="outlined">
-                        <CardHeader
-                            title="Heatmap of Change in Contribution"
-                            titleTypographyProps={{ variant: "h5" }}
-                        />
-                        <CardContent>
-                            <AnomalyBreakdownComparisonHeatmap
-                                anomalyId={toNumber(params.id)}
-                            />
-                        </CardContent>
-                    </Card>
+                    <AnomalyBreakdownComparisonHeatmap
+                        anomaly={anomaly}
+                        anomalyId={toNumber(params.id)}
+                    />
                 </Grid>
             </Grid>
         </PageContents>

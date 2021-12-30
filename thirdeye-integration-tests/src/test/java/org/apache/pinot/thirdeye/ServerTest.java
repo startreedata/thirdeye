@@ -34,7 +34,6 @@ import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 public class ServerTest {
@@ -156,8 +155,6 @@ public class ServerTest {
   }
 
   @Test(dependsOnMethods = "testLoadMockDataSource")
-  @Ignore
-  //fixme cyril do not ignore this test
   public void testEvaluate() throws IOException {
     final AlertEvaluationApi entity = loadApiFromFile("payload_alerts_evaluate.json",
         AlertEvaluationApi.class);

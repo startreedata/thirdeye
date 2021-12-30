@@ -5,11 +5,9 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
-import org.apache.pinot.thirdeye.alert.AlertExecutionPlanBuilder;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +16,8 @@ public class AlertApiBeanMapper {
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertApiBeanMapper.class);
 
-  private final DataProvider dataProvider;
-
   @Inject
-  public AlertApiBeanMapper(
-      final DataProvider dataProvider) {
-    this.dataProvider = dataProvider;
+  public AlertApiBeanMapper() {
   }
 
   public AlertDTO toAlertDTO(final AlertApi api) {
@@ -55,10 +49,7 @@ public class AlertApiBeanMapper {
         .ifPresent(dto::setCreatedBy);
 
     if (api.getNodes() != null) {
-      final AlertExecutionPlanBuilder builder = new AlertExecutionPlanBuilder(dataProvider)
-          .process(api);
-      dto.setProperties(builder.getProperties());
-      dto.setComponentSpecs(builder.getComponentSpecs());
+      LOG.error("nodes field is not null, but legacy detection config is not supported anymore. Parsing skipped");
     }
 
     return dto;

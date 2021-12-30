@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
-
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +47,7 @@ import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
  */
 public class GrouperWrapper extends DetectionPipeline {
 
+  private static final String PROP_SUB_ENTITY_NAME = "subEntityName";
   private static final String PROP_NESTED = "nested";
   private static final String PROP_GROUPER = "grouper";
 

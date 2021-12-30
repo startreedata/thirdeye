@@ -6,7 +6,7 @@ public interface AnomalyDetectorV2Factory {
 
   <T extends AbstractSpec>
   AnomalyDetectorV2<T> build(
-      AnomalyDetectorFactoryContext context);
+      AnomalyDetectorFactoryV2Context context);
 
   boolean isBaselineProvider();
 }

@@ -38,7 +38,7 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
@@ -178,13 +178,13 @@ public class DetectionRegistry {
   // todo cyril remove once DetectionPipeline is removed
   public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
-      AnomalyDetectorFactoryContext context) {
+      AnomalyDetectorFactoryV2Context context) {
     return null;
   }
 
   public AnomalyDetectorV2<AbstractSpec> buildDetectorV2(
       String factoryName,
-      AnomalyDetectorFactoryContext context) {
+      AnomalyDetectorFactoryV2Context context) {
     checkArgument(anomalyDetectorV2FactoryMap.containsKey(factoryName),
         String.format("Detector type not registered: %s. Available detectors: %s",
             factoryName,

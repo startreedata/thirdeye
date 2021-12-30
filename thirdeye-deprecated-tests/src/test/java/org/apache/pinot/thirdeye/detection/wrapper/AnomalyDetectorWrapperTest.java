@@ -16,57 +16,13 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AnomalyDetectorWrapperTest {
-
-  @BeforeMethod
-  public void setUp() {
-    MockDataProvider provider = new MockDataProvider();
-    MetricConfigDTO metric = new MetricConfigDTO();
-    metric.setId(1L);
-    metric.setDataset("test");
-    provider.setMetrics(Collections.singletonList(metric));
-    DatasetConfigDTO dataset = new DatasetConfigDTO();
-    dataset.setDataset("test");
-    dataset.setTimeUnit(TimeUnit.DAYS);
-    dataset.setTimeDuration(1);
-    provider.setDatasets(Collections.singletonList(dataset));
-    provider.setTimeseries(ImmutableMap.of(
-        MetricSlice.from(1L, 1546646400000L, 1546732800000L),
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 500, 1000)
-            .addSeries(DataFrame.COL_TIME, 1546646400000L, 1546732800000L),
-        MetricSlice.from(1L, 1546819200000L, 1546905600000L),
-        DataFrame.builder(DataFrame.COL_TIME, DataFrame.COL_VALUE).build(),
-        MetricSlice.from(1L, 1546300800000L, 1546560000000L),
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 500, 1000)
-            .addSeries(DataFrame.COL_TIME, 1546300800000L, 1546387200000L),
-        MetricSlice.from(1L, 1540147725000L - TimeUnit.DAYS.toMillis(90), 1540493325000L,
-            HashMultimap.create(),
-            new TimeGranularity(1, TimeUnit.DAYS)),
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 500, 1000)
-            .addSeries(DataFrame.COL_TIME, 1546646400000L, 1546732800000L),
-        MetricSlice.from(1L, 1540080000000L - TimeUnit.DAYS.toMillis(90), 1540425600000L,
-            HashMultimap.create(),
-            new TimeGranularity(1, TimeUnit.DAYS)),
-        new DataFrame().addSeries(DataFrame.COL_VALUE, 500, 1000)
-            .addSeries(DataFrame.COL_TIME, 1546646400000L, 1546732800000L)));
-  }
 
   @Test
   public void testConsolidateTimeSeries() {

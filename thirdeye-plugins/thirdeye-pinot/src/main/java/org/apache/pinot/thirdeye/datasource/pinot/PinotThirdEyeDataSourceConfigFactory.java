@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,6 +60,8 @@ public class PinotThirdEyeDataSourceConfigFactory {
         .getString(processedProperties, PinotThirdeyeDataSourceProperties.TAG.getValue());
     String name = MapUtils
         .getString(processedProperties, PinotThirdeyeDataSourceProperties.NAME.getValue());
+    Map<String, String> headers = (Map<String, String>) MapUtils
+      .getMap(processedProperties, PinotThirdeyeDataSourceProperties.HEADERS.getValue());
 
     Builder builder =
         builder().setControllerHost(controllerHost)
@@ -72,6 +75,9 @@ public class PinotThirdEyeDataSourceConfigFactory {
     }
     if (StringUtils.isNotBlank(name)) {
       builder.setName(name);
+    }
+    if (MapUtils.isNotEmpty(headers)) {
+      builder.setHeaders(headers);
     }
     if (StringUtils.isNotBlank(controllerConnectionScheme)) {
       builder.setControllerConnectionScheme(controllerConnectionScheme);
@@ -127,6 +133,10 @@ public class PinotThirdEyeDataSourceConfigFactory {
           builder.put(optionalProperty.getValue(), propertyString);
         }
       }
+      Optional.ofNullable(properties.get(PinotThirdeyeDataSourceProperties.HEADERS.getValue()))
+        .ifPresent(
+          headers -> builder.put(PinotThirdeyeDataSourceProperties.HEADERS.getValue(), headers)
+        );
 
       return builder.build();
     } else {
@@ -151,6 +161,7 @@ public class PinotThirdEyeDataSourceConfigFactory {
     private String brokerUrl;
     private String tag;
     private String name;
+    private Map<String, String> headers;
 
     public Builder setZookeeperUrl(String zookeeperUrl) {
       this.zookeeperUrl = zookeeperUrl;
@@ -192,6 +203,11 @@ public class PinotThirdEyeDataSourceConfigFactory {
       return this;
     }
 
+    public Builder setHeaders(final Map<String, String> headers) {
+      this.headers = headers;
+      return this;
+    }
+
     public PinotThirdEyeDataSourceConfig build() {
       final String className = PinotThirdEyeDataSourceConfig.class.getSimpleName();
       checkNotNull(controllerHost, "{} is missing 'Controller Host' property", className);
@@ -211,7 +227,8 @@ public class PinotThirdEyeDataSourceConfigFactory {
           .setClusterName(clusterName)
           .setBrokerUrl(brokerUrl)
           .setTag(tag)
-          .setControllerConnectionScheme(controllerConnectionScheme).setName(name);
+          .setControllerConnectionScheme(controllerConnectionScheme).setName(name)
+          .setHeaders(headers);
     }
   }
 }

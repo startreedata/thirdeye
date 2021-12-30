@@ -27,7 +27,8 @@ public enum PinotThirdeyeDataSourceProperties {
   ZOOKEEPER_URL("zookeeperUrl"),
   TAG("tag"),
   BROKER_URL("brokerUrl"),
-  NAME("name");
+  NAME("name"),
+  HEADERS("headers");
 
   private final String value;
 

@@ -175,6 +175,7 @@ public class DetectionRegistry {
 
   @Deprecated
   // always returns null - legacy detector not available anymore
+  // todo cyril remove once DetectionPipeline is removed
   public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
       AnomalyDetectorFactoryContext context) {

@@ -867,5 +867,9 @@
       <id>atlassian-public</id>
       <url>https://packages.atlassian.com/maven/repository/public</url>
     </repository>
+    <repository>
+      <id>startree-releases</id>
+      <url>https://repo.startreedata.io/artifactory/startree-releases</url>
+    </repository>
   </repositories>
 </project>

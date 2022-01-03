@@ -73,7 +73,7 @@
         "end": "End",
         "from": "From",
         "to": "To",
-        "filter-by": "Filter by",
+        "add-a-dimension": "Add a Dimension",
         "last-15-minutes": "Last 15 Minutes",
         "last-1-hour": "Last 1 Hour",
         "last-12-hours": "Last 12 Hours",
@@ -185,6 +185,6 @@
 
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
         "authentication-disabled": "Authentication has been disabled.",
-        "anomaly-filter-search": "Add a dimension filter(Type to Search)"
+        "anomaly-filter-search": "Add a dimension filter (Type to Search)"
     }
 }

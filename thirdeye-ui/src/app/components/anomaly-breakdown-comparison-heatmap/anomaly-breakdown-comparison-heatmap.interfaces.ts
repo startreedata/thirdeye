@@ -36,7 +36,7 @@ export interface AnomalyBreakdownComparisonDataByDimensionColumn {
     };
 }
 
-export interface AnomalyFilterOptions {
+export interface AnomalyFilterOption {
     key: string;
     value: string;
 }

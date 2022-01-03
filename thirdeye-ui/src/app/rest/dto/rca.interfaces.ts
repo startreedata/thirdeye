@@ -1,3 +1,5 @@
+import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+
 export interface AnomalyBreakdown {
     [key: string]: {
         [key: string]: number;
@@ -5,7 +7,7 @@ export interface AnomalyBreakdown {
 }
 
 export interface AnomalyBreakdownRequest {
-    offset?: string;
+    offset?: AnomalyBreakdownAPIOffsetValues;
     timezone?: string;
     filters?: string[];
     limit?: string;

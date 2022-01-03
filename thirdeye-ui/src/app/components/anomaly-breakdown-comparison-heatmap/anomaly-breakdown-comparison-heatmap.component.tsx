@@ -227,6 +227,16 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         setAnomalyFilters([...options]);
     };
 
+    const colorChangeValueAccessor = (
+        node: TreemapData<AnomalyBreakdownComparisonData>
+    ): number => {
+        if (node.extraData) {
+            return node.extraData.percentageDiff * 100;
+        }
+
+        return node.size;
+    };
+
     return (
         <Card variant="outlined">
             <CardHeader
@@ -375,7 +385,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                 <>
                                     <Divider />
                                     <Treemap<AnomalyBreakdownComparisonData>
-                                        colorChangeFactor="percentageDiff"
+                                        colorChangeValueAccessor={
+                                            colorChangeValueAccessor
+                                        }
                                         name={data.column}
                                         tooltipElement={DimensionHeatmapTooltip}
                                         treemapData={formatTreemapData(data)}

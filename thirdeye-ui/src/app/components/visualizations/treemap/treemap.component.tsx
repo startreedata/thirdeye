@@ -81,6 +81,7 @@ function Treemap<Data>({
 function TreemapInternal<Data>({
     width,
     height,
+    colorChangeValueAccessor = (d) => d.size,
     ...props
 }: TreemapPropsInternal<Data>): JSX.Element {
     const xMax = Math.abs(width) - margin.left - margin.right;
@@ -93,9 +94,18 @@ function TreemapInternal<Data>({
         .parentId((d) => d.parent)(props.treemapData)
         .sum((d) => Math.abs(d.size) || 0);
 
+    const colorValues = props.treemapData.map(
+        (d) => colorChangeValueAccessor(d) || 0
+    );
     const colorScale = scaleLinear<string>({
-        domain: [0, Math.max(...props.treemapData.map((d) => d.size || 0))],
-        range: [theme.palette.success.light, theme.palette.error.light],
+        domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
+        range: [
+            theme.palette.success.light,
+            "#eee",
+            "#eee",
+            "#eee",
+            theme.palette.error.light,
+        ],
     });
 
     const root = hierarchy(data).sort(
@@ -172,9 +182,12 @@ function TreemapInternal<Data>({
                             .map((node, i) => {
                                 const nodeWidth = node.x1 - node.x0 - 1;
                                 const nodeHeight = node.y1 - node.y0 - 1;
+                                const colorValue = node.data.data
+                                    ? colorChangeValueAccessor(node.data.data)
+                                    : node.value;
                                 const rect = (
                                     <rect
-                                        fill={colorScale(node.value || 0)}
+                                        fill={colorScale(colorValue || 0)}
                                         height={Math.max(
                                             node.y1 - node.y0 - 1,
                                             0

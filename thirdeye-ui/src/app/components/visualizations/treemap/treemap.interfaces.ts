@@ -7,7 +7,7 @@ export interface TreemapProps<Data> {
     onDimensionClickHandler?: (treeMapNode: AnomalyFilterOption) => void;
     height?: number;
     tooltipElement?: React.FunctionComponent<TreemapData<Data>>;
-    colorChangeFactor?: string;
+    colorChangeValueAccessor?: (node: TreemapData<Data>) => number;
 }
 
 export interface TreemapData<Data> {

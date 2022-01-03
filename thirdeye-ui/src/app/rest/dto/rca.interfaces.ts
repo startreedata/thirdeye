@@ -10,5 +10,5 @@ export interface AnomalyBreakdownRequest {
     offset?: AnomalyBreakdownAPIOffsetValues;
     timezone?: string;
     filters?: string[];
-    limit?: string;
+    limit?: number;
 }

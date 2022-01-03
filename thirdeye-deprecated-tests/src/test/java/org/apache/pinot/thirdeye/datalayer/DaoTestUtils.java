@@ -37,7 +37,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.detector.email.filter.AlphaBetaAlertFilter;
 import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
-import org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator;
 import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
 import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
@@ -83,9 +82,6 @@ public class DaoTestUtils {
     properties.put("timezone", "UTC");
     detectionConfig.setProperties(properties);
     detectionConfig.setCron("0/10 * * * * ?");
-
-    DetectionConfigValidator validator = new DetectionConfigValidator(provider);
-    validator.semanticValidation(detectionConfig);
 
     detectionConfig.setLastTimestamp(DateTime.now().minusDays(2).getMillis());
     return detectionConfig;

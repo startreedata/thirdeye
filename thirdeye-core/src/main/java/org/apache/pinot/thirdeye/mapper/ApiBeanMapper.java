@@ -171,6 +171,7 @@ public abstract class ApiBeanMapper {
     return AlertTemplateMapper.INSTANCE.toApi(alertTemplateDTO);
   }
 
+  @Deprecated
   private static Map<String, AlertNodeApi> toAlertNodeApiMap(
       final Map<String, AlertNode> nodes) {
     Map<String, AlertNodeApi> map = new HashMap<>(nodes.size());
@@ -180,6 +181,7 @@ public abstract class ApiBeanMapper {
     return map;
   }
 
+  @Deprecated
   private static AlertNodeApi toAlertNodeApi(final AlertNode dto) {
     return new AlertNodeApi()
         .setName(dto.getName())
@@ -197,6 +199,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
+  @Deprecated
   public static Map<String, AlertNode> toAlertNodeMap(
       final Map<String, AlertNodeApi> nodes) {
     Map<String, AlertNode> map = new HashMap<>(nodes.size());
@@ -206,6 +209,7 @@ public abstract class ApiBeanMapper {
     return map;
   }
 
+  @Deprecated
   public static AlertNode toAlertNode(final AlertNodeApi api) {
     return new AlertNode()
         .setName(api.getName())
@@ -414,8 +418,8 @@ public abstract class ApiBeanMapper {
           );
     }
     anomalyApi.setAlert(new AlertApi()
-        .setId(dto.getDetectionConfigId())
-    )
+            .setId(dto.getDetectionConfigId())
+        )
         .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
             .map(ApiBeanMapper::toDetectionAlertNodeApi)

@@ -19,11 +19,13 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -93,6 +95,29 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
     return connections;
   }
 
+  private static JsonAsyncHttpPinotClientTransport buildTransport(PinotThirdEyeDataSourceConfig config){
+    JsonAsyncHttpPinotClientTransportFactory factory = new JsonAsyncHttpPinotClientTransportFactory();
+    Optional.ofNullable(config.getControllerConnectionScheme()).ifPresent(
+      schema -> {
+        factory.setScheme(schema);
+        if(schema.equals("https")) {
+          try {
+            factory.setSslContext(SSLContext.getDefault());
+          } catch (NoSuchAlgorithmException e) {
+            LOG.warn("SSL context not set for transport!");
+          }
+        }
+      }
+    );
+    Optional.ofNullable(config.getHeaders()).ifPresent(
+      headers -> {
+        if (!headers.isEmpty()) {
+          factory.setHeaders(headers);
+        }
+      });
+    return (JsonAsyncHttpPinotClientTransport) factory.buildTransport();
+  }
+
   /**
    * Initializes the cache loader using the given property map.
    *
@@ -114,16 +139,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
     final String brokerUrl = pinotThirdEyeDataSourceConfig.getBrokerUrl();
-
-    JsonAsyncHttpPinotClientTransportFactory factory = new JsonAsyncHttpPinotClientTransportFactory();
-    factory.setScheme(pinotThirdEyeDataSourceConfig.getControllerConnectionScheme());
-    factory.setHeaders(pinotThirdEyeDataSourceConfig.getHeaders());
-
-    if(pinotThirdEyeDataSourceConfig.getControllerConnectionScheme().equals("https")) {
-      factory.setSslContext(SSLContext.getDefault());
-    }
-    
-    JsonAsyncHttpPinotClientTransport transport = (JsonAsyncHttpPinotClientTransport) factory.buildTransport();
+    final JsonAsyncHttpPinotClientTransport transport = buildTransport(pinotThirdEyeDataSourceConfig) ;
 
     if (brokerUrl != null && brokerUrl.trim().length() > 0) {
       this.connections = fromHostList(Collections.singletonList(brokerUrl), transport);

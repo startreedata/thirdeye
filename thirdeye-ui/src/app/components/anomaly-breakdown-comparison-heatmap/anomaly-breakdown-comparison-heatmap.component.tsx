@@ -51,10 +51,10 @@ const OFFSET_TO_HUMAN_READABLE = {
 
 function summarizeDimensionValueData(
     dimensionValueData: SummarizeDataFunctionParams
-): SummaryData {
+): [number, SummaryData] {
     const summarized: SummaryData = {};
     if (isEmpty(dimensionValueData)) {
-        return summarized;
+        return [0, summarized];
     }
 
     const totalCount = Object.keys(dimensionValueData).reduce(
@@ -71,7 +71,7 @@ function summarizeDimensionValueData(
         };
     });
 
-    return summarized;
+    return [totalCount, summarized];
 }
 
 function formatTreemapData(
@@ -143,10 +143,16 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         }
 
         Object.keys(anomalyBreakdownCurrent).forEach((dimensionColumnName) => {
-            const currentDimensionValuesData = summarizeDimensionValueData(
+            const [
+                currentTotal,
+                currentDimensionValuesData,
+            ] = summarizeDimensionValueData(
                 anomalyBreakdownCurrent[dimensionColumnName]
             );
-            const comparisonDimensionValuesData = summarizeDimensionValueData(
+            const [
+                comparisonTotal,
+                comparisonDimensionValuesData,
+            ] = summarizeDimensionValueData(
                 anomalyBreakdownComparison[dimensionColumnName]
             );
             const dimensionComparisonData: {
@@ -155,26 +161,22 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
             Object.keys(currentDimensionValuesData).forEach(
                 (dimension: string) => {
+                    const currentDataForDimension =
+                        currentDimensionValuesData[dimension];
+                    const comparisonDataForDimension =
+                        comparisonDimensionValuesData[dimension] || {};
                     dimensionComparisonData[dimension] = {
-                        current: currentDimensionValuesData[dimension].count,
+                        current: currentDataForDimension.count,
                         currentPercentage:
-                            currentDimensionValuesData[dimension].percentage,
-                        comparison:
-                            comparisonDimensionValuesData[dimension]?.count ||
-                            0,
+                            currentDataForDimension.percentage || 0,
+                        comparison: comparisonDataForDimension.count || 0,
                         comparisonPercentage:
-                            comparisonDimensionValuesData[dimension]
-                                ?.percentage,
+                            comparisonDataForDimension.percentage || 0,
                         percentageDiff:
-                            (currentDimensionValuesData[dimension]
-                                ?.percentage || 0) -
-                            (comparisonDimensionValuesData[dimension]
-                                ?.percentage || 0),
-                        currentTotalCount:
-                            currentDimensionValuesData[dimension]?.totalCount,
-                        comparisonTotalCount:
-                            comparisonDimensionValuesData[dimension]
-                                ?.totalCount,
+                            (currentDataForDimension.percentage || 0) -
+                            (comparisonDataForDimension.percentage || 0),
+                        currentTotalCount: currentTotal,
+                        comparisonTotalCount: comparisonTotal,
                     };
                 }
             );

@@ -19,6 +19,7 @@ data:
         - type: https
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
+          keyStoreType: {{ .Values.tls.type }}
         {{- else }}
         - type: http
         {{- end }}

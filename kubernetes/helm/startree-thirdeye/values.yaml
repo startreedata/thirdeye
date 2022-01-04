@@ -90,6 +90,7 @@ smtp:
 tls:
   enabled: false
   password: password
+  type: PKCS12
 
 auth:
   enabled: false

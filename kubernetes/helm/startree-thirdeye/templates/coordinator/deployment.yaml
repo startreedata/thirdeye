@@ -47,8 +47,8 @@ spec:
         - -c
         - >
           echo "importing ca cert and tls key"
-          openssl pkcs12 -export -name tls -in /opt/startree/platform/tls/tls.crt -inkey /opt/startree/platform/tls/tls.key -out /opt/startree/platform/keystore.p12 -password pass:changeit &&
-          keytool -importkeystore -alias tls  -srckeystore /opt/startree/platform/keystore.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/startree/platform/keystore/keystore
+          openssl pkcs12 -export -name tls -in /opt/thirdeye/server/tls/tls.crt -inkey /opt/thirdeye/server/tls/tls.key -out /opt/thirdeye/server/keystore/keystore.p12 -password pass:changeit &&
+          keytool -importkeystore -alias tls  -srckeystore /opt/thirdeye/server/keystore/keystore.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore
         volumeMounts:
         - name: tls
           mountPath: /opt/thirdeye/server/tls

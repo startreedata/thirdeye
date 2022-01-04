@@ -40,15 +40,15 @@ spec:
       {{- if .Values.tls.enabled }}
       initContainers:
       - name: init-keystore
-        image: adoptopenjdk/openjdk11:alpine
+        image: eclipse-temurin:17-jdk
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         command:
         - /bin/sh
         - -c
         - >
-          echo "importing ca cert and tls key"
-          openssl pkcs12 -export -name tls -in /opt/thirdeye/server/tls/tls.crt -inkey /opt/thirdeye/server/tls/tls.key -out /opt/thirdeye/server/keystore/keystore.p12 -password pass:changeit &&
-          keytool -importkeystore -alias tls  -srckeystore /opt/thirdeye/server/keystore/keystore.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore
+          echo "importing ca cert and tls key" &&
+          openssl pkcs12 -export -name tls -in /opt/thirdeye/server/tls/tls.crt -inkey /opt/thirdeye/server/tls/tls.key -out /opt/thirdeye/server/keystore.p12 -password pass:{{ .Values.tls.password }} &&
+          keytool -importkeystore -alias tls  -srckeystore /opt/thirdeye/server/keystore.p12 -srcstoretype PKCS12 -srcstorepass {{ .Values.tls.password }} -deststorepass {{ .Values.tls.password }} -destkeystore /opt/thirdeye/server/keystore/keystore
         volumeMounts:
         - name: tls
           mountPath: /opt/thirdeye/server/tls
@@ -85,6 +85,9 @@ spec:
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
             subPath: "server.yaml"
+            readOnly: true
+          - name: keystore
+            mountPath: /opt/thirdeye/server/keystore
             readOnly: true
           {{- if .Values.config.holidayLoaderKey }}
           - name: thirdeye-config

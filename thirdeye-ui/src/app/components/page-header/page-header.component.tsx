@@ -1,11 +1,10 @@
-import { useMediaQuery } from "@material-ui/core";
+import { useMediaQuery, useTheme } from "@material-ui/core";
 import {
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageHeaderV1,
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
-import { theme } from "../../utils/material-ui/theme.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
@@ -20,6 +19,7 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
         setTimeRangeDuration,
         refreshTimeRange,
     } = useTimeRange();
+    const theme = useTheme();
 
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 

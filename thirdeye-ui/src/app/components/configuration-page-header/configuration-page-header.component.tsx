@@ -1,4 +1,4 @@
-import { useMediaQuery } from "@material-ui/core";
+import { useMediaQuery, useTheme } from "@material-ui/core";
 import {
     PageHeaderActionsV1,
     PageHeaderTabsV1,
@@ -8,7 +8,6 @@ import {
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { theme } from "../../utils/material-ui/theme.util";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
@@ -19,7 +18,7 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
     props: ConfigurationPageHeaderProps
 ) => {
     const { t } = useTranslation();
-
+    const theme = useTheme();
     const {
         timeRangeDuration,
         recentCustomTimeRangeDurations,

@@ -27,6 +27,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,7 +58,14 @@ public class PinotSqlControllerResponseCacheLoader extends PinotSqlResponseCache
 
   private static Connection[] fromController(
       final PinotSqlThirdEyeDataSourceConfig pinotSqlThirdEyeDataSourceConfig) throws Exception {
-    Callable<Connection> callable = () -> DriverManager.getConnection(pinotSqlThirdEyeDataSourceConfig.connectionUrl());
+    Properties info = new Properties();
+    Map<String, String> headers = pinotSqlThirdEyeDataSourceConfig.getHeaders();
+    for(String header : headers.keySet()){
+      info.setProperty(String.format("headers.%s", header), headers.get(header));
+    }
+    info.setProperty("scheme", pinotSqlThirdEyeDataSourceConfig.getControllerConnectionScheme());
+    Callable<Connection> callable = () -> DriverManager.getConnection(pinotSqlThirdEyeDataSourceConfig.connectionUrl(),
+      info);
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 

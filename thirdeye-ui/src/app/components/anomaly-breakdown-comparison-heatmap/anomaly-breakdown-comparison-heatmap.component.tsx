@@ -9,7 +9,7 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
-import { Autocomplete, createFilterOptions } from "@material-ui/lab";
+import { Autocomplete } from "@material-ui/lab";
 import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { isEmpty, isString, map, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -31,10 +31,6 @@ import {
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
-const OPTIONS_LIMIT = 10;
-const filterOptions = createFilterOptions<AnomalyFilterOption>({
-    limit: OPTIONS_LIMIT,
-});
 const WEEK_IN_MILLISECONDS = 604800000;
 const OFFSET_TO_MILLISECONDS = {
     [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
@@ -320,7 +316,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             <Autocomplete
                                 freeSolo
                                 multiple
-                                filterOptions={filterOptions}
                                 getOptionLabel={(option: AnomalyFilterOption) =>
                                     isString(option.value) ? option.value : ""
                                 }

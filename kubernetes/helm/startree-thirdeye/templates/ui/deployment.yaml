@@ -35,7 +35,7 @@ spec:
       tolerations:
 {{ toYaml .Values.ui.tolerations | indent 8 }}
       initContainers:
-      - name: init-keystore
+      - name: init-config
         image: adoptopenjdk/openjdk11:alpine
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         env:

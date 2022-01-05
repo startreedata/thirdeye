@@ -184,11 +184,11 @@ describe("Visualization Util", () => {
         expect(timeTickValues).toHaveLength(8);
         expect(timeTickValues[0]).toEqual(1577865600000);
         expect(timeTickValues[1]).toEqual(1591393371428.5715);
-        expect(timeTickValues[2]).toEqual(1604921142856.5715);
-        expect(timeTickValues[3]).toEqual(1618448914284.5715);
-        expect(timeTickValues[4]).toEqual(1631976685712.5715);
-        expect(timeTickValues[5]).toEqual(1645504457140.5715);
-        expect(timeTickValues[6]).toEqual(1659032228568.5715);
+        expect(timeTickValues[2]).toEqual(1604921142857.1428);
+        expect(timeTickValues[3]).toEqual(1618448914285.7144);
+        expect(timeTickValues[4]).toEqual(1631976685714.2856);
+        expect(timeTickValues[5]).toEqual(1645504457142.8572);
+        expect(timeTickValues[6]).toEqual(1659032228571.4285);
         expect(timeTickValues[7]).toEqual(1672560000000);
     });
 
@@ -202,11 +202,11 @@ describe("Visualization Util", () => {
         expect(timeTickValues).toHaveLength(8);
         expect(timeTickValues[0]).toEqual(1577865600000);
         expect(timeTickValues[1]).toEqual(1591393371428.5715);
-        expect(timeTickValues[2]).toEqual(1604921142856.5715);
-        expect(timeTickValues[3]).toEqual(1618448914284.5715);
-        expect(timeTickValues[4]).toEqual(1631976685712.5715);
-        expect(timeTickValues[5]).toEqual(1645504457140.5715);
-        expect(timeTickValues[6]).toEqual(1659032228568.5715);
+        expect(timeTickValues[2]).toEqual(1604921142857.1428);
+        expect(timeTickValues[3]).toEqual(1618448914285.7144);
+        expect(timeTickValues[4]).toEqual(1631976685714.2856);
+        expect(timeTickValues[5]).toEqual(1645504457142.8572);
+        expect(timeTickValues[6]).toEqual(1659032228571.4285);
         expect(timeTickValues[7]).toEqual(1672560000000);
     });
 

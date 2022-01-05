@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.wrapper;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
-
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AnomalyDetectorWrapper extends DetectionPipeline {
 
+  private static final String PROP_SUB_ENTITY_NAME = "subEntityName";
   private static final String PROP_METRIC_URN = "metricUrn";
   private static final String PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
 

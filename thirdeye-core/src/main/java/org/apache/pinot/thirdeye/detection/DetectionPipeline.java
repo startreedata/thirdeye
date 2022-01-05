@@ -37,7 +37,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
 import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -152,8 +152,7 @@ public abstract class DetectionPipeline {
       final Map<String, Object> componentSpec, final InputDataFetcher dataFetcher,
       final String type) {
     final AnomalyDetector<AbstractSpec> detector = detectionRegistry.buildDetector(type,
-        new AnomalyDetectorFactoryContext()
-            .setInputDataFetcher(dataFetcher)
+        new AnomalyDetectorFactoryV2Context()
             .setProperties(componentSpec)
     );
     return detector;

@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.dataquality.wrapper;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
-
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +47,7 @@ public class DataSlaWrapper extends DetectionPipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSlaWrapper.class);
 
+  public static final String PROP_SUB_ENTITY_NAME = "subEntityName";
   private static final String PROP_METRIC_URN = "metricUrn";
   private static final String PROP_QUALITY_CHECK = "qualityCheck";
   private static final String PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";

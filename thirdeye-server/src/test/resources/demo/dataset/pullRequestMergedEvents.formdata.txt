@@ -1,1 +1,1 @@
-dataSourceName=pinotQuickStartAzure&datasetName=pageviews
+dataSourceName=pinotQuickStartAzure&datasetName=pullRequestMergedEvents

@@ -264,3 +264,20 @@ const anomaliesEndTimeComparator = (
 ): number => {
     return anomaly1.endTime - anomaly2.endTime;
 };
+
+export const getShortText = (
+    text: string,
+    nodeWidth: number,
+    nodeHeight: number
+): string => {
+    const estimatedTextLength = text.length * 10;
+    const textToShow: string =
+        estimatedTextLength > nodeWidth
+            ? text.substring(0, nodeWidth / 10) + ".."
+            : text;
+    if (nodeWidth <= 30 && nodeHeight <= 20) {
+        return "";
+    }
+
+    return textToShow;
+};

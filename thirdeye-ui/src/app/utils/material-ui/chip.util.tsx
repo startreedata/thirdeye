@@ -22,5 +22,4 @@ export const chipProps: Partial<ChipProps> = {
             <CloseIcon color="action" fontSize="small" />
         </IconButton>
     ),
-    color: "secondary",
 };

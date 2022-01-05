@@ -5,6 +5,7 @@ export const useAnomalyBreakdownComparisonHeatmapStyles = makeStyles(
         filtersContainer: {
             "& .filter-chip": {
                 margin: theme.spacing(1),
+                background: theme.palette.secondary,
             },
         },
     })

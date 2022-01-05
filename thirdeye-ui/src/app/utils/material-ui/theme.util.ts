@@ -1,6 +1,5 @@
 import { createMuiTheme, Theme } from "@material-ui/core";
 import { buttonClasses } from "./button.util";
-import { chipClasses, chipProps } from "./chip.util";
 import { cssBaselineClasses } from "./css-baseline.util";
 import { gridProps } from "./grid.util";
 import { linkClasses, linkProps } from "./link.util";
@@ -20,7 +19,6 @@ export const theme: Theme = createMuiTheme({
         MuiMenu: menuProps,
         MuiGrid: gridProps,
         MuiPopover: popoverProps,
-        MuiChip: chipProps,
     },
     overrides: {
         MuiCssBaseline: cssBaselineClasses,
@@ -29,7 +27,6 @@ export const theme: Theme = createMuiTheme({
         MuiListItemText: listItemTextClasses,
         MuiButton: buttonClasses,
         MuiTooltip: tooltipClasses,
-        MuiChip: chipClasses,
     },
     shape: shapeOptions,
     typography: typographyOptions,

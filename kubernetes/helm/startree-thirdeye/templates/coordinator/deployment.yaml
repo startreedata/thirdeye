@@ -86,9 +86,11 @@ spec:
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
             subPath: "server.yaml"
             readOnly: true
+          {{- if .Values.tls.enabled }}
           - name: keystore
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
+          {{- end }}
           {{- if .Values.config.holidayLoaderKey }}
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"

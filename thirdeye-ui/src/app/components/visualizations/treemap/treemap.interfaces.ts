@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { AnomalyFilterOption } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
 export interface TreemapProps<Data> {
@@ -17,15 +17,8 @@ export interface TreemapData<Data> {
     extraData?: Data;
 }
 
-type ShowTooltipParams<Data> = {
-    tooltipLeft: number;
-    tooltipTop: number;
-    tooltipData: Data;
-};
-
 export type TreemapPropsInternal<Data> = {
     width: number;
     height: number;
-    showTooltip: (params: ShowTooltipParams<TreemapData<Data>>) => void;
-    hideTooltip: () => void;
+    tooltipElement: FunctionComponent<TreemapData<Data>>;
 } & TreemapProps<Data>;

@@ -348,7 +348,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                             <Chip
                                                 className="filter-chip"
                                                 key={`${index}_${option.value}`}
-                                                label={`${option.key}=${option.value}`}
+                                                label={`${option.key}=${
+                                                    option.value || `""`
+                                                }`}
                                                 onDelete={() =>
                                                     handleNodeClick(option)
                                                 }

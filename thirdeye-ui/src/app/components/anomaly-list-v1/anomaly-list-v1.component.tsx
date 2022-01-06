@@ -89,7 +89,6 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 header: t("label.alert"),
                 sortable: true,
                 minWidth: 300,
-                // flex: 1,
                 customCellRenderer: alertNameRenderer,
             },
             {

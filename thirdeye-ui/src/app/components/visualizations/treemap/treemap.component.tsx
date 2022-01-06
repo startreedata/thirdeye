@@ -15,7 +15,10 @@ import {
 } from "@visx/visx";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 import React, { MouseEvent } from "react";
-import { getShortText } from "../../../utils/anomalies/anomalies.util";
+import {
+    EMPTY_STRING_DISPLAY,
+    getShortText,
+} from "../../../utils/anomalies/anomalies.util";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
 import { GenericTreemapTooltip } from "./generic-treemap-tooltip";
 import {
@@ -33,6 +36,7 @@ const margin = {
     right: 0,
     bottom: 0,
 };
+const GRAY = "#EEEEEE";
 
 function Treemap<Data>({
     height = DEFAULT_TREEMAP_HEIGHT,
@@ -100,7 +104,7 @@ function TreemapInternal<Data>({
     );
     const colorScale = scaleLinear<string>({
         domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
-        range: [purple[500], "#eee", "#eee", "#eee", theme.palette.error.main],
+        range: [purple[500], GRAY, GRAY, GRAY, theme.palette.error.main],
     });
 
     const root = hierarchy(data).sort(
@@ -223,7 +227,8 @@ function TreemapInternal<Data>({
                                                     y={nodeHeight / 2}
                                                 >
                                                     {getShortText(
-                                                        node.data.id || "",
+                                                        node.data.id ||
+                                                            EMPTY_STRING_DISPLAY,
                                                         nodeWidth,
                                                         nodeHeight
                                                     )}

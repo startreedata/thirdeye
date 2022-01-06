@@ -8,6 +8,8 @@ import { formatDateAndTime, formatDuration } from "../date-time/date-time.util";
 import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
+export const EMPTY_STRING_DISPLAY = "<EMPTY_VALUE>";
+
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly || isNil(anomaly.id)) {
         return i18n.t("label.anomaly");

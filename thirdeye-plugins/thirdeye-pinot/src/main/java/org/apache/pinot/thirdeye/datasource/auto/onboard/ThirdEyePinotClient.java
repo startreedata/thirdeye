@@ -33,17 +33,22 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
@@ -87,13 +92,22 @@ public class ThirdEyePinotClient {
       controllerHost = config.getControllerHost();
       controllerPort = config.getControllerPort();
     }
-    pinotControllerClient = buildPinotControllerClient(controllerConnectionScheme);
+    pinotControllerClient = buildPinotControllerClient(controllerConnectionScheme, dataSourceMeta.getProperties());
     pinotControllerHost = new HttpHost(controllerHost,
         controllerPort,
         controllerConnectionScheme);
   }
 
-  private CloseableHttpClient buildPinotControllerClient(final String controllerConnectionScheme) {
+  private CloseableHttpClient buildPinotControllerClient(final String controllerConnectionScheme,
+    final Map<String, Object> properties) {
+    final HttpClientBuilder customClient = HttpClients.custom();
+    if(properties.containsKey("headers")){
+      final List<Header> headers = new ArrayList<>();
+      ((Map<String, String>)properties.get("headers")).forEach((key, value) ->
+        headers.add(new BasicHeader(key, value))
+      );
+      customClient.setDefaultHeaders(headers);
+    }
     if (HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
         // Accept all SSL certificate because we assume that the Pinot broker are setup in the
@@ -101,17 +115,15 @@ public class ThirdEyePinotClient {
         final SSLContext sslContext = new SSLContextBuilder()
             .loadTrustMaterial(null, new AcceptAllTrustStrategy())
             .build();
-        return HttpClients.custom()
-            .setSSLContext(sslContext)
-            .setSSLHostnameVerifier(new NoopHostnameVerifier())
-            .build();
+        customClient.setSSLContext(sslContext)
+          .setSSLHostnameVerifier(new NoopHostnameVerifier());
       } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
         // This section shouldn't happen because we use Accept All Strategy
         LOG.error("Failed to start auto onboard for Pinot data source.");
         throw new RuntimeException(e);
       }
     }
-    return HttpClients.createDefault();
+    return customClient.build();
   }
 
   public JsonNode getAllTablesFromPinot() throws IOException {

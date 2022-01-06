@@ -254,6 +254,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     {props.link && (
                                                                         <Link
                                                                             component="button"
+                                                                            variant="body2"
                                                                             onClick={() =>
                                                                                 props.onClick &&
                                                                                 props.onClick(
@@ -275,7 +276,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                             }
                                                             primaryTypographyProps={{
                                                                 variant:
-                                                                    "body1",
+                                                                    "body2",
                                                             }}
                                                         />
 
@@ -288,7 +289,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     )
                                                                 }
                                                             >
-                                                                <ArrowForwardIcon />
+                                                                <ArrowForwardIcon fontSize="small" />
                                                             </IconButton>
                                                         </ListItemSecondaryAction>
                                                     </ListItem>
@@ -375,6 +376,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     {props.link && (
                                                                         <Link
                                                                             component="button"
+                                                                            variant="body2"
                                                                             onClick={() =>
                                                                                 props.onClick &&
                                                                                 props.onClick(
@@ -396,7 +398,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                             }
                                                             primaryTypographyProps={{
                                                                 variant:
-                                                                    "body1",
+                                                                    "body2",
                                                             }}
                                                         />
 
@@ -409,7 +411,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     )
                                                                 }
                                                             >
-                                                                <CloseIcon />
+                                                                <CloseIcon fontSize="small" />
                                                             </IconButton>
                                                         </ListItemSecondaryAction>
                                                     </ListItem>

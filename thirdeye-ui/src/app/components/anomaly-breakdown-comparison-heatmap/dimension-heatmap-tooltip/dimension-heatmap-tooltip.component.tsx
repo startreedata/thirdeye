@@ -1,6 +1,7 @@
 import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { formatLargeNumber } from "../../../utils/number/number.util";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
@@ -35,7 +36,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                             }
                         >
                             <Typography variant="overline">
-                                {props.id}
+                                {props.id || EMPTY_STRING_DISPLAY}
                             </Typography>
                         </Grid>
                     </Grid>

@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
+import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
 import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
@@ -317,7 +318,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                 freeSolo
                                 multiple
                                 getOptionLabel={(option: AnomalyFilterOption) =>
-                                    isString(option.value) ? option.value : ""
+                                    isString(option.value)
+                                        ? option.value || EMPTY_STRING_DISPLAY
+                                        : ""
                                 }
                                 groupBy={(option: AnomalyFilterOption) =>
                                     isString(option.key) ? option.key : ""
@@ -344,7 +347,8 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                                 className="filter-chip"
                                                 key={`${index}_${option.value}`}
                                                 label={`${option.key}=${
-                                                    option.value || `""`
+                                                    option.value ||
+                                                    EMPTY_STRING_DISPLAY
                                                 }`}
                                                 onDelete={() =>
                                                     handleNodeClick(option)

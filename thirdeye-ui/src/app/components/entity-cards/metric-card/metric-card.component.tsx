@@ -1,4 +1,5 @@
 import {
+    Button,
     Card,
     CardContent,
     CardHeader,
@@ -10,6 +11,8 @@ import {
     MenuItem,
     Typography,
 } from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
@@ -73,22 +76,27 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             {props.metric && (
                 <CardHeader
                     action={
-                        <Grid container alignItems="center" spacing={0}>
+                        <Grid container alignItems="center" spacing={2}>
                             {/* Active/inactive */}
                             <Grid item>
-                                <Typography
-                                    className={
-                                        props.metric.active
-                                            ? metricCardClasses.active
-                                            : metricCardClasses.inactive
+                                <Button
+                                    disableRipple
+                                    startIcon={
+                                        props.metric.active ? (
+                                            <CheckIcon color="primary" />
+                                        ) : (
+                                            <CloseIcon color="error" />
+                                        )
                                     }
-                                    variant="h6"
                                 >
-                                    <TextHighlighter
-                                        searchWords={props.searchWords}
-                                        text={props.metric.activeText}
-                                    />
-                                </Typography>
+                                    {t(
+                                        `label.${
+                                            props.metric.active
+                                                ? "active"
+                                                : "inactive"
+                                        }`
+                                    )}
+                                </Button>
                             </Grid>
 
                             <Grid item>

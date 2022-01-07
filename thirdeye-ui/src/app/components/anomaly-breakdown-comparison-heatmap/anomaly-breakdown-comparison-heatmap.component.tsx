@@ -9,7 +9,7 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
-import { Autocomplete, createFilterOptions } from "@material-ui/lab";
+import { Autocomplete } from "@material-ui/lab";
 import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { isEmpty, isString, map, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
+import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
 import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
@@ -31,10 +32,6 @@ import {
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
-const OPTIONS_LIMIT = 10;
-const filterOptions = createFilterOptions<AnomalyFilterOption>({
-    limit: OPTIONS_LIMIT,
-});
 const WEEK_IN_MILLISECONDS = 604800000;
 const OFFSET_TO_MILLISECONDS = {
     [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
@@ -320,9 +317,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             <Autocomplete
                                 freeSolo
                                 multiple
-                                filterOptions={filterOptions}
                                 getOptionLabel={(option: AnomalyFilterOption) =>
-                                    isString(option.value) ? option.value : ""
+                                    isString(option.value)
+                                        ? option.value || EMPTY_STRING_DISPLAY
+                                        : ""
                                 }
                                 groupBy={(option: AnomalyFilterOption) =>
                                     isString(option.key) ? option.key : ""
@@ -348,7 +346,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                             <Chip
                                                 className="filter-chip"
                                                 key={`${index}_${option.value}`}
-                                                label={`${option.key}=${option.value}`}
+                                                label={`${option.key}=${
+                                                    option.value ||
+                                                    EMPTY_STRING_DISPLAY
+                                                }`}
                                                 onDelete={() =>
                                                     handleNodeClick(option)
                                                 }

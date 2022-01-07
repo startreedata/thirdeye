@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
@@ -117,8 +118,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents centered title={uiAnomaly ? uiAnomaly.name : ""}>
-            <Grid container>
+        <PageV1>
+            <PageHeader title={uiAnomaly ? uiAnomaly.name : ""} />
+            <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid item xs={12}>
                     <AnomalyCard
@@ -143,7 +145,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         anomalyId={toNumber(params.id)}
                     />
                 </Grid>
-            </Grid>
-        </PageContents>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

@@ -33,6 +33,7 @@ const margin = {
     right: 0,
     bottom: 0,
 };
+const GRAY = "#EEEEEE";
 
 function Treemap<Data>({
     height = DEFAULT_TREEMAP_HEIGHT,
@@ -89,7 +90,7 @@ function TreemapInternal<Data>({
     );
     const colorScale = scaleLinear<string>({
         domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
-        range: [purple[500], "#eee", "#eee", "#eee", theme.palette.error.main],
+        range: [purple[500], GRAY, GRAY, GRAY, theme.palette.error.main],
     });
 
     const root = hierarchy(data).sort(

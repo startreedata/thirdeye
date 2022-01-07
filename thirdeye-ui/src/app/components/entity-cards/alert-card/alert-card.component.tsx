@@ -1,4 +1,5 @@
 import {
+    Button,
     Card,
     CardContent,
     CardHeader,
@@ -8,8 +9,9 @@ import {
     Link,
     Menu,
     MenuItem,
-    Typography,
 } from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,12 +29,10 @@ import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.compo
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { AlertCardProps } from "./alert-card.interfaces";
-import { useAlertCardStyles } from "./alert-card.styles";
 
 export const AlertCard: FunctionComponent<AlertCardProps> = (
     props: AlertCardProps
 ) => {
-    const alertCardClasses = useAlertCardStyles();
     const [
         alertOptionsAnchorElement,
         setAlertOptionsAnchorElement,
@@ -122,22 +122,27 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             {props.uiAlert && (
                 <CardHeader
                     action={
-                        <Grid container alignItems="center" spacing={0}>
+                        <Grid container alignItems="center" spacing={2}>
                             {/* Active/inactive */}
                             <Grid item>
-                                <Typography
-                                    className={
-                                        props.uiAlert.active
-                                            ? alertCardClasses.active
-                                            : alertCardClasses.inactive
+                                <Button
+                                    disableRipple
+                                    startIcon={
+                                        props.uiAlert.active ? (
+                                            <CheckIcon color="primary" />
+                                        ) : (
+                                            <CloseIcon color="error" />
+                                        )
                                     }
-                                    variant="h6"
                                 >
-                                    <TextHighlighter
-                                        searchWords={props.searchWords}
-                                        text={props.uiAlert.activeText}
-                                    />
-                                </Typography>
+                                    {t(
+                                        `label.${
+                                            props.uiAlert.active
+                                                ? "active"
+                                                : "inactive"
+                                        }`
+                                    )}
+                                </Button>
                             </Grid>
 
                             <Grid item>
@@ -161,7 +166,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         </MenuItem>
                                     )}
 
-                                    {/* Activate/deactivete alert */}
+                                    {/* Activate/deactivate alert */}
                                     <MenuItem onClick={handleAlertStateToggle}>
                                         {props.uiAlert.active
                                             ? t("label.deactivate-entity", {

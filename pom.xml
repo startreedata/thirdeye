@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.pinot.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.21.0-SNAPSHOT</version>
+  <version>1.22.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -82,7 +82,7 @@
     <mysql.connector.version>5.1.44</mysql.connector.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <parsii.version>1.5</parsii.version>
-    <pinot.version>0.9.3</pinot.version>
+    <pinot.version>0.10.0-ST.7</pinot.version>
     <quartz.version>2.2.1</quartz.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
@@ -866,6 +866,10 @@
     <repository>
       <id>atlassian-public</id>
       <url>https://packages.atlassian.com/maven/repository/public</url>
+    </repository>
+    <repository>
+      <id>startree-releases</id>
+      <url>https://repo.startreedata.io/artifactory/startree-releases</url>
     </repository>
   </repositories>
 </project>

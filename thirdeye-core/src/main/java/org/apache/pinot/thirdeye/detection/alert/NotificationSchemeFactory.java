@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.detection.alert;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
-import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
@@ -63,6 +61,7 @@ public class NotificationSchemeFactory {
   public NotificationSchemeFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
+      final WebhookAlertScheme webhookAlertScheme,
       final ThirdEyeServerConfiguration configuration,
       final EntityGroupKeyContent entityGroupKeyContent,
       final MetricAnomaliesContent metricAnomaliesContent,
@@ -71,6 +70,7 @@ public class NotificationSchemeFactory {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
+    this.webhookAlertScheme = webhookAlertScheme;
 
     context = new NotificationSchemeContext()
         .setUiPublicUrl(configuration.getUiConfiguration().getExternalUrl())
@@ -80,18 +80,11 @@ public class NotificationSchemeFactory {
         .setSmtpConfiguration(configuration.getAlerterConfigurations().getSmtpConfiguration())
         .setNotificationServiceRegistry(notificationServiceRegistry)
     ;
-    this.webhookAlertScheme = createWebhookAlertScheme();
     this.emailAlertScheme = createEmailAlertScheme();
   }
 
   public EmailAlertScheme createEmailAlertScheme() {
     final EmailAlertScheme instance = new EmailAlertScheme();
-    instance.init(context);
-    return instance;
-  }
-
-  public WebhookAlertScheme createWebhookAlertScheme() {
-    final WebhookAlertScheme instance = new WebhookAlertScheme();
     instance.init(context);
     return instance;
   }
@@ -114,8 +107,8 @@ public class NotificationSchemeFactory {
         this.alertManager);
   }
 
-  public Set<NotificationScheme> getAlertSchemes() {
-    return ImmutableSet.of(emailAlertScheme, webhookAlertScheme);
+  public EmailAlertScheme getEmailAlertScheme() {
+    return emailAlertScheme;
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)
@@ -143,4 +136,17 @@ public class NotificationSchemeFactory {
 
     return detectionAlertSuppressors;
   }
-}
+
+  public DetectionAlertFilterResult getDetectionAlertFilterResult(
+      final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
+    // Load all the anomalies along with their recipients
+    final DetectionAlertFilter alertFilter = loadAlertFilter(subscriptionGroupDTO, System.currentTimeMillis());
+    DetectionAlertFilterResult result = alertFilter.run();
+
+    // Suppress alerts if any and get the filtered anomalies to be notified
+    final Set<DetectionAlertSuppressor> alertSuppressors = loadAlertSuppressors(subscriptionGroupDTO);
+    for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
+      result = alertSuppressor.run(result);
+    }
+    return result;
+  }}

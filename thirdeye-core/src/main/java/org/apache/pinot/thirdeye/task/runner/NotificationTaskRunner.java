@@ -27,14 +27,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
-import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
-import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
-import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -57,25 +54,25 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
-  private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final WebhookAlertScheme webhookAlertScheme;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
 
   @Inject
   public NotificationTaskRunner(
-      final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final WebhookAlertScheme webhookAlertScheme,
       final MetricRegistry metricRegistry) {
-    this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.webhookAlertScheme = webhookAlertScheme;
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
@@ -121,7 +118,8 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void executeInternal(final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
-    final DetectionAlertFilterResult result = getDetectionAlertFilterResult(subscriptionGroupDTO);
+    final DetectionAlertFilterResult result = notificationSchemeFactory
+        .getDetectionAlertFilterResult(subscriptionGroupDTO);
 
     // TODO: The old UI relies on notified tag to display the anomalies. After the migration
     // we need to clean up all references to notified tag.
@@ -130,29 +128,26 @@ public class NotificationTaskRunner implements TaskRunner {
       mergedAnomalyResultManager.update(anomaly);
     }
 
-    // Send out alert notifications (email and/or iris)
-    final Set<NotificationScheme> alertSchemes = notificationSchemeFactory.getAlertSchemes();
-    for (final NotificationScheme alertScheme : alertSchemes) {
-      alertScheme.run(subscriptionGroupDTO, result);
-      alertScheme.destroy();
-    }
+    fireNotifications(subscriptionGroupDTO, result);
 
     updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
   }
 
-  private DetectionAlertFilterResult getDetectionAlertFilterResult(
-      final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
-    // Load all the anomalies along with their recipients
-    final DetectionAlertFilter alertFilter = notificationSchemeFactory
-        .loadAlertFilter(subscriptionGroupDTO, System.currentTimeMillis());
-    DetectionAlertFilterResult result = alertFilter.run();
+  private void fireNotifications(
+      final SubscriptionGroupDTO subscriptionGroupDTO,
+      final DetectionAlertFilterResult result) throws Exception {
 
-    // Suppress alerts if any and get the filtered anomalies to be notified
-    final Set<DetectionAlertSuppressor> alertSuppressors = notificationSchemeFactory
-        .loadAlertSuppressors(subscriptionGroupDTO);
-    for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
-      result = alertSuppressor.run(result);
-    }
-    return result;
+    // Send out emails
+    final EmailAlertScheme emailAlertScheme = notificationSchemeFactory.getEmailAlertScheme();
+    emailAlertScheme.run(subscriptionGroupDTO, result);
+    emailAlertScheme.destroy();
+
+    // fire webhook
+    fireWebhook(subscriptionGroupDTO, result);
+  }
+
+  private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,
+      final DetectionAlertFilterResult result) throws Exception {
+    webhookAlertScheme.run(subscriptionGroupDTO, result);
   }
 }

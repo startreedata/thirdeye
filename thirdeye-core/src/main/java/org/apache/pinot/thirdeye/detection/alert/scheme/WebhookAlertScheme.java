@@ -4,39 +4,43 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
-import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
-import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
 import org.apache.pinot.thirdeye.spi.notification.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AlertScheme(type = "WEBHOOK")
 @Singleton
-public class WebhookAlertScheme extends NotificationScheme {
+public class WebhookAlertScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebhookAlertScheme.class);
   private static final String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
+  private final NotificationServiceRegistry notificationServiceRegistry;
+  private final UiConfiguration uiConfiguration;
 
-  @Override
-  public void init(final NotificationSchemeContext context) {
-    super.init(context);
+  @Inject
+  public WebhookAlertScheme(
+      final NotificationServiceRegistry notificationServiceRegistry,
+      final UiConfiguration uiConfiguration) {
+    this.notificationServiceRegistry = notificationServiceRegistry;
+    this.uiConfiguration = uiConfiguration;
   }
 
-  @Override
   public void run(final SubscriptionGroupDTO subscriptionGroup,
       final DetectionAlertFilterResult results) throws Exception {
     requireNonNull(results);
@@ -62,7 +66,7 @@ public class WebhookAlertScheme extends NotificationScheme {
             .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroupDTO))
             .setAnomalyReports(toAnomalyReports(anomalyResults));
 
-        final NotificationService webhookNotificationService = context.getNotificationServiceRegistry()
+        final NotificationService webhookNotificationService = notificationServiceRegistry
             .get("webhook", ImmutableMap.of(
                 "url", webhook.getUrl(),
                 "hashKey", webhook.getHashKey()
@@ -81,7 +85,7 @@ public class WebhookAlertScheme extends NotificationScheme {
   }
 
   private String getDashboardUrl(final Long id) {
-    String extUrl = context.getUiPublicUrl();
+    String extUrl = uiConfiguration.getExternalUrl();
     if (!extUrl.matches(".*/")) {
       extUrl += "/";
     }

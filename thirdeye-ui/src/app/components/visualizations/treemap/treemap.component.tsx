@@ -43,43 +43,24 @@ function Treemap<Data>({
     tooltipElement = GenericTreemapTooltip,
     ...props
 }: TreemapProps<Data>): JSX.Element {
-    const {
-        tooltipTop,
-        tooltipLeft,
-        tooltipData,
-        showTooltip,
-        hideTooltip,
-    } = useTooltip<TreemapData<Data>>();
-
     return (
-        <TooltipWithBounds
-            left={tooltipLeft}
-            open={Boolean(tooltipData)}
-            title={React.createElement<TreemapData<Data>>(
-                tooltipElement,
-                tooltipData
-            )}
-            top={tooltipTop}
-        >
-            <Grid container alignItems="center">
-                <Grid item sm={2}>
-                    <Typography variant="subtitle1">{props.name}</Typography>
-                </Grid>
-                <Grid item sm={10}>
-                    <ParentSize>
-                        {({ width }) => (
-                            <TreemapInternal
-                                {...props}
-                                height={height}
-                                hideTooltip={hideTooltip}
-                                showTooltip={showTooltip}
-                                width={width}
-                            />
-                        )}
-                    </ParentSize>
-                </Grid>
+        <Grid container alignItems="center">
+            <Grid item sm={2}>
+                <Typography variant="subtitle1">{props.name}</Typography>
             </Grid>
-        </TooltipWithBounds>
+            <Grid item sm={10}>
+                <ParentSize>
+                    {({ width }) => (
+                        <TreemapInternal
+                            {...props}
+                            height={height}
+                            tooltipElement={tooltipElement}
+                            width={width}
+                        />
+                    )}
+                </ParentSize>
+            </Grid>
+        </Grid>
     );
 }
 
@@ -93,6 +74,14 @@ function TreemapInternal<Data>({
     const yMax = Math.abs(height) - margin.top - margin.bottom;
     const treemapClasses = useTreemapStyles();
     const theme = useTheme();
+
+    const {
+        tooltipTop,
+        tooltipLeft,
+        tooltipData,
+        showTooltip,
+        hideTooltip,
+    } = useTooltip<TreemapData<Data>>();
 
     const data: HierarchyNode<TreemapData<Data>> = stratify<TreemapData<Data>>()
         .id((d) => d.id)
@@ -112,7 +101,7 @@ function TreemapInternal<Data>({
     );
 
     const handleMouseLeave = (): void => {
-        props.hideTooltip();
+        hideTooltip();
     };
 
     const handleMouseMove = (
@@ -135,7 +124,7 @@ function TreemapInternal<Data>({
             clickedOnRect.ownerSVGElement.width.baseVal.value -
             RIGHT_BOUNDS_PADDING;
 
-        props.showTooltip({
+        showTooltip({
             tooltipLeft: Math.min(rightBound, event.nativeEvent.offsetX),
             tooltipTop: event.nativeEvent.offsetY,
             tooltipData: node.data.data,
@@ -165,83 +154,102 @@ function TreemapInternal<Data>({
     };
 
     return (
-        <svg height={height} width={width}>
-            <VisxTreemap<HierarchyNode<TreemapData<Data>>>
-                round
-                root={root}
-                size={[xMax, yMax]}
-                tile={treemapSquarify}
-                top={margin.top}
-            >
-                {(treemap) => (
-                    <Group>
-                        {treemap
-                            .descendants()
-                            .reverse()
-                            .map((node, i) => {
-                                const nodeWidth = node.x1 - node.x0 - 1;
-                                const nodeHeight = node.y1 - node.y0 - 1;
-                                const colorValue = node.data.data
-                                    ? colorChangeValueAccessor(node.data.data)
-                                    : node.value;
-                                const rect = (
-                                    <rect
-                                        fill={colorScale(colorValue || 0)}
-                                        height={Math.max(
-                                            node.y1 - node.y0 - 1,
-                                            0
-                                        )}
-                                        width={Math.max(
-                                            node.x1 - node.x0 - 1,
-                                            0
-                                        )}
-                                    />
-                                );
-
-                                return (
-                                    <Group
-                                        className={
-                                            props.onDimensionClickHandler
-                                                ? treemapClasses.clickable
-                                                : undefined
-                                        }
-                                        key={`node-${i}`}
-                                        left={node.x0 + margin.left}
-                                        top={node.y0 + margin.top}
-                                        onClick={() => handleMouseClick(node)}
-                                        onMouseLeave={handleMouseLeave}
-                                        onMouseMove={(event) =>
-                                            handleMouseMove(event, node)
-                                        }
-                                    >
-                                        {node.depth === 1 && (
-                                            <>
-                                                {rect}
-                                                <Text
-                                                    className={
-                                                        treemapClasses.heading
-                                                    }
-                                                    textAnchor="middle"
-                                                    verticalAnchor="middle"
-                                                    x={nodeWidth / 2}
-                                                    y={nodeHeight / 2}
-                                                >
-                                                    {getShortText(
-                                                        node.data.id ||
-                                                            EMPTY_STRING_DISPLAY,
-                                                        nodeWidth,
-                                                        nodeHeight
-                                                    )}
-                                                </Text>
-                                            </>
-                                        )}
-                                    </Group>
-                                );
-                            })}
-                    </Group>
+        <>
+            <TooltipWithBounds
+                left={tooltipLeft}
+                open={Boolean(tooltipData)}
+                title={React.createElement<TreemapData<Data>>(
+                    props.tooltipElement,
+                    tooltipData
                 )}
-            </VisxTreemap>
-        </svg>
+                top={tooltipTop}
+            >
+                <svg height={height} width={width}>
+                    <VisxTreemap<HierarchyNode<TreemapData<Data>>>
+                        round
+                        root={root}
+                        size={[xMax, yMax]}
+                        tile={treemapSquarify}
+                        top={margin.top}
+                    >
+                        {(treemap) => (
+                            <Group>
+                                {treemap
+                                    .descendants()
+                                    .reverse()
+                                    .map((node, i) => {
+                                        const nodeWidth = node.x1 - node.x0 - 1;
+                                        const nodeHeight =
+                                            node.y1 - node.y0 - 1;
+                                        const colorValue = node.data.data
+                                            ? colorChangeValueAccessor(
+                                                  node.data.data
+                                              )
+                                            : node.value;
+                                        const rect = (
+                                            <rect
+                                                fill={colorScale(
+                                                    colorValue || 0
+                                                )}
+                                                height={Math.max(
+                                                    node.y1 - node.y0 - 1,
+                                                    0
+                                                )}
+                                                width={Math.max(
+                                                    node.x1 - node.x0 - 1,
+                                                    0
+                                                )}
+                                            />
+                                        );
+
+                                        return (
+                                            <Group
+                                                className={
+                                                    props.onDimensionClickHandler
+                                                        ? treemapClasses.clickable
+                                                        : undefined
+                                                }
+                                                key={`node-${i}`}
+                                                left={node.x0 + margin.left}
+                                                top={node.y0 + margin.top}
+                                                onClick={() =>
+                                                    handleMouseClick(node)
+                                                }
+                                                onMouseLeave={handleMouseLeave}
+                                                onMouseMove={(event) =>
+                                                    handleMouseMove(event, node)
+                                                }
+                                            >
+                                                {node.depth === 1 && (
+                                                    <>
+                                                        {rect}
+                                                        <Text
+                                                            className={
+                                                                treemapClasses.heading
+                                                            }
+                                                            textAnchor="middle"
+                                                            verticalAnchor="middle"
+                                                            x={nodeWidth / 2}
+                                                            y={nodeHeight / 2}
+                                                        >
+                                                            {getShortText(
+                                                                node.data.id ||
+                                                                    EMPTY_STRING_DISPLAY,
+                                                                nodeWidth,
+                                                                nodeHeight
+                                                            )}
+                                                        </Text>
+                                                    </>
+                                                )}
+                                            </Group>
+                                        );
+                                    })}
+                            </Group>
+                        )}
+                    </VisxTreemap>
+                </svg>
+            </TooltipWithBounds>
+        </>
     );
 }
 

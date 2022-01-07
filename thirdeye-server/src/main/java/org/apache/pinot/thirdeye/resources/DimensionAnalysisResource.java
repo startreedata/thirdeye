@@ -83,6 +83,7 @@ public class DimensionAnalysisResource {
     return Response.ok(dataCubeSummaryCalculator.compute(anomalyDTO)).build();
   }
 
+  @Deprecated
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response buildSummary(

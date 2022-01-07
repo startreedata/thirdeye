@@ -1,14 +1,10 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_DEPTH_STRING;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_SUMMARY_SIZE_STRING;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DEPTH;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DIM_HIERARCHIES;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_EXCLUDED_DIMENSIONS;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_SUMMARY_SIZE;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ImmutableList;
@@ -54,6 +50,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,15 +98,16 @@ public class DimensionAnalysisResource {
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
       @QueryParam("timezone") @DefaultValue(RootCauseMetricResource.TIMEZONE_DEFAULT) String timezone,
-      @QueryParam(CUBE_SUMMARY_SIZE) @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @QueryParam(CUBE_DEPTH) @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
-      @QueryParam(CUBE_ONE_SIDE_ERROR) @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
+      @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
+      @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
+      @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
       @QueryParam("dimensions") List<String> dimensions,
-      @QueryParam(CUBE_EXCLUDED_DIMENSIONS) List<String> excludedDimensions,
-      @QueryParam(CUBE_DIM_HIERARCHIES) @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
+      @QueryParam("excludedDimensions") List<String> excludedDimensions,
+      @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
     DateTimeZone dateTimeZone = RootCauseMetricResource.parseTimeZone(timezone);
 
+    // rewrite this as a metric/dataset info from anomalyId
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(
         mergedAnomalyDAO.findById(id), String.format("Anomaly ID: %d", id));
     long detectionConfigId = anomalyDTO.getDetectionConfigId();
@@ -125,32 +123,34 @@ public class DimensionAnalysisResource {
     // todo cyril managed null result below ?
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
 
-    // use last week as baseline if baseline timeframe is not provided
-    // todo cyril check that both baselines are set or not set - avoid one set only
-    baselineStartInclusive = baselineStartInclusive != -1 ? baselineStartInclusive :
-        anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7);
-    baselineEndExclusive = baselineEndExclusive != -1 ? baselineEndExclusive :
-        anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7);
+    // todo cyril - refactored without changing timeZone usage - not sure if it is correct - timezone should be front only
+    final Interval currentInterval = new Interval(anomalyDTO.getStartTime(), anomalyDTO.getEndTime(), dateTimeZone);
+    if (baselineStartInclusive == -1 && baselineEndExclusive == -1) {
+      baselineStartInclusive = anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7);
+      baselineEndExclusive = anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7);
+    }
+    checkArgument(baselineStartInclusive != -1 && baselineEndExclusive == -1,
+        "baselineStart and baselineEnd must be both custom or both default");
+    final Interval baselineInterval = new Interval(baselineStartInclusive, baselineEndExclusive, dateTimeZone);
 
-    List<String> dimensionNames = dimensions.isEmpty() ?
+    final List<String> dimensionNames = dimensions.isEmpty() ?
         getDimensionsFromDataset(dataset) :
         DataCubeSummaryCalculator.cleanDimensionStrings(dimensions);
     dimensionNames.removeAll(DataCubeSummaryCalculator.cleanDimensionStrings(excludedDimensions));
-    Dimensions filteredDimensions = new Dimensions(dimensionNames);
+    final Dimensions filteredDimensions = new Dimensions(dimensionNames);
 
-    // todo cyril implement filters the same way as heatmap/breakdown if possible
-    Multimap<String, String> filterSetMap = ImmutableMultimap.of();//parseFilterJsonPayload(filterJsonPayload); //parseSimpleFilters(filters)
+    // fixme cyril implement filters the same way as heatmap/breakdown if possible
+    final Multimap<String, String> filterSetMap = ImmutableMultimap.of();//parseFilterJsonPayload(filterJsonPayload); //parseSimpleFilters(filters)
 
     // todo cyril implement hierarchies
-    List<List<String>> hierarchies = ImmutableList.of();//parseHierarchiesPayload(hierarchiesPayload);
+    final List<List<String>> hierarchies = ImmutableList.of();//parseHierarchiesPayload(hierarchiesPayload);
+
 
     DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
         metricConfigDTO.getName(),
         dataset,
-        anomalyDTO.getStartTime(),
-        anomalyDTO.getEndTime(),
-        baselineStartInclusive,
-        baselineEndExclusive,
+        currentInterval,
+        baselineInterval,
         summarySize,
         depth,
         doOneSideError,

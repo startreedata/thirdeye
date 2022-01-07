@@ -16,12 +16,6 @@ public class SummaryUtils {
    * @param dataset the name of dataset; cannot be null or empty.
    * @param metrics the list of metrics; it needs to contain at least one metric and they cannot
    *     be null or empty.
-   * @param currentStartInclusive the current start time; needs to be smaller than current end
-   *     time.
-   * @param currentEndExclusive the current end time.
-   * @param baselineStartInclusive the baseline start time; needs to be smaller than baseline
-   *     end time.
-   * @param baselineEndExclusive the baseline end time.
    * @param dimensions the dimensions to be explored; it needs to contains at least one
    *     dimensions.
    * @param dataFilters the filter to be applied on the Pinot query; cannot be null.
@@ -29,24 +23,19 @@ public class SummaryUtils {
    * @param depth the max depth of dimensions to be drilled down; needs to be >= 0.
    * @param hierarchies the hierarchy among dimensions; cannot be null.
    */
-  public static void checkArguments(String dataset,
-      List<String> metrics,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
-      Dimensions dimensions,
-      Multimap<String, String> dataFilters,
-      int summarySize,
-      int depth,
-      List<List<String>> hierarchies) {
+  public static void checkArguments(
+      final String dataset,
+      final List<String> metrics,
+      final Dimensions dimensions,
+      final Multimap<String, String> dataFilters,
+      final int summarySize,
+      final int depth,
+      final List<List<String>> hierarchies) {
     checkArgument(!Strings.isNullOrEmpty(dataset));
     checkArgument(!metrics.isEmpty());
     for (String metric : metrics) {
       checkArgument(!Strings.isNullOrEmpty(metric));
     }
-    checkArgument(currentStartInclusive < currentEndExclusive);
-    checkArgument(baselineStartInclusive < baselineEndExclusive);
     Preconditions.checkNotNull(dimensions);
     checkArgument(dimensions.size() > 0);
     Preconditions.checkNotNull(dataFilters);

@@ -35,6 +35,7 @@ import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 
 /**
  * A portal class that is used to trigger the multi-dimensional summary algorithm and to get the
@@ -45,16 +46,12 @@ public class MultiDimensionalSummary {
 
   private final AdditiveDBClient dbClient;
   private final CostFunction costFunction;
-  private final DateTimeZone dateTimeZone;
 
-  public MultiDimensionalSummary(AdditiveDBClient dbClient, CostFunction costFunction,
-      DateTimeZone dateTimeZone) {
+  public MultiDimensionalSummary(AdditiveDBClient dbClient, CostFunction costFunction) {
     Preconditions.checkNotNull(dbClient);
-    Preconditions.checkNotNull(dateTimeZone);
     Preconditions.checkNotNull(costFunction);
     this.dbClient = dbClient;
     this.costFunction = costFunction;
-    this.dateTimeZone = dateTimeZone;
   }
 
   /**
@@ -62,10 +59,8 @@ public class MultiDimensionalSummary {
    *
    * @param dataset the dataset of the metric.
    * @param metric the name of the metric.
-   * @param currentStartInclusive the start time of current data cube, inclusive.
-   * @param currentEndExclusive the end time of the current data cube, exclusive.
-   * @param baselineStartInclusive the start of the baseline data cube, inclusive.
-   * @param baselineEndExclusive the end of the baseline data cube, exclusive.
+   * @param currentInterval interval of the current data cube.
+   * @param baselineInterval interval of the baseline data cube.
    * @param dimensions the dimensions to be considered in the summary. If the variable depth is
    *     zero, then the order
    *     of the dimension is used; otherwise, this method will determine the order of the
@@ -84,10 +79,8 @@ public class MultiDimensionalSummary {
    */
   public DimensionAnalysisResultApi buildSummary(String dataset,
       String metric,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
+      Interval currentInterval,
+      Interval baselineInterval,
       Dimensions dimensions,
       Multimap<String, String> dataFilters,
       int summarySize,
@@ -99,10 +92,6 @@ public class MultiDimensionalSummary {
     metrics.add(metric);
     checkArguments(dataset,
         metrics,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
         dimensions,
         dataFilters,
         summarySize,
@@ -111,10 +100,10 @@ public class MultiDimensionalSummary {
 
     dbClient.setDataset(dataset);
     dbClient.setMetric(metric);
-    dbClient.setCurrentStartInclusive(new DateTime(currentStartInclusive, dateTimeZone));
-    dbClient.setCurrentEndExclusive(new DateTime(currentEndExclusive, dateTimeZone));
-    dbClient.setBaselineStartInclusive(new DateTime(baselineStartInclusive, dateTimeZone));
-    dbClient.setBaselineEndExclusive(new DateTime(baselineEndExclusive, dateTimeZone));
+    dbClient.setCurrentStartInclusive(currentInterval.getStart());
+    dbClient.setCurrentEndExclusive(currentInterval.getEnd());
+    dbClient.setBaselineStartInclusive(baselineInterval.getStart());
+    dbClient.setBaselineEndExclusive(baselineInterval.getEnd());
 
     Cube cube = new Cube(costFunction);
     DimensionAnalysisResultApi response;

@@ -14,6 +14,7 @@ import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 
 /**
  * A portal class that is used to trigger the multi-dimensional summary algorithm and to get the
@@ -24,17 +25,13 @@ public class MultiDimensionalRatioSummary {
 
   private final RatioDBClient dbClient;
   private final CostFunction costFunction;
-  private final DateTimeZone dateTimeZone;
 
-  public MultiDimensionalRatioSummary(RatioDBClient dbClient, CostFunction costFunction,
-      DateTimeZone dateTimeZone) {
+  public MultiDimensionalRatioSummary(RatioDBClient dbClient, CostFunction costFunction) {
     Preconditions.checkNotNull(dbClient);
-    Preconditions.checkNotNull(dateTimeZone);
     Preconditions.checkNotNull(costFunction);
 
     this.dbClient = dbClient;
     this.costFunction = costFunction;
-    this.dateTimeZone = dateTimeZone;
   }
 
   /**
@@ -43,10 +40,8 @@ public class MultiDimensionalRatioSummary {
    * @param dataset the dataset of the metric.
    * @param numeratorMetric the name of the numerator metric.
    * @param denominatorMetric the name of the denominator metric.
-   * @param currentStartInclusive the start time of current data cube, inclusive.
-   * @param currentEndExclusive the end time of the current data cube, exclusive.
-   * @param baselineStartInclusive the start of the baseline data cube, inclusive.
-   * @param baselineEndExclusive the end of the baseline data cube, exclusive.
+   * @param currentInterval interval of the current data cube.
+   * @param baselineInterval interval of the baseline data cube.
    * @param dimensions the dimensions to be considered in the summary. If the variable depth is
    *     zero, then the order
    *     of the dimension is used; otherwise, this method will determine the order of the
@@ -66,10 +61,8 @@ public class MultiDimensionalRatioSummary {
   public DimensionAnalysisResultApi buildRatioSummary(String dataset,
       String numeratorMetric,
       String denominatorMetric,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
+      Interval currentInterval,
+      Interval baselineInterval,
       Dimensions dimensions,
       Multimap<String, String> dataFilters,
       int summarySize,
@@ -81,24 +74,20 @@ public class MultiDimensionalRatioSummary {
     metrics.add(numeratorMetric);
     metrics.add(denominatorMetric);
     SummaryUtils.checkArguments(dataset,
-        metrics,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        dimensions,
-        dataFilters,
-        summarySize,
-        depth,
-        hierarchies);
+      metrics,
+       dimensions,
+       dataFilters,
+       summarySize,
+       depth,
+       hierarchies);
 
     dbClient.setDataset(dataset);
     dbClient.setNumeratorMetric(numeratorMetric);
     dbClient.setDenominatorMetric(denominatorMetric);
-    dbClient.setCurrentStartInclusive(new DateTime(currentStartInclusive, dateTimeZone));
-    dbClient.setCurrentEndExclusive(new DateTime(currentEndExclusive, dateTimeZone));
-    dbClient.setBaselineStartInclusive(new DateTime(baselineStartInclusive, dateTimeZone));
-    dbClient.setBaselineEndExclusive(new DateTime(baselineEndExclusive, dateTimeZone));
+    dbClient.setCurrentStartInclusive(currentInterval.getStart());
+    dbClient.setCurrentEndExclusive(currentInterval.getEnd());
+    dbClient.setBaselineStartInclusive(baselineInterval.getStart());
+    dbClient.setBaselineEndExclusive(baselineInterval.getEnd());
 
     Cube cube = new Cube(costFunction);
     DimensionAnalysisResultApi response;

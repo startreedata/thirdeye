@@ -36,13 +36,12 @@ import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DataCubeSummaryCalculator {
-
-  public static final String DEFAULT_TIMEZONE_ID = "UTC";
   public static final String DEFAULT_HIERARCHIES = "[]";
   public static final String DEFAULT_ONE_SIDE_ERROR = "false";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
@@ -81,21 +80,17 @@ public class DataCubeSummaryCalculator {
 
   public DimensionAnalysisResultApi computeCube(
       final String metricName, final String datasetName,
-      final long currentStartInclusive, final long currentEndExclusive,
-      final long baselineStartInclusive, final long baselineEndExclusive, final int summarySize,
+      final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
       final String derivedMetricExpression,
       final DateTimeZone dateTimeZone, final Dimensions filteredDimensions,
       final Multimap<String, String> filterSetMap, final List<List<String>> hierarchies) {
     CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
         derivedMetricExpression,
-        dateTimeZone,
         datasetName,
         metricName,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
+        currentInterval,
+        currentBaseline,
         filteredDimensions,
         filterSetMap,
         summarySize,
@@ -140,13 +135,10 @@ public class DataCubeSummaryCalculator {
         "^id(?<" + NUMERATOR_GROUP_NAME + ">\\d*)\\/id(?<" + DENOMINATOR_GROUP_NAME + ">\\d*)$");
 
     private final String derivedMetricExpression;
-    private final DateTimeZone dateTimeZone;
-    private final String dataset;
-    private final String metric;
-    private final long currentStartInclusive;
-    private final long currentEndExclusive;
-    private final long baselineStartInclusive;
-    private final long baselineEndExclusive;
+    private final String datasetName;
+    private final String metricName;
+    private final Interval currentInterval;
+    private final Interval baselineInterval;
     private final Dimensions dimensions;
     private final Multimap<String, String> dataFilters;
     private final int summarySize;
@@ -157,13 +149,11 @@ public class DataCubeSummaryCalculator {
     /**
      * Cube Algorithm Runner. Select the relevant algorithm based on the config and run it.
      *
-     * @param dateTimeZone time zone of the data.
-     * @param dataset dataset name.
+     * @param datasetName dataset name.
+     * @param metricName metric name
      * @param derivedMetricExpression derivedMetricExpression String from MetricConfigDTO.
-     * @param currentStartInclusive timestamp of current start.
-     * @param currentEndExclusive timestamp of current end.
-     * @param baselineStartInclusive timestamp of baseline start.
-     * @param baselineEndExclusive timestamp of baseline end.
+     * @param currentInterval current time interval.
+     * @param baselineInterval baseline time interval.
      * @param dimensions ordered dimensions to be drilled down by the algorithm.
      * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only
      *     analyze a subset of data.
@@ -174,21 +164,19 @@ public class DataCubeSummaryCalculator {
      * @return the summary result of cube algorithm.
      */
     public CubeAlgorithmRunner(
-        final String derivedMetricExpression, final DateTimeZone dateTimeZone,
-        final String dataset,
-        final String metric, final long currentStartInclusive, final long currentEndExclusive,
-        final long baselineStartInclusive, final long baselineEndExclusive,
+        final String derivedMetricExpression,
+        final String datasetName,
+        final String metricName,
+        final Interval currentInterval,
+        final Interval baselineInterval,
         final Dimensions dimensions,
         final Multimap<String, String> dataFilters, final int summarySize, final int depth,
         final List<List<String>> hierarchies, final boolean doOneSideError) {
       this.derivedMetricExpression = derivedMetricExpression;
-      this.dateTimeZone = dateTimeZone;
-      this.dataset = dataset;
-      this.metric = metric;
-      this.currentStartInclusive = currentStartInclusive;
-      this.currentEndExclusive = currentEndExclusive;
-      this.baselineStartInclusive = baselineStartInclusive;
-      this.baselineEndExclusive = baselineEndExclusive;
+      this.datasetName = datasetName;
+      this.metricName = metricName;
+      this.currentInterval = currentInterval;
+      this.baselineInterval = baselineInterval;
       this.dimensions = dimensions;
       this.dataFilters = dataFilters;
       this.summarySize = summarySize;
@@ -214,16 +202,13 @@ public class DataCubeSummaryCalculator {
           thirdEyeCacheRegistry);
       final MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(
           cubeDbClient,
-          costFunction,
-          dateTimeZone);
+          costFunction);
 
       return mdSummary.buildSummary(
-          dataset,
-          metric,
-          currentStartInclusive,
-          currentEndExclusive,
-          baselineStartInclusive,
-          baselineEndExclusive,
+          datasetName,
+          metricName,
+          currentInterval,
+          baselineInterval,
           dimensions,
           dataFilters,
           summarySize,
@@ -250,16 +235,14 @@ public class DataCubeSummaryCalculator {
       CostFunction costFunction = new RatioCostFunction();
       RatioDBClient dbClient = new RatioDBClient(dataSourceCache, thirdEyeCacheRegistry);
       MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient,
-          costFunction, dateTimeZone);
+          costFunction);
 
       return mdSummary.buildRatioSummary(
-          dataset,
+          datasetName,
           numeratorMetric,
           denominatorMetric,
-          currentStartInclusive,
-          currentEndExclusive,
-          baselineStartInclusive,
-          baselineEndExclusive,
+          currentInterval,
+          baselineInterval,
           dimensions,
           dataFilters,
           summarySize,

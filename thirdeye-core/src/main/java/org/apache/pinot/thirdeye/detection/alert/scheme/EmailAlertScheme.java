@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,8 +22,6 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.EmailTemplateType;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
@@ -34,7 +31,6 @@ import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyCo
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
@@ -46,8 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class EmailAlertScheme {
-
-  public static final String PROP_RECIPIENTS = "recipients";
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailAlertScheme.class);
   private final List<String> emailBlacklist = Arrays.asList(
@@ -223,34 +217,11 @@ public class EmailAlertScheme {
     LOG.info("Email sent with subject '{}' to {} recipients", email.getSubject(), recipientCount);
   }
 
-  public void buildAndSendEmails(
-      final SubscriptionGroupDTO subscriptionGroup,
-      final DetectionAlertFilterResult results) {
-    LOG.info("Preparing an email alert for subscription group id {}", subscriptionGroup.getId());
-    Preconditions.checkNotNull(results.getResult());
-    for (final Map.Entry<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result : results
-        .getResult().entrySet()) {
-      try {
-        final SubscriptionGroupDTO subscriptionGroupDTO = result.getKey().getSubscriptionConfig();
-        if (subscriptionGroupDTO.getNotificationSchemes().getEmailScheme() == null) {
-          throw new IllegalArgumentException(
-              "Invalid email settings in subscription group " + subscriptionGroup.getId());
-        }
-
-        final List<AnomalyResult> anomalyResults = new ArrayList<>(result.getValue());
-        anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
-
-        buildAndSendEmail(subscriptionGroupDTO, anomalyResults);
-      } catch (final Exception e) {
-        emailAlertsFailedCounter.inc();
-        LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
-      }
-    }
-  }
-
   public void buildAndSendEmail(
       final SubscriptionGroupDTO sg,
       final List<AnomalyResult> anomalyResults) throws Exception {
+    final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
+    sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
     final Properties emailConfig = new Properties();
 //    TODO accommodate all required properties in EmailSchemeDto
@@ -268,7 +239,7 @@ public class EmailAlertScheme {
         emailScheme.getBcc());
     final HtmlEmail email = prepareEmailContent(sg,
         emailConfig,
-        anomalyResults,
+        sortedAnomalyResults,
         recipients);
 
     sendEmail(email);

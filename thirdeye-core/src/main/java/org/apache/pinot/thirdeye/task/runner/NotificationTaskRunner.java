@@ -158,14 +158,14 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private void fireNotifications(
       final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) {
+      final DetectionAlertFilterResult result) throws Exception {
 
     // Send out emails
     final EmailAlertScheme emailAlertScheme = notificationSchemeFactory.getEmailAlertScheme();
     final EmailSchemeDto emailScheme = subscriptionGroupDTO.getNotificationSchemes()
         .getEmailScheme();
     if (emailScheme != null) {
-      emailAlertScheme.buildAndSendEmails(subscriptionGroupDTO, result);
+      fireEmails(subscriptionGroupDTO, result, emailAlertScheme);
     }
 
     // fire webhook
@@ -174,6 +174,13 @@ public class NotificationTaskRunner implements TaskRunner {
     if (webhookScheme != null) {
       fireWebhook(subscriptionGroupDTO, result);
     }
+  }
+
+  private void fireEmails(final SubscriptionGroupDTO subscriptionGroupDTO,
+      final DetectionAlertFilterResult result,
+      final EmailAlertScheme emailAlertScheme) throws Exception {
+    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroupDTO, result);
+    emailAlertScheme.buildAndSendEmail(subscriptionGroupDTO, new ArrayList<>(anomalies));
   }
 
   private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,

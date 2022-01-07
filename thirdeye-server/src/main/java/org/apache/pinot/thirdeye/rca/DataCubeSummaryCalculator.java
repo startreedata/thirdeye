@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
@@ -125,10 +126,15 @@ public class DataCubeSummaryCalculator {
 
     String metricName = metric;
     String datasetName = dataset;
-    DimensionAnalysisResultApi response;
+    MetricConfigDTO metricConfigDTO;
+    DateTimeZone dateTimeZone;
+    Dimensions filteredDimensions;
+    Multimap<String, String> filterSetMap;
+    List<List<String>> hierarchies;
+
     try {
       //fixme cyril relies on dataset if metricUrn is null ...
-      MetricConfigDTO metricConfigDTO = fetchMetricConfig(metricUrn, metric, dataset);
+      metricConfigDTO = fetchMetricConfig(metricUrn, metric, dataset);
       if (metricConfigDTO != null) {
         metricName = metricConfigDTO.getName();
         //...fixme cyril then get datasets !
@@ -138,41 +144,71 @@ public class DataCubeSummaryCalculator {
       List<String> dimensionNames = dimensions.isEmpty() ? getDimensionsFromDataset(datasetName)
           : cleanDimensionStrings(dimensions);
       dimensionNames.removeAll(cleanDimensionStrings(excludedDimensions));
-      Dimensions filteredDimensions = new Dimensions(dimensionNames);
+      filteredDimensions = new Dimensions(dimensionNames);
 
-      Multimap<String, String> filterSetMap = parseFilterJsonPayload(filterJsonPayload);
-      List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
-      DateTimeZone dateTimeZone = DateTimeZone.forID(timeZone);
-
-      CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
-          metricConfigDTO,
-          dateTimeZone,
-          datasetName,
-          metricName,
-          currentStartInclusive,
-          currentEndExclusive,
-          baselineStartInclusive,
-          baselineEndExclusive,
-          filteredDimensions,
-          filterSetMap,
-          summarySize,
-          depth,
-          hierarchies,
-          doOneSideError
-      );
-      response = cubeAlgorithmRunner.run();
-    } catch (Exception e) {
-      LOG.error("Exception while generating difference summary", e);
-      response = notAvailable().setMetric(new MetricApi()
+      filterSetMap = parseFilterJsonPayload(filterJsonPayload);
+      hierarchies = parseHierarchiesPayload(hierarchiesPayload);
+      dateTimeZone = DateTimeZone.forID(timeZone);
+    } catch (IOException e) {
+      LOG.error("Exception while fetching anomaly info", e);
+      return notAvailable().setMetric(new MetricApi()
           .setUrn(metricUrn)
           .setName(metricName)
           .setDataset(new DatasetApi().setName(datasetName)));
     }
 
-    return response;
+    return computeCube(metricName,
+        datasetName,
+        currentStartInclusive,
+        currentEndExclusive,
+        baselineStartInclusive,
+        baselineEndExclusive,
+        summarySize,
+        depth,
+        doOneSideError,
+        metricConfigDTO.getDerivedMetricExpression(),
+        dateTimeZone,
+        filteredDimensions,
+        filterSetMap,
+        hierarchies);
   }
 
-  private List<String> cleanDimensionStrings(List<String> dimensions) {
+  public DimensionAnalysisResultApi computeCube(
+      final String metricName, final String datasetName,
+      final long currentStartInclusive, final long currentEndExclusive,
+      final long baselineStartInclusive, final long baselineEndExclusive, final int summarySize,
+      final int depth, final boolean doOneSideError,
+      final String derivedMetricExpression,
+      final DateTimeZone dateTimeZone, final Dimensions filteredDimensions,
+      final Multimap<String, String> filterSetMap, final List<List<String>> hierarchies) {
+    CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
+        derivedMetricExpression,
+        dateTimeZone,
+        datasetName,
+        metricName,
+        currentStartInclusive,
+        currentEndExclusive,
+        baselineStartInclusive,
+        baselineEndExclusive,
+        filteredDimensions,
+        filterSetMap,
+        summarySize,
+        depth,
+        hierarchies,
+        doOneSideError
+    );
+
+    try {
+      return cubeAlgorithmRunner.run();
+    } catch (Exception e) {
+      LOG.error("Exception while fetching running cube algorithm", e);
+      return notAvailable().setMetric(new MetricApi()
+          .setName(metricName)
+          .setDataset(new DatasetApi().setName(datasetName)));
+    }
+  }
+
+  public static List<String> cleanDimensionStrings(List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 
@@ -189,7 +225,7 @@ public class DataCubeSummaryCalculator {
 
   private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
       throws JsonProcessingException {
-    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<List<List<String>>>() {});
+    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 
   private Multimap<String, String> parseFilterJsonPayload(String filterJsonPayload)
@@ -218,7 +254,7 @@ public class DataCubeSummaryCalculator {
     private final Pattern SIMPLE_RATIO_METRIC_EXPRESSION_PARSER = Pattern.compile(
         "^id(?<" + NUMERATOR_GROUP_NAME + ">\\d*)\\/id(?<" + DENOMINATOR_GROUP_NAME + ">\\d*)$");
 
-    private final MetricConfigDTO metricConfigDTO;
+    private final String derivedMetricExpression;
     private final DateTimeZone dateTimeZone;
     private final String dataset;
     private final String metric;
@@ -238,7 +274,7 @@ public class DataCubeSummaryCalculator {
      *
      * @param dateTimeZone time zone of the data.
      * @param dataset dataset name.
-     * @param metricConfigDTO the metric config of the ratio metric.
+     * @param derivedMetricExpression derivedMetricExpression String from MetricConfigDTO.
      * @param currentStartInclusive timestamp of current start.
      * @param currentEndExclusive timestamp of current end.
      * @param baselineStartInclusive timestamp of baseline start.
@@ -253,14 +289,14 @@ public class DataCubeSummaryCalculator {
      * @return the summary result of cube algorithm.
      */
     public CubeAlgorithmRunner(
-        final MetricConfigDTO metricConfigDTO, final DateTimeZone dateTimeZone,
+        final String derivedMetricExpression, final DateTimeZone dateTimeZone,
         final String dataset,
         final String metric, final long currentStartInclusive, final long currentEndExclusive,
         final long baselineStartInclusive, final long baselineEndExclusive,
         final Dimensions dimensions,
         final Multimap<String, String> dataFilters, final int summarySize, final int depth,
         final List<List<String>> hierarchies, final boolean doOneSideError) {
-      this.metricConfigDTO = metricConfigDTO;
+      this.derivedMetricExpression = derivedMetricExpression;
       this.dateTimeZone = dateTimeZone;
       this.dataset = dataset;
       this.metric = metric;
@@ -317,9 +353,7 @@ public class DataCubeSummaryCalculator {
     private DimensionAnalysisResultApi runRatioCubeAlgorithm()
         throws Exception {
       Preconditions.checkArgument(isSimpleRatioMetric());
-
-      String derivedMetric = metricConfigDTO.getDerivedMetricExpression();
-      Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetric);
+      Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetricExpression);
       // Extract numerator and denominator id
       long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
       long denominatorId = Long.parseLong(matcher.group(DENOMINATOR_GROUP_NAME));
@@ -354,12 +388,9 @@ public class DataCubeSummaryCalculator {
      * metric.
      */
     private boolean isSimpleRatioMetric() {
-      if (metricConfigDTO != null) {
-        String derivedMetric = metricConfigDTO.getDerivedMetricExpression();
-        if (!Strings.isNullOrEmpty(derivedMetric)) {
-          Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetric);
-          return matcher.matches();
-        }
+      if (!Strings.isNullOrEmpty(derivedMetricExpression)) {
+        Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetricExpression);
+        return matcher.matches();
       }
       return false;
     }

@@ -84,7 +84,7 @@ public class RootCauseMetricResource {
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
   private static final long TIMEOUT = 600000;
   private static final String OFFSET_DEFAULT = "current";
-  private static final String TIMEZONE_DEFAULT = "UTC";
+  protected static final String TIMEZONE_DEFAULT = "UTC";
   private static final int LIMIT_DEFAULT = 100;
 
   private final ExecutorService executor;
@@ -291,61 +291,6 @@ public class RootCauseMetricResource {
   }
 
   /**
-   * Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally)
-   * offset.
-   * Aligns time stamps if necessary and omits null values.
-   *
-   * @param urn metric urn
-   * @param start start time (in millis)
-   * @param end end time (in millis)
-   * @param offset offset identifier (e.g. "current", "wo2w")
-   * @param timezone timezone identifier (e.g. "America/Los_Angeles")
-   * @param limit limit results to the top k elements, plus a rollup element
-   * @return aggregate value, or NaN if data not available
-   * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
-   */
-  @GET
-  @Path("/breakdown")
-  @ApiOperation(value =
-      "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
-          + "Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  public Response getBreakdown(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "metric urn", required = true)
-      @QueryParam("urn") @NotNull String urn,
-      @ApiParam(value = "start time (in millis)", required = true)
-      @QueryParam("start") @NotNull long start,
-      @ApiParam(value = "end time (in millis)", required = true)
-      @QueryParam("end") @NotNull long end,
-      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
-      @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-
-    if (limit == null) {
-      limit = LIMIT_DEFAULT;
-    }
-    DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    MetricEntity metricEntity = MetricEntity.fromURN(urn);
-    long metricId = metricEntity.getId();
-    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricId,
-        filters,
-        start,
-        end,
-        offset,
-        dateTimeZone,
-        limit);
-
-    return Response.ok(breakdown).build();
-  }
-
-  /**
    * Returns a time series for the specified metric and time range, and (optionally) offset at an
    * (optional)
    * time granularity. Aligns time stamps if necessary.
@@ -396,7 +341,7 @@ public class RootCauseMetricResource {
     return Response.ok(timeseries).build();
   }
 
-  private DateTimeZone parseTimeZone(final String timezone) {
+  protected static DateTimeZone parseTimeZone(final String timezone) {
     return DateTimeZone.forID(timezone);
   }
 

@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.notification.content.templates;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -59,6 +57,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class EntityGroupKeyContent extends BaseNotificationContent {
 
+  private static final String PROP_SUB_ENTITY_NAME = "subEntityName";
   private static final Logger LOG = LoggerFactory.getLogger(EntityGroupKeyContent.class);
 
   // Give some kind of special status to this metric entity. Anomalies from this whitelisted metric entity

@@ -5,6 +5,7 @@ import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
+import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -135,6 +136,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         alertEvaluationTimeSeriesHeight={500}
                         maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
                         onRefresh={fetchAlertEvaluation}
+                    />
+                </Grid>
+
+                <Grid item xs={12}>
+                    <AnomalyBreakdownComparisonHeatmap
+                        anomaly={anomaly}
+                        anomalyId={toNumber(params.id)}
                     />
                 </Grid>
             </PageContentsGridV1>

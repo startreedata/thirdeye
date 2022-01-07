@@ -19,23 +19,24 @@
 
 package org.apache.pinot.thirdeye.datasource.pinot;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.helix.manager.zk.ZKHelixAdmin;
-import org.apache.helix.manager.zk.ZNRecordSerializer;
-import org.apache.helix.manager.zk.ZkClient;
-import org.apache.helix.model.InstanceConfig;
+import javax.net.ssl.SSLContext;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.ConnectionFactory;
+import org.apache.pinot.client.JsonAsyncHttpPinotClientTransport;
+import org.apache.pinot.client.JsonAsyncHttpPinotClientTransportFactory;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSetGroup;
@@ -65,16 +66,13 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   private final AtomicInteger activeConnections = new AtomicInteger();
   private Connection[] connections;
 
-  private static Connection[] fromHostList(final String[] thirdeyeBrokers) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers);
+  private static Connection[] fromHostList(final List<String> thirdeyeBrokers, JsonAsyncHttpPinotClientTransport transport) throws Exception {
+    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers, transport);
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
-  private static Connection[] fromZookeeper(
-      final PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(
-        pinotThirdEyeDataSourceConfig.getZookeeperUrl()
-            + "/" + pinotThirdEyeDataSourceConfig.getClusterName());
+  private static Connection[] fromZookeeper(final String zkUrl, JsonAsyncHttpPinotClientTransport transport) throws Exception {
+    Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(zkUrl, transport);
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
@@ -95,6 +93,29 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       connections[i++] = f.get(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
     }
     return connections;
+  }
+
+  private static JsonAsyncHttpPinotClientTransport buildTransport(PinotThirdEyeDataSourceConfig config){
+    JsonAsyncHttpPinotClientTransportFactory factory = new JsonAsyncHttpPinotClientTransportFactory();
+    Optional.ofNullable(config.getControllerConnectionScheme()).ifPresent(
+      schema -> {
+        factory.setScheme(schema);
+        if(schema.equals("https")) {
+          try {
+            factory.setSslContext(SSLContext.getDefault());
+          } catch (NoSuchAlgorithmException e) {
+            LOG.warn("SSL context not set for transport!");
+          }
+        }
+      }
+    );
+    Optional.ofNullable(config.getHeaders()).ifPresent(
+      headers -> {
+        if (!headers.isEmpty()) {
+          factory.setHeaders(headers);
+        }
+      });
+    return (JsonAsyncHttpPinotClientTransport) factory.buildTransport();
   }
 
   /**
@@ -118,11 +139,16 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
     final String brokerUrl = pinotThirdEyeDataSourceConfig.getBrokerUrl();
+    final JsonAsyncHttpPinotClientTransport transport = buildTransport(pinotThirdEyeDataSourceConfig) ;
+
     if (brokerUrl != null && brokerUrl.trim().length() > 0) {
-      this.connections = fromHostList(new String[]{brokerUrl});
+      this.connections = fromHostList(Collections.singletonList(brokerUrl), transport);
       LOG.info("Created PinotControllerResponseCacheLoader with brokers [{}]", brokerUrl);
     } else {
-      this.connections = fromZookeeper(pinotThirdEyeDataSourceConfig);
+      this.connections = fromZookeeper(
+        String.format("%s/%s", pinotThirdEyeDataSourceConfig.getZookeeperUrl(),
+          pinotThirdEyeDataSourceConfig.getClusterName()),
+        transport);
       LOG.info("Created PinotControllerResponseCacheLoader with controller {}:{}",
           pinotThirdEyeDataSourceConfig.getControllerHost(),
           pinotThirdEyeDataSourceConfig.getControllerPort());

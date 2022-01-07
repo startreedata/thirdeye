@@ -8,6 +8,8 @@ import { formatDateAndTime, formatDuration } from "../date-time/date-time.util";
 import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
+export const EMPTY_STRING_DISPLAY = "<EMPTY_VALUE>";
+
 export const getAnomalyName = (anomaly: Anomaly): string => {
     if (!anomaly || isNil(anomaly.id)) {
         return i18n.t("label.anomaly");
@@ -263,4 +265,21 @@ const anomaliesEndTimeComparator = (
     anomaly2: Anomaly
 ): number => {
     return anomaly1.endTime - anomaly2.endTime;
+};
+
+export const getShortText = (
+    text: string,
+    nodeWidth: number,
+    nodeHeight: number
+): string => {
+    const estimatedTextLength = text.length * 10;
+    const textToShow: string =
+        estimatedTextLength > nodeWidth
+            ? text.substring(0, nodeWidth / 10) + ".."
+            : text;
+    if (nodeWidth <= 30 && nodeHeight <= 20) {
+        return "";
+    }
+
+    return textToShow;
 };

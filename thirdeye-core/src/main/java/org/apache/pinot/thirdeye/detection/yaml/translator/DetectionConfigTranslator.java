@@ -120,8 +120,6 @@ import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 public class DetectionConfigTranslator extends
     ConfigTranslator<AlertDTO, DetectionConfigValidator> {
 
-  public static final String PROP_SUB_ENTITY_NAME = "subEntityName";
-
   private static final String PROP_CRON = "cron";
   private static final String PROP_TYPE = "type";
   private static final String PROP_NAME = "name";

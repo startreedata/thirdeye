@@ -87,6 +87,11 @@ smtp:
   secretKeyRef:
     name: smtp-credentials
 
+tls:
+  enabled: false
+  password: password
+  type: PKCS12
+
 auth:
   enabled: false
 #  infoURL: <platform url>/api/info

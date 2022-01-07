@@ -1,3 +1,5 @@
+import { Grid } from "@material-ui/core";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -5,7 +7,7 @@ import { AnomalyList } from "../../components/anomaly-list/anomaly-list.componen
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteAnomaly,
@@ -81,12 +83,18 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents centered hideAppBreadcrumbs title={t("label.anomalies")}>
-            {/* Anomaly list */}
-            <AnomalyList
-                anomalies={uiAnomalies}
-                onDelete={handleAnomalyDelete}
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader showTimeRange title={t("label.anomalies")} />
+
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {/* Anomaly list */}
+                    <AnomalyList
+                        anomalies={uiAnomalies}
+                        onDelete={handleAnomalyDelete}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

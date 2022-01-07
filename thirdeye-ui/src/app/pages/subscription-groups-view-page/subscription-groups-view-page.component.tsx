@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { cloneDeep, toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -8,7 +9,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
@@ -191,12 +192,11 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
-        >
-            <Grid container>
+        <PageV1>
+            <PageHeader
+                title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
+            />
+            <PageContentsGridV1>
                 {/* Subscription Group */}
                 <Grid item xs={12}>
                     <SubscriptionGroupCard
@@ -223,7 +223,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                         onChange={handleSubscriptionGroupEmailsChange}
                     />
                 </Grid>
-            </Grid>
-        </PageContents>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

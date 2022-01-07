@@ -1,17 +1,12 @@
-import {
-    PageContentsGridV1,
-    PageHeaderTextV1,
-    PageHeaderV1,
-    PageV1,
-} from "@startree-ui/platform-ui";
+import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { CreateMenuButton } from "../../components/create-menu-button.component/create-menu-button.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteAlert,
@@ -140,10 +135,8 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
-                <PageHeaderTextV1>{t("label.alerts")}</PageHeaderTextV1>
-                <CreateMenuButton />
-            </PageHeaderV1>
+            <PageHeader showTimeRange title={t("label.alerts")} />
+
             <PageContentsGridV1 fullHeight>
                 {/* Alert list */}
                 <AlertListV1

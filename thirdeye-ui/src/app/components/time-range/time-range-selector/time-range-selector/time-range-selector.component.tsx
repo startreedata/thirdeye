@@ -159,7 +159,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     };
 
     return (
-        <Grid container alignItems="center">
+        <Grid container alignItems="center" justifyContent="flex-end">
             {/* Time range */}
             {!props.hideTimeRange && props.timeRangeDuration && (
                 <Grid item>

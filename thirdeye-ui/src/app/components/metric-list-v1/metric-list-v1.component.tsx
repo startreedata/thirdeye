@@ -1,6 +1,4 @@
-import { Button, Grid, Link, useTheme } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
+import { Button, Grid, Link } from "@material-ui/core";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -15,6 +13,7 @@ import {
     getMetricsUpdatePath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
+import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { MetricListV1Props } from "./metric-list-v1.interfaces";
 
 export const MetricListV1: FunctionComponent<MetricListV1Props> = (
@@ -26,7 +25,6 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         setSelectedMetric,
     ] = useState<DataGridSelectionModelV1>();
     const history = useHistory();
-    const theme = useTheme();
 
     const handleMetricDelete = (): void => {
         if (!selectedMetric) {
@@ -92,25 +90,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     ): ReactElement => {
         const active = ((data as unknown) as UiMetric).active;
 
-        return (
-            <>
-                {/* Active */}
-                {active && (
-                    <CheckIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.success.main}
-                    />
-                )}
-
-                {/* Inactive */}
-                {!active && (
-                    <CloseIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.error.main}
-                    />
-                )}
-            </>
-        );
+        return <ActiveIndicator active={active} />;
     };
 
     const metricColumns = [

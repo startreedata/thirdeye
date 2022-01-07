@@ -1,4 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -7,7 +12,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
@@ -112,17 +117,21 @@ export const MetricsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            {metric && (
-                <MetricsWizard
-                    datasets={datasets}
-                    metric={metric}
-                    onFinish={onMetricWizardFinish}
-                />
-            )}
-
-            {/* No data available message */}
-            {!metric && <NoDataIndicator />}
-        </PageContents>
+        <PageV1>
+            <PageHeader title={t("label.update")} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {metric && (
+                        <MetricsWizard
+                            datasets={datasets}
+                            metric={metric}
+                            onFinish={onMetricWizardFinish}
+                        />
+                    )}
+                    {/* No data available message */}
+                    {!metric && <NoDataIndicator />}
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

@@ -1,11 +1,12 @@
 package org.apache.pinot.thirdeye.detection.alert.scheme;
 
-import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
+import static org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.PROP_TEMPLATE;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,30 +20,32 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
+import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.EmailTemplateType;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
-import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.NotificationContent;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
-import org.apache.pinot.thirdeye.spi.detection.annotation.AlertScheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class is responsible for sending the email alerts
  */
-@AlertScheme(type = "EMAIL")
 @Singleton
-public class EmailAlertScheme extends NotificationScheme {
+public class EmailAlertScheme {
 
   public static final String PROP_RECIPIENTS = "recipients";
 
@@ -50,19 +53,27 @@ public class EmailAlertScheme extends NotificationScheme {
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
-  private SmtpConfiguration smtpConfig;
-  private EmailContentFormatter emailContentFormatter;
+  private final EmailContentFormatter emailContentFormatter;
+  private final SmtpConfiguration smtpConfig;
+  private final UiConfiguration uiConfig;
+  private final EntityGroupKeyContent entityGroupKeyContent;
+  private final MetricAnomaliesContent metricAnomaliesContent;
   private Counter emailAlertsFailedCounter;
   private Counter emailAlertsSuccessCounter;
   private List<String> adminRecipients = new ArrayList<>();
   private List<String> emailWhitelist = new ArrayList<>();
 
-  @Override
-  public void init(final NotificationSchemeContext context) {
-    super.init(context);
+  @Inject
+  public EmailAlertScheme(final ThirdEyeServerConfiguration configuration,
+      final EntityGroupKeyContent entityGroupKeyContent,
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final MetricRegistry metricRegistry) {
+    this.entityGroupKeyContent = entityGroupKeyContent;
+    this.metricAnomaliesContent = metricAnomaliesContent;
 
-    smtpConfig = context.getSmtpConfiguration();
     emailContentFormatter = new EmailContentFormatter();
+    smtpConfig = configuration.getAlerterConfigurations().getSmtpConfiguration();
+    uiConfig = configuration.getUiConfiguration();
 
     emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
     emailAlertsSuccessCounter = metricRegistry.counter("emailAlertsSuccessCounter");
@@ -121,6 +132,26 @@ public class EmailAlertScheme extends NotificationScheme {
     }
   }
 
+  private EmailTemplateType getTemplate(final Properties properties) {
+    if (properties != null && properties.containsKey(PROP_TEMPLATE)) {
+      return EmailTemplateType.valueOf(properties.get(PROP_TEMPLATE).toString());
+    }
+    return EmailTemplateType.DEFAULT_EMAIL;
+  }
+
+  private NotificationContent getNotificationContent(
+      final Properties properties) {
+    final EmailTemplateType template = getTemplate(properties);
+    switch (template) {
+      case DEFAULT_EMAIL:
+        return metricAnomaliesContent;
+      case ENTITY_GROUPBY_REPORT:
+        return entityGroupKeyContent;
+      default:
+        throw new IllegalArgumentException(String.format("Unknown email template '%s'", template));
+    }
+  }
+
   private HtmlEmail prepareEmailContent(final SubscriptionGroupDTO subsConfig,
       final Properties emailClientConfigs,
       final List<AnomalyResult> anomalies, final DetectionAlertFilterRecipients recipients)
@@ -133,7 +164,7 @@ public class EmailAlertScheme extends NotificationScheme {
     final NotificationContent content = getNotificationContent(emailClientConfigs);
     final NotificationContext notificationContext = new NotificationContext()
         .setProperties(emailClientConfigs)
-        .setUiPublicUrl(this.context.getUiPublicUrl());
+        .setUiPublicUrl(uiConfig.getExternalUrl());
     content.init(notificationContext);
 
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
@@ -192,7 +223,7 @@ public class EmailAlertScheme extends NotificationScheme {
     LOG.info("Email sent with subject '{}' to {} recipients", email.getSubject(), recipientCount);
   }
 
-  private void buildAndSendEmails(
+  public void buildAndSendEmails(
       final SubscriptionGroupDTO subscriptionGroup,
       final DetectionAlertFilterResult results) {
     LOG.info("Preparing an email alert for subscription group id {}", subscriptionGroup.getId());
@@ -212,7 +243,7 @@ public class EmailAlertScheme extends NotificationScheme {
         buildAndSendEmail(subscriptionGroupDTO, anomalyResults);
       } catch (final Exception e) {
         emailAlertsFailedCounter.inc();
-        super.handleAlertFailure(e);
+        LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
       }
     }
   }
@@ -242,19 +273,5 @@ public class EmailAlertScheme extends NotificationScheme {
 
     sendEmail(email);
     emailAlertsSuccessCounter.inc();
-  }
-
-  @Override
-  public void run(
-      final SubscriptionGroupDTO subscriptionGroup,
-      final DetectionAlertFilterResult result) throws Exception {
-    requireNonNull(result);
-    if (result.getAllAnomalies().size() == 0) {
-      LOG.info("Zero anomalies found, skipping email alert for {}", subscriptionGroup.getId());
-      return;
-    }
-
-    optional(subscriptionGroup.getNotificationSchemes()
-        .getEmailScheme()).ifPresent(e -> buildAndSendEmails(subscriptionGroup, result));
   }
 }

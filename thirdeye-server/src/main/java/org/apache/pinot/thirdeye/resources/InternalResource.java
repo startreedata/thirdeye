@@ -35,7 +35,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
@@ -75,7 +74,7 @@ public class InternalResource {
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final DatabaseAdminResource databaseAdminResource,
-      final NotificationSchemeFactory notificationSchemeFactory,
+      final EmailAlertScheme emailAlertScheme,
       final MetricAnomaliesContent metricAnomaliesContent,
       final ThirdEyeServerConfiguration configuration,
       final EmailContentFormatter emailContentFormatter,
@@ -87,8 +86,7 @@ public class InternalResource {
     this.metricAnomaliesContent = metricAnomaliesContent;
     this.configuration = configuration;
     this.emailContentFormatter = emailContentFormatter;
-
-    this.emailAlertScheme = notificationSchemeFactory.createEmailAlertScheme();
+    this.emailAlertScheme = emailAlertScheme;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
   }

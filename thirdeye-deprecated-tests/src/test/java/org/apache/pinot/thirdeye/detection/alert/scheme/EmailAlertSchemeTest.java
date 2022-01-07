@@ -22,6 +22,7 @@ import static org.apache.pinot.thirdeye.detection.alert.filter.AlertFilterUtils.
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.codahale.metrics.MetricRegistry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,8 @@ import org.apache.pinot.thirdeye.detection.alert.filter.SubscriptionUtils;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
+import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
+import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -82,11 +85,12 @@ public class EmailAlertSchemeTest {
     properties.put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(alertDTO.getId()));
 
     final EmailSchemeDto recipients = new EmailSchemeDto()
-    .setTo(PROP_TO_VALUE)
-    .setCc(PROP_CC_VALUE)
-    .setBcc(PROP_BCC_VALUE);
+        .setTo(PROP_TO_VALUE)
+        .setCc(PROP_CC_VALUE)
+        .setBcc(PROP_BCC_VALUE);
 
-    subscriptionGroupDTO.setNotificationSchemes(new NotificationSchemesDto().setEmailScheme(recipients));
+    subscriptionGroupDTO.setNotificationSchemes(new NotificationSchemesDto().setEmailScheme(
+        recipients));
     subscriptionGroupDTO.setProperties(properties);
     subscriptionGroupDTO.setFrom(FROM_ADDRESS_VALUE);
     subscriptionGroupDTO.setName(ALERT_NAME_VALUE);
@@ -127,12 +131,6 @@ public class EmailAlertSchemeTest {
 
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testFailAlertWithNullResult() throws Exception {
-    final EmailAlertScheme alertTaskInfo = new EmailAlertScheme();
-    alertTaskInfo.run(subscriptionGroupDTO, null);
-  }
-
   @Test
   public void testSendEmailSuccessful() throws Exception {
     final Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result = new HashMap<>();
@@ -149,13 +147,17 @@ public class EmailAlertSchemeTest {
     when(htmlEmail.getMailSession()).thenReturn(Session.getInstance(new Properties()));
     when(htmlEmail.send()).thenReturn("sent");
 
-    final EmailAlertScheme emailAlerter = new EmailAlertScheme() {
+    final EmailAlertScheme emailAlerter = new EmailAlertScheme(
+        mock(ThirdEyeServerConfiguration.class),
+        mock(EntityGroupKeyContent.class),
+        mock(MetricAnomaliesContent.class),
+        new MetricRegistry()) {
       @Override
       protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
         return htmlEmail;
       }
     };
     // Executes successfully without errors
-    emailAlerter.run(subscriptionGroupDTO, mock(DetectionAlertFilterResult.class));
+    emailAlerter.buildAndSendEmails(subscriptionGroupDTO, mock(DetectionAlertFilterResult.class));
   }
 }

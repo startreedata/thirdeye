@@ -40,6 +40,7 @@ import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
@@ -143,31 +144,6 @@ public class NotificationTaskRunner implements TaskRunner {
       mergedAnomalyResultManager.update(anomaly);
     }
 
-    fireNotifications(subscriptionGroupDTO, result);
-
-    updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
-  }
-
-  private void fireNotifications(
-      final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) throws Exception {
-
-    // Send out emails
-    final EmailAlertScheme emailAlertScheme = notificationSchemeFactory.getEmailAlertScheme();
-    emailAlertScheme.run(subscriptionGroupDTO, result);
-    emailAlertScheme.destroy();
-
-    // fire webhook
-    fireWebhook(subscriptionGroupDTO, result);
-  }
-
-  private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) {
-    final WebhookSchemeDto webhookScheme = subscriptionGroupDTO.getNotificationSchemes()
-        .getWebhookScheme();
-    if (webhookScheme == null) {
-      return;
-    }
     requireNonNull(result);
     if (result.getAllAnomalies().size() == 0) {
       LOG.debug("Zero anomalies found, skipping webhook alert for {}",
@@ -175,9 +151,39 @@ public class NotificationTaskRunner implements TaskRunner {
       return;
     }
 
+    fireNotifications(subscriptionGroupDTO, result);
+
+    updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
+  }
+
+  private void fireNotifications(
+      final SubscriptionGroupDTO subscriptionGroupDTO,
+      final DetectionAlertFilterResult result) {
+
+    // Send out emails
+    final EmailAlertScheme emailAlertScheme = notificationSchemeFactory.getEmailAlertScheme();
+    final EmailSchemeDto emailScheme = subscriptionGroupDTO.getNotificationSchemes()
+        .getEmailScheme();
+    if (emailScheme != null) {
+      emailAlertScheme.buildAndSendEmails(subscriptionGroupDTO, result);
+    }
+
+    // fire webhook
+    final WebhookSchemeDto webhookScheme = subscriptionGroupDTO.getNotificationSchemes()
+        .getWebhookScheme();
+    if (webhookScheme != null) {
+      fireWebhook(subscriptionGroupDTO, result);
+    }
+  }
+
+  private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,
+      final DetectionAlertFilterResult result) {
     final NotificationPayloadApi entity = buildNotificationPayload(
         subscriptionGroupDTO,
         result);
+
+    final WebhookSchemeDto webhookScheme = subscriptionGroupDTO.getNotificationSchemes()
+        .getWebhookScheme();
 
     final Map<String, String> properties = new HashMap<>();
     properties.put("url", webhookScheme.getUrl());

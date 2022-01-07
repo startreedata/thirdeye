@@ -2,16 +2,12 @@ package org.apache.pinot.thirdeye.detection.alert;
 
 import static org.mockito.Mockito.mock;
 
-import com.codahale.metrics.MetricRegistry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
-import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
-import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -50,11 +46,7 @@ public class NotificationSchemeFactoryTest {
     notificationSchemeFactory = new NotificationSchemeFactory(mock(DataProvider.class),
         mock(MergedAnomalyResultManager.class),
         mock(AlertManager.class),
-        new ThirdEyeServerConfiguration(),
-        mock(EntityGroupKeyContent.class),
-        mock(MetricAnomaliesContent.class),
-        new MetricRegistry(),
-        mock(NotificationServiceRegistry.class));
+        mock(EmailAlertScheme.class));
   }
 
   @AfterClass(alwaysRun = true)

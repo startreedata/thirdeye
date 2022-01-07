@@ -48,6 +48,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.task.runner.NotificationTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +68,7 @@ public class InternalResource {
   private final ThirdEyeServerConfiguration configuration;
   private final EmailContentFormatter emailContentFormatter;
   private final NotificationServiceRegistry notificationServiceRegistry;
+  private final NotificationTaskRunner notificationTaskRunner;
 
   @Inject
   public InternalResource(
@@ -77,7 +79,8 @@ public class InternalResource {
       final MetricAnomaliesContent metricAnomaliesContent,
       final ThirdEyeServerConfiguration configuration,
       final EmailContentFormatter emailContentFormatter,
-      final NotificationServiceRegistry notificationServiceRegistry) {
+      final NotificationServiceRegistry notificationServiceRegistry,
+      final NotificationTaskRunner notificationTaskRunner) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.databaseAdminResource = databaseAdminResource;
@@ -87,6 +90,7 @@ public class InternalResource {
 
     this.emailAlertScheme = notificationSchemeFactory.createEmailAlertScheme();
     this.notificationServiceRegistry = notificationServiceRegistry;
+    this.notificationTaskRunner = notificationTaskRunner;
   }
 
   @Path("db-admin")
@@ -178,7 +182,7 @@ public class InternalResource {
 
   @POST
   @Path("trigger/webhook")
-  public Response triggerWebhook() throws Exception {
+  public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     final ImmutableMap<String, String> properties = ImmutableMap.of(
         "url", "http://localhost:8080/internal/webhook"
     );
@@ -188,6 +192,14 @@ public class InternalResource {
             .setSubscriptionGroup(new SubscriptionGroupApi()
                 .setName("dummy"))
         );
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("notify")
+  public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @FormParam("subscriptionGroupId") Long subscriptionGroupId) throws Exception {
+    notificationTaskRunner.execute(subscriptionGroupId);
     return Response.ok().build();
   }
 

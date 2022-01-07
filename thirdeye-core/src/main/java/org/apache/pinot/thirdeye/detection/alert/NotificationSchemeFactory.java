@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.notification.NotificationSchemeContext;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
@@ -53,7 +52,6 @@ public class NotificationSchemeFactory {
   private final DataProvider provider;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
-  private final WebhookAlertScheme webhookAlertScheme;
   private final EmailAlertScheme emailAlertScheme;
   private final NotificationSchemeContext context;
 
@@ -61,7 +59,6 @@ public class NotificationSchemeFactory {
   public NotificationSchemeFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final WebhookAlertScheme webhookAlertScheme,
       final ThirdEyeServerConfiguration configuration,
       final EntityGroupKeyContent entityGroupKeyContent,
       final MetricAnomaliesContent metricAnomaliesContent,
@@ -70,7 +67,6 @@ public class NotificationSchemeFactory {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
-    this.webhookAlertScheme = webhookAlertScheme;
 
     context = new NotificationSchemeContext()
         .setUiPublicUrl(configuration.getUiConfiguration().getExternalUrl())

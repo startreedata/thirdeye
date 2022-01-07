@@ -26,16 +26,24 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationPayloadBuilder;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
+import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
+import org.apache.pinot.thirdeye.spi.notification.NotificationService;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskContext;
@@ -57,7 +65,8 @@ public class NotificationTaskRunner implements TaskRunner {
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final WebhookAlertScheme webhookAlertScheme;
+  private final NotificationPayloadBuilder notificationPayloadBuilder;
+  private final NotificationServiceRegistry notificationServiceRegistry;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
@@ -67,15 +76,17 @@ public class NotificationTaskRunner implements TaskRunner {
       final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final WebhookAlertScheme webhookAlertScheme,
-      final MetricRegistry metricRegistry) {
+      final NotificationPayloadBuilder notificationPayloadBuilder,
+      final MetricRegistry metricRegistry,
+      final NotificationServiceRegistry notificationServiceRegistry) {
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.webhookAlertScheme = webhookAlertScheme;
+    this.notificationPayloadBuilder = notificationPayloadBuilder;
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
+    this.notificationServiceRegistry = notificationServiceRegistry;
   }
 
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
@@ -104,10 +115,14 @@ public class NotificationTaskRunner implements TaskRunner {
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
+    return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId());
+  }
+
+  public ArrayList<TaskResult> execute(final long subscriptionGroupId)
+      throws Exception {
     notificationTaskCounter.inc();
 
     try {
-      final long subscriptionGroupId = ((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId();
       final SubscriptionGroupDTO subscriptionGroupDTO = getSubscriptionGroupDTO(subscriptionGroupId);
 
       executeInternal(subscriptionGroupDTO);
@@ -147,7 +162,50 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) throws Exception {
-    webhookAlertScheme.run(subscriptionGroupDTO, result);
+      final DetectionAlertFilterResult result) {
+    final WebhookSchemeDto webhookScheme = subscriptionGroupDTO.getNotificationSchemes()
+        .getWebhookScheme();
+    if (webhookScheme == null) {
+      return;
+    }
+    requireNonNull(result);
+    if (result.getAllAnomalies().size() == 0) {
+      LOG.debug("Zero anomalies found, skipping webhook alert for {}",
+          subscriptionGroupDTO.getId());
+      return;
+    }
+
+    final NotificationPayloadApi entity = buildNotificationPayload(
+        subscriptionGroupDTO,
+        result);
+
+    final Map<String, String> properties = new HashMap<>();
+    properties.put("url", webhookScheme.getUrl());
+    if (webhookScheme.getHashKey() != null) {
+      properties.put("hashKey", webhookScheme.getHashKey());
+    }
+    final NotificationService webhookNotificationService = notificationServiceRegistry
+        .get("webhook", properties);
+    webhookNotificationService.notify(entity);
+  }
+
+  private NotificationPayloadApi buildNotificationPayload(
+      final SubscriptionGroupDTO subscriptionGroupDTO, final DetectionAlertFilterResult result) {
+    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroupDTO, result);
+    return notificationPayloadBuilder.buildNotificationPayload(
+        subscriptionGroupDTO,
+        anomalies);
+  }
+
+  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult results) {
+    return results
+        .getResult()
+        .entrySet()
+        .stream()
+        .filter(result -> subscriptionGroup.equals(result.getKey().getSubscriptionConfig()))
+        .findFirst()
+        .map(Entry::getValue)
+        .orElse(null);
   }
 }

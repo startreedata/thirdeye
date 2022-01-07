@@ -26,7 +26,7 @@ import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationPayloadBuilder;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.commons.NotificationConfiguration;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
@@ -124,7 +124,6 @@ public class SendAlertTest {
     final NotificationSchemeFactory notificationSchemeFactory = new NotificationSchemeFactory(null,
         null,
         null,
-        mock(WebhookAlertScheme.class),
         null,
         mock(EntityGroupKeyContent.class),
         mock(MetricAnomaliesContent.class),
@@ -134,8 +133,9 @@ public class SendAlertTest {
         notificationSchemeFactory,
         TestDbEnv.getInstance().getDetectionAlertConfigManager(),
         TestDbEnv.getInstance().getMergedAnomalyResultDAO(),
-        mock(WebhookAlertScheme.class),
-        new MetricRegistry());
+        mock(NotificationPayloadBuilder.class),
+        new MetricRegistry(),
+        mock(NotificationServiceRegistry.class));
   }
 
   @AfterMethod(alwaysRun = true)

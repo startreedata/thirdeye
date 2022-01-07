@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.datasource.DAORegistry;
-import org.apache.pinot.thirdeye.detection.alert.scheme.WebhookAlertScheme;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
@@ -51,7 +50,6 @@ public class NotificationSchemeFactoryTest {
     notificationSchemeFactory = new NotificationSchemeFactory(mock(DataProvider.class),
         mock(MergedAnomalyResultManager.class),
         mock(AlertManager.class),
-        mock(WebhookAlertScheme.class),
         new ThirdEyeServerConfiguration(),
         mock(EntityGroupKeyContent.class),
         mock(MetricAnomaliesContent.class),

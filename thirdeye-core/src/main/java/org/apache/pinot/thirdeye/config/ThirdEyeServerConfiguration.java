@@ -120,11 +120,11 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return this;
   }
 
-  public NotificationConfiguration getAlerterConfigurations() {
+  public NotificationConfiguration getNotificationConfiguration() {
     return notificationConfiguration;
   }
 
-  public ThirdEyeServerConfiguration setAlerterConfigurations(
+  public ThirdEyeServerConfiguration setNotificationConfiguration(
       final NotificationConfiguration notificationConfiguration) {
     this.notificationConfiguration = notificationConfiguration;
     return this;

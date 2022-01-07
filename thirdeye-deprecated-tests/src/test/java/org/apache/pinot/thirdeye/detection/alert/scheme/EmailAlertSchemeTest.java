@@ -123,7 +123,7 @@ public class EmailAlertSchemeTest {
     smtpProperties.setPort(25);
     final NotificationConfiguration alerterProps = new NotificationConfiguration();
     alerterProps.setSmtpConfiguration(smtpProperties);
-    thirdEyeConfig.setAlerterConfigurations(alerterProps);
+    thirdEyeConfig.setNotificationConfiguration(alerterProps);
   }
 
   @AfterClass(alwaysRun = true)
@@ -148,7 +148,7 @@ public class EmailAlertSchemeTest {
     when(htmlEmail.send()).thenReturn("sent");
 
     final EmailAlertScheme emailAlerter = new EmailAlertScheme(
-        mock(ThirdEyeServerConfiguration.class),
+        new ThirdEyeServerConfiguration().setNotificationConfiguration(new NotificationConfiguration()),
         mock(EntityGroupKeyContent.class),
         mock(MetricAnomaliesContent.class),
         new MetricRegistry()) {

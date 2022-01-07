@@ -72,7 +72,7 @@ public class EmailAlertScheme {
     this.metricAnomaliesContent = metricAnomaliesContent;
 
     emailContentFormatter = new EmailContentFormatter();
-    smtpConfig = configuration.getAlerterConfigurations().getSmtpConfiguration();
+    smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
     uiConfig = configuration.getUiConfiguration();
 
     emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");

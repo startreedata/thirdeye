@@ -151,7 +151,7 @@ public class SendAlertTest {
 
     ThirdEyeServerConfiguration thirdEyeConfig = new ThirdEyeServerConfiguration();
     thirdEyeConfig.setUiConfiguration(new UiConfiguration().setExternalUrl(DASHBOARD_HOST_VALUE));
-    thirdEyeConfig.setAlerterConfigurations(alerterProps);
+    thirdEyeConfig.setNotificationConfiguration(alerterProps);
 
     final TaskContext taskContext = new TaskContext()
         .setThirdEyeWorkerConfiguration(thirdEyeConfig);

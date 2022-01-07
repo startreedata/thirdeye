@@ -158,7 +158,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private void fireNotifications(
       final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) throws Exception {
+      final DetectionAlertFilterResult result) {
 
     // Send out emails
     final EmailAlertScheme emailAlertScheme = notificationSchemeFactory.getEmailAlertScheme();
@@ -178,7 +178,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private void fireEmails(final SubscriptionGroupDTO subscriptionGroupDTO,
       final DetectionAlertFilterResult result,
-      final EmailAlertScheme emailAlertScheme) throws Exception {
+      final EmailAlertScheme emailAlertScheme) {
     final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroupDTO, result);
     emailAlertScheme.buildAndSendEmail(subscriptionGroupDTO, new ArrayList<>(anomalies));
   }

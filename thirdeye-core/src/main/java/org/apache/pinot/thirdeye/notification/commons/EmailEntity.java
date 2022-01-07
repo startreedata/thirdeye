@@ -28,6 +28,7 @@ public class EmailEntity {
   private DetectionAlertFilterRecipients to;
   private String subject;
   private HtmlEmail content;
+  private String snapshotPath;
 
   public String getFrom() {
     return from;
@@ -63,6 +64,15 @@ public class EmailEntity {
 
   public EmailEntity setContent(final HtmlEmail content) {
     this.content = content;
+    return this;
+  }
+
+  public String getSnapshotPath() {
+    return snapshotPath;
+  }
+
+  public EmailEntity setSnapshotPath(final String snapshotPath) {
+    this.snapshotPath = snapshotPath;
     return this;
   }
 }

@@ -105,7 +105,8 @@ public class EmailContentFormatter {
         htmlEmail,
         htmlText,
         notificationContext.getProperties(),
-        subsConfig);
+        subsConfig,
+        content.getSnaphotPath());
   }
 
   public String buildHtml(final String templateName, final Map<String, Object> templateValues) {
@@ -129,15 +130,19 @@ public class EmailContentFormatter {
       final HtmlEmail email,
       final String htmlEmail,
       final Properties alertClientConfig,
-      final SubscriptionGroupDTO subsConfig) {
+      final SubscriptionGroupDTO subsConfig,
+      final String snapshotPath) {
     try {
-      final EmailEntity emailEntity = new EmailEntity();
       final String subject = BaseNotificationContent
           .makeSubject(getSubjectType(alertClientConfig, subsConfig), subsConfig, templateValues);
-      emailEntity.setSubject(subject);
+
       email.setHtmlMsg(htmlEmail);
-      emailEntity.setContent(email);
-      return emailEntity;
+
+      return new EmailEntity()
+          .setSnapshotPath(snapshotPath)
+          .setSubject(subject)
+          .setContent(email);
+
     } catch (final EmailException e) {
       throw new RuntimeException(e);
     }

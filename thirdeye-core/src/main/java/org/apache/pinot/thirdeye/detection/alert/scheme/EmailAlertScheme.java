@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 public class EmailAlertScheme {
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailAlertScheme.class);
+
   private final List<String> emailBlacklist = Arrays.asList(
       "me@company.com",
       "cc_email@company.com");
@@ -52,10 +53,11 @@ public class EmailAlertScheme {
   private final UiConfiguration uiConfig;
   private final EntityGroupKeyContent entityGroupKeyContent;
   private final MetricAnomaliesContent metricAnomaliesContent;
-  private Counter emailAlertsFailedCounter;
-  private Counter emailAlertsSuccessCounter;
-  private List<String> adminRecipients = new ArrayList<>();
-  private List<String> emailWhitelist = new ArrayList<>();
+
+  private final Counter emailAlertsFailedCounter;
+  private final Counter emailAlertsSuccessCounter;
+  private final List<String> adminRecipients = new ArrayList<>();
+  private final List<String> emailWhitelist = new ArrayList<>();
 
   @Inject
   public EmailAlertScheme(final ThirdEyeServerConfiguration configuration,
@@ -150,6 +152,29 @@ public class EmailAlertScheme {
       final Properties emailClientConfigs,
       final List<AnomalyResult> anomalies, final DetectionAlertFilterRecipients recipients)
       throws Exception {
+    final EmailEntity emailEntity = buildEmailEntity(
+        subsConfig,
+        emailClientConfigs,
+        anomalies,
+        recipients);
+
+    final HtmlEmail email = emailEntity.getContent();
+    email.setSubject(emailEntity.getSubject());
+    email.setFrom(subsConfig.getFrom());
+    email.setTo(AlertUtils.toAddress(recipients.getTo()));
+    if (!CollectionUtils.isEmpty(recipients.getCc())) {
+      email.setCc(AlertUtils.toAddress(recipients.getCc()));
+    }
+    if (!CollectionUtils.isEmpty(recipients.getBcc())) {
+      email.setBcc(AlertUtils.toAddress(recipients.getBcc()));
+    }
+
+    return emailEntity.getContent();
+  }
+
+  private EmailEntity buildEmailEntity(final SubscriptionGroupDTO subsConfig,
+      final Properties emailClientConfigs, final List<AnomalyResult> anomalies,
+      final DetectionAlertFilterRecipients recipients) {
     configureAdminRecipients(recipients);
     whitelistRecipients(recipients);
     blacklistRecipients(recipients);
@@ -173,23 +198,41 @@ public class EmailAlertScheme {
       }
       subsConfig.setFrom(fromAddress);
     }
-
-    final HtmlEmail email = emailEntity.getContent();
-    email.setSubject(emailEntity.getSubject());
-    email.setFrom(subsConfig.getFrom());
-    email.setTo(AlertUtils.toAddress(recipients.getTo()));
-    if (!CollectionUtils.isEmpty(recipients.getCc())) {
-      email.setCc(AlertUtils.toAddress(recipients.getCc()));
-    }
-    if (!CollectionUtils.isEmpty(recipients.getBcc())) {
-      email.setBcc(AlertUtils.toAddress(recipients.getBcc()));
-    }
-
-    return getHtmlContent(emailEntity);
+    return emailEntity;
   }
 
-  protected HtmlEmail getHtmlContent(final EmailEntity emailEntity) {
-    return emailEntity.getContent();
+  public void buildAndSendEmail(
+      final SubscriptionGroupDTO sg,
+      final List<AnomalyResult> anomalyResults) {
+    final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
+    sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
+
+    final Properties emailConfig = new Properties();
+//    TODO accommodate all required properties in EmailSchemeDto
+//    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
+    final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
+
+    if (emailScheme.getTo() == null || emailScheme.getTo().isEmpty()) {
+      throw new IllegalArgumentException(
+          "No email recipients found in subscription group " + sg.getId());
+    }
+
+    final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
+        emailScheme.getTo(),
+        emailScheme.getCc(),
+        emailScheme.getBcc());
+    try {
+      final HtmlEmail email = prepareEmailContent(sg,
+          emailConfig,
+          sortedAnomalyResults,
+          recipients);
+
+      sendEmail(email);
+      emailAlertsSuccessCounter.inc();
+    } catch (Exception e) {
+      emailAlertsFailedCounter.inc();
+      LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
+    }
   }
 
   /**
@@ -215,34 +258,5 @@ public class EmailAlertScheme {
         email.getToAddresses().size() + email.getCcAddresses().size() + email.getBccAddresses()
             .size();
     LOG.info("Email sent with subject '{}' to {} recipients", email.getSubject(), recipientCount);
-  }
-
-  public void buildAndSendEmail(
-      final SubscriptionGroupDTO sg,
-      final List<AnomalyResult> anomalyResults) throws Exception {
-    final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
-    sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
-
-    final Properties emailConfig = new Properties();
-//    TODO accommodate all required properties in EmailSchemeDto
-//    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
-    final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
-
-    if (emailScheme.getTo() == null || emailScheme.getTo().isEmpty()) {
-      throw new IllegalArgumentException(
-          "No email recipients found in subscription group " + sg.getId());
-    }
-
-    final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
-        emailScheme.getTo(),
-        emailScheme.getCc(),
-        emailScheme.getBcc());
-    final HtmlEmail email = prepareEmailContent(sg,
-        emailConfig,
-        sortedAnomalyResults,
-        recipients);
-
-    sendEmail(email);
-    emailAlertsSuccessCounter.inc();
   }
 }

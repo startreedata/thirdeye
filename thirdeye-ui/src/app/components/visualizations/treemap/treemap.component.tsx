@@ -15,7 +15,10 @@ import {
 } from "@visx/visx";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 import React, { MouseEvent } from "react";
-import { getShortText } from "../../../utils/anomalies/anomalies.util";
+import {
+    EMPTY_STRING_DISPLAY,
+    getShortText,
+} from "../../../utils/anomalies/anomalies.util";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
 import { GenericTreemapTooltip } from "./generic-treemap-tooltip";
 import {
@@ -231,7 +234,7 @@ function TreemapInternal<Data>({
                                                         >
                                                             {getShortText(
                                                                 node.data.id ||
-                                                                    "",
+                                                                    EMPTY_STRING_DISPLAY,
                                                                 nodeWidth,
                                                                 nodeHeight
                                                             )}

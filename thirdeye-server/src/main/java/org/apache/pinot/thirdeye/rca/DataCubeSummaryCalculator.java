@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.rca;
 
-import static java.util.Collections.singletonList;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,21 +25,20 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalRatioSummary;
 import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummary;
 import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
-import org.apache.pinot.thirdeye.cube.summary.Summary;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
-import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
+import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DataCubeSummaryCalculator {
+
   public static final String DEFAULT_HIERARCHIES = "[]";
   public static final String DEFAULT_ONE_SIDE_ERROR = "false";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
@@ -68,23 +65,14 @@ public class DataCubeSummaryCalculator {
     this.dataSourceCache = dataSourceCache;
   }
 
-  private static DimensionAnalysisResultApi notAvailable() {
-    //fixme cyril return something less confusing
-    return new DimensionAnalysisResultApi()
-        .setBaselineTotal(0d)
-        .setCurrentTotal(0d)
-        .setBaselineTotalSize(0d)
-        .setCurrentTotalSize(0d)
-        .setDimensions(singletonList(Summary.NOT_AVAILABLE));
-  }
-
   public DimensionAnalysisResultApi computeCube(
       final String metricName, final String datasetName,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
-      final String derivedMetricExpression,
-      final DateTimeZone dateTimeZone, final Dimensions filteredDimensions,
-      final Multimap<String, String> filterSetMap, final List<List<String>> hierarchies) {
+      final String derivedMetricExpression, final Dimensions filteredDimensions,
+      final List<String> filters, final List<List<String>> hierarchies)
+      throws Exception {
+
     CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
         derivedMetricExpression,
         datasetName,
@@ -92,21 +80,14 @@ public class DataCubeSummaryCalculator {
         currentInterval,
         currentBaseline,
         filteredDimensions,
-        filterSetMap,
+        filters,
         summarySize,
         depth,
         hierarchies,
         doOneSideError
     );
 
-    try {
-      return cubeAlgorithmRunner.run();
-    } catch (Exception e) {
-      LOG.error("Exception while running cube algorithm", e);
-      return notAvailable().setMetric(new MetricApi()
-          .setName(metricName)
-          .setDataset(new DatasetApi().setName(datasetName)));
-    }
+    return cubeAlgorithmRunner.run();
   }
 
   public static List<String> cleanDimensionStrings(List<String> dimensions) {
@@ -155,8 +136,8 @@ public class DataCubeSummaryCalculator {
      * @param currentInterval current time interval.
      * @param baselineInterval baseline time interval.
      * @param dimensions ordered dimensions to be drilled down by the algorithm.
-     * @param dataFilters the filter to be applied on the data. Thus, the algorithm will only
-     *     analyze a subset of data.
+     * @param filters a filter in simple string format to be applied on the data. Thus, the algorithm will only
+     *     analyze a subset of data. Format is dim=value.
      * @param summarySize the size of the summary result.
      * @param depth the depth of the dimensions to be analyzed.
      * @param hierarchies the hierarchy among the dimensions.
@@ -170,7 +151,7 @@ public class DataCubeSummaryCalculator {
         final Interval currentInterval,
         final Interval baselineInterval,
         final Dimensions dimensions,
-        final Multimap<String, String> dataFilters, final int summarySize, final int depth,
+        final List<String> filters, final int summarySize, final int depth,
         final List<List<String>> hierarchies, final boolean doOneSideError) {
       this.derivedMetricExpression = derivedMetricExpression;
       this.datasetName = datasetName;
@@ -178,7 +159,7 @@ public class DataCubeSummaryCalculator {
       this.currentInterval = currentInterval;
       this.baselineInterval = baselineInterval;
       this.dimensions = dimensions;
-      this.dataFilters = dataFilters;
+      this.dataFilters = ParsedUrn.toFiltersMap(EntityUtils.extractFilterPredicates(filters));
       this.summarySize = summarySize;
       this.depth = depth;
       this.hierarchies = hierarchies;

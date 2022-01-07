@@ -1,6 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_DEPTH_STRING;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_SUMMARY_SIZE_STRING;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
@@ -8,8 +7,6 @@ import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ON
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -89,11 +86,11 @@ public class DimensionAnalysisResource {
   @Path("anomaly/{id}")
   @ApiOperation("Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
+      //fixme cyril doc
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
       @QueryParam("baselineStart") @DefaultValue("-1") long baselineStartInclusive,
       @QueryParam("baselineEnd") @DefaultValue("-1") long baselineEndExclusive,
-      // todo cyril implement filters
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
@@ -120,30 +117,25 @@ public class DimensionAnalysisResource {
         "rca$metric not found in alert config.");
     String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
         "rca$dataset not found in alert config.");
-    // todo cyril managed null result below ?
+    // fixme cyril managed null result below ?
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
 
     // todo cyril - refactored without changing timeZone usage - not sure if it is correct - timezone should be front only
     final Interval currentInterval = new Interval(anomalyDTO.getStartTime(), anomalyDTO.getEndTime(), dateTimeZone);
-    if (baselineStartInclusive == -1 && baselineEndExclusive == -1) {
-      baselineStartInclusive = anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7);
-      baselineEndExclusive = anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7);
-    }
-    checkArgument(baselineStartInclusive != -1 && baselineEndExclusive == -1,
-        "baselineStart and baselineEnd must be both custom or both default");
-    final Interval baselineInterval = new Interval(baselineStartInclusive, baselineEndExclusive, dateTimeZone);
+    final Interval baselineInterval = parseOrDefaultBaselineInterval(baselineStartInclusive,
+        baselineEndExclusive,
+        dateTimeZone,
+        currentInterval);
 
+    // fixme clean/move the dimensions cleaning
     final List<String> dimensionNames = dimensions.isEmpty() ?
         getDimensionsFromDataset(dataset) :
         DataCubeSummaryCalculator.cleanDimensionStrings(dimensions);
     dimensionNames.removeAll(DataCubeSummaryCalculator.cleanDimensionStrings(excludedDimensions));
     final Dimensions filteredDimensions = new Dimensions(dimensionNames);
 
-    // fixme cyril implement filters the same way as heatmap/breakdown if possible
-    final Multimap<String, String> filterSetMap = ImmutableMultimap.of();//parseFilterJsonPayload(filterJsonPayload); //parseSimpleFilters(filters)
-
-    // todo cyril implement hierarchies
-    final List<List<String>> hierarchies = ImmutableList.of();//parseHierarchiesPayload(hierarchiesPayload);
+    // fixme cyril implement hierarchies parsing
+    final List<List<String>> hierarchies = ImmutableList.of(); //parseHierarchiesPayload(hierarchiesPayload);
 
 
     DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
@@ -155,14 +147,28 @@ public class DimensionAnalysisResource {
         depth,
         doOneSideError,
         metricConfigDTO.getDerivedMetricExpression(),
-        dateTimeZone,
         filteredDimensions,
-        filterSetMap,
+        filters,
         hierarchies
     );
 
     // In the highlights api we retrieve only the top 3 results across 3 dimensions.
     return Response.ok(resultApi).build();
+  }
+
+  private Interval parseOrDefaultBaselineInterval(long baselineStartInclusive, long baselineEndExclusive,
+      final DateTimeZone dateTimeZone, final Interval currentInterval) {
+    if (baselineStartInclusive == -1 && baselineEndExclusive == -1) {
+      // default baseline - 7 days offset
+      baselineStartInclusive = currentInterval.getStartMillis() - TimeUnit.DAYS.toMillis(7);
+      baselineEndExclusive = currentInterval.getEndMillis() - TimeUnit.DAYS.toMillis(7);
+    } else if (baselineStartInclusive == -1 || baselineEndExclusive == -1) {
+     throw new IllegalArgumentException("baselineStart and baselineEnd must be both custom or both default");
+    }
+
+    return new Interval(baselineStartInclusive,
+        baselineEndExclusive,
+        dateTimeZone);
   }
 
   private List<String> getDimensionsFromDataset(String datasetName) {

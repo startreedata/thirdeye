@@ -4,18 +4,11 @@ import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CU
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_SUMMARY_SIZE_STRING;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DEPTH;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DIM_HIERARCHIES;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_EXCLUDED_DIMENSIONS;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
 import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_SUMMARY_SIZE;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.BASELINE_END;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.BASELINE_START;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.CURRENT_END;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.CURRENT_START;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.METRIC_URN;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.TIME_ZONE;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.google.common.collect.ImmutableList;
@@ -56,6 +49,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
@@ -100,6 +94,8 @@ public class DimensionAnalysisResource {
   public Response dataCubeSummary(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
+      @QueryParam("baselineStart") @DefaultValue("-1") long baselineStartInclusive,
+      @QueryParam("baselineEnd") @DefaultValue("-1") long baselineEndExclusive,
       // todo cyril implement filters
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
@@ -129,12 +125,15 @@ public class DimensionAnalysisResource {
     // todo cyril managed null result below ?
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
 
-    // fixme cyril use offset (create api param) rather than hardcode
-    long baselineStartInclusive = anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7);
-    long baselineEndInclusive = anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7);
+    // use last week as baseline if baseline timeframe is not provided
+    // todo cyril check that both baselines are set or not set - avoid one set only
+    baselineStartInclusive = baselineStartInclusive != -1 ? baselineStartInclusive :
+        anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7);
+    baselineEndExclusive = baselineEndExclusive != -1 ? baselineEndExclusive :
+        anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7);
 
     List<String> dimensionNames = dimensions.isEmpty() ?
-        this.datasetDAO.findByDataset(dataset).getDimensions() :
+        getDimensionsFromDataset(dataset) :
         DataCubeSummaryCalculator.cleanDimensionStrings(dimensions);
     dimensionNames.removeAll(DataCubeSummaryCalculator.cleanDimensionStrings(excludedDimensions));
     Dimensions filteredDimensions = new Dimensions(dimensionNames);
@@ -151,7 +150,7 @@ public class DimensionAnalysisResource {
         anomalyDTO.getStartTime(),
         anomalyDTO.getEndTime(),
         baselineStartInclusive,
-        baselineEndInclusive,
+        baselineEndExclusive,
         summarySize,
         depth,
         doOneSideError,
@@ -166,41 +165,13 @@ public class DimensionAnalysisResource {
     return Response.ok(resultApi).build();
   }
 
-  @Deprecated
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response buildSummary(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam(METRIC_URN) String metricUrn,
-      @QueryParam("dataset") String dataset,
-      @QueryParam("metric") String metric,
-      @QueryParam(CURRENT_START) long currentStartInclusive,
-      @QueryParam(CURRENT_END) long currentEndExclusive,
-      @QueryParam(BASELINE_START) long baselineStartInclusive,
-      @QueryParam(BASELINE_END) long baselineEndExclusive,
-      @QueryParam("dimensions") List<String> dimensions,
-      @QueryParam(CUBE_EXCLUDED_DIMENSIONS) List<String> excludedDimensions,
-      @QueryParam("filters") String filterJsonPayload,
-      @QueryParam(CUBE_SUMMARY_SIZE) @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @QueryParam(CUBE_DEPTH) @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
-      @QueryParam(CUBE_DIM_HIERARCHIES) @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload,
-      @QueryParam(CUBE_ONE_SIDE_ERROR) @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @QueryParam(TIME_ZONE) @DefaultValue(DEFAULT_TIMEZONE_ID) String timeZone) {
-    final DimensionAnalysisResultApi response = dataCubeSummaryCalculator.compute(metricUrn,
-        metric,
-        dataset,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        dimensions,
-        filterJsonPayload,
-        summarySize,
-        depth,
-        hierarchiesPayload,
-        doOneSideError,
-        excludedDimensions,
-        timeZone);
-    return Response.ok(response).build();
+  private List<String> getDimensionsFromDataset(String datasetName) {
+    DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(datasetName);
+    if (datasetConfigDTO != null) {
+      return datasetConfigDTO.getDimensions();
+    }
+    // fixme cyril cannot happen because called after findByMetricAndDataset
+    throw new IllegalArgumentException(String.format("Unknown dataset %s. Cannot get dimensions.",
+        datasetName));
   }
 }

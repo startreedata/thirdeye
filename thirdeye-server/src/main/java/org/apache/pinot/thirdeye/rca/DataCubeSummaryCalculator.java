@@ -12,11 +12,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,12 +33,7 @@ import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -64,18 +57,15 @@ public class DataCubeSummaryCalculator {
 
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
-  private final DatasetConfigManager datasetConfigManager;
   private final DataSourceCache dataSourceCache;
 
   @Inject
   public DataCubeSummaryCalculator(
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager,
       final DataSourceCache dataSourceCache) {
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.metricConfigManager = metricConfigManager;
-    this.datasetConfigManager = datasetConfigManager;
     this.dataSourceCache = dataSourceCache;
   }
 
@@ -87,90 +77,6 @@ public class DataCubeSummaryCalculator {
         .setBaselineTotalSize(0d)
         .setCurrentTotalSize(0d)
         .setDimensions(singletonList(Summary.NOT_AVAILABLE));
-  }
-
-  public DimensionAnalysisResultApi compute(final MergedAnomalyResultDTO anomalyDTO) {
-    return compute(
-        anomalyDTO.getMetricUrn(),
-        anomalyDTO.getCollection(),
-        anomalyDTO.getMetric(),
-        anomalyDTO.getStartTime(),
-        anomalyDTO.getEndTime(),
-        anomalyDTO.getStartTime() - TimeUnit.DAYS.toMillis(7),
-        anomalyDTO.getEndTime() - TimeUnit.DAYS.toMillis(7),
-        DEFAULT_DIMENSIONS,
-        DEFAULT_FILTER_JSON_PAYLOAD,
-        Integer.parseInt(DEFAULT_CUBE_SUMMARY_SIZE_STRING),
-        Integer.parseInt(DEFAULT_CUBE_DEPTH_STRING),
-        DEFAULT_HIERARCHIES,
-        false,
-        DEFAULT_EXCLUDED_DIMENSIONS,
-        DEFAULT_TIMEZONE_ID);
-  }
-
-  public DimensionAnalysisResultApi compute(String metricUrn,
-      String dataset,
-      String metric,
-      long currentStartInclusive,
-      long currentEndExclusive,
-      long baselineStartInclusive,
-      long baselineEndExclusive,
-      List<String> dimensions,
-      String filterJsonPayload,
-      int summarySize,
-      int depth,
-      String hierarchiesPayload,
-      boolean doOneSideError,
-      List<String> excludedDimensions,
-      String timeZone) {
-
-    String metricName = metric;
-    String datasetName = dataset;
-    MetricConfigDTO metricConfigDTO;
-    DateTimeZone dateTimeZone;
-    Dimensions filteredDimensions;
-    Multimap<String, String> filterSetMap;
-    List<List<String>> hierarchies;
-
-    try {
-      //fixme cyril relies on dataset if metricUrn is null ...
-      metricConfigDTO = fetchMetricConfig(metricUrn, metric, dataset);
-      if (metricConfigDTO != null) {
-        metricName = metricConfigDTO.getName();
-        //...fixme cyril then get datasets !
-        datasetName = metricConfigDTO.getDataset();
-      }
-
-      List<String> dimensionNames = dimensions.isEmpty() ? getDimensionsFromDataset(datasetName)
-          : cleanDimensionStrings(dimensions);
-      dimensionNames.removeAll(cleanDimensionStrings(excludedDimensions));
-      filteredDimensions = new Dimensions(dimensionNames);
-
-      filterSetMap = parseFilterJsonPayload(filterJsonPayload);
-      hierarchies = parseHierarchiesPayload(hierarchiesPayload);
-      dateTimeZone = DateTimeZone.forID(timeZone);
-    } catch (IOException e) {
-      LOG.error("Exception while fetching anomaly info", e);
-      return notAvailable().setMetric(new MetricApi()
-          .setUrn(metricUrn)
-          .setName(metricName)
-          .setDataset(new DatasetApi().setName(datasetName)));
-    }
-
-    return computeCube(metricName,
-        datasetName,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        summarySize,
-        depth,
-        doOneSideError,
-        metricConfigDTO.getDerivedMetricExpression(),
-        dateTimeZone,
-        filteredDimensions,
-        filterSetMap,
-        hierarchies);
   }
 
   public DimensionAnalysisResultApi computeCube(
@@ -201,7 +107,7 @@ public class DataCubeSummaryCalculator {
     try {
       return cubeAlgorithmRunner.run();
     } catch (Exception e) {
-      LOG.error("Exception while fetching running cube algorithm", e);
+      LOG.error("Exception while running cube algorithm", e);
       return notAvailable().setMetric(new MetricApi()
           .setName(metricName)
           .setDataset(new DatasetApi().setName(datasetName)));
@@ -210,17 +116,6 @@ public class DataCubeSummaryCalculator {
 
   public static List<String> cleanDimensionStrings(List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
-  }
-
-  private List<String> getDimensionsFromDataset(String datasetName) {
-    // fixme cyril need to find by dataset+datasource --> rewrite this in datasetConfigManager interface
-    // fixme cyril refacto error management
-    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
-    if (datasetConfigDTO != null) {
-      return datasetConfigDTO.getDimensions();
-    }
-    throw new IllegalArgumentException(String.format("Unknown dataset %s. Cannot get dimensions.",
-        datasetName));
   }
 
   private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
@@ -233,16 +128,6 @@ public class DataCubeSummaryCalculator {
     return StringUtils.isBlank(filterJsonPayload) ?
         ArrayListMultimap.create() :
         ThirdEyeUtils.convertToMultiMap(URLDecoder.decode(filterJsonPayload, HTML_STRING_ENCODING));
-  }
-
-  private MetricConfigDTO fetchMetricConfig(String metricUrn, String metric, String dataset) {
-    MetricConfigDTO metricConfigDTO;
-    if (StringUtils.isNotBlank(metricUrn)) {
-      metricConfigDTO = metricConfigManager.findById(MetricEntity.fromURN(metricUrn).getId());
-    } else {
-      metricConfigDTO = metricConfigManager.findByMetricAndDataset(metric, dataset);
-    }
-    return metricConfigDTO;
   }
 
   private class CubeAlgorithmRunner {

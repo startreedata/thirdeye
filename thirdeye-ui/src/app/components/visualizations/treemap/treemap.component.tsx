@@ -96,11 +96,9 @@ function TreemapInternal<Data>({
         range: [purple[500], GRAY, GRAY, GRAY, theme.palette.error.main],
     });
 
-    const root = hierarchy(data).sort((a, b) => {
-        return a.data.id?.toLowerCase() === "other"
-            ? -1
-            : (b.value || 0) - (a.value || 0);
-    });
+    const root = hierarchy(data)
+        .sort((a, b) => (b.value || 0) - (a.value || 0))
+        .sort((_a, b) => (b.data.id?.toLowerCase() === "other" ? -1 : 1));
 
     const handleMouseLeave = (): void => {
         hideTooltip();

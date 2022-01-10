@@ -1,7 +1,11 @@
 import { Grid } from "@material-ui/core";
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -19,10 +23,6 @@ import {
     getMetricsAllPath,
     getMetricsUpdatePath,
 } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 
 export const MetricsViewPage: FunctionComponent = () => {
@@ -30,10 +30,10 @@ export const MetricsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<MetricsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -50,12 +50,12 @@ export const MetricsViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.metric"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiMetric(fetchedUiMetric);
@@ -81,9 +81,9 @@ export const MetricsViewPage: FunctionComponent = () => {
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
         deleteMetric(uiMetric.id).then(() => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.metric") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.metric") })
             );
 
             // Redirect to metrics all path

@@ -1,10 +1,11 @@
 import { Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
+    NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -16,15 +17,14 @@ import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -40,11 +40,11 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
 
         createSubscriptionGroup(subscriptionGroup).then(
             (subscriptionGroup: SubscriptionGroup): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.create-success", {
                         entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Redirect to subscription groups detail path

@@ -1,5 +1,9 @@
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
@@ -15,18 +19,14 @@ import {
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
     const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -46,10 +46,7 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 fetchedUiDatasets = getUiDatasets(datasets);
             })
             .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
+                notify(NotificationTypeV1.Error, t("message.fetch-error"))
             )
             .finally(() => setUiDatasets(fetchedUiDatasets));
     };
@@ -66,18 +63,18 @@ export const DatasetsAllPage: FunctionComponent = () => {
     const handleDatasetDeleteOk = (uiDataset: UiDataset): void => {
         deleteDataset(uiDataset.id)
             .then((dataset) => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.dataset") }),
-                    getSuccessSnackbarOption()
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.delete-success", { entity: t("label.dataset") })
                 );
 
                 // Remove deleted dataset from fetched datasets
                 removeUiDataset(dataset);
             })
             .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.dataset") }),
-                    getErrorSnackbarOption()
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.delete-error", { entity: t("label.dataset") })
                 )
             );
     };

@@ -1,6 +1,10 @@
 import { Grid } from "@material-ui/core";
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyList } from "../../components/anomaly-list/anomaly-list.component";
@@ -16,15 +20,14 @@ import {
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -60,9 +63,9 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
         deleteAnomaly(uiAnomaly.id).then((anomaly): void => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.anomaly") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.anomaly") })
             );
 
             // Remove deleted anomaly from fetched anomalies

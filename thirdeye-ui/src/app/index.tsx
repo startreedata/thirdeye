@@ -3,6 +3,7 @@ import {
     AuthProviderV1,
     AuthRedirectMethodV1,
     lightV1,
+    NotificationProviderV1,
 } from "@startree-ui/platform-ui";
 import "@startree-ui/platform-ui/assets/styles/fonts.scss";
 import "@startree-ui/platform-ui/assets/styles/layout.scss";
@@ -36,24 +37,26 @@ ReactDOM.render(
             {/* App rendered by a router to allow navigation using app bar */}
             <Router history={appHistory}>
                 <SnackbarProvider>
-                    <AuthProviderV1
-                        clientId={
-                            getClientIdFromUrl(window.location.href) || ""
-                        }
-                        redirectMethod={AuthRedirectMethodV1.Post}
-                        redirectPathBlacklist={[
-                            AppRoute.LOGIN,
-                            AppRoute.LOGOUT,
-                        ]}
-                    >
-                        <TimeRangeProvider>
-                            <AppBreadcrumbsProvider>
-                                <DialogProvider>
-                                    <App />
-                                </DialogProvider>
-                            </AppBreadcrumbsProvider>
-                        </TimeRangeProvider>
-                    </AuthProviderV1>
+                    <NotificationProviderV1>
+                        <AuthProviderV1
+                            clientId={
+                                getClientIdFromUrl(window.location.href) || ""
+                            }
+                            redirectMethod={AuthRedirectMethodV1.Post}
+                            redirectPathBlacklist={[
+                                AppRoute.LOGIN,
+                                AppRoute.LOGOUT,
+                            ]}
+                        >
+                            <TimeRangeProvider>
+                                <AppBreadcrumbsProvider>
+                                    <DialogProvider>
+                                        <App />
+                                    </DialogProvider>
+                                </AppBreadcrumbsProvider>
+                            </TimeRangeProvider>
+                        </AuthProviderV1>
+                    </NotificationProviderV1>
                 </SnackbarProvider>
             </Router>
         </ThemeProvider>

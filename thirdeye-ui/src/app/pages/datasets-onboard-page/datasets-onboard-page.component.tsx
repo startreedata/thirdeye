@@ -1,10 +1,11 @@
 import { Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
+    NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -16,18 +17,14 @@ import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 
 export const DatasetsOnboardPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasources, setDatasources] = useState<Datasource[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -41,22 +38,22 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
 
         onBoardDataset(dataset.name, dataset.dataSource.name)
             .then((dataset: Dataset): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.onboard-success", {
                         entity: t("label.dataset"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Redirect to datasets detail path
                 history.push(getDatasetsViewPath(dataset.id));
             })
             .catch((): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Error,
                     t("message.onboard-error", {
                         entity: t("label.dataset"),
-                    }),
-                    getErrorSnackbarOption()
+                    })
                 );
             });
     };
@@ -67,10 +64,7 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 setDatasources(datasources);
             })
             .catch((): void => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
+                notify(NotificationTypeV1.Error, t("message.fetch-error"));
             })
             .finally((): void => {
                 setLoading(false);

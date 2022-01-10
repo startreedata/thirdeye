@@ -1,11 +1,12 @@
 import { Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
+    NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -19,10 +20,6 @@ import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { DatasetsUpdatePageParams } from "./datasets-update-page.interfaces";
 
 export const DatasetsUpdatePage: FunctionComponent = () => {
@@ -30,10 +27,10 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     const [dataset, setDataset] = useState<Dataset>();
     const [datasources, setDatasources] = useState<Datasource[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<DatasetsUpdatePageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         // Fetched dataset changed, set breadcrumbs
@@ -60,22 +57,22 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
 
         updateDataset(dataset)
             .then((dataset: Dataset): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.update-success", {
                         entity: t("label.dataset"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Redirect to datasets detail path
                 history.push(getDatasetsViewPath(dataset.id));
             })
             .catch((): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Error,
                     t("message.update-error", {
                         entity: t("label.dataset"),
-                    }),
-                    getErrorSnackbarOption()
+                    })
                 );
             });
     };
@@ -83,12 +80,12 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     const fetchDataset = (): void => {
         // Validate id from URL
         if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.dataset"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
             setLoading(false);
 
@@ -105,10 +102,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                     datasetResponse.status === "rejected" ||
                     datasourcesResponse.status === "rejected"
                 ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
+                    notify(NotificationTypeV1.Error, t("message.fetch-error"));
                 }
 
                 // Attempt to gather data

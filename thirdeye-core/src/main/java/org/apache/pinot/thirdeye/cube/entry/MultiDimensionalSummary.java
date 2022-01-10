@@ -105,7 +105,7 @@ public class MultiDimensionalSummary {
 
     Cube cube = new Cube(costFunction);
     DimensionAnalysisResultApi response;
-    if (depth > 0) { // depth != 0 means manual dimension order
+    if (depth > 0) { // depth != 0 means auto dimension order
       cube.buildWithAutoDimensionOrder(dbClient, dimensions, dataFilters, depth, hierarchies);
       Summary summary = new Summary(cube, costFunction);
       response = summary.computeSummary(summarySize, doOneSideError, depth);

@@ -6,7 +6,9 @@ import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HI
 import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
-import com.google.common.collect.ImmutableList;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -58,6 +60,7 @@ import org.slf4j.LoggerFactory;
 public class DimensionAnalysisResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(DimensionAnalysisResource.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
@@ -86,20 +89,30 @@ public class DimensionAnalysisResource {
   @Path("anomaly/{id}")
   @ApiOperation("Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
-      //fixme cyril doc
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
+      @ApiParam(value = "Baseline timeframe start. Epoch milliseconds. If -1, a sensible default timeframe is used.")
       @QueryParam("baselineStart") @DefaultValue("-1") long baselineStartInclusive,
+      @ApiParam(value = "Baseline timeframe end. Epoch milliseconds. If -1, a sensible default timeframe is used.")
       @QueryParam("baselineEnd") @DefaultValue("-1") long baselineEndExclusive,
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
       @QueryParam("timezone") @DefaultValue(RootCauseMetricResource.TIMEZONE_DEFAULT) String timezone,
+      @ApiParam(value = "Number of entries to put in the summary.")
       @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
+      @ApiParam(value = "Number of dimensions to drill down by.")
       @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
+      @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
       @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
+      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
+      @ApiParam(value = "List of dimensions to exclude from the analysis.")
       @QueryParam("excludedDimensions") List<String> excludedDimensions,
+      @ApiParam(value =
+          "Hierarchy among some dimensions. The order will be respected in the result. "
+              + "An example of a hierarchical group is {continent, country}. "
+              + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
     DateTimeZone dateTimeZone = RootCauseMetricResource.parseTimeZone(timezone);
@@ -121,7 +134,9 @@ public class DimensionAnalysisResource {
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
 
     // todo cyril - refactored without changing timeZone usage - not sure if it is correct - timezone should be front only
-    final Interval currentInterval = new Interval(anomalyDTO.getStartTime(), anomalyDTO.getEndTime(), dateTimeZone);
+    final Interval currentInterval = new Interval(anomalyDTO.getStartTime(),
+        anomalyDTO.getEndTime(),
+        dateTimeZone);
     final Interval baselineInterval = parseOrDefaultBaselineInterval(baselineStartInclusive,
         baselineEndExclusive,
         dateTimeZone,
@@ -134,9 +149,7 @@ public class DimensionAnalysisResource {
     dimensionNames.removeAll(DataCubeSummaryCalculator.cleanDimensionStrings(excludedDimensions));
     final Dimensions filteredDimensions = new Dimensions(dimensionNames);
 
-    // fixme cyril implement hierarchies parsing
-    final List<List<String>> hierarchies = ImmutableList.of(); //parseHierarchiesPayload(hierarchiesPayload);
-
+    final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
     DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
         metricConfigDTO.getName(),
@@ -156,14 +169,16 @@ public class DimensionAnalysisResource {
     return Response.ok(resultApi).build();
   }
 
-  private Interval parseOrDefaultBaselineInterval(long baselineStartInclusive, long baselineEndExclusive,
+  private Interval parseOrDefaultBaselineInterval(long baselineStartInclusive,
+      long baselineEndExclusive,
       final DateTimeZone dateTimeZone, final Interval currentInterval) {
     if (baselineStartInclusive == -1 && baselineEndExclusive == -1) {
       // default baseline - 7 days offset
       baselineStartInclusive = currentInterval.getStartMillis() - TimeUnit.DAYS.toMillis(7);
       baselineEndExclusive = currentInterval.getEndMillis() - TimeUnit.DAYS.toMillis(7);
     } else if (baselineStartInclusive == -1 || baselineEndExclusive == -1) {
-     throw new IllegalArgumentException("baselineStart and baselineEnd must be both custom or both default");
+      throw new IllegalArgumentException(
+          "baselineStart and baselineEnd must be both custom or both default");
     }
 
     return new Interval(baselineStartInclusive,
@@ -179,5 +194,10 @@ public class DimensionAnalysisResource {
     // fixme cyril cannot happen because called after findByMetricAndDataset
     throw new IllegalArgumentException(String.format("Unknown dataset %s. Cannot get dimensions.",
         datasetName));
+  }
+
+  private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
+      throws JsonProcessingException {
+    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 }

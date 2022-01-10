@@ -1,22 +1,14 @@
 package org.apache.pinot.thirdeye.rca;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
 import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
@@ -31,7 +23,6 @@ import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
-import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +34,8 @@ public class DataCubeSummaryCalculator {
   public static final String DEFAULT_ONE_SIDE_ERROR = "false";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
-  private static final List<String> DEFAULT_DIMENSIONS = ImmutableList.of();
-  private static final List<String> DEFAULT_EXCLUDED_DIMENSIONS = ImmutableList.of();
-  private static final String DEFAULT_FILTER_JSON_PAYLOAD = "";
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final String HTML_STRING_ENCODING = "UTF-8";
 
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
@@ -92,18 +78,6 @@ public class DataCubeSummaryCalculator {
 
   public static List<String> cleanDimensionStrings(List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
-  }
-
-  private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
-      throws JsonProcessingException {
-    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
-  }
-
-  private Multimap<String, String> parseFilterJsonPayload(String filterJsonPayload)
-      throws UnsupportedEncodingException {
-    return StringUtils.isBlank(filterJsonPayload) ?
-        ArrayListMultimap.create() :
-        ThirdEyeUtils.convertToMultiMap(URLDecoder.decode(filterJsonPayload, HTML_STRING_ENCODING));
   }
 
   private class CubeAlgorithmRunner {

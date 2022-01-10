@@ -39,10 +39,10 @@ public class DataCubeSummaryCalculator {
   @Inject
   public DataCubeSummaryCalculator(
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
-      final MetricConfigManager metricConfigManager,
+      final MetricConfigManager metricDAO,
       final DataSourceCache dataSourceCache) {
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
-    this.metricConfigManager = metricConfigManager;
+    this.metricConfigManager = metricDAO;
     this.dataSourceCache = dataSourceCache;
   }
 

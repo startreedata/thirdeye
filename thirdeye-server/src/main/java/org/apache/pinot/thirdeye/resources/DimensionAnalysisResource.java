@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +15,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
@@ -30,20 +27,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfo;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -63,27 +51,15 @@ public class DimensionAnalysisResource {
   public static final String DEFAULT_DIM_ANALYSIS_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_DIM_ANALYSIS_CUBE_SUMMARY_SIZE_STRING = "4";
 
-  private final MergedAnomalyResultManager mergedAnomalyDAO;
-  private final AlertManager alertDAO;
-  private final DatasetConfigManager datasetDAO;
-  private final MetricConfigManager metricDAO;
-  private final AlertTemplateRenderer alertTemplateRenderer;
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
+  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
 
   @Inject
   public DimensionAnalysisResource(
-      final MergedAnomalyResultManager mergedAnomalyDAO,
-      final AlertManager alertDAO,
-      final DatasetConfigManager datasetDAO,
-      final MetricConfigManager metricDAO,
-      final AlertTemplateRenderer alertTemplateRenderer,
-      final DataCubeSummaryCalculator dataCubeSummaryCalculator) {
-    this.mergedAnomalyDAO = mergedAnomalyDAO;
-    this.alertDAO = alertDAO;
-    this.datasetDAO = datasetDAO;
-    this.metricDAO = metricDAO;
-    this.alertTemplateRenderer = alertTemplateRenderer;
+      final DataCubeSummaryCalculator dataCubeSummaryCalculator,
+      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
+    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
   }
 
   @GET
@@ -117,27 +93,11 @@ public class DimensionAnalysisResource {
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_DIM_ANALYSIS_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
     DateTimeZone dateTimeZone = RootCauseMetricResource.parseTimeZone(timezone);
-
-    // rewrite this as a metric/dataset info from anomalyId
-    final MergedAnomalyResultDTO anomalyDTO = ensureExists(
-        mergedAnomalyDAO.findById(anomalyId), String.format("Anomaly ID: %d", anomalyId));
-    long detectionConfigId = anomalyDTO.getDetectionConfigId();
-    AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    //startTime/endTime not important
-    AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO, 0L, 0L);
-    RcaMetadataDTO rcaMetadataDTO = Objects.requireNonNull(templateWithProperties.getRca(),
-        "rca not found in alert config.");
-    String metric = Objects.requireNonNull(rcaMetadataDTO.getMetric(),
-        "rca$metric not found in alert config.");
-    String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
-        "rca$dataset not found in alert config.");
-    MetricConfigDTO metricConfigDTO = Objects.requireNonNull(metricDAO.findByMetricAndDataset(metric, dataset),
-        String.format("Could not find metric %s for dataset %s. Invalid RCA configuration for the alert %s?",
-            metric, dataset, anomalyId));
-
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
     // todo cyril - refactored without changing timeZone usage - not sure if it is correct - timezone should be front only
-    final Interval currentInterval = new Interval(anomalyDTO.getStartTime(),
-        anomalyDTO.getEndTime(),
+    final Interval currentInterval = new Interval(
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
         dateTimeZone);
     final Interval baselineInterval = parseOrDefaultBaselineInterval(baselineStartInclusive,
         baselineEndExclusive,
@@ -146,21 +106,21 @@ public class DimensionAnalysisResource {
 
     dimensions = cleanDimensionStrings(dimensions);
     if (dimensions.isEmpty()) {
-      dimensions = getDimensionsFromDataset(dataset);
+      dimensions = rootCauseAnalysisInfo.getDatasetConfigDTO().getDimensions();
     }
     excludedDimensions = cleanDimensionStrings(excludedDimensions);
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
     DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
-        metricConfigDTO.getName(),
-        dataset,
+        rootCauseAnalysisInfo.getMetricConfigDTO().getName(),
+        rootCauseAnalysisInfo.getDatasetConfigDTO().getName(),
         currentInterval,
         baselineInterval,
         summarySize,
         depth,
         doOneSideError,
-        metricConfigDTO.getDerivedMetricExpression(),
+        rootCauseAnalysisInfo.getMetricConfigDTO().getDerivedMetricExpression(),
         dimensions,
         excludedDimensions,
         filters,
@@ -189,15 +149,6 @@ public class DimensionAnalysisResource {
 
   private static List<String> cleanDimensionStrings(List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
-  }
-
-  private List<String> getDimensionsFromDataset(String datasetName) {
-    DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(datasetName);
-    if (datasetConfigDTO != null) {
-      return datasetConfigDTO.getDimensions();
-    }
-    throw new IllegalArgumentException(String.format("Unknown dataset %s. Cannot get dimensions.",
-        datasetName));
   }
 
   private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)

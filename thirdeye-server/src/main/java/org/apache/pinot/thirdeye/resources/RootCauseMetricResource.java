@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -35,22 +34,17 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfo;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
@@ -90,27 +84,25 @@ public class RootCauseMetricResource {
   private final ExecutorService executor;
   private final AggregationLoader aggregationLoader;
   private final TimeSeriesLoader timeSeriesLoader;
+  @Deprecated
+  // prefer getting datasetDAO from rootCauseAnalysisInfoFetcher
   private final MetricConfigManager metricDAO;
+  @Deprecated
+  // prefer getting datasetDAO from rootCauseAnalysisInfoFetcher
   private final DatasetConfigManager datasetDAO;
-  private final MergedAnomalyResultManager mergedAnomalyDAO;
-  private final AlertManager alertDAO;
-  private final AlertTemplateRenderer alertTemplateRenderer;
+  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
 
   @Inject
   public RootCauseMetricResource(final AggregationLoader aggregationLoader,
       final TimeSeriesLoader timeSeriesLoader,
       final MetricConfigManager metricDAO,
       final DatasetConfigManager datasetDAO,
-      final MergedAnomalyResultManager mergedAnomalyDAO,
-      final AlertManager alertDAO,
-      final AlertTemplateRenderer alertTemplateRenderer) {
+      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
     this.aggregationLoader = aggregationLoader;
     this.timeSeriesLoader = timeSeriesLoader;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.mergedAnomalyDAO = mergedAnomalyDAO;
-    this.alertDAO = alertDAO;
-    this.alertTemplateRenderer = alertTemplateRenderer;
+    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
 
     this.executor = Executors.newCachedThreadPool();
   }
@@ -265,30 +257,17 @@ public class RootCauseMetricResource {
       limit = LIMIT_DEFAULT;
     }
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
 
-    final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
-        String.format("Anomaly ID: %d", anomalyId));
-    long detectionConfigId = anomalyDTO.getDetectionConfigId();
-    AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    //startTime/endTime not important
-    AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO, 0L, 0L);
-    RcaMetadataDTO rcaMetadataDTO = Objects.requireNonNull(templateWithProperties.getRca(),
-        "rca not found in alert config.");
-    String metric = Objects.requireNonNull(rcaMetadataDTO.getMetric(),
-        "rca$metric not found in alert config.");
-    String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
-        "rca$dataset not found in alert config.");
-    MetricConfigDTO metricConfigDTO = Objects.requireNonNull(metricDAO.findByMetricAndDataset(metric, dataset),
-        String.format("Could not find metric %s for dataset %s. Invalid RCA configuration for the alert %s?",
-            metric, dataset, anomalyId));
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricConfigDTO.getId(),
+    final Map<String, Map<String, Double>> breakdown = computeBreakdown(
+        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
         filters,
-        anomalyDTO.getStartTime(),
-        anomalyDTO.getEndTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
         offset,
         dateTimeZone,
-        limit);
+        limit,
+        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
     return Response.ok(breakdown).build();
   }
 
@@ -434,13 +413,14 @@ public class RootCauseMetricResource {
       final long end,
       final String offset,
       final DateTimeZone timezone,
-      final int limit) throws Exception {
+      final int limit,
+      final TimeGranularity timeGranularity) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricId,
             start,
             end,
             filters,
-            findMetricGranularity(metricId))
+            timeGranularity)
         .alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
@@ -558,6 +538,8 @@ public class RootCauseMetricResource {
     return output;
   }
 
+  @Deprecated
+  // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
   private TimeGranularity findMetricGranularity(final Long metricId) {
     final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
         String.format("metric id: %d", metricId));

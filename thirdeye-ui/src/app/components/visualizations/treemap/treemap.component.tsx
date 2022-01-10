@@ -37,6 +37,7 @@ const margin = {
     bottom: 0,
 };
 const GRAY = "#EEEEEE";
+const OTHER = "other";
 
 function Treemap<Data>({
     height = DEFAULT_TREEMAP_HEIGHT,
@@ -83,6 +84,14 @@ function TreemapInternal<Data>({
         hideTooltip,
     } = useTooltip<TreemapData<Data>>();
 
+    const checkOtherDimension = (id: string | undefined): boolean => {
+        if (!id) {
+            return false;
+        }
+
+        return id.toLowerCase() === OTHER;
+    };
+
     const data: HierarchyNode<TreemapData<Data>> = stratify<TreemapData<Data>>()
         .id((d) => d.id)
         .parentId((d) => d.parent)(props.treemapData)
@@ -98,7 +107,7 @@ function TreemapInternal<Data>({
 
     const root = hierarchy(data)
         .sort((a, b) => (b.value || 0) - (a.value || 0))
-        .sort((_a, b) => (b.data.id?.toLowerCase() === "other" ? -1 : 1));
+        .sort((_a, b) => (checkOtherDimension(b.data.id) ? -1 : 1));
 
     const handleMouseLeave = (): void => {
         hideTooltip();
@@ -136,10 +145,7 @@ function TreemapInternal<Data>({
             | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
             | undefined
     ): void => {
-        if (
-            !node ||
-            (node.data.id && node?.data?.id.toLowerCase() === "other")
-        ) {
+        if (!node || (node.data.id && checkOtherDimension(node?.data?.id))) {
             return;
         }
         let key = "";
@@ -181,7 +187,11 @@ function TreemapInternal<Data>({
                                         const nodeWidth = node.x1 - node.x0 - 1;
                                         const nodeHeight =
                                             node.y1 - node.y0 - 1;
-                                        const colorValue = node.data.data
+                                        const colorValue = checkOtherDimension(
+                                            node.data.id
+                                        )
+                                            ? -1
+                                            : node.data.data
                                             ? colorChangeValueAccessor(
                                                   node.data.data
                                               )

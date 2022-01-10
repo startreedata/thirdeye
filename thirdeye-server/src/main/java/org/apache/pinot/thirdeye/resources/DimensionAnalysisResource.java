@@ -1,9 +1,5 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_DEPTH_STRING;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_SUMMARY_SIZE_STRING;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,6 +19,7 @@ import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -34,7 +31,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
-import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
@@ -61,6 +57,11 @@ public class DimensionAnalysisResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(DimensionAnalysisResource.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  public static final String DEFAULT_DIM_ANALYSIS_HIERARCHIES = "[]";
+  public static final String DEFAULT_DIM_ANALYSIS_ONE_SIDE_ERROR = "false";
+  public static final String DEFAULT_DIM_ANALYSIS_CUBE_DEPTH_STRING = "3";
+  public static final String DEFAULT_DIM_ANALYSIS_CUBE_SUMMARY_SIZE_STRING = "4";
 
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
@@ -90,7 +91,7 @@ public class DimensionAnalysisResource {
   @ApiOperation("Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
+      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
       @ApiParam(value = "Baseline timeframe start. Epoch milliseconds. If -1, a sensible default timeframe is used.")
       @QueryParam("baselineStart") @DefaultValue("-1") long baselineStartInclusive,
       @ApiParam(value = "Baseline timeframe end. Epoch milliseconds. If -1, a sensible default timeframe is used.")
@@ -100,11 +101,11 @@ public class DimensionAnalysisResource {
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
       @QueryParam("timezone") @DefaultValue(RootCauseMetricResource.TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "Number of entries to put in the summary.")
-      @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
+      @QueryParam("summarySize") @DefaultValue(DEFAULT_DIM_ANALYSIS_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
       @ApiParam(value = "Number of dimensions to drill down by.")
-      @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
+      @QueryParam("depth") @DefaultValue(DEFAULT_DIM_ANALYSIS_CUBE_DEPTH_STRING) int depth,
       @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
-      @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
+      @QueryParam("oneSideError") @DefaultValue(DEFAULT_DIM_ANALYSIS_ONE_SIDE_ERROR) boolean doOneSideError,
       @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
       @ApiParam(value = "List of dimensions to exclude from the analysis.")
@@ -113,13 +114,13 @@ public class DimensionAnalysisResource {
           "Hierarchy among some dimensions. The order will be respected in the result. "
               + "An example of a hierarchical group is {continent, country}. "
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
-      @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
+      @QueryParam("hierarchies") @DefaultValue(DEFAULT_DIM_ANALYSIS_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
     DateTimeZone dateTimeZone = RootCauseMetricResource.parseTimeZone(timezone);
 
     // rewrite this as a metric/dataset info from anomalyId
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(
-        mergedAnomalyDAO.findById(id), String.format("Anomaly ID: %d", id));
+        mergedAnomalyDAO.findById(anomalyId), String.format("Anomaly ID: %d", anomalyId));
     long detectionConfigId = anomalyDTO.getDetectionConfigId();
     AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
     //startTime/endTime not important
@@ -130,8 +131,9 @@ public class DimensionAnalysisResource {
         "rca$metric not found in alert config.");
     String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
         "rca$dataset not found in alert config.");
-    // fixme cyril managed null result below ?
-    MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
+    MetricConfigDTO metricConfigDTO = Objects.requireNonNull(metricDAO.findByMetricAndDataset(metric, dataset),
+        String.format("Could not find metric %s for dataset %s. Invalid RCA configuration for the alert %s?",
+            metric, dataset, anomalyId));
 
     // todo cyril - refactored without changing timeZone usage - not sure if it is correct - timezone should be front only
     final Interval currentInterval = new Interval(anomalyDTO.getStartTime(),
@@ -142,12 +144,11 @@ public class DimensionAnalysisResource {
         dateTimeZone,
         currentInterval);
 
-    // fixme clean/move the dimensions cleaning
-    final List<String> dimensionNames = dimensions.isEmpty() ?
-        getDimensionsFromDataset(dataset) :
-        DataCubeSummaryCalculator.cleanDimensionStrings(dimensions);
-    dimensionNames.removeAll(DataCubeSummaryCalculator.cleanDimensionStrings(excludedDimensions));
-    final Dimensions filteredDimensions = new Dimensions(dimensionNames);
+    dimensions = cleanDimensionStrings(dimensions);
+    if (dimensions.isEmpty()) {
+      dimensions = getDimensionsFromDataset(dataset);
+    }
+    excludedDimensions = cleanDimensionStrings(excludedDimensions);
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
@@ -160,12 +161,12 @@ public class DimensionAnalysisResource {
         depth,
         doOneSideError,
         metricConfigDTO.getDerivedMetricExpression(),
-        filteredDimensions,
+        dimensions,
+        excludedDimensions,
         filters,
         hierarchies
     );
 
-    // In the highlights api we retrieve only the top 3 results across 3 dimensions.
     return Response.ok(resultApi).build();
   }
 
@@ -186,12 +187,15 @@ public class DimensionAnalysisResource {
         dateTimeZone);
   }
 
+  private static List<String> cleanDimensionStrings(List<String> dimensions) {
+    return dimensions.stream().map(String::trim).collect(Collectors.toList());
+  }
+
   private List<String> getDimensionsFromDataset(String datasetName) {
     DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(datasetName);
     if (datasetConfigDTO != null) {
       return datasetConfigDTO.getDimensions();
     }
-    // fixme cyril cannot happen because called after findByMetricAndDataset
     throw new IllegalArgumentException(String.format("Unknown dataset %s. Cannot get dimensions.",
         datasetName));
   }

@@ -30,11 +30,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class DataCubeSummaryCalculator {
 
-  public static final String DEFAULT_HIERARCHIES = "[]";
-  public static final String DEFAULT_ONE_SIDE_ERROR = "false";
-  public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
-  public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
-
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
 
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
@@ -55,9 +50,12 @@ public class DataCubeSummaryCalculator {
       final String metricName, final String datasetName,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
-      final String derivedMetricExpression, final Dimensions filteredDimensions,
+      final String derivedMetricExpression, final List<String> dimensions, final List<String> excludedDimensions,
       final List<String> filters, final List<List<String>> hierarchies)
       throws Exception {
+
+    Dimensions filteredDimensions = new Dimensions(dimensions.stream()
+        .filter(dim -> !excludedDimensions.contains(dim)).collect(Collectors.toUnmodifiableList()));
 
     CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
         derivedMetricExpression,
@@ -74,10 +72,6 @@ public class DataCubeSummaryCalculator {
     );
 
     return cubeAlgorithmRunner.run();
-  }
-
-  public static List<String> cleanDimensionStrings(List<String> dimensions) {
-    return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 
   private class CubeAlgorithmRunner {

@@ -236,7 +236,7 @@ public class RootCauseMetricResource {
    * Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.
    * Aligns time stamps if necessary and omits null values.
    *
-   * @param id anomaly id
+   * @param anomalyId anomaly id
    * @param offset offset identifier (e.g. "current", "wo2w")
    * @param timezone timezone identifier (e.g. "America/Los_Angeles")
    * @param limit limit results to the top k elements, plus a rollup element
@@ -251,7 +251,7 @@ public class RootCauseMetricResource {
           + "Aligns time stamps if necessary and omits null values.")
   public Response getAnomalyBreakdown(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
+      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
       @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
@@ -266,8 +266,8 @@ public class RootCauseMetricResource {
     }
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
 
-    final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(id),
-        String.format("Anomaly ID: %d", id));
+    final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
     long detectionConfigId = anomalyDTO.getDetectionConfigId();
     AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
     //startTime/endTime not important
@@ -278,7 +278,9 @@ public class RootCauseMetricResource {
         "rca$metric not found in alert config.");
     String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
         "rca$dataset not found in alert config.");
-    MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
+    MetricConfigDTO metricConfigDTO = Objects.requireNonNull(metricDAO.findByMetricAndDataset(metric, dataset),
+        String.format("Could not find metric %s for dataset %s. Invalid RCA configuration for the alert %s?",
+            metric, dataset, anomalyId));
 
     final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricConfigDTO.getId(),
         filters,

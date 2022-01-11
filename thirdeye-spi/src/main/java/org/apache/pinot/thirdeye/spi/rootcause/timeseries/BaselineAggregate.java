@@ -84,6 +84,8 @@ public class BaselineAggregate implements Baseline {
    * Helper to apply map operation to partially incomplete row, i.e. a row
    * that contains null values.
    *
+   * This is the important function that performs the function mean/sum/etc in eg "mean2w".
+   *
    * @param df dataframe
    * @param f function
    * @param colNames column to apply function to
@@ -92,7 +94,6 @@ public class BaselineAggregate implements Baseline {
   // TODO move this into DataFrame API?
   private static DoubleSeries mapWithNull(DataFrame df, Series.DoubleFunction f,
       List<String> colNames) {
-    // todo cyril important function that performs the function mean/sum/etc
     double[] values = new double[df.size()];
 
     double[] row = new double[colNames.size()];
@@ -289,20 +290,18 @@ public class BaselineAggregate implements Baseline {
 
     // aggregate and clean
     List<String> sliceColumnNames = new ArrayList<>(preparedSlices.keySet());
-    output
+    return output
         // aggregate slices
         .addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), sliceColumnNames))
         // align times
         .addSeries(COL_TIME,
             this.toTimestampSeries(referenceSlice.getStart(), output.getLongs(COL_TIME)))
-        // filter by original time range
-        .filter(output.getLongs(COL_TIME).gte(referenceSlice.getStart())
-            .and(output.getLongs(COL_TIME).lt(referenceSlice.getEnd())))
         // drop slice columns
         .dropSeries(sliceColumnNames)
+        // filter by original time range - (not an in-place operation)
+        .filter(output.getLongs(COL_TIME).gte(referenceSlice.getStart())
+            .and(output.getLongs(COL_TIME).lt(referenceSlice.getEnd())))
         .dropNull(output.getIndexNames());
-
-    return output;
   }
 
   private Map.Entry<String, DataFrame> prepareSliceData(final MetricSlice slice,

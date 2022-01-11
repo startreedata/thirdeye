@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 public class CubeTest {
 
   @Test
-  public void testSortDimensionNoHierarchy() throws Exception {
+  public void testSortDimensionNoHierarchy() {
     List<DimensionCost> dimensionCosts = getBasicDimensionCosts();
     Dimensions expectedSortedDimensions1 = new Dimensions(
         Arrays.asList("country", "page", "continent"));
@@ -50,7 +50,7 @@ public class CubeTest {
   }
 
   @Test
-  public void testSortDimensionWithHierarchy() throws Exception {
+  public void testSortDimensionWithHierarchy() {
     List<DimensionCost> dimensionCosts = getBasicDimensionCosts();
 
     // Hierarchy with depth = 1

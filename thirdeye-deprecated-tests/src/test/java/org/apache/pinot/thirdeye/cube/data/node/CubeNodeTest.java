@@ -160,10 +160,10 @@ public class CubeNodeTest {
 
     // Level 1
     AdditiveRow USRow = (AdditiveRow) rows.get(1).get(0);
-    CubeNode USNode = new AdditiveCubeNode(1, 0, USRow, rootNode);
+    new AdditiveCubeNode(1, 0, USRow, rootNode);
 
     AdditiveRow INRow = (AdditiveRow) rows.get(1).get(1);
-    CubeNode INNode = new AdditiveCubeNode(1, 1, INRow, rootNode);
+    new AdditiveCubeNode(1, 1, INRow, rootNode);
 
     return rootNode;
   }

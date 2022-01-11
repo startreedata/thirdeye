@@ -124,7 +124,8 @@ function TreemapInternal<Data>({
         if (
             !node ||
             !clickedOnRect.ownerSVGElement ||
-            !node.data.data.extraData
+            !node.data.data.extraData ||
+            isOtherDimension(node.data.id)
         ) {
             return;
         }
@@ -237,7 +238,11 @@ function TreemapInternal<Data>({
                                                         {rect}
                                                         <Text
                                                             className={
-                                                                treemapClasses.heading
+                                                                isOtherDimension(
+                                                                    node.data.id
+                                                                )
+                                                                    ? treemapClasses.headingOtherDimension
+                                                                    : treemapClasses.heading
                                                             }
                                                             textAnchor="middle"
                                                             verticalAnchor="middle"

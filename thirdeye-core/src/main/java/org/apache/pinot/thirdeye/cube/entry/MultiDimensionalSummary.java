@@ -98,10 +98,8 @@ public class MultiDimensionalSummary {
 
     dbClient.setDataset(dataset);
     dbClient.setMetric(metric);
-    dbClient.setCurrentStartInclusive(currentInterval.getStart());
-    dbClient.setCurrentEndExclusive(currentInterval.getEnd());
-    dbClient.setBaselineStartInclusive(baselineInterval.getStart());
-    dbClient.setBaselineEndExclusive(baselineInterval.getEnd());
+    dbClient.setCurrentInterval(currentInterval);
+    dbClient.setBaselineInterval(baselineInterval);
 
     Cube cube = new Cube(costFunction);
     DimensionAnalysisResultApi response;

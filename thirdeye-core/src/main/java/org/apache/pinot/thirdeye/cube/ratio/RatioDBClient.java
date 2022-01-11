@@ -32,8 +32,7 @@ import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
 
 /**
  * This class generates query requests to the backend database and retrieve the metrics that compose
- * the ratio metric
- * for summary algorithm.
+ * the ratio metric for summary algorithm.
  *
  * @see org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient
  */
@@ -76,16 +75,12 @@ public class RatioDBClient extends BaseCubePinotClient<RatioRow> {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 
     cubeSpecs.add(
-        new CubeSpec(CubeTag.BaselineNumerator, numeratorMetric, baselineStartInclusive,
-            baselineEndExclusive));
+        new CubeSpec(CubeTag.BaselineNumerator, numeratorMetric, baselineInterval));
     cubeSpecs.add(
-        new CubeSpec(CubeTag.BaselineDenominator, denominatorMetric, baselineStartInclusive,
-            baselineEndExclusive));
-    cubeSpecs.add(new CubeSpec(CubeTag.CurrentNumerator, numeratorMetric, currentStartInclusive,
-        currentEndExclusive));
+        new CubeSpec(CubeTag.BaselineDenominator, denominatorMetric, baselineInterval));
+    cubeSpecs.add(new CubeSpec(CubeTag.CurrentNumerator, numeratorMetric, currentInterval));
     cubeSpecs.add(
-        new CubeSpec(CubeTag.CurrentDenominator, denominatorMetric, currentStartInclusive,
-            currentEndExclusive));
+        new CubeSpec(CubeTag.CurrentDenominator, denominatorMetric, currentInterval));
 
     return cubeSpecs;
   }

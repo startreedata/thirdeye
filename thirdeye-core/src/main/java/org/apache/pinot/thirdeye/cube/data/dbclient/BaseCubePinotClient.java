@@ -41,7 +41,7 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.apache.pinot.thirdeye.util.Utils;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,17 +66,15 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
 
   protected static final Logger LOG = LoggerFactory.getLogger(BaseCubePinotClient.class);
 
-  protected final static DateTime NULL_DATETIME = new DateTime();
+  protected final static Interval NULL_INTERVAL = new Interval(0L, 0L);
   protected final static int TIME_OUT_VALUE = 1200;
   protected final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   protected DataSourceCache dataSourceCache;
   protected String dataset = "";
-  protected DateTime baselineStartInclusive = NULL_DATETIME;
-  protected DateTime baselineEndExclusive = NULL_DATETIME;
-  protected DateTime currentStartInclusive = NULL_DATETIME;
-  protected DateTime currentEndExclusive = NULL_DATETIME;
+  protected Interval baselineInterval = NULL_INTERVAL;
+  protected Interval currentInterval = NULL_INTERVAL;
 
   /**
    * Constructs a Pinot client.
@@ -95,23 +93,13 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   }
 
   @Override
-  public void setBaselineStartInclusive(DateTime dateTime) {
-    baselineStartInclusive = Preconditions.checkNotNull(dateTime);
+  public void setBaselineInterval(Interval baselineInterval) {
+    this.baselineInterval = Preconditions.checkNotNull(baselineInterval);
   }
 
   @Override
-  public void setBaselineEndExclusive(DateTime dateTime) {
-    baselineEndExclusive = Preconditions.checkNotNull(dateTime);
-  }
-
-  @Override
-  public void setCurrentStartInclusive(DateTime dateTime) {
-    currentStartInclusive = Preconditions.checkNotNull(dateTime);
-  }
-
-  @Override
-  public void setCurrentEndExclusive(DateTime dateTime) {
-    currentEndExclusive = Preconditions.checkNotNull(dateTime);
+  public void setCurrentInterval(Interval currentInterval) {
+    this.currentInterval = Preconditions.checkNotNull(currentInterval);
   }
 
   /**
@@ -144,8 +132,8 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
       builder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctions));
 
       // Set start and end time
-      builder.setStartTimeInclusive(cubeSpec.getStartInclusive());
-      builder.setEndTimeExclusive(cubeSpec.getEndExclusive());
+      builder.setStartTimeInclusive(cubeSpec.getInterval().getStartMillis());
+      builder.setEndTimeExclusive(cubeSpec.getInterval().getEndMillis());
 
       // Set groupBy and filter
       builder.setGroupBy(groupBy);

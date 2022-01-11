@@ -66,9 +66,9 @@ public class AdditiveDBClient extends BaseCubePinotClient<AdditiveRow> {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 
     cubeSpecs
-        .add(new CubeSpec(CubeTag.Baseline, metric, baselineStartInclusive, baselineEndExclusive));
+        .add(new CubeSpec(CubeTag.Baseline, metric, baselineInterval));
     cubeSpecs
-        .add(new CubeSpec(CubeTag.Current, metric, currentStartInclusive, currentEndExclusive));
+        .add(new CubeSpec(CubeTag.Current, metric, currentInterval));
 
     return cubeSpecs;
   }

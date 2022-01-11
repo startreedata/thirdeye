@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.cube.data.dbclient;
 
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * The CubeClient that is based on Pinot.
@@ -35,30 +35,16 @@ public interface CubePinotClient<R extends Row> extends CubeClient<R> {
   void setDataset(String dataset);
 
   /**
-   * Sets the start date time of baseline (inclusive).
+   * Sets the baseline interval.
    *
-   * @param dateTime the start date time of baseline (inclusive).
+   * @param baselineInterval the interval of the baseline.
    */
-  void setBaselineStartInclusive(DateTime dateTime);
-
-  /**
-   * Sets the end data time of baseline (exclusive).
-   *
-   * @param dateTime the end data time of baseline (exclusive).
-   */
-  void setBaselineEndExclusive(DateTime dateTime);
+  void setBaselineInterval(Interval baselineInterval);
 
   /**
    * Sets the start date time of current (inclusive).
    *
-   * @param dateTime the start date time of current (inclusive).
+   * @param currentInterval the interval of the current data.
    */
-  void setCurrentStartInclusive(DateTime dateTime);
-
-  /**
-   * Sets the end date time of current (exclusive).
-   *
-   * @param dateTime the end date time of current (exclusive).
-   */
-  void setCurrentEndExclusive(DateTime dateTime);
+  void setCurrentInterval(Interval currentInterval);
 }

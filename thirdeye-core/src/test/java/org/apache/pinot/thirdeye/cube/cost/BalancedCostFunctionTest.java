@@ -16,22 +16,22 @@
 
 package org.apache.pinot.thirdeye.cube.cost;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction.CHANGE_CONTRIBUTION_THRESHOLD_PARAM;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class BalancedCostFunctionTest {
 
   @Test
   public void testCreate() {
-    double threshold = 3.54d;
+    double expectedThreshold = 3.54;
     Map<String, String> params = new HashMap<>();
-    params.put(CHANGE_CONTRIBUTION_THRESHOLD_PARAM, Double.toString(threshold));
-
+    params.put(CHANGE_CONTRIBUTION_THRESHOLD_PARAM, Double.toString(expectedThreshold));
     BalancedCostFunction function = new BalancedCostFunction(params);
-    Assert.assertEquals(function.getChangeContributionThreshold(), threshold);
+
+    assertThat(function.getChangeContributionThreshold()).isEqualTo(expectedThreshold);
   }
 }

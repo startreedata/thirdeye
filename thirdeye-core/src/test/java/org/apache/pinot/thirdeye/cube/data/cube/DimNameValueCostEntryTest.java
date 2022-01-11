@@ -22,6 +22,7 @@ public class DimNameValueCostEntryTest {
 
   @Test
   public void testCreation() {
+    // test that constructor is working
     new DimNameValueCostEntry("", "", 0, 0, 0d, 0d, 0, 0, 0, 0);
   }
 

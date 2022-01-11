@@ -16,12 +16,13 @@
 
 package org.apache.pinot.thirdeye.cube.data.node;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Collections;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.ratio.RatioCubeNode;
 import org.apache.pinot.thirdeye.cube.ratio.RatioRow;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class RatioCubeNodeTest {
@@ -43,8 +44,8 @@ public class RatioCubeNodeTest {
     rowUS.setCurrentNumeratorValue(80); // 70 left
     rowUS.setCurrentDenominatorValue(180); // 70 left
     RatioCubeNode nodeUS = new RatioCubeNode(1, 0, rowUS, rootNode);
-    Assert.assertEquals(nodeUS.changeRatio(), (80 / 180d) / (50d / 120d));
-    Assert.assertEquals(nodeUS.side(), nodeUS.changeRatio() > 1d);
+    assertThat(nodeUS.changeRatio()).isEqualTo((80 / 180d) / (50d / 120d));
+    assertThat(nodeUS.side()).isEqualTo(nodeUS.changeRatio() > 1d);
 
     // Ratio node doesn't have baseline
     RatioRow rowIN = new RatioRow(new Dimensions(Collections.singletonList("country")),
@@ -54,9 +55,8 @@ public class RatioCubeNodeTest {
     rowIN.setCurrentNumeratorValue(70); // 0 left
     rowIN.setCurrentDenominatorValue(50); // 20 left
     RatioCubeNode nodeIN = new RatioCubeNode(1, 1, rowIN, rootNode);
-    Assert.assertEquals(nodeIN.changeRatio(),
-        Double.NaN); // The ratio will be inferred by algorithm itself
-    Assert.assertEquals(nodeIN.side(), nodeIN.getCurrentValue() > rootNode.getCurrentValue());
+    assertThat(nodeIN.changeRatio()).isEqualTo((Double) Double.NaN); // The ratio will be inferred by algorithm itself
+    assertThat(nodeIN.side()).isEqualTo(nodeIN.getCurrentValue() > rootNode.getCurrentValue());
 
     // Ratio node doesn't have baseline
     RatioRow rowFR = new RatioRow(new Dimensions(Collections.singletonList("country")),
@@ -66,11 +66,10 @@ public class RatioCubeNodeTest {
     rowFR.setCurrentNumeratorValue(0); // 0 left
     rowFR.setCurrentDenominatorValue(0); // 20 left
     RatioCubeNode nodeFR = new RatioCubeNode(1, 2, rowFR, rootNode);
-    Assert.assertEquals(nodeFR.changeRatio(),
-        Double.NaN); // The ratio will be inferred by algorithm itself
+    assertThat(nodeFR.changeRatio()).isEqualTo((Double) Double.NaN); // The ratio will be inferred by algorithm itself
     // The side of FR is UP because it's baseline has lower ratio than it's parent; hence, we expect that removing FR
     // will move the metric upward.
-    Assert.assertEquals(nodeFR.side(), nodeFR.getBaselineValue() < rootNode.getBaselineValue());
+    assertThat(nodeFR.side()).isEqualTo(nodeFR.getBaselineValue() < rootNode.getBaselineValue());
   }
 
   // Since CubeNode has cyclic reference between current node and parent node, the toString() will encounter
@@ -99,14 +98,14 @@ public class RatioCubeNodeTest {
     RatioRow root2 = new RatioRow(new Dimensions(), new DimensionValues());
     CubeNode rootNode2 = new RatioCubeNode(root2);
 
-    Assert.assertEquals(rootNode1, rootNode2);
-    Assert.assertTrue(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2));
-    Assert.assertEquals(rootNode1.hashCode(), rootNode2.hashCode());
+    assertThat(rootNode1).isEqualTo(rootNode2);
+    assertThat(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2)).isTrue();
+    assertThat(rootNode1.hashCode()).isEqualTo(rootNode2.hashCode());
 
     RatioRow root3 = new RatioRow(new Dimensions(Collections.singletonList("country")),
         new DimensionValues(Collections.singletonList("US")));
     CubeNode rootNode3 = new RatioCubeNode(root3);
-    Assert.assertNotEquals(rootNode1, rootNode3);
-    Assert.assertNotEquals(rootNode1.hashCode(), rootNode3.hashCode());
+    assertThat(rootNode1).isNotEqualTo(rootNode3);
+    assertThat(rootNode1.hashCode()).isNotEqualTo(rootNode3.hashCode());
   }
 }

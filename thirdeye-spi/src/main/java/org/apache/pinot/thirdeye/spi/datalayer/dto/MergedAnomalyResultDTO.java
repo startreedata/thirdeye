@@ -66,6 +66,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private Long createdTime;
   private boolean notified;
   private String message;
+  @Deprecated
   private String metricUrn;
   private Long detectionConfigId;
   private Set<Long> childIds; // ids of the anomalies this anomaly merged from
@@ -276,10 +277,12 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     this.anomalyResultSource = anomalyResultSource;
   }
 
+  @Deprecated
   public String getMetricUrn() {
     return metricUrn;
   }
 
+  @Deprecated
   public void setMetricUrn(String metricUrn) {
     this.metricUrn = metricUrn;
   }

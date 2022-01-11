@@ -56,7 +56,7 @@ public class DimensionAnalysisResultApiTest {
         .setCurrentTotalSize(currentSize)
         .setGlobalRatio(roundUp(currentTotal / baselineTotal));
     Summary.buildDiffSummary(response, cubeNodes, 2, new BalancedCostFunction());
-    response.setMetric(new MetricApi().setUrn("testMetricUrn"));
+    response.setMetric(new MetricApi().setName("testMetric"));
 
     // Validation
     List<SummaryResponseRow> responseRows = response.getResponseRows();

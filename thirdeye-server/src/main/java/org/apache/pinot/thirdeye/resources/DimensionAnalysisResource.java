@@ -46,10 +46,10 @@ public class DimensionAnalysisResource {
   private static final Logger LOG = LoggerFactory.getLogger(DimensionAnalysisResource.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  public static final String DEFAULT_DIM_ANALYSIS_HIERARCHIES = "[]";
-  public static final String DEFAULT_DIM_ANALYSIS_ONE_SIDE_ERROR = "false";
-  public static final String DEFAULT_DIM_ANALYSIS_CUBE_DEPTH_STRING = "3";
-  public static final String DEFAULT_DIM_ANALYSIS_CUBE_SUMMARY_SIZE_STRING = "4";
+  public static final String DEFAULT_HIERARCHIES = "[]";
+  public static final String DEFAULT_ONE_SIDE_ERROR = "false";
+  public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
+  public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
   private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
@@ -74,14 +74,12 @@ public class DimensionAnalysisResource {
       @QueryParam("baselineEnd") @DefaultValue("-1") long baselineEndExclusive,
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
-      @QueryParam("timezone") @DefaultValue(RootCauseMetricResource.TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "Number of entries to put in the summary.")
-      @QueryParam("summarySize") @DefaultValue(DEFAULT_DIM_ANALYSIS_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
+      @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
       @ApiParam(value = "Number of dimensions to drill down by.")
-      @QueryParam("depth") @DefaultValue(DEFAULT_DIM_ANALYSIS_CUBE_DEPTH_STRING) int depth,
+      @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
       @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
-      @QueryParam("oneSideError") @DefaultValue(DEFAULT_DIM_ANALYSIS_ONE_SIDE_ERROR) boolean doOneSideError,
+      @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
       @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
       @ApiParam(value = "List of dimensions to exclude from the analysis.")
@@ -90,18 +88,16 @@ public class DimensionAnalysisResource {
           "Hierarchy among some dimensions. The order will be respected in the result. "
               + "An example of a hierarchical group is {continent, country}. "
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
-      @QueryParam("hierarchies") @DefaultValue(DEFAULT_DIM_ANALYSIS_HIERARCHIES) String hierarchiesPayload
+      @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
-    DateTimeZone dateTimeZone = RootCauseMetricResource.parseTimeZone(timezone);
     RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
-    // todo cyril - refactored without changing timeZone usage - not sure if it is correct - timezone should be front only
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        dateTimeZone);
+        DateTimeZone.UTC);
     final Interval baselineInterval = parseOrDefaultBaselineInterval(baselineStartInclusive,
         baselineEndExclusive,
-        dateTimeZone,
+        DateTimeZone.UTC,
         currentInterval);
 
     dimensions = cleanDimensionStrings(dimensions);

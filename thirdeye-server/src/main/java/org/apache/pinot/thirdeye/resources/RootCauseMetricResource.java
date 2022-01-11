@@ -249,6 +249,7 @@ public class RootCauseMetricResource {
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
+      @Deprecated(forRemoval = true)
       @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
       @QueryParam("limit") Integer limit) throws Exception {
@@ -256,7 +257,6 @@ public class RootCauseMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
-    DateTimeZone dateTimeZone = parseTimeZone(timezone);
     RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
 
     final Map<String, Map<String, Double>> breakdown = computeBreakdown(
@@ -265,7 +265,7 @@ public class RootCauseMetricResource {
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
         offset,
-        dateTimeZone,
+        DateTimeZone.UTC,
         limit,
         rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
     return Response.ok(breakdown).build();

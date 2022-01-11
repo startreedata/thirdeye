@@ -104,8 +104,7 @@ public class DataCubeSummaryCalculator {
      * @param currentInterval current time interval.
      * @param baselineInterval baseline time interval.
      * @param dimensions ordered dimensions to be drilled down by the algorithm.
-     * @param filters a filter in simple string format to be applied on the data. Thus, the algorithm will only
-     *     analyze a subset of data. Format is dim=value.
+     * @param filters filters in simple string format to apply on the data. Format is dim=value.
      * @param summarySize the size of the summary result.
      * @param depth the depth of the dimensions to be analyzed.
      * @param hierarchies the hierarchy among the dimensions.

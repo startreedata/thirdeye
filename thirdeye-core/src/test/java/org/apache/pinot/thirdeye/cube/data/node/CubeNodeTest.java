@@ -16,6 +16,8 @@
 
 package org.apache.pinot.thirdeye.cube.data.node;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +26,6 @@ import org.apache.pinot.thirdeye.cube.additive.AdditiveRow;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -37,7 +38,7 @@ public class CubeNodeTest {
     AdditiveCubeNode rootNode1 = buildHierarchicalNodes();
     AdditiveCubeNode rootNode2 = buildHierarchicalNodes();
 
-    Assert.assertTrue(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2));
+    assertThat(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2)).isTrue();
   }
 
   /**
@@ -58,8 +59,8 @@ public class CubeNodeTest {
     AdditiveRow rootRow = new AdditiveRow(new Dimensions(), new DimensionValues(), 30, 45);
     AdditiveCubeNode rootNode2 = new AdditiveCubeNode(rootRow);
 
-    Assert.assertEquals(rootNode1, rootNode2);
-    Assert.assertFalse(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2));
+    assertThat(rootNode1).isEqualTo(rootNode2);
+    assertThat(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2)).isFalse();
   }
 
   /**
@@ -80,8 +81,8 @@ public class CubeNodeTest {
     AdditiveRow rootRow = new AdditiveRow(new Dimensions(), new DimensionValues(), 20, 15);
     AdditiveCubeNode rootNode2 = new AdditiveCubeNode(rootRow);
 
-    Assert.assertNotEquals(rootNode1, rootNode2);
-    Assert.assertFalse(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2));
+    assertThat(rootNode1).isNotEqualTo(rootNode2);
+    assertThat(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2)).isFalse();
   }
 
   /**
@@ -102,7 +103,7 @@ public class CubeNodeTest {
    * Failed because Hierarchy 2's A doesn't have a reference to B.
    */
   @Test
-  public void testHierarchicalEqualsFail3() throws Exception {
+  public void testHierarchicalEqualsFail3() {
     AdditiveCubeNode rootNode1 = buildHierarchicalNodes();
 
     List<List<Row>> rows = buildHierarchicalRows();
@@ -112,10 +113,10 @@ public class CubeNodeTest {
 
     // Level 1
     AdditiveRow INRow = (AdditiveRow) rows.get(1).get(1);
-    CubeNode INNode = new AdditiveCubeNode(1, 1, INRow, rootNode2);
+    new AdditiveCubeNode(1, 1, INRow, rootNode2);
 
-    Assert.assertEquals(rootNode1, rootNode2);
-    Assert.assertFalse(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2));
+    assertThat(rootNode1).isEqualTo(rootNode2);
+    assertThat(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2)).isFalse();
   }
 
   /**
@@ -148,9 +149,9 @@ public class CubeNodeTest {
 
   /**
    * Builds hierarchy:
-   * A
-   * / \
-   * B  C
+   *   A
+   *  / \
+   * B   C
    */
   private AdditiveCubeNode buildHierarchicalNodes() {
     List<List<Row>> rows = buildHierarchicalRows();

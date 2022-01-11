@@ -15,7 +15,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
     const { t } = useTranslation();
 
     if (!props.extraData) {
-        return <span />;
+        return <span data-testid="empty-dimension-tooltip" />;
     }
 
     return (

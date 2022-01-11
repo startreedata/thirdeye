@@ -188,7 +188,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
     useEffect(() => {
         getMetricBreakdownForCurrent(anomalyId, {
-            timezone: "UTC",
             filters: [
                 ...anomalyFilters.map(
                     (option) => `${option.key}=${option.value}`
@@ -197,7 +196,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         });
 
         getMetricBreakdownForComparison(anomalyId, {
-            timezone: "UTC",
             offset: comparisonOffset,
             filters: [
                 ...anomalyFilters.map(

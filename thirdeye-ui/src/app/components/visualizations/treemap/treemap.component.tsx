@@ -84,7 +84,7 @@ function TreemapInternal<Data>({
         hideTooltip,
     } = useTooltip<TreemapData<Data>>();
 
-    const checkOtherDimension = (id: string | undefined): boolean => {
+    const isOtherDimension = (id: string | undefined): boolean => {
         if (!id) {
             return false;
         }
@@ -107,7 +107,7 @@ function TreemapInternal<Data>({
 
     const root = hierarchy(data)
         .sort((a, b) => (b.value || 0) - (a.value || 0))
-        .sort((_a, b) => (checkOtherDimension(b.data.id) ? -1 : 1));
+        .sort((_a, b) => (isOtherDimension(b.data.id) ? -1 : 1));
 
     const handleMouseLeave = (): void => {
         hideTooltip();
@@ -145,7 +145,7 @@ function TreemapInternal<Data>({
             | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
             | undefined
     ): void => {
-        if (!node || (node.data.id && checkOtherDimension(node?.data?.id))) {
+        if (!node || (node.data.id && isOtherDimension(node?.data?.id))) {
             return;
         }
         let key = "";
@@ -187,15 +187,17 @@ function TreemapInternal<Data>({
                                         const nodeWidth = node.x1 - node.x0 - 1;
                                         const nodeHeight =
                                             node.y1 - node.y0 - 1;
-                                        const colorValue = checkOtherDimension(
-                                            node.data.id
-                                        )
-                                            ? -1
-                                            : node.data.data
-                                            ? colorChangeValueAccessor(
-                                                  node.data.data
-                                              )
-                                            : node.value;
+                                        let colorValue = -1;
+
+                                        if (!isOtherDimension(node.data.id)) {
+                                            if (node.data.data) {
+                                                colorValue = colorChangeValueAccessor(
+                                                    node.data.data
+                                                );
+                                            } else if (node.value) {
+                                                colorValue = node.value;
+                                            }
+                                        }
                                         const rect = (
                                             <rect
                                                 fill={colorScale(

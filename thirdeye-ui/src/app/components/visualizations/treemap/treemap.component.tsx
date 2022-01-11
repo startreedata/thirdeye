@@ -124,8 +124,7 @@ function TreemapInternal<Data>({
         if (
             !node ||
             !clickedOnRect.ownerSVGElement ||
-            !node.data.data.extraData ||
-            isOtherDimension(node.data.id)
+            !node.data.data.extraData
         ) {
             return;
         }

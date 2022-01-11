@@ -1,5 +1,8 @@
 package org.apache.pinot.thirdeye.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils.parseOffset;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +18,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
@@ -32,6 +34,9 @@ import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfo;
 import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -46,6 +51,7 @@ public class DimensionAnalysisResource {
   private static final Logger LOG = LoggerFactory.getLogger(DimensionAnalysisResource.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  private static final String DEFAULT_BASELINE_OFFSET = "wo1w";
   public static final String DEFAULT_HIERARCHIES = "[]";
   public static final String DEFAULT_ONE_SIDE_ERROR = "false";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
@@ -68,10 +74,8 @@ public class DimensionAnalysisResource {
   public Response dataCubeSummary(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "Baseline timeframe start. Epoch milliseconds. If -1, a sensible default timeframe is used.")
-      @QueryParam("baselineStart") @DefaultValue("-1") long baselineStartInclusive,
-      @ApiParam(value = "Baseline timeframe end. Epoch milliseconds. If -1, a sensible default timeframe is used.")
-      @QueryParam("baselineEnd") @DefaultValue("-1") long baselineEndExclusive,
+      @ApiParam(value = "baseline offset identifier (e.g. \"wo1w\"). Not compatible with mean and median functions.")
+      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "Number of entries to put in the summary.")
@@ -90,15 +94,14 @@ public class DimensionAnalysisResource {
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+        anomalyId);
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
         DateTimeZone.UTC);
-    final Interval baselineInterval = parseOrDefaultBaselineInterval(baselineStartInclusive,
-        baselineEndExclusive,
-        DateTimeZone.UTC,
-        currentInterval);
+    final Interval baselineInterval = baselineOffsetToInterval(baselineOffset,
+        currentInterval, rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
 
     dimensions = cleanDimensionStrings(dimensions);
     if (dimensions.isEmpty()) {
@@ -126,21 +129,38 @@ public class DimensionAnalysisResource {
     return Response.ok(resultApi).build();
   }
 
-  private Interval parseOrDefaultBaselineInterval(long baselineStartInclusive,
-      long baselineEndExclusive,
-      final DateTimeZone dateTimeZone, final Interval currentInterval) {
-    if (baselineStartInclusive == -1 && baselineEndExclusive == -1) {
-      // default baseline - 7 days offset
-      baselineStartInclusive = currentInterval.getStartMillis() - TimeUnit.DAYS.toMillis(7);
-      baselineEndExclusive = currentInterval.getEndMillis() - TimeUnit.DAYS.toMillis(7);
-    } else if (baselineStartInclusive == -1 || baselineEndExclusive == -1) {
-      throw new IllegalArgumentException(
-          "baselineStart and baselineEnd must be both custom or both default");
-    }
+  /**
+   * Convert a baseline offset to an interval.
+   *
+   * HACK. It would be better to manipulate offset, but
+   * the cube implementation were not compatible without significant refactorings.
+   * Chose to keep the current format for the moment, but it could be refactored.
+   * Important: if changes are made: try to keep consistency with the breakdown endpoint.
+   *
+   * HACK 2. The cube implementation is not compatible with slices,
+   * it only manages a single timeframe.
+   * So this convert function only works with offsets that only need a single timeframe.
+   * Eg: wo1w works. median2w does not work.
+   * */
+  private Interval baselineOffsetToInterval(final String offset,
+      final Interval currentInterval, final TimeGranularity timeGranularity) {
+    // hacky design to have the same interface as the breakdown endpoint
+    MetricSlice currentSlice = MetricSlice.from(0L,
+        currentInterval.getStartMillis(),
+        currentInterval.getEndMillis(),
+        List.of(),
+        timeGranularity
+    );
+    Baseline range = parseOffset(offset, DateTimeZone.UTC);
+    List<MetricSlice> slices = range.scatter(currentSlice);
+    checkArgument(slices.size() == 1,
+        "dimension analysis is only compatible with single-slice offsets. Eg wo1w, do1d. "
+            + "It is not implemented for meanXw, medianXw.");
+    MetricSlice baselineSlice = slices.get(0);
 
-    return new Interval(baselineStartInclusive,
-        baselineEndExclusive,
-        dateTimeZone);
+    return new Interval(baselineSlice.getStart(),
+        baselineSlice.getEnd(),
+        DateTimeZone.UTC);
   }
 
   private static List<String> cleanDimensionStrings(List<String> dimensions) {

@@ -24,15 +24,11 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
@@ -89,20 +85,9 @@ public class EmailContentFormatter {
       final Collection<AnomalyResult> anomalies) {
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     templateData.put("dashboardHost", notificationContext.getUiPublicUrl());
-    final HtmlEmail htmlEmail = new HtmlEmail();
-    String contentId = "";
-    try {
-      if (StringUtils.isNotBlank(content.getSnaphotPath())) {
-        contentId = htmlEmail.embed(new File(content.getSnaphotPath()));
-      }
-    } catch (final Exception e) {
-      LOG.error("Exception while embedding screenshot for anomaly", e);
-    }
-    templateData.put("cid", contentId);
 
     final String htmlText = buildHtml(TEMPLATE_MAP.get(content.getTemplate()), templateData);
     return buildEmailEntity(templateData,
-        htmlEmail,
         htmlText,
         notificationContext.getProperties(),
         subsConfig,
@@ -127,24 +112,16 @@ public class EmailContentFormatter {
   }
 
   private EmailEntity buildEmailEntity(final Map<String, Object> templateValues,
-      final HtmlEmail email,
       final String htmlEmail,
       final Properties alertClientConfig,
       final SubscriptionGroupDTO subsConfig,
       final String snapshotPath) {
-    try {
-      final String subject = BaseNotificationContent
-          .makeSubject(getSubjectType(alertClientConfig, subsConfig), subsConfig, templateValues);
+    final String subject = BaseNotificationContent
+        .makeSubject(getSubjectType(alertClientConfig, subsConfig), subsConfig, templateValues);
 
-      email.setHtmlMsg(htmlEmail);
-
-      return new EmailEntity()
-          .setSnapshotPath(snapshotPath)
-          .setSubject(subject)
-          .setContent(email);
-
-    } catch (final EmailException e) {
-      throw new RuntimeException(e);
-    }
+    return new EmailEntity()
+        .setSnapshotPath(snapshotPath)
+        .setSubject(subject)
+        .setHtmlContent(htmlEmail);
   }
 }

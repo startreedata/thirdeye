@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.notification.commons;
 
-import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 
 public class EmailEntity {
@@ -27,7 +26,7 @@ public class EmailEntity {
   private String from;
   private DetectionAlertFilterRecipients to;
   private String subject;
-  private HtmlEmail content;
+  private String htmlContent;
   private String snapshotPath;
 
   public String getFrom() {
@@ -58,12 +57,12 @@ public class EmailEntity {
     return this;
   }
 
-  public HtmlEmail getContent() {
-    return content;
+  public String getHtmlContent() {
+    return htmlContent;
   }
 
-  public EmailEntity setContent(final HtmlEmail content) {
-    this.content = content;
+  public EmailEntity setHtmlContent(final String htmlContent) {
+    this.htmlContent = htmlContent;
     return this;
   }
 

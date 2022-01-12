@@ -148,33 +148,36 @@ public class EmailAlertScheme {
     }
   }
 
-  private HtmlEmail prepareEmailContent(final SubscriptionGroupDTO subsConfig,
-      final Properties emailClientConfigs,
-      final List<AnomalyResult> anomalies, final DetectionAlertFilterRecipients recipients)
-      throws Exception {
-    final EmailEntity emailEntity = buildEmailEntity(
-        subsConfig,
-        emailClientConfigs,
-        anomalies,
-        recipients);
+  private HtmlEmail buildHtmlEmail(final EmailEntity emailEntity)
+      throws EmailException {
+    final HtmlEmail email = new HtmlEmail();
+    final DetectionAlertFilterRecipients recipients = emailEntity.getTo();
 
-    final HtmlEmail email = emailEntity.getContent();
+    email.setHtmlMsg(emailEntity.getHtmlContent());
     email.setSubject(emailEntity.getSubject());
-    email.setFrom(subsConfig.getFrom());
+    email.setFrom(emailEntity.getFrom());
     email.setTo(AlertUtils.toAddress(recipients.getTo()));
+
     if (!CollectionUtils.isEmpty(recipients.getCc())) {
       email.setCc(AlertUtils.toAddress(recipients.getCc()));
     }
+
     if (!CollectionUtils.isEmpty(recipients.getBcc())) {
       email.setBcc(AlertUtils.toAddress(recipients.getBcc()));
     }
 
-    return emailEntity.getContent();
+    return email;
   }
 
-  private EmailEntity buildEmailEntity(final SubscriptionGroupDTO subsConfig,
-      final Properties emailClientConfigs, final List<AnomalyResult> anomalies,
-      final DetectionAlertFilterRecipients recipients) {
+  private EmailEntity buildEmailEntity(final SubscriptionGroupDTO subscriptionGroup,
+      final Properties emailClientConfigs,
+      final List<AnomalyResult> anomalies,
+      final EmailSchemeDto emailScheme) {
+    final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
+        emailScheme.getTo(),
+        emailScheme.getCc(),
+        emailScheme.getBcc());
+
     configureAdminRecipients(recipients);
     whitelistRecipients(recipients);
     blacklistRecipients(recipients);
@@ -188,15 +191,21 @@ public class EmailAlertScheme {
 
     final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
         content,
-        subsConfig,
+        subscriptionGroup,
         anomalies);
+    emailEntity.setTo(recipients);
 
-    if (Strings.isNullOrEmpty(subsConfig.getFrom())) {
+
+    if (Strings.isNullOrEmpty(subscriptionGroup.getFrom())) {
       final String fromAddress = smtpConfig.getUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
         throw new IllegalArgumentException("Invalid sender's email");
       }
-      subsConfig.setFrom(fromAddress);
+
+      // TODO spyne Investigate and remove logic where email send is updating dto object temporarily
+      subscriptionGroup.setFrom(fromAddress);
+
+      emailEntity.setFrom(emailEntity.getFrom());
     }
     return emailEntity;
   }
@@ -207,9 +216,6 @@ public class EmailAlertScheme {
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final Properties emailConfig = new Properties();
-//    TODO accommodate all required properties in EmailSchemeDto
-//    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
     final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
 
     if (emailScheme.getTo() == null || emailScheme.getTo().isEmpty()) {
@@ -217,16 +223,18 @@ public class EmailAlertScheme {
           "No email recipients found in subscription group " + sg.getId());
     }
 
-    final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
-        emailScheme.getTo(),
-        emailScheme.getCc(),
-        emailScheme.getBcc());
-    try {
-      final HtmlEmail email = prepareEmailContent(sg,
-          emailConfig,
-          sortedAnomalyResults,
-          recipients);
+    final Properties emailConfig = new Properties();
+//    TODO accommodate all required properties in EmailSchemeDto
+//    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
 
+    final EmailEntity emailEntity = buildEmailEntity(
+        sg,
+        emailConfig,
+        sortedAnomalyResults,
+        emailScheme);
+
+    try {
+      final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
       emailAlertsSuccessCounter.inc();
     } catch (Exception e) {

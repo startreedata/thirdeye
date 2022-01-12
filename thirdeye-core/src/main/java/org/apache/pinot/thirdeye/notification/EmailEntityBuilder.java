@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.alert.scheme;
+package org.apache.pinot.thirdeye.notification;
 
 import static org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.PROP_TEMPLATE;
 
@@ -16,7 +16,6 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.EmailTemplateType;
-import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.NotificationContent;

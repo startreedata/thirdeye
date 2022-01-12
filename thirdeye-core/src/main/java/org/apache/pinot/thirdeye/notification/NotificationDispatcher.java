@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
-import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationPayloadBuilder;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
@@ -47,19 +46,20 @@ public class NotificationDispatcher {
     fireNotifications(subscriptionGroup, payload);
   }
 
-  private void fireNotifications(final SubscriptionGroupDTO subscriptionGroup,
+  private void fireNotifications(final SubscriptionGroupDTO sg,
       final NotificationPayloadApi payload) {
     // Send out emails
-    final EmailSchemeDto emailScheme = subscriptionGroup.getNotificationSchemes().getEmailScheme();
+    final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
     if (emailScheme != null) {
-      fireEmails(payload);
+      final Map<String, String> properties = buildEmailProperties();
+      fireNotification("email", properties, payload);
     }
 
     // fire webhook
-    final WebhookSchemeDto webhookScheme = subscriptionGroup.getNotificationSchemes()
-        .getWebhookScheme();
+    final WebhookSchemeDto webhookScheme = sg.getNotificationSchemes().getWebhookScheme();
     if (webhookScheme != null) {
-      fireWebhook(webhookScheme, payload);
+      final Map<String, String> properties = buildWebhookProperties(webhookScheme);
+      fireNotification("webhook", properties, payload);
     }
   }
 
@@ -75,28 +75,29 @@ public class NotificationDispatcher {
         .orElse(null);
   }
 
-  private void fireEmails(final NotificationPayloadApi api) {
+  private Map<String, String> buildEmailProperties() {
     final Map<String, String> properties = new HashMap<>();
     properties.put("host", smtpConfig.getHost());
     properties.put("port", String.valueOf(smtpConfig.getPort()));
     properties.put("user", smtpConfig.getUser());
     properties.put("password", smtpConfig.getPassword());
 
-    final NotificationService emailNotificationService = notificationServiceRegistry
-        .get("email", properties);
-    emailNotificationService.notify(api);
+    return properties;
   }
 
-  private void fireWebhook(final WebhookSchemeDto webhookScheme,
-      final NotificationPayloadApi entity) {
-
+  private Map<String, String> buildWebhookProperties(final WebhookSchemeDto webhookScheme) {
     final Map<String, String> properties = new HashMap<>();
     properties.put("url", webhookScheme.getUrl());
     if (webhookScheme.getHashKey() != null) {
       properties.put("hashKey", webhookScheme.getHashKey());
     }
-    final NotificationService webhookNotificationService = notificationServiceRegistry
-        .get("webhook", properties);
-    webhookNotificationService.notify(entity);
+    return properties;
+  }
+
+  private void fireNotification(final String name,
+      final Map<String, String> properties,
+      final NotificationPayloadApi entity) {
+    final NotificationService service = notificationServiceRegistry.get(name, properties);
+    service.notify(entity);
   }
 }

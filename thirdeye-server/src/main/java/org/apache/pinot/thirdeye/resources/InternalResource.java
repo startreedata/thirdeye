@@ -35,7 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.scheme.EmailEntityBuilder;
+import org.apache.pinot.thirdeye.notification.EmailEntityBuilder;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;

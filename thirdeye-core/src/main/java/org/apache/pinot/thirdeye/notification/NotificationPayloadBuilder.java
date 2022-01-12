@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.alert.scheme;
+package org.apache.pinot.thirdeye.notification;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

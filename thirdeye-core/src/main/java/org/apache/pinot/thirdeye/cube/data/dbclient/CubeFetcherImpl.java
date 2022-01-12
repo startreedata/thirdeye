@@ -41,7 +41,6 @@ import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.util.ThirdEyeUtils;
 import org.apache.pinot.thirdeye.util.Utils;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,44 +61,25 @@ import org.slf4j.LoggerFactory;
  * GroupBy dimension are
  * located together.
  */
-public abstract class BaseCubePinotClient<R extends Row> implements CubePinotClient<R> {
+public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(BaseCubePinotClient.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CubeFetcherImpl.class);
+  private final static int TIME_OUT_VALUE = 1200;
+  private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
 
-  protected final static Interval NULL_INTERVAL = new Interval(0L, 0L);
-  protected final static int TIME_OUT_VALUE = 1200;
-  protected final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
-
-  protected DataSourceCache dataSourceCache;
-  protected String dataset = "";
-  protected Interval baselineInterval = NULL_INTERVAL;
-  protected Interval currentInterval = NULL_INTERVAL;
+  private final DataSourceCache dataSourceCache;
+  private final CubeMetric<R> cubeMetric;
 
   /**
-   * Constructs a Pinot client.
+   * Constructs a Cube client.
    *
-   * @param dataSourceCache the query cached to Pinot.
-   * @param thirdEyeCacheRegistry
    */
-  public BaseCubePinotClient(DataSourceCache dataSourceCache,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+  public CubeFetcherImpl(DataSourceCache dataSourceCache,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry, CubeMetric<R> cubeMetric) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
-  }
-
-  public void setDataset(String dataset) {
-    this.dataset = Preconditions.checkNotNull(dataset);
-  }
-
-  @Override
-  public void setBaselineInterval(Interval baselineInterval) {
-    this.baselineInterval = Preconditions.checkNotNull(baselineInterval);
-  }
-
-  @Override
-  public void setCurrentInterval(Interval currentInterval) {
-    this.currentInterval = Preconditions.checkNotNull(currentInterval);
+    this.cubeMetric = cubeMetric;
   }
 
   /**
@@ -148,13 +128,6 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   }
 
   /**
-   * The cube specs that specified which metric and dataset to be queried.
-   *
-   * @return a list of cube spec.
-   */
-  protected abstract List<CubeSpec> getCubeSpecs();
-
-  /**
    * Fills in multiple Pinot results to one Cube row.
    *
    * @param rowTable the table from dimension values to cube row; the return of this method.
@@ -163,8 +136,10 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
    * @param value the value to be filled in to the row.
    * @param tag The field of the row where the value is filled in.
    */
-  protected abstract void fillValueToRowTable(Map<List<String>, R> rowTable, Dimensions dimensions,
-      List<String> dimensionValues, double value, CubeTag tag);
+  protected void fillValueToRowTable(Map<List<String>, R> rowTable, Dimensions dimensions,
+      List<String> dimensionValues, double value, CubeTag tag) {
+    cubeMetric.fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
+  }
 
   /**
    * Returns a list of rows. The value of each row is evaluated and no further processing is needed.
@@ -254,7 +229,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
   public R getTopAggregatedValues(Multimap<String, String> filterSets) throws Exception {
     List<String> groupBy = Collections.emptyList();
     List<Map<CubeTag, ThirdEyeRequestMetricExpressions>> bulkRequests = Collections.singletonList(
-        constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+        constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
     return constructAggregatedValues(new Dimensions(), bulkRequests).get(0).get(0);
   }
 
@@ -266,7 +241,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
     for (int level = 0; level < dimensions.size(); ++level) {
       List<String> groupBy = Lists.newArrayList(dimensions.get(level));
       bulkRequests.add(
-          constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+          constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }
@@ -279,7 +254,7 @@ public abstract class BaseCubePinotClient<R extends Row> implements CubePinotCli
     for (int level = 0; level < dimensions.size() + 1; ++level) {
       List<String> groupBy = Lists.newArrayList(dimensions.namesToDepth(level));
       bulkRequests.add(
-          constructBulkRequests(dataset, getCubeSpecs(), groupBy, filterSets));
+          constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }

@@ -1,5 +1,7 @@
 package org.apache.pinot.thirdeye.rca;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
@@ -9,17 +11,23 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.pinot.thirdeye.cube.additive.AdditiveDBClient;
+import org.apache.pinot.thirdeye.cube.additive.AdditiveCubeMetric;
 import org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
 import org.apache.pinot.thirdeye.cube.cost.RatioCostFunction;
+import org.apache.pinot.thirdeye.cube.data.cube.Cube;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeFetcher;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeFetcherImpl;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeMetric;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalRatioSummary;
-import org.apache.pinot.thirdeye.cube.entry.MultiDimensionalSummary;
-import org.apache.pinot.thirdeye.cube.ratio.RatioDBClient;
+import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
+import org.apache.pinot.thirdeye.cube.ratio.RatioCubeMetric;
+import org.apache.pinot.thirdeye.cube.summary.Summary;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.apache.pinot.thirdeye.spi.api.DatasetApi;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
+import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
@@ -50,7 +58,8 @@ public class DataCubeSummaryCalculator {
       final String metricName, final String datasetName,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
-      final String derivedMetricExpression, final List<String> dimensions, final List<String> excludedDimensions,
+      final String derivedMetricExpression, final List<String> dimensions,
+      final List<String> excludedDimensions,
       final List<String> filters, final List<List<String>> hierarchies)
       throws Exception {
 
@@ -103,13 +112,18 @@ public class DataCubeSummaryCalculator {
      * @param derivedMetricExpression derivedMetricExpression String from MetricConfigDTO.
      * @param currentInterval current time interval.
      * @param baselineInterval baseline time interval.
-     * @param dimensions ordered dimensions to be drilled down by the algorithm.
+     * @param dimensions the dimensions to be considered in the summary. If the variable depth
+     *     is zero, then the order of the dimension is used; otherwise, this method will
+     *     determine the order of the dimensions depending on their cost.
+     *     After the order is determined, the first 'depth' dimensions are used the generated
+     *     the summary.
      * @param filters filters in simple string format to apply on the data. Format is dim=value.
-     * @param summarySize the size of the summary result.
-     * @param depth the depth of the dimensions to be analyzed.
-     * @param hierarchies the hierarchy among the dimensions.
-     * @param doOneSideError flag to toggle if we only want one side results.
-     * @return the summary result of cube algorithm.
+     * @param summarySize the number of entries to be put in the summary.
+     * @param depth the number of dimensions to be drilled down when analyzing the summary.
+     * @param hierarchies the hierarchy among the dimensions. The order will always be honored
+     *     when determining the order of dimensions.
+     * @param doOneSideError if the summary should only consider one side error. (global change
+     *     side)
      */
     public CubeAlgorithmRunner(
         final String derivedMetricExpression,
@@ -125,52 +139,42 @@ public class DataCubeSummaryCalculator {
       this.metricName = metricName;
       this.currentInterval = currentInterval;
       this.baselineInterval = baselineInterval;
+      Preconditions.checkNotNull(dimensions);
+      checkArgument(dimensions.size() > 0);
       this.dimensions = dimensions;
       this.dataFilters = ParsedUrn.toFiltersMap(EntityUtils.extractFilterPredicates(filters));
+      checkArgument(summarySize > 1);
       this.summarySize = summarySize;
+      checkArgument(depth >= 0);
       this.depth = depth;
+      Preconditions.checkNotNull(hierarchies);
       this.hierarchies = hierarchies;
       this.doOneSideError = doOneSideError;
     }
 
+    /**
+     * @return the summary result of cube algorithm.
+     */
     public DimensionAnalysisResultApi run() throws Exception {
-      if (isSimpleRatioMetric()) {
-        return runRatioCubeAlgorithm();
+      final CubeMetric<? extends Row> cubeMetric;
+      final CostFunction costFunction;
+      if (isRatioMetric()) {
+        cubeMetric = buildRatioCubeMetric();
+        costFunction = new RatioCostFunction();
+      } else {
+        // additive - nominal case
+        cubeMetric =
+            new AdditiveCubeMetric(datasetName, metricName, currentInterval, baselineInterval);
+        costFunction = new BalancedCostFunction();
       }
-      return runAdditiveCubeAlgorithm();
+
+      final CubeFetcher<? extends Row> cubeFetcher =
+          new CubeFetcherImpl<>(dataSourceCache, thirdEyeCacheRegistry, cubeMetric);
+
+      return buildSummary(cubeFetcher, costFunction);
     }
 
-    /**
-     * Executes cube algorithm for the given additive metric.
-     */
-    private DimensionAnalysisResultApi runAdditiveCubeAlgorithm() throws Exception {
-      final CostFunction costFunction = new BalancedCostFunction();
-      final AdditiveDBClient cubeDbClient = new AdditiveDBClient(
-          dataSourceCache,
-          thirdEyeCacheRegistry);
-      final MultiDimensionalSummary mdSummary = new MultiDimensionalSummary(
-          cubeDbClient,
-          costFunction);
-
-      return mdSummary.buildSummary(
-          datasetName,
-          metricName,
-          currentInterval,
-          baselineInterval,
-          dimensions,
-          dataFilters,
-          summarySize,
-          depth,
-          hierarchies,
-          doOneSideError);
-    }
-
-    /**
-     * Executes cube algorithm for a given ratio metric.
-     */
-    private DimensionAnalysisResultApi runRatioCubeAlgorithm()
-        throws Exception {
-      Preconditions.checkArgument(isSimpleRatioMetric());
+    private CubeMetric<? extends Row> buildRatioCubeMetric() {
       Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetricExpression);
       // Extract numerator and denominator id
       long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
@@ -180,35 +184,45 @@ public class DataCubeSummaryCalculator {
       String numeratorMetric = metricConfigManager.findById(numeratorId).getName();
       String denominatorMetric = metricConfigManager.findById(denominatorId).getName();
       // Generate cube result
-      CostFunction costFunction = new RatioCostFunction();
-      RatioDBClient dbClient = new RatioDBClient(dataSourceCache, thirdEyeCacheRegistry);
-      MultiDimensionalRatioSummary mdSummary = new MultiDimensionalRatioSummary(dbClient,
-          costFunction);
-
-      return mdSummary.buildRatioSummary(
-          datasetName,
+      return new RatioCubeMetric(datasetName,
           numeratorMetric,
           denominatorMetric,
           currentInterval,
-          baselineInterval,
-          dimensions,
-          dataFilters,
-          summarySize,
-          depth,
-          hierarchies,
-          doOneSideError);
+          baselineInterval);
     }
 
     /**
      * Returns true if the derived metric is a simple ratio metric such as "A/B" where A and B is a
      * metric.
      */
-    private boolean isSimpleRatioMetric() {
+    private boolean isRatioMetric() {
       if (!Strings.isNullOrEmpty(derivedMetricExpression)) {
         Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetricExpression);
         return matcher.matches();
       }
       return false;
+    }
+
+    public DimensionAnalysisResultApi buildSummary(CubeFetcher<? extends Row> cubeFetcher,
+        CostFunction costFunction) throws Exception {
+      Cube cube = new Cube(costFunction);
+      DimensionAnalysisResultApi response;
+      if (depth > 0) { // depth != 0 means auto dimension order
+        cube.buildWithAutoDimensionOrder(cubeFetcher, dimensions, dataFilters, depth, hierarchies);
+        Summary summary = new Summary(cube, costFunction);
+        response = summary.computeSummary(summarySize, doOneSideError, depth);
+      } else { // manual dimension order
+        cube.buildWithManualDimensionOrder(cubeFetcher, dimensions, dataFilters);
+        Summary summary = new Summary(cube, costFunction);
+        response = summary.computeSummary(summarySize, doOneSideError);
+      }
+
+      response.setMetric(new MetricApi()
+          .setName(metricName)
+          .setDataset(new DatasetApi().setName(datasetName))
+      );
+
+      return response;
     }
   }
 }

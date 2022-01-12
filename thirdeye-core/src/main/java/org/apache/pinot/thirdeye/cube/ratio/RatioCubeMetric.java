@@ -22,71 +22,69 @@ package org.apache.pinot.thirdeye.cube.ratio;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeFetcherImpl;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeMetric;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeSpec;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeTag;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.joda.time.Interval;
 
 /**
- * This class generates query requests to the backend database and retrieve the metrics that compose
- * the ratio metric for summary algorithm.
+ * Describes a CubeMetric that is a simple ratio metric such as "A/B" where A and B is a metric.
  *
- * @see org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient
+ * @see CubeFetcherImpl
  */
-public class RatioDBClient extends BaseCubePinotClient<RatioRow> {
+public class RatioCubeMetric implements CubeMetric<RatioRow> {
 
-  private String numeratorMetric = "";
-  private String denominatorMetric = "";
-
-  /**
-   * Constructs a DB client to the ratio metric.
-   *
-   * @param dataSourceCache the query cache to Pinot DB.
-   * @param thirdEyeCacheRegistry
-   */
-  public RatioDBClient(DataSourceCache dataSourceCache,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(dataSourceCache, thirdEyeCacheRegistry);
-  }
+  private final String dataset;
+  private final String numeratorMetricName;
+  private final String denominatorMetricName;
+  private final Interval currentInterval;
+  private final Interval baselineInterval;
 
   /**
-   * Sets the numerator metric of the ratio metric.
-   *
-   * @param numeratorMetric the numerator metric of the ratio metric.
+   * Constructs an Additive cube metric.
    */
-  public void setNumeratorMetric(String numeratorMetric) {
-    this.numeratorMetric = numeratorMetric;
-  }
-
-  /**
-   * Sets the denominator metric of the ratio metric.
-   *
-   * @param denominatorMetric the denominator metric of the ratio metric.
-   */
-  public void setDenominatorMetric(String denominatorMetric) {
-    this.denominatorMetric = denominatorMetric;
+  public RatioCubeMetric(String dataset,
+      String numeratorMetricName,
+      String denominatorMetricName,
+      Interval currentInterval,
+      Interval baselineInterval) {
+    this.dataset = dataset;
+    this.numeratorMetricName = numeratorMetricName;
+    this.denominatorMetricName = denominatorMetricName;
+    this.currentInterval = currentInterval;
+    this.baselineInterval = baselineInterval;
   }
 
   @Override
-  protected List<CubeSpec> getCubeSpecs() {
+  public String getDataset() {
+    return dataset;
+  }
+
+  @Override
+  public String getMetric() {
+    return numeratorMetricName + "/" + denominatorMetricName;
+  }
+
+  @Override
+  public List<CubeSpec> getCubeSpecs() {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 
     cubeSpecs.add(
-        new CubeSpec(CubeTag.BaselineNumerator, numeratorMetric, baselineInterval));
+        new CubeSpec(CubeTag.BaselineNumerator, numeratorMetricName, baselineInterval));
     cubeSpecs.add(
-        new CubeSpec(CubeTag.BaselineDenominator, denominatorMetric, baselineInterval));
-    cubeSpecs.add(new CubeSpec(CubeTag.CurrentNumerator, numeratorMetric, currentInterval));
+        new CubeSpec(CubeTag.BaselineDenominator, denominatorMetricName, baselineInterval));
+    cubeSpecs.add(new CubeSpec(CubeTag.CurrentNumerator, numeratorMetricName, currentInterval));
     cubeSpecs.add(
-        new CubeSpec(CubeTag.CurrentDenominator, denominatorMetric, currentInterval));
+        new CubeSpec(CubeTag.CurrentDenominator, denominatorMetricName, currentInterval));
 
     return cubeSpecs;
   }
 
   @Override
-  protected void fillValueToRowTable(Map<List<String>, RatioRow> rowTable, Dimensions dimensions,
+  public void fillValueToRowTable(Map<List<String>, RatioRow> rowTable, Dimensions dimensions,
       List<String> dimensionValues, double value, CubeTag tag) {
 
     if (Double.compare(0d, value) < 0 && !Double.isInfinite(value)) {

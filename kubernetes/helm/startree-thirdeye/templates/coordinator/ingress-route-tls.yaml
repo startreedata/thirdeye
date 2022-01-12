@@ -1,0 +1,18 @@
+{{- if and .Values.traefik.coordinator.enabled .Values.tls.enabled -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: {{ include "thirdeye.coordinator.fullname" . }}
+spec:
+  entryPoints:
+    websecure:
+      address: {{ .Values.coordinator.port }}
+  routes:
+  - match: HostSNI(`{{ .Release.Name }}-coordinator.{{ .Release.Namespace }}.{{ required "domain is required." .Values.domain }}`)
+    services:
+    - name: {{ include "thirdeye.coordinator.headless" . }}
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.coordinator.port }}
+  tls:
+    passthrough: true
+{{- end }}

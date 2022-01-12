@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Objects;
 import java.util.List;
+import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 
 @JsonInclude(Include.NON_NULL)
 public class NotificationPayloadApi implements ThirdEyeApi {
+
   private SubscriptionGroupApi subscriptionGroup;
   private List<AnomalyReportApi> anomalyReports;
+  private EmailEntity emailEntity;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
@@ -29,6 +32,16 @@ public class NotificationPayloadApi implements ThirdEyeApi {
     return this;
   }
 
+  public EmailEntity getEmailEntity() {
+    return emailEntity;
+  }
+
+  public NotificationPayloadApi setEmailEntity(
+      final EmailEntity emailEntity) {
+    this.emailEntity = emailEntity;
+    return this;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -46,5 +59,4 @@ public class NotificationPayloadApi implements ThirdEyeApi {
   public int hashCode() {
     return Objects.hashCode(subscriptionGroup, anomalyReports);
   }
-
 }

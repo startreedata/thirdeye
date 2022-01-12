@@ -31,12 +31,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
 import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationPayloadBuilder;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
+import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
+import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -71,6 +74,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
+  private final SmtpConfiguration smtpConfig;
 
   @Inject
   public NotificationTaskRunner(
@@ -79,15 +83,18 @@ public class NotificationTaskRunner implements TaskRunner {
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final MetricRegistry metricRegistry,
-      final NotificationServiceRegistry notificationServiceRegistry) {
+      final NotificationServiceRegistry notificationServiceRegistry,
+      final ThirdEyeServerConfiguration configuration) {
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
+    this.notificationServiceRegistry = notificationServiceRegistry;
+
+    smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
-    this.notificationServiceRegistry = notificationServiceRegistry;
   }
 
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
@@ -180,7 +187,19 @@ public class NotificationTaskRunner implements TaskRunner {
       final DetectionAlertFilterResult result,
       final EmailAlertScheme emailAlertScheme) {
     final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroupDTO, result);
-    emailAlertScheme.buildAndSendEmail(subscriptionGroupDTO, new ArrayList<>(anomalies));
+    final EmailEntity entity = emailAlertScheme.buildAndSendEmail(subscriptionGroupDTO,
+        new ArrayList<>(anomalies));
+
+    final Map<String, String> properties = new HashMap<>();
+    properties.put("host", smtpConfig.getHost());
+    properties.put("port", String.valueOf(smtpConfig.getPort()));
+    properties.put("user", smtpConfig.getUser());
+    properties.put("password", smtpConfig.getPassword());
+
+
+    final NotificationService emailNotificationService = notificationServiceRegistry
+        .get("email", properties);
+    emailNotificationService.notify(new NotificationPayloadApi().setEmailEntity(entity));
   }
 
   private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,

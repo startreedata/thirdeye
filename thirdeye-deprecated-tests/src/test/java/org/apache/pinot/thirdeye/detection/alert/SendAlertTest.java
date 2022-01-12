@@ -130,7 +130,8 @@ public class SendAlertTest {
         TestDbEnv.getInstance().getMergedAnomalyResultDAO(),
         mock(NotificationPayloadBuilder.class),
         new MetricRegistry(),
-        mock(NotificationServiceRegistry.class));
+        mock(NotificationServiceRegistry.class),
+        mock(ThirdEyeServerConfiguration.class));
   }
 
   @AfterMethod(alwaysRun = true)

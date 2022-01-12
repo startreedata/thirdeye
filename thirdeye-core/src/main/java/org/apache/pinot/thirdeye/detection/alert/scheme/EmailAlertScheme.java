@@ -2,8 +2,6 @@ package org.apache.pinot.thirdeye.detection.alert.scheme;
 
 import static org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.PROP_TEMPLATE;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -15,13 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.EmailTemplateType;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
@@ -54,25 +47,19 @@ public class EmailAlertScheme {
   private final EntityGroupKeyContent entityGroupKeyContent;
   private final MetricAnomaliesContent metricAnomaliesContent;
 
-  private final Counter emailAlertsFailedCounter;
-  private final Counter emailAlertsSuccessCounter;
   private final List<String> adminRecipients = new ArrayList<>();
   private final List<String> emailWhitelist = new ArrayList<>();
 
   @Inject
   public EmailAlertScheme(final ThirdEyeServerConfiguration configuration,
       final EntityGroupKeyContent entityGroupKeyContent,
-      final MetricAnomaliesContent metricAnomaliesContent,
-      final MetricRegistry metricRegistry) {
+      final MetricAnomaliesContent metricAnomaliesContent) {
     this.entityGroupKeyContent = entityGroupKeyContent;
     this.metricAnomaliesContent = metricAnomaliesContent;
 
     emailContentFormatter = new EmailContentFormatter();
     smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
     uiConfig = configuration.getUiConfiguration();
-
-    emailAlertsFailedCounter = metricRegistry.counter("emailAlertsFailedCounter");
-    emailAlertsSuccessCounter = metricRegistry.counter("emailAlertsSuccessCounter");
   }
 
   private Set<String> retainWhitelisted(final Set<String> recipients,
@@ -148,27 +135,6 @@ public class EmailAlertScheme {
     }
   }
 
-  private HtmlEmail buildHtmlEmail(final EmailEntity emailEntity)
-      throws EmailException {
-    final HtmlEmail email = new HtmlEmail();
-    final DetectionAlertFilterRecipients recipients = emailEntity.getTo();
-
-    email.setHtmlMsg(emailEntity.getHtmlContent());
-    email.setSubject(emailEntity.getSubject());
-    email.setFrom(emailEntity.getFrom());
-    email.setTo(AlertUtils.toAddress(recipients.getTo()));
-
-    if (!CollectionUtils.isEmpty(recipients.getCc())) {
-      email.setCc(AlertUtils.toAddress(recipients.getCc()));
-    }
-
-    if (!CollectionUtils.isEmpty(recipients.getBcc())) {
-      email.setBcc(AlertUtils.toAddress(recipients.getBcc()));
-    }
-
-    return email;
-  }
-
   private EmailEntity buildEmailEntity(final SubscriptionGroupDTO subscriptionGroup,
       final Properties emailClientConfigs,
       final List<AnomalyResult> anomalies,
@@ -204,13 +170,13 @@ public class EmailAlertScheme {
 
       // TODO spyne Investigate and remove logic where email send is updating dto object temporarily
       subscriptionGroup.setFrom(fromAddress);
-
-      emailEntity.setFrom(emailEntity.getFrom());
     }
+    emailEntity.setFrom(subscriptionGroup.getFrom());
+
     return emailEntity;
   }
 
-  public void buildAndSendEmail(
+  public EmailEntity buildAndSendEmail(
       final SubscriptionGroupDTO sg,
       final List<AnomalyResult> anomalyResults) {
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
@@ -227,44 +193,10 @@ public class EmailAlertScheme {
 //    TODO accommodate all required properties in EmailSchemeDto
 //    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
 
-    final EmailEntity emailEntity = buildEmailEntity(
+    return buildEmailEntity(
         sg,
         emailConfig,
         sortedAnomalyResults,
         emailScheme);
-
-    try {
-      final HtmlEmail email = buildHtmlEmail(emailEntity);
-      sendEmail(email);
-      emailAlertsSuccessCounter.inc();
-    } catch (Exception e) {
-      emailAlertsFailedCounter.inc();
-      LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
-    }
-  }
-
-  /**
-   * Sends email according to the provided config.
-   */
-  private void sendEmail(final HtmlEmail email) throws EmailException {
-    email.setHostName(smtpConfig.getHost());
-    email.setSmtpPort(smtpConfig.getPort());
-    if (smtpConfig.getUser() != null && smtpConfig.getPassword() != null) {
-      email.setAuthenticator(
-          new DefaultAuthenticator(smtpConfig.getUser(), smtpConfig.getPassword()));
-      email.setSSLOnConnect(true);
-      email.setSslSmtpPort(Integer.toString(smtpConfig.getPort()));
-    }
-
-    // This needs to be done after the configuration phase since getMailSession() creates
-    // a new mail session if required.
-    email.getMailSession().getProperties().put("mail.smtp.ssl.trust", smtpConfig.getHost());
-
-    email.send();
-
-    final int recipientCount =
-        email.getToAddresses().size() + email.getCcAddresses().size() + email.getBccAddresses()
-            .size();
-    LOG.info("Email sent with subject '{}' to {} recipients", email.getSubject(), recipientCount);
   }
 }

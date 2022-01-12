@@ -19,6 +19,8 @@
 
 package org.apache.pinot.thirdeye.spi;
 
+import java.util.concurrent.TimeUnit;
+
 public interface Constants {
 
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
@@ -43,6 +45,9 @@ public interface Constants {
   String ENV_THIRDEYE_PLUGINS_DIR = "THIRDEYE_PLUGINS_DIR";
 
   String SCALING_FACTOR = "scalingFactor";
+
+  // Time beyond which we do not want to notify anomalies
+  long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(1400);
 
   enum JobStatus {
     SCHEDULED,

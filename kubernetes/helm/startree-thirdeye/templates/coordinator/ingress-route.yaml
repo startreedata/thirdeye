@@ -1,4 +1,4 @@
-{{- if .Values.traefik.coordinator.enabled -}}
+{{- if and .Values.traefik.coordinator.enabled ( not .Values.tls.enabled ) -}}
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:

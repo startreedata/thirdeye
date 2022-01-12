@@ -16,12 +16,13 @@
 
 package org.apache.pinot.thirdeye.cube.data.node;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Collections;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveCubeNode;
 import org.apache.pinot.thirdeye.cube.additive.AdditiveRow;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class AdditiveCubeNodeTest {
@@ -48,14 +49,14 @@ public class AdditiveCubeNodeTest {
     AdditiveRow root2 = new AdditiveRow(new Dimensions(), new DimensionValues());
     AdditiveCubeNode rootNode2 = new AdditiveCubeNode(root2);
 
-    Assert.assertEquals(rootNode1, rootNode2);
-    Assert.assertTrue(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2));
-    Assert.assertEquals(rootNode1.hashCode(), rootNode2.hashCode());
+    assertThat(rootNode1).isEqualTo(rootNode2);
+    assertThat(CubeNodeUtils.equalHierarchy(rootNode1, rootNode2)).isTrue();
+    assertThat(rootNode1).hasSameHashCodeAs(rootNode2);
 
     AdditiveRow root3 = new AdditiveRow(new Dimensions(Collections.singletonList("country")),
         new DimensionValues(Collections.singletonList("US")));
     CubeNode rootNode3 = new AdditiveCubeNode(root3);
-    Assert.assertNotEquals(rootNode1, rootNode3);
-    Assert.assertNotEquals(rootNode1.hashCode(), rootNode3.hashCode());
+    assertThat(rootNode1).isNotEqualTo(rootNode3);
+    assertThat(rootNode1.hashCode()).isNotEqualTo(rootNode3.hashCode());
   }
 }

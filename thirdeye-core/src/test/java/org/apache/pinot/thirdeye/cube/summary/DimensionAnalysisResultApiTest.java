@@ -18,6 +18,7 @@ package org.apache.pinot.thirdeye.cube.summary;
 
 import static org.apache.pinot.thirdeye.cube.summary.Summary.NOT_ALL;
 import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,12 +33,12 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
-import org.testng.Assert;
+import org.assertj.core.data.Offset;
 import org.testng.annotations.Test;
 
 public class DimensionAnalysisResultApiTest {
 
-  private static final double EPSILON = 0.0001d;
+  private static final Offset<Double> EPSILON = Offset.offset(0.0001);
 
   @Test
   public void testBuildDiffSummary() {
@@ -56,25 +57,23 @@ public class DimensionAnalysisResultApiTest {
         .setCurrentTotalSize(currentSize)
         .setGlobalRatio(roundUp(currentTotal / baselineTotal));
     Summary.buildDiffSummary(response, cubeNodes, 2, new BalancedCostFunction());
-    response.setMetric(new MetricApi().setUrn("testMetricUrn"));
+    response.setMetric(new MetricApi().setName("testMetric"));
 
     // Validation
     List<SummaryResponseRow> responseRows = response.getResponseRows();
-    Assert.assertEquals(responseRows.size(),
-        2); // Our test summary contains only root (OTHER) and US node.
+    assertThat(responseRows.size()).isEqualTo(2); // Our test summary contains only root (OTHER) and US node.
     List<SummaryResponseRow> expectedResponseRows = buildExpectedResponseRows();
     for (int i = 0; i < expectedResponseRows.size(); ++i) {
       SummaryResponseRow actualRow = responseRows.get(i);
       SummaryResponseRow expectedRow = expectedResponseRows.get(i);
-      Assert.assertEquals(actualRow.getNames(), expectedRow.getNames());
-      Assert.assertEquals(actualRow.getOtherDimensionValues(),
-          expectedRow.getOtherDimensionValues());
-      Assert.assertEquals(actualRow.getCost(), expectedRow.getCost(), EPSILON);
-      Assert.assertEquals(actualRow.getBaselineValue(), expectedRow.getBaselineValue());
-      Assert.assertEquals(actualRow.getCurrentValue(), expectedRow.getCurrentValue());
-      Assert.assertEquals(Double.parseDouble(actualRow.getPercentageChange().split("%")[0]),
-          Double.parseDouble(expectedRow.getPercentageChange().split("%")[0]));
-      Assert.assertEquals(actualRow.getSizeFactor(), expectedRow.getSizeFactor(), EPSILON);
+      assertThat(actualRow.getNames()).isEqualTo(expectedRow.getNames());
+      assertThat(actualRow.getOtherDimensionValues()).isEqualTo(expectedRow.getOtherDimensionValues());
+      assertThat(actualRow.getCost()).isCloseTo(expectedRow.getCost(), EPSILON);
+      assertThat(actualRow.getBaselineValue()).isEqualTo(expectedRow.getBaselineValue());
+      assertThat(actualRow.getCurrentValue()).isEqualTo(expectedRow.getCurrentValue());
+      assertThat(Double.parseDouble(actualRow.getPercentageChange().split("%")[0]))
+          .isEqualTo(Double.parseDouble(expectedRow.getPercentageChange().split("%")[0]));
+      assertThat(actualRow.getSizeFactor()).isCloseTo(expectedRow.getSizeFactor(), EPSILON);
     }
   }
 

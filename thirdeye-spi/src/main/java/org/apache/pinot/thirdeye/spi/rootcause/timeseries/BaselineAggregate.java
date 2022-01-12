@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -83,6 +84,8 @@ public class BaselineAggregate implements Baseline {
    * Helper to apply map operation to partially incomplete row, i.e. a row
    * that contains null values.
    *
+   * This is the important function that performs the function mean/sum/etc in eg "mean2w".
+   *
    * @param df dataframe
    * @param f function
    * @param colNames column to apply function to
@@ -90,21 +93,21 @@ public class BaselineAggregate implements Baseline {
    */
   // TODO move this into DataFrame API?
   private static DoubleSeries mapWithNull(DataFrame df, Series.DoubleFunction f,
-      String[] colNames) {
+      List<String> colNames) {
     double[] values = new double[df.size()];
 
-    double[] row = new double[colNames.length];
+    double[] row = new double[colNames.size()];
     for (int i = 0; i < df.size(); i++) {
       int offset = 0;
-      for (int j = 0; j < colNames.length; j++) {
-        if (!df.isNull(colNames[j], i)) {
-          row[offset++] = df.getDouble(colNames[j], i);
+      for (int j = 0; j < colNames.size(); j++) {
+        if (!df.isNull(colNames.get(j), i)) {
+          row[offset++] = df.getDouble(colNames.get(j), i);
         }
       }
 
       if (offset <= 0) {
         values[i] = DoubleSeries.NULL;
-      } else if (offset >= colNames.length) {
+      } else if (offset >= colNames.size()) {
         values[i] = f.apply(row);
       } else {
         values[i] = f.apply(Arrays.copyOf(row, offset));
@@ -265,61 +268,62 @@ public class BaselineAggregate implements Baseline {
   }
 
   @Override
-  public DataFrame gather(final MetricSlice slice, Map<MetricSlice, DataFrame> data) {
-    Map<MetricSlice, DataFrame> filtered = this.filter(slice, data);
-
-    DataFrame output = new DataFrame(COL_TIME, LongSeries.empty());
-
-    List<String> colNames = new ArrayList<>();
+  // todo cyril gather should not require the reference slice imo
+  public DataFrame gather(final MetricSlice referenceSlice, Map<MetricSlice, DataFrame> data) {
+    // prepare the slices data
+    Map<MetricSlice, DataFrame> filtered = this.filter(referenceSlice, data);
+    Map<String, DataFrame> preparedSlices = new HashMap<>();
     for (Map.Entry<MetricSlice, DataFrame> entry : filtered.entrySet()) {
-      MetricSlice s = entry.getKey();
-
-      Period period = new Period(
-          new DateTime(slice.getStart(), this.timeZone),
-          new DateTime(s.getStart(), this.timeZone),
-          this.periodType);
-
-      if (!offsets.contains(period)) {
-        continue;
-      }
-
-      String colName = String.valueOf(s.getStart());
-
-      DataFrame dfTransform = new DataFrame(entry.getValue());
-      dfTransform
-          .addSeries(COL_TIME, this.toVirtualSeries(s.getStart(), dfTransform.getLongs(COL_TIME)));
-      dfTransform = eliminateDuplicates(dfTransform);
-
-      dfTransform.renameSeries(COL_VALUE, colName);
-
-      if (output.isEmpty()) {
-        // handle multi-index via prototyping
-        output = dfTransform;
-      } else {
-        output = output.joinOuter(dfTransform);
-      }
-
-      colNames.add(colName);
+      Optional.ofNullable(prepareSliceData(entry.getKey(), entry.getValue(), referenceSlice))
+          .ifPresent(e -> preparedSlices.put(e.getKey(), e.getValue()));
     }
 
-    String[] arrNames = colNames.toArray(new String[colNames.size()]);
+    // put all prepared slice data in the same dataframe
+    DataFrame output = new DataFrame(COL_TIME, LongSeries.empty());
+    for (DataFrame preparedSlice : preparedSlices.values()) {
+      if (output.isEmpty()) {
+        output = preparedSlice;
+      } else {
+        output = output.joinOuter(preparedSlice);
+      }
+    }
 
-    // aggregation
-    output.addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), arrNames));
-
-    // alignment
-    output.addSeries(COL_TIME, this.toTimestampSeries(slice.getStart(), output.getLongs(COL_TIME)));
-
-    // filter by original time range
-    List<String> dropNames = new ArrayList<>(output.getSeriesNames());
-    dropNames.removeAll(output.getIndexNames());
-
-    output = output.filter(
-        output.getLongs(COL_TIME).gte(slice.getStart()).and(
-            output.getLongs(COL_TIME).lt(slice.getEnd())))
+    // aggregate and clean
+    List<String> sliceColumnNames = new ArrayList<>(preparedSlices.keySet());
+    return output
+        // aggregate slices
+        .addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), sliceColumnNames))
+        // align times
+        .addSeries(COL_TIME,
+            this.toTimestampSeries(referenceSlice.getStart(), output.getLongs(COL_TIME)))
+        // drop slice columns
+        .dropSeries(sliceColumnNames)
+        // filter by original time range - (not an in-place operation)
+        .filter(output.getLongs(COL_TIME).gte(referenceSlice.getStart())
+            .and(output.getLongs(COL_TIME).lt(referenceSlice.getEnd())))
         .dropNull(output.getIndexNames());
+  }
 
-    return output;
+  private Map.Entry<String, DataFrame> prepareSliceData(final MetricSlice slice,
+      final DataFrame data,
+      final MetricSlice referenceSlice) {
+    // check if offset corresponds to configuration
+    Period period = new Period(
+        new DateTime(referenceSlice.getStart(), this.timeZone),
+        new DateTime(slice.getStart(), this.timeZone),
+        this.periodType);
+    if (!offsets.contains(period)) {
+      return null;
+    }
+
+    String sliceColName = String.valueOf(slice.getStart());
+    DataFrame dfTransform = new DataFrame(data);
+    dfTransform.addSeries(COL_TIME,
+        this.toVirtualSeries(slice.getStart(), dfTransform.getLongs(COL_TIME)));
+    dfTransform = eliminateDuplicates(dfTransform);
+    dfTransform.renameSeries(COL_VALUE, sliceColName);
+
+    return Map.entry(sliceColName, dfTransform);
   }
 
   /**

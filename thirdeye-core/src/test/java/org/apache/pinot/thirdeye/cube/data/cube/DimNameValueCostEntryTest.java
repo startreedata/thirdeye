@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package org.apache.pinot.thirdeye.cube.cost;
+package org.apache.pinot.thirdeye.cube.data.cube;
 
-import static org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction.CHANGE_CONTRIBUTION_THRESHOLD_PARAM;
-
-import java.util.HashMap;
-import java.util.Map;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class BalancedCostFunctionTest {
+public class DimNameValueCostEntryTest {
 
   @Test
-  public void testCreate() {
-    double threshold = 3.54d;
-    Map<String, String> params = new HashMap<>();
-    params.put(CHANGE_CONTRIBUTION_THRESHOLD_PARAM, Double.toString(threshold));
+  public void testCreation() {
+    // test that constructor is working
+    new DimNameValueCostEntry("", "", 0, 0, 0d, 0d, 0, 0, 0, 0);
+  }
 
-    BalancedCostFunction function = new BalancedCostFunction(params);
-    Assert.assertEquals(function.getChangeContributionThreshold(), threshold);
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testNullDimensionNameCreation() {
+    new DimNameValueCostEntry(null, "", 0, 0, 0d, 0d, 0, 0, 0, 0);
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testNullDimensionValueCreation() {
+    new DimNameValueCostEntry("", null, 0, 0, 0d, 0d, 0, 0, 0, 0);
   }
 }

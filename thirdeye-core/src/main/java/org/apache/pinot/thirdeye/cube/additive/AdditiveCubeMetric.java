@@ -19,62 +19,73 @@
 
 package org.apache.pinot.thirdeye.cube.additive;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeFetcherImpl;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeMetric;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeSpec;
 import org.apache.pinot.thirdeye.cube.data.dbclient.CubeTag;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
-import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
+import org.joda.time.Interval;
 
 /**
- * This class generates query requests to the backend database and retrieve the additive metric for
- * summary algorithm.
+ * Describes a CubeMetric that is additive.
  *
- * @see org.apache.pinot.thirdeye.cube.data.dbclient.BaseCubePinotClient
+ * @see CubeFetcherImpl
  */
-public class AdditiveDBClient extends BaseCubePinotClient<AdditiveRow> {
+public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
 
-  private String metric;
-
-  /**
-   * Constructs a DB client to an additive metric.
-   *
-   * @param dataSourceCache the query cache to Pinot DB.
-   * @param thirdEyeCacheRegistry
-   */
-  public AdditiveDBClient(DataSourceCache dataSourceCache,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    super(dataSourceCache, thirdEyeCacheRegistry);
-  }
+  private final String dataset;
+  private final String metricName;
+  private final Interval currentInterval;
+  private final Interval baselineInterval;
 
   /**
-   * Sets the additive metric name.
-   *
-   * @param metric the additive metric name.
+   * Constructs an Additive cube metric.
    */
-  public void setMetric(String metric) {
-    this.metric = Preconditions.checkNotNull(metric);
+  public AdditiveCubeMetric(
+      String dataset,
+      String metricName,
+      Interval currentInterval,
+      Interval baselineInterval) {
+    checkArgument(!Strings.isNullOrEmpty(dataset));
+    this.dataset = dataset;
+    checkArgument(!Strings.isNullOrEmpty(metricName));
+    this.metricName = metricName;
+    this.currentInterval = Preconditions.checkNotNull(currentInterval);
+    this.baselineInterval = Preconditions.checkNotNull(baselineInterval);
   }
 
   @Override
-  protected List<CubeSpec> getCubeSpecs() {
+  public String getDataset() {
+    return dataset;
+  }
+
+  @Override
+  public String getMetric() {
+    return metricName;
+  }
+
+  @Override
+  public List<CubeSpec> getCubeSpecs() {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 
     cubeSpecs
-        .add(new CubeSpec(CubeTag.Baseline, metric, baselineStartInclusive, baselineEndExclusive));
+        .add(new CubeSpec(CubeTag.Baseline, metricName, baselineInterval));
     cubeSpecs
-        .add(new CubeSpec(CubeTag.Current, metric, currentStartInclusive, currentEndExclusive));
+        .add(new CubeSpec(CubeTag.Current, metricName, currentInterval));
 
     return cubeSpecs;
   }
 
   @Override
-  protected void fillValueToRowTable(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
+  public void fillValueToRowTable(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
       List<String> dimensionValues, double value, CubeTag tag) {
 
     if (Double.compare(0d, value) < 0 && !Double.isInfinite(value)) {

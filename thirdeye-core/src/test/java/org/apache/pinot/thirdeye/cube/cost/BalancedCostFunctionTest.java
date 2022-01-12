@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package org.apache.pinot.thirdeye.cube.data.cube;
+package org.apache.pinot.thirdeye.cube.cost;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.apache.pinot.thirdeye.cube.cost.BalancedCostFunction.CHANGE_CONTRIBUTION_THRESHOLD_PARAM;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.testng.annotations.Test;
 
-public class DimNameValueCostEntryTest {
+public class BalancedCostFunctionTest {
 
   @Test
-  public void testCreation() {
-    new DimNameValueCostEntry("", "", 0, 0, 0d, 0d, 0, 0, 0, 0);
-  }
+  public void testCreate() {
+    double expectedThreshold = 3.54;
+    Map<String, String> params = new HashMap<>();
+    params.put(CHANGE_CONTRIBUTION_THRESHOLD_PARAM, Double.toString(expectedThreshold));
+    BalancedCostFunction function = new BalancedCostFunction(params);
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testNullDimensionNameCreation() {
-    new DimNameValueCostEntry(null, "", 0, 0, 0d, 0d, 0, 0, 0, 0);
-  }
-
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testNullDimensionValueCreation() {
-    new DimNameValueCostEntry("", null, 0, 0, 0d, 0d, 0, 0, 0, 0);
+    assertThat(function.getChangeContributionThreshold()).isEqualTo(expectedThreshold);
   }
 }

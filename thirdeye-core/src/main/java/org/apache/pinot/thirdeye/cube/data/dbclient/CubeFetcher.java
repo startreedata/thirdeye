@@ -27,7 +27,7 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 /**
  * The database client that provides the function of data retrieval for the cube algorithm.
  */
-public interface CubeClient<R extends Row> {
+public interface CubeFetcher<R extends Row> {
 
   /**
    * Returns the baseline and current value for the root node.

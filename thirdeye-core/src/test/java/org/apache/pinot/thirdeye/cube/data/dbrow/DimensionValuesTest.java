@@ -16,10 +16,11 @@
 
 package org.apache.pinot.thirdeye.cube.data.dbrow;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class DimensionValuesTest {
@@ -27,17 +28,17 @@ public class DimensionValuesTest {
   @Test
   public void testDefaultCreation() {
     DimensionValues dimensionValues = new DimensionValues();
-    Assert.assertEquals(dimensionValues.size(), 0);
+    assertThat(dimensionValues.size()).isEqualTo(0);
   }
 
   @Test
   public void testListCreation() {
     List<String> names = Arrays.asList("a", "b");
     DimensionValues dimensionValues = new DimensionValues(names);
-    Assert.assertEquals(dimensionValues.size(), 2);
-    Assert.assertEquals(dimensionValues.values(), names);
-    Assert.assertEquals(dimensionValues.get(0), "a");
-    Assert.assertEquals(dimensionValues.get(1), "b");
+    assertThat(dimensionValues.size()).isEqualTo(2);
+    assertThat(dimensionValues.values()).isEqualTo(names);
+    assertThat(dimensionValues.get(0)).isEqualTo("a");
+    assertThat(dimensionValues.get(1)).isEqualTo("b");
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -46,7 +47,7 @@ public class DimensionValuesTest {
   }
 
   @Test
-  public void testCompareTo() throws Exception {
+  public void testCompareTo() {
     List<String> dimValueString1 = Collections.singletonList("a");
     List<String> dimValueString2 = Collections.singletonList("b");
     List<String> dimValueString3 = Arrays.asList("a", "b");
@@ -62,28 +63,28 @@ public class DimensionValuesTest {
     DimensionValues dimensionValues5 = new DimensionValues(dimValueString5);
     DimensionValues dimensionValues6 = new DimensionValues(dimValueString6);
 
-    Assert.assertTrue(dimensionValues1.compareTo(dimensionValues1Dup) == 0);
-    Assert.assertTrue(dimensionValues1Dup.compareTo(dimensionValues1) == 0);
+    assertThat(dimensionValues1.compareTo(dimensionValues1Dup) == 0).isTrue();
+    assertThat(dimensionValues1Dup.compareTo(dimensionValues1) == 0).isTrue();
 
-    Assert.assertTrue(dimensionValues1.compareTo(dimensionValues0) < 0);
-    Assert.assertTrue(dimensionValues0.compareTo(dimensionValues1) > 0);
+    assertThat(dimensionValues1.compareTo(dimensionValues0) < 0).isTrue();
+    assertThat(dimensionValues0.compareTo(dimensionValues1) > 0).isTrue();
 
-    Assert.assertTrue(dimensionValues1.compareTo(dimensionValues2) < 0);
-    Assert.assertTrue(dimensionValues2.compareTo(dimensionValues1) > 0);
+    assertThat(dimensionValues1.compareTo(dimensionValues2) < 0).isTrue();
+    assertThat(dimensionValues2.compareTo(dimensionValues1) > 0).isTrue();
 
-    Assert.assertTrue(dimensionValues1.compareTo(dimensionValues3) > 0);
-    Assert.assertTrue(dimensionValues3.compareTo(dimensionValues1) < 0);
+    assertThat(dimensionValues1.compareTo(dimensionValues3) > 0).isTrue();
+    assertThat(dimensionValues3.compareTo(dimensionValues1) < 0).isTrue();
 
-    Assert.assertTrue(dimensionValues1.compareTo(dimensionValues4) < 0);
-    Assert.assertTrue(dimensionValues4.compareTo(dimensionValues1) > 0);
+    assertThat(dimensionValues1.compareTo(dimensionValues4) < 0).isTrue();
+    assertThat(dimensionValues4.compareTo(dimensionValues1) > 0).isTrue();
 
-    Assert.assertTrue(dimensionValues3.compareTo(dimensionValues4) < 0);
-    Assert.assertTrue(dimensionValues4.compareTo(dimensionValues3) > 0);
+    assertThat(dimensionValues3.compareTo(dimensionValues4) < 0).isTrue();
+    assertThat(dimensionValues4.compareTo(dimensionValues3) > 0).isTrue();
 
-    Assert.assertTrue(dimensionValues4.compareTo(dimensionValues5) < 0);
-    Assert.assertTrue(dimensionValues5.compareTo(dimensionValues4) > 0);
+    assertThat(dimensionValues4.compareTo(dimensionValues5) < 0).isTrue();
+    assertThat(dimensionValues5.compareTo(dimensionValues4) > 0).isTrue();
 
-    Assert.assertTrue(dimensionValues6.compareTo(dimensionValues3) > 0);
-    Assert.assertTrue(dimensionValues3.compareTo(dimensionValues6) < 0);
+    assertThat(dimensionValues6.compareTo(dimensionValues3) > 0).isTrue();
+    assertThat(dimensionValues3.compareTo(dimensionValues6) < 0).isTrue();
   }
 }

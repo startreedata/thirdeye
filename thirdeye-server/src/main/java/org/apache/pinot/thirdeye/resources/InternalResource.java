@@ -35,7 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.detection.alert.scheme.EmailEntityBuilder;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
@@ -62,7 +62,7 @@ public class InternalResource {
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final DatabaseAdminResource databaseAdminResource;
-  private final EmailAlertScheme emailAlertScheme;
+  private final EmailEntityBuilder emailEntityBuilder;
   private final MetricAnomaliesContent metricAnomaliesContent;
   private final ThirdEyeServerConfiguration configuration;
   private final EmailContentFormatter emailContentFormatter;
@@ -74,7 +74,7 @@ public class InternalResource {
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final DatabaseAdminResource databaseAdminResource,
-      final EmailAlertScheme emailAlertScheme,
+      final EmailEntityBuilder emailEntityBuilder,
       final MetricAnomaliesContent metricAnomaliesContent,
       final ThirdEyeServerConfiguration configuration,
       final EmailContentFormatter emailContentFormatter,
@@ -86,7 +86,7 @@ public class InternalResource {
     this.metricAnomaliesContent = metricAnomaliesContent;
     this.configuration = configuration;
     this.emailContentFormatter = emailContentFormatter;
-    this.emailAlertScheme = emailAlertScheme;
+    this.emailEntityBuilder = emailEntityBuilder;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
   }
@@ -119,7 +119,7 @@ public class InternalResource {
         subscriptionGroupId));
     final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findAll());
 
-    emailAlertScheme.buildAndSendEmail(sg, new ArrayList<>(all));
+    emailEntityBuilder.buildEmailEntity(sg, new ArrayList<>(all));
     return Response.ok().build();
   }
 

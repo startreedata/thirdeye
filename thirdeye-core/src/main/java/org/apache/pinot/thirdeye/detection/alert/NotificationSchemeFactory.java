@@ -26,7 +26,6 @@ import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
 import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -46,18 +45,14 @@ public class NotificationSchemeFactory {
   private final DataProvider provider;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
-  private final EmailAlertScheme emailAlertScheme;
 
   @Inject
   public NotificationSchemeFactory(final DataProvider provider,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final AlertManager alertManager,
-      final EmailAlertScheme emailAlertScheme) {
+      final AlertManager alertManager) {
     this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
-
-    this.emailAlertScheme = emailAlertScheme;
   }
 
   public DetectionAlertFilter loadAlertFilter(SubscriptionGroupDTO alertConfig, long endTime)
@@ -76,10 +71,6 @@ public class NotificationSchemeFactory {
         endTime,
         this.mergedAnomalyResultManager,
         this.alertManager);
-  }
-
-  public EmailAlertScheme getEmailAlertScheme() {
-    return emailAlertScheme;
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(SubscriptionGroupDTO alertConfig)

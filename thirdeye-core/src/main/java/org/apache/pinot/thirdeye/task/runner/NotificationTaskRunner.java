@@ -26,28 +26,15 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
-import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
-import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationPayloadBuilder;
-import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
-import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
-import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
+import org.apache.pinot.thirdeye.notification.NotificationDispatcher;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.WebhookSchemeDto;
-import org.apache.pinot.thirdeye.spi.notification.NotificationService;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.apache.pinot.thirdeye.task.DetectionAlertTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskContext;
@@ -69,32 +56,25 @@ public class NotificationTaskRunner implements TaskRunner {
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final NotificationPayloadBuilder notificationPayloadBuilder;
-  private final NotificationServiceRegistry notificationServiceRegistry;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
-  private final SmtpConfiguration smtpConfig;
+  private final NotificationDispatcher notificationDispatcher;
 
   @Inject
   public NotificationTaskRunner(
       final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final NotificationPayloadBuilder notificationPayloadBuilder,
       final MetricRegistry metricRegistry,
-      final NotificationServiceRegistry notificationServiceRegistry,
-      final ThirdEyeServerConfiguration configuration) {
+      final NotificationDispatcher notificationDispatcher) {
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.notificationPayloadBuilder = notificationPayloadBuilder;
-    this.notificationServiceRegistry = notificationServiceRegistry;
-
-    smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
+    this.notificationDispatcher = notificationDispatcher;
   }
 
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
@@ -158,86 +138,8 @@ public class NotificationTaskRunner implements TaskRunner {
       return;
     }
 
-    fireNotifications(subscriptionGroupDTO, result);
+    notificationDispatcher.dispatch(subscriptionGroupDTO, result);
 
     updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
-  }
-
-  private void fireNotifications(
-      final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) {
-
-    // Send out emails
-    final EmailAlertScheme emailAlertScheme = notificationSchemeFactory.getEmailAlertScheme();
-    final EmailSchemeDto emailScheme = subscriptionGroupDTO.getNotificationSchemes()
-        .getEmailScheme();
-    if (emailScheme != null) {
-      fireEmails(subscriptionGroupDTO, result, emailAlertScheme);
-    }
-
-    // fire webhook
-    final WebhookSchemeDto webhookScheme = subscriptionGroupDTO.getNotificationSchemes()
-        .getWebhookScheme();
-    if (webhookScheme != null) {
-      fireWebhook(subscriptionGroupDTO, result);
-    }
-  }
-
-  private void fireEmails(final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result,
-      final EmailAlertScheme emailAlertScheme) {
-    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroupDTO, result);
-    final EmailEntity entity = emailAlertScheme.buildAndSendEmail(subscriptionGroupDTO,
-        new ArrayList<>(anomalies));
-
-    final Map<String, String> properties = new HashMap<>();
-    properties.put("host", smtpConfig.getHost());
-    properties.put("port", String.valueOf(smtpConfig.getPort()));
-    properties.put("user", smtpConfig.getUser());
-    properties.put("password", smtpConfig.getPassword());
-
-
-    final NotificationService emailNotificationService = notificationServiceRegistry
-        .get("email", properties);
-    emailNotificationService.notify(new NotificationPayloadApi().setEmailEntity(entity));
-  }
-
-  private void fireWebhook(final SubscriptionGroupDTO subscriptionGroupDTO,
-      final DetectionAlertFilterResult result) {
-    final NotificationPayloadApi entity = buildNotificationPayload(
-        subscriptionGroupDTO,
-        result);
-
-    final WebhookSchemeDto webhookScheme = subscriptionGroupDTO.getNotificationSchemes()
-        .getWebhookScheme();
-
-    final Map<String, String> properties = new HashMap<>();
-    properties.put("url", webhookScheme.getUrl());
-    if (webhookScheme.getHashKey() != null) {
-      properties.put("hashKey", webhookScheme.getHashKey());
-    }
-    final NotificationService webhookNotificationService = notificationServiceRegistry
-        .get("webhook", properties);
-    webhookNotificationService.notify(entity);
-  }
-
-  private NotificationPayloadApi buildNotificationPayload(
-      final SubscriptionGroupDTO subscriptionGroupDTO, final DetectionAlertFilterResult result) {
-    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroupDTO, result);
-    return notificationPayloadBuilder.buildNotificationPayload(
-        subscriptionGroupDTO,
-        anomalies);
-  }
-
-  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
-      final DetectionAlertFilterResult results) {
-    return results
-        .getResult()
-        .entrySet()
-        .stream()
-        .filter(result -> subscriptionGroup.equals(result.getKey().getSubscriptionConfig()))
-        .findFirst()
-        .map(Entry::getValue)
-        .orElse(null);
   }
 }

@@ -46,21 +46,16 @@ public class SummaryResponseTree {
 
     // Build the header
     Dimensions dimensions = nodes.get(0).getDimensions();
-    double topBaselineValue = nodes.get(0).getOriginalBaselineValue();
-    double topCurrentValue = nodes.get(0).getOriginalCurrentValue();
-    double topBaselineSize = nodes.get(0).getOriginalBaselineSize();
-    double topCurrentSize = nodes.get(0).getOriginalCurrentSize();
+    responseTree.dimensions.addAll(dimensions.names().subList(0, levelCount));
+
+    // take the first node as the top Node
+    CubeNode topNode = nodes.get(0);
+    // replace topNode by the root node if it is found
     for (CubeNode node : nodes) {
       if (node.getLevel() == 0) {
-        topBaselineValue = node.getOriginalBaselineValue();
-        topCurrentValue = node.getOriginalCurrentValue();
-        topBaselineSize = node.getOriginalBaselineSize();
-        topCurrentSize = node.getOriginalCurrentSize();
+        topNode = node;
         break;
       }
-    }
-    for (int i = 0; i < levelCount; ++i) {
-      responseTree.dimensions.add(dimensions.get(i));
     }
 
     List<SummaryResponseTreeNode> treeNodes = new ArrayList<>();
@@ -90,8 +85,7 @@ public class SummaryResponseTree {
     }
 
     // Sort the children of each node by their cost
-    sortChildNodes(treeNodes.get(0), topBaselineValue, topCurrentValue, topBaselineSize,
-        topCurrentSize, costFunction);
+    sortChildNodes(treeNodes.get(0), topNode, costFunction);
 
     // Put the nodes to a flattened array
     insertChildNodes(treeNodes.get(0), responseTree.hierarchicalNodes);
@@ -112,40 +106,39 @@ public class SummaryResponseTree {
   /**
    * A recursive function to sort response tree.
    */
-  private static void sortChildNodes(SummaryResponseTreeNode node, double topBaselineValue,
-      double topCurrentValue, double topBaselineSize, double topCurrentSize,
+  private static void sortChildNodes(SummaryResponseTreeNode node, final CubeNode topNode,
       CostFunction costFunction) {
     if (node.children.size() == 0) {
       return;
     }
     for (SummaryResponseTreeNode child : node.children) {
-      sortChildNodes(child, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize,
-          costFunction);
+      sortChildNodes(child, topNode, costFunction);
     }
     double ratio = node.currentChangeRatio();
     for (SummaryResponseTreeNode child : node.children) {
-      computeCost(child, ratio, topBaselineValue, topCurrentValue, topBaselineSize, topCurrentSize,
-          costFunction);
+      computeCost(child, ratio, topNode, costFunction);
     }
     node.children.sort(Collections.reverseOrder(new SummaryResponseTreeNodeCostComparator()));
   }
 
   private static void computeCost(SummaryResponseTreeNode node, double targetChangeRatio,
-      double topBaselineValue,
-      double topCurrentValue, double topBaselineSize, double topCurrentSize,
-      CostFunction costFunction) {
+      final CubeNode topNode, CostFunction costFunction) {
     if (node.cubeNode != null) {
       double nodeCost = costFunction
-          .computeCost(targetChangeRatio, node.getBaselineValue(), node.getCurrentValue(),
-              node.getBaselineSize(), node.getCurrentSize(), topBaselineValue, topCurrentValue,
-              topBaselineSize,
-              topCurrentSize);
+          .computeCost(targetChangeRatio,
+              node.getBaselineValue(),
+              node.getCurrentValue(),
+              node.getBaselineSize(),
+              node.getCurrentSize(),
+              topNode.getOriginalBaselineValue(),
+              topNode.getOriginalCurrentValue(),
+              topNode.getOriginalBaselineSize(),
+              topNode.getOriginalCurrentSize());
       node.cubeNode.setCost(nodeCost);
       node.subTreeCost = nodeCost;
     }
     for (SummaryResponseTreeNode child : node.children) {
-      computeCost(child, targetChangeRatio, topBaselineValue, topCurrentValue, topBaselineSize,
-          topCurrentSize, costFunction);
+      computeCost(child, targetChangeRatio, topNode, costFunction);
       node.subTreeCost += child.subTreeCost;
     }
   }

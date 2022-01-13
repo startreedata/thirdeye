@@ -124,7 +124,11 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.update")} />
+            <PageHeader
+                title={t("label.update-entity", {
+                    entity: t("label.subscription-group"),
+                })}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {subscriptionGroup && (

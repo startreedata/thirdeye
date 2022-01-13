@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Grid, TextField } from "@material-ui/core";
+import { Box, Grid, TextField, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -39,9 +39,16 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
             id={props.id}
             onSubmit={handleSubmit(onSubmitSusbcriptionGroupPropertiesForm)}
         >
-            <Grid container>
-                <Grid item sm={6}>
-                    {/* Name */}
+            <Grid container alignItems="center">
+                {/* Subscription group name label */}
+                <Grid item lg={2} md={3} sm={5} xs={12}>
+                    <Typography variant="subtitle2">
+                        {t("label.name")}
+                    </Typography>
+                </Grid>
+
+                {/* Subscription group name input */}
+                <Grid item lg={4} md={5} sm={6} xs={12}>
                     <TextField
                         fullWidth
                         required
@@ -50,18 +57,26 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGrou
                             errors && errors.name && errors.name.message
                         }
                         inputRef={register}
-                        label={t("label.name")}
                         name="name"
                         type="string"
                         variant="outlined"
                     />
                 </Grid>
-                <Grid item sm={6}>
-                    {/* Schedule (or Cron) */}
+
+                <Box width="100%" />
+
+                {/* Schedule (or Cron) label */}
+                <Grid item lg={2} md={3} sm={5} xs={12}>
+                    <Typography variant="subtitle2">
+                        {t("label.cron")}
+                    </Typography>
+                </Grid>
+
+                {/* Schedule (or Cron) input */}
+                <Grid item lg={4} md={5} sm={6} xs={12}>
                     <TextField
                         fullWidth
                         inputRef={register}
-                        label={t("label.cron")}
                         name="cron"
                         type="string"
                         variant="outlined"

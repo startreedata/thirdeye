@@ -53,7 +53,11 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.create")} />
+            <PageHeader
+                title={t("label.create-entity", {
+                    entity: t("label.datasource"),
+                })}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <DatasourceWizard onFinish={onDatasourceWizardFinish} />

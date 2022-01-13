@@ -152,7 +152,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.create")} />
+            <PageHeader
+                title={t("label.create-entity", {
+                    entity: t("label.alert"),
+                })}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <AlertWizard

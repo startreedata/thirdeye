@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,6 +43,7 @@ import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.api.cube.SummaryGainerLoserResponseRow;
 import org.apache.pinot.thirdeye.spi.api.cube.SummaryResponseRow;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +66,6 @@ public class Summary {
     this.cube = cube;
     this.costFunction = costFunction;
 
-    // fixme cyril I'm here - clean the row Inserter design
-    // fixme cyril  + move api generation to DataCubeSummaryCalculator ?
     this.basicRowInserter = new BasicRowInserter(costFunction, cube);
     this.oneSideErrorRowInserter = basicRowInserter;
     this.leafRowInserter = basicRowInserter;
@@ -122,24 +122,22 @@ public class Summary {
   public static void buildDiffSummary(final DimensionAnalysisResultApi dimensionAnalysisResultApi,
       List<CubeNode> nodes,
       CostFunction costFunction) {
-    // If all nodes have a lower level count than targetLevelCount, then it is not necessary to print the summary with
-    // height higher than the available level.
-    int maxNodeLevelCount = 0;
-    for (CubeNode node : nodes) {
-      maxNodeLevelCount = Math.max(maxNodeLevelCount, node.getLevel());
-    }
-
     // Build the header
     Dimensions dimensions = nodes.get(0).getDimensions();
     dimensionAnalysisResultApi.getDimensions().addAll(dimensions.names());
 
+    // get the maxLevel - it is not necessary to print the summary with bigger depth,
+    // even if the config depth was bigger
+    int maxNodeLevel = nodes.stream().mapToInt(CubeNode::getLevel).max()
+        .orElseThrow(NoSuchElementException::new);
+
     // Build the response
-    nodes = SummaryResponseTree.sortResponseTree(nodes, maxNodeLevelCount, costFunction);
+    nodes = SummaryResponseTree.sortResponseTree(nodes, maxNodeLevel, costFunction);
     //   Build name tag for each row of responses
     Map<CubeNode, NameTag> nameTags = new HashMap<>();
     Map<CubeNode, LinkedHashSet<String>> otherDimensionValues = new HashMap<>();
     for (CubeNode node : nodes) {
-      NameTag tag = new NameTag(maxNodeLevelCount);
+      NameTag tag = new NameTag(maxNodeLevel);
       nameTags.put(node, tag);
       tag.copyNames(node.getDimensionValues());
 
@@ -166,7 +164,7 @@ public class Summary {
           int notAllLevel = node.getLevel() - levelDiff;
           parentNameTag.setNotAll(notAllLevel);
           // After that, set the names after NOT_ALL to empty, e.g., [home page, (ALL)-, ""]
-          for (int i = notAllLevel + 1; i < maxNodeLevelCount; ++i) {
+          for (int i = notAllLevel + 1; i < maxNodeLevel; ++i) {
             parentNameTag.setEmpty(i);
           }
           // Each picked child will remove itself from this parent's other dimension values.
@@ -198,21 +196,27 @@ public class Summary {
           dimensionAnalysisResultApi.getCurrentTotal()));
       row.setCost(node.getCost());
       // Add other dimension values if this node is (ALL)-
-      StringBuilder sb = new StringBuilder();
-      String separator = "";
-      Iterator<String> iterator = otherDimensionValues.get(node).iterator();
-      int counter = 0;
-      while (iterator.hasNext()) {
-        if (++counter > 10) { // Get at most 10 children
-          sb.append(separator).append("and more...");
-          break;
-        }
-        sb.append(separator).append(iterator.next());
-        separator = ", ";
-      }
-      row.setOtherDimensionValues(sb.toString());
+      final String otherDimensionValuesString = buildOtherDimensionsString(otherDimensionValues.get(node));
+      row.setOtherDimensionValues(otherDimensionValuesString);
       dimensionAnalysisResultApi.getResponseRows().add(row);
     }
+  }
+
+  @NotNull
+  private static String buildOtherDimensionsString(final LinkedHashSet<String> otherDimensionsSet) {
+    StringBuilder sb = new StringBuilder();
+    String separator = "";
+    Iterator<String> iterator = otherDimensionsSet.iterator();
+    int counter = 0;
+    while (iterator.hasNext()) {
+      if (++counter > 10) { // Get at most 10 children
+        sb.append(separator).append("and more...");
+        break;
+      }
+      sb.append(separator).append(iterator.next());
+      separator = ", ";
+    }
+    return sb.toString();
   }
 
   public static String computePercentageChange(double baseline, double current) {
@@ -318,22 +322,25 @@ public class Summary {
       levelCount = cube.getDimensions().size();
     }
 
+    // init inserters
     CubeNode root = cube.getRoot();
     if (doOneSideError) {
       oneSideErrorRowInserter =
-          new OneSideErrorRowInserter(basicRowInserter,
-              Double.compare(1., root.bootStrapChangeRatio()) <= 0);
+          new OneSideErrorRowInserter(basicRowInserter, root.safeChangeRatio() >= 1.0);
       // If this cube contains only one dimension, one side error is calculated starting at leaf (detailed) level;
       // otherwise, a row at different side is removed through internal nodes.
       if (levelCount == 1) {
         leafRowInserter = oneSideErrorRowInserter;
       }
     }
+
+    // compute answer
     final List<DPArray> dpArrays = Stream.generate(() -> new DPArray(answerSize))
         .limit(levelCount).collect(Collectors.toList());
     computeChildDPArray(root, levelCount, dpArrays);
     List<CubeNode> answer = new ArrayList<>(dpArrays.get(0).getAnswer());
 
+    // translate answer to api result
     DimensionAnalysisResultApi response = buildApiResponse(answer);
 
     return response;
@@ -363,11 +370,12 @@ public class Summary {
    * dpArrays should be correctly initialized with n=levelCount  DpArray of size answerSize
    * So, the final answer is located at dpArray[0].
    */
-  private void computeChildDPArray(CubeNode node, final int levelCount, final List<DPArray> dpArrays) {
+  private void computeChildDPArray(CubeNode node, final int levelCount,
+      final List<DPArray> dpArrays) {
     CubeNode parent = node.getParent();
     DPArray dpArray = dpArrays.get(node.getLevel());
     dpArray.fullReset();
-    dpArray.targetRatio = node.bootStrapChangeRatio();
+    dpArray.targetRatio = node.safeChangeRatio();
 
     // Compute DPArray if the current node is the lowest internal node.
     // Otherwise, merge DPArrays from its children.
@@ -375,16 +383,16 @@ public class Summary {
       // Shrink answer size for getting a higher level view, which gives larger picture of the dataset
       // GIT REF - roll-up rows aggressively code suggestion removed - see previous commit
       for (CubeNode child : (List<CubeNode>) node.getChildren()) {
-        leafRowInserter.insertRowToDPArray(dpArray, child, node.bootStrapChangeRatio());
+        leafRowInserter.insertRowToDPArray(dpArray, child, node.safeChangeRatio());
         updateWowValues(node, dpArray.getAnswer());
-        dpArray.targetRatio = node.bootStrapChangeRatio(); // get updated changeRatio
+        dpArray.targetRatio = node.safeChangeRatio(); // get updated changeRatio
       }
     } else {
       for (CubeNode child : (List<CubeNode>) node.getChildren()) {
         computeChildDPArray(child, levelCount, dpArrays);
         mergeDPArray(node, dpArray, dpArrays.get(node.getLevel() + 1));
         updateWowValues(node, dpArray.getAnswer());
-        dpArray.targetRatio = node.bootStrapChangeRatio(); // get updated changeRatio
+        dpArray.targetRatio = node.safeChangeRatio(); // get updated changeRatio
       }
       // GIT REF - roll-up rows aggressively code suggestion removed - see previous commit
     }
@@ -394,7 +402,7 @@ public class Summary {
     // Moreover, if a node is thinned out by its children, it won't be inserted to the answer.
     if (node.getLevel() != 0) {
       updateWowValues(parent, dpArray.getAnswer());
-      double targetRatio = parent.bootStrapChangeRatio();
+      double targetRatio = parent.safeChangeRatio();
       recomputeCostAndRemoveSmallNodes(node, dpArray, targetRatio);
       dpArray.targetRatio = targetRatio;
       if (!nodeIsThinnedOut(node)) {
@@ -422,10 +430,9 @@ public class Summary {
 
   /**
    * Merge the answers of the two given DPArrays. The merged answer is put in the DPArray at the
-   * left hand side.
-   * After merging, the baseline and current values of the removed nodes (rows) will be add back to
-   * those of their
-   * parent node.
+   * left-hand side.
+   * After merging, the baseline and current values of the removed nodes (rows) will be added back
+   * to those of their parent node.
    */
   private Set<CubeNode> mergeDPArray(CubeNode parentNode, DPArray parentArray, DPArray childArray) {
     Set<CubeNode> removedNodes = new HashSet<>(parentArray.getAnswer());
@@ -475,7 +482,7 @@ public class Summary {
       double targetRatio) {
     if (dp.getAnswer().contains(node.getParent())) {
       // For one side error if node's parent is included in the solution, then its cost will be calculated normally.
-      basicRowInserter.insertRowToDPArray(dp, node, node.getParent().bootStrapChangeRatio());
+      basicRowInserter.insertRowToDPArray(dp, node, node.getParent().safeChangeRatio());
     } else {
       basicRowInserter.insertRowToDPArray(dp, node, targetRatio);
     }
@@ -483,13 +490,13 @@ public class Summary {
 
   /**
    * If the node's parent is also in the DPArray, then it's parent's current changeRatio is used as
-   * the target changeRatio for
-   * calculating the cost of the node; otherwise, bootStrapChangeRatio is used.
+   * the target changeRatio for calculating the cost of the node;
+   * otherwise, targetRatio is used.
    */
   private void insertRowWithAdaptiveRatio(DPArray dp, CubeNode node, double targetRatio) {
     if (dp.getAnswer().contains(node.getParent())) {
       // For one side error if node's parent is included in the solution, then its cost will be calculated normally.
-      basicRowInserter.insertRowToDPArray(dp, node, node.getParent().bootStrapChangeRatio());
+      basicRowInserter.insertRowToDPArray(dp, node, node.getParent().safeChangeRatio());
     } else {
       oneSideErrorRowInserter.insertRowToDPArray(dp, node, targetRatio);
     }

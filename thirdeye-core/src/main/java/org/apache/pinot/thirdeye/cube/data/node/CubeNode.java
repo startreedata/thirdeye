@@ -188,7 +188,7 @@ public interface CubeNode<N extends CubeNode> {
    *
    * @see BaseCubeNode for the basic implementation.
    */
-  double bootStrapChangeRatio();
+  double safeChangeRatio();
 
   /**
    * Returns the current changeRatio of this node is increased or decreased, i.e., returns true if

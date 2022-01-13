@@ -139,7 +139,7 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
    * 3. If none is available, return 1.0.
    */
   @Override
-  public double bootStrapChangeRatio() {
+  public double safeChangeRatio() {
     double ratio = changeRatio();
     if (Double.isFinite(ratio) && Double.compare(ratio, 0d) != 0) {
       return ratio;
@@ -150,7 +150,7 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
       } else {
         if (parent != null) {
           return CubeUtils.ensureChangeRatioDirection(getBaselineValue(), getCurrentValue(),
-              parent.bootStrapChangeRatio());
+              parent.safeChangeRatio());
         } else {
           return 1.;
         }

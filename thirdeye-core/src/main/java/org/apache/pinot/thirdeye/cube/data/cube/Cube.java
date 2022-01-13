@@ -121,8 +121,7 @@ public class Cube { // the cube (Ca|Cb)
 
   /**
    * Automatically orders of the given dimensions depending on their error cost and builds the
-   * subcube of data according
-   * to that order.
+   * subcube of data according to that order.
    *
    * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions to be ordered.

@@ -27,8 +27,8 @@ public interface CostFunction {
    * @param parentChangeRatio change ratio of the parent node.
    * @param baselineValue the baseline value of the node.
    * @param currentValue the current value of the node.
-   * @param baselineSize the baseline node size.
-   * @param currentSize the current node size.
+   * @param baselineSize the baseline size of the node.
+   * @param currentSize the current size of the node.
    * @param topBaselineValue the baseline value of the root node.
    * @param topCurrentValue the current value of the root node.
    * @param topBaselineSize the baseline size of root node.

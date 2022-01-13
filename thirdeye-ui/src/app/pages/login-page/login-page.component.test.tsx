@@ -18,17 +18,14 @@ jest.mock("@startree-ui/platform-ui", () => ({
     PageV1: jest.fn().mockImplementation((props) => props.children),
     PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
     PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),
+    useNotificationProviderV1: jest
+        .fn()
+        .mockImplementation(() => ({ notify: mockNotify })),
 }));
 
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockImplementation(() => ({
         t: mockT,
-    })),
-}));
-
-jest.mock("notistack", () => ({
-    useSnackbar: jest.fn().mockImplementation(() => ({
-        enqueueSnackbar: mockNotify,
     })),
 }));
 
@@ -67,8 +64,9 @@ describe("Login Page", () => {
         });
 
         expect(mockNotify).toHaveBeenCalledWith(
+            "error",
             "message.authentication-error",
-            { preventDuplicate: false, variant: "error" }
+            true
         );
         expect(mockT).toHaveBeenCalledWith("message.authentication-error", {
             exceptionCode: AuthExceptionCodeV1.InfoCallFailure,

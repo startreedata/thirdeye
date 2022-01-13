@@ -1,11 +1,12 @@
 import { Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
+    NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -32,10 +33,6 @@ import {
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
@@ -51,10 +48,10 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AlertsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -96,12 +93,12 @@ export const AlertsViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.alert"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiAlert(fetchedUiAlert);
@@ -139,9 +136,9 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
 
         updateAlert(uiAlert.alert).then((alert) => {
-            enqueueSnackbar(
-                t("message.update-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", { entity: t("label.alert") })
             );
 
             // Replace updated alert as fetched alert
@@ -163,9 +160,9 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
         deleteAlert(uiAlert.id).then(() => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
             );
 
             // Redirect to alerts all path

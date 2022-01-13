@@ -35,7 +35,7 @@ public class BalancedCostFunction implements CostFunction {
   @VisibleForTesting
   protected static final String CHANGE_CONTRIBUTION_THRESHOLD_PARAM = "threshold";
   // The threshold to the contribution to overall changes in percentage
-  private double changeContributionThreshold = 3d;
+  private double changeContributionThreshold = 3;
   private final double epsilon = 0.00001;
 
   public BalancedCostFunction() {

@@ -37,6 +37,7 @@ const margin = {
     bottom: 0,
 };
 const GRAY = "#EEEEEE";
+const OTHER = "other";
 
 function Treemap<Data>({
     height = DEFAULT_TREEMAP_HEIGHT,
@@ -83,6 +84,14 @@ function TreemapInternal<Data>({
         hideTooltip,
     } = useTooltip<TreemapData<Data>>();
 
+    const isOtherDimension = (id: string | undefined): boolean => {
+        if (!id) {
+            return false;
+        }
+
+        return id.toLowerCase() === OTHER;
+    };
+
     const data: HierarchyNode<TreemapData<Data>> = stratify<TreemapData<Data>>()
         .id((d) => d.id)
         .parentId((d) => d.parent)(props.treemapData)
@@ -96,9 +105,9 @@ function TreemapInternal<Data>({
         range: [purple[500], GRAY, GRAY, GRAY, theme.palette.error.main],
     });
 
-    const root = hierarchy(data).sort(
-        (a, b) => (b.value || 0) - (a.value || 0)
-    );
+    const root = hierarchy(data)
+        .sort((a, b) => (b.value || 0) - (a.value || 0))
+        .sort((_a, b) => (isOtherDimension(b.data.id) ? -1 : 1));
 
     const handleMouseLeave = (): void => {
         hideTooltip();
@@ -136,10 +145,7 @@ function TreemapInternal<Data>({
             | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
             | undefined
     ): void => {
-        if (
-            !node ||
-            (node.data.id && node?.data?.id.toLowerCase() === "other")
-        ) {
+        if (!node || (node.data.id && isOtherDimension(node?.data?.id))) {
             return;
         }
         let key = "";
@@ -181,11 +187,17 @@ function TreemapInternal<Data>({
                                         const nodeWidth = node.x1 - node.x0 - 1;
                                         const nodeHeight =
                                             node.y1 - node.y0 - 1;
-                                        const colorValue = node.data.data
-                                            ? colorChangeValueAccessor(
-                                                  node.data.data
-                                              )
-                                            : node.value;
+                                        let colorValue = -1;
+
+                                        if (!isOtherDimension(node.data.id)) {
+                                            if (node.data.data) {
+                                                colorValue = colorChangeValueAccessor(
+                                                    node.data.data
+                                                );
+                                            } else if (node.value) {
+                                                colorValue = node.value;
+                                            }
+                                        }
                                         const rect = (
                                             <rect
                                                 fill={colorScale(
@@ -225,7 +237,11 @@ function TreemapInternal<Data>({
                                                         {rect}
                                                         <Text
                                                             className={
-                                                                treemapClasses.heading
+                                                                isOtherDimension(
+                                                                    node.data.id
+                                                                )
+                                                                    ? treemapClasses.headingOtherDimension
+                                                                    : treemapClasses.heading
                                                             }
                                                             textAnchor="middle"
                                                             verticalAnchor="middle"

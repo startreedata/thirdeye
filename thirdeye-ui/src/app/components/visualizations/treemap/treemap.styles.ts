@@ -7,4 +7,8 @@ export const useTreemapStyles = makeStyles(() => ({
     clickable: {
         cursor: "pointer",
     },
+    headingOtherDimension: {
+        fontSize: "13px",
+        fill: "rgba(0, 0, 0, 0.45)",
+    },
 }));

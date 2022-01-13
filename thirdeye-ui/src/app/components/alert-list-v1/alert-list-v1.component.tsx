@@ -14,7 +14,10 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import {
+    getAlertsUpdatePath,
+    getAlertsViewPath,
+} from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
@@ -96,6 +99,15 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
         }
     };
 
+    const handleAlertEdit = (): void => {
+        if (!selectedAlert) {
+            return;
+        }
+        const selectedAlertId = selectedAlert.rowKeyValues[0] as number;
+
+        history.push(getAlertsUpdatePath(selectedAlertId));
+    };
+
     const alertGroupColumns = [
         {
             key: "name",
@@ -137,14 +149,28 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
                         entity: t("label.alerts"),
                     })}
                     toolbarComponent={
-                        <Grid>
-                            <Button
-                                disabled={isActionButtonDisable}
-                                variant="contained"
-                                onClick={handleAlertDelete}
-                            >
-                                {t("label.delete")}
-                            </Button>
+                        <Grid container alignItems="center" spacing={2}>
+                            {/* Edit */}
+                            <Grid item>
+                                <Button
+                                    disabled={isActionButtonDisable}
+                                    variant="contained"
+                                    onClick={handleAlertEdit}
+                                >
+                                    {t("label.edit")}
+                                </Button>
+                            </Grid>
+
+                            {/* Delete */}
+                            <Grid>
+                                <Button
+                                    disabled={isActionButtonDisable}
+                                    variant="contained"
+                                    onClick={handleAlertDelete}
+                                >
+                                    {t("label.delete")}
+                                </Button>
+                            </Grid>
                         </Grid>
                     }
                     onSelectionChange={setSelectedAlert}

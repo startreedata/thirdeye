@@ -34,6 +34,56 @@ spec:
 {{ toYaml .Values.ui.affinity | indent 8 }}
       tolerations:
 {{ toYaml .Values.ui.tolerations | indent 8 }}
+      initContainers:
+      - name: init-config
+        image: adoptopenjdk/openjdk11:alpine
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        env:
+        - name: NGINX_ENVSUBST_TEMPLATE_DIR
+          value: /home/thirdeye/nginx/templates
+        - name: NGINX_CONF
+          value: |
+            server {
+              listen  ${NGINX_PORT};
+              {{- if .Values.tls.enabled }}
+              ssl_certificate /home/thirdeye/tls/tls.crt;
+              ssl_certificate_key /home/thirdeye/tls/tls.key;
+              ssl_password_file /home/thirdeye/tls-pass/pass;
+              {{- end }}
+              location ~/api(.*) {
+                if ($args != "") {
+                  proxy_pass ${THIRDEYE_API_BASE_URL}/api$1?$args;
+                }
+                if ($args = "") {
+                  proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
+                }
+                resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+                proxy_ssl_server_name on;
+                proxy_redirect off;
+                proxy_set_header Host $proxy_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Host $server_name;
+              }
+              location / {
+                  try_files $uri $uri/ /index.html;
+              }
+            }
+        command:
+        - /bin/sh
+        - -c
+        - >
+          {{- if .Values.tls.enabled }}
+          echo {{ .Values.tls.password }} > /home/thirdeye/tls-pass/pass &&
+          {{- end }}
+          echo $NGINX_CONF > $NGINX_ENVSUBST_TEMPLATE_DIR/default.conf.template
+        volumeMounts:
+        - name: nginx-conf
+          mountPath: /home/thirdeye/nginx/templates
+        {{- if .Values.tls.enabled }}
+        - name: tls-pass
+          mountPath: /home/thirdeye/tls-pass
+        {{- end }}
       containers:
       - name: ui
         image: "{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag }}"
@@ -44,12 +94,32 @@ spec:
             protocol: TCP
         env:
           - name: NGINX_PORT
-            value: "{{ .Values.ui.port }}"
+            value: "{{ .Values.ui.port }} {{- if .Values.tls.enabled }} ssl {{- end }}"
           - name: THIRDEYE_API_BASE_URL
-            value: "http://{{ template "thirdeye.coordinator.headless" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.coordinator.port }}"
+            value: "{{ if .Values.tls.enabled -}} https {{- else -}} http {{- end }}://{{ template "thirdeye.coordinator.headless" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.coordinator.port }}"
           - name: NGINX_ENVSUBST_TEMPLATE_DIR
             value: /home/thirdeye/nginx/templates
           - name: NGINX_ENVSUBST_OUTPUT_DIR
             value: /home/thirdeye/nginx/conf.d
-
+        volumeMounts:
+          {{- if .Values.tls.enabled }}
+          - name: tls
+            mountPath: /home/thirdeye/tls
+            readOnly: true
+          - name: tls-pass
+            mountPath: /home/thirdeye/tls-pass
+            readOnly: true
+          {{- end }}
+          - name: nginx-conf
+            mountPath: /home/thirdeye/nginx/templates
+      volumes:
+        - name: nginx-conf
+          emptyDir: {}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ include "thirdeye.ui.fullname" . }}-tls
+        - name: tls-pass
+          emptyDir: {}
+        {{- end }}
       restartPolicy: Always

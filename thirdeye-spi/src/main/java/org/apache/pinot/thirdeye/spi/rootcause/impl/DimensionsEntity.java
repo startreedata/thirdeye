@@ -77,6 +77,6 @@ public class DimensionsEntity extends Entity {
   }
 
   public static DimensionsEntity fromURN(String urn, double score) {
-    return fromDimensions(score, EntityUtils.parseUrnString(urn, TYPE, 2).toFilters());
+    return fromDimensions(score, EntityUtils.parseUrnString(urn, TYPE, 2).toFiltersMap());
   }
 }

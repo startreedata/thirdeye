@@ -1,23 +1,11 @@
 package org.apache.pinot.thirdeye.resources;
 
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_DEPTH_STRING;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_CUBE_SUMMARY_SIZE_STRING;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_HIERARCHIES;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator.DEFAULT_TIMEZONE_ID;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DEPTH;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_DIM_HIERARCHIES;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_EXCLUDED_DIMENSIONS;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_ONE_SIDE_ERROR;
-import static org.apache.pinot.thirdeye.rootcause.MultiDimensionalSummaryConstants.CUBE_SUMMARY_SIZE;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.BASELINE_END;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.BASELINE_START;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.CURRENT_END;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.CURRENT_START;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.METRIC_URN;
-import static org.apache.pinot.thirdeye.rootcause.RootCauseResourceConstants.TIME_ZONE;
-import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureExists;
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils.parseOffset;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -30,6 +18,7 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -41,10 +30,15 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.rca.DataCubeSummaryCalculator;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfo;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,16 +49,23 @@ import org.slf4j.LoggerFactory;
 public class DimensionAnalysisResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(DimensionAnalysisResource.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private static final String DEFAULT_BASELINE_OFFSET = "wo1w";
+  public static final String DEFAULT_HIERARCHIES = "[]";
+  public static final String DEFAULT_ONE_SIDE_ERROR = "false";
+  public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
+  public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
+
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
+  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
 
   @Inject
   public DimensionAnalysisResource(
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final DataCubeSummaryCalculator dataCubeSummaryCalculator) {
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+      final DataCubeSummaryCalculator dataCubeSummaryCalculator,
+      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
+    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
   }
 
   @GET
@@ -72,51 +73,102 @@ public class DimensionAnalysisResource {
   @ApiOperation("Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "internal id of the anomaly")
-      @PathParam("id") long id) {
-    final MergedAnomalyResultDTO anomalyDTO = ensureExists(
-        mergedAnomalyResultManager.findById(id), String.format("Anomaly ID: %d", id));
-
-    // In the highlights api we retrieve only the top 3 results across 3 dimensions.
-    // TODO: polish the results to make it more meaningful
-    // TODO CYRIL metricUrn is null with new version --> so can't get data
-    return Response.ok(dataCubeSummaryCalculator.compute(anomalyDTO)).build();
-  }
-
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response buildSummary(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam(METRIC_URN) String metricUrn,
-      @QueryParam("dataset") String dataset,
-      @QueryParam("metric") String metric,
-      @QueryParam(CURRENT_START) long currentStartInclusive,
-      @QueryParam(CURRENT_END) long currentEndExclusive,
-      @QueryParam(BASELINE_START) long baselineStartInclusive,
-      @QueryParam(BASELINE_END) long baselineEndExclusive,
+      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
+      @ApiParam(value = "baseline offset identifier (e.g. \"wo1w\"). Not compatible with mean and median functions.")
+      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
+      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
+      @QueryParam("filters") List<String> filters,
+      @ApiParam(value = "Number of entries to put in the summary.")
+      @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
+      @ApiParam(value = "Number of dimensions to drill down by.")
+      @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
+      @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
+      @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
+      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
-      @QueryParam(CUBE_EXCLUDED_DIMENSIONS) List<String> excludedDimensions,
-      @QueryParam("filters") String filterJsonPayload,
-      @QueryParam(CUBE_SUMMARY_SIZE) @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @QueryParam(CUBE_DEPTH) @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
-      @QueryParam(CUBE_DIM_HIERARCHIES) @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload,
-      @QueryParam(CUBE_ONE_SIDE_ERROR) @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @QueryParam(TIME_ZONE) @DefaultValue(DEFAULT_TIMEZONE_ID) String timeZone) {
-    final DimensionAnalysisResultApi response = dataCubeSummaryCalculator.compute(metricUrn,
-        metric,
-        dataset,
-        currentStartInclusive,
-        currentEndExclusive,
-        baselineStartInclusive,
-        baselineEndExclusive,
-        dimensions,
-        filterJsonPayload,
+      @ApiParam(value = "List of dimensions to exclude from the analysis.")
+      @QueryParam("excludedDimensions") List<String> excludedDimensions,
+      @ApiParam(value =
+          "Hierarchy among some dimensions. The order will be respected in the result. "
+              + "An example of a hierarchical group is {continent, country}. "
+              + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
+      @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
+  ) throws Exception {
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+        anomalyId);
+    final Interval currentInterval = new Interval(
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
+        DateTimeZone.UTC);
+    final Interval baselineInterval = baselineOffsetToInterval(baselineOffset,
+        currentInterval, rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+
+    dimensions = cleanDimensionStrings(dimensions);
+    if (dimensions.isEmpty()) {
+      dimensions = rootCauseAnalysisInfo.getDatasetConfigDTO().getDimensions();
+    }
+    excludedDimensions = cleanDimensionStrings(excludedDimensions);
+
+    final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
+
+    DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
+        rootCauseAnalysisInfo.getMetricConfigDTO().getName(),
+        rootCauseAnalysisInfo.getDatasetConfigDTO().getName(),
+        currentInterval,
+        baselineInterval,
         summarySize,
         depth,
-        hierarchiesPayload,
         doOneSideError,
+        rootCauseAnalysisInfo.getMetricConfigDTO().getDerivedMetricExpression(),
+        dimensions,
         excludedDimensions,
-        timeZone);
-    return Response.ok(response).build();
+        filters,
+        hierarchies
+    );
+
+    return Response.ok(resultApi).build();
+  }
+
+  /**
+   * Convert a baseline offset to an interval.
+   *
+   * HACK. It would be better to manipulate offset, but
+   * the cube implementation were not compatible without significant refactorings.
+   * Chose to keep the current format for the moment, but it could be refactored.
+   * Important: if changes are made: try to keep consistency with the breakdown endpoint.
+   *
+   * HACK 2. The cube implementation is not compatible with slices,
+   * it only manages a single timeframe.
+   * So this convert function only works with offsets that only need a single timeframe.
+   * Eg: wo1w works. median2w does not work.
+   * */
+  private Interval baselineOffsetToInterval(final String offset,
+      final Interval currentInterval, final TimeGranularity timeGranularity) {
+    // hacky design to have the same interface as the breakdown endpoint
+    MetricSlice currentSlice = MetricSlice.from(0L,
+        currentInterval.getStartMillis(),
+        currentInterval.getEndMillis(),
+        List.of(),
+        timeGranularity
+    );
+    Baseline range = parseOffset(offset, DateTimeZone.UTC);
+    List<MetricSlice> slices = range.scatter(currentSlice);
+    checkArgument(slices.size() == 1,
+        "dimension analysis is only compatible with single-slice offsets. Eg wo1w, do1d. "
+            + "It is not implemented for meanXw, medianXw.");
+    MetricSlice baselineSlice = slices.get(0);
+
+    return new Interval(baselineSlice.getStart(),
+        baselineSlice.getEnd(),
+        DateTimeZone.UTC);
+  }
+
+  private static List<String> cleanDimensionStrings(List<String> dimensions) {
+    return dimensions.stream().map(String::trim).collect(Collectors.toList());
+  }
+
+  private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
+      throws JsonProcessingException {
+    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 }

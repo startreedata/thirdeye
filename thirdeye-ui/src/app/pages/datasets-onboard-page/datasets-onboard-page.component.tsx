@@ -77,7 +77,11 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.onboard")} />
+            <PageHeader
+                title={t("label.onboard-entity", {
+                    entity: t("label.dataset"),
+                })}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <DatasetWizard

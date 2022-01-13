@@ -14,8 +14,8 @@ public class EmailNotificationServiceFactory implements NotificationServiceFacto
 
   @Override
   public NotificationService build(final Map<String, String> properties) {
-    final EmailConfiguration configuration = new ObjectMapper()
-        .convertValue(properties, EmailConfiguration.class);
+    final SmtpConfiguration configuration = new ObjectMapper()
+        .convertValue(properties, SmtpConfiguration.class);
 
     return new EmailNotificationService(configuration);
   }

@@ -10,6 +10,7 @@ import {
     ListItemSecondaryAction,
     ListItemText,
     TextField,
+    Typography,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
@@ -94,9 +95,16 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     };
 
     return (
-        <Grid container>
+        <Grid container alignItems="center">
+            {/* Input label */}
+            <Grid item xs={1}>
+                <Typography variant="subtitle2">
+                    {props.inputLabel || t("label.add")}
+                </Typography>
+            </Grid>
+
             {/* Input */}
-            <Grid item sm={10} xs={9}>
+            <Grid item xs={9}>
                 <TextField
                     fullWidth
                     InputProps={{
@@ -104,7 +112,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                             // Add button
                             <InputAdornment position="end">
                                 <IconButton onClick={handleListItemAdd}>
-                                    <SubdirectoryArrowLeftIcon />
+                                    <SubdirectoryArrowLeftIcon fontSize="small" />
                                 </IconButton>
                             </InputAdornment>
                         ),
@@ -113,14 +121,13 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     error={Boolean(helperText)}
                     helperText={helperText}
                     inputRef={inputRef}
-                    label={props.inputLabel || t("label.add")}
                     variant="outlined"
                     onKeyDown={handleInputKeyDown}
                 />
             </Grid>
 
             {/* Add button */}
-            <Grid item sm={2} xs={3}>
+            <Grid item xs={2}>
                 <Button
                     fullWidth
                     className={editableListClasses.addButton}
@@ -150,7 +157,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                             <ListItemText
                                                 primary={listItem}
                                                 primaryTypographyProps={{
-                                                    variant: "body1",
+                                                    variant: "body2",
                                                 }}
                                             />
 
@@ -161,7 +168,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                                         index
                                                     )}
                                                 >
-                                                    <CloseIcon />
+                                                    <CloseIcon fontSize="small" />
                                                 </IconButton>
                                             </ListItemSecondaryAction>
                                         </ListItem>

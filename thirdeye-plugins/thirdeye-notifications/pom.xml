@@ -30,11 +30,20 @@
       <artifactId>retrofit</artifactId>
       <version>${retrofit2.version}</version>
     </dependency>
+
+    <!--    Firing webhooks -->
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
       <artifactId>converter-jackson</artifactId>
       <version>${retrofit2.version}</version>
     </dependency>
+
+    <!-- Firing emails -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-email</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>

@@ -20,7 +20,7 @@
 package org.apache.pinot.thirdeye.cube.data.dbclient;
 
 import com.google.common.base.Preconditions;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * The spec that specifies the metric and its time range to be retrieved from the data base.
@@ -29,22 +29,19 @@ public class CubeSpec {
 
   private CubeTag tag;
   private String metric;
-  private DateTime startInclusive;
-  private DateTime endExclusive;
+  private Interval interval;
 
   /**
    * Constructs a cube spec.
    *
    * @param tag the field name corresponds to the retrieved metric.
    * @param metric the name of the metric.
-   * @param startInclusive start time of the metric, inclusive.
-   * @param endExclusive the time of the metric, exclusive.
+   * @param interval the interval time range of the metric.
    */
-  public CubeSpec(CubeTag tag, String metric, DateTime startInclusive, DateTime endExclusive) {
+  public CubeSpec(CubeTag tag, String metric, Interval interval) {
     setTag(tag);
     setMetric(metric);
-    setStartInclusive(startInclusive);
-    setEndExclusive(endExclusive);
+    setInterval(interval);
   }
 
   /**
@@ -86,40 +83,18 @@ public class CubeSpec {
   }
 
   /**
-   * Returns start time of the metric, inclusive.
-   *
-   * @return start time of the metric, inclusive.
+   * Returns the interval time range of the metric.
    */
-  public DateTime getStartInclusive() {
-    return startInclusive;
+  public Interval getInterval() {
+    return interval;
   }
 
   /**
-   * Sets start time of the metric, inclusive.
+   * Sets the interval time range of the metric.
    *
-   * @param startInclusive start time of the metric, inclusive.
    */
-  public void setStartInclusive(DateTime startInclusive) {
-    Preconditions.checkNotNull(startInclusive);
-    this.startInclusive = startInclusive;
-  }
-
-  /**
-   * Returns end time of the metric, exclusive.
-   *
-   * @return end time of the metric, exclusive.
-   */
-  public DateTime getEndExclusive() {
-    return endExclusive;
-  }
-
-  /**
-   * Sets end time of the metric, exclusive.
-   *
-   * @param endExclusive end time of the metric, exclusive.
-   */
-  public void setEndExclusive(DateTime endExclusive) {
-    Preconditions.checkNotNull(endExclusive);
-    this.endExclusive = endExclusive;
+  public void setInterval(Interval interval) {
+    Preconditions.checkNotNull(interval);
+    this.interval = interval;
   }
 }

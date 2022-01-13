@@ -117,7 +117,11 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.update")} />
+            <PageHeader
+                title={t("label.update-entity", {
+                    entity: t("label.datasource"),
+                })}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {datasource && (

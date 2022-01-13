@@ -26,9 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -47,8 +47,6 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
   public static final String PROP_BCC = "bcc";
   public static final String PROP_RECIPIENTS = "recipients";
 
-  // Time beyond which we do not want to notify anomalies
-  private static final long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(14);
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager detectionConfigManager;
 
@@ -73,8 +71,8 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
 
       // No point in fetching anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
       long startTime = vectorClocks.get(detectionId);
-      if (startTime < this.endTime - ANOMALY_NOTIFICATION_LOOKBACK_TIME) {
-        startTime = this.endTime - ANOMALY_NOTIFICATION_LOOKBACK_TIME;
+      if (startTime < this.endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME) {
+        startTime = this.endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME;
       }
 
       Collection<MergedAnomalyResultDTO> candidates = mergedAnomalyResultManager

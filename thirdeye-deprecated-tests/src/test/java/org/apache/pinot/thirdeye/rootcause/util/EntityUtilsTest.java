@@ -145,7 +145,7 @@ public class EntityUtilsTest {
         )));
 
     Assert
-        .assertEquals(parsedUrn.toFilters().get("key"), Arrays.asList("!:::", "<=value", "value"));
+        .assertEquals(parsedUrn.toFiltersMap().get("key"), Arrays.asList("!:::", "<=value", "value"));
   }
 
   @Test

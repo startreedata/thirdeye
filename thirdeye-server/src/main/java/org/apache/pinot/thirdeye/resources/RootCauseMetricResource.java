@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -35,22 +34,17 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.thirdeye.alert.AlertTemplateRenderer;
 import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfo;
+import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
@@ -84,33 +78,31 @@ public class RootCauseMetricResource {
   private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
   private static final long TIMEOUT = 600000;
   private static final String OFFSET_DEFAULT = "current";
-  private static final String TIMEZONE_DEFAULT = "UTC";
+  protected static final String TIMEZONE_DEFAULT = "UTC";
   private static final int LIMIT_DEFAULT = 100;
 
   private final ExecutorService executor;
   private final AggregationLoader aggregationLoader;
   private final TimeSeriesLoader timeSeriesLoader;
+  @Deprecated
+  // prefer getting datasetDAO from rootCauseAnalysisInfoFetcher
   private final MetricConfigManager metricDAO;
+  @Deprecated
+  // prefer getting datasetDAO from rootCauseAnalysisInfoFetcher
   private final DatasetConfigManager datasetDAO;
-  private final MergedAnomalyResultManager mergedAnomalyDAO;
-  private final AlertManager alertDAO;
-  private final AlertTemplateRenderer alertTemplateRenderer;
+  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
 
   @Inject
   public RootCauseMetricResource(final AggregationLoader aggregationLoader,
       final TimeSeriesLoader timeSeriesLoader,
       final MetricConfigManager metricDAO,
       final DatasetConfigManager datasetDAO,
-      final MergedAnomalyResultManager mergedAnomalyDAO,
-      final AlertManager alertDAO,
-      final AlertTemplateRenderer alertTemplateRenderer) {
+      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
     this.aggregationLoader = aggregationLoader;
     this.timeSeriesLoader = timeSeriesLoader;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.mergedAnomalyDAO = mergedAnomalyDAO;
-    this.alertDAO = alertDAO;
-    this.alertTemplateRenderer = alertTemplateRenderer;
+    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
 
     this.executor = Executors.newCachedThreadPool();
   }
@@ -138,7 +130,7 @@ public class RootCauseMetricResource {
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")") @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
+      @Deprecated @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
 
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
@@ -175,7 +167,7 @@ public class RootCauseMetricResource {
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "A list of offset identifier separated by comma (e.g. \"current\", \"wo2w\")") @QueryParam("offsets") List<String> offsets,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
+      @Deprecated @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
     MetricEntity metricEntity = MetricEntity.fromURN(urn);
@@ -216,7 +208,7 @@ public class RootCauseMetricResource {
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "A list of offset identifier separated by comma (e.g. \"current\", \"wo2w\")") @QueryParam("offsets") List<String> offsets,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
+      @Deprecated @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")") @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone)
       throws Exception {
     DateTimeZone dateTimeZone = parseTimeZone(timezone);
 
@@ -236,9 +228,8 @@ public class RootCauseMetricResource {
    * Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.
    * Aligns time stamps if necessary and omits null values.
    *
-   * @param id anomaly id
+   * @param anomalyId anomaly id
    * @param offset offset identifier (e.g. "current", "wo2w")
-   * @param timezone timezone identifier (e.g. "America/Los_Angeles")
    * @param limit limit results to the top k elements, plus a rollup element
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
@@ -251,97 +242,28 @@ public class RootCauseMetricResource {
           + "Aligns time stamps if necessary and omits null values.")
   public Response getAnomalyBreakdown(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long id,
+      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
       @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
-      @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
       @QueryParam("limit") Integer limit) throws Exception {
 
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
-    DateTimeZone dateTimeZone = parseTimeZone(timezone);
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
 
-    final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(id),
-        String.format("Anomaly ID: %d", id));
-    long detectionConfigId = anomalyDTO.getDetectionConfigId();
-    AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    //startTime/endTime not important
-    AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO, 0L, 0L);
-    RcaMetadataDTO rcaMetadataDTO = Objects.requireNonNull(templateWithProperties.getRca(),
-        "rca not found in alert config.");
-    String metric = Objects.requireNonNull(rcaMetadataDTO.getMetric(),
-        "rca$metric not found in alert config.");
-    String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
-        "rca$dataset not found in alert config.");
-    MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metric, dataset);
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricConfigDTO.getId(),
+    final Map<String, Map<String, Double>> breakdown = computeBreakdown(
+        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
         filters,
-        anomalyDTO.getStartTime(),
-        anomalyDTO.getEndTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
         offset,
-        dateTimeZone,
-        limit);
-    return Response.ok(breakdown).build();
-  }
-
-  /**
-   * Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally)
-   * offset.
-   * Aligns time stamps if necessary and omits null values.
-   *
-   * @param urn metric urn
-   * @param start start time (in millis)
-   * @param end end time (in millis)
-   * @param offset offset identifier (e.g. "current", "wo2w")
-   * @param timezone timezone identifier (e.g. "America/Los_Angeles")
-   * @param limit limit results to the top k elements, plus a rollup element
-   * @return aggregate value, or NaN if data not available
-   * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
-   */
-  @GET
-  @Path("/breakdown")
-  @ApiOperation(value =
-      "Returns a breakdown (de-aggregation) of the specified metric and time range, and (optionally) offset.\n"
-          + "Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  public Response getBreakdown(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "metric urn", required = true)
-      @QueryParam("urn") @NotNull String urn,
-      @ApiParam(value = "start time (in millis)", required = true)
-      @QueryParam("start") @NotNull long start,
-      @ApiParam(value = "end time (in millis)", required = true)
-      @QueryParam("end") @NotNull long end,
-      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
-      @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-
-    if (limit == null) {
-      limit = LIMIT_DEFAULT;
-    }
-    DateTimeZone dateTimeZone = parseTimeZone(timezone);
-    MetricEntity metricEntity = MetricEntity.fromURN(urn);
-    long metricId = metricEntity.getId();
-    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(metricId,
-        filters,
-        start,
-        end,
-        offset,
-        dateTimeZone,
-        limit);
-
+        DateTimeZone.UTC,
+        limit,
+        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
     return Response.ok(breakdown).build();
   }
 
@@ -375,7 +297,7 @@ public class RootCauseMetricResource {
       @QueryParam("end") @NotNull long end,
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
       @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
+      @Deprecated @ApiParam(value = "timezone identifier (e.g. \"America/Los_Angeles\")")
       @QueryParam("timezone") @DefaultValue(TIMEZONE_DEFAULT) String timezone,
       @ApiParam(value = "limit results to the top k elements, plus an 'OTHER' rollup element")
       @QueryParam("granularity") String granularityString) throws Exception {
@@ -396,7 +318,7 @@ public class RootCauseMetricResource {
     return Response.ok(timeseries).build();
   }
 
-  private DateTimeZone parseTimeZone(final String timezone) {
+  protected static DateTimeZone parseTimeZone(final String timezone) {
     return DateTimeZone.forID(timezone);
   }
 
@@ -487,13 +409,14 @@ public class RootCauseMetricResource {
       final long end,
       final String offset,
       final DateTimeZone timezone,
-      final int limit) throws Exception {
+      final int limit,
+      final TimeGranularity timeGranularity) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricId,
             start,
             end,
             filters,
-            findMetricGranularity(metricId))
+            timeGranularity)
         .alignedOn(timezone);
     Baseline range = parseOffset(offset, timezone);
 
@@ -611,6 +534,8 @@ public class RootCauseMetricResource {
     return output;
   }
 
+  @Deprecated
+  // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
   private TimeGranularity findMetricGranularity(final Long metricId) {
     final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
         String.format("metric id: %d", metricId));

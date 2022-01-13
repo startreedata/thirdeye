@@ -10,7 +10,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
     const { t } = useTranslation();
 
     return (
-        <Grid container justify="flex-end">
+        <Grid container item justify="flex-end">
             {/* Name */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">
@@ -19,7 +19,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
             </Grid>
 
             <Grid item sm={10}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.subscriptionGroup &&
                         props.subscriptionGroup.name) ||
                         t("label.no-data-marker")}
@@ -34,7 +34,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
             </Grid>
 
             <Grid item sm={10}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.subscriptionGroup &&
                         props.subscriptionGroup.cron) ||
                         t("label.no-data-marker")}
@@ -52,7 +52,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
             {!props.subscriptionGroup ||
                 (isEmpty(props.subscriptionGroup.alerts) && (
                     <Grid item sm={10}>
-                        <Typography variant="body1">
+                        <Typography variant="body2">
                             {t("label.no-data-marker")}
                         </Typography>
                     </Grid>
@@ -63,7 +63,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                 !isEmpty(props.subscriptionGroup.alerts) && (
                     <Grid item sm={10}>
                         {props.subscriptionGroup.alerts.map((alert, index) => (
-                            <Typography key={index} variant="body1">
+                            <Typography key={index} variant="body2">
                                 {alert.name}
                             </Typography>
                         ))}
@@ -84,7 +84,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                     props.subscriptionGroup.notificationSchemes.email.to
                 ) && (
                     <Grid item sm={10}>
-                        <Typography variant="body1">
+                        <Typography variant="body2">
                             {t("label.no-data-marker")}
                         </Typography>
                     </Grid>
@@ -99,7 +99,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRende
                     <Grid item sm={10}>
                         {props.subscriptionGroup.notificationSchemes.email.to.map(
                             (email, index) => (
-                                <Typography key={index} variant="body1">
+                                <Typography key={index} variant="body2">
                                     {email}
                                 </Typography>
                             )

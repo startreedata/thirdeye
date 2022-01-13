@@ -9,7 +9,7 @@ export const DatasetRenderer: FunctionComponent<DatasetRendererProps> = (
     const { t } = useTranslation();
 
     return (
-        <Grid container justify="flex-end">
+        <Grid container item justify="flex-end">
             {/* Name */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">
@@ -18,7 +18,7 @@ export const DatasetRenderer: FunctionComponent<DatasetRendererProps> = (
             </Grid>
 
             <Grid item sm={10}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.dataset && props.dataset.name) ||
                         t("label.no-data-marker")}
                 </Typography>
@@ -32,7 +32,7 @@ export const DatasetRenderer: FunctionComponent<DatasetRendererProps> = (
             </Grid>
 
             <Grid item sm={10}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.dataset && props.dataset.dataSource?.name) ||
                         t("label.no-data-marker")}
                 </Typography>

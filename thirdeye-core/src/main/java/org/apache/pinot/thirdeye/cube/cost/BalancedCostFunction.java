@@ -49,12 +49,9 @@ public class BalancedCostFunction implements CostFunction {
     }
   }
 
-  public double getChangeContributionThreshold() {
+  @VisibleForTesting
+  protected double getChangeContributionThreshold() {
     return changeContributionThreshold;
-  }
-
-  public void setChangeContributionThreshold(double changeContributionThreshold) {
-    this.changeContributionThreshold = changeContributionThreshold;
   }
 
   /**

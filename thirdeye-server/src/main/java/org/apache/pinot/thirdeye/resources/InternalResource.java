@@ -8,6 +8,7 @@ import static org.apache.pinot.thirdeye.util.SecurityUtils.hmacSHA512;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
@@ -34,16 +35,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
-import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
-import org.apache.pinot.thirdeye.detection.alert.scheme.EmailAlertScheme;
+import org.apache.pinot.thirdeye.notification.EmailEntityBuilder;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
+import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import org.apache.pinot.thirdeye.task.runner.NotificationTaskRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,28 +62,33 @@ public class InternalResource {
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final DatabaseAdminResource databaseAdminResource;
-  private final EmailAlertScheme emailAlertScheme;
+  private final EmailEntityBuilder emailEntityBuilder;
   private final MetricAnomaliesContent metricAnomaliesContent;
   private final ThirdEyeServerConfiguration configuration;
   private final EmailContentFormatter emailContentFormatter;
+  private final NotificationServiceRegistry notificationServiceRegistry;
+  private final NotificationTaskRunner notificationTaskRunner;
 
   @Inject
   public InternalResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final DatabaseAdminResource databaseAdminResource,
-      final NotificationSchemeFactory notificationSchemeFactory,
+      final EmailEntityBuilder emailEntityBuilder,
       final MetricAnomaliesContent metricAnomaliesContent,
       final ThirdEyeServerConfiguration configuration,
-      final EmailContentFormatter emailContentFormatter) {
+      final EmailContentFormatter emailContentFormatter,
+      final NotificationServiceRegistry notificationServiceRegistry,
+      final NotificationTaskRunner notificationTaskRunner) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.databaseAdminResource = databaseAdminResource;
     this.metricAnomaliesContent = metricAnomaliesContent;
     this.configuration = configuration;
     this.emailContentFormatter = emailContentFormatter;
-
-    this.emailAlertScheme = notificationSchemeFactory.createEmailAlertScheme();
+    this.emailEntityBuilder = emailEntityBuilder;
+    this.notificationServiceRegistry = notificationServiceRegistry;
+    this.notificationTaskRunner = notificationTaskRunner;
   }
 
   @Path("db-admin")
@@ -110,7 +119,7 @@ public class InternalResource {
         subscriptionGroupId));
     final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findAll());
 
-    emailAlertScheme.buildAndSendEmail(sg, new ArrayList<>(all));
+    emailEntityBuilder.buildEmailEntity(sg, new ArrayList<>(all));
     return Response.ok().build();
   }
 
@@ -132,7 +141,7 @@ public class InternalResource {
 
   @GET
   @Path("email/entity")
-  @JacksonFeatures(serializationEnable =  { SerializationFeature.INDENT_OUTPUT })
+  @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
   @Produces(MediaType.APPLICATION_JSON)
   public Response generateEmailEntity(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
@@ -167,6 +176,29 @@ public class InternalResource {
   @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
   public Response getPackageInfo(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     return Response.ok(PACKAGE).build();
+  }
+
+  @POST
+  @Path("trigger/webhook")
+  public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+    final ImmutableMap<String, String> properties = ImmutableMap.of(
+        "url", "http://localhost:8080/internal/webhook"
+    );
+    notificationServiceRegistry
+        .get("webhook", properties)
+        .notify(new NotificationPayloadApi()
+            .setSubscriptionGroup(new SubscriptionGroupApi()
+                .setName("dummy"))
+        );
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("notify")
+  public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @FormParam("subscriptionGroupId") Long subscriptionGroupId) throws Exception {
+    notificationTaskRunner.execute(subscriptionGroupId);
+    return Response.ok().build();
   }
 
   @POST

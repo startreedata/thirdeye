@@ -13,6 +13,7 @@ public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
 
   private Long id;
   private String name;
+  @Deprecated
   private String urn;
   private DatasetApi dataset;
   private Boolean active;
@@ -44,10 +45,12 @@ public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
     return this;
   }
 
+  @Deprecated
   public String getUrn() {
     return urn;
   }
 
+  @Deprecated
   public MetricApi setUrn(final String urn) {
     this.urn = urn;
     return this;

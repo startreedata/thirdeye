@@ -111,7 +111,7 @@ public class MetricEntity extends Entity {
   public static MetricEntity fromURN(String urn, double score) {
     ParsedUrn parsedUrn = EntityUtils.parseUrnString(urn, TYPE, 3);
     long id = Long.parseLong(parsedUrn.getPrefixes().get(2));
-    return new MetricEntity(urn, score, Collections.emptyList(), id, parsedUrn.toFilters());
+    return new MetricEntity(urn, score, Collections.emptyList(), id, parsedUrn.toFiltersMap());
   }
 
   public static MetricEntity fromURN(String urn) {

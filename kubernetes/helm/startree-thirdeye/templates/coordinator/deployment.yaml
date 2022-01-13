@@ -37,6 +37,25 @@ spec:
 {{ toYaml .Values.coordinator.affinity | indent 8 }}
       tolerations:
 {{ toYaml .Values.coordinator.tolerations | indent 8 }}
+      {{- if .Values.tls.enabled }}
+      initContainers:
+      - name: init-keystore
+        image: eclipse-temurin:17-jdk
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        command:
+        - /bin/sh
+        - -c
+        - >
+          echo "importing ca cert and tls key" &&
+          openssl pkcs12 -export -name tls -in /opt/thirdeye/server/tls/tls.crt -inkey /opt/thirdeye/server/tls/tls.key -out /opt/thirdeye/server/keystore.p12 -password pass:{{ .Values.tls.password }} &&
+          keytool -importkeystore -alias tls  -srckeystore /opt/thirdeye/server/keystore.p12 -srcstoretype PKCS12 -srcstorepass {{ .Values.tls.password }} -deststorepass {{ .Values.tls.password }} -destkeystore /opt/thirdeye/server/keystore/keystore
+        volumeMounts:
+        - name: tls
+          mountPath: /opt/thirdeye/server/tls
+          readOnly: true
+        - name: keystore
+          mountPath: /opt/thirdeye/server/keystore
+      {{- end }}
       containers:
       - name: coordinator
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -67,6 +86,11 @@ spec:
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
             subPath: "server.yaml"
             readOnly: true
+          {{- if .Values.tls.enabled }}
+          - name: keystore
+            mountPath: /opt/thirdeye/server/keystore
+            readOnly: true
+          {{- end }}
           {{- if .Values.config.holidayLoaderKey }}
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
@@ -80,3 +104,10 @@ spec:
         - name: thirdeye-config
           configMap:
             name: thirdeye-config
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ include "thirdeye.coordinator.fullname" . }}-tls
+        - name: keystore
+          emptyDir: {}
+        {{- end }}

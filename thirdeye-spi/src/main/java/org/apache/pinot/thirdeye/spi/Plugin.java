@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.spi;
 
 import java.util.Collections;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactory;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.EventTriggerFactory;
 import org.apache.pinot.thirdeye.spi.notification.NotificationServiceFactory;
@@ -10,10 +9,6 @@ import org.apache.pinot.thirdeye.spi.notification.NotificationServiceFactory;
 public interface Plugin {
 
   default Iterable<ThirdEyeDataSourceFactory> getDataSourceFactories() {
-    return Collections.emptyList();
-  }
-
-  default Iterable<AnomalyDetectorFactory> getAnomalyDetectorFactories() {
     return Collections.emptyList();
   }
 

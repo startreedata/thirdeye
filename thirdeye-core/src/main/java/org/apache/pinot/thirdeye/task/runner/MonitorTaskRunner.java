@@ -226,7 +226,7 @@ public class MonitorTaskRunner implements TaskRunner {
       recipients.add(config.getUpdatedBy());
     }
     EmailHelper.sendEmailWithTextBody(email,
-        configuration.getAlerterConfigurations().getSmtpConfiguration(),
+        configuration.getNotificationConfiguration().getSmtpConfiguration(),
         subject,
         textBody, configuration.getFailureFromAddress(),
         new DetectionAlertFilterRecipients(recipients));

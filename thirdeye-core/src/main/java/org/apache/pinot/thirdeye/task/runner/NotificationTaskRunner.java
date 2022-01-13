@@ -19,20 +19,18 @@
 
 package org.apache.pinot.thirdeye.task.runner;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.apache.pinot.thirdeye.detection.alert.AlertUtils;
-import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilter;
 import org.apache.pinot.thirdeye.detection.alert.DetectionAlertFilterResult;
 import org.apache.pinot.thirdeye.detection.alert.NotificationSchemeFactory;
-import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme;
-import org.apache.pinot.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
-import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
+import org.apache.pinot.thirdeye.notification.NotificationDispatcher;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -55,94 +53,93 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
-  private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
+  private final NotificationDispatcher notificationDispatcher;
 
   @Inject
   public NotificationTaskRunner(
-      final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final MetricRegistry metricRegistry) {
-    this.notificationServiceRegistry = notificationServiceRegistry;
+      final MetricRegistry metricRegistry,
+      final NotificationDispatcher notificationDispatcher) {
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
+    this.notificationDispatcher = notificationDispatcher;
   }
 
-  private SubscriptionGroupDTO loadDetectionAlertConfig(final long detectionAlertConfigId) {
-    final SubscriptionGroupDTO detectionAlertConfig = this.subscriptionGroupManager
-        .findById(detectionAlertConfigId);
-    if (detectionAlertConfig == null) {
-      throw new RuntimeException("Cannot find detection alert config id " + detectionAlertConfigId);
-    }
+  private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
+    final SubscriptionGroupDTO subscriptionGroupDTO = requireNonNull(
+        subscriptionGroupManager.findById(id),
+        "Cannot find subscription group: " + id);
 
-    if (detectionAlertConfig.getProperties() == null) {
-      LOG.warn(String.format("Detection alert %d contains no properties", detectionAlertConfigId));
+    if (subscriptionGroupDTO.getProperties() == null) {
+      LOG.warn(String.format("Detection alert %d contains no properties", id));
     }
-    return detectionAlertConfig;
+    return subscriptionGroupDTO;
   }
 
-  private void updateSubscriptionWatermarks(final DetectionAlertFilterResult result,
-      final SubscriptionGroupDTO subscriptionConfig) {
-    if (!result.getAllAnomalies().isEmpty()) {
+  private void updateSubscriptionWatermarks(final SubscriptionGroupDTO subscriptionConfig,
+      final List<MergedAnomalyResultDTO> allAnomalies) {
+    if (!allAnomalies.isEmpty()) {
       subscriptionConfig.setVectorClocks(
           AlertUtils.mergeVectorClock(subscriptionConfig.getVectorClocks(),
-              AlertUtils.makeVectorClock(result.getAllAnomalies())));
+              AlertUtils.makeVectorClock(allAnomalies)));
 
       LOG.info("Updating watermarks for subscription config : {}", subscriptionConfig.getId());
-      this.subscriptionGroupManager.save(subscriptionConfig);
+      subscriptionGroupManager.save(subscriptionConfig);
     }
   }
 
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
+    return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId());
+  }
+
+  public ArrayList<TaskResult> execute(final long subscriptionGroupId)
+      throws Exception {
     notificationTaskCounter.inc();
 
     try {
-      final long alertId = ((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId();
-      final SubscriptionGroupDTO alertConfig = loadDetectionAlertConfig(alertId);
+      final SubscriptionGroupDTO subscriptionGroupDTO = getSubscriptionGroupDTO(subscriptionGroupId);
 
-      // Load all the anomalies along with their recipients
-      final DetectionAlertFilter alertFilter = notificationSchemeFactory
-          .loadAlertFilter(alertConfig, System.currentTimeMillis());
-      DetectionAlertFilterResult result = alertFilter.run();
-
-      // TODO: The old UI relies on notified tag to display the anomalies. After the migration
-      // we need to clean up all references to notified tag.
-      for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
-        anomaly.setNotified(true);
-        mergedAnomalyResultManager.update(anomaly);
-      }
-
-      // Suppress alerts if any and get the filtered anomalies to be notified
-      final Set<DetectionAlertSuppressor> alertSuppressors = notificationSchemeFactory
-          .loadAlertSuppressors(alertConfig);
-      for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
-        result = alertSuppressor.run(result);
-      }
-
-      // Send out alert notifications (email and/or iris)
-      final Set<NotificationScheme> alertSchemes = notificationSchemeFactory.getAlertSchemes();
-      for (final NotificationScheme alertScheme : alertSchemes) {
-        alertScheme.run(alertConfig, result);
-        alertScheme.destroy();
-      }
-
-      updateSubscriptionWatermarks(result, alertConfig);
+      executeInternal(subscriptionGroupDTO);
       return new ArrayList<>();
     } finally {
       notificationTaskSuccessCounter.inc();
     }
+  }
+
+  private void executeInternal(final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
+    final DetectionAlertFilterResult result = notificationSchemeFactory
+        .getDetectionAlertFilterResult(subscriptionGroupDTO);
+
+    // TODO: The old UI relies on notified tag to display the anomalies. After the migration
+    // we need to clean up all references to notified tag.
+    for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
+      anomaly.setNotified(true);
+      mergedAnomalyResultManager.update(anomaly);
+    }
+
+    requireNonNull(result);
+    if (result.getAllAnomalies().size() == 0) {
+      LOG.debug("Zero anomalies found, skipping webhook alert for {}",
+          subscriptionGroupDTO.getId());
+      return;
+    }
+
+    notificationDispatcher.dispatch(subscriptionGroupDTO, result);
+
+    updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
   }
 }

@@ -11,7 +11,7 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
@@ -44,7 +44,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     final Map<String, Object> componentSpec = getComponentSpec(params);
     return new DetectionRegistry()
-        .buildDetectorV2(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
+        .buildDetectorV2(type, new AnomalyDetectorFactoryV2Context().setProperties(componentSpec));
   }
 
   @Override

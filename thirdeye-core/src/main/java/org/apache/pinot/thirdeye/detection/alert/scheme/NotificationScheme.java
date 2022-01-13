@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class NotificationScheme {
 
-  private static final String PROP_TEMPLATE = "template";
+  public static final String PROP_TEMPLATE = "template";
   private static final Logger LOG = LoggerFactory.getLogger(NotificationScheme.class);
   protected static final Comparator<AnomalyResult> COMPARATOR_DESC =
       (o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime());

@@ -16,7 +16,6 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator.PROP_SUB_ENTITY_NAME;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.mergeAndSortAnomalies;
 
 import java.util.ArrayList;
@@ -32,6 +31,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TriggerConditionGrouperTest {
+
+  private static final String PROP_SUB_ENTITY_NAME = "subEntityName";
 
   public static MergedAnomalyResultDTO makeAnomaly(long start, long end, String entity) {
     MergedAnomalyResultDTO anomaly = DetectionTestUtils

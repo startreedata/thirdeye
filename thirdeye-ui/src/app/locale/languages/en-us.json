@@ -73,6 +73,7 @@
         "end": "End",
         "from": "From",
         "to": "To",
+        "add-a-dimension": "Add a Dimension",
         "last-15-minutes": "Last 15 Minutes",
         "last-1-hour": "Last 1 Hour",
         "last-12-hours": "Last 12 Hours",
@@ -113,6 +114,7 @@
         "predicted": "Predicted",
         "deviation": "Deviation",
         "baseline": "Baseline",
+        "change": "Change",
         "upper-bound": "Upper bound",
         "lower-bound": "Lower bound",
         "upper-and-lower-bound": "Upper and Lower bound",
@@ -142,7 +144,12 @@
         "minimize": "Minimize",
         "maximize": "Maximize",
 
-        "authentication-error": "Authentication Error"
+        "authentication-error": "Authentication Error",
+
+        "metric-value": "Metric Value",
+        "%-contribution": "% Contribution",
+        "comparison": "Comparison",
+        "difference": "Difference"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -177,6 +184,7 @@
         "dataset-datasource-required": "Datasource is required",
 
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
-        "authentication-disabled": "Authentication has been disabled."
+        "authentication-disabled": "Authentication has been disabled.",
+        "anomaly-filter-search": "Add a dimension filter (Type to Search)"
     }
 }

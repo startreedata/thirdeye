@@ -80,7 +80,7 @@ public class DetectionJiraAlerter extends NotificationScheme {
       final ThirdEyeJiraClient jiraClient) {
     teConfig = thirdeyeConfig;
 
-    jiraAdminConfig = thirdeyeConfig.getAlerterConfigurations().getJiraConfiguration();
+    jiraAdminConfig = thirdeyeConfig.getNotificationConfiguration().getJiraConfiguration();
     this.jiraClient = jiraClient;
   }
 

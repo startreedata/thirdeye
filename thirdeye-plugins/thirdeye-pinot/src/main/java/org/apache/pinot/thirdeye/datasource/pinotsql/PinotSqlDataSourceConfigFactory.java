@@ -7,8 +7,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +47,8 @@ public class PinotSqlDataSourceConfigFactory {
         PinotSqlDataSourceProperties.CONTROLLER_PORT.getValue());
     String controllerConnectionScheme = MapUtils.getString(processedProperties,
         PinotSqlDataSourceProperties.CONTROLLER_CONNECTION_SCHEME.getValue());
+    Map<String, String> headers = (Map<String, String>) MapUtils.getMap(processedProperties,
+      PinotSqlDataSourceProperties.CONTROLLER_HEADERS.getValue());
 
     Builder builder =
         builder().setControllerHost(controllerHost)
@@ -52,6 +56,7 @@ public class PinotSqlDataSourceConfigFactory {
     if (StringUtils.isNotBlank(controllerConnectionScheme)) {
       builder.setControllerConnectionScheme(controllerConnectionScheme);
     }
+    Optional.ofNullable(headers).ifPresent(h -> builder.setHeaders(h));
     return builder.build();
   }
 
@@ -100,6 +105,12 @@ public class PinotSqlDataSourceConfigFactory {
           builder.put(optionalProperty.getValue(), propertyString);
         }
       }
+      // Handling separately as headers value is a map.
+      // TODO make the above iterator logic generic
+      String headers = PinotSqlDataSourceProperties.CONTROLLER_HEADERS.getValue();
+      if(properties.containsKey(headers)){
+        builder.put(headers, properties.get(headers));
+      }
       return builder.build();
     } else {
       return null;
@@ -118,6 +129,7 @@ public class PinotSqlDataSourceConfigFactory {
     private String controllerHost;
     private int controllerPort = -1;
     private String controllerConnectionScheme = HTTP_SCHEME;
+    private Map<String, String> headers = new HashMap<>();
 
     public Builder setControllerHost(String controllerHost) {
       this.controllerHost = controllerHost;
@@ -134,6 +146,11 @@ public class PinotSqlDataSourceConfigFactory {
       return this;
     }
 
+    public Builder setHeaders(final Map<String, String> headers) {
+      this.headers = headers;
+      return this;
+    }
+
     public PinotSqlThirdEyeDataSourceConfig build() {
       final String className = PinotSqlThirdEyeDataSourceConfig.class.getSimpleName();
       checkNotNull(controllerHost, "{} is missing 'Controller Host' property", className);
@@ -147,7 +164,8 @@ public class PinotSqlDataSourceConfigFactory {
       return new PinotSqlThirdEyeDataSourceConfig()
           .setControllerHost(controllerHost)
           .setControllerPort(controllerPort)
-          .setControllerConnectionScheme(controllerConnectionScheme);
+          .setControllerConnectionScheme(controllerConnectionScheme)
+          .setHeaders(headers);
     }
   }
 }

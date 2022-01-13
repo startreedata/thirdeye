@@ -1,7 +1,7 @@
 package org.apache.pinot.thirdeye.detection.components;
 
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
@@ -28,7 +28,7 @@ public class GenericAnomalyDetectorV2Factory<T extends AbstractSpec> implements
 
   @SuppressWarnings("unchecked")
   @Override
-  public AnomalyDetectorV2<T> build(final AnomalyDetectorFactoryContext context) {
+  public AnomalyDetectorV2<T> build(final AnomalyDetectorFactoryV2Context context) {
     try {
       final AnomalyDetectorV2<T> detector = clazz.newInstance();
       detector.init(buildSpec(context));
@@ -38,7 +38,7 @@ public class GenericAnomalyDetectorV2Factory<T extends AbstractSpec> implements
     }
   }
 
-  private T buildSpec(final AnomalyDetectorFactoryContext context) {
+  private T buildSpec(final AnomalyDetectorFactoryV2Context context) {
     return AbstractSpec.fromProperties(context.getProperties(), specClazz);
   }
 

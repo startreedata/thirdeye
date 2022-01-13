@@ -20,7 +20,8 @@
 package org.apache.pinot.thirdeye.datasource.pinot;
 
 import com.google.common.base.MoreObjects;
-import java.util.Objects;
+import com.google.common.base.Objects;
+import java.util.Map;
 
 /**
  * An immutable configurations for setting up {@link PinotThirdEyeDataSource}'s connection to Pinot.
@@ -35,6 +36,7 @@ public class PinotThirdEyeDataSourceConfig {
   private String brokerUrl;
   private String tag;
   private String name;
+  private Map<String, String> headers;
 
   public String getZookeeperUrl() {
     return zookeeperUrl;
@@ -68,7 +70,7 @@ public class PinotThirdEyeDataSourceConfig {
   }
 
   public PinotThirdEyeDataSourceConfig setControllerConnectionScheme(
-      final String controllerConnectionScheme) {
+    final String controllerConnectionScheme) {
     this.controllerConnectionScheme = controllerConnectionScheme;
     return this;
   }
@@ -109,38 +111,61 @@ public class PinotThirdEyeDataSourceConfig {
     return this;
   }
 
+  public Map<String, String> getHeaders() {
+    return headers;
+  }
+
+  public PinotThirdEyeDataSourceConfig setHeaders(final Map<String, String> headers) {
+    this.headers = headers;
+    return this;
+  }
+
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PinotThirdEyeDataSourceConfig config = (PinotThirdEyeDataSourceConfig) o;
-    return getControllerPort() == config.getControllerPort() && Objects
-        .equals(getZookeeperUrl(), config.getZookeeperUrl()) && Objects
-        .equals(getControllerHost(), config.getControllerHost()) && Objects
-        .equals(getControllerConnectionScheme(), config.getControllerConnectionScheme()) && Objects
-        .equals(getClusterName(), config.getClusterName()) && Objects
-        .equals(getBrokerUrl(), config.getBrokerUrl())
-        && Objects.equals(getTag(), config.getTag());
+    final PinotThirdEyeDataSourceConfig that = (PinotThirdEyeDataSourceConfig) o;
+    return getControllerPort() == that.getControllerPort() && Objects.equal(
+      getZookeeperUrl(),
+      that.getZookeeperUrl()) && Objects.equal(getControllerHost(),
+      that.getControllerHost())
+      && Objects.equal(getControllerConnectionScheme(),
+      that.getControllerConnectionScheme()) && Objects.equal(getClusterName(),
+      that.getClusterName()) && Objects.equal(getBrokerUrl(),
+      that.getBrokerUrl()) && Objects.equal(getTag(), that.getTag())
+      && Objects.equal(getName(), that.getName())
+      && Objects.equal(getHeaders(), that.getHeaders());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getZookeeperUrl(), getControllerHost(), getControllerPort(),
-        getControllerConnectionScheme(),
-        getClusterName(), getBrokerUrl(), getTag(), getName());
+    return Objects.hashCode(getZookeeperUrl(),
+      getControllerHost(),
+      getControllerPort(),
+      getControllerConnectionScheme(),
+      getClusterName(),
+      getBrokerUrl(),
+      getTag(),
+      getName(),
+      getHeaders());
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("zookeeperUrl", zookeeperUrl)
-        .add("controllerHost", controllerHost)
-        .add("controllerPort", controllerPort)
-        .add("controllerConnectionScheme", controllerConnectionScheme)
-        .add("clusterName", clusterName).add("brokerUrl", brokerUrl).add("tag", tag)
-        .add("name", name).toString();
+    return MoreObjects.toStringHelper(this)
+      .add("zookeeperUrl", zookeeperUrl)
+      .add("controllerHost", controllerHost)
+      .add("controllerPort", controllerPort)
+      .add("controllerConnectionScheme", controllerConnectionScheme)
+      .add("clusterName", clusterName)
+      .add("brokerUrl", brokerUrl)
+      .add("tag", tag)
+      .add("name", name)
+      .add("headers", headers)
+      .toString();
   }
 }

@@ -101,14 +101,15 @@ public final class ParsedUrn {
    */
   // TODO use FilterPredicates throughout RCA framework
   @Deprecated
-  public Multimap<String, String> toFilters() {
-    return toFilters(this.predicates);
+  public Multimap<String, String> toFiltersMap() {
+    return toFiltersMap(this.predicates);
   }
 
   /**
    * For transition to FilterPredicate only. Prefer manipulating FilterPredicate directly.
    * */
-  public static Multimap<String, String> toFilters(Collection<FilterPredicate> predicates) {
+  @Deprecated
+  public static Multimap<String, String> toFiltersMap(Collection<FilterPredicate> predicates) {
     Multimap<String, String> filters = TreeMultimap.create();
     for (FilterPredicate predicate : predicates) {
       if (!OPERATOR_TO_FILTER.containsKey(predicate.operator)) {

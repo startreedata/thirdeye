@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import static org.apache.pinot.thirdeye.cube.summary.Summary.NOT_ALL;
+import static org.apache.pinot.thirdeye.cube.summary.NameTag.NOT_ALL;
 import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +56,7 @@ public class DimensionAnalysisResultApiTest {
         .setBaselineTotalSize(baselineSize)
         .setCurrentTotalSize(currentSize)
         .setGlobalRatio(roundUp(currentTotal / baselineTotal));
-    Summary.buildDiffSummary(response, cubeNodes, 2, new BalancedCostFunction());
+    Summary.buildDiffSummary(response, cubeNodes, new BalancedCostFunction());
     response.setMetric(new MetricApi().setName("testMetric"));
 
     // Validation

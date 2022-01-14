@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,6 @@ import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
 import org.apache.pinot.thirdeye.spi.api.DimensionAnalysisResultApi;
 import org.apache.pinot.thirdeye.spi.api.cube.SummaryGainerLoserResponseRow;
 import org.apache.pinot.thirdeye.spi.api.cube.SummaryResponseRow;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +53,7 @@ public class Summary {
 
   static final NodeDimensionValuesComparator NODE_COMPARATOR = new NodeDimensionValuesComparator();
   private static final Logger LOG = LoggerFactory.getLogger(Summary.class);
+  public static final int OTHER_DIMENSIONS_LIST_LIMIT = 10;
 
   private final Cube cube;
   private final CostFunction costFunction;
@@ -196,27 +195,15 @@ public class Summary {
           dimensionAnalysisResultApi.getCurrentTotal()));
       row.setCost(node.getCost());
       // Add other dimension values if this node is (ALL)-
-      final String otherDimensionValuesString = buildOtherDimensionsString(otherDimensionValues.get(node));
-      row.setOtherDimensionValues(otherDimensionValuesString);
+      LinkedHashSet<String> otherDimensionsSet = otherDimensionValues.get(node);
+      row.setOtherDimensionValues(otherDimensionsSet.stream().limit(OTHER_DIMENSIONS_LIST_LIMIT)
+          .collect(Collectors.toList()));
+      if (otherDimensionsSet.size() > OTHER_DIMENSIONS_LIST_LIMIT) {
+        // other dimension limit was applied - give the number of other dim not in list
+        row.setMoreOtherDimensionNumber(otherDimensionsSet.size() - OTHER_DIMENSIONS_LIST_LIMIT);
+      }
       dimensionAnalysisResultApi.getResponseRows().add(row);
     }
-  }
-
-  @NotNull
-  private static String buildOtherDimensionsString(final LinkedHashSet<String> otherDimensionsSet) {
-    StringBuilder sb = new StringBuilder();
-    String separator = "";
-    Iterator<String> iterator = otherDimensionsSet.iterator();
-    int counter = 0;
-    while (iterator.hasNext()) {
-      if (++counter > 10) { // Get at most 10 children
-        sb.append(separator).append("and more...");
-        break;
-      }
-      sb.append(separator).append(iterator.next());
-      separator = ", ";
-    }
-    return sb.toString();
   }
 
   public static String computePercentageChange(double baseline, double current) {

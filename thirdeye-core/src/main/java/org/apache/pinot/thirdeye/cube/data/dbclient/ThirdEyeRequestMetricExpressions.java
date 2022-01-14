@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.cube.data.dbclient;
 
+import com.google.common.base.MoreObjects;
 import java.util.List;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
@@ -62,5 +63,13 @@ public class ThirdEyeRequestMetricExpressions {
    */
   public List<MetricExpression> getMetricExpressions() {
     return metricExpressions;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("thirdEyeRequest", thirdEyeRequest)
+        .add("metricExpressions", metricExpressions)
+        .toString();
   }
 }

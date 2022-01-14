@@ -231,8 +231,11 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
     List<String> groupBy = Collections.emptyList();
     List<Map<CubeTag, ThirdEyeRequestMetricExpressions>> bulkRequests = Collections.singletonList(
         constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
+    // quickfix - redundant local variables for better IndexOutOfBoundsException logging
     List<List<R>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
-    return constructAggregatedValues(new Dimensions(), bulkRequests).get(0).get(0);
+    List<R> aggregatedValue = aggregatedValues.get(0);
+    R topValue = aggregatedValue.get(0);
+    return topValue;
   }
 
   @Override

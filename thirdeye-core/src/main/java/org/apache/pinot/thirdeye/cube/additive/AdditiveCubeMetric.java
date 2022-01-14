@@ -33,6 +33,8 @@ import org.apache.pinot.thirdeye.cube.data.dbclient.CubeTag;
 import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Describes a CubeMetric that is additive.
@@ -40,6 +42,8 @@ import org.joda.time.Interval;
  * @see CubeFetcherImpl
  */
 public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(AdditiveCubeMetric.class);
 
   private final String dataset;
   private final String metricName;
@@ -84,26 +88,30 @@ public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
     return cubeSpecs;
   }
 
-  @Override
   public void fillValueToRowTable(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
       List<String> dimensionValues, double value, CubeTag tag) {
-
-    if (Double.compare(0d, value) < 0 && !Double.isInfinite(value)) {
-      AdditiveRow row = rowTable.get(dimensionValues);
-      if (row == null) {
-        row = new AdditiveRow(dimensions, new DimensionValues(dimensionValues));
-        rowTable.put(dimensionValues, row);
-      }
-      switch (tag) {
-        case Baseline:
-          row.setBaselineValue(value);
-          break;
-        case Current:
-          row.setCurrentValue(value);
-          break;
-        default:
-          throw new IllegalArgumentException("Unsupported CubeTag: " + tag.name());
-      }
+    if (Double.compare(0d, value) >= 0) {
+      LOG.warn("Value not added to rowTable: it is too small. Value: {}. Tag: {}", value, tag);
+      return;
+    }
+    if (Double.isInfinite(value)) {
+      LOG.warn("Value not added to rowTable: it is infinite. Value: {}. Tag: {}", value, tag);
+      return;
+    }
+    AdditiveRow row = rowTable.get(dimensionValues);
+    if (row == null) {
+      row = new AdditiveRow(dimensions, new DimensionValues(dimensionValues));
+      rowTable.put(dimensionValues, row);
+    }
+    switch (tag) {
+      case Baseline:
+        row.setBaselineValue(value);
+        break;
+      case Current:
+        row.setCurrentValue(value);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported CubeTag: " + tag.name());
     }
   }
 }

@@ -1,4 +1,7 @@
-import { formatTreemapData, summarizeDimensionValueData } from "./utils";
+import {
+    formatTreemapData,
+    summarizeDimensionValueData,
+} from "./anomaly-breakdown-comparison-heatmap.utils";
 
 describe("summarizeDimensionValueData", () => {
     it("total and summary is expected for non empty input", () => {

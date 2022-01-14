@@ -8,6 +8,7 @@ export interface TreemapProps<Data> {
     height?: number;
     tooltipElement?: React.FunctionComponent<TreemapData<Data>>;
     colorChangeValueAccessor?: (node: TreemapData<Data>) => number;
+    shouldTruncateText: boolean;
 }
 
 export interface TreemapData<Data> {
@@ -21,4 +22,5 @@ export type TreemapPropsInternal<Data> = {
     width: number;
     height: number;
     tooltipElement: FunctionComponent<TreemapData<Data>>;
+    shouldTruncateText: boolean;
 } & TreemapProps<Data>;

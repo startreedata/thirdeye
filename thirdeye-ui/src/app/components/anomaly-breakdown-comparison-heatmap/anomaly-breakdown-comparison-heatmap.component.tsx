@@ -9,7 +9,7 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -40,6 +40,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     anomalyId,
     comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
     anomaly,
+    shouldTruncateText = true,
 }: AnomalyBreakdownComparisonHeatmapProps) => {
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
@@ -182,6 +183,27 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
         return node.size;
     };
+
+    if (
+        anomalyBreakdownCurrentReqStatus === ActionStatus.Error ||
+        anomalyBreakdownComparisonReqStatus === ActionStatus.Error
+    ) {
+        return (
+            <Card variant="outlined">
+                <CardHeader
+                    title="Heatmap of Change in Contribution"
+                    titleTypographyProps={{ variant: "h5" }}
+                />
+                <CardContent>
+                    <Alert severity="error">
+                        <AlertTitle>Data Retrieval Error</AlertTitle>
+                        An issue was experienced while retrieving data for
+                        change in contribution. Please try again later.
+                    </Alert>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card variant="outlined">
@@ -339,6 +361,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                             colorChangeValueAccessor
                                         }
                                         name={data.column}
+                                        shouldTruncateText={shouldTruncateText}
                                         tooltipElement={DimensionHeatmapTooltip}
                                         treemapData={formatTreemapData(data)}
                                         onDimensionClickHandler={

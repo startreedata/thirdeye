@@ -29,7 +29,6 @@ import {
 import { useTreemapStyles } from "./treemap.styles";
 
 const DEFAULT_TREEMAP_HEIGHT = 60;
-const RIGHT_BOUNDS_PADDING = 30;
 const margin = {
     left: 10,
     top: 10,
@@ -42,6 +41,7 @@ const OTHER = "other";
 function Treemap<Data>({
     height = DEFAULT_TREEMAP_HEIGHT,
     tooltipElement = GenericTreemapTooltip,
+    shouldTruncateText = true,
     ...props
 }: TreemapProps<Data>): JSX.Element {
     return (
@@ -55,6 +55,7 @@ function Treemap<Data>({
                         <TreemapInternal
                             {...props}
                             height={height}
+                            shouldTruncateText={shouldTruncateText}
                             tooltipElement={tooltipElement}
                             width={width}
                         />
@@ -69,6 +70,7 @@ function TreemapInternal<Data>({
     width,
     height,
     colorChangeValueAccessor = (d) => d.size,
+    shouldTruncateText = true,
     ...props
 }: TreemapPropsInternal<Data>): JSX.Element {
     const xMax = Math.abs(width) - margin.left - margin.right;
@@ -129,12 +131,8 @@ function TreemapInternal<Data>({
             return;
         }
 
-        const rightBound =
-            clickedOnRect.ownerSVGElement.width.baseVal.value -
-            RIGHT_BOUNDS_PADDING;
-
         showTooltip({
-            tooltipLeft: Math.min(rightBound, event.nativeEvent.offsetX),
+            tooltipLeft: event.nativeEvent.offsetX,
             tooltipTop: event.nativeEvent.offsetY,
             tooltipData: node.data.data,
         });
@@ -248,12 +246,15 @@ function TreemapInternal<Data>({
                                                             x={nodeWidth / 2}
                                                             y={nodeHeight / 2}
                                                         >
-                                                            {getShortText(
-                                                                node.data.id ||
-                                                                    EMPTY_STRING_DISPLAY,
-                                                                nodeWidth,
-                                                                nodeHeight
-                                                            )}
+                                                            {shouldTruncateText
+                                                                ? getShortText(
+                                                                      node.data
+                                                                          .id ||
+                                                                          EMPTY_STRING_DISPLAY,
+                                                                      nodeWidth,
+                                                                      nodeHeight
+                                                                  )
+                                                                : node.data.id}
                                                         </Text>
                                                     </>
                                                 )}

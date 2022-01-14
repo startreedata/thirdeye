@@ -5,6 +5,7 @@ export interface AnomalyBreakdownComparisonHeatmapProps {
     anomalyId: number;
     comparisonOffset?: AnomalyBreakdownAPIOffsetValues;
     anomaly?: Anomaly | null;
+    shouldTruncateText?: boolean;
 }
 
 export interface SummaryData {

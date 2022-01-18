@@ -351,6 +351,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                             alertEvaluationTimeSeriesHeight={
                                                 500
                                             }
+                                            hideRangeControls={false}
                                             title="Preview Alert"
                                             onRefresh={refreshAlertEvaluation}
                                         />

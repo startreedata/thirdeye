@@ -11,4 +11,5 @@ export interface AlertEvaluationTimeSeriesCardProps {
     helperText?: string;
     hideRefreshButton?: boolean;
     onRefresh?: () => void;
+    hideRangeControls?: boolean;
 }

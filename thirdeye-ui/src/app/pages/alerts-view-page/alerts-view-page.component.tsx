@@ -191,6 +191,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                     <AlertEvaluationTimeSeriesCard
                         alertEvaluation={alertEvaluation}
                         alertEvaluationTimeSeriesHeight={300}
+                        hideRangeControls={false}
                         title={uiAlert.name}
                         onRefresh={fetchAlertEvaluation}
                     />

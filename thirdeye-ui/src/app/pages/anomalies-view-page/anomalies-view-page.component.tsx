@@ -146,6 +146,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     <AlertEvaluationTimeSeriesCard
                         alertEvaluation={alertEvaluation}
                         alertEvaluationTimeSeriesHeight={500}
+                        hideRangeControls={false}
                         maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
                         onRefresh={fetchAlertEvaluation}
                     />

@@ -10,12 +10,15 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.pinot.thirdeye.auth.AuthConfiguration;
 import org.apache.pinot.thirdeye.auth.OAuthConfig;
 import org.apache.pinot.thirdeye.auth.OidcUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.events.MockEventsConfiguration;
+import org.apache.pinot.thirdeye.spi.api.AuthInfoApi;
+import org.apache.pinot.thirdeye.spi.auth.AuthManager;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeServerModule extends AbstractModule {
@@ -41,13 +44,13 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public AuthConfiguration getAuthConfiguration() {
+  public AuthConfiguration getAuthConfiguration(AuthManager authManager) {
     AuthConfiguration authConfig = configuration.getAuthConfiguration();
     if(authConfig.isEnabled()){
       if (authConfig.getInfoURL() != null && !authConfig.getInfoURL().trim().isEmpty()) {
-        HashMap<String, Object> info = OidcUtils.getAuthInfo(authConfig.getInfoURL());
-        if (info != null && info.get(ISSUER_URL_KEY) !=null && !info.get(ISSUER_URL_KEY).toString().isEmpty()) {
-          HashMap<String, Object> oidcConfig = (HashMap<String, Object>) info.get(OIDC_CONFIG_KEY);
+        AuthInfoApi info = authManager.getInfo();
+        if (info != null && info.getOpenidConfiguration() !=null) {
+          Map<String, Object> oidcConfig = info.getOpenidConfiguration();
           if(authConfig.getOAuthConfig() == null) {
             authConfig.setOAuthConfig(new OAuthConfig());
           }

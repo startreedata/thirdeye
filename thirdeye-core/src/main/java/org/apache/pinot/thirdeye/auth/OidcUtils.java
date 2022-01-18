@@ -43,18 +43,4 @@ public class OidcUtils {
           keysUrl), e);
     }
   }
-
-  public static HashMap<String, Object> getAuthInfo(final String infoURL){
-    final Retrofit retrofit = new Retrofit.Builder()
-      .baseUrl(infoURL.substring(0, infoURL.lastIndexOf('/') + 1))
-      .addConverterFactory(JacksonConverterFactory.create())
-      .build();
-    final InfoService service = retrofit.create(InfoService.class);
-    final Call<HashMap<String, Object>> call = service.getInfo(infoURL);
-    try {
-      return call.execute().body();
-    } catch (IOException e) {
-      return null;
-    }
-  }
 }

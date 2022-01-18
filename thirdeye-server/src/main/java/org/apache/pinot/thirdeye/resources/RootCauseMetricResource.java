@@ -38,6 +38,10 @@ import org.apache.pinot.thirdeye.datasource.loader.DefaultAggregationLoader;
 import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfo;
 import org.apache.pinot.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
+import org.apache.pinot.thirdeye.spi.api.DatasetApi;
+import org.apache.pinot.thirdeye.spi.api.HeatMapResultApi;
+import org.apache.pinot.thirdeye.spi.api.HeatMapResultApi.HeatMapBreakdownApi;
+import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
@@ -51,12 +55,16 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
+import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +88,7 @@ public class RootCauseMetricResource {
   private static final String OFFSET_DEFAULT = "current";
   protected static final String TIMEZONE_DEFAULT = "UTC";
   private static final int LIMIT_DEFAULT = 100;
+  private static final String DEFAULT_BASELINE_OFFSET = "P1W";
 
   private final ExecutorService executor;
   private final AggregationLoader aggregationLoader;
@@ -240,6 +249,7 @@ public class RootCauseMetricResource {
   @ApiOperation(value =
       "Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.\n"
           + "Aligns time stamps if necessary and omits null values.")
+  @Deprecated
   public Response getAnomalyBreakdown(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
@@ -253,18 +263,97 @@ public class RootCauseMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(anomalyId);
+    Baseline range = parseOffset(offset, DateTimeZone.UTC);
+
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+        anomalyId);
+    final Interval anomalyInterval = new Interval(
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
+        DateTimeZone.UTC);
 
     final Map<String, Map<String, Double>> breakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
         filters,
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        offset,
+        anomalyInterval,
+        range,
         DateTimeZone.UTC,
         limit,
         rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
     return Response.ok(breakdown).build();
+  }
+
+  @GET
+  @Path("/heatmap/anomaly/{id}")
+  @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
+  public Response getAnomalyHeatmap(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
+      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
+      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
+      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
+      @QueryParam("filters") List<String> filters,
+      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
+      @QueryParam("limit") Integer limit) throws Exception {
+
+    if (limit == null) {
+      limit = LIMIT_DEFAULT;
+    }
+    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+        anomalyId);
+    final Interval currentInterval = new Interval(
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
+        DateTimeZone.UTC);
+
+    Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
+    final Interval baselineInterval = new Interval(
+        currentInterval.getStart().minus(baselineOffsetPeriod),
+        currentInterval.getEnd().minus(baselineOffsetPeriod)
+    );
+
+    final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
+        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        filters,
+        currentInterval,
+        getSimpleRange(),
+        DateTimeZone.UTC,
+        limit,
+        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+
+    final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
+        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        filters,
+        baselineInterval,
+        getSimpleRange(),
+        DateTimeZone.UTC,
+        limit,
+        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+
+    final HeatMapResultApi resultApi = new HeatMapResultApi()
+        .setMetric(new MetricApi()
+            .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
+            .setDataset(new DatasetApi().setName(rootCauseAnalysisInfo.getDatasetConfigDTO()
+                .getName())))
+        .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
+        .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
+
+    return Response.ok(resultApi).build();
+  }
+
+  /**
+   * Returns a baseline equivalent to "current" in the wo1w format.
+   * Ie when used for a scatter/gather operation, this baseline will only generate one slice,
+   * on the startTime/endTime provided.
+   *
+   * Hack to keep the compatibility with complex baselines.
+   * May be removed once timeseries filtering and timeseries baseline is implemented.
+   */
+  private Baseline getSimpleRange() {
+    return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM,
+        1,
+        0,
+        DateTimeZone.UTC);
   }
 
   /**
@@ -405,20 +494,19 @@ public class RootCauseMetricResource {
   private Map<String, Map<String, Double>> computeBreakdown(
       final long metricId,
       final List<String> filters,
-      final long start,
-      final long end,
-      final String offset,
+      final Interval interval,
+      final Baseline range,
       final DateTimeZone timezone,
       final int limit,
       final TimeGranularity timeGranularity) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricId,
-            start,
-            end,
+            interval.getStartMillis(),
+            interval.getEndMillis(),
             filters,
             timeGranularity)
+        // fixme cyril remove line below if not useful
         .alignedOn(timezone);
-    Baseline range = parseOffset(offset, timezone);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);

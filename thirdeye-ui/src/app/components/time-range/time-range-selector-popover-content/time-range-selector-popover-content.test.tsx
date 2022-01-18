@@ -1,6 +1,5 @@
 import { createTheme, MuiThemeProvider } from "@material-ui/core";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { TimeRange } from "../time-range-provider/time-range-provider.interfaces";
 import { TimeRangeSelectorPopoverContent } from "./time-range-selector-popover-content.component";
@@ -29,7 +28,7 @@ it("TimeRangeSelectorPopoverContent updates internal timeRangeDuration when exte
     );
 
     const applyButton = screen.getByText("label.apply");
-    userEvent.click(applyButton);
+    applyButton.click();
 
     expect(mockOnChange).toHaveBeenLastCalledWith(JAN_TIME_RANGE_DURATION);
 
@@ -42,7 +41,7 @@ it("TimeRangeSelectorPopoverContent updates internal timeRangeDuration when exte
             />
         </MuiThemeProvider>
     );
-    userEvent.click(applyButton);
+    applyButton.click();
 
     expect(mockOnChange).toHaveBeenLastCalledWith(FEB_TIME_RANGE_DURATION);
 });
@@ -60,15 +59,15 @@ it("TimeRangeSelectorPopoverContent should change selected value when quick sele
     );
 
     const applyButton = screen.getByText("label.apply");
-    userEvent.click(applyButton);
+    applyButton.click();
 
     // Make sure initial conditions are correct
     expect(mockOnChange).toHaveBeenLastCalledWith(JAN_TIME_RANGE_DURATION);
 
     const lastTwelveHoursButton = screen.getByText(/last-12-hours/);
-    userEvent.click(lastTwelveHoursButton);
+    lastTwelveHoursButton.click();
 
-    userEvent.click(applyButton);
+    applyButton.click();
 
     expect(mockOnChange).not.toHaveBeenLastCalledWith(JAN_TIME_RANGE_DURATION);
 });
@@ -86,7 +85,7 @@ it("TimeRangeSelectorPopoverContent should call onClose if passed", () => {
     );
 
     const cancelButton = screen.getByText("label.cancel");
-    userEvent.click(cancelButton);
+    cancelButton.click();
 
     expect(mockOnClose).toHaveBeenCalled();
 });

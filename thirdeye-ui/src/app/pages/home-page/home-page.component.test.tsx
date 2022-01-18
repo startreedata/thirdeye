@@ -1,7 +1,23 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { PageContentsGridV1 } from "@startree-ui/platform-ui";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
-import { PageContents } from "../../components/page-contents/page-contents.component";
 import { HomePage } from "./home-page.component";
+
+jest.mock("@startree-ui/platform-ui", () => ({
+    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+        string,
+        unknown
+    >),
+    PageContentsGridV1: jest.fn().mockImplementation((props) => props.children),
+    PageV1: jest.fn().mockImplementation((props) => props.children),
+    TileButtonIconV1: jest.fn().mockImplementation((props) => props.children),
+    TileButtonTextV1: jest.fn().mockImplementation((props) => props.children),
+    TileButtonV1: jest.fn().mockImplementation((props) => (
+        <a data-testid={props.href} href={props.href}>
+            {props.children}
+        </a>
+    )),
+}));
 
 jest.mock(
     "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
@@ -12,10 +28,8 @@ jest.mock(
     })
 );
 
-jest.mock("react-router-dom", () => ({
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+jest.mock("../../components/page-header/page-header.component", () => ({
+    PageHeader: jest.fn().mockReturnValue("label.home"),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -31,11 +45,9 @@ jest.mock("../../utils/routes/routes.util", () => ({
     getSubscriptionGroupsPath: jest
         .fn()
         .mockReturnValue("testSubscriptionGroupsPath"),
+    getDatasetsPath: jest.fn().mockReturnValue("testDatasetsPath"),
+    getDatasourcesPath: jest.fn().mockReturnValue("testDatasourcesPath"),
     getMetricsPath: jest.fn().mockReturnValue("testMetricsPath"),
-}));
-
-jest.mock("../../components/page-contents/page-contents.component", () => ({
-    PageContents: jest.fn().mockImplementation((props) => props.children),
 }));
 
 describe("Home Page", () => {
@@ -52,11 +64,8 @@ describe("Home Page", () => {
             render(<HomePage />);
         });
 
-        expect(PageContents).toHaveBeenCalledWith(
+        expect(PageContentsGridV1).toHaveBeenCalledWith(
             {
-                centered: true,
-                hideAppBreadcrumbs: true,
-                title: "label.home",
                 children: expect.any(Object),
             },
             {}
@@ -74,60 +83,96 @@ describe("Home Page", () => {
         expect(
             screen.getByText("label.subscription-groups")
         ).toBeInTheDocument();
+        expect(screen.getByText("label.datasets")).toBeInTheDocument();
+        expect(screen.getByText("label.datasources")).toBeInTheDocument();
         expect(screen.getByText("label.metrics")).toBeInTheDocument();
     });
 
-    it("should navigate to alerts path on alerts button click", async () => {
+    it("should have proper link to alerts path on alerts icon button", async () => {
         act(() => {
             render(<HomePage />);
         });
 
-        fireEvent.click(screen.getByText("label.alerts"));
-
-        expect(mockPush).toHaveBeenCalledWith("testAlertsPath");
+        expect(screen.getByTestId(TEST_PATHS.alerts)).toHaveAttribute(
+            "href",
+            TEST_PATHS.alerts
+        );
     });
 
-    it("should navigate to anomalies path on anomalies button click", async () => {
+    it("should have proper link to anomalies path on anomalies icon button", async () => {
         act(() => {
             render(<HomePage />);
         });
 
-        fireEvent.click(screen.getByText("label.anomalies"));
-
-        expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
+        expect(screen.getByTestId(TEST_PATHS.anomalies)).toHaveAttribute(
+            "href",
+            TEST_PATHS.anomalies
+        );
     });
 
-    it("should navigate to configuartion path on configuration button click", async () => {
+    it("should have proper link to configuration path on configuration icon button", async () => {
         act(() => {
             render(<HomePage />);
         });
 
-        fireEvent.click(screen.getByText("label.configuration"));
-
-        expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
+        expect(screen.getByTestId(TEST_PATHS.configuration)).toHaveAttribute(
+            "href",
+            TEST_PATHS.configuration
+        );
     });
 
-    it("should navigate to subscription groups path on subscription groups button click", async () => {
+    it("should have proper link to subscription groups path on subscription groups icon button", async () => {
         act(() => {
             render(<HomePage />);
         });
 
-        fireEvent.click(screen.getByText("label.subscription-groups"));
-
-        expect(mockPush).toHaveBeenCalledWith("testSubscriptionGroupsPath");
+        expect(
+            screen.getByTestId(TEST_PATHS.subscriptionGroups)
+        ).toHaveAttribute("href", TEST_PATHS.subscriptionGroups);
     });
 
-    it("should navigate to metrics path on metrics button click", async () => {
+    it("should have proper link to datasets path on datasets icon button", async () => {
         act(() => {
             render(<HomePage />);
         });
 
-        fireEvent.click(screen.getByText("label.metrics"));
+        expect(screen.getByTestId(TEST_PATHS.datasets)).toHaveAttribute(
+            "href",
+            TEST_PATHS.datasets
+        );
+    });
 
-        expect(mockPush).toHaveBeenCalledWith("testMetricsPath");
+    it("should have proper link to datasources path on datasources icon button", async () => {
+        act(() => {
+            render(<HomePage />);
+        });
+
+        expect(screen.getByTestId(TEST_PATHS.datasources)).toHaveAttribute(
+            "href",
+            TEST_PATHS.datasources
+        );
+    });
+
+    it("should have proper link to metrics path on metrics icon button", async () => {
+        act(() => {
+            render(<HomePage />);
+        });
+
+        expect(screen.getByTestId(TEST_PATHS.metrics)).toHaveAttribute(
+            "href",
+            TEST_PATHS.metrics
+        );
     });
 });
 
 const mockSetPageBreadcrumbs = jest.fn();
 
-const mockPush = jest.fn();
+const TEST_PATHS = {
+    alerts: "testAlertsPath",
+    anomalies: "testAnomaliesPath",
+    configuration: "testConfigurationPath",
+    subscriptionGroups: "testSubscriptionGroupsPath",
+    datasets: "testDatasetsPath",
+    datasources: "testDatasourcesPath",
+    metrics: "testMetricsPath",
+};

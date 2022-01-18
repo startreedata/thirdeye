@@ -1,5 +1,9 @@
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
@@ -18,7 +22,6 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getUiAlert, getUiAlerts } from "../../utils/alerts/alerts.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
@@ -28,8 +31,8 @@ export const AlertsAllPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -71,9 +74,9 @@ export const AlertsAllPage: FunctionComponent = () => {
         }
 
         updateAlert(uiAlert.alert).then((alert) => {
-            enqueueSnackbar(
-                t("message.update-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", { entity: t("label.alert") })
             );
 
             // Replace updated alert in fetched alerts
@@ -92,9 +95,9 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
         deleteAlert(uiAlert.id).then((alert) => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
             );
 
             // Remove deleted alert from fetched alerts

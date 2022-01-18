@@ -1,7 +1,11 @@
 import { Grid } from "@material-ui/core";
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -20,15 +24,14 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
     const { getEvaluation } = useGetEvaluation();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
-    const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -43,9 +46,9 @@ export const AlertsCreatePage: FunctionComponent = () => {
         }
 
         createAlert(alert).then((alert: Alert): void => {
-            enqueueSnackbar(
-                t("message.create-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.create-success", { entity: t("label.alert") })
             );
 
             if (isEmpty(subscriptionGroups)) {
@@ -68,11 +71,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
             updateSubscriptionGroups(subscriptionGroups)
                 .then((): void => {
-                    enqueueSnackbar(
+                    notify(
+                        NotificationTypeV1.Success,
                         t("message.update-success", {
                             entity: t("label.subscription-groups"),
-                        }),
-                        getSuccessSnackbarOption()
+                        })
                     );
                 })
                 .finally((): void => {
@@ -95,11 +98,12 @@ export const AlertsCreatePage: FunctionComponent = () => {
             newSubscriptionGroup = await createSubscriptionGroup(
                 subscriptionGroup
             );
-            enqueueSnackbar(
+
+            notify(
+                NotificationTypeV1.Success,
                 t("message.create-success", {
                     entity: t("label.subscription-group"),
-                }),
-                getSuccessSnackbarOption()
+                })
             );
         } catch (error) {
             // Empty
@@ -152,7 +156,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.create")} />
+            <PageHeader
+                title={t("label.create-entity", {
+                    entity: t("label.alert"),
+                })}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <AlertWizard

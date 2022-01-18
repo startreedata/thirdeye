@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import static org.apache.pinot.thirdeye.cube.summary.Summary.NOT_ALL;
+import static org.apache.pinot.thirdeye.cube.summary.NameTag.NOT_ALL;
 import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +56,7 @@ public class DimensionAnalysisResultApiTest {
         .setBaselineTotalSize(baselineSize)
         .setCurrentTotalSize(currentSize)
         .setGlobalRatio(roundUp(currentTotal / baselineTotal));
-    Summary.buildDiffSummary(response, cubeNodes, 2, new BalancedCostFunction());
+    Summary.buildDiffSummary(response, cubeNodes, new BalancedCostFunction());
     response.setMetric(new MetricApi().setName("testMetric"));
 
     // Validation
@@ -68,6 +68,7 @@ public class DimensionAnalysisResultApiTest {
       SummaryResponseRow expectedRow = expectedResponseRows.get(i);
       assertThat(actualRow.getNames()).isEqualTo(expectedRow.getNames());
       assertThat(actualRow.getOtherDimensionValues()).isEqualTo(expectedRow.getOtherDimensionValues());
+      assertThat(actualRow.getMoreOtherDimensionNumber()).isEqualTo(expectedRow.getMoreOtherDimensionNumber());
       assertThat(actualRow.getCost()).isCloseTo(expectedRow.getCost(), EPSILON);
       assertThat(actualRow.getBaselineValue()).isEqualTo(expectedRow.getBaselineValue());
       assertThat(actualRow.getCurrentValue()).isEqualTo(expectedRow.getCurrentValue());
@@ -156,7 +157,7 @@ public class DimensionAnalysisResultApiTest {
   private List<SummaryResponseRow> buildExpectedResponseRows() {
     SummaryResponseRow root = new SummaryResponseRow();
     root.setNames(Collections.singletonList(NOT_ALL));
-    root.setOtherDimensionValues("IN, FR");
+    root.setOtherDimensionValues(List.of("IN", "FR"));
     root.setCost(0d); // root doesn't have cost
     root.setBaselineValue(25d);
     root.setCurrentValue(28d);
@@ -165,7 +166,7 @@ public class DimensionAnalysisResultApiTest {
 
     SummaryResponseRow US = new SummaryResponseRow();
     US.setNames(Collections.singletonList("US"));
-    US.setOtherDimensionValues("");
+    US.setOtherDimensionValues(List.of());
     US.setCost(1.1587d);
     US.setBaselineValue(20d);
     US.setCurrentValue(30d);

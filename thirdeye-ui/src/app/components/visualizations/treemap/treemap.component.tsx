@@ -104,7 +104,7 @@ function TreemapInternal<Data>({
     );
     const colorScale = scaleLinear<string>({
         domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
-        range: [purple[500], GRAY, GRAY, GRAY, theme.palette.error.main],
+        range: [theme.palette.error.main, GRAY, GRAY, GRAY, purple[500]],
     });
 
     const root = hierarchy(data)

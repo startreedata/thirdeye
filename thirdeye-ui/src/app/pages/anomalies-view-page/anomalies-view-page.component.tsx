@@ -1,7 +1,11 @@
 import { Grid } from "@material-ui/core";
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -20,14 +24,11 @@ import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
+    filterAnomaliesByTime,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
@@ -41,10 +42,10 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AnomaliesViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -60,8 +61,19 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }, [anomaly]);
 
     useEffect(() => {
-        !!evaluation && setAlertEvaluation(evaluation);
-    }, [evaluation]);
+        if (!evaluation || !anomaly) {
+            return;
+        }
+        // Only filter for the current anomaly
+        const anomalyDetectionResults =
+            evaluation.detectionEvaluations.output_AnomalyDetectorResult_0;
+        anomalyDetectionResults.anomalies = filterAnomaliesByTime(
+            anomalyDetectionResults.anomalies,
+            anomaly.startTime,
+            anomaly.endTime
+        );
+        setAlertEvaluation(evaluation);
+    }, [evaluation, anomaly]);
 
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
@@ -70,12 +82,12 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     if (!isValidNumberId(params.id)) {
         // Invalid id
-        enqueueSnackbar(
+        notify(
+            NotificationTypeV1.Error,
             t("message.invalid-id", {
                 entity: t("label.anomaly"),
                 id: params.id,
-            }),
-            getErrorSnackbarOption()
+            })
         );
 
         setUiAnomaly(null);
@@ -107,9 +119,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
         deleteAnomaly(uiAnomaly.id).then(() => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.anomaly") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.anomaly") })
             );
 
             // Redirect to anomalies all path

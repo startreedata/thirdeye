@@ -1,4 +1,9 @@
-import { IconButton, InputAdornment, TextField } from "@material-ui/core";
+import {
+    IconButton,
+    InputAdornment,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SearchIcon from "@material-ui/icons/Search";
 import { debounce, isNil } from "lodash";
@@ -104,20 +109,22 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 startAdornment: (
                     // Search icon
                     <InputAdornment position="start">
-                        <SearchIcon />
+                        <SearchIcon fontSize="small" />
                     </InputAdornment>
                 ),
                 endAdornment: (
                     <>
                         {/* Search status label */}
                         <InputAdornment position="end">
-                            {props.searchStatusLabel}
+                            <Typography variant="body2">
+                                {props.searchStatusLabel}
+                            </Typography>
                         </InputAdornment>
 
                         {/* Clear button */}
                         <InputAdornment position="end">
                             <IconButton onClick={handleClearClick}>
-                                <CloseIcon />
+                                <CloseIcon fontSize="small" />
                             </IconButton>
                         </InputAdornment>
                     </>
@@ -125,7 +132,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             }}
             autoFocus={props.autoFocus}
             inputRef={searchInputRef}
-            label={props.searchLabel}
+            placeholder={props.searchLabel}
             value={searchText}
             variant="outlined"
             onChange={handleInputChange}

@@ -1,5 +1,9 @@
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
@@ -12,15 +16,14 @@ import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
 import { getUiMetrics } from "../../utils/metrics/metrics.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
     const [uiMetrics, setUiMetrics] = useState<UiMetric[] | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -53,9 +56,9 @@ export const MetricsAllPage: FunctionComponent = () => {
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
         deleteMetric(uiMetric.id).then((metric) => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.metric") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.metric") })
             );
 
             // Remove deleted metric from fetched metrics

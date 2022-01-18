@@ -65,7 +65,8 @@ Following the installation, the command above will let you switch to the require
 
 #### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with [Artifactory](https://repo.startreedata.io)
 
-The project may depend on some packages to be installed from Artifactory and npm needs to be configured to allow access to these packages. The Artifactory repository to install packages from is configured in project root [**.npmrc**](./.npmrc).
+The project may depend on some packages to be installed from Artifactory and npm needs to be configured to allow access to these packages.
+The Artifactory repository to install packages from is configured in project root [**.npmrc**](./.npmrc).
 
 You need to append your credentials to [**.npmrc**](./.npmrc) to access the Artifactory.
 
@@ -84,6 +85,9 @@ This will return HTTP basic auth credentials:
     email = your_name@startree.ai
 
 -   Append these credentials to the [**.npmrc**](./.npmrc) file.
+
+To avoid making tracked changes to this project, you can also copy [**.npmrc**](./.npmrc) in your shared **user** `~/.npmrc`
+file.
 
 ### Setup
 

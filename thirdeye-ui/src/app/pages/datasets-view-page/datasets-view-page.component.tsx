@@ -1,7 +1,11 @@
 import { Grid } from "@material-ui/core";
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -19,10 +23,6 @@ import {
     getDatasetsAllPath,
     getDatasetsUpdatePath,
 } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 
 export const DatasetsViewPage: FunctionComponent = () => {
@@ -30,10 +30,10 @@ export const DatasetsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<DatasetsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -50,12 +50,12 @@ export const DatasetsViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.dataset"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiDataset(fetchedUiDataset);
@@ -68,10 +68,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 fetchedUiDataset = getUiDataset(dataset);
             })
             .catch(() =>
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                )
+                notify(NotificationTypeV1.Error, t("message.fetch-error"))
             )
             .finally(() => setUiDataset(fetchedUiDataset));
     };
@@ -88,18 +85,18 @@ export const DatasetsViewPage: FunctionComponent = () => {
     const handleDatasetDeleteOk = (uiDataset: UiDataset): void => {
         deleteDataset(uiDataset.id)
             .then(() => {
-                enqueueSnackbar(
-                    t("message.delete-success", { entity: t("label.dataset") }),
-                    getSuccessSnackbarOption()
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.delete-success", { entity: t("label.dataset") })
                 );
 
                 // Redirect to datasets all path
                 history.push(getDatasetsAllPath());
             })
             .catch(() =>
-                enqueueSnackbar(
-                    t("message.delete-error", { entity: t("label.dataset") }),
-                    getErrorSnackbarOption()
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.delete-error", { entity: t("label.dataset") })
                 )
             );
     };

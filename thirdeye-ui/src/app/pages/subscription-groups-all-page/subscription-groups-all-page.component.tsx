@@ -1,5 +1,9 @@
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
@@ -16,7 +20,6 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
@@ -26,8 +29,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -79,11 +82,11 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     ): void => {
         deleteSubscriptionGroup(uiSubscriptionGroup.id).then(
             (subscriptionGroup) => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.delete-success", {
                         entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Remove deleted subscription group from fetched subscription groups

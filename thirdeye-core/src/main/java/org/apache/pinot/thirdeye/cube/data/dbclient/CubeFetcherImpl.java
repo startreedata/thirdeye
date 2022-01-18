@@ -215,7 +215,8 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
             thirdEyeResponse, rowOfSameLevel, tag);
       }
       if (rowOfSameLevel.size() == 0) {
-        LOG.warn("Failed to retrieve non-zero results for requests of level {}.", level);
+        LOG.warn("Failed to retrieve non-zero results for requests of level {}. BulkRequest: {}",
+            level, bulkRequest);
       }
       List<R> rows = new ArrayList<>(rowOfSameLevel.values());
       res.add(rows);
@@ -230,7 +231,11 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
     List<String> groupBy = Collections.emptyList();
     List<Map<CubeTag, ThirdEyeRequestMetricExpressions>> bulkRequests = Collections.singletonList(
         constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
-    return constructAggregatedValues(new Dimensions(), bulkRequests).get(0).get(0);
+    // quickfix - redundant local variables for better IndexOutOfBoundsException logging
+    List<List<R>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
+    List<R> aggregatedValue = aggregatedValues.get(0);
+    R topValue = aggregatedValue.get(0);
+    return topValue;
   }
 
   @Override

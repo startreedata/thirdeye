@@ -68,3 +68,21 @@ export const getRejectedResponseInterceptor = (
 
     return rejectedResponseInterceptor;
 };
+
+export const duplicateKeyForArrayQueryParams = (params: {
+    [key: string]: number | string | string[] | boolean;
+}): string => {
+    const searchStringParts: string[] = [];
+
+    Object.entries(params).forEach(([queryParamKey, value]) => {
+        if (Array.isArray(value)) {
+            value.forEach((val) => {
+                searchStringParts.push(`${queryParamKey}=${val}`);
+            });
+        } else {
+            searchStringParts.push(`${queryParamKey}=${value}`);
+        }
+    });
+
+    return searchStringParts.length > 0 ? searchStringParts.join("&") : "";
+};

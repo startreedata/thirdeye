@@ -1,5 +1,6 @@
 import { AxiosError } from "axios";
 import {
+    duplicateKeyForArrayQueryParams,
     getFulfilledResponseInterceptor,
     getRejectedResponseInterceptor,
     getRequestInterceptor,
@@ -86,6 +87,24 @@ describe("Axios Util", () => {
         expect(mockEnqueueSnackbar).toHaveBeenCalledWith("testError", {
             preventDuplicate: false,
             variant: "error",
+        });
+    });
+
+    describe("getDimensionAnalysisForAnomaly", () => {
+        it("should duplicate query param keys if array value", () => {
+            const result = duplicateKeyForArrayQueryParams({
+                foo: ["bar", "baz"],
+                hello: ["world"],
+                test: "key",
+            });
+
+            expect(result).toEqual("foo=bar&foo=baz&hello=world&test=key");
+        });
+
+        it("should return empty string if object is empty", () => {
+            const result = duplicateKeyForArrayQueryParams({});
+
+            expect(result).toEqual("");
         });
     });
 });

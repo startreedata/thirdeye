@@ -7,7 +7,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import javax.annotation.Nullable;
-import org.apache.pinot.thirdeye.auth.AuthManagerImpl;
+import org.apache.pinot.thirdeye.auth.OAuthManager;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfigurationModule;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;
@@ -18,7 +18,6 @@ import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
 import org.apache.pinot.thirdeye.detection.cache.CacheDAO;
 import org.apache.pinot.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import org.apache.pinot.thirdeye.detection.cache.TimeSeriesCache;
-import org.apache.pinot.thirdeye.spi.auth.AuthManager;
 import org.apache.pinot.thirdeye.spi.datasource.loader.AggregationLoader;
 import org.apache.pinot.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
@@ -51,12 +50,5 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Nullable
   public CacheDAO getCacheDAO(CacheConfig config) throws Exception {
     return config.useCentralizedCache() ? loadCacheDAO(config) : null;
-  }
-
-  @Singleton
-  @Provides
-  @Nullable
-  public AuthManager getAuthManager() {
-    return new AuthManagerImpl(configuration.getAuthConfiguration());
   }
 }

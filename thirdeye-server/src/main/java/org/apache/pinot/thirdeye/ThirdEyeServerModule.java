@@ -1,24 +1,11 @@
 package org.apache.pinot.thirdeye;
 
-import static org.apache.pinot.thirdeye.auth.AuthConfiguration.ISSUER_KEY;
-import static org.apache.pinot.thirdeye.auth.AuthConfiguration.ISSUER_URL_KEY;
-import static org.apache.pinot.thirdeye.auth.AuthConfiguration.JWKS_KEY;
-import static org.apache.pinot.thirdeye.auth.AuthConfiguration.OIDC_CONFIG_KEY;
-
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import org.apache.pinot.thirdeye.auth.AuthConfiguration;
-import org.apache.pinot.thirdeye.auth.OAuthConfig;
-import org.apache.pinot.thirdeye.auth.OidcUtils;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.events.MockEventsConfiguration;
-import org.apache.pinot.thirdeye.spi.api.AuthInfoApi;
-import org.apache.pinot.thirdeye.spi.auth.AuthManager;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeServerModule extends AbstractModule {
@@ -40,29 +27,6 @@ public class ThirdEyeServerModule extends AbstractModule {
 
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
-  }
-
-  @Singleton
-  @Provides
-  public AuthConfiguration getAuthConfiguration(AuthManager authManager) {
-    AuthConfiguration authConfig = configuration.getAuthConfiguration();
-    if(authConfig.isEnabled()){
-      if (authConfig.getInfoURL() != null && !authConfig.getInfoURL().trim().isEmpty()) {
-        AuthInfoApi info = authManager.getInfo();
-        if (info != null && info.getOpenidConfiguration() !=null) {
-          Map<String, Object> oidcConfig = info.getOpenidConfiguration();
-          if(authConfig.getOAuthConfig() == null) {
-            authConfig.setOAuthConfig(new OAuthConfig());
-          }
-          OAuthConfig oauth = authConfig.getOAuthConfig();
-          Optional.ofNullable(oidcConfig.get(ISSUER_KEY))
-            .ifPresent(iss -> oauth.getExactMatch().put("iss", iss.toString()));
-          Optional.ofNullable(oidcConfig.get(JWKS_KEY))
-            .ifPresent(jwkUrl -> oauth.setKeysUrl(jwkUrl.toString()));
-        }
-      }
-    }
-    return authConfig;
   }
 
   @Singleton

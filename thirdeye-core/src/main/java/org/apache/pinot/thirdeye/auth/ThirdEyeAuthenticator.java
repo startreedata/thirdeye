@@ -1,5 +1,6 @@
 package org.apache.pinot.thirdeye.auth;
 
+import static org.apache.pinot.thirdeye.auth.OidcUtils.generateOAuthConfig;
 import static org.apache.pinot.thirdeye.auth.OidcUtils.makeDefaultCache;
 
 import com.google.common.cache.LoadingCache;
@@ -14,18 +15,18 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrincipal> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthenticator.class);
-  private AuthConfiguration config;
   private LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
   @Inject
-  public ThirdEyeAuthenticator(final AuthConfiguration config) {
-    this.config = config;
-    this.bindingsCache = makeDefaultCache(new OidcContext(config.getOAuthConfig()));
+  public ThirdEyeAuthenticator(final OAuthConfiguration oAuthConfig,
+    final OAuthManager oAuthManager) {
+    generateOAuthConfig(oAuthManager, oAuthConfig);
+    this.bindingsCache = makeDefaultCache(new OidcContext(oAuthConfig));
   }
 
   @Override
   public Optional<ThirdEyePrincipal> authenticate(final String authToken)
-      throws AuthenticationException {
+    throws AuthenticationException {
     try {
       return Optional.ofNullable(bindingsCache.get(authToken));
     } catch (Exception exception) {

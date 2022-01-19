@@ -9,23 +9,23 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.thirdeye.spi.auth.AuthManager;
+import org.apache.pinot.thirdeye.auth.OAuthManager;
 
 @Api(tags = "Auth Info")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthInfoResource {
-  private final AuthManager authManager;
+  private final OAuthManager oAuthManager;
 
   @Inject
-  public AuthInfoResource(AuthManager authManager){
-    this.authManager = authManager;
+  public AuthInfoResource(OAuthManager oAuthManager){
+    this.oAuthManager = oAuthManager;
   }
 
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    return Response.ok(authManager.getInfo()).build();
+    return Response.ok(oAuthManager.getInfo()).build();
   }
 }

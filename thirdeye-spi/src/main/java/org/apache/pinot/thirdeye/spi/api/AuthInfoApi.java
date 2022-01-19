@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
-public class AuthInfoApi implements ThirdEyeApi{
+public class AuthInfoApi implements ThirdEyeApi {
+
   private String oidcIssuerUrl;
   private Map<String, Object> openidConfiguration;
 

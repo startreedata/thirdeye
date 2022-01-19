@@ -8,6 +8,7 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureNull;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
@@ -55,7 +56,7 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupDTO createDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
-    if (api.getCron() == null) {
+    if (Strings.isNullOrEmpty(api.getCron())) {
       api.setCron(CRON_EVERY_5MIN);
     }
     return toDto(api);

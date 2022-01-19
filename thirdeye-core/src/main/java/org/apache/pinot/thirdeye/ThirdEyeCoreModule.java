@@ -7,7 +7,6 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import javax.annotation.Nullable;
-import org.apache.pinot.thirdeye.auth.OAuthManager;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfigurationModule;
 import org.apache.pinot.thirdeye.datalayer.ThirdEyePersistenceModule;

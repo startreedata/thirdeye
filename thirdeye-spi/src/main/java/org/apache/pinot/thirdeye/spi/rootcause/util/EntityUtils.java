@@ -533,6 +533,7 @@ public class EntityUtils {
    * @param filterString raw (decoded) filter string
    * @return filter predicate
    */
+  // todo cyril return a Predicate
   public static FilterPredicate extractFilterPredicate(String filterString) {
     Matcher m = PATTERN_FILTER_OPERATOR.matcher(filterString);
     if (!m.find()) {

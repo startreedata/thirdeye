@@ -123,7 +123,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                         dimensionHeatmapTooltipStyles.tableCellLabel
                                     }
                                 >
-                                    {t("label.comparison")}
+                                    {t("label.baseline")}
                                 </th>
                                 <td
                                     className={

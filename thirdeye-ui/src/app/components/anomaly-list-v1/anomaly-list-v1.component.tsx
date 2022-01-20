@@ -119,10 +119,11 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 sortable: true,
                 minWidth: 150,
             },
+            // We're using Baseline as the title for `predicted` as of 1/20/21
             {
                 key: "predicted",
                 dataKey: "predicted",
-                header: t("label.predicted"),
+                header: t("label.baseline"),
                 sortable: true,
                 minWidth: 150,
             },

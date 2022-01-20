@@ -186,12 +186,12 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             />
                         </Grid>
 
-                        {/* Current/Predicted */}
+                        {/* Current/Baseline */}
                         <Grid item md={3} xs={6}>
                             <NameValueDisplayCard<string>
                                 name={`${t("label.current")}${t(
                                     "label.pair-separator"
-                                )}${t("label.predicted")}`}
+                                )}${t("label.baseline")}`}
                                 searchWords={props.searchWords}
                                 values={[
                                     `${props.uiAnomaly.current}${t(

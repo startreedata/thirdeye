@@ -267,7 +267,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             <Grid item xs={6}>
                                 <div>
                                     <strong>
-                                        &quot;{t("label.comparison")}&quot;
+                                        &quot;{t("label.baseline")}&quot;
                                     </strong>
                                     <span>
                                         {" "}

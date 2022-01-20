@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import static org.apache.pinot.thirdeye.cube.summary.NameTag.NOT_ALL;
+import static org.apache.pinot.thirdeye.cube.summary.NameTag.ALL_OTHERS;
 import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -156,7 +156,7 @@ public class DimensionAnalysisResultApiTest {
    */
   private List<SummaryResponseRow> buildExpectedResponseRows() {
     SummaryResponseRow root = new SummaryResponseRow();
-    root.setNames(Collections.singletonList(NOT_ALL));
+    root.setNames(Collections.singletonList(ALL_OTHERS));
     root.setOtherDimensionValues(List.of("IN", "FR"));
     root.setCost(0d); // root doesn't have cost
     root.setBaselineValue(25d);

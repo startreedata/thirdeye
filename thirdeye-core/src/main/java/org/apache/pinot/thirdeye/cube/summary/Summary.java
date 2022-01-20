@@ -160,14 +160,14 @@ public class Summary {
         NameTag parentNameTag = nameTags.get(parent);
         if (parentNameTag != null) {
           // Set parent's name tag from ALL to NOT_ALL String.
-          int notAllLevel = node.getLevel() - levelDiff;
-          parentNameTag.setNotAll(notAllLevel);
+          int allOthersLevel = node.getLevel() - levelDiff;
+          parentNameTag.setAllOthers(allOthersLevel);
           // After that, set the names after NOT_ALL to empty, e.g., [home page, (ALL)-, ""]
-          for (int i = notAllLevel + 1; i < maxNodeLevel; ++i) {
+          for (int i = allOthersLevel + 1; i < maxNodeLevel; ++i) {
             parentNameTag.setEmpty(i);
           }
           // Each picked child will remove itself from this parent's other dimension values.
-          // Thus, the (ALL)- node will only show the names of the children name that are NOT picked in the summary.
+          // Thus, the (ALL_OTHERS) node will only show the names of the children name that are NOT picked in other summary lines.
           otherDimensionValues.get(parent).remove(node.getDimensionValues().get(parent.getLevel()));
           break;
         }

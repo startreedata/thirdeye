@@ -38,12 +38,8 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   public Operator buildOperator() throws Exception {
     final EnumeratorOperator operator = new EnumeratorOperator();
     operator.init(new OperatorContext()
-        .setStartTime(params
-            .getOrDefault("startTime", String.valueOf(this.startTime))
-            .toString())
-        .setEndTime(params
-            .getOrDefault("endTime", String.valueOf(this.endTime))
-            .toString())
+        .setStartTime((Long) params.getOrDefault("startTime", this.startTime))
+        .setEndTime((Long) params.getOrDefault("endTime", this.endTime))
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

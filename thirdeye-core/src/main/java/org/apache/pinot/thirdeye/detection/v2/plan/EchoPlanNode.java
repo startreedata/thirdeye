@@ -33,8 +33,8 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   public Operator buildOperator() throws Exception {
     final EchoOperator operator = new EchoOperator();
     operator.init(new OperatorContext()
-        .setStartTime(String.valueOf(this.startTime))
-        .setEndTime(String.valueOf(this.endTime))
+        .setStartTime(this.startTime)
+        .setEndTime(this.endTime)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

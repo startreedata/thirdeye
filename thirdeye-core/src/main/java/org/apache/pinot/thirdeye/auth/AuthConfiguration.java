@@ -5,22 +5,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AuthConfiguration {
 
   public static final String ISSUER_KEY = "issuer";
-  public static final String ISSUER_URL_KEY = "oidcIssuerUrl";
-  public static final String OIDC_CONFIG_KEY = "openidConfiguration";
   public static final String JWKS_KEY = "jwks_uri";
+  public static final String OIDC_CONFIG_SUFFIX = ".well-known/openid-configuration";
 
-  private boolean enabled = true;
+  private boolean enabled;
 
   @JsonProperty("oauth")
-  private OAuthConfig oAuthConfig;
-  private String infoURL;
+  private OAuthConfiguration oAuthConfig;
 
-  public OAuthConfig getOAuthConfig() {
+  public OAuthConfiguration getOAuthConfig() {
     return oAuthConfig;
   }
 
-  public AuthConfiguration setOAuthConfig(final OAuthConfig oAuthConfig) {
-    this.oAuthConfig = oAuthConfig;
+  public AuthConfiguration setOAuthConfig(final OAuthConfiguration oAuthConfiguration) {
+    this.oAuthConfig = oAuthConfiguration;
     return this;
   }
 
@@ -30,15 +28,6 @@ public class AuthConfiguration {
 
   public AuthConfiguration setEnabled(final boolean enabled) {
     this.enabled = enabled;
-    return this;
-  }
-
-  public String getInfoURL() {
-    return infoURL;
-  }
-
-  public AuthConfiguration setInfoURL(final String infoURL) {
-    this.infoURL = infoURL;
     return this;
   }
 }

@@ -5,18 +5,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OAuthConfig {
+public class OAuthConfiguration {
+  private String serverUrl;
   private String keysUrl;
   private String clientId;
   private List<String> required = new ArrayList<>();
   private Map<String, Object> exactMatch = new HashMap<>();
   private CacheConfig cache;
 
+  public String getServerUrl() {
+    return serverUrl;
+  }
+
+  public OAuthConfiguration setServerUrl(final String serverUrl) {
+    this.serverUrl = serverUrl;
+    return this;
+  }
+
   public String getKeysUrl() {
     return keysUrl;
   }
 
-  public OAuthConfig setKeysUrl(final String baseUrl) {
+  public OAuthConfiguration setKeysUrl(final String baseUrl) {
     this.keysUrl = baseUrl;
     return this;
   }
@@ -25,7 +35,7 @@ public class OAuthConfig {
     return clientId;
   }
 
-  public OAuthConfig setClientId(final String clientId) {
+  public OAuthConfiguration setClientId(final String clientId) {
     this.clientId = clientId;
     return this;
   }
@@ -34,7 +44,7 @@ public class OAuthConfig {
     return required;
   }
 
-  public OAuthConfig setRequired(final List<String> required) {
+  public OAuthConfiguration setRequired(final List<String> required) {
     this.required = required;
     return this;
   }
@@ -43,7 +53,7 @@ public class OAuthConfig {
     return exactMatch;
   }
 
-  public OAuthConfig setExactMatch(final Map<String, Object> exactMatch) {
+  public OAuthConfiguration setExactMatch(final Map<String, Object> exactMatch) {
     this.exactMatch = exactMatch;
     return this;
   }
@@ -52,7 +62,7 @@ public class OAuthConfig {
     return cache;
   }
 
-  public OAuthConfig setCache(final CacheConfig cache) {
+  public OAuthConfiguration setCache(final CacheConfig cache) {
     this.cache = cache;
     return this;
   }

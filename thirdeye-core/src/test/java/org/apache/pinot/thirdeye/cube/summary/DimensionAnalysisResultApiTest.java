@@ -72,8 +72,7 @@ public class DimensionAnalysisResultApiTest {
       assertThat(actualRow.getCost()).isCloseTo(expectedRow.getCost(), EPSILON);
       assertThat(actualRow.getBaselineValue()).isEqualTo(expectedRow.getBaselineValue());
       assertThat(actualRow.getCurrentValue()).isEqualTo(expectedRow.getCurrentValue());
-      assertThat(Double.parseDouble(actualRow.getPercentageChange().split("%")[0]))
-          .isEqualTo(Double.parseDouble(expectedRow.getPercentageChange().split("%")[0]));
+      assertThat(actualRow.getChangePercentage()).isEqualTo(expectedRow.getChangePercentage());
       assertThat(actualRow.getSizeFactor()).isCloseTo(expectedRow.getSizeFactor(), EPSILON);
     }
   }
@@ -162,7 +161,7 @@ public class DimensionAnalysisResultApiTest {
     root.setBaselineValue(25d);
     root.setCurrentValue(28d);
     root.setSizeFactor(0.5145d);
-    root.setPercentageChange((28d - 25d) / 25d * 100 + "%");
+    root.setChangePercentage((28d - 25d) / 25d * 100);
 
     SummaryResponseRow US = new SummaryResponseRow();
     US.setNames(Collections.singletonList("US"));
@@ -171,7 +170,7 @@ public class DimensionAnalysisResultApiTest {
     US.setBaselineValue(20d);
     US.setCurrentValue(30d);
     US.setSizeFactor(0.4854d); // UPDATE THIS
-    US.setPercentageChange((30d - 20d) / 20d * 100 + "%");
+    US.setChangePercentage((30d - 20d) / 20d * 100);
 
     List<SummaryResponseRow> rows = new ArrayList<>();
     rows.add(root);

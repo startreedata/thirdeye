@@ -328,7 +328,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                     <TextField
                                         {...params}
                                         fullWidth
-                                        label={t("label.add-a-dimension")}
                                         placeholder={t(
                                             "message.anomaly-filter-search"
                                         )}

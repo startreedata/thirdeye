@@ -74,13 +74,15 @@ function summarizeDimensionValueData(
 function formatTreemapData(
     dimensionData: AnomalyBreakdownComparisonDataByDimensionColumn
 ): TreemapData<AnomalyBreakdownComparisonData>[] {
+    const parentId = `${dimensionData.column}-parent`;
+
     return [
-        { id: dimensionData.column, size: 0, parent: null },
+        { id: parentId, size: 0, parent: null },
         ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
             return {
                 id: k,
                 size: comparisonData.current,
-                parent: dimensionData.column,
+                parent: parentId,
                 extraData: comparisonData,
             };
         }),

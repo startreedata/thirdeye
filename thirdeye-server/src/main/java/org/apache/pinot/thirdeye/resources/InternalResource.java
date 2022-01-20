@@ -35,7 +35,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
-import org.apache.pinot.thirdeye.notification.EmailEntityBuilder;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
 import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
@@ -44,7 +43,6 @@ import org.apache.pinot.thirdeye.spi.ThirdEyePrincipal;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import org.apache.pinot.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.task.runner.NotificationTaskRunner;
@@ -60,9 +58,7 @@ public class InternalResource {
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final SubscriptionGroupManager subscriptionGroupManager;
   private final DatabaseAdminResource databaseAdminResource;
-  private final EmailEntityBuilder emailEntityBuilder;
   private final MetricAnomaliesContent metricAnomaliesContent;
   private final ThirdEyeServerConfiguration configuration;
   private final EmailContentFormatter emailContentFormatter;
@@ -72,21 +68,17 @@ public class InternalResource {
   @Inject
   public InternalResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final SubscriptionGroupManager subscriptionGroupManager,
       final DatabaseAdminResource databaseAdminResource,
-      final EmailEntityBuilder emailEntityBuilder,
       final MetricAnomaliesContent metricAnomaliesContent,
       final ThirdEyeServerConfiguration configuration,
       final EmailContentFormatter emailContentFormatter,
       final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationTaskRunner notificationTaskRunner) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.subscriptionGroupManager = subscriptionGroupManager;
     this.databaseAdminResource = databaseAdminResource;
     this.metricAnomaliesContent = metricAnomaliesContent;
     this.configuration = configuration;
     this.emailContentFormatter = emailContentFormatter;
-    this.emailEntityBuilder = emailEntityBuilder;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
   }
@@ -106,21 +98,6 @@ public class InternalResource {
   @Path("version")
   public Response getVersion(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();
-  }
-
-  @POST
-  @Path("email/send")
-  public Response sendEmail(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @FormParam("subscriptionGroupId") Long subscriptionGroupId
-  ) throws Exception {
-
-    final SubscriptionGroupDTO sg = ensureExists(subscriptionGroupManager.findById(
-        subscriptionGroupId));
-    final Set<MergedAnomalyResultDTO> all = new HashSet<>(mergedAnomalyResultManager.findAll());
-
-    emailEntityBuilder.buildEmailEntity(sg, new ArrayList<>(all));
-    return Response.ok().build();
   }
 
   @GET

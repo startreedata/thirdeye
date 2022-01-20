@@ -42,8 +42,24 @@ public class PluginClassLoader extends URLClassLoader {
       .add("org.slf4j")
       .add("org.h2")
       .add("com.mysql")
+      .add("javax.activation")
       .build();
 
+
+
+
+  /*
+  *
+  *
+  * .add("org.apache.pinot.thirdeye.spi")
+      .add("org.joda.time")
+      .add("org.slf4j")
+      .add("org.h2")
+      .add("com.google.common")
+      .add("com.mysql")
+      .add("com.sun")
+      .add("javax.mail")
+  * */
   private final ClassLoader parentClassLoader;
 
   public PluginClassLoader(final URL[] urls, final ClassLoader parentClassLoader) {

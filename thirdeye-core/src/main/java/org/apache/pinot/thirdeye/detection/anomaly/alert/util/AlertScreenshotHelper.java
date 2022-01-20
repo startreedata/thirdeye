@@ -55,7 +55,7 @@ public class AlertScreenshotHelper {
       result = task.get(3, TimeUnit.MINUTES);
       LOG.info("Finished with result: {}", result);
     } catch (final Exception e) {
-      LOG.error("Exception in fetching screenshot for anomaly id {}", anomalyId, e);
+      LOG.error("Exception in fetching screenshot for anomaly id {}", anomalyId);
     }
     return result;
   }

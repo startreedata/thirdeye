@@ -99,7 +99,7 @@ public final class ParsedUrn {
    * @deprecated Prefer manipulating FilterPredicate directly with getPredicates()
    * @return filter multimap from predicates
    */
-  // TODO use FilterPredicates throughout RCA framework
+  // TODO prefer Predicate in all ThirdEye - see buildFilter in CrudResource
   @Deprecated
   public Multimap<String, String> toFiltersMap() {
     return toFiltersMap(this.predicates);

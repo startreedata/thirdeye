@@ -21,6 +21,8 @@ package org.apache.pinot.thirdeye.spi.rootcause.util;
 
 import java.util.Objects;
 
+// TODO prefer Predicate in all ThirdEye - see buildFilter in CrudResource
+@Deprecated
 public final class FilterPredicate {
 
   final String key;

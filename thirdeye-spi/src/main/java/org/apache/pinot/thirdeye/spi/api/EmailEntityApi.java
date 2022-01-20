@@ -17,11 +17,11 @@
  * under the License.
  */
 
-package org.apache.pinot.thirdeye.notification.commons;
+package org.apache.pinot.thirdeye.spi.api;
 
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 
-public class EmailEntity {
+public class EmailEntityApi {
 
   private String from;
   private DetectionAlertFilterRecipients to;
@@ -33,7 +33,7 @@ public class EmailEntity {
     return from;
   }
 
-  public EmailEntity setFrom(final String from) {
+  public EmailEntityApi setFrom(final String from) {
     this.from = from;
     return this;
   }
@@ -42,7 +42,7 @@ public class EmailEntity {
     return to;
   }
 
-  public EmailEntity setTo(
+  public EmailEntityApi setTo(
       final DetectionAlertFilterRecipients to) {
     this.to = to;
     return this;
@@ -52,7 +52,7 @@ public class EmailEntity {
     return subject;
   }
 
-  public EmailEntity setSubject(final String subject) {
+  public EmailEntityApi setSubject(final String subject) {
     this.subject = subject;
     return this;
   }
@@ -61,7 +61,7 @@ public class EmailEntity {
     return htmlContent;
   }
 
-  public EmailEntity setHtmlContent(final String htmlContent) {
+  public EmailEntityApi setHtmlContent(final String htmlContent) {
     this.htmlContent = htmlContent;
     return this;
   }
@@ -70,7 +70,7 @@ public class EmailEntity {
     return snapshotPath;
   }
 
-  public EmailEntity setSnapshotPath(final String snapshotPath) {
+  public EmailEntityApi setSnapshotPath(final String snapshotPath) {
     this.snapshotPath = snapshotPath;
     return this;
   }

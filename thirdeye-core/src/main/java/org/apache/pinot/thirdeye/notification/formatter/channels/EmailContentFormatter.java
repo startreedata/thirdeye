@@ -30,13 +30,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.pinot.thirdeye.notification.NotificationContext;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.content.BaseNotificationContent;
 import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.HierarchicalAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
+import org.apache.pinot.thirdeye.spi.api.EmailEntityApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class EmailContentFormatter {
     return subjectType;
   }
 
-  public EmailEntity getEmailEntity(
+  public EmailEntityApi getEmailEntity(
       final NotificationContext notificationContext,
       final NotificationContent content,
       final SubscriptionGroupDTO subsConfig,
@@ -111,7 +111,7 @@ public class EmailContentFormatter {
     }
   }
 
-  private EmailEntity buildEmailEntity(final Map<String, Object> templateValues,
+  private EmailEntityApi buildEmailEntity(final Map<String, Object> templateValues,
       final String htmlEmail,
       final Properties alertClientConfig,
       final SubscriptionGroupDTO subsConfig,
@@ -119,7 +119,7 @@ public class EmailContentFormatter {
     final String subject = BaseNotificationContent
         .makeSubject(getSubjectType(alertClientConfig, subsConfig), subsConfig, templateValues);
 
-    return new EmailEntity()
+    return new EmailEntityApi()
         .setSnapshotPath(snapshotPath)
         .setSubject(subject)
         .setHtmlContent(htmlEmail);

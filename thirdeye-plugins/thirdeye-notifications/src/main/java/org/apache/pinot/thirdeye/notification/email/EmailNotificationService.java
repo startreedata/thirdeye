@@ -9,7 +9,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
+import org.apache.pinot.thirdeye.spi.api.EmailEntityApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.notification.NotificationService;
@@ -60,7 +60,7 @@ public class EmailNotificationService implements NotificationService {
     }
   }
 
-  private HtmlEmail buildHtmlEmail(final EmailEntity emailEntity)
+  private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
       throws EmailException {
     final HtmlEmail email = new HtmlEmail();
     final DetectionAlertFilterRecipients recipients = emailEntity.getTo();

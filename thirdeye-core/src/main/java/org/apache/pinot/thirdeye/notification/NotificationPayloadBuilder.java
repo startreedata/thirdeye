@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
+import org.apache.pinot.thirdeye.spi.api.EmailEntityApi;
 import org.apache.pinot.thirdeye.spi.api.NotificationPayloadApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -39,7 +39,7 @@ public class NotificationPayloadBuilder {
     final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(anomalies);
     anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final EmailEntity emailEntity = emailEntityBuilder.buildEmailEntity(subscriptionGroup,
+    final EmailEntityApi emailEntity = emailEntityBuilder.buildEmailEntity(subscriptionGroup,
         new ArrayList<>(anomalies));
 
     return new NotificationPayloadApi()

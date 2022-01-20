@@ -65,10 +65,10 @@ public class EmailNotificationService implements NotificationService {
     final HtmlEmail email = new HtmlEmail();
     final DetectionAlertFilterRecipients recipients = emailEntity.getTo();
 
-    email.setHtmlMsg(emailEntity.getHtmlContent());
     email.setSubject(emailEntity.getSubject());
     email.setFrom(emailEntity.getFrom());
     email.setTo(toAddress(recipients.getTo()));
+    email.setContent(emailEntity.getHtmlContent(), "text/html; charset=utf-8");
 
     if (!CollectionUtils.isEmpty(recipients.getCc())) {
       email.setCc(toAddress(recipients.getCc()));

@@ -39,19 +39,11 @@ import org.apache.pinot.thirdeye.spi.Constants.SubjectType;
 import org.apache.pinot.thirdeye.spi.api.EmailEntityApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class formats the content for email alerts.
  */
 public class EmailContentFormatter {
-
-  protected static final String PROP_SUBJECT_STYLE = "subject";
-
-  private static final Logger LOG = LoggerFactory.getLogger(EmailContentFormatter.class);
-  private static final String BASE_PACKAGE_PATH = "/org/apache/pinot/thirdeye/detection/detector";
-  private static final String CHARSET = "UTF-8";
 
   public static final Map<String, String> TEMPLATE_MAP = ImmutableMap.<String, String>builder()
       .put(MetricAnomaliesContent.class.getSimpleName(), "metric-anomalies-template.ftl")
@@ -59,6 +51,11 @@ public class EmailContentFormatter {
       .put(HierarchicalAnomaliesContent.class.getSimpleName(),
           "hierarchical-anomalies-email-template.ftl")
       .build();
+
+  protected static final String PROP_SUBJECT_STYLE = "subject";
+
+  private static final String BASE_PACKAGE_PATH = "/org/apache/pinot/thirdeye/detection/detector";
+  private static final String CHARSET = "UTF-8";
 
   /**
    * Plug the appropriate subject style based on configuration
@@ -86,12 +83,17 @@ public class EmailContentFormatter {
     final Map<String, Object> templateData = content.format(anomalies, subsConfig);
     templateData.put("dashboardHost", notificationContext.getUiPublicUrl());
 
-    final String htmlText = buildHtml(TEMPLATE_MAP.get(content.getTemplate()), templateData);
-    return buildEmailEntity(templateData,
-        htmlText,
-        notificationContext.getProperties(),
+    final String templateName = TEMPLATE_MAP.get(content.getTemplate());
+    final String htmlText = buildHtml(templateName, templateData);
+    final SubjectType subjectType = getSubjectType(notificationContext.getProperties(), subsConfig);
+    final String subject = BaseNotificationContent.makeSubject(subjectType,
         subsConfig,
-        content.getSnaphotPath());
+        templateData);
+
+    return new EmailEntityApi()
+        .setSnapshotPath(content.getSnaphotPath())
+        .setSubject(subject)
+        .setHtmlContent(htmlText);
   }
 
   public String buildHtml(final String templateName, final Map<String, Object> templateValues) {
@@ -109,19 +111,5 @@ public class EmailContentFormatter {
     } catch (final Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private EmailEntityApi buildEmailEntity(final Map<String, Object> templateValues,
-      final String htmlEmail,
-      final Properties alertClientConfig,
-      final SubscriptionGroupDTO subsConfig,
-      final String snapshotPath) {
-    final String subject = BaseNotificationContent
-        .makeSubject(getSubjectType(alertClientConfig, subsConfig), subsConfig, templateValues);
-
-    return new EmailEntityApi()
-        .setSnapshotPath(snapshotPath)
-        .setSubject(subject)
-        .setHtmlContent(htmlEmail);
   }
 }

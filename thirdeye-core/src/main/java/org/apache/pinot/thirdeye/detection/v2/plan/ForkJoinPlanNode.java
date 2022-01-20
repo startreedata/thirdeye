@@ -48,12 +48,8 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
 
     final ForkJoinOperator operator = new ForkJoinOperator();
     operator.init(new OperatorContext()
-        .setStartTime(getParams()
-            .getOrDefault("startTime", String.valueOf(startTime))
-            .toString())
-        .setEndTime(getParams()
-            .getOrDefault("endTime", String.valueOf(endTime))
-            .toString())
+        .setStartTime((Long) getParams().getOrDefault("startTime", startTime))
+        .setEndTime((Long) getParams().getOrDefault("endTime", endTime))
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(

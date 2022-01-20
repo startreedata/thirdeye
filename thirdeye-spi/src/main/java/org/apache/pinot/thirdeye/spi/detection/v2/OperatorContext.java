@@ -1,31 +1,29 @@
 package org.apache.pinot.thirdeye.spi.detection.v2;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import org.apache.pinot.thirdeye.spi.util.SpiUtils.TimeFormat;
 
 public class OperatorContext {
-  private String startTime;
-  private String endTime;
+  private long startTime;
+  private long endTime;
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, DetectionPipelineResult> inputsMap;
 
-  public String getStartTime() {
+  public long getStartTime() {
     return startTime;
   }
 
-  public OperatorContext setStartTime(final String startTime) {
+  public OperatorContext setStartTime(final long startTime) {
     this.startTime = startTime;
     return this;
   }
 
-  public String getEndTime() {
+  public long getEndTime() {
     return endTime;
   }
 
-  public OperatorContext setEndTime(final String endTime) {
+  public OperatorContext setEndTime(final long endTime) {
     this.endTime = endTime;
     return this;
   }

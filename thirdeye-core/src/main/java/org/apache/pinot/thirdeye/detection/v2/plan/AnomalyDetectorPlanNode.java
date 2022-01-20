@@ -33,8 +33,8 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   public Operator buildOperator() throws Exception {
     final AnomalyDetectorOperator anomalyDetectorOperator = new AnomalyDetectorOperator();
     anomalyDetectorOperator.init(new OperatorContext()
-        .setStartTime(String.valueOf(this.startTime))
-        .setEndTime(String.valueOf(this.endTime))
+        .setStartTime(this.startTime)
+        .setEndTime(this.endTime)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

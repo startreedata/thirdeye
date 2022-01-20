@@ -21,16 +21,31 @@ package org.apache.pinot.thirdeye.spi.datalayer;
 
 import com.google.common.base.MoreObjects;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class Predicate {
+
+  public static final Pattern COMPARISON_OPERATORS_PATTERN = Pattern.compile(
+      String.join("|",
+          OPER.EQ.sign,
+          OPER.GT.sign,
+          OPER.GE.sign,
+          OPER.LT.sign,
+          OPER.LE.sign,
+          OPER.NEQ.sign)
+  );
 
   private final OPER oper;
 
   private String lhs;
   private Object rhs;
   private Predicate[] childPredicates;
+
   public Predicate(String lhs, OPER oper, Object rhs) {
     this.lhs = lhs;
     this.oper = oper;
@@ -116,16 +131,52 @@ public class Predicate {
     BETWEEN("BETWEEN"),
     LIKE("LIKE");
 
+    private static final Map<String, OPER> STRING_TO_ENUM = Arrays.stream(OPER.values()).collect(
+        Collectors.toMap(Object::toString, e -> e));
+
     private final String sign;
 
     OPER(String sign) {
       this.sign = sign;
     }
 
+    public static OPER fromString(String sign) {
+      // fails at runtime if sign string is invalid
+      return STRING_TO_ENUM.get(sign);
+    }
+
     @Override
     public String toString() {
       return sign;
     }
+  }
+
+  /**
+   * Parse a comparison string filter in format col1=val1 to a predicate.
+   * rhs is parsed as a string.
+   * Only compatible with comparison operators.
+   */
+  public static Predicate parseFilterPredicate(String filterString) {
+    Matcher m = COMPARISON_OPERATORS_PATTERN.matcher(filterString);
+    if (!m.find()) {
+      throw new IllegalArgumentException(
+          String.format("Could not find filter predicate operator. Expected regex '%s'",
+              COMPARISON_OPERATORS_PATTERN.pattern()));
+    }
+
+    int keyStart = 0;
+    int keyEnd = m.start();
+    String key = filterString.substring(keyStart, keyEnd);
+
+    int opStart = m.start();
+    int opEnd = m.end();
+    OPER operator = OPER.fromString(filterString.substring(opStart, opEnd));
+
+    int valueStart = m.end();
+    int valueEnd = filterString.length();
+    String value = filterString.substring(valueStart, valueEnd);
+
+    return new Predicate(key, operator, value);
   }
 
   @Override

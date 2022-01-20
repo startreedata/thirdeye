@@ -45,6 +45,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
 
+    // todo cyril add filters info to the generic data fetcher
+
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();
     genericDataFetcher.init(spec);
 

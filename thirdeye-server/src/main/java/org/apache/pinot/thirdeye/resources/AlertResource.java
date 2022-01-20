@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
@@ -172,6 +173,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
+    if (request.getFilters() == null) {
+      request.setFilters(List.of());
+    }
 
     final AlertApi alert = request.getAlert();
     ensureExists(alert)

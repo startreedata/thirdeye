@@ -23,6 +23,7 @@ package org.apache.pinot.thirdeye.spi.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
@@ -33,6 +34,7 @@ public class AlertEvaluationApi {
   private Map<String, Map<String, DetectionEvaluationApi>> evaluations;
   private Date start;
   private Date end;
+  private List<String> filters;
   private Date lastTimestamp;
   Boolean dryRun;
 
@@ -70,6 +72,15 @@ public class AlertEvaluationApi {
 
   public AlertEvaluationApi setEnd(final Date end) {
     this.end = end;
+    return this;
+  }
+
+  public List<String> getFilters() {
+    return filters;
+  }
+
+  public AlertEvaluationApi setFilters(final List<String> filters) {
+    this.filters = filters;
     return this;
   }
 

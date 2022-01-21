@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.sql;
+package org.apache.pinot.thirdeye.detection.v2.operator.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;

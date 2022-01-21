@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.detection.v2.macro;
 
-import static org.apache.pinot.thirdeye.detection.v2.macro.SqlLanguageTranslator.translate;
-
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +13,6 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlShuttle;
-import org.apache.calcite.sql.util.SqlVisitor;
 import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeFilterFunction;
 import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeGroupFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
@@ -127,61 +124,6 @@ public class MacroEngine {
       }
       // not a macro OR macro expansion parsing failed: return input unchanged
       return call;
-    }
-
-    /**
-     * Implementation of
-     * {@link org.apache.calcite.sql.util.SqlBasicVisitor.ArgHandler}
-     * that deep-copies {@link SqlCall}s and their operands.
-     *
-     * @see <a href="https://github.com/apache/calcite/blob/d70583c4a8013f878457f82df6dffddd71875900/core/src/main/java/org/apache/calcite/sql/util/SqlShuttle.java#L101>same
-     *     implementation</a>"
-     */
-    private class CallCopyingArgHandler implements ArgHandler<SqlNode> {
-
-      boolean update;
-      @Nullable
-      SqlNode[] clonedOperands;
-      private final SqlCall call;
-      private final boolean alwaysCopy;
-
-      public CallCopyingArgHandler(SqlCall call, boolean alwaysCopy) {
-        this.call = call;
-        this.update = false;
-        final List<SqlNode> operands = call.getOperandList();
-        this.clonedOperands = operands.toArray(new SqlNode[0]);
-        this.alwaysCopy = alwaysCopy;
-      }
-
-      @Override
-      public SqlNode result() {
-        if (update || alwaysCopy) {
-          return call.getOperator().createCall(
-              call.getFunctionQuantifier(),
-              call.getParserPosition(),
-              clonedOperands);
-        } else {
-          return call;
-        }
-      }
-
-      @Override
-      public @Nullable
-      SqlNode visitChild(
-          SqlVisitor<SqlNode> visitor,
-          SqlNode expr,
-          int i,
-          @Nullable SqlNode operand) {
-        if (operand == null) {
-          return null;
-        }
-        SqlNode newOperand = operand.accept(MacroVisitor.this);
-        if (newOperand != operand) {
-          update = true;
-        }
-        clonedOperands[i] = newOperand;
-        return newOperand;
-      }
     }
   }
 }

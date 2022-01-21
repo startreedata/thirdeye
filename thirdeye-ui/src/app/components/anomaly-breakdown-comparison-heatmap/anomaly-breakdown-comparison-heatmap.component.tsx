@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, map, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -207,18 +208,26 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
 
-    const handleNodeClick = (node: AnomalyFilterOption): void => {
-        if (!node) {
+    const handleNodeClick = (
+        tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
+        dimensionColumn: string
+    ): void => {
+        if (!tileData) {
             return;
         }
 
-        let resultantFilters: AnomalyFilterOption[] = [];
+        const resultantFilters: AnomalyFilterOption[] = [
+            ...anomalyFilters,
+            {
+                key: dimensionColumn,
+                value: tileData.data.id,
+            },
+        ];
+        setAnomalyFilters([...resultantFilters]);
+    };
 
-        if (anomalyFilters.includes(node)) {
-            resultantFilters = pull(anomalyFilters, node);
-        } else {
-            resultantFilters = [...anomalyFilters, node];
-        }
+    const handleNodeFilterOnDelete = (node: AnomalyFilterOption): void => {
+        const resultantFilters = pull(anomalyFilters, node);
         setAnomalyFilters([...resultantFilters]);
     };
 
@@ -350,7 +359,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                                     EMPTY_STRING_DISPLAY
                                                 }`}
                                                 onDelete={() =>
-                                                    handleNodeClick(option)
+                                                    handleNodeFilterOnDelete(
+                                                        option
+                                                    )
                                                 }
                                             />
                                         )
@@ -393,8 +404,8 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                         name={data.column}
                                         tooltipElement={DimensionHeatmapTooltip}
                                         treemapData={formatTreemapData(data)}
-                                        onDimensionClickHandler={
-                                            handleNodeClick
+                                        onDimensionClickHandler={(node) =>
+                                            handleNodeClick(node, data.column)
                                         }
                                     />
                                 </>

@@ -148,15 +148,10 @@ function TreemapInternal<Data>({
         if (!node || (node.data.id && isOtherDimension(node?.data?.id))) {
             return;
         }
-        let key = "";
-        if (node.data.data.parent) {
-            key = node.data.data.parent.toString();
-        }
+
         props.onDimensionClickHandler &&
-            props.onDimensionClickHandler({
-                key,
-                value: node.data.id || "",
-            });
+            node.data &&
+            props.onDimensionClickHandler(node.data);
     };
 
     return (

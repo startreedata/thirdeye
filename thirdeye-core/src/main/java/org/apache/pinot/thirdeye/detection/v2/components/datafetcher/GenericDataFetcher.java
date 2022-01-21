@@ -28,9 +28,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
    * Table to query.
    */
   private String tableName;
-
   private ThirdEyeDataSource thirdEyeDataSource;
-
   private List<TimeseriesFilter> timeseriesFilters;
 
   public String getQuery() {
@@ -67,23 +65,23 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
 
   @Override
   public DataTable getDataTable(Interval detectionInterval) throws Exception {
-    String queryWithFilters = applyFilters(query);
+    String queryWithFilters = injectFilters(query);
     ThirdEyeRequestV2 preparedRequest = applyMacros(detectionInterval, queryWithFilters);
     DataTable result = thirdEyeDataSource.fetchDataTable(preparedRequest);
     result.addProperties(preparedRequest.getProperties());
     return result;
   }
 
-  private String applyFilters(final String queryWithoutFilters) throws SqlParseException {
+  private String injectFilters(final String query) throws SqlParseException {
     if (timeseriesFilters.isEmpty()) {
-      return queryWithoutFilters;
+      return query;
     }
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     checkArgument(sqlLanguage != null,
         String.format(
             "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
             thirdEyeDataSource.getName()));
-    return new FiltersEngine(sqlLanguage, queryWithoutFilters, timeseriesFilters).prepareQuery();
+    return new FiltersEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
   }
 
   private ThirdEyeRequestV2 applyMacros(final Interval detectionInterval,

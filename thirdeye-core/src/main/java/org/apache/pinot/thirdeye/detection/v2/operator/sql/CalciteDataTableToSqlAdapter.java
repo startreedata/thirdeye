@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.sql;
+package org.apache.pinot.thirdeye.detection.v2.operator.sql;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Connection;

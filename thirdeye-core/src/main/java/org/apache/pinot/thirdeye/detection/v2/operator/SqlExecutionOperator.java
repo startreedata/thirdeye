@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.v2.sql.DataTableToSqlAdapterFactory;
+import org.apache.pinot.thirdeye.detection.v2.operator.sql.DataTableToSqlAdapterFactory;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;

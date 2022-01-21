@@ -43,16 +43,12 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
   protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,
       final DataSourceCache dataSourceCache) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
-
-    // add datasource cache info
     final DataFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
-
-    // add filters info from evaluation pipeline
-    @SuppressWarnings("unchecked")
-    final List<TimeseriesFilter> timeseriesFilters = (List<TimeseriesFilter>) params.getOrDefault(EVALUATION_FILTERS_KEY, List.of());
+    @SuppressWarnings("unchecked") final List<TimeseriesFilter> timeseriesFilters =
+        (List<TimeseriesFilter>) params.getOrDefault(EVALUATION_FILTERS_KEY, List.of());
     spec.setTimeseriesFilters(timeseriesFilters);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();

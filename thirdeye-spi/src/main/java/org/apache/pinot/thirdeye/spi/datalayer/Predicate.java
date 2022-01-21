@@ -163,18 +163,17 @@ public class Predicate {
           String.format("Could not find filter predicate operator. Expected regex '%s'",
               COMPARISON_OPERATORS_PATTERN.pattern()));
     }
+    final int keyStart = 0;
+    final int keyEnd = m.start();
+    final String key = filterString.substring(keyStart, keyEnd);
 
-    int keyStart = 0;
-    int keyEnd = m.start();
-    String key = filterString.substring(keyStart, keyEnd);
+    final int opStart = m.start();
+    final int opEnd = m.end();
+    final OPER operator = OPER.fromString(filterString.substring(opStart, opEnd));
 
-    int opStart = m.start();
-    int opEnd = m.end();
-    OPER operator = OPER.fromString(filterString.substring(opStart, opEnd));
-
-    int valueStart = m.end();
-    int valueEnd = filterString.length();
-    String value = filterString.substring(valueStart, valueEnd);
+    final int valueStart = m.end();
+    final int valueEnd = filterString.length();
+    final String value = filterString.substring(valueStart, valueEnd);
 
     return new Predicate(key, operator, value);
   }

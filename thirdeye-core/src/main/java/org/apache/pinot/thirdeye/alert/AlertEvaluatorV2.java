@@ -147,7 +147,7 @@ public class AlertEvaluatorV2 {
     final String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
         "rca$dataset not found in alert config.");
 
-    List<TimeseriesFilter> timeseriesFilters = filters
+    final List<TimeseriesFilter> timeseriesFilters = filters
         .stream()
         .map(Predicate::parseFilterPredicate)
         .map(p -> TimeseriesFilter.of(p, getDimensionType(p.getLhs(), dataset), dataset))
@@ -157,8 +157,8 @@ public class AlertEvaluatorV2 {
   }
 
   // fixme datatype from metricDTO is always double + abstraction metric/dimension needs refactoring
-  // first version: assume dimension is always of type String
   private DimensionType getDimensionType(final String metric, final String dataset) {
+    // first version: assume dimension is always of type String
     // todo fetch info from database with a DAO
     return DimensionType.STRING;
   }

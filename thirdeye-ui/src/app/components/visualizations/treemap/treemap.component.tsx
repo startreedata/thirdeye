@@ -1,5 +1,4 @@
 import { Grid, Typography, useTheme } from "@material-ui/core";
-import { purple } from "@material-ui/core/colors";
 import {
     hierarchy,
     Treemap as VisxTreemap,
@@ -37,6 +36,7 @@ const margin = {
     bottom: 0,
 };
 const GRAY = "#EEEEEE";
+const PURPLE = "#5B6AEC";
 const OTHER = "other";
 
 function Treemap<Data>({
@@ -101,8 +101,20 @@ function TreemapInternal<Data>({
         (d) => colorChangeValueAccessor(d) || 0
     );
     const colorScale = scaleLinear<string>({
-        domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
-        range: [theme.palette.error.main, GRAY, GRAY, GRAY, purple[500]],
+        domain: [
+            Math.min(...colorValues),
+            -25,
+            0,
+            25,
+            Math.max(...colorValues),
+        ],
+        range: [
+            theme.palette.error.main,
+            theme.palette.error.main,
+            GRAY,
+            PURPLE,
+            PURPLE,
+        ],
     });
 
     const root = hierarchy(data)

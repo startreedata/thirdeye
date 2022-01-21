@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.macro;
+package org.apache.pinot.thirdeye.detection.v2.sql.macro;
 
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
@@ -13,8 +13,9 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlShuttle;
-import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeFilterFunction;
-import org.apache.pinot.thirdeye.detection.v2.macro.function.TimeGroupFunction;
+import org.apache.pinot.thirdeye.detection.v2.sql.SqlLanguageTranslator;
+import org.apache.pinot.thirdeye.detection.v2.sql.macro.function.TimeFilterFunction;
+import org.apache.pinot.thirdeye.detection.v2.sql.macro.function.TimeGroupFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroFunction;
 import org.apache.pinot.thirdeye.spi.datasource.macro.MacroFunctionContext;

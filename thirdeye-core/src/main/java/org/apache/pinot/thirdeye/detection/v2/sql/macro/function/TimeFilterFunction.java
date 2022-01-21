@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.macro.function;
+package org.apache.pinot.thirdeye.detection.v2.sql.macro.function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;

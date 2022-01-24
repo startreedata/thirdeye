@@ -77,7 +77,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${offsetJava}, ${offsetJava}) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${offsetJava}', '${offsetJava}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -92,7 +92,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [

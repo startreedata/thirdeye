@@ -1,16 +1,28 @@
-import { Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Divider,
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+} from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { formatLargeNumber } from "../../../utils/number/number.util";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
-import { AnomalyBreakdownComparisonData } from "../anomaly-breakdown-comparison-heatmap.interfaces";
+import {
+    AnomalyBreakdownComparisonData,
+    DimensionDisplayData,
+} from "../anomaly-breakdown-comparison-heatmap.interfaces";
 import { useDimensionHeatmapTooltipStyles } from "./dimension-heatmap-tooltip.styles";
 
 export const DimensionHeatmapTooltip: FunctionComponent<
-    TreemapData<AnomalyBreakdownComparisonData>
-> = (props: TreemapData<AnomalyBreakdownComparisonData>) => {
+    TreemapData<AnomalyBreakdownComparisonData & DimensionDisplayData>
+> = (
+    props: TreemapData<AnomalyBreakdownComparisonData & DimensionDisplayData>
+) => {
     const dimensionHeatmapTooltipStyles = useDimensionHeatmapTooltipStyles();
     const { t } = useTranslation();
 
@@ -22,7 +34,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
         <>
             <Grid container direction="column" spacing={0}>
                 {/* Name of the Dimension */}
-                <Grid item>
+                <Grid item xs={12}>
                     <Grid
                         container
                         alignItems="center"
@@ -35,155 +47,217 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 dimensionHeatmapTooltipStyles.spaceBottom
                             }
                         >
-                            <Typography variant="overline">
-                                {props.id || EMPTY_STRING_DISPLAY}
-                            </Typography>
+                            {props.extraData.columnName}:{" "}
+                            {props.id || EMPTY_STRING_DISPLAY}
                         </Grid>
                     </Grid>
+                    <Divider light />
                 </Grid>
 
-                <Grid
-                    item
-                    className={dimensionHeatmapTooltipStyles.spaceBottom}
-                    xs={12}
-                >
-                    <table>
-                        <thead>
-                            <tr>
-                                <th
+                <Grid item xs={12}>
+                    <List
+                        dense
+                        disablePadding
+                        className={
+                            dimensionHeatmapTooltipStyles.dataDisplayList
+                        }
+                    >
+                        <ListItem
+                            className={
+                                dimensionHeatmapTooltipStyles.dataDisplayItem
+                            }
+                        >
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${t("label.current")} ${t(
+                                    "label.value"
+                                )}`}
+                            />
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${formatLargeNumber(
+                                    props.extraData.current
+                                )}`}
+                                primaryTypographyProps={{
+                                    align: "right",
+                                    variant: "subtitle2",
+                                }}
+                            />
+                        </ListItem>
+
+                        <ListItem
+                            className={
+                                dimensionHeatmapTooltipStyles.dataDisplayItem
+                            }
+                        >
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${t("label.baseline")} ${t(
+                                    "label.value"
+                                )}`}
+                            />
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${formatLargeNumber(
+                                    props.extraData.baseline
+                                )}`}
+                                primaryTypographyProps={{
+                                    align: "right",
+                                    variant: "subtitle2",
+                                }}
+                            />
+                        </ListItem>
+
+                        <ListItem
+                            className={
+                                dimensionHeatmapTooltipStyles.dataDisplayItem
+                            }
+                        >
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${t("label.change")}`}
+                            />
+                            {props.extraData.metricValueDiffPercentage !==
+                                null && (
+                                <ListItemText
                                     className={
-                                        dimensionHeatmapTooltipStyles.tableCell
+                                        dimensionHeatmapTooltipStyles.dataDisplayText
                                     }
+                                    primary={`(${props.extraData.metricValueDiffPercentage.toFixed(
+                                        2
+                                    )}%) ${formatLargeNumber(
+                                        props.extraData.metricValueDiff
+                                    )} `}
+                                    primaryTypographyProps={{
+                                        align: "right",
+                                        variant: "subtitle2",
+                                    }}
                                 />
-                                <th
+                            )}
+                            {props.extraData.metricValueDiffPercentage ===
+                                null && (
+                                <ListItemText
                                     className={
-                                        dimensionHeatmapTooltipStyles.tableCell
+                                        dimensionHeatmapTooltipStyles.dataDisplayText
                                     }
-                                >
-                                    {t("label.metric-value")}{" "}
-                                    <small
-                                        className={
-                                            dimensionHeatmapTooltipStyles.smallText
-                                        }
-                                    >
-                                        (of total)
-                                    </small>
-                                </th>
-                                <th
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCell
-                                    }
-                                >
-                                    {t("label.%-contribution")}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellLabel
-                                    }
-                                >
-                                    {t("label.current")}
-                                </th>
-                                <td
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellData
-                                    }
-                                >
-                                    {formatLargeNumber(props.extraData.current)}
-                                    <small
-                                        className={
-                                            dimensionHeatmapTooltipStyles.smallText
-                                        }
-                                    >
-                                        {" "}
-                                        (of{" "}
-                                        {formatLargeNumber(
-                                            props.extraData.currentTotalCount
-                                        )}
-                                        )
-                                    </small>
-                                </td>
-                                <td
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellData
-                                    }
-                                >
-                                    {formatLargeNumber(
-                                        props.extraData.currentPercentage * 100
-                                    )}
-                                    %
-                                </td>
-                            </tr>
-                            <tr>
-                                <th
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellLabel
-                                    }
-                                >
-                                    {t("label.comparison")}
-                                </th>
-                                <td
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellData
-                                    }
-                                >
-                                    {formatLargeNumber(
-                                        props.extraData.comparison
-                                    )}
-                                    <small
-                                        className={
-                                            dimensionHeatmapTooltipStyles.smallText
-                                        }
-                                    >
-                                        {" "}
-                                        (of{" "}
-                                        {formatLargeNumber(
-                                            props.extraData.comparisonTotalCount
-                                        )}
-                                        )
-                                    </small>
-                                </td>
-                                <td
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellData
-                                    }
-                                >
-                                    {formatLargeNumber(
-                                        props.extraData.comparisonPercentage *
-                                            100
-                                    )}
-                                    %
-                                </td>
-                            </tr>
-                            <tr>
-                                <th
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellLabel
-                                    }
-                                >
-                                    {t("label.difference")}
-                                </th>
-                                <td
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellData
-                                    }
+                                    primary={`${formatLargeNumber(
+                                        props.extraData.metricValueDiff
+                                    )}`}
+                                    primaryTypographyProps={{
+                                        align: "right",
+                                        variant: "subtitle2",
+                                    }}
                                 />
-                                <td
-                                    className={
-                                        dimensionHeatmapTooltipStyles.tableCellData
-                                    }
-                                >
-                                    {formatLargeNumber(
-                                        props.extraData.percentageDiff * 100
-                                    )}
-                                    %
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            )}
+                        </ListItem>
+                    </List>
+                </Grid>
+
+                <Grid item xs={12}>
+                    <Box padding={1}>
+                        <Divider light />
+                    </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                    <List
+                        dense
+                        disablePadding
+                        className={
+                            dimensionHeatmapTooltipStyles.dataDisplayList
+                        }
+                    >
+                        <ListItem
+                            className={
+                                dimensionHeatmapTooltipStyles.dataDisplayItem
+                            }
+                        >
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${t("label.current")} ${t(
+                                    "label.contribution"
+                                )}`}
+                            />
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${formatLargeNumber(
+                                    props.extraData
+                                        .currentContributionPercentage * 100
+                                )}%`}
+                                primaryTypographyProps={{
+                                    align: "right",
+                                    variant: "subtitle2",
+                                }}
+                            />
+                        </ListItem>
+
+                        <ListItem
+                            className={
+                                dimensionHeatmapTooltipStyles.dataDisplayItem
+                            }
+                        >
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${t("label.baseline")} ${t(
+                                    "label.contribution"
+                                )}`}
+                            />
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${formatLargeNumber(
+                                    props.extraData
+                                        .baselineContributionPercentage * 100
+                                )}%`}
+                                primaryTypographyProps={{
+                                    align: "right",
+                                    variant: "subtitle2",
+                                }}
+                            />
+                        </ListItem>
+
+                        <ListItem
+                            className={
+                                dimensionHeatmapTooltipStyles.dataDisplayItem
+                            }
+                        >
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${t("label.change")}`}
+                            />
+                            <ListItemText
+                                className={
+                                    dimensionHeatmapTooltipStyles.dataDisplayText
+                                }
+                                primary={`${formatLargeNumber(
+                                    props.extraData.contributionDiff * 100
+                                )}%`}
+                                primaryTypographyProps={{
+                                    align: "right",
+                                    variant: "subtitle2",
+                                }}
+                            />
+                        </ListItem>
+                    </List>
                 </Grid>
 
                 <SafariMuiGridFix />

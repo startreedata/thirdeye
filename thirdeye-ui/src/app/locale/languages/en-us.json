@@ -145,10 +145,8 @@
 
         "authentication-error": "Authentication Error",
 
-        "metric-value": "Metric Value",
-        "%-contribution": "% Contribution",
-        "comparison": "Comparison",
-        "difference": "Difference"
+        "contribution": "Contribution",
+        "value": "Value"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

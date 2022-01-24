@@ -31,6 +31,7 @@ public class MacroEngineTest {
   private static final long INPUT_END_TIME = 22222222L;
   private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME, INPUT_END_TIME);
   private static final String IDENTIFIER_QUOTE_STRING = "\"";
+  private static final String LITERAL_QUOTE_STRING = "'";
 
   private String clean(String sql) {
     return sql
@@ -124,6 +125,34 @@ public class MacroEngineTest {
   }
 
   @Test
+  public void testTimeGroupMacroWithQuotedLiterals() {
+    // test if a macro with string literal params is parsed correctly
+    String timeColumnMacroArg = "timeCol";
+    String timeColumnFormatMacroArg = "myTestFormat";
+    String timeColumnFormatMacroArgQuoted =
+        LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
+    Period granularityMacroArg = Period.ZERO;
+    String granularityMacroArgQuoted =
+        LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
+
+    String inputQuery = String.format("select __timeGroup(%s,%s,%s) from tableName",
+        timeColumnMacroArg,
+        timeColumnFormatMacroArgQuoted,
+        granularityMacroArgQuoted);
+
+    String expectedQuery = String.format("select %s from tableName",
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
+            timeColumnFormatMacroArg,
+            granularityMacroArg));
+
+    Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(), Period.ZERO.toString()
+    );
+
+    prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
+  }
+
+  @Test
   public void testNestedMacro() {
     // test if nested macros work - eg: __timeFilter(__timeGroup(timeCol, myTestFormat, P0D))
     String timeColumnMacroArg = "timeCol";
@@ -136,10 +165,12 @@ public class MacroEngineTest {
         timeColumnFormatMacroArg,
         granularityMacroArg);
 
-    String expectedTimeGroupMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
+    String expectedTimeGroupMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
+        timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg);
-    String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(expectedTimeGroupMacro,
+    String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
+        expectedTimeGroupMacro,
         INPUT_START_TIME,
         INPUT_END_TIME);
     Map<String, String> expectedProperties = ImmutableMap.of(
@@ -190,6 +221,7 @@ public class MacroEngineTest {
       return new ThirdeyeSqlDialect.Builder()
           .withBaseDialect("AnsiSqlDialect")
           .withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING)
+          .withLiteralQuoteString(LITERAL_QUOTE_STRING)
           .build();
     }
   }

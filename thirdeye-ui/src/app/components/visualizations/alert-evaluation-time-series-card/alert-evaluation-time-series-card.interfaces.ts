@@ -1,7 +1,6 @@
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertEvaluationTimeSeriesCardProps {
-    maximized?: boolean;
     alertEvaluationTimeSeriesHeight: number;
     alertEvaluationTimeSeriesMaximizedHeight?: number;
     title?: string;

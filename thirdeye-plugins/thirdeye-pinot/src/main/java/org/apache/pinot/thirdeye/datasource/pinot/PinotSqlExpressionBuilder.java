@@ -30,6 +30,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
         return "1:MILLISECONDS:EPOCH";
       case "EPOCH": case "1:SECONDS:EPOCH":
         return "1:SECONDS:EPOCH";
+      case "EPOCH_HOURS": case "1:HOURS:EPOCH":
+        return "1:HOURS:EPOCH";
       default:
         new SimpleDateFormat(timeColumnFormat);
         return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);

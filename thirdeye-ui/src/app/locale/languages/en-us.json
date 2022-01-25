@@ -146,7 +146,8 @@
         "authentication-error": "Authentication Error",
 
         "contribution": "Contribution",
-        "value": "Value"
+        "value": "Value",
+        "alert-performance": "Alert Performance"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

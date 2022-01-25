@@ -3,7 +3,6 @@ import {
     Card,
     CardContent,
     CardHeader,
-    Divider,
     Grid,
     IconButton,
     Link,
@@ -16,14 +15,10 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import {
-    UiAlertDatasetAndMetric,
-    UiAlertSubscriptionGroup,
-} from "../../../rest/dto/ui-alert.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     getAlertsUpdatePath,
     getAlertsViewPath,
-    getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -85,37 +80,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         handleAlertOptionsClose();
     };
 
-    const handleSubscriptionGroupViewDetails = (
-        subscriptionGroup: UiAlertSubscriptionGroup
-    ): void => {
-        if (!subscriptionGroup) {
-            return;
-        }
-
-        history.push(getSubscriptionGroupsViewPath(subscriptionGroup.id));
-    };
-
-    const getAlertDataSetAndMetric = (
-        uiAlertDatasetAndMetric: UiAlertDatasetAndMetric
-    ): string => {
-        if (!uiAlertDatasetAndMetric) {
-            return "";
-        }
-
-        return `${uiAlertDatasetAndMetric.datasetName}${t(
-            "label.pair-separator"
-        )}${uiAlertDatasetAndMetric.metricName}`;
-    };
-
-    const getUiAlertSubscriptionGroupName = (
-        uiAlertSubscriptionGroup: UiAlertSubscriptionGroup
-    ): string => {
-        if (!uiAlertSubscriptionGroup) {
-            return "";
-        }
-
-        return uiAlertSubscriptionGroup.name;
-    };
+    const anomalies: Anomaly[] =
+        props.alertEvaluation.detectionEvaluations
+            .output_AnomalyDetectorResult_0.anomalies;
 
     return (
         <Card variant="outlined">
@@ -207,7 +174,8 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                             )}
 
                             {/* Summary */}
-                            {!props.showViewDetails && t("label.summary")}
+                            {!props.showViewDetails &&
+                                t("label.alert-performance")}
                         </>
                     }
                     titleTypographyProps={{ variant: "h6" }}
@@ -220,60 +188,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         {/* Created by */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<string>
-                                name={t("label.created-by")}
+                                name={t("label.anomalies")}
                                 searchWords={props.searchWords}
-                                values={[props.uiAlert.createdBy]}
-                            />
-                        </Grid>
-
-                        {/* Separator */}
-                        <Grid item xs={12}>
-                            <Divider variant="fullWidth" />
-                        </Grid>
-
-                        {/* Detection type */}
-                        <Grid item md={3} sm={6} xs={12}>
-                            <NameValueDisplayCard<string>
-                                showCount
-                                name={t("label.detection-type")}
-                                searchWords={props.searchWords}
-                                values={props.uiAlert.detectionTypes}
-                            />
-                        </Grid>
-
-                        {/* Dataset/Metric */}
-                        <Grid item md={3} sm={6} xs={12}>
-                            <NameValueDisplayCard<UiAlertDatasetAndMetric>
-                                showCount
-                                name={`${t("label.dataset")}${t(
-                                    "label.pair-separator"
-                                )}${t("label.metric")}`}
-                                searchWords={props.searchWords}
-                                valueRenderer={getAlertDataSetAndMetric}
-                                values={props.uiAlert.datasetAndMetrics}
-                            />
-                        </Grid>
-
-                        {/* Filtered by */}
-                        <Grid item md={3} sm={6} xs={12}>
-                            <NameValueDisplayCard<string>
-                                showCount
-                                name={t("label.filtered-by")}
-                                searchWords={props.searchWords}
-                                values={props.uiAlert.filteredBy}
-                            />
-                        </Grid>
-
-                        {/* Subscription groups */}
-                        <Grid item md={3} sm={6} xs={12}>
-                            <NameValueDisplayCard<UiAlertSubscriptionGroup>
-                                link
-                                showCount
-                                name={t("label.subscription-groups")}
-                                searchWords={props.searchWords}
-                                valueRenderer={getUiAlertSubscriptionGroupName}
-                                values={props.uiAlert.subscriptionGroups}
-                                onClick={handleSubscriptionGroupViewDetails}
+                                values={[`${anomalies ? anomalies.length : 0}`]}
                             />
                         </Grid>
                     </Grid>

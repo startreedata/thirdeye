@@ -145,10 +145,8 @@
 
         "authentication-error": "Authentication Error",
 
-        "metric-value": "Metric Value",
-        "%-contribution": "% Contribution",
-        "comparison": "Comparison",
-        "difference": "Difference",
+        "contribution": "Contribution",
+        "value": "Value",
         "alert-performance": "Alert Performance"
     },
     "message": {

@@ -27,6 +27,7 @@ import {
     AnomalyBreakdownComparisonDataByDimensionColumn,
     AnomalyBreakdownComparisonHeatmapProps,
     AnomalyFilterOption,
+    DimensionDisplayData,
     SummarizeDataFunctionParams,
     SummaryData,
 } from "./anomaly-breakdown-comparison-heatmap.interfaces";
@@ -73,18 +74,21 @@ function summarizeDimensionValueData(
 }
 
 function formatTreemapData(
-    dimensionData: AnomalyBreakdownComparisonDataByDimensionColumn
-): TreemapData<AnomalyBreakdownComparisonData>[] {
+    dimensionData: AnomalyBreakdownComparisonDataByDimensionColumn,
+    columnName: string
+): TreemapData<AnomalyBreakdownComparisonData & DimensionDisplayData>[] {
     const parentId = `${dimensionData.column}-parent`;
 
     return [
         { id: parentId, size: 0, parent: null },
         ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
+            const comparisonAndDisplayData = { ...comparisonData, columnName };
+
             return {
                 id: k,
                 size: comparisonData.current,
                 parent: parentId,
-                extraData: comparisonData,
+                extraData: comparisonAndDisplayData,
             };
         }),
     ];
@@ -150,8 +154,8 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                 anomalyBreakdownCurrent[dimensionColumnName]
             );
             const [
-                comparisonTotal,
-                comparisonDimensionValuesData,
+                baselineTotal,
+                baselineDimensionValuesData,
             ] = summarizeDimensionValueData(
                 anomalyBreakdownComparison[dimensionColumnName]
             );
@@ -163,21 +167,37 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                 (dimension: string) => {
                     const currentDataForDimension =
                         currentDimensionValuesData[dimension];
-                    const comparisonDataForDimension =
-                        comparisonDimensionValuesData[dimension] || {};
+                    const baselineDataForDimension =
+                        baselineDimensionValuesData[dimension] || {};
+                    const baselineMetricValue =
+                        baselineDataForDimension.count || 0;
+
                     dimensionComparisonData[dimension] = {
                         current: currentDataForDimension.count,
-                        currentPercentage:
+                        baseline: baselineMetricValue,
+                        metricValueDiff:
+                            currentDataForDimension.count - baselineMetricValue,
+                        metricValueDiffPercentage: null,
+                        currentContributionPercentage:
                             currentDataForDimension.percentage || 0,
-                        comparison: comparisonDataForDimension.count || 0,
-                        comparisonPercentage:
-                            comparisonDataForDimension.percentage || 0,
-                        percentageDiff:
+                        baselineContributionPercentage:
+                            baselineDataForDimension.percentage || 0,
+                        contributionDiff:
                             (currentDataForDimension.percentage || 0) -
-                            (comparisonDataForDimension.percentage || 0),
+                            (baselineDataForDimension.percentage || 0),
                         currentTotalCount: currentTotal,
-                        comparisonTotalCount: comparisonTotal,
+                        baselineTotalCount: baselineTotal,
                     };
+
+                    if (baselineMetricValue > 0) {
+                        dimensionComparisonData[
+                            dimension
+                        ].metricValueDiffPercentage =
+                            ((currentDataForDimension.count -
+                                baselineMetricValue) /
+                                baselineMetricValue) *
+                            100;
+                    }
                 }
             );
 
@@ -239,7 +259,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         node: TreemapData<AnomalyBreakdownComparisonData>
     ): number => {
         if (node.extraData) {
-            return node.extraData.percentageDiff * 100;
+            return node.extraData.contributionDiff * 100;
         }
 
         return node.size;
@@ -278,7 +298,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             <Grid item xs={6}>
                                 <div>
                                     <strong>
-                                        &quot;{t("label.comparison")}&quot;
+                                        &quot;{t("label.baseline")}&quot;
                                     </strong>
                                     <span>
                                         {" "}
@@ -397,13 +417,19 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             breakdownComparisonData.map((data) => (
                                 <>
                                     <Divider />
-                                    <Treemap<AnomalyBreakdownComparisonData>
+                                    <Treemap<
+                                        AnomalyBreakdownComparisonData &
+                                            DimensionDisplayData
+                                    >
                                         colorChangeValueAccessor={
                                             colorChangeValueAccessor
                                         }
                                         name={data.column}
                                         tooltipElement={DimensionHeatmapTooltip}
-                                        treemapData={formatTreemapData(data)}
+                                        treemapData={formatTreemapData(
+                                            data,
+                                            data.column
+                                        )}
                                         onDimensionClickHandler={(node) =>
                                             handleNodeClick(node, data.column)
                                         }

@@ -138,7 +138,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader showTimeRange title={t("label.alerts")} />
+            <PageHeader title={t("label.alerts")} />
 
             <PageContentsGridV1 fullHeight>
                 {/* Alert list */}

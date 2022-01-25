@@ -27,6 +27,7 @@ import {
 } from "./treemap.interfaces";
 import { useTreemapStyles } from "./treemap.styles";
 
+// #TODO move to a constants file
 const DEFAULT_TREEMAP_HEIGHT = 60;
 const RIGHT_BOUNDS_PADDING = 30;
 const margin = {

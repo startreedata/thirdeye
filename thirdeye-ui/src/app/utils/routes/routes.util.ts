@@ -13,7 +13,7 @@ export const AppRoute = {
     ANOMALIES: "/anomalies",
     ANOMALIES_ALL: "/anomalies/all",
     ANOMALIES_VIEW: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}`,
-    ANOMALIES_VIEW_INDEX: `/anomalies/view/${PLACEHOLDER_ROUTE_ID}/index`,
+    ANOMALIES_VIEW_INDEX: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}/index`,
     CONFIGURATION: "/configuration",
     SUBSCRIPTION_GROUPS: "/configuration/subscription-groups",
     SUBSCRIPTION_GROUPS_ALL: "/configuration/subscription-groups/all",

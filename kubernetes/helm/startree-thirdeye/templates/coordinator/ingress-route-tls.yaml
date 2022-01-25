@@ -5,8 +5,7 @@ metadata:
   name: {{ include "thirdeye.coordinator.fullname" . }}
 spec:
   entryPoints:
-    websecure:
-      address: {{ .Values.coordinator.port }}
+  - websecure
   routes:
   - match: HostSNI(`{{ .Release.Name }}-coordinator.{{ .Release.Namespace }}.{{ required "domain is required." .Values.domain }}`)
     services:

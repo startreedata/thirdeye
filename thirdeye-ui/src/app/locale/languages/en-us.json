@@ -148,7 +148,8 @@
         "metric-value": "Metric Value",
         "%-contribution": "% Contribution",
         "comparison": "Comparison",
-        "difference": "Difference"
+        "difference": "Difference",
+        "alert-performance": "Alert Performance"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

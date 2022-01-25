@@ -170,16 +170,17 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    return !uiAlert ? (
+    return !uiAlert || !alertEvaluation ? (
         <AppLoadingIndicatorV1 />
     ) : (
         <PageV1>
-            <PageHeader title={uiAlert.name} />
+            <PageHeader showTimeRange title={uiAlert.name} />
 
             <PageContentsGridV1>
                 {/* Alert Details Card*/}
                 <Grid item xs={12}>
                     <AlertCard
+                        alertEvaluation={alertEvaluation}
                         uiAlert={uiAlert}
                         onChange={handleAlertChange}
                         onDelete={handleAlertDelete}
@@ -190,7 +191,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     <AlertEvaluationTimeSeriesCard
                         alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={300}
+                        alertEvaluationTimeSeriesHeight={500}
                         title={uiAlert.name}
                         onRefresh={fetchAlertEvaluation}
                     />

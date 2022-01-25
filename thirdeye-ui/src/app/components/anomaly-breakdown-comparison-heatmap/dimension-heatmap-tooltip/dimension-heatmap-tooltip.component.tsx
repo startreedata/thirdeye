@@ -25,6 +25,37 @@ export const DimensionHeatmapTooltip: FunctionComponent<
 ) => {
     const dimensionHeatmapTooltipStyles = useDimensionHeatmapTooltipStyles();
     const { t } = useTranslation();
+    let metricValueDiffDisplay;
+    let metricValueChangeColorClass;
+    let contributionChangeColorClass;
+
+    if (props.extraData) {
+        metricValueDiffDisplay = formatLargeNumber(
+            props.extraData.metricValueDiff
+        );
+
+        if (props.extraData.metricValueDiffPercentage) {
+            metricValueDiffDisplay = `(${props.extraData.metricValueDiffPercentage.toFixed(
+                2
+            )}%) ${metricValueDiffDisplay}`;
+        }
+
+        if (props.extraData.metricValueDiff > 0) {
+            metricValueChangeColorClass =
+                dimensionHeatmapTooltipStyles.increased;
+        } else if (props.extraData.metricValueDiff < 0) {
+            metricValueChangeColorClass =
+                dimensionHeatmapTooltipStyles.decreased;
+        }
+
+        if (props.extraData.contributionDiff > 0) {
+            contributionChangeColorClass =
+                dimensionHeatmapTooltipStyles.increased;
+        } else if (props.extraData.contributionDiff < 0) {
+            contributionChangeColorClass =
+                dimensionHeatmapTooltipStyles.decreased;
+        }
+    }
 
     if (!props.extraData) {
         return <span />;
@@ -51,7 +82,10 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                             {props.id || EMPTY_STRING_DISPLAY}
                         </Grid>
                     </Grid>
-                    <Divider light />
+
+                    <Box padding={1}>
+                        <Divider light />
+                    </Box>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -127,45 +161,21 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 }
                                 primary={`${t("label.change")}`}
                             />
-                            {props.extraData.metricValueDiffPercentage !==
-                                null && (
-                                <ListItemText
-                                    className={
-                                        dimensionHeatmapTooltipStyles.dataDisplayText
-                                    }
-                                    primary={`(${props.extraData.metricValueDiffPercentage.toFixed(
-                                        2
-                                    )}%) ${formatLargeNumber(
-                                        props.extraData.metricValueDiff
-                                    )} `}
-                                    primaryTypographyProps={{
-                                        align: "right",
-                                        variant: "subtitle2",
-                                    }}
-                                />
-                            )}
-                            {props.extraData.metricValueDiffPercentage ===
-                                null && (
-                                <ListItemText
-                                    className={
-                                        dimensionHeatmapTooltipStyles.dataDisplayText
-                                    }
-                                    primary={`${formatLargeNumber(
-                                        props.extraData.metricValueDiff
-                                    )}`}
-                                    primaryTypographyProps={{
-                                        align: "right",
-                                        variant: "subtitle2",
-                                    }}
-                                />
-                            )}
+                            <ListItemText
+                                className={`${dimensionHeatmapTooltipStyles.dataDisplayText} ${metricValueChangeColorClass}`}
+                                primary={metricValueDiffDisplay}
+                                primaryTypographyProps={{
+                                    align: "right",
+                                    variant: "subtitle2",
+                                }}
+                            />
                         </ListItem>
                     </List>
                 </Grid>
 
                 <Grid item xs={12}>
                     <Box padding={1}>
-                        <Divider light />
+                        <Divider />
                     </Box>
                 </Grid>
 
@@ -245,9 +255,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 primary={`${t("label.change")}`}
                             />
                             <ListItemText
-                                className={
-                                    dimensionHeatmapTooltipStyles.dataDisplayText
-                                }
+                                className={`${dimensionHeatmapTooltipStyles.dataDisplayText} ${contributionChangeColorClass}`}
                                 primary={`${formatLargeNumber(
                                     props.extraData.contributionDiff * 100
                                 )}%`}

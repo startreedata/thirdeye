@@ -1,27 +1,17 @@
 import { makeStyles } from "@material-ui/core";
 
-const TABLE_CELL_SPACING = 3;
-
 export const useDimensionHeatmapTooltipStyles = makeStyles((theme) => ({
-    tableCell: {
-        padding: TABLE_CELL_SPACING,
-    },
-    tableCellData: {
-        textAlign: "right",
-        padding: TABLE_CELL_SPACING,
-    },
-    tableCellLabel: {
-        textAlign: "left",
-        padding: TABLE_CELL_SPACING,
-    },
     spaceBottom: {
         marginBottom: theme.spacing(1),
     },
-    smallText: {
-        fontSize: "x-small",
-    },
     dataDisplayList: {
         minWidth: "300px;",
+    },
+    decreased: {
+        color: theme.palette.error.dark,
+    },
+    increased: {
+        color: theme.palette.success.dark,
     },
     dataDisplayItem: {
         marginTop: 0,

@@ -27,6 +27,12 @@ const AnomaliesViewPage = lazy(() =>
     ).then((module) => ({ default: module.AnomaliesViewPage }))
 );
 
+const AnomaliesViewIndexPage = lazy(() =>
+    import(
+        /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewIndexPage }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -67,6 +73,13 @@ export const AnomaliesRouter: FunctionComponent = () => {
                     exact
                     component={AnomaliesAllPage}
                     path={AppRoute.ANOMALIES_ALL}
+                />
+
+                {/* Anomalies view index path to change time range*/}
+                <Route
+                    exact
+                    component={AnomaliesViewIndexPage}
+                    path={AppRoute.ANOMALIES_VIEW_INDEX}
                 />
 
                 {/* Anomalies view path */}

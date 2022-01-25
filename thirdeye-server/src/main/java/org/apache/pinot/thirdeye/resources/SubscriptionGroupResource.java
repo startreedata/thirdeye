@@ -3,7 +3,6 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureNull;
 
@@ -65,8 +64,10 @@ public class SubscriptionGroupResource extends
   @Override
   protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
     super.validate(api, existing);
-    optional(api.getCron()).ifPresent(cron ->
-        ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
+    String cron = api.getCron();
+    ensure(Strings.isNullOrEmpty(cron) || CronExpression.isValidExpression(cron),
+        ERR_CRON_INVALID,
+        cron);
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {

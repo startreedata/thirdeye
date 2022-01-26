@@ -21,8 +21,6 @@ package org.apache.pinot.thirdeye.cube.summary;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -48,8 +46,6 @@ import org.slf4j.LoggerFactory;
 public class Summary {
 
   public final static int MAX_GAINER_LOSER_COUNT = 5;
-  public final static NumberFormat DOUBLE_FORMATTER = new DecimalFormat("#0.0000");
-  public static final String INFINITE = "";
 
   static final NodeDimensionValuesComparator NODE_COMPARATOR = new NodeDimensionValuesComparator();
   private static final Logger LOG = LoggerFactory.getLogger(Summary.class);
@@ -105,16 +101,16 @@ public class Summary {
     row.setSizeFactor(costEntry.getSizeFactor());
     row.setDimensionName(costEntry.getDimName());
     row.setDimensionValue(costEntry.getDimValue());
-    row.setPercentageChange(computePercentageChange(row.getBaselineValue(), row.getCurrentValue()));
-    row.setContributionChange(computeContributionChange(row.getBaselineValue(),
+    row.setChangePercentage(computePercentageChange(row.getBaselineValue(), row.getCurrentValue()));
+    row.setContributionChangePercentage(computeContributionChange(row.getBaselineValue(),
         row.getCurrentValue(),
         baselineTotal,
         currentTotal));
-    row.setContributionToOverallChange(computeContributionToOverallChange(row.getBaselineValue(),
+    row.setContributionToOverallChangePercentage(computeContributionToOverallChange(row.getBaselineValue(),
         row.getCurrentValue(),
         baselineTotal,
         currentTotal));
-    row.setCost(DOUBLE_FORMATTER.format(roundUp(costEntry.getCost())));
+    row.setCost(roundUp(costEntry.getCost()));
     return row;
   }
 
@@ -160,14 +156,14 @@ public class Summary {
         NameTag parentNameTag = nameTags.get(parent);
         if (parentNameTag != null) {
           // Set parent's name tag from ALL to NOT_ALL String.
-          int notAllLevel = node.getLevel() - levelDiff;
-          parentNameTag.setNotAll(notAllLevel);
+          int allOthersLevel = node.getLevel() - levelDiff;
+          parentNameTag.setAllOthers(allOthersLevel);
           // After that, set the names after NOT_ALL to empty, e.g., [home page, (ALL)-, ""]
-          for (int i = notAllLevel + 1; i < maxNodeLevel; ++i) {
+          for (int i = allOthersLevel + 1; i < maxNodeLevel; ++i) {
             parentNameTag.setEmpty(i);
           }
           // Each picked child will remove itself from this parent's other dimension values.
-          // Thus, the (ALL)- node will only show the names of the children name that are NOT picked in the summary.
+          // Thus, the (ALL_OTHERS) node will only show the names of the children name that are NOT picked in other summary lines.
           otherDimensionValues.get(parent).remove(node.getDimensionValues().get(parent.getLevel()));
           break;
         }
@@ -180,16 +176,16 @@ public class Summary {
       row.setNames(nameTags.get(node).getNames());
       row.setBaselineValue(node.getBaselineValue());
       row.setCurrentValue(node.getCurrentValue());
-      row.setPercentageChange(computePercentageChange(row.getBaselineValue(),
+      row.setChangePercentage(computePercentageChange(row.getBaselineValue(),
           row.getCurrentValue()));
       row.setSizeFactor((node.getBaselineSize() + node.getCurrentSize()) / (
           dimensionAnalysisResultApi.getBaselineTotalSize()
               + dimensionAnalysisResultApi.getCurrentTotalSize()));
-      row.setContributionChange(computeContributionChange(row.getBaselineValue(),
+      row.setContributionChangePercentage(computeContributionChange(row.getBaselineValue(),
           row.getCurrentValue(),
           dimensionAnalysisResultApi.getBaselineTotal(),
           dimensionAnalysisResultApi.getCurrentTotal()));
-      row.setContributionToOverallChange(computeContributionToOverallChange(row.getBaselineValue(),
+      row.setContributionToOverallChangePercentage(computeContributionToOverallChange(row.getBaselineValue(),
           row.getCurrentValue(),
           dimensionAnalysisResultApi.getBaselineTotal(),
           dimensionAnalysisResultApi.getCurrentTotal()));
@@ -206,35 +202,35 @@ public class Summary {
     }
   }
 
-  public static String computePercentageChange(double baseline, double current) {
+  public static double computePercentageChange(double baseline, double current) {
     if (baseline != 0d) {
       double percentageChange = ((current - baseline) / baseline) * 100d;
-      return DOUBLE_FORMATTER.format(roundUp(percentageChange)) + "%";
+      return roundUp(percentageChange);
     } else {
-      return INFINITE;
+      return Double.NaN;
     }
   }
 
-  public static String computeContributionChange(double baseline, double current,
+  public static double computeContributionChange(double baseline, double current,
       double baselineTotal,
       double currentTotal) {
     if (currentTotal != 0d && baselineTotal != 0d) {
       double contributionChange = ((current / currentTotal) - (baseline / baselineTotal)) * 100d;
-      return DOUBLE_FORMATTER.format(roundUp(contributionChange)) + "%";
+      return roundUp(contributionChange);
     } else {
-      return INFINITE;
+      return Double.NaN;
     }
   }
 
-  public static String computeContributionToOverallChange(double baseline, double current,
+  public static double computeContributionToOverallChange(double baseline, double current,
       double baselineTotal,
       double currentTotal) {
     if (baselineTotal != 0d) {
       double contributionToOverallChange =
           ((current - baseline) / Math.abs(currentTotal - baselineTotal)) * 100d;
-      return DOUBLE_FORMATTER.format(roundUp(contributionToOverallChange)) + "%";
+      return roundUp(contributionToOverallChange);
     } else {
-      return INFINITE;
+      return Double.NaN;
     }
   }
 

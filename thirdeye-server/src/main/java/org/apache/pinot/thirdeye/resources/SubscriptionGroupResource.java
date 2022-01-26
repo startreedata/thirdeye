@@ -3,11 +3,11 @@ package org.apache.pinot.thirdeye.resources;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static org.apache.pinot.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensure;
 import static org.apache.pinot.thirdeye.util.ResourceUtils.ensureNull;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
@@ -55,7 +55,7 @@ public class SubscriptionGroupResource extends
   protected SubscriptionGroupDTO createDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
-    if (api.getCron() == null) {
+    if (Strings.isNullOrEmpty(api.getCron())) {
       api.setCron(CRON_EVERY_5MIN);
     }
     return toDto(api);
@@ -64,8 +64,10 @@ public class SubscriptionGroupResource extends
   @Override
   protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
     super.validate(api, existing);
-    optional(api.getCron()).ifPresent(cron ->
-        ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
+    String cron = api.getCron();
+    ensure(Strings.isNullOrEmpty(cron) || CronExpression.isValidExpression(cron),
+        ERR_CRON_INVALID,
+        cron);
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {

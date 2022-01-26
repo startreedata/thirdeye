@@ -1,5 +1,4 @@
 import { Grid, Typography, useTheme } from "@material-ui/core";
-import { purple } from "@material-ui/core/colors";
 import {
     hierarchy,
     Treemap as VisxTreemap,
@@ -28,6 +27,7 @@ import {
 } from "./treemap.interfaces";
 import { useTreemapStyles } from "./treemap.styles";
 
+// #TODO move to a constants file
 const DEFAULT_TREEMAP_HEIGHT = 60;
 const RIGHT_BOUNDS_PADDING = 30;
 const margin = {
@@ -37,6 +37,7 @@ const margin = {
     bottom: 0,
 };
 const GRAY = "#EEEEEE";
+const PURPLE = "#5B6AEC";
 const OTHER = "other";
 
 function Treemap<Data>({
@@ -101,8 +102,20 @@ function TreemapInternal<Data>({
         (d) => colorChangeValueAccessor(d) || 0
     );
     const colorScale = scaleLinear<string>({
-        domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
-        range: [theme.palette.error.main, GRAY, GRAY, GRAY, purple[500]],
+        domain: [
+            Math.min(...colorValues),
+            -25,
+            0,
+            25,
+            Math.max(...colorValues),
+        ],
+        range: [
+            theme.palette.error.main,
+            theme.palette.error.main,
+            GRAY,
+            PURPLE,
+            PURPLE,
+        ],
     });
 
     const root = hierarchy(data)
@@ -148,15 +161,10 @@ function TreemapInternal<Data>({
         if (!node || (node.data.id && isOtherDimension(node?.data?.id))) {
             return;
         }
-        let key = "";
-        if (node.data.data.parent) {
-            key = node.data.data.parent.toString();
-        }
+
         props.onDimensionClickHandler &&
-            props.onDimensionClickHandler({
-                key,
-                value: node.data.id || "",
-            });
+            node.data &&
+            props.onDimensionClickHandler(node.data);
     };
 
     return (

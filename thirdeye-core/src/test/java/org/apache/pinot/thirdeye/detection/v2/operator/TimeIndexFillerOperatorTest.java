@@ -1,33 +1,16 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.datasource.cache.DataSourceCache;
-import org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher;
-import org.apache.pinot.thirdeye.detection.v2.spec.DataFetcherSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeDataSource;
-import org.apache.pinot.thirdeye.spi.detection.BaseComponent;
-import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
-import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType;
-import org.apache.pinot.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.detection.v2.OperatorContext;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class TimeIndexFillerOperatorTest {
@@ -88,8 +71,8 @@ public class TimeIndexFillerOperatorTest {
   @Test
   public void testTimeIndexFillerExecutionFillLeftRightInferBoundsFromDetectionTime() throws Exception {
     final TimeIndexFillerOperator timeIndexFillerOperator = new TimeIndexFillerOperator();
-    final String startTime = String.valueOf(OCTOBER_23_MILLIS);
-    final String endTime = String.valueOf(OCTOBER_26_MILLIS);
+    final long startTime = OCTOBER_23_MILLIS;
+    final long endTime = OCTOBER_26_MILLIS;
 
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
@@ -126,8 +109,8 @@ public class TimeIndexFillerOperatorTest {
         .setProperties(properties);
 
     timeIndexFillerOperator.init(context);
-    Assert.assertEquals(String.valueOf(timeIndexFillerOperator.getStartTime()), startTime);
-    Assert.assertEquals(String.valueOf(timeIndexFillerOperator.getEndTime()), endTime);
+    Assert.assertEquals(timeIndexFillerOperator.getStartTime(), startTime);
+    Assert.assertEquals(timeIndexFillerOperator.getEndTime(), endTime);
 
     timeIndexFillerOperator.execute();
 

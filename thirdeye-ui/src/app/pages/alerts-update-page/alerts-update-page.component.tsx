@@ -58,7 +58,6 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     }, [alert]);
 
     useEffect(() => {
-        notify(NotificationTypeV1.Success, "test");
         fetchAlert();
     }, []);
 

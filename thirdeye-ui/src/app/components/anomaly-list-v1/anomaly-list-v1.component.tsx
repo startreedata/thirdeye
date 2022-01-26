@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
-    getAnomaliesViewPath,
+    getAnomaliesViewIndexPath,
 } from "../../utils/routes/routes.util";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
@@ -28,7 +28,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     ): ReactNode => {
         return linkRendererV1(
             cellValue,
-            getAnomaliesViewPath(data.id as number)
+            getAnomaliesViewIndexPath(data.id as number)
         );
     };
 

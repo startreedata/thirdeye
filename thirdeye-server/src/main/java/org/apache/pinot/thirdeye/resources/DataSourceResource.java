@@ -91,6 +91,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceName);
 
     final DatasetConfigDTO datasetConfigDTO = dataSource.onboardDataset(datasetName);
+    ensureExists(datasetConfigDTO, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
 
     return respondOk(ApiBeanMapper.toApi(datasetConfigDTO));
   }

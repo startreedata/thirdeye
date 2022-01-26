@@ -73,7 +73,6 @@
         "end": "End",
         "from": "From",
         "to": "To",
-        "add-a-dimension": "Add a Dimension",
         "last-15-minutes": "Last 15 Minutes",
         "last-1-hour": "Last 1 Hour",
         "last-12-hours": "Last 12 Hours",
@@ -146,10 +145,9 @@
 
         "authentication-error": "Authentication Error",
 
-        "metric-value": "Metric Value",
-        "%-contribution": "% Contribution",
-        "comparison": "Comparison",
-        "difference": "Difference"
+        "contribution": "Contribution",
+        "value": "Value",
+        "alert-performance": "Alert Performance"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

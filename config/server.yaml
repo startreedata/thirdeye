@@ -24,19 +24,16 @@ logging:
 
 auth:
   enabled: false
-#  Uncomment the below line and provide the platform auth info url to enable authentication.
-#  It will replace keysUrl and exactMatch issuer(iss) value with the value from info payload.
-#  infoURL: http://<startree-platform domain>/api/info
-  oauth:
-#    keysUrl: <Keys URL>
-    required:
-      - sub
-      - exp
+#  oauth:
+#    serverUrl: <dex server url>
+#    required:
+#      - sub
+#      - exp
 #    exactMatch:
-#      iss: <dex server url>
-    cache:
-      size: 64
-      ttl: 60000
+#      sub: <subject name>
+#    cache:
+#      size: 64
+#      ttl: 60000
 
 database:
   # Assuming a local MySQL server running on the default port 3306

@@ -38,12 +38,8 @@ public class CombinerPlanNode extends DetectionPipelinePlanNode {
   public Operator buildOperator() throws Exception {
     final CombinerOperator operator = new CombinerOperator();
     operator.init(new OperatorContext()
-        .setStartTime(params
-            .getOrDefault("startTime", String.valueOf(this.startTime))
-            .toString())
-        .setEndTime(params
-            .getOrDefault("endTime", String.valueOf(this.endTime))
-            .toString())
+        .setStartTime((Long) getParams().getOrDefault("startTime", startTime))
+        .setEndTime((Long) getParams().getOrDefault("endTime", endTime))
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
     );

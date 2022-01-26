@@ -16,12 +16,12 @@ import java.util.Set;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
 import org.apache.pinot.thirdeye.config.UiConfiguration;
 import org.apache.pinot.thirdeye.detection.alert.scheme.NotificationScheme.EmailTemplateType;
-import org.apache.pinot.thirdeye.notification.commons.EmailEntity;
 import org.apache.pinot.thirdeye.notification.commons.SmtpConfiguration;
 import org.apache.pinot.thirdeye.notification.content.NotificationContent;
 import org.apache.pinot.thirdeye.notification.content.templates.EntityGroupKeyContent;
 import org.apache.pinot.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import org.apache.pinot.thirdeye.notification.formatter.channels.EmailContentFormatter;
+import org.apache.pinot.thirdeye.spi.api.EmailEntityApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyResult;
@@ -134,7 +134,7 @@ public class EmailEntityBuilder {
     }
   }
 
-  public EmailEntity buildEmailEntity(
+  public EmailEntityApi buildEmailEntity(
       final SubscriptionGroupDTO sg,
       final List<AnomalyResult> anomalyResults) {
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
@@ -167,7 +167,7 @@ public class EmailEntityBuilder {
         .setUiPublicUrl(uiConfig.getExternalUrl());
     content.init(notificationContext);
 
-    final EmailEntity emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
+    final EmailEntityApi emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
         content,
         sg,
         sortedAnomalyResults);

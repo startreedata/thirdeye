@@ -23,7 +23,7 @@ public class SummaryGainerLoserResponseRow extends BaseResponseRow {
 
   private String dimensionName;
   private String dimensionValue;
-  private String cost;
+  private double cost;
 
   public String getDimensionName() {
     return dimensionName;
@@ -43,11 +43,11 @@ public class SummaryGainerLoserResponseRow extends BaseResponseRow {
     return this;
   }
 
-  public String getCost() {
+  public double getCost() {
     return cost;
   }
 
-  public SummaryGainerLoserResponseRow setCost(final String cost) {
+  public SummaryGainerLoserResponseRow setCost(final double cost) {
     this.cost = cost;
     return this;
   }

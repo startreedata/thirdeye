@@ -21,9 +21,9 @@ public class TimeGroupFunction implements MacroFunction {
     //parse params
     checkArgument(macroParams.size() == 3,
         "timeGroup macro requires 3 parameters");
-    String timeColumn = macroParams.get(0);
-    String timeColumnFormat = macroParams.get(1);
-    String granularityText = macroParams.get(2);
+    final String timeColumn = macroParams.get(0);
+    final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
+    final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
     Period granularity = Period.parse(granularityText, ISOPeriodFormat.standard());
 
     //write granularity to metadata

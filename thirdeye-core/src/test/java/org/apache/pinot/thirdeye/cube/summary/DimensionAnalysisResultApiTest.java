@@ -16,7 +16,7 @@
 
 package org.apache.pinot.thirdeye.cube.summary;
 
-import static org.apache.pinot.thirdeye.cube.summary.NameTag.NOT_ALL;
+import static org.apache.pinot.thirdeye.cube.summary.NameTag.ALL_OTHERS;
 import static org.apache.pinot.thirdeye.cube.summary.Summary.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -72,8 +72,7 @@ public class DimensionAnalysisResultApiTest {
       assertThat(actualRow.getCost()).isCloseTo(expectedRow.getCost(), EPSILON);
       assertThat(actualRow.getBaselineValue()).isEqualTo(expectedRow.getBaselineValue());
       assertThat(actualRow.getCurrentValue()).isEqualTo(expectedRow.getCurrentValue());
-      assertThat(Double.parseDouble(actualRow.getPercentageChange().split("%")[0]))
-          .isEqualTo(Double.parseDouble(expectedRow.getPercentageChange().split("%")[0]));
+      assertThat(actualRow.getChangePercentage()).isEqualTo(expectedRow.getChangePercentage());
       assertThat(actualRow.getSizeFactor()).isCloseTo(expectedRow.getSizeFactor(), EPSILON);
     }
   }
@@ -156,13 +155,13 @@ public class DimensionAnalysisResultApiTest {
    */
   private List<SummaryResponseRow> buildExpectedResponseRows() {
     SummaryResponseRow root = new SummaryResponseRow();
-    root.setNames(Collections.singletonList(NOT_ALL));
+    root.setNames(Collections.singletonList(ALL_OTHERS));
     root.setOtherDimensionValues(List.of("IN", "FR"));
     root.setCost(0d); // root doesn't have cost
     root.setBaselineValue(25d);
     root.setCurrentValue(28d);
     root.setSizeFactor(0.5145d);
-    root.setPercentageChange((28d - 25d) / 25d * 100 + "%");
+    root.setChangePercentage((28d - 25d) / 25d * 100);
 
     SummaryResponseRow US = new SummaryResponseRow();
     US.setNames(Collections.singletonList("US"));
@@ -171,7 +170,7 @@ public class DimensionAnalysisResultApiTest {
     US.setBaselineValue(20d);
     US.setCurrentValue(30d);
     US.setSizeFactor(0.4854d); // UPDATE THIS
-    US.setPercentageChange((30d - 20d) / 20d * 100 + "%");
+    US.setChangePercentage((30d - 20d) / 20d * 100);
 
     List<SummaryResponseRow> rows = new ArrayList<>();
     rows.add(root);

@@ -94,8 +94,8 @@ tls:
 
 auth:
   enabled: false
-#  infoURL: <platform url>/api/info
   oauth:
+#    serverUrl: <dex server url>
 #    keysUrl: <keys url>
     required:
      - sub

@@ -109,7 +109,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         filteredAlertEvaluationAnomalies: [],
         currentPlotVisible: true,
         baselinePlotVisible: true,
-        upperAndLowerBoundPlotVisible: true,
+        upperAndLowerBoundPlotVisible: false,
         anomaliesPlotVisible: true,
     });
     const {
@@ -520,15 +520,17 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         <Group opacity={0.5}>
                             {/* Time series plot */}
                             <AlertEvaluationTimeSeriesPlot
-                                anomalies
-                                baseline
-                                current
-                                upperAndLowerBound
                                 alertEvaluationAnomalies={
                                     alertEvaluationAnomalies
                                 }
                                 alertEvaluationTimeSeriesPoints={
                                     alertEvaluationTimeSeriesPoints
+                                }
+                                anomalies={anomaliesPlotVisible}
+                                baseline={baselinePlotVisible}
+                                current={currentPlotVisible}
+                                upperAndLowerBound={
+                                    upperAndLowerBoundPlotVisible
                                 }
                                 xScale={brushXScale}
                                 yScale={brushYScale}

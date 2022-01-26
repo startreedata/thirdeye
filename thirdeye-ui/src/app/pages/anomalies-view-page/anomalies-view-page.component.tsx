@@ -24,6 +24,7 @@ import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
+    filterAnomaliesByTime,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -60,8 +61,19 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }, [anomaly]);
 
     useEffect(() => {
-        !!evaluation && setAlertEvaluation(evaluation);
-    }, [evaluation]);
+        if (!evaluation || !anomaly) {
+            return;
+        }
+        // Only filter for the current anomaly
+        const anomalyDetectionResults =
+            evaluation.detectionEvaluations.output_AnomalyDetectorResult_0;
+        anomalyDetectionResults.anomalies = filterAnomaliesByTime(
+            anomalyDetectionResults.anomalies,
+            anomaly.startTime,
+            anomaly.endTime
+        );
+        setAlertEvaluation(evaluation);
+    }, [evaluation, anomaly]);
 
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
@@ -119,7 +131,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={uiAnomaly ? uiAnomaly.name : ""} />
+            <PageHeader showTimeRange title={uiAnomaly ? uiAnomaly.name : ""} />
             <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid item xs={12}>

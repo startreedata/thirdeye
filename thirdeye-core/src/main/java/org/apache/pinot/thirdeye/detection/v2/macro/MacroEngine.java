@@ -1,7 +1,5 @@
 package org.apache.pinot.thirdeye.detection.v2.macro;
 
-import static org.apache.pinot.thirdeye.detection.v2.macro.SqlLanguageTranslator.translate;
-
 import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +52,7 @@ public class MacroEngine {
     this.macroFunctionContext = new MacroFunctionContext()
         .setSqlExpressionBuilder(sqlExpressionBuilder)
         .setDetectionInterval(detectionInterval)
+        .setLiteralUnquoter(this.sqlDialect::unquoteStringLiteral)
         .setProperties(this.properties);
     // possible to put datasource-specific macros here in the future
     for (MacroFunction function: CORE_MACROS )

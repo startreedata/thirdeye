@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.task.runner;
 
-import static org.apache.pinot.thirdeye.spi.Constants.NO_AUTH_USER;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
@@ -32,13 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
-import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
-import org.apache.pinot.thirdeye.detection.anomaly.alert.util.EmailHelper;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorJobRunner;
-import org.apache.pinot.thirdeye.detection.anomaly.utils.EmailUtils;
 import org.apache.pinot.thirdeye.spi.Constants.JobStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
@@ -50,7 +43,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.JobDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
-import org.apache.pinot.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
 import org.apache.pinot.thirdeye.spi.task.TaskStatus;
 import org.apache.pinot.thirdeye.task.MonitorTaskInfo;
@@ -69,7 +61,6 @@ public class MonitorTaskRunner implements TaskRunner {
 
   private final TaskManager taskManager;
   private final JobManager jobManager;
-  private final ThirdEyeServerConfiguration configuration;
   private final AlertManager alertManager;
   private final DetectionStatusManager detectionStatusManager;
   private final EvaluationManager evaluationManager;
@@ -77,8 +68,7 @@ public class MonitorTaskRunner implements TaskRunner {
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
   @Inject
-  public MonitorTaskRunner(final ThirdEyeServerConfiguration configuration,
-      final TaskManager taskManager,
+  public MonitorTaskRunner(final TaskManager taskManager,
       final JobManager jobManager,
       final AlertManager alertManager,
       final DetectionStatusManager detectionStatusManager,
@@ -87,7 +77,6 @@ public class MonitorTaskRunner implements TaskRunner {
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     this.taskManager = taskManager;
     this.jobManager = jobManager;
-    this.configuration = configuration;
     this.alertManager = alertManager;
     this.detectionStatusManager = detectionStatusManager;
     this.evaluationManager = evaluationManager;
@@ -196,7 +185,6 @@ public class MonitorTaskRunner implements TaskRunner {
                   || lastTaskExecutionTime <= currentTimeMillis - maxTaskFailMillis)) {
             config.setActive(false);
             alertManager.update(config);
-            sendDisableAlertNotificationEmail(config);
             LOG.info("Disabled alert {} since it failed more than {} days. "
                     + "Task last update time: {}. Last success task execution time: {}",
                 config.getId(), MAX_FAILED_DISABLE_DAYS, config.getUpdateTime(),
@@ -207,29 +195,6 @@ public class MonitorTaskRunner implements TaskRunner {
         LOG.error("Exception in disabling alert ", e);
       }
     }
-  }
-
-  private void sendDisableAlertNotificationEmail(AlertDTO config) throws EmailException {
-    HtmlEmail email = new HtmlEmail();
-    String subject = String.format("ThirdEye alert disabled: %s", config.getName());
-    String textBody = String.format(
-        "Your alert has failed for %d days and was disabled. Please fix your alert and enable it again. \n"
-            + "Here is the link for your alert: https://thirdeye.corp.linkedin.com/app/#/manage/explore/%d",
-        MAX_FAILED_DISABLE_DAYS,
-        config.getId());
-    Set<String> recipients = EmailUtils
-        .getValidEmailAddresses(configuration.getFailureToAddress());
-    if (config.getCreatedBy() != null && !config.getCreatedBy().equals(NO_AUTH_USER)) {
-      recipients.add(config.getCreatedBy());
-    }
-    if (config.getUpdatedBy() != null && !config.getUpdatedBy().equals(NO_AUTH_USER)) {
-      recipients.add(config.getUpdatedBy());
-    }
-    EmailHelper.sendEmailWithTextBody(email,
-        configuration.getNotificationConfiguration().getSmtpConfiguration(),
-        subject,
-        textBody, configuration.getFailureFromAddress(),
-        new DetectionAlertFilterRecipients(recipients));
   }
 
   private void executeMonitorExpire(MonitorTaskInfo monitorTaskInfo) {

@@ -7,7 +7,7 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 public class NameTag {
 
   public static final String ALL = "(ALL)";
-  public static final String NOT_ALL = "(ALL)-";
+  public static final String ALL_OTHERS = "(ALL_OTHERS)";
   public static final String EMPTY = "";
 
   public final List<String> names;
@@ -29,8 +29,8 @@ public class NameTag {
     }
   }
 
-  void setNotAll(int index) {
-    names.set(index, NOT_ALL);
+  void setAllOthers(int index) {
+    names.set(index, ALL_OTHERS);
   }
 
   void setEmpty(int index) {

@@ -7,6 +7,7 @@ import {
     getAlertsViewPath,
     getAnomaliesAllPath,
     getAnomaliesPath,
+    getAnomaliesViewIndexPath,
     getAnomaliesViewPath,
     getBasePath,
     getConfigurationPath,
@@ -71,6 +72,12 @@ describe("Routes Util", () => {
     it("getAnomaliesViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getAnomaliesViewPath(1)).toEqual(
             "/anomalies/view/id/1?testQueryString"
+        );
+    });
+
+    it("getAnomaliesViewIndexPath should return appropriate path with appropriate query string for id", () => {
+        expect(getAnomaliesViewIndexPath(1)).toEqual(
+            "/anomalies/view/id/1/index?testQueryString"
         );
     });
 

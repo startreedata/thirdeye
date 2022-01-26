@@ -27,9 +27,9 @@ public class BaseResponseRow {
   private double baselineValue;
   private double currentValue;
   private double sizeFactor;
-  private String percentageChange;
-  private String contributionChange;
-  private String contributionToOverallChange;
+  private double changePercentage;
+  private double contributionChangePercentage;
+  private double contributionToOverallChangePercentage;
 
   public double getBaselineValue() {
     return baselineValue;
@@ -58,31 +58,31 @@ public class BaseResponseRow {
     return this;
   }
 
-  public String getPercentageChange() {
-    return percentageChange;
+  public double getChangePercentage() {
+    return changePercentage;
   }
 
-  public BaseResponseRow setPercentageChange(final String percentageChange) {
-    this.percentageChange = percentageChange;
+  public BaseResponseRow setChangePercentage(final double changePercentage) {
+    this.changePercentage = changePercentage;
     return this;
   }
 
-  public String getContributionChange() {
-    return contributionChange;
+  public double getContributionChangePercentage() {
+    return contributionChangePercentage;
   }
 
-  public BaseResponseRow setContributionChange(final String contributionChange) {
-    this.contributionChange = contributionChange;
+  public BaseResponseRow setContributionChangePercentage(final double contributionChangePercentage) {
+    this.contributionChangePercentage = contributionChangePercentage;
     return this;
   }
 
-  public String getContributionToOverallChange() {
-    return contributionToOverallChange;
+  public double getContributionToOverallChangePercentage() {
+    return contributionToOverallChangePercentage;
   }
 
-  public BaseResponseRow setContributionToOverallChange(
-      final String contributionToOverallChange) {
-    this.contributionToOverallChange = contributionToOverallChange;
+  public BaseResponseRow setContributionToOverallChangePercentage(
+      final double contributionToOverallChangePercentage) {
+    this.contributionToOverallChangePercentage = contributionToOverallChangePercentage;
     return this;
   }
 }

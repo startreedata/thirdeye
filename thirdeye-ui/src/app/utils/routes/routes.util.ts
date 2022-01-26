@@ -13,6 +13,7 @@ export const AppRoute = {
     ANOMALIES: "/anomalies",
     ANOMALIES_ALL: "/anomalies/all",
     ANOMALIES_VIEW: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    ANOMALIES_VIEW_INDEX: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}/index`,
     CONFIGURATION: "/configuration",
     SUBSCRIPTION_GROUPS: "/configuration/subscription-groups",
     SUBSCRIPTION_GROUPS_ALL: "/configuration/subscription-groups/all",
@@ -82,6 +83,13 @@ export const getAnomaliesAllPath = (): string => {
 
 export const getAnomaliesViewPath = (id: number): string => {
     let path: string = AppRoute.ANOMALIES_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getAnomaliesViewIndexPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_VIEW_INDEX;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

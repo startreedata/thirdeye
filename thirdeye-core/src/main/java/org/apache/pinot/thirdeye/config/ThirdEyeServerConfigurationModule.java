@@ -4,6 +4,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
+import org.apache.pinot.thirdeye.auth.AuthConfiguration;
+import org.apache.pinot.thirdeye.auth.OAuthConfiguration;
 import org.apache.pinot.thirdeye.datasource.AutoOnboardConfiguration;
 import org.apache.pinot.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
 import org.apache.pinot.thirdeye.detection.cache.CacheConfig;
@@ -42,6 +44,10 @@ public class ThirdEyeServerConfigurationModule extends AbstractModule {
     bind(UiConfiguration.class)
         .toProvider(configuration::getUiConfiguration)
         .in(Scopes.SINGLETON);
+
+    bind(AuthConfiguration.class)
+      .toProvider(configuration::getAuthConfiguration)
+      .in(Scopes.SINGLETON);
   }
 
   @Singleton
@@ -63,5 +69,12 @@ public class ThirdEyeServerConfigurationModule extends AbstractModule {
   public MonitorConfiguration getMonitorConfiguration(
       ThirdEyeSchedulerConfiguration schedulerConfiguration) {
     return schedulerConfiguration.getMonitorConfiguration();
+  }
+
+  @Singleton
+  @Provides
+  public OAuthConfiguration getOAuthConfig(
+    AuthConfiguration authConfiguration) {
+    return authConfiguration.getOAuthConfig();
   }
 }

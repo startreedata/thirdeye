@@ -32,10 +32,10 @@ public class TimeFilterFunction implements MacroFunction {
     String lookbackFromStart = NO_LOOKBACK;
     String lookbackFromEnd = NO_LOOKBACK;
     if (macroParams.size() >= 2) {
-      lookbackFromStart = macroParams.get(1);
+      lookbackFromStart = context.getLiteralUnquoter().apply(macroParams.get(1));
     }
     if (macroParams.size() >= 3) {
-      lookbackFromEnd = macroParams.get(2);
+      lookbackFromEnd = context.getLiteralUnquoter().apply(macroParams.get(2));
     }
 
     // compute timeLimits

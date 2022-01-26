@@ -8,7 +8,6 @@ import { menuClasses, menuProps } from "./menu.util";
 import { paletteOptions } from "./palette.util";
 import { popoverProps } from "./popover.util";
 import { shapeOptions } from "./shape.util";
-import { tooltipClasses } from "./tooltip.util";
 import { typographyOptions } from "./typography.util";
 
 // Material-UI theme
@@ -26,7 +25,6 @@ export const theme: Theme = createMuiTheme({
         MuiMenu: menuClasses,
         MuiListItemText: listItemTextClasses,
         MuiButton: buttonClasses,
-        MuiTooltip: tooltipClasses,
     },
     shape: shapeOptions,
     typography: typographyOptions,

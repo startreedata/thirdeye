@@ -20,7 +20,6 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,8 +71,8 @@ public abstract class DetectionPipelineOperator implements Operator {
   @Override
   public void init(final OperatorContext context) {
     planNode = context.getPlanNode();
-    startTime = optional(context.getStartTime()).map(TIME_CONVERTER::convert).orElse(-1L);
-    endTime = optional(context.getEndTime()).map(TIME_CONVERTER::convert).orElse(-1L);
+    startTime = context.getStartTime();
+    endTime = context.getEndTime();
     checkArgument(startTime <= endTime, "start time cannot be greater than end time");
 
     resultMap = new HashMap<>();

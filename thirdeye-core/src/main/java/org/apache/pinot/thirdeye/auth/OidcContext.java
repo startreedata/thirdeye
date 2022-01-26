@@ -18,7 +18,7 @@ public class OidcContext implements SecurityContext {
   private long cacheSize = DEFAULT_SIZE;
   private long cacheTtl = DEFAULT_TTL;
 
-  public OidcContext(final OAuthConfig config) {
+  public OidcContext(final OAuthConfiguration config) {
     this.keysUrl = config.getKeysUrl();
     this.requiredClaims = new HashSet<>(config.getRequired());
     Builder builder = new JWTClaimsSet.Builder();

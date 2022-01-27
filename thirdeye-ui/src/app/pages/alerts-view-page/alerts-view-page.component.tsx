@@ -1,6 +1,8 @@
-import { Grid } from "@material-ui/core";
+import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import {
     AppLoadingIndicatorV1,
+    JSONEditorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
@@ -17,6 +19,7 @@ import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.c
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
     deleteAlert,
@@ -36,7 +39,11 @@ import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
-    const { evaluation, getEvaluation } = useGetEvaluation();
+    const {
+        evaluation,
+        getEvaluation,
+        status: evaluationRequestStatus,
+    } = useGetEvaluation();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -48,7 +55,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const params = useParams<AlertsViewPageParams>();
+    const { id: alertId } = useParams<AlertsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -58,9 +65,8 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        // Time range refreshed, fetch alert
         fetchAlert();
-    }, [timeRangeDuration]);
+    }, [alertId]);
 
     useEffect(() => {
         !!evaluation && setAlertEvaluation(evaluation);
@@ -91,13 +97,13 @@ export const AlertsViewPage: FunctionComponent = () => {
         let fetchedUiAlert = {} as UiAlert;
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
 
-        if (!isValidNumberId(params.id)) {
+        if (!isValidNumberId(alertId)) {
             // Invalid id
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.alert"),
-                    id: params.id,
+                    id: alertId,
                 })
             );
 
@@ -108,7 +114,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
 
         Promise.allSettled([
-            getAlert(toNumber(params.id)),
+            getAlert(toNumber(alertId)),
             getAllSubscriptionGroups(),
         ])
             .then(([alertResponse, subscriptionGroupsResponse]) => {
@@ -170,7 +176,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    return !uiAlert || !alertEvaluation ? (
+    return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
         <AppLoadingIndicatorV1 />
     ) : (
         <PageV1>
@@ -189,12 +195,50 @@ export const AlertsViewPage: FunctionComponent = () => {
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    <AlertEvaluationTimeSeriesCard
-                        alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={500}
-                        title={uiAlert.name}
-                        onRefresh={fetchAlertEvaluation}
-                    />
+                    {evaluationRequestStatus === ActionStatus.Error && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Alert severity="error">
+                                    <AlertTitle>
+                                        Data Retrieval Error
+                                    </AlertTitle>
+                                    An issue was experienced while retrieving
+                                    anomalies for the alert. Please try
+                                    reloading the page.
+                                </Alert>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {evaluationRequestStatus === ActionStatus.Done && (
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                            alertEvaluationTimeSeriesHeight={500}
+                            title={uiAlert.name}
+                            onRefresh={fetchAlertEvaluation}
+                        />
+                    )}
+                </Grid>
+
+                {/* Readonly detection configuration */}
+                <Grid item sm={12}>
+                    <Card variant="outlined">
+                        <CardHeader
+                            title={t("label.detection-configuration")}
+                            titleTypographyProps={{ variant: "h6" }}
+                        />
+                        <CardContent>
+                            <JSONEditorV1
+                                readOnly
+                                value={
+                                    (uiAlert.alert as unknown) as Record<
+                                        string,
+                                        unknown
+                                    >
+                                }
+                            />
+                        </CardContent>
+                    </Card>
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

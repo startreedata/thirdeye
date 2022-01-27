@@ -270,8 +270,9 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
    * See https://stackoverflow.com/questions/8933158/how-do-i-round-a-datetime-to-the-nearest-period
    * Floors correctly only if 1 Time unit is used in the Period.
    */
+  // todo this is useful move this elsewhere
   @VisibleForTesting
-  protected static DateTime floorByPeriod(DateTime dt, Period period) {
+  public static DateTime floorByPeriod(DateTime dt, Period period) {
     if (period.getYears() != 0) {
       return dt.yearOfEra().roundFloorCopy().minusYears(dt.getYearOfEra() % period.getYears());
     } else if (period.getMonths() != 0) {

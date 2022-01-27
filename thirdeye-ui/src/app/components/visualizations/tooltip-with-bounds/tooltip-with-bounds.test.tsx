@@ -3,12 +3,6 @@ import React, { ReactNode } from "react";
 import { TooltipWithBounds } from "./tooltip-with-bounds.component";
 import { TooltipWithBoundsProps } from "./tooltip-with-bounds.interfaces";
 
-jest.mock("react-i18next", () => ({
-    useTranslation: jest.fn().mockReturnValue({
-        t: (key: string) => key,
-    }),
-}));
-
 describe("TooltipWithBounds", () => {
     beforeEach(() => cleanup);
 

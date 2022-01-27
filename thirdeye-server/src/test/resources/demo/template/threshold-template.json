@@ -1,7 +1,7 @@
 {
   "name": "threshold-template",
   "description": "Threshold Template",
-  "cron": "0 0/1 * 1/1 * ? * ",
+  "cron": "0 0 0/2 1/1 * ? *",
   "nodes": [
     {
       "name": "root",

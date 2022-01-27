@@ -1,6 +1,7 @@
-import { Grid } from "@material-ui/core";
+import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
+    JSONEditorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
@@ -195,6 +196,27 @@ export const AlertsViewPage: FunctionComponent = () => {
                         title={uiAlert.name}
                         onRefresh={fetchAlertEvaluation}
                     />
+                </Grid>
+
+                {/* Readonly detection configuration */}
+                <Grid item sm={12}>
+                    <Card variant="outlined">
+                        <CardHeader
+                            title={t("label.detection-configuration")}
+                            titleTypographyProps={{ variant: "h6" }}
+                        />
+                        <CardContent>
+                            <JSONEditorV1
+                                readOnly
+                                value={
+                                    (uiAlert.alert as unknown) as Record<
+                                        string,
+                                        unknown
+                                    >
+                                }
+                            />
+                        </CardContent>
+                    </Card>
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

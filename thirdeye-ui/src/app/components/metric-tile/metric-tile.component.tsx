@@ -21,6 +21,7 @@ export const MetricTile: FunctionComponent<MetricTileProps> = (
         >
             <ButtonBase
                 className={metricTileClasses.metricTileContents}
+                data-testid="metricContainer"
                 disabled={!props.clickable}
                 onClick={props.onClick}
             >
@@ -29,6 +30,7 @@ export const MetricTile: FunctionComponent<MetricTileProps> = (
                     <Typography
                         noWrap
                         className={props.metricValueClassName}
+                        data-testid="metricValueContainer"
                         variant={props.compact ? "h5" : "h3"}
                     >
                         {props.metricValue || t("label.no-data-marker")}
@@ -43,6 +45,7 @@ export const MetricTile: FunctionComponent<MetricTileProps> = (
                                 metricTileClasses.metricName,
                                 props.metricNameClassName
                             )}
+                            data-testid="metricNameContainer"
                             variant="subtitle1"
                         >
                             {props.metricName}

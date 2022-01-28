@@ -5,9 +5,7 @@ import static org.apache.pinot.thirdeye.auth.AuthConfiguration.JWKS_KEY;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -29,17 +27,8 @@ public class OidcUtils {
       .maximumSize(context.getCacheSize())
       .expireAfterWrite(context.getCacheTtl(), TimeUnit.MILLISECONDS)
       .build(new OidcBindingsCache()
-        .setProcessor(new OidcJWTProcessor(fetchKeys(context.getKeysUrl()).getKeys(), context))
+        .setProcessor(new OidcJWTProcessor(context))
         .setContext(context));
-  }
-
-  public static JWKSet fetchKeys(String keysUrl) {
-    try {
-      return JWKSet.load(new URL(keysUrl).openStream());
-    } catch (Exception e) {
-      throw new IllegalArgumentException(String.format("Could not retrieve keys from '%s'",
-        keysUrl), e);
-    }
   }
 
   public static void generateOAuthConfig(OAuthManager oAuthManager, OAuthConfiguration oAuthConfig) {

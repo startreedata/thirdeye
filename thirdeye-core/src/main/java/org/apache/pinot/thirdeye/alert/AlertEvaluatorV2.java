@@ -4,33 +4,46 @@ import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertE
 import static org.apache.pinot.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
+import org.apache.pinot.thirdeye.detection.v2.plan.DataFetcherPlanNode;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
+import org.apache.pinot.thirdeye.spi.api.EvaluationContextApi;
+import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import org.apache.pinot.thirdeye.spi.detection.v2.TimeseriesFilter;
+import org.apache.pinot.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AlertEvaluatorV2 {
+
+  public static final String EVALUATION_FILTERS_KEY = "evaluation.filters";
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluatorV2.class);
   private static final boolean USE_V1_FORMAT = true;
@@ -94,10 +107,14 @@ public class AlertEvaluatorV2 {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
+      // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
           request.getAlert(),
           request.getStart().getTime(),
           request.getEnd().getTime());
+
+      // inject custom evaluation context
+      injectEvaluationContext(templateWithProperties, request.getEvaluationContext());
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()
@@ -122,6 +139,55 @@ public class AlertEvaluatorV2 {
       handleAlertEvaluationException(e);
     }
     return null;
+  }
+
+  private void injectEvaluationContext(final AlertTemplateDTO templateWithProperties,
+      @Nullable final EvaluationContextApi evaluationContext) {
+    if (evaluationContext == null) {
+      return;
+    }
+
+    List<String> filters = evaluationContext.getFilters();
+    if (filters != null) {
+      injectFilters(templateWithProperties, filters);
+    }
+
+  }
+
+  @VisibleForTesting
+  protected void injectFilters(final AlertTemplateDTO templateWithProperties,
+      List<String> filters) {
+    if (filters.isEmpty()) {
+      return;
+    }
+    final RcaMetadataDTO rcaMetadataDTO = Objects.requireNonNull(templateWithProperties.getRca(),
+        "rca not found in alert config.");
+    final String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
+        "rca$dataset not found in alert config.");
+
+    final List<TimeseriesFilter> timeseriesFilters = filters
+        .stream()
+        .map(Predicate::parseFilterPredicate)
+        .map(p -> TimeseriesFilter.of(p, getDimensionType(p.getLhs(), dataset), dataset))
+        .collect(Collectors.toList());
+
+    templateWithProperties.getNodes().forEach(n -> addFilters(n, timeseriesFilters));
+  }
+
+  // fixme datatype from metricDTO is always double + abstraction metric/dimension needs refactoring
+  private DimensionType getDimensionType(final String metric, final String dataset) {
+    // first version: assume dimension is always of type String
+    // todo fetch info from database with a DAO
+    return DimensionType.STRING;
+  }
+
+  private void addFilters(PlanNodeBean planNodeBean, List<TimeseriesFilter> filters) {
+    if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
+      if (planNodeBean.getParams() == null) {
+        planNodeBean.setParams(new HashMap<>());
+      }
+      planNodeBean.getParams().put(EVALUATION_FILTERS_KEY, filters);
+    }
   }
 
   private AlertEvaluationApi toApi(final Map<String, DetectionPipelineResult> outputMap) {

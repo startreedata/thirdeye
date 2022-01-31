@@ -23,7 +23,9 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
@@ -73,6 +75,28 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Override
   protected DataSourceApi toApi(final DataSourceDTO dto) {
     return ApiBeanMapper.toApi(dto);
+  }
+
+  @PUT
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @Override
+  public Response editMultiple(
+    @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+    List<DataSourceApi> list) {
+    list.forEach(ds -> dataSourceCache.removeDataSource(ds.getName()));
+    return super.editMultiple(principal, list);
+  }
+
+  @DELETE
+  @Path("{id}")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response delete(
+    @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+    @PathParam("id") Long id) {
+    dataSourceCache.removeDataSource(id);
+    return super.delete(principal, id);
   }
 
   @POST

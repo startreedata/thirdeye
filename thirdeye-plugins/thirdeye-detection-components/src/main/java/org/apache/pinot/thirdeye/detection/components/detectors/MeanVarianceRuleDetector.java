@@ -33,10 +33,7 @@ import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -48,15 +45,9 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
@@ -72,7 +63,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
-  private InputDataFetcher dataFetcher;
   private Pattern pattern;
   private String monitoringGranularity;
   private TimeGranularity timeGranularity;
@@ -107,42 +97,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
 
     checkArgument(lookback >= 5,
         String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
-  }
-
-  @Override
-  public void init(final MeanVarianceRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
-    init(spec);
-    this.dataFetcher = dataFetcher;
-  }
-
-  @Override
-  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
-    // todo cyril - not used - may be broken - logic should be the same for all detectors
-    final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
-    final Interval window = new Interval(slice.getStart(), slice.getEnd());
-    final DateTime trainStart;
-
-    if (isMultiDayGranularity()) {
-      trainStart = window.getStart().minusDays(timeGranularity.getSize() * lookback);
-    } else if (monitoringGranularity.equals("1_MONTHS")) {
-      trainStart = window.getStart().minusMonths(lookback);
-    } else {
-      trainStart = window.getStart().minusWeeks(lookback);
-    }
-
-    final DataFrame inputDf = fetchData(metricEntity,
-        trainStart.getMillis(),
-        window.getEndMillis());
-    DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis());
-    resultDF = resultDF.joinLeft(inputDf.renameSeries(
-        COL_VALUE, COL_CURRENT), COL_TIME);
-
-    // Exclude the end because baseline calculation should not contain the end
-    if (resultDF.size() > 1) {
-      resultDF = resultDF.head(resultDF.size() - 1);
-    }
-
-    return TimeSeries.fromDataFrame(resultDF);
   }
 
   @Override
@@ -256,29 +210,5 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
             + indexStart);
     loobackDf = loobackDf.append(inputDF.slice(indexStart, indexEnd));
     return loobackDf;
-  }
-
-  /**
-   * Fetch data from metric
-   *
-   * @param metricEntity metric entity
-   * @param start start timestamp
-   * @param end end timestamp
-   * @return Data Frame that has data from start to end
-   */
-  private DataFrame fetchData(final MetricEntity metricEntity, final long start, final long end) {
-    final List<MetricSlice> slices = new ArrayList<>();
-    final MetricSlice sliceData = MetricSlice.from(metricEntity.getId(), start, end,
-        metricEntity.getFilters(), timeGranularity);
-    slices.add(sliceData);
-    LOG.info("Getting data for" + sliceData);
-    final InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
-    return data.getTimeseries().get(sliceData);
-  }
-
-  // Check whether monitoring timeGranularity is multiple days
-  private boolean isMultiDayGranularity() {
-    return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
-        && timeGranularity.getUnit() == TimeUnit.DAYS;
   }
 }

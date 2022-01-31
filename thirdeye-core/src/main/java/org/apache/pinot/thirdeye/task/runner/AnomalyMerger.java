@@ -3,7 +3,6 @@ package org.apache.pinot.thirdeye.task.runner;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.PROP_GROUP_KEY;
 import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.copyAnomalyInfo;
-import static org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper.PROP_PATTERN_KEY;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -33,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AnomalyMerger {
+
+  public static final String PROP_PATTERN_KEY = "pattern";
 
   public static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
     // earlier for start time
@@ -114,7 +115,6 @@ public class AnomalyMerger {
   }
 
   /**
-   * Copied from {@link org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper}
    * The Wrapper code is legacy and will be subsequently deleted
    *
    * @param alert alert DTO

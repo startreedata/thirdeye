@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.GrouperWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -42,6 +40,7 @@ import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 /**
  * This is the root of the detection config builder. Other translators extend from this class.
  */
+@Deprecated
 public abstract class DetectionConfigPropertiesBuilder {
 
   public static final String PROP_SUB_ENTITY_NAME = "subEntityName";
@@ -220,19 +219,8 @@ public abstract class DetectionConfigPropertiesBuilder {
         .getList(compositeAlertConfigMap.get(PROP_GROUPER));
     Map<String, Object> mergerProperties = ConfigUtils
         .getMap(compositeAlertConfigMap.get(PROP_MERGER));
-    if (!grouperProps.isEmpty()) {
-      properties = buildWrapperProperties(
-          EntityAnomalyMergeWrapper.class.getName(),
-          Collections.singletonList(buildGroupWrapperProperties(subEntityName, grouperProps.get(0),
-              nestedPropertiesList)),
-          mergerProperties);
-      nestedPropertiesList = Collections.singletonList(properties);
-    }
 
-    return buildWrapperProperties(
-        ChildKeepingMergeWrapper.class.getName(),
-        nestedPropertiesList,
-        mergerProperties);
+    return new HashMap<>();
   }
 
   Map<String, Object> buildWrapperProperties(String wrapperClassName,

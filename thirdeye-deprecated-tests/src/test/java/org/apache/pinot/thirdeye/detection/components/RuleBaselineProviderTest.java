@@ -16,8 +16,6 @@
 
 package org.apache.pinot.thirdeye.detection.components;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,11 +23,9 @@ import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
 import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class RuleBaselineProviderTest {
 
@@ -66,24 +62,5 @@ public class RuleBaselineProviderTest {
             .append(1537959128000L, 200)
             .append(1538002328000L, 200)
             .build())).setAggregates(aggregates);
-  }
-
-  @Test
-  public void testFetchBaselineTimeSeries() {
-    DataFrame df = baselineProvider.computePredictedTimeSeries(slice1).getDataFrame();
-    assertThat(df.getDoubles(DataFrame.COL_VALUE).get(0)).isEqualTo(100.0);
-    assertThat(df.getDoubles(DataFrame.COL_VALUE).get(1)).isEqualTo(200.0);
-  }
-
-  @Test
-  public void testFetchBaselineAggregates() {
-    assertThat(
-        this.baselineProvider.computePredictedAggregates(slice1,
-            DoubleSeries.MEAN)).isEqualTo(150.0);
-  }
-
-  @Test
-  public void testFetchBaselineAggregatesNaN() {
-    assertThat(this.baselineProvider.computePredictedAggregates(slice2, DoubleSeries.MEAN)).isNaN();
   }
 }

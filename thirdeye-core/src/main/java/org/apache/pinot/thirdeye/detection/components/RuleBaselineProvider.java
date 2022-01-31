@@ -20,13 +20,9 @@
 package org.apache.pinot.thirdeye.detection.components;
 
 import org.apache.pinot.thirdeye.detection.spec.RuleBaselineProviderSpec;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.annotation.Components;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 
 @Components(title = "rule baseline",
@@ -37,25 +33,11 @@ public class RuleBaselineProvider implements BaselineProvider<RuleBaselineProvid
   private Baseline baseline;
   private String timezone;
   private String offset;
-  private InputDataFetcher dataFetcher;
 
   @Override
   public void init(RuleBaselineProviderSpec spec) {
     this.offset = spec.getOffset();
     this.timezone = spec.getTimezone();
     this.baseline = BaselineParsingUtils.parseOffset(this.offset, this.timezone);
-  }
-
-  @Override
-  public void init(RuleBaselineProviderSpec spec, InputDataFetcher dataFetcher) {
-    init(spec);
-    this.dataFetcher = dataFetcher;
-  }
-
-  @Override
-  public TimeSeries computePredictedTimeSeries(MetricSlice slice) {
-    return TimeSeries.fromDataFrame(DetectionUtils.buildBaselines(slice,
-        this.baseline,
-        this.dataFetcher));
   }
 }

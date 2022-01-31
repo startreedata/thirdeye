@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * The Merge wrapper. Supports time-based merging of anomalies along the same set of dimensions.
  * Forward scan only, greedy clustering. Does not merge clusters that converge.
  */
+@Deprecated
 public class MergeWrapper extends DetectionPipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(MergeWrapper.class);

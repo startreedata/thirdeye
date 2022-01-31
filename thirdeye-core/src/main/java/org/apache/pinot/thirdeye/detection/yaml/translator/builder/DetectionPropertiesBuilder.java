@@ -34,9 +34,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyLabelerWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.ChildKeepingMergeWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.EntityAnomalyMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -48,6 +45,7 @@ import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 /**
  * This class is responsible for translating the detection properties
  */
+@Deprecated
 public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder {
 
   private static final Set<String> MOVING_WINDOW_DETECTOR_TYPES = ImmutableSet.of("ALGORITHM");
@@ -104,24 +102,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         datasetConfigDTO.getDataset(),
         dimensionExploreYaml,
         containsDimensionExploration);
-    Map<String, Object> properties = buildWrapperProperties(
-        ChildKeepingMergeWrapper.class.getName(),
-        List.of(),
-        mergerProperties);
-
-    // Wrap with metric level grouper, restricting to only 1 grouper
-    if (!grouperYamls.isEmpty()) {
-      properties = buildWrapperProperties(
-          EntityAnomalyMergeWrapper.class.getName(),
-          Collections.singletonList(buildGroupWrapperProperties(alertName, metricUrn, grouperYamls
-              .get(0), Collections.singletonList(properties))),
-          mergerProperties);
-
-      properties = buildWrapperProperties(
-          ChildKeepingMergeWrapper.class.getName(),
-          Collections.singletonList(properties),
-          mergerProperties);
-    }
+    Map<String, Object> properties = new HashMap<>();
 
     return properties;
   }
@@ -218,7 +199,6 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     buildComponentSpec(metricUrn, yamlConfig, detectorRefKey);
 
     Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, BaselineFillingMergeWrapper.class.getName());
     properties.put(PROP_NESTED, Collections.singletonList(nestedProperties));
     properties.put(PROP_DETECTOR, detectorRefKey);
 

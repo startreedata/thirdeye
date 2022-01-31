@@ -37,6 +37,7 @@ import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
 /**
  * This class is responsible for translating the data quality properties
  */
+@Deprecated
 public class DataQualityPropertiesBuilder extends DetectionConfigPropertiesBuilder {
 
   static final String PROP_QUALITY_CHECK = "qualityCheck";

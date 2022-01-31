@@ -1,5 +1,11 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
-import React from "react";
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+} from "@testing-library/react";
+import React, { ReactNode } from "react";
 import {
     Alert,
     AlertNode,
@@ -14,17 +20,40 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
+jest.mock("../entity-cards/alert-card-v1/alert-card-v1.component", () => ({
+    AlertCardV1: jest.fn().mockImplementation((props) => props.uiAlert),
+}));
+
 jest.mock("@startree-ui/platform-ui", () => ({
     PageContentsCardV1: jest.fn().mockImplementation((props) => props.children),
     DataGridV1: jest.fn().mockImplementation((props) => (
         <>
             {Array.isArray(props.data) && props.data.length ? (
-                props.data.map((alert: Alert) => (
-                    <span key={alert.id}>
-                        {alert.name}
-                        {props.toolbarComponent}
-                    </span>
-                ))
+                props.data.map(
+                    (
+                        alert: Alert & {
+                            children?: {
+                                id: number;
+                                expandPanelContents: ReactNode;
+                            };
+                        }
+                    ) => {
+                        const mockAlert = { ...alert };
+                        delete mockAlert.children;
+
+                        return (
+                            <span key={alert.id}>
+                                {alert.name}
+                                <p
+                                    onClick={() => mockMethod(mockAlert)}
+                                >{`Edit${alert.id}`}</p>
+                                <p
+                                    onClick={() => mockMethod(mockAlert)}
+                                >{`Delete${alert.id}`}</p>
+                            </span>
+                        );
+                    }
+                )
             ) : (
                 <p>NoDataIndicator</p>
             )}
@@ -61,9 +90,31 @@ describe("AlertListV1", () => {
 
         expect(await screen.findByText("testNameAlert1")).toBeInTheDocument();
     });
+
+    it("component should call onChange when Edit is clicked", async () => {
+        const props = { ...mockProps };
+        act(() => {
+            render(<AlertListV1 {...props} />);
+        });
+
+        fireEvent.click(screen.getByText("Edit1"));
+
+        expect(mockMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
+    });
+
+    it("component should call onDelete when Delete is clicked", async () => {
+        const props = { ...mockProps };
+        act(() => {
+            render(<AlertListV1 {...props} />);
+        });
+
+        fireEvent.click(screen.getByText("Delete1"));
+
+        expect(mockMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
+    });
 });
 
-const mockAlert1 = {
+const mockAlert = {
     id: 1,
     name: "testNameAlert1",
     active: true,
@@ -109,7 +160,7 @@ const mockAlert1 = {
     } as { [index: string]: AlertNode },
 } as Alert;
 
-const mockUiAlert1 = {
+const mockUiAlert = {
     id: 1,
     name: "testNameAlert1",
     active: true,
@@ -148,13 +199,13 @@ const mockUiAlert1 = {
             name: "label.no-data-marker",
         },
     ],
-    alert: mockAlert1,
+    alert: mockAlert,
 };
 
 const mockMethod = jest.fn();
 
 const mockDefaultProps = {
-    alerts: [mockUiAlert1],
+    alerts: [mockUiAlert],
     onChange: mockMethod,
     onDelete: mockMethod,
 } as AlertListV1Props;

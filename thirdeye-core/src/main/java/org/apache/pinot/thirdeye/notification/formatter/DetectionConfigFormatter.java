@@ -23,8 +23,6 @@ package org.apache.pinot.thirdeye.notification.formatter;
 import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.PROP_DATASET;
 import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.PROP_METRIC;
 import static org.apache.pinot.thirdeye.detection.validators.DetectionConfigValidator.PROP_RULES;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_DIMENSION_EXPLORATION;
-import static org.apache.pinot.thirdeye.detection.yaml.translator.builder.DetectionConfigPropertiesBuilder.PROP_FILTERS;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +78,8 @@ public class DetectionConfigFormatter implements DTOFormatter<AlertDTO> {
   private static final String PROP_NESTED_PROPERTIES_KEY = "nested";
   private static final String PROP_MONITORING_GRANULARITY = "monitoringGranularity";
   private static final String PROP_BUCKET_PERIOD = "bucketPeriod";
+  public static final String PROP_DIMENSION_EXPLORATION = "dimensionExploration";
+  public static final String PROP_FILTERS = "filters";
 
   private static final long DEFAULT_PRESENTING_WINDOW_SIZE_MINUTELY = TimeUnit.HOURS.toMillis(48);
   private static final long DEFAULT_PRESENTING_WINDOW_SIZE_DAILY = TimeUnit.DAYS.toMillis(30);

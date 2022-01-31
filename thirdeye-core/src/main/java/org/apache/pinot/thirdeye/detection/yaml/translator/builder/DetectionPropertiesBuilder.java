@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.AnomalyLabelerWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -127,21 +125,9 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         nestedPipelines.addAll(detectionProperties);
       } else {
         // wrap detection properties around with filter properties if a filter is configured
-        List<Map<String, Object>> filterNestedProperties = detectionProperties;
-        for (Map<String, Object> filterProperties : filterYamls) {
-          filterNestedProperties = buildFilterWrapperPropertiesLegacy(metricUrn,
-              AnomalyFilterWrapper.class.getName(), filterProperties,
-              filterNestedProperties);
-        }
         if (labelerYamls.isEmpty()) {
           // output filter properties if no labeler is configured
-          nestedPipelines.addAll(filterNestedProperties);
-        } else {
-          // wrap filter properties around with labeler properties if a labeler is configured
-          nestedPipelines.add(
-              buildLabelerWrapperProperties(metricUrn, AnomalyLabelerWrapper.class.getName(),
-                  labelerYamls.get(0),
-                  filterNestedProperties));
+          nestedPipelines.addAll(detectionProperties);
         }
       }
     }

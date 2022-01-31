@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Wrapper class that is responsible for running the @{link DataSlaQualityChecker}
  */
+@Deprecated
 public class DataSlaWrapper extends DetectionPipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSlaWrapper.class);

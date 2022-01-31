@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
-import org.apache.pinot.thirdeye.detection.wrapper.GrouperWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
@@ -115,27 +114,6 @@ public abstract class DetectionConfigPropertiesBuilder {
       }
     }
     return dimensionWrapperProperties;
-  }
-
-  Map<String, Object> buildGroupWrapperProperties(String entityName,
-      Map<String, Object> grouperYaml, List<Map<String, Object>> nestedProps) {
-    return buildGroupWrapperProperties(entityName, null, grouperYaml, nestedProps);
-  }
-
-  Map<String, Object> buildGroupWrapperProperties(String entityName, String metricUrn,
-      Map<String, Object> grouperYaml, List<Map<String, Object>> nestedProps) {
-    Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, GrouperWrapper.class.getName());
-    properties.put(PROP_NESTED, nestedProps);
-    properties.put(PROP_SUB_ENTITY_NAME, entityName);
-
-    String grouperRefKey = makeComponentRefKey(
-        MapUtils.getString(grouperYaml, PROP_TYPE), MapUtils.getString(grouperYaml, PROP_NAME));
-    properties.put(PROP_GROUPER, grouperRefKey);
-
-    buildComponentSpec(metricUrn, grouperYaml, grouperRefKey);
-
-    return properties;
   }
 
   public List<Map<String, Object>> buildFilterWrapperPropertiesLegacy(String metricUrn,

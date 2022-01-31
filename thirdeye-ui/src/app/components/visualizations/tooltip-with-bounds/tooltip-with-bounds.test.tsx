@@ -8,7 +8,11 @@ describe("TooltipWithBounds", () => {
 
     it("component should load title and children correctly", async () => {
         act(() => {
-            render(<TooltipWithBounds {...mockDefaultProps} />);
+            render(
+                <TooltipWithBounds {...mockDefaultProps}>
+                    <p>TestChildren</p>
+                </TooltipWithBounds>
+            );
         });
 
         expect(await screen.findByText("TestTitle")).toBeInTheDocument();
@@ -18,7 +22,11 @@ describe("TooltipWithBounds", () => {
     it("component should not load title if tooltip is not open", async () => {
         const props = { ...mockDefaultProps, open: false };
         act(() => {
-            render(<TooltipWithBounds {...props} />);
+            render(
+                <TooltipWithBounds {...props}>
+                    <p>TestChildren</p>
+                </TooltipWithBounds>
+            );
         });
 
         expect(screen.queryByText("TestTitle")).not.toBeInTheDocument();
@@ -30,5 +38,4 @@ const mockDefaultProps = {
     left: 10,
     open: true,
     title: "TestTitle" as ReactNode,
-    children: (<p>TestChildren</p>) as ReactNode,
 } as TooltipWithBoundsProps;

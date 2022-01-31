@@ -12,7 +12,7 @@ describe("ActiveIndicator", () => {
 
         expect(
             await screen.findByTestId("activity-indicator-icon")
-        ).toHaveAttribute("color", mockActiveColor);
+        ).toHaveAttribute("color", expectedActiveColor);
     });
 
     it("should render an indicator for the inactive state", async () => {
@@ -23,7 +23,7 @@ describe("ActiveIndicator", () => {
 
         expect(
             await screen.findByTestId("activity-indicator-icon")
-        ).toHaveAttribute("color", mockInactiveColor);
+        ).toHaveAttribute("color", expectedInactiveColor);
     });
 });
 
@@ -31,5 +31,5 @@ const mockActiveIndicatorProps = {
     active: true,
 } as ActiveIndicatorProps;
 
-const mockActiveColor: string = Color.GREEN_5.toLowerCase();
-const mockInactiveColor: string = Color.RED_2.toLowerCase();
+const expectedActiveColor: string = Color.GREEN_5.toLowerCase();
+const expectedInactiveColor: string = Color.RED_2.toLowerCase();

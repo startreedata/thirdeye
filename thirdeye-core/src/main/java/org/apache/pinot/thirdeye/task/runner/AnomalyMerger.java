@@ -1,8 +1,6 @@
 package org.apache.pinot.thirdeye.task.runner;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.PROP_GROUP_KEY;
-import static org.apache.pinot.thirdeye.detection.algorithm.MergeWrapper.copyAnomalyInfo;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -34,6 +32,7 @@ import org.slf4j.LoggerFactory;
 public class AnomalyMerger {
 
   public static final String PROP_PATTERN_KEY = "pattern";
+  public static final String PROP_GROUP_KEY = "groupKey";
 
   public static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
     // earlier for start time
@@ -254,5 +253,27 @@ public class AnomalyMerger {
         .fetchAnomalies(Collections.singleton(effectiveSlice))
         .get(effectiveSlice);
     return new ArrayList<>(existingAnomalies);
+  }
+
+  public static MergedAnomalyResultDTO copyAnomalyInfo(MergedAnomalyResultDTO from,
+      MergedAnomalyResultDTO to) {
+    to.setStartTime(from.getStartTime());
+    to.setEndTime(from.getEndTime());
+    to.setMetric(from.getMetric());
+    to.setMetricUrn(from.getMetricUrn());
+    to.setCollection(from.getCollection());
+    to.setDimensions(from.getDimensions());
+    to.setDetectionConfigId(from.getDetectionConfigId());
+    to.setAnomalyResultSource(from.getAnomalyResultSource());
+    to.setAvgBaselineVal(from.getAvgBaselineVal());
+    to.setAvgCurrentVal(from.getAvgCurrentVal());
+    to.setFeedback(from.getFeedback());
+    to.setAnomalyFeedbackId(from.getAnomalyFeedbackId());
+    to.setScore(from.getScore());
+    to.setWeight(from.getWeight());
+    to.setProperties(from.getProperties());
+    to.setType(from.getType());
+    to.setSeverityLabel(from.getSeverityLabel());
+    return to;
   }
 }

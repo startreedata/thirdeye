@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.sql;
+package org.apache.pinot.thirdeye.detection.v2.operator.sql;
 
 import java.util.Locale;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTableToSqlAdapter;

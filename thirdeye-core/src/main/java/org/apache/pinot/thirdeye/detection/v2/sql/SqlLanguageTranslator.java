@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.macro;
+package org.apache.pinot.thirdeye.detection.v2.sql;
 
 import java.lang.reflect.Field;
 import java.util.Objects;

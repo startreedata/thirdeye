@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyLabelerWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
@@ -107,9 +106,7 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
         containsDimensionExploration);
     Map<String, Object> properties = buildWrapperProperties(
         ChildKeepingMergeWrapper.class.getName(),
-        Collections.singletonList(
-            buildWrapperProperties(DimensionWrapper.class.getName(), nestedPipelines,
-                dimensionWrapperProperties)),
+        List.of(),
         mergerProperties);
 
     // Wrap with metric level grouper, restricting to only 1 grouper

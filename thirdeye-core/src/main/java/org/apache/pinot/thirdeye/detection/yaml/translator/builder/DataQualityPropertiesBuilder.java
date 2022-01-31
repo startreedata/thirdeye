@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.dataquality.wrapper.DataSlaWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.DataQualityMergeWrapper;
 import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionMetricAttributeHolder;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.ConfigUtils;
@@ -82,10 +81,6 @@ public class DataQualityPropertiesBuilder extends DetectionConfigPropertiesBuild
       // No data quality rules
       return properties;
     }
-
-    properties.putAll(
-        buildWrapperProperties(DataQualityMergeWrapper.class.getName(), nestedPipelines,
-            mergerProperties));
     return properties;
   }
 

@@ -33,6 +33,7 @@ public class AlertEvaluationApi {
   private Map<String, Map<String, DetectionEvaluationApi>> evaluations;
   private Date start;
   private Date end;
+  private EvaluationContextApi evaluationContext;
   private Date lastTimestamp;
   Boolean dryRun;
 
@@ -70,6 +71,16 @@ public class AlertEvaluationApi {
 
   public AlertEvaluationApi setEnd(final Date end) {
     this.end = end;
+    return this;
+  }
+
+  public EvaluationContextApi getEvaluationContext() {
+    return evaluationContext;
+  }
+
+  public AlertEvaluationApi setEvaluationContext(
+      final EvaluationContextApi evaluationContext) {
+    this.evaluationContext = evaluationContext;
     return this;
   }
 

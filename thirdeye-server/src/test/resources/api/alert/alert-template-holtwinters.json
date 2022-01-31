@@ -1,0 +1,47 @@
+[
+  {
+    "name": "holtwinters",
+    "description": "Holtwinters Alert Template",
+    "cron": "0 0/1 * 1/1 * ? * ",
+    "nodes": [
+      {
+        "name": "root",
+        "type": "AnomalyDetector",
+        "params": {
+          "type": "HOLT_WINTERS",
+          "component.timezone": "US/Pacific",
+          "component.monitoringGranularity": "1_DAYS",
+          "component.timestamp": "ts",
+          "component.metric": "met",
+          "component.dimensions": [],
+          "component.pattern": "${pattern}",
+          "component.sensitivity": "${sensitivity}",
+          "anomaly.metric": "${metric}"
+        },
+        "inputs": [
+          {
+            "targetProperty": "current",
+            "sourcePlanNode": "currentDataFetcher",
+            "sourceProperty": "currentOutput"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "currentDataFetcher",
+        "type": "DataFetcher",
+        "params": {
+          "component.dataSource": "${dataSource}",
+          "component.query": "SELECT DATETIMECONVERT(\"${timeColumn}\", '${timeColumnFormat}', '1:MILLISECONDS:EPOCH', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "outputKey": "pinot",
+            "outputName": "currentOutput"
+          }
+        ]
+      }
+    ]
+  }
+]

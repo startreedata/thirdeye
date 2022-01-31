@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye.detection.v2.macro;
+package org.apache.pinot.thirdeye.detection.v2.sql.macro;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Locale;

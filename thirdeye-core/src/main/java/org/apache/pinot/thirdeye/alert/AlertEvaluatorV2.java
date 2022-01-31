@@ -4,6 +4,7 @@ import static org.apache.pinot.thirdeye.alert.AlertExceptionHandler.handleAlertE
 import static org.apache.pinot.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.bool;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
 import org.apache.pinot.thirdeye.detection.v2.plan.DataFetcherPlanNode;
 import org.apache.pinot.thirdeye.mapper.ApiBeanMapper;
@@ -24,6 +26,7 @@ import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionDataApi;
 import org.apache.pinot.thirdeye.spi.api.DetectionEvaluationApi;
+import org.apache.pinot.thirdeye.spi.api.EvaluationContextApi;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -109,8 +112,9 @@ public class AlertEvaluatorV2 {
           request.getAlert(),
           request.getStart().getTime(),
           request.getEnd().getTime());
-      // inject filters info
-      injectFilters(templateWithProperties, request.getFilters());
+
+      // inject custom evaluation context
+      injectEvaluationContext(templateWithProperties, request.getEvaluationContext());
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()
@@ -137,7 +141,21 @@ public class AlertEvaluatorV2 {
     return null;
   }
 
-  private void injectFilters(final AlertTemplateDTO templateWithProperties,
+  private void injectEvaluationContext(final AlertTemplateDTO templateWithProperties,
+      @Nullable final EvaluationContextApi evaluationContext) {
+    if (evaluationContext == null) {
+      return;
+    }
+
+    List<String> filters = evaluationContext.getFilters();
+    if (filters != null) {
+      injectFilters(templateWithProperties, filters);
+    }
+
+  }
+
+  @VisibleForTesting
+  protected void injectFilters(final AlertTemplateDTO templateWithProperties,
       List<String> filters) {
     if (filters.isEmpty()) {
       return;
@@ -165,6 +183,9 @@ public class AlertEvaluatorV2 {
 
   private void addFilters(PlanNodeBean planNodeBean, List<TimeseriesFilter> filters) {
     if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
+      if (planNodeBean.getParams() == null) {
+        planNodeBean.setParams(new HashMap<>());
+      }
       planNodeBean.getParams().put(EVALUATION_FILTERS_KEY, filters);
     }
   }

@@ -33,7 +33,7 @@ database:
   url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true
   user: uthirdeye
   password: pass
-  driver: com.mysql.jdbc.Driver
+  driver: com.mysql.cj.jdbc.Driver
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

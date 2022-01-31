@@ -43,7 +43,7 @@ data:
       url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&useSSL=false
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
-      driver: com.mysql.jdbc.Driver
+      driver: com.mysql.cj.jdbc.Driver
 
     swagger:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

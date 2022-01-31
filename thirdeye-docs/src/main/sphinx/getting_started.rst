@@ -116,7 +116,7 @@ with the one shown below.
     url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true
     user: uthirdeye
     password: pass
-    driver: com.mysql.jdbc.Driver
+    driver: com.mysql.cj.jdbc.Driver
 
 All set! ThirdEye is now configured to use MySQL as the persistence layer.
 

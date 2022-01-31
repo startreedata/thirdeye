@@ -41,6 +41,7 @@ import org.apache.pinot.thirdeye.spi.detection.model.EventSlice;
  * <br/><b>NOTE:</b> extend this interface in case necessary data cannot be obtained
  * through one of the existing methods.
  */
+@Deprecated
 public interface DataProvider {
 
   /**

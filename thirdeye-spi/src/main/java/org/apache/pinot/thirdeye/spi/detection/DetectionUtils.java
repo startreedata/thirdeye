@@ -19,9 +19,7 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
-import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
-import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.collect.Multimap;
 import java.lang.reflect.ParameterizedType;
@@ -46,12 +44,9 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
-import org.apache.pinot.thirdeye.spi.detection.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -379,13 +374,6 @@ public class DetectionUtils {
       anomalyNotificationDTO.setNotifiedSubscriptionGroupIds(Collections.emptyList());
     }
     anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
-  }
-
-  public static DataFrame buildBaselines(final MetricSlice slice, final Baseline baseline,
-      final InputDataFetcher dataFetcher) {
-    final List<MetricSlice> slices = new ArrayList<>(baseline.scatter(slice));
-    final InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices));
-    return baseline.gather(slice, data.getTimeseries());
   }
 
   public static Map<String, DataTable> getTimeSeriesMap(

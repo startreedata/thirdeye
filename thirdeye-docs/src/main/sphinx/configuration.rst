@@ -92,10 +92,10 @@ persistence.yml
 
 ThirdEye uses MySQL to store all the metadata.  This file is used to configure MySQL database instance.
 
-databaseConfiguration: url: user: password: driver: com.mysql.jdbc.Driver
+databaseConfiguration: url: user: password: driver: com.mysql.cj.jdbc.Driver
 Here is an example:
 
-databaseConfiguration: url: jdbc:mysql:///thirdeye?autoReconnect=true user: te_dev password: xxxxx driver: com.mysql.jdbc.Driver
+databaseConfiguration: url: jdbc:mysql:///thirdeye?autoReconnect=true user: te_dev password: xxxxx driver: com.mysql.cj.jdbc.Driver
 
 
 .. _data-sources-config.yml:

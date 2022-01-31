@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.detection.algorithm.DimensionWrapper;
-import org.apache.pinot.thirdeye.detection.wrapper.AnomalyDetectorWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyFilterWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.AnomalyLabelerWrapper;
 import org.apache.pinot.thirdeye.detection.wrapper.BaselineFillingMergeWrapper;
@@ -213,7 +212,6 @@ public class DetectionPropertiesBuilder extends DetectionConfigPropertiesBuilder
     String detectorType = MapUtils.getString(yamlConfig, PROP_TYPE);
     String name = MapUtils.getString(yamlConfig, PROP_NAME);
     Map<String, Object> nestedProperties = new HashMap<>();
-    nestedProperties.put(PROP_CLASS_NAME, AnomalyDetectorWrapper.class.getName());
     nestedProperties.put(PROP_SUB_ENTITY_NAME, subEntityName);
     String detectorRefKey = makeComponentRefKey(detectorType, name);
 

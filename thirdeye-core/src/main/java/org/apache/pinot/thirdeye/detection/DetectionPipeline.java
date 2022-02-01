@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection;
 
-import static org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator.PROP_TYPE;
 import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getSpecClassName;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
@@ -56,6 +55,7 @@ import org.slf4j.LoggerFactory;
 public abstract class DetectionPipeline {
 
   private static final String PROP_CLASS_NAME = "className";
+  public static final String PROP_TYPE = "type";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipeline.class);
 
   protected final DataProvider provider;

@@ -60,7 +60,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-// todo cyril work on this
 public class DefaultDataProvider implements DataProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultDataProvider.class);

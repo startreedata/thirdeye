@@ -20,7 +20,7 @@
 
 package org.apache.pinot.thirdeye.task;
 
-public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
+public class OnboardingTaskInfo extends DetectionPipelineTaskInfo {
 
   private long tuningWindowStart;
   private long tuningWindowEnd;
@@ -29,7 +29,7 @@ public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
     return tuningWindowStart;
   }
 
-  public YamlOnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
+  public OnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
     this.tuningWindowStart = tuningWindowStart;
     return this;
   }
@@ -38,7 +38,7 @@ public class YamlOnboardingTaskInfo extends DetectionPipelineTaskInfo {
     return tuningWindowEnd;
   }
 
-  public YamlOnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
+  public OnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
     this.tuningWindowEnd = tuningWindowEnd;
     return this;
   }

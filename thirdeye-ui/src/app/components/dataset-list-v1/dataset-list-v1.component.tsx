@@ -19,10 +19,9 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     props: DatasetListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedDataset,
-        setSelectedDataset,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedDataset, setSelectedDataset] = useState<
+        DataGridSelectionModelV1<UiDataset>
+    >();
     const history = useHistory();
 
     const handleDatasetDelete = (): void => {
@@ -68,16 +67,10 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiDataset
     ): ReactElement => {
         return (
-            <Link
-                onClick={() =>
-                    handleDatasetViewDetailsById(
-                        ((data as unknown) as UiDataset).id
-                    )
-                }
-            >
+            <Link onClick={() => handleDatasetViewDetailsById(data.id)}>
                 {cellValue}
             </Link>
         );
@@ -106,12 +99,10 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiDataset>
                     hideBorder
                     columns={datasetColumns}
-                    data={
-                        (props.datasets as unknown) as Record<string, unknown>[]
-                    }
+                    data={props.datasets as UiDataset[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

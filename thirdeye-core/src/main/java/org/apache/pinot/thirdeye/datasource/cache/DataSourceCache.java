@@ -150,11 +150,16 @@ public class DataSourceCache {
     @Override
     public boolean equals(final Object o) {
       final DataSourceCacheKey that = (DataSourceCacheKey) o;
-      // "this" is equal to "that" if "this" is loaded after "that" and have same names.
-      // Usually here "this" is a cached datasource entry and "that" is a DB entry with updateTime as loadTime.
+      // "this" is equal to "that" if "that" is loaded after "this" and have same names.
+      // Usually here "that" is a cached datasource entry and "this" is a DB entry with updateTime as loadTime.
       // The implication being the datasource which is cached after the updateTime of that datasource is a valid datasource.
       return Objects.equal(getName(), that.getName())
-        && getLoadTime().after(that.getLoadTime());
+        && that.getLoadTime().after(getLoadTime());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(getName());
     }
   }
 }

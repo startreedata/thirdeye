@@ -7,8 +7,11 @@ import static org.apache.pinot.thirdeye.util.ResourceUtils.badRequest;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,7 +40,7 @@ public class DataSourceCache {
   private final DataSourcesLoader dataSourcesLoader;
   private final ExecutorService executorService;
 
-  private final Map<String, ThirdEyeDataSource> cache = new HashMap<>();
+  private final Map<DataSourceCacheKey, ThirdEyeDataSource> cache = new HashMap<>();
 
   private final Counter datasourceExceptionCounter;
   private final Counter datasourceDurationCounter;
@@ -58,20 +61,26 @@ public class DataSourceCache {
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {
-    final ThirdEyeDataSource cachedThirdEyeDataSource = cache.get(name);
+    final Optional<DataSourceDTO> dataSource = findByName(name);
+
+    // datasource absent in DB
+    if(dataSource.isEmpty()) {
+      // remove redundant cache if datasource was recently deleted
+      removeDataSource(name);
+      throw badRequest(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
+    }
+
+    final ThirdEyeDataSource cachedThirdEyeDataSource = cache.get(new DataSourceCacheKey(name, dataSource.get().getUpdateTime()));
     if (cachedThirdEyeDataSource != null) {
       return cachedThirdEyeDataSource;
     }
 
-    final Optional<DataSourceDTO> dataSource = findByName(name);
-    if (dataSource.isPresent()) {
-      final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource.get());
-
-      requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + name);
-      cache.put(name, thirdEyeDataSource);
-      return thirdEyeDataSource;
-    }
-    throw badRequest(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
+    // remove outdated cached datasource if any
+    removeDataSource(name);
+    final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource.get());
+    requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + name);
+    cache.put(new DataSourceCacheKey(name, new Timestamp(new Date().getTime())), thirdEyeDataSource);
+    return thirdEyeDataSource;
   }
 
   private Optional<DataSourceDTO> findByName(final String name) {
@@ -83,12 +92,7 @@ public class DataSourceCache {
   }
 
   public void removeDataSource(final String name) {
-    cache.remove(name);
-  }
-
-  public void removeDataSource(final Long id) {
-    final DataSourceDTO dataSource = dataSourceManager.findById(id);
-    Optional.ofNullable(dataSource).ifPresent(ds -> removeDataSource(ds.getName()));
+    cache.remove(new DataSourceCacheKey(name, new Timestamp(0)));
   }
 
   public ThirdEyeResponse getQueryResult(final ThirdEyeRequest request) throws Exception {
@@ -125,4 +129,33 @@ public class DataSourceCache {
     }
     cache.clear();
   }
+
+  private class DataSourceCacheKey {
+    private String name;
+    private Timestamp loadTime;
+
+    public DataSourceCacheKey(final String name, final Timestamp loadTime) {
+      this.name = name;
+      this.loadTime = loadTime;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public Timestamp getLoadTime() {
+      return loadTime;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      final DataSourceCacheKey that = (DataSourceCacheKey) o;
+      // "this" is equal to "that" if "this" is loaded after "that" and have same names.
+      // Usually here "this" is a cached datasource entry and "that" is a DB entry with updateTime as loadTime.
+      // The implication being the datasource which is cached after the updateTime of that datasource is a valid datasource.
+      return Objects.equal(getName(), that.getName())
+        && getLoadTime().after(that.getLoadTime());
+    }
+  }
 }
+

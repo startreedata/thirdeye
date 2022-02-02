@@ -39,14 +39,12 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -64,8 +62,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
 
   private Pattern pattern;
-  private String monitoringGranularity;
-  private TimeGranularity timeGranularity;
   private double sensitivity;
   private int lookback;
   private Period monitoringGranularityPeriod;
@@ -87,13 +83,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
     pattern = spec.getPattern();
     lookback = spec.getLookback();
     sensitivity = spec.getSensitivity();
-    monitoringGranularity = spec.getMonitoringGranularity();
-
-    if (monitoringGranularity.equals("1_MONTHS")) {
-      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
-    } else {
-      timeGranularity = TimeGranularity.fromString(spec.getMonitoringGranularity());
-    }
+    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
 
     checkArgument(lookback >= 5,
         String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
@@ -103,7 +93,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
   public AnomalyDetectorV2Result runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
-    setMonitoringGranularityPeriod();
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame();
     currentDf
@@ -112,17 +101,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
         .setIndex(COL_TIME);
 
     return runDetectionOnSingleDataTable(currentDf, window);
-  }
-
-  private void setMonitoringGranularityPeriod() {
-    requireNonNull(spec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
-        spec.getMonitoringGranularity(),
-        null);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

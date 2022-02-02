@@ -19,6 +19,9 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +35,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -105,12 +107,11 @@ public class DetectionUtils {
   /**
    * Get the joda period for a monitoring granularity
    */
-  public static Period getMonitoringGranularityPeriod(final String monitoringGranularity,
-      final DatasetConfigDTO datasetConfigDTO) {
-    if (monitoringGranularity
-        .equals(MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString())) {
-      return datasetConfigDTO.bucketTimeGranularity().toPeriod();
-    }
+  public static Period getMonitoringGranularityPeriod(final String monitoringGranularity) {
+    requireNonNull(monitoringGranularity, "monitoringGranularity is mandatory in v2 interface");
+    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
+        monitoringGranularity), "NATIVE_GRANULARITY not supported in v2 interface");
+
     final String[] split = monitoringGranularity.split("_");
     if (split[1].equals("MONTHS")) {
       return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());

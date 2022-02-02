@@ -19,7 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
@@ -34,7 +33,6 @@ import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Res
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
@@ -60,16 +58,13 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
   @Override
   public void init(final ThresholdRuleDetectorSpec spec) {
     this.spec = spec;
-
-    // todo cyril refactor this
-    final String monitoringGranularity = spec.getMonitoringGranularity();
+    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
   }
 
   @Override
   public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
-    setMonitoringGranularityPeriod();
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame();
     currentDf
@@ -78,17 +73,6 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
         .setIndex(COL_TIME);
 
     return runDetectionOnSingleDataTable(currentDf, interval);
-  }
-
-  private void setMonitoringGranularityPeriod() {
-    requireNonNull(spec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
-        spec.getMonitoringGranularity(),
-        null);
   }
 
   private BooleanSeries valueTooHigh(DoubleSeries values) {

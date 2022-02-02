@@ -21,7 +21,6 @@ package org.apache.pinot.thirdeye.spi.detection;
 
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 
-import com.google.common.collect.Multimap;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +29,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -42,7 +40,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -53,15 +50,6 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
 public class DetectionUtils {
-
-  // TODO anomaly should support multimap
-  public static DimensionMap toFilterMap(final Multimap<String, String> filters) {
-    final DimensionMap map = new DimensionMap();
-    for (final Map.Entry<String, Collection<String>> entry : filters.asMap().entrySet()) {
-      map.put(entry.getKey(), String.join(", ", entry.getValue()));
-    }
-    return map;
-  }
 
   // Check if a string is a component reference
   public static boolean isReferenceName(final String key) {
@@ -219,19 +207,6 @@ public class DetectionUtils {
   }
 
   /**
-   * Helper for consolidate last time stamps in all nested detection pipelines
-   *
-   * @param nestedLastTimeStamps all nested last time stamps
-   * @return the last time stamp
-   */
-  public static long consolidateNestedLastTimeStamps(final Collection<Long> nestedLastTimeStamps) {
-    if (nestedLastTimeStamps.isEmpty()) {
-      return -1L;
-    }
-    return Collections.max(nestedLastTimeStamps);
-  }
-
-  /**
    * Get the joda period for a monitoring granularity
    */
   public static Period getMonitoringGranularityPeriod(final String monitoringGranularity,
@@ -248,82 +223,6 @@ public class DetectionUtils {
       return new Period(0, 0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, PeriodType.weeks());
     }
     return TimeGranularity.fromString(monitoringGranularity).toPeriod();
-  }
-
-  public static Period periodFromTimeUnit(final int size, final TimeUnit unit) {
-    switch (unit) {
-      case DAYS:
-        return Period.days(size);
-      case HOURS:
-        return Period.hours(size);
-      case MINUTES:
-        return Period.minutes(size);
-      case SECONDS:
-        return Period.seconds(size);
-      case MILLISECONDS:
-        return Period.millis(size);
-      default:
-        return new Period(TimeUnit.MILLISECONDS.convert(size, unit));
-    }
-  }
-
-  /**
-   * Aggregate the time series data frame's value to specified granularity
-   *
-   * @param df the data frame
-   * @param origin the aggregation origin time stamp
-   * @param granularityPeriod the aggregation granularity in period
-   * @param aggregationFunction the metric's aggregation function
-   * @return the aggregated time series data frame
-   */
-  public static DataFrame aggregateByPeriod(final DataFrame df, final DateTime origin,
-      final Period granularityPeriod,
-      final MetricAggFunction aggregationFunction) {
-    switch (aggregationFunction) {
-      case SUM:
-        return df.groupByPeriod(df.getLongs(DataFrame.COL_TIME), origin, granularityPeriod).sum(
-            DataFrame.COL_TIME, DataFrame.COL_VALUE);
-      case AVG:
-        return df.groupByPeriod(df.getLongs(DataFrame.COL_TIME), origin, granularityPeriod).mean(
-            DataFrame.COL_TIME, DataFrame.COL_VALUE);
-      default:
-        throw new UnsupportedOperationException(String
-            .format("The aggregate by period for %s is not supported in DataFrame.",
-                aggregationFunction));
-    }
-  }
-
-  /**
-   * Check if the aggregation result is complete or not, if not, remove it from the aggregated
-   * result.
-   *
-   * For example, say the weekStart is Monday and current data is available through Jan 8,
-   * Wednesday.
-   * the latest data time stamp will be Jan 8. The latest aggregation start time stamp should be Jan
-   * 6, Monday.
-   * In such case, the latest data point is incomplete and should be filtered. If the latest data
-   * time stamp is
-   * Jan 12, Sunday instead, the data is complete and good to use because the week's data is
-   * complete.
-   *
-   * @param df the aggregated data frame to check
-   * @param latestDataTimeStamp the latest data time stamp
-   * @param bucketTimeGranularity the metric's original granularity
-   * @param aggregationGranularityPeriod the granularity after aggregation
-   * @return the filtered data frame
-   */
-  public static DataFrame filterIncompleteAggregation(DataFrame df,
-      final long latestDataTimeStamp,
-      final TimeGranularity bucketTimeGranularity,
-      final Period aggregationGranularityPeriod) {
-    final long latestAggregationStartTimeStamp = df.getLong(DataFrame.COL_TIME, df.size() - 1);
-    if (latestDataTimeStamp + bucketTimeGranularity.toMillis()
-        < latestAggregationStartTimeStamp + aggregationGranularityPeriod.toStandardDuration()
-        .getMillis()) {
-      df = df.filter(df.getLongs(DataFrame.COL_TIME).neq(latestAggregationStartTimeStamp))
-          .dropNull();
-    }
-    return df;
   }
 
   /**

@@ -1,4 +1,4 @@
-package org.apache.pinot.thirdeye;
+package org.apache.pinot.thirdeye.database;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;

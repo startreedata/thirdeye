@@ -30,23 +30,29 @@ import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.database.ThirdEyeMySQLContainer;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
+import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
+import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
+import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Smoke tests with **Pinot** Datasource.
+ * Smoke tests with **Pinot** Datasource and **MySQL** persistence.
  * Test the following flow (the happy path):
  * - create a Pinot datasource
  * - create a dataset
  * - evaluate an alert
  * - create an alert
+ * - create a subscription
  * - get anomalies
  * - get a single anomaly
  * - get the anomaly breakdown (heatmap)
@@ -56,6 +62,7 @@ public class HappyPathTest {
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
+  private static final String MYSQL_DOCKER_IMAGE = "mysql:5.7.37";
 
   private static final String INGESTION_JOB_SPEC_FILENAME = "batch-job-spec.yml";
   private static final String SCHEMA_FILENAME = "schema.json";
@@ -76,13 +83,15 @@ public class HappyPathTest {
     }
   }
 
-  private PinotContainer container;
-  public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
+  // make containers singleton to share between instances https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/
+  private PinotContainer pinotContainer;
+  private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private ThirdEyeH2DatabaseServer db;
+  private JdbcDatabaseContainer<?> persistenceDbContainer;
 
   // this attribute is shared between tests
-  private int anomalyId;
+  private long anomalyId;
+  private long alertId;
 
   private PinotContainer startPinot() {
     URL datasetsBaseResource = getClass().getClassLoader().getResource("datasets");
@@ -98,39 +107,35 @@ public class HappyPathTest {
       File tableConfigFile = Paths.get(datasetsBasePath, tableName, TABLE_CONFIG_FILENAME).toFile();
       addTableList.add(new AddTable(schemaFile, tableConfigFile));
 
-      File batchJobSpecFile = Paths.get(datasetsBasePath, tableName, INGESTION_JOB_SPEC_FILENAME).toFile();
+      File batchJobSpecFile = Paths.get(datasetsBasePath, tableName, INGESTION_JOB_SPEC_FILENAME)
+          .toFile();
       File dataFile = Paths.get(datasetsBasePath, tableName, DATA_FILENAME).toFile();
       importDataList.add(new ImportData(batchJobSpecFile, dataFile));
     }
-    container = new PinotContainer(addTableList, importDataList);
-    container.start();
+    pinotContainer = new PinotContainer(addTableList, importDataList);
+    pinotContainer.start();
 
-    log.info("Pinot Broker URL: {}", container.getPinotBrokerUrl());
-    log.info("Pinot Controller port: {}", container.getControllerPort());
-    log.info("Pinot Zookeeper port: {}", container.getZookeeperPort());
-    return container;
+    return pinotContainer;
   }
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    // todo cyril replace by a Mysql Container
-    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "HappyPathTest");
-    db.start();
-    db.truncateAllTables();
+    persistenceDbContainer = new ThirdEyeMySQLContainer(MYSQL_DOCKER_IMAGE);
+    persistenceDbContainer.start();
 
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
-    container = startPinot();
-    container.addTables();
+    pinotContainer = startPinot();
+    pinotContainer.addTables();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("happypath/config/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", db.getDbConfig().getUrl()),
-        config("database.user", db.getDbConfig().getUser()),
-        config("database.password", db.getDbConfig().getPassword()),
-        config("database.driver", db.getDbConfig().getDriver())
+        config("database.url", persistenceDbContainer.getJdbcUrl() + "?autoreconnect=true"),
+        config("database.user", persistenceDbContainer.getUsername()),
+        config("database.password", persistenceDbContainer.getPassword()),
+        config("database.driver", persistenceDbContainer.getDriverClassName())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -163,11 +168,11 @@ public class HappyPathTest {
 
   @AfterClass
   public void afterClass() {
-    log.info("Pinot container port: {}", container.getPinotBrokerUrl());
+    log.info("Pinot container port: {}", pinotContainer.getPinotBrokerUrl());
     log.info("Thirdeye port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    container.stop();
-    db.stop();
+    pinotContainer.stop();
+    persistenceDbContainer.stop();
   }
 
   @Test()
@@ -182,12 +187,12 @@ public class HappyPathTest {
         .setName(DATA_SOURCE_NAME)
         .setType("pinot")
         .setProperties(Map.of(
-            "zookeeperUrl", "localhost:" + container.getZookeeperPort(),
-            "brokerUrl", container.getPinotBrokerUrl().replace("http://", ""),
+            "zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(),
+            "brokerUrl", pinotContainer.getPinotBrokerUrl().replace("http://", ""),
             "clusterName", "QuickStartCluster", // really not sure here
             "controllerConnectionScheme", "http",
             "controllerHost", "localhost",
-            "controllerPort", container.getControllerPort())
+            "controllerPort", pinotContainer.getControllerPort())
         );
 
     Response response = request("api/data-sources")
@@ -224,6 +229,23 @@ public class HappyPathTest {
     Response response = request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
 
+    assertThat(response.getStatus()).isEqualTo(200);
+    List<Map<String, Object>> alerts = response.readEntity(List.class);
+    alertId = ((Number) alerts.get(0).get("id")).longValue();
+  }
+
+  @Test(dependsOnMethods = "testCreateAlert")
+  public void testCreateSubscription() {
+    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi()
+        .setName("testSubscription")
+        .setCron("")
+        .setNotificationSchemes(new NotificationSchemesApi()
+            .setEmail(new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
+        .setAlerts(List.of(
+            new AlertApi().setId(alertId)
+        ));
+    Response response = request("api/subscription-groups")
+        .post(Entity.json(List.of(subscriptionGroupApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 

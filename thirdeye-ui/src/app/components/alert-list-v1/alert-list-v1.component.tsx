@@ -25,10 +25,9 @@ import { AlertListV1Props } from "./alert-list-v1.interfaces";
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     props: AlertListV1Props
 ) => {
-    const [
-        selectedAlert,
-        setSelectedAlert,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedAlert, setSelectedAlert] = useState<
+        DataGridSelectionModelV1<UiAlert>
+    >();
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
     const history = useHistory();
 
@@ -61,14 +60,10 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAlert
     ): ReactElement => {
         return (
-            <Link
-                onClick={() =>
-                    handleAlertViewDetails(((data as unknown) as UiAlert).id)
-                }
-            >
+            <Link onClick={() => handleAlertViewDetails(data.id)}>
                 {cellValue}
             </Link>
         );
@@ -76,9 +71,9 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
 
     const renderAlertStatus = (
         _: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAlert
     ): ReactElement => {
-        const active = ((data as unknown) as UiAlert).active;
+        const active = data.active;
 
         return <ActiveIndicator active={active} />;
     };
@@ -138,10 +133,10 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiAlert>
                     hideBorder
                     columns={alertGroupColumns}
-                    data={(alertsData as unknown) as Record<string, unknown>[]}
+                    data={alertsData as UiAlert[]}
                     expandColumnKey="name"
                     rowKey="id"
                     scroll={DataGridScrollV1.Body}

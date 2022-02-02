@@ -76,27 +76,19 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   protected DataSourceApi toApi(final DataSourceDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }
-
-  @PUT
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
+  
   @Override
-  public Response editMultiple(
-    @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-    List<DataSourceApi> list) {
-    list.forEach(ds -> dataSourceCache.removeDataSource(ds.getName()));
-    return super.editMultiple(principal, list);
+  protected void deleteDto(DataSourceDTO dto) {
+    dtoManager.delete(dto);
+    dataSourceCache.removeDataSource(dto.getName());
   }
 
-  @DELETE
-  @Path("{id}")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(
-    @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-    @PathParam("id") Long id) {
-    dataSourceCache.removeDataSource(id);
-    return super.delete(principal, id);
+  @Override
+  protected void prepareUpdatedDto(
+    final ThirdEyePrincipal principal,
+    final DataSourceDTO existing,
+    final DataSourceDTO updated) {
+    dataSourceCache.removeDataSource(existing.getName());
   }
 
   @POST

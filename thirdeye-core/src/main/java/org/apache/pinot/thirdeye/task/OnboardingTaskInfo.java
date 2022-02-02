@@ -15,31 +15,31 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.apache.pinot.thirdeye.detection.finetune;
+package org.apache.pinot.thirdeye.task;
 
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
-import org.apache.pinot.thirdeye.spi.detection.model.AnomalySlice;
+public class OnboardingTaskInfo extends DetectionPipelineTaskInfo {
 
-/**
- * The interface Tuning algorithm.
- */
-public interface TuningAlgorithm {
+  private long tuningWindowStart;
+  private long tuningWindowEnd;
 
-  /**
-   * Fit the time series and anomalies between start and end time stamps, and score the detection
-   * configs.
-   *
-   * @param slice anomaly slice
-   * @throws Exception the exception
-   */
-  void fit(AnomalySlice slice, long configId) throws Exception;
+  public long getTuningWindowStart() {
+    return tuningWindowStart;
+  }
 
-  /**
-   * Return the best detection config detection config dto.
-   *
-   * @return the detection config dto
-   */
-  AlertDTO bestDetectionConfig();
+  public OnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
+    this.tuningWindowStart = tuningWindowStart;
+    return this;
+  }
+
+  public long getTuningWindowEnd() {
+    return tuningWindowEnd;
+  }
+
+  public OnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
+    this.tuningWindowEnd = tuningWindowEnd;
+    return this;
+  }
 }

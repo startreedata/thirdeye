@@ -47,6 +47,7 @@ public class AlertDTO extends AbstractDTO {
   DetectionHealth health;
 
   // Stores properties related to data SLA rules for every metric
+  @Deprecated
   Map<String, Object> dataQualityProperties;
 
   // The legacy execution dag

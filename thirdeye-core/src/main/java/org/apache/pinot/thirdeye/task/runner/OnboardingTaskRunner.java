@@ -35,10 +35,10 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyResultSource;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.apache.pinot.thirdeye.spi.task.TaskInfo;
+import org.apache.pinot.thirdeye.task.OnboardingTaskInfo;
 import org.apache.pinot.thirdeye.task.TaskContext;
 import org.apache.pinot.thirdeye.task.TaskResult;
 import org.apache.pinot.thirdeye.task.TaskRunner;
-import org.apache.pinot.thirdeye.task.YamlOnboardingTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class OnboardingTaskRunner implements TaskRunner {
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
-    final YamlOnboardingTaskInfo info = (YamlOnboardingTaskInfo) taskInfo;
+    final OnboardingTaskInfo info = (OnboardingTaskInfo) taskInfo;
     final long alertId = info.getConfigId();
     LOG.info("Running yaml detection onboarding task for id {}", alertId);
 

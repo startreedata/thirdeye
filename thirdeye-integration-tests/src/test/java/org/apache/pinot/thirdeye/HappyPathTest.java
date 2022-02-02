@@ -34,6 +34,9 @@ import org.apache.pinot.thirdeye.database.ThirdEyeMySQLContainer;
 import org.apache.pinot.thirdeye.spi.api.AlertApi;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
+import org.apache.pinot.thirdeye.spi.api.EmailSchemeApi;
+import org.apache.pinot.thirdeye.spi.api.NotificationSchemesApi;
+import org.apache.pinot.thirdeye.spi.api.SubscriptionGroupApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -49,6 +52,7 @@ import org.testng.annotations.Test;
  * - create a dataset
  * - evaluate an alert
  * - create an alert
+ * - create a subscription
  * - get anomalies
  * - get a single anomaly
  * - get the anomaly breakdown (heatmap)
@@ -86,7 +90,8 @@ public class HappyPathTest {
   private JdbcDatabaseContainer<?> persistenceDbContainer;
 
   // this attribute is shared between tests
-  private int anomalyId;
+  private long anomalyId;
+  private long alertId;
 
   private PinotContainer startPinot() {
     URL datasetsBaseResource = getClass().getClassLoader().getResource("datasets");
@@ -102,7 +107,8 @@ public class HappyPathTest {
       File tableConfigFile = Paths.get(datasetsBasePath, tableName, TABLE_CONFIG_FILENAME).toFile();
       addTableList.add(new AddTable(schemaFile, tableConfigFile));
 
-      File batchJobSpecFile = Paths.get(datasetsBasePath, tableName, INGESTION_JOB_SPEC_FILENAME).toFile();
+      File batchJobSpecFile = Paths.get(datasetsBasePath, tableName, INGESTION_JOB_SPEC_FILENAME)
+          .toFile();
       File dataFile = Paths.get(datasetsBasePath, tableName, DATA_FILENAME).toFile();
       importDataList.add(new ImportData(batchJobSpecFile, dataFile));
     }
@@ -223,6 +229,23 @@ public class HappyPathTest {
     Response response = request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
 
+    assertThat(response.getStatus()).isEqualTo(200);
+    List<Map<String, Object>> alerts = response.readEntity(List.class);
+    alertId = ((Number) alerts.get(0).get("id")).longValue();
+  }
+
+  @Test(dependsOnMethods = "testCreateAlert")
+  public void testCreateSubscription() {
+    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi()
+        .setName("testSubscription")
+        .setCron("")
+        .setNotificationSchemes(new NotificationSchemesApi()
+            .setEmail(new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
+        .setAlerts(List.of(
+            new AlertApi().setId(alertId)
+        ));
+    Response response = request("api/subscription-groups")
+        .post(Entity.json(List.of(subscriptionGroupApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 

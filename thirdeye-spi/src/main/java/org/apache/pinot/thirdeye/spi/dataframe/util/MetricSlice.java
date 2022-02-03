@@ -41,11 +41,11 @@ public final class MetricSlice {
   public static final TimeGranularity NATIVE_GRANULARITY = new TimeGranularity(0,
       TimeUnit.MILLISECONDS);
 
-  public final long metricId;
-  public final long start;
-  public final long end;
-  public final Multimap<String, String> filters;
-  public final TimeGranularity granularity;
+  private final long metricId;
+  private final long start;
+  private final long end;
+  private final Multimap<String, String> filters;
+  private final TimeGranularity granularity;
 
   MetricSlice(long metricId, long start, long end, Multimap<String, String> filters,
       TimeGranularity granularity) {

@@ -157,6 +157,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
+                showTimeRange
                 title={t("label.create-entity", {
                     entity: t("label.alert"),
                 })}

@@ -29,7 +29,6 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
   private int period = 7;
   private double sensitivity = 5;
   private Pattern pattern = Pattern.UP_OR_DOWN;
-  private boolean smoothing = true;
   private String weekStart = "WEDNESDAY";
   private Integer lookback = null;
 
@@ -84,15 +83,6 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
 
   public HoltWintersDetectorSpec setPattern(final Pattern pattern) {
     this.pattern = pattern;
-    return this;
-  }
-
-  public boolean isSmoothing() {
-    return smoothing;
-  }
-
-  public HoltWintersDetectorSpec setSmoothing(final boolean smoothing) {
-    this.smoothing = smoothing;
     return this;
   }
 

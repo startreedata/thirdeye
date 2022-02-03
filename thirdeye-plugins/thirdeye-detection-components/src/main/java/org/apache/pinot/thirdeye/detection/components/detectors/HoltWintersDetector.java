@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
@@ -51,11 +50,9 @@ import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
@@ -63,7 +60,6 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +76,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
   private static final String COL_ERROR = "error";
-  private static final long KERNEL_PERIOD = 3600000L;
 
   private int period;
   private double alpha;
@@ -88,11 +83,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private double gamma;
   private Pattern pattern;
   private double sensitivity;
-  private boolean smoothing;
   private String monitoringGranularity;
   private TimeGranularity timeGranularity;
   private HoltWintersDetectorSpec spec;
-  private Period monitoringGranularityPeriod;
   private int lookback = 60;
 
   private static double calculateInitialLevel(final double[] y) {
@@ -195,10 +188,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     gamma = spec.getGamma();
     pattern = requireNonNull(spec.getPattern(),
         "pattern is null. Allowed values : " + Arrays.toString(Pattern.values()));
-    smoothing = spec.isSmoothing();
     sensitivity = spec.getSensitivity();
     monitoringGranularity = spec.getMonitoringGranularity();
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
 
     if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
         .endsWith(TimeGranularity.WEEKS)) {
@@ -226,10 +217,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    // Kernel smoothing
-    if (smoothing) {
-      smoothInputDf(inputDf);
-    }
     DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis(),
         spec.getTimezone());
     inputDf
@@ -245,26 +232,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     return
         new SimpleAnomalyDetectorV2Result(inputDf);
-  }
-
-  /**
-   * In place smoothing of inputDF
-   */
-  // fixme cyril - kept this logic, but not very good because original values are lost
-  // fixme cyril this will be confusing when anomaly is displayed
-  private void smoothInputDf(final DataFrame inputDf) {
-    final int kernelSize = (int) (
-        KERNEL_PERIOD / monitoringGranularityPeriod.toStandardDuration().getMillis()
-    );
-    if (kernelSize > 1) {
-      final int kernelOffset = kernelSize / 2;
-      final double[] values = inputDf.getDoubles(COL_VALUE).values();
-      for (int i = 0; i <= values.length - kernelSize; i++) {
-        values[i + kernelOffset] = AlgorithmUtils.robustMean(inputDf.getDoubles(COL_VALUE)
-            .slice(i, i + kernelSize), kernelSize).getDouble(kernelSize - 1);
-      }
-      inputDf.addSeries(COL_VALUE, values);
-    }
   }
 
   /**
@@ -516,12 +483,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma);
     }
     return params;
-  }
-
-  // Check whether monitoring timeGranularity is multiple days
-  private boolean isMultiDayGranularity() {
-    return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
-        && timeGranularity.getUnit() == TimeUnit.DAYS;
   }
 
   /**

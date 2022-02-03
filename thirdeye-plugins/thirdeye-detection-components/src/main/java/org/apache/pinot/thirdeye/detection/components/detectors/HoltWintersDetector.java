@@ -49,16 +49,12 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
@@ -83,8 +79,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private double gamma;
   private Pattern pattern;
   private double sensitivity;
-  private String monitoringGranularity;
-  private TimeGranularity timeGranularity;
   private HoltWintersDetectorSpec spec;
   private int lookback = 60;
 
@@ -189,14 +183,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     pattern = requireNonNull(spec.getPattern(),
         "pattern is null. Allowed values : " + Arrays.toString(Pattern.values()));
     sensitivity = spec.getSensitivity();
-    monitoringGranularity = spec.getMonitoringGranularity();
 
-    if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
-        .endsWith(TimeGranularity.WEEKS)) {
-      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
-    } else {
-      timeGranularity = TimeGranularity.fromString(monitoringGranularity);
-    }
     optional(spec.getLookback())
         .ifPresent(lookback -> this.lookback = lookback);
   }
@@ -217,8 +204,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis(),
-        spec.getTimezone());
+    DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
         // rename current which is still called "value" to "current"
         .renameSeries(COL_VALUE, COL_CURRENT)
@@ -250,56 +236,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final int indexStart = Math.max(0, indexFinish - lookback);
       df = df.append(originalDF.slice(indexStart, indexFinish));
     }
-    return df;
-  }
-
-  /**
-   * Returns a data frame containing the same time daily data, based on input time
-   *
-   * @param originalDF the original dataframe
-   * @param time the prediction time, in unix timestamp
-   * @return DataFrame containing same time of daily data for lookback number of days
-   */
-  private DataFrame getDailyDF(final DataFrame originalDF, final Long time, final String timezone) {
-    final LongSeries longSeries = (LongSeries) originalDF.get(COL_TIME);
-    final long start = longSeries.getLong(0);
-    DateTime dt = new DateTime(time).withZone(DateTimeZone.forID(timezone));
-    DataFrame df = DataFrame.builder(COL_TIME, COL_VALUE).build();
-
-    for (int i = 0; i < lookback; i++) {
-      DateTime subDt = dt.minusDays(1);
-      final long t = subDt.getMillis();
-      if (t < start) {
-        break;
-      }
-      int index = longSeries.find(t);
-      if (index != -1) {
-        df = df.append(originalDF.slice(index, index + 1));
-      } else {
-        int backtrackCounter = 0;
-        // If the 1 day look back data doesn't exist, use the data one period before till backtrackCounter greater than 4
-        while (index == -1 && backtrackCounter <= 4) {
-          subDt = subDt.minusDays(period);
-          final long timestamp = subDt.getMillis();
-          index = longSeries.find(timestamp);
-          backtrackCounter++;
-        }
-
-        if (index != -1) {
-          df = df.append(originalDF.slice(index, index + 1));
-        } else {
-          // If not found value up to 4 weeks, insert the last value
-          final double lastVal = (originalDF.get(COL_VALUE))
-              .getDouble(longSeries.find(dt.getMillis()));
-          final DateTime nextDt = dt.minusDays(1);
-          final DataFrame appendDf = DataFrame.builder(COL_TIME, COL_VALUE)
-              .append(nextDt, lastVal).build();
-          df = df.append(appendDf);
-        }
-      }
-      dt = dt.minusDays(1);
-    }
-    df = df.reverse();
     return df;
   }
 
@@ -369,8 +305,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param windowStartTime prediction start time
    * @return DataFrame with timestamp, baseline, error bound
    */
-  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime,
-      final String timezone) {
+  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
 
     final DataFrame resultDF = new DataFrame();
     final DataFrame forecastDF = inputDF
@@ -389,14 +324,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double lastGamma = gamma;
 
     for (int k = 0; k < size; k++) {
-      final DataFrame trainingDF;
-      if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
-          && !monitoringGranularity.endsWith(TimeGranularity.MONTHS)
-          && !monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-        trainingDF = getDailyDF(inputDF, forecastDF.getLong(COL_TIME, k), timezone);
-      } else {
-        trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
-      }
+      final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
       // We need at least 2 periods of data
       if (trainingDF.size() < 2 * period) {

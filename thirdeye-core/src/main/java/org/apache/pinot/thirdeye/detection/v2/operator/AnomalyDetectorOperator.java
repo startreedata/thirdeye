@@ -61,6 +61,11 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     // get generic detector info
     genericDetectorSpec = AbstractSpec.fromProperties(componentSpec, GenericDetectorSpec.class);
+    requireNonNull(genericDetectorSpec.getMonitoringGranularity(),
+        "monitoringGranularity is mandatory in v2 interface");
+    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
+            genericDetectorSpec.getMonitoringGranularity()),
+        "NATIVE_GRANULARITY not supported in v2 interface");
 
     return new DetectionRegistry()
         .buildDetectorV2(type, new AnomalyDetectorFactoryV2Context().setProperties(componentSpec));
@@ -183,10 +188,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
    * Get the joda period for a monitoring granularity
    */
   private static Period getMonitoringGranularityPeriod(final String monitoringGranularity) {
-    requireNonNull(monitoringGranularity, "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        monitoringGranularity), "NATIVE_GRANULARITY not supported in v2 interface");
-
     final String[] split = monitoringGranularity.split("_");
     if (split[1].equals("MONTHS")) {
       return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());
@@ -238,9 +239,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     }
   }
 
-  /** Used to parse parameters common to all detectors that use AbstractSpec
+  /**
+   * Used to parse parameters common to all detectors that use AbstractSpec
    * Makes the AnomalyDetectorOperator more aware of what's happening.
    * Temporary solution. Maybe introduce a DetectorSpec extends AbstractSpec in public
-   * */
-  private static class GenericDetectorSpec extends AbstractSpec { public GenericDetectorSpec() {}}
+   */
+  private static class GenericDetectorSpec extends AbstractSpec {
+
+    public GenericDetectorSpec() {
+    }
+  }
 }

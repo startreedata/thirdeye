@@ -25,9 +25,11 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
 
     return (
         <PageHeaderV1>
-            <PageHeaderTextV1>{props.title}</PageHeaderTextV1>
+            <PageHeaderTextV1 data-testid="page-header-text">
+                {props.title}
+            </PageHeaderTextV1>
 
-            <PageHeaderActionsV1>
+            <PageHeaderActionsV1 data-testid="page-header-actions">
                 {/* Time range selector */}
                 {props.showTimeRange && (
                     <TimeRangeSelector

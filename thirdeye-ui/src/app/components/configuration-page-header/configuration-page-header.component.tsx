@@ -18,7 +18,9 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
 
     return (
         <PageHeaderV1>
-            <PageHeaderTextV1>{t("label.configuration")}</PageHeaderTextV1>
+            <PageHeaderTextV1 data-testid="page-header-text">
+                {t("label.configuration")}
+            </PageHeaderTextV1>
             <PageHeaderActionsV1>
                 {/* Create options button */}
                 <CreateMenuButton />

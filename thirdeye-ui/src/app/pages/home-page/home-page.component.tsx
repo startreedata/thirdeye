@@ -38,7 +38,7 @@ export const HomePage: FunctionComponent = () => {
         <PageV1>
             <PageHeader title={t("label.home")} />
 
-            <PageContentsGridV1>
+            <PageContentsGridV1 data-testid="home-page-tile-buttons">
                 {/* Alerts */}
                 <Grid item>
                     <TileButtonV1 href={getAlertsPath()}>

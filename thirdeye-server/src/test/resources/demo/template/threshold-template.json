@@ -15,7 +15,6 @@
         "anomaly.metric": "${metric}",
         "component.timezone": "US/Pacific",
         "type": "THRESHOLD",
-        "component.dimensions": [],
         "component.offset": "mo1m",
         "component.pattern": "down"
       },

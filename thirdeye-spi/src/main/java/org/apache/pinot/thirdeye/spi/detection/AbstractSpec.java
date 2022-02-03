@@ -21,8 +21,6 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.modelmapper.ModelMapper;
@@ -35,11 +33,11 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   public static final String DEFAULT_TIMESTAMP = "timestamp";
+  public static final String DEFAULT_METRIC = "value";
 
   private String timezone = DEFAULT_TIMEZONE;
   private String timestamp = DEFAULT_TIMESTAMP;
-  private String metric = "value";
-  private List<String> dimensions = Collections.emptyList();
+  private String metric = DEFAULT_METRIC;
   private String monitoringGranularity = MetricSlice
       .NATIVE_GRANULARITY
       .toAggregationGranularityString(); // use native granularity by default
@@ -85,15 +83,6 @@ public abstract class AbstractSpec implements Serializable {
 
   public AbstractSpec setMetric(final String metric) {
     this.metric = metric;
-    return this;
-  }
-
-  public List<String> getDimensions() {
-    return dimensions;
-  }
-
-  public AbstractSpec setDimensions(final List<String> dimensions) {
-    this.dimensions = dimensions;
     return this;
   }
 

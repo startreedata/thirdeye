@@ -1,6 +1,6 @@
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, isEmpty, isNil } from "lodash";
+import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
@@ -72,15 +72,15 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     }
 
     // Current and predicted values
-    if (anomaly.avgCurrentVal) {
+    if (isNumber(anomaly.avgCurrentVal)) {
         uiAnomaly.current = formatLargeNumber(anomaly.avgCurrentVal);
     }
-    if (anomaly.avgBaselineVal) {
+    if (isNumber(anomaly.avgBaselineVal)) {
         uiAnomaly.predicted = formatLargeNumber(anomaly.avgBaselineVal);
     }
 
     // Calculate deviation if both current and average values are available
-    if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
+    if (isNumber(anomaly.avgCurrentVal) && isNumber(anomaly.avgBaselineVal)) {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;

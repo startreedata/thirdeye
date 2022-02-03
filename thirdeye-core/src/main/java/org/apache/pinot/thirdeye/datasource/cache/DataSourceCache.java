@@ -131,8 +131,8 @@ public class DataSourceCache {
   }
 
   private class DataSourceCacheKey {
-    private String name;
-    private Timestamp loadTime;
+    private final String name;
+    private final Timestamp loadTime;
 
     public DataSourceCacheKey(final String name, final Timestamp loadTime) {
       this.name = name;

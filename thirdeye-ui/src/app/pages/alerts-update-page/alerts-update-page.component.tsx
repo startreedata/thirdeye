@@ -252,6 +252,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
+                showTimeRange
                 title={t("label.update-entity", {
                     entity: t("label.alert"),
                 })}

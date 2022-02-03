@@ -19,9 +19,6 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +27,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -38,8 +34,6 @@ import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotif
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 
 public class DetectionUtils {
 
@@ -102,24 +96,6 @@ public class DetectionUtils {
     // Sort by increasing order of anomaly start time
     anomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
     return anomalies;
-  }
-
-  /**
-   * Get the joda period for a monitoring granularity
-   */
-  public static Period getMonitoringGranularityPeriod(final String monitoringGranularity) {
-    requireNonNull(monitoringGranularity, "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        monitoringGranularity), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    final String[] split = monitoringGranularity.split("_");
-    if (split[1].equals("MONTHS")) {
-      return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());
-    }
-    if (split[1].equals("WEEKS")) {
-      return new Period(0, 0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, PeriodType.weeks());
-    }
-    return TimeGranularity.fromString(monitoringGranularity).toPeriod();
   }
 
   /**

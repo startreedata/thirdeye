@@ -244,7 +244,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return
-        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
+        new SimpleAnomalyDetectorV2Result(inputDf);
   }
 
   /**

@@ -3,6 +3,7 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static org.apache.pinot.thirdeye.spi.detection.DetectionUtils.getMonitoringGranularityPeriod;
 import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
 
   private AnomalyDetectorV2<? extends AbstractSpec> detector;
+  private String monitoringGranularity;
+  private String timeZone;
 
   public AnomalyDetectorOperator() {
     super();
@@ -54,6 +57,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "Must have 'type' in detector config");
 
     final Map<String, Object> componentSpec = getComponentSpec(params);
+    AbstractSpec genericSpec = AbstractSpec.fromProperties(componentSpec, GenericSpec.class);
+    monitoringGranularity = genericSpec.getMonitoringGranularity();
+    timeZone = genericSpec.getTimezone();
+
     return new DetectionRegistry()
         .buildDetectorV2(type, new AnomalyDetectorFactoryV2Context().setProperties(componentSpec));
   }
@@ -100,12 +107,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     return "AnomalyDetectorOperator";
   }
 
-  private static DetectionResult buildDetectionResult(
+  private DetectionResult buildDetectionResult(
       final AnomalyDetectorV2Result detectorV2Result) {
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame(),
-        detectorV2Result.getTimeZone(),
-        detectorV2Result.getMonitoringGranularityPeriod());
+        timeZone,
+        getMonitoringGranularityPeriod(monitoringGranularity));
 
     return DetectionResult.from(anomalies,
         TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
@@ -210,4 +217,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       baselineCount = 0;
     }
   }
+
+  /** Used to parse parameters common to all detectors that use AbstractSpec
+   * Makes the AnomalyDetectorOperator more aware of what's happening.
+   * Temporary solution to get granularity and timezone.
+   * */
+  private static class GenericSpec extends AbstractSpec { public GenericSpec() {}}
 }

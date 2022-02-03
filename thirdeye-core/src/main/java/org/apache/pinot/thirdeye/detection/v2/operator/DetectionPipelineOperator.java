@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DetectionPipeline forms the root of the detection class hierarchy. It represents a wireframe
+ * DetectionPipelineOperator forms the root of the detection class hierarchy. It represents a wireframe
  * for implementing (intermittently stateful) executable pipelines on top of it.
  */
 public abstract class DetectionPipelineOperator implements Operator {

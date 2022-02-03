@@ -48,7 +48,7 @@ public class TaskInfoFactory {
           .put(DATA_QUALITY, DetectionPipelineTaskInfo.class)
           .put(DETECTION, DetectionPipelineTaskInfo.class)
           .put(NOTIFICATION, DetectionAlertTaskInfo.class)
-          .put(ONBOARDING, YamlOnboardingTaskInfo.class)
+          .put(ONBOARDING, OnboardingTaskInfo.class)
           .put(MONITOR, MonitorTaskInfo.class)
           .build();
 

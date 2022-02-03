@@ -18,24 +18,28 @@
  *
  */
 
-package org.apache.pinot.thirdeye.spi.detection;
+package org.apache.pinot.thirdeye.task;
 
-import org.apache.pinot.thirdeye.spi.detection.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
+public class OnboardingTaskInfo extends DetectionPipelineTaskInfo {
 
-/**
- * Input data fetcher interface.
- * For components to fetch the input data it need.
- *
- * Deprecated in favor of {@link DataFetcher}
- * This is used by the v2 pipeline
- */
-@Deprecated
-public interface InputDataFetcher {
+  private long tuningWindowStart;
+  private long tuningWindowEnd;
 
-  /**
-   * fetch data for input data spec
-   */
-  @Deprecated
-  InputData fetchData(InputDataSpec inputDataSpec);
+  public long getTuningWindowStart() {
+    return tuningWindowStart;
+  }
+
+  public OnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
+    this.tuningWindowStart = tuningWindowStart;
+    return this;
+  }
+
+  public long getTuningWindowEnd() {
+    return tuningWindowEnd;
+  }
+
+  public OnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
+    this.tuningWindowEnd = tuningWindowEnd;
+    return this;
+  }
 }

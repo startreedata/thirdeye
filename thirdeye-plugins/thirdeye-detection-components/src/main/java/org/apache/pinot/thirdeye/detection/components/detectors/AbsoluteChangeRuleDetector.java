@@ -51,9 +51,7 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
@@ -68,7 +66,6 @@ public class AbsoluteChangeRuleDetector implements
     BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
 
   private double absoluteChange;
-  private InputDataFetcher dataFetcher;
   private Baseline baseline;
   private Pattern pattern;
   // todo cyril refactor this
@@ -87,12 +84,6 @@ public class AbsoluteChangeRuleDetector implements
     pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
 
     monitoringGranularity = spec.getMonitoringGranularity();
-  }
-
-  @Override
-  public void init(final AbsoluteChangeRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
-    init(spec);
-    this.dataFetcher = dataFetcher;
   }
 
   @Override
@@ -144,13 +135,6 @@ public class AbsoluteChangeRuleDetector implements
 
     return
         new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
-  }
-
-  @Override
-  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
-    final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
-    addBoundaries(df);
-    return TimeSeries.fromDataFrame(df);
   }
 
   private void addBoundaries(final DataFrame inputDf) {

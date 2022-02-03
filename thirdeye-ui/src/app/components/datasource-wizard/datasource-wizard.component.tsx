@@ -177,17 +177,12 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                         <>
                             {/* Datasource configuration editor */}
                             <Grid item sm={12}>
-                                <JSONEditorV1
+                                <JSONEditorV1<Datasource>
                                     error={datasourceConfigurationError}
                                     helperText={
                                         datasourceConfigurationHelperText
                                     }
-                                    value={
-                                        (newDatasource as unknown) as Record<
-                                            string,
-                                            unknown
-                                        >
-                                    }
+                                    value={newDatasource}
                                     onChange={onDatasourceConfigurationChange}
                                 />
                             </Grid>
@@ -200,14 +195,9 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                         <>
                             {/* Datasource information */}
                             <Grid item sm={12}>
-                                <JSONEditorV1
+                                <JSONEditorV1<Datasource>
                                     readOnly
-                                    value={
-                                        (newDatasource as unknown) as Record<
-                                            string,
-                                            unknown
-                                        >
-                                    }
+                                    value={newDatasource}
                                 />
                             </Grid>
                         </>

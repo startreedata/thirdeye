@@ -20,14 +20,8 @@
 
 package org.apache.pinot.thirdeye.spi.datalayer.dto;
 
-import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
-import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.detection.Evaluation;
-import org.apache.pinot.thirdeye.spi.detection.PredictionResult;
 
 /**
  * The class for evaluation metrics.
@@ -118,31 +112,5 @@ public class EvaluationDTO extends AbstractDTO {
         + endTime + ", detectorName='" + detectorName + '\'' + ", mape=" + mape + ", metricUrn='"
         + metricUrn + '\''
         + '}';
-  }
-
-
-  public static EvaluationDTO fromPredictionResult(PredictionResult predictionResult,
-      long startTime, long endTime,
-      long detectionConfigId) {
-    EvaluationDTO evaluation = new EvaluationDTO();
-    evaluation.setDetectionConfigId(detectionConfigId);
-    evaluation.setStartTime(startTime);
-    evaluation.setEndTime(endTime);
-    evaluation.setDetectorName(predictionResult.getDetectorName());
-    evaluation.setMetricUrn(predictionResult.getMetricUrn());
-    evaluation.setMape(getMape(predictionResult));
-    return evaluation;
-  }
-
-  private static Double getMape(PredictionResult result) {
-    DataFrame df = result.getPredictedTimeSeries();
-    // drop zero current value for mape calculation
-    df = df.filter(df.getDoubles(COL_CURRENT).ne(0.0)).dropNull(COL_CURRENT, COL_VALUE);
-    Double mape = Evaluation.calculateMape(df.getDoubles(COL_CURRENT), df.getDoubles(COL_VALUE));
-    if (Double.isNaN(mape)) {
-      // explicitly swap NaN to null values because mysql doesn't support storing NaN and will throw an exception.
-      mape = null;
-    }
-    return mape;
   }
 }

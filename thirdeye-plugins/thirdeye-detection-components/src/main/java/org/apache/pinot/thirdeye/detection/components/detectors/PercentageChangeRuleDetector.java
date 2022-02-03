@@ -54,9 +54,7 @@ import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
@@ -71,7 +69,6 @@ public class PercentageChangeRuleDetector implements
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
 
   private double percentageChange;
-  private InputDataFetcher dataFetcher;
   private Baseline baseline;
   private Pattern pattern;
   // todo cyril refactor this
@@ -88,13 +85,6 @@ public class PercentageChangeRuleDetector implements
     pattern = valueOf(spec.getPattern().toUpperCase());
 
     monitoringGranularity = spec.getMonitoringGranularity();
-  }
-
-  @Override
-  public void init(final PercentageChangeRuleDetectorSpec spec,
-      final InputDataFetcher dataFetcher) {
-    init(spec);
-    this.dataFetcher = dataFetcher;
   }
 
   @Override
@@ -157,13 +147,6 @@ public class PercentageChangeRuleDetector implements
           : (first > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
     }
     return (first - second) / second;
-  }
-
-  @Override
-  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
-    final DataFrame df = DetectionUtils.buildBaselines(slice, baseline, dataFetcher);
-    addBoundaries(df);
-    return TimeSeries.fromDataFrame(df);
   }
 
   private void addBoundaries(final DataFrame inputDf) {

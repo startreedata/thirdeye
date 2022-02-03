@@ -19,10 +19,9 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedDatasource,
-        setSelectedDatasource,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedDatasource, setSelectedDatasource] = useState<
+        DataGridSelectionModelV1<UiDatasource>
+    >();
     const history = useHistory();
 
     const handleDatasourceDelete = (): void => {
@@ -70,16 +69,10 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiDatasource
     ): ReactElement => {
         return (
-            <Link
-                onClick={() =>
-                    handleDatasourceViewDetailsById(
-                        ((data as unknown) as UiDatasource).id
-                    )
-                }
-            >
+            <Link onClick={() => handleDatasourceViewDetailsById(data.id)}>
                 {cellValue}
             </Link>
         );
@@ -108,15 +101,10 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiDatasource>
                     hideBorder
                     columns={datasourceColumns}
-                    data={
-                        (props.datasources as unknown) as Record<
-                            string,
-                            unknown
-                        >[]
-                    }
+                    data={props.datasources as UiDatasource[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

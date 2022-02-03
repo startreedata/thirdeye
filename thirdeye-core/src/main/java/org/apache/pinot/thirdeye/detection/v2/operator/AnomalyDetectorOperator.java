@@ -57,7 +57,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "Must have 'type' in detector config");
 
     final Map<String, Object> componentSpec = getComponentSpec(params);
-    AbstractSpec genericSpec = AbstractSpec.fromProperties(componentSpec, GenericSpec.class);
+    AbstractSpec genericSpec = AbstractSpec.fromProperties(componentSpec, GenericDetectorSpec.class);
     monitoringGranularity = genericSpec.getMonitoringGranularity();
     timeZone = genericSpec.getTimezone();
 
@@ -222,5 +222,5 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
    * Makes the AnomalyDetectorOperator more aware of what's happening.
    * Temporary solution to get granularity and timezone.
    * */
-  private static class GenericSpec extends AbstractSpec { public GenericSpec() {}}
+  private static class GenericDetectorSpec extends AbstractSpec { public GenericDetectorSpec() {}}
 }

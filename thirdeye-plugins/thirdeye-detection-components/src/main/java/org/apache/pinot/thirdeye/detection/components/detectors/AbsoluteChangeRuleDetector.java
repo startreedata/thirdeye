@@ -47,12 +47,10 @@ import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
 
 /**
@@ -64,7 +62,6 @@ public class AbsoluteChangeRuleDetector implements
 
   private double absoluteChange;
   private Pattern pattern;
-  private Period monitoringGranularityPeriod;
   private AbsoluteChangeRuleDetectorSpec spec;
 
   @Override
@@ -73,7 +70,6 @@ public class AbsoluteChangeRuleDetector implements
     checkArgument(!Double.isNaN(spec.getAbsoluteChange()), "Absolute change is not set.");
     absoluteChange = spec.getAbsoluteChange();
     pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
   }
 
   @Override
@@ -113,7 +109,7 @@ public class AbsoluteChangeRuleDetector implements
     addBoundaries(inputDf);
 
     return
-        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
+        new SimpleAnomalyDetectorV2Result(inputDf);
   }
 
   private void addBoundaries(final DataFrame inputDf) {

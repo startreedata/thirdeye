@@ -42,12 +42,10 @@ import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +62,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
   private Pattern pattern;
   private double sensitivity;
   private int lookback;
-  private Period monitoringGranularityPeriod;
   private MeanVarianceRuleDetectorSpec spec;
 
   /**
@@ -83,7 +80,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
     pattern = spec.getPattern();
     lookback = spec.getLookback();
     sensitivity = spec.getSensitivity();
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
 
     checkArgument(lookback >= 5,
         String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
@@ -117,9 +113,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return new SimpleAnomalyDetectorV2Result(inputDf,
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
+    return new SimpleAnomalyDetectorV2Result(inputDf);
   }
 
   //todo cyril move this as utils/shared method

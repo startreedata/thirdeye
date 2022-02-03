@@ -50,12 +50,10 @@ import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
 
 /**
@@ -68,7 +66,6 @@ public class PercentageChangeRuleDetector implements
   private double percentageChange;
   private Pattern pattern;
   private PercentageChangeRuleDetectorSpec spec;
-  private Period monitoringGranularityPeriod;
 
   @Override
   public void init(final PercentageChangeRuleDetectorSpec spec) {
@@ -76,7 +73,6 @@ public class PercentageChangeRuleDetector implements
     checkArgument(!Double.isNaN(spec.getPercentageChange()), "Percentage change is not set.");
     percentageChange = spec.getPercentageChange();
     pattern = valueOf(spec.getPattern().toUpperCase());
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
   }
 
   @Override
@@ -110,7 +106,7 @@ public class PercentageChangeRuleDetector implements
     addBoundaries(inputDf);
 
     return
-        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
+        new SimpleAnomalyDetectorV2Result(inputDf);
   }
 
   private Series percentageChanges(final DataFrame inputDf) {

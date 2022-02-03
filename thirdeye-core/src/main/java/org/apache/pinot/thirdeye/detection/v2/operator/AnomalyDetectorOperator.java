@@ -240,7 +240,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   /** Used to parse parameters common to all detectors that use AbstractSpec
    * Makes the AnomalyDetectorOperator more aware of what's happening.
-   * Temporary solution to get granularity and timezone.
+   * Temporary solution. Maybe introduce a DetectorSpec extends AbstractSpec in public
    * */
   private static class GenericDetectorSpec extends AbstractSpec { public GenericDetectorSpec() {}}
 }

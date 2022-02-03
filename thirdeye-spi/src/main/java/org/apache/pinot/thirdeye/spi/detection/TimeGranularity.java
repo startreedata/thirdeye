@@ -181,9 +181,6 @@ public class TimeGranularity {
   /**
    * Return the string representation of this time granularity, in which duration and unit are
    * separated by "_".
-   *
-   * @return the string representation of this time granularity, in which duration and unit are
-   *     separated by "_".
    */
   public String toAggregationGranularityString() {
     return size + "_" + unit;
@@ -200,9 +197,6 @@ public class TimeGranularity {
   /**
    * Return the string representation of this time granularity, in which duration and unit are
    * separated by "-".
-   *
-   * @return the string representation of this time granularity, in which duration and unit are
-   *     separated by "-".
    */
   @Override
   public String toString() {

@@ -20,7 +20,6 @@ Content-Type: application/json
             "component.monitoringGranularity": "1_DAYS",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.absoluteChange": "${absoluteChange}",
             "component.offset": "${offset}",
             "component.pattern": "${pattern}",

@@ -18,7 +18,6 @@
  */
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
@@ -199,6 +198,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     smoothing = spec.isSmoothing();
     sensitivity = spec.getSensitivity();
     monitoringGranularity = spec.getMonitoringGranularity();
+    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
 
     if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
         .endsWith(TimeGranularity.WEEKS)) {
@@ -214,7 +214,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
-    setMonitoringGranularityPeriod();
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame();
     currentDf
@@ -223,17 +222,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         .setIndex(COL_TIME);
 
     return runDetectionOnSingleDataTable(currentDf, interval);
-  }
-
-  private void setMonitoringGranularityPeriod() {
-    requireNonNull(spec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
-        spec.getMonitoringGranularity(),
-        null);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

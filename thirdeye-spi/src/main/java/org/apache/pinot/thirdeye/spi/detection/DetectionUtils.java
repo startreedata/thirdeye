@@ -19,7 +19,8 @@
 
 package org.apache.pinot.thirdeye.spi.detection;
 
-import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -29,42 +30,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
 public class DetectionUtils {
-
-  // Check if a string is a component reference
-  public static boolean isReferenceName(final String key) {
-    return key.startsWith("$");
-  }
-
-  // Extracts the component key from the reference key
-  // e.g., "$myRule:ALGORITHM" -> "myRule:ALGORITHM"
-  public static String getComponentKey(final String componentRefKey) {
-    if (isReferenceName(componentRefKey)) {
-      return componentRefKey.substring(1);
-    } else {
-      throw new IllegalArgumentException("not a component reference key. should starts with $");
-    }
-  }
 
   // Extracts the component type from the component key
   // e.g., "myRule:ALGORITHM" -> "ALGORITHM"
@@ -81,85 +58,6 @@ public class DetectionUtils {
     final ParameterizedType genericSuperclass = (ParameterizedType) componentClass
         .getGenericInterfaces()[0];
     return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
-  }
-
-  // todo cyril can be moved to core once v1 is removed
-  public static DetectionResult buildDetectionResult(
-      final AnomalyDetectorV2Result detectorV2Result) {
-    final List<MergedAnomalyResultDTO> anomalies = DetectionUtils.buildAnomaliesFromDetectorDf(
-        detectorV2Result.getDataFrame(),
-        detectorV2Result.getTimeZone(),
-        detectorV2Result.getMonitoringGranularityPeriod());
-
-    return DetectionResult.from(anomalies,
-        TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
-  }
-
-  // todo cyril can be moved to core once v1 is removed
-  public static List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df,
-      final String datasetTimezone,
-      final Period monitoringGranularityPeriod) {
-    if (df.isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
-    final LongSeries timeMillisSeries = df.getLongs(DataFrame.COL_TIME);
-    final BooleanSeries isAnomalySeries = df.getBooleans(DataFrame.COL_ANOMALY);
-    final DoubleSeries currentSeries = df.getDoubles(DataFrame.COL_CURRENT);
-    final DoubleSeries baselineSeries = df.getDoubles(DataFrame.COL_VALUE);
-
-    long lastStartMillis = -1;
-    AnomalyStatsAccumulator anomalyStatsAccumulator = new AnomalyStatsAccumulator();
-
-    for (int i = 0; i < df.size(); i++) {
-      if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
-        // inside an anomaly range
-        if (lastStartMillis < 0) {
-          // start of an anomaly range
-          lastStartMillis = timeMillisSeries.get(i);
-        }
-        if (!currentSeries.isNull(i)) {
-          anomalyStatsAccumulator.addCurrentValue(currentSeries.getDouble(i));
-        }
-        if (!baselineSeries.isNull(i)) {
-          anomalyStatsAccumulator.addBaselineValue(baselineSeries.getDouble(i));
-        }
-      } else if (lastStartMillis >= 0) {
-        // anomaly range opened - let's close the anomaly
-        long endMillis = timeMillisSeries.get(i);
-        anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endMillis));
-
-        // reset variables for next anomaly
-        anomalyStatsAccumulator.reset();
-        lastStartMillis = -1;
-      }
-    }
-
-    if (lastStartMillis >= 0) {
-      // last anomaly has not been closed - let's close it
-      // estimate end time of anomaly range
-      final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
-      // default: add 1 to lastTimestamp
-      long endMillis = lastTimestamp + 1;
-      if (datasetTimezone != null && monitoringGranularityPeriod != null) {
-        // exact computation of end of period
-        final DateTimeZone timezone = DateTimeZone.forID(datasetTimezone);
-        endMillis = new DateTime(lastTimestamp, timezone)
-            .plus(monitoringGranularityPeriod)
-            .getMillis();
-      }
-      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endMillis));
-    }
-
-    return anomalies;
-  }
-
-  public static MergedAnomalyResultDTO makeAnomaly(final long start, final long end) {
-    final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-    anomaly.setStartTime(start);
-    anomaly.setEndTime(end);
-    return anomaly;
   }
 
   public static void setEntityChildMapping(final MergedAnomalyResultDTO parent,
@@ -209,12 +107,11 @@ public class DetectionUtils {
   /**
    * Get the joda period for a monitoring granularity
    */
-  public static Period getMonitoringGranularityPeriod(final String monitoringGranularity,
-      final DatasetConfigDTO datasetConfigDTO) {
-    if (monitoringGranularity
-        .equals(MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString())) {
-      return datasetConfigDTO.bucketTimeGranularity().toPeriod();
-    }
+  public static Period getMonitoringGranularityPeriod(final String monitoringGranularity) {
+    requireNonNull(monitoringGranularity, "monitoringGranularity is mandatory in v2 interface");
+    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
+        monitoringGranularity), "NATIVE_GRANULARITY not supported in v2 interface");
+
     final String[] split = monitoringGranularity.split("_");
     if (split[1].equals("MONTHS")) {
       return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());
@@ -285,46 +182,5 @@ public class DetectionUtils {
       }
     }
     return timeSeriesMap;
-  }
-
-  private static class AnomalyStatsAccumulator {
-
-    private double currentSum = 0;
-    private int currentCount = 0;
-    private double baselineSum = 0;
-    private int baselineCount = 0;
-
-    public AnomalyStatsAccumulator() {
-    }
-
-    public MergedAnomalyResultDTO buildAnomaly(long startMillis, long endMillis) {
-      final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-      anomaly.setStartTime(startMillis);
-      anomaly.setEndTime(endMillis);
-      if (currentCount > 0) {
-        anomaly.setAvgCurrentVal(currentSum / currentCount);
-      }
-      if (baselineCount > 0) {
-        anomaly.setAvgBaselineVal(baselineSum / baselineCount);
-      }
-      return anomaly;
-    }
-
-    public void addCurrentValue(double currentValue) {
-      currentSum += currentValue;
-      ++currentCount;
-    }
-
-    public void addBaselineValue(double baselineValue) {
-      baselineSum += baselineValue;
-      ++baselineCount;
-    }
-
-    public void reset() {
-      currentSum = 0;
-      currentCount = 0;
-      baselineSum = 0;
-      baselineCount = 0;
-    }
   }
 }

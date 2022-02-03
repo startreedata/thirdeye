@@ -21,7 +21,6 @@ Content-Type: application/json
             "component.monitoringGranularity": "1_DAYS",
             "component.timestamp": "ts",
             "component.metric": "${metric}",
-            "component.dimensions": [],
             "component.max": "${max}",
             "component.min": "${min}",
             "component.offset": "mo1m",

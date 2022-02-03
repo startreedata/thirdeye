@@ -47,16 +47,13 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
-import org.apache.pinot.thirdeye.spi.detection.BaselineParsingUtils;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
@@ -69,10 +66,7 @@ public class PercentageChangeRuleDetector implements
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
 
   private double percentageChange;
-  private Baseline baseline;
   private Pattern pattern;
-  // todo cyril refactor this
-  private String monitoringGranularity;
   private PercentageChangeRuleDetectorSpec spec;
   private Period monitoringGranularityPeriod;
 
@@ -81,16 +75,13 @@ public class PercentageChangeRuleDetector implements
     this.spec = spec;
     checkArgument(!Double.isNaN(spec.getPercentageChange()), "Percentage change is not set.");
     percentageChange = spec.getPercentageChange();
-    baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
     pattern = valueOf(spec.getPattern().toUpperCase());
-
-    monitoringGranularity = spec.getMonitoringGranularity();
+    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity());
   }
 
   @Override
   public AnomalyDetectorV2Result runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap) throws DetectorException {
-    setMonitoringGranularityPeriod();
     final DataTable baseline = requireNonNull(timeSeriesMap.get(KEY_BASELINE), "baseline is null");
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame baselineDf = baseline.getDataFrame();
@@ -102,16 +93,6 @@ public class PercentageChangeRuleDetector implements
         .addSeries(COL_VALUE, baselineDf.get(spec.getMetric()));
 
     return runDetectionOnSingleDataTable(currentDf, window);
-  }
-
-  private void setMonitoringGranularityPeriod() {
-    requireNonNull(spec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(spec.getMonitoringGranularity(),
-        null);
   }
 
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,

@@ -147,7 +147,8 @@
 
         "contribution": "Contribution",
         "value": "Value",
-        "alert-performance": "Alert Performance"
+        "alert-performance": "Alert Performance",
+        "root-cause-analysis": "Root Cause Analysis"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

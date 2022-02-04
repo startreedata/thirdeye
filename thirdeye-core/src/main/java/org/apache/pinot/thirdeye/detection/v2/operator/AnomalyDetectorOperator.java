@@ -22,7 +22,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.model.DetectionResult;
 import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
@@ -32,7 +31,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.PeriodType;
+import org.joda.time.format.ISOPeriodFormat;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
@@ -114,7 +113,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame(),
         genericDetectorSpec.getTimezone(),
-        getMonitoringGranularityPeriod(genericDetectorSpec.getMonitoringGranularity()));
+        Period.parse(genericDetectorSpec.getMonitoringGranularity(), ISOPeriodFormat.standard()));
 
     return DetectionResult.from(anomalies,
         TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
@@ -177,20 +176,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     }
 
     return anomalies;
-  }
-
-  /**
-   * Get the joda period for a monitoring granularity
-   */
-  private static Period getMonitoringGranularityPeriod(final String monitoringGranularity) {
-    final String[] split = monitoringGranularity.split("_");
-    if (split[1].equals("MONTHS")) {
-      return new Period(0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, 0, PeriodType.months());
-    }
-    if (split[1].equals("WEEKS")) {
-      return new Period(0, 0, Integer.parseInt(split[0]), 0, 0, 0, 0, 0, PeriodType.weeks());
-    }
-    return TimeGranularity.fromString(monitoringGranularity).toPeriod();
   }
 
   private static class AnomalyStatsAccumulator {

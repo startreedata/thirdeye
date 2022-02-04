@@ -20,7 +20,7 @@ Content-Type: application/json
           "params": {
             "type": "ABSOLUTE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.absoluteChange": "${absoluteChange}",
@@ -46,7 +46,7 @@ Content-Type: application/json
           "name": "currentMissingDataManager",
           "type": "TimeIndexFiller",
           "params": {
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.minTimeInference": "FROM_DETECTION_TIME",
             "component.maxTimeInference": "FROM_DETECTION_TIME"
@@ -68,7 +68,7 @@ Content-Type: application/json
           "name": "baselineMissingDataManager",
           "type": "TimeIndexFiller",
           "params": {
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.minTimeInference": "FROM_DETECTION_TIME_WITH_LOOKBACK",
             "component.maxTimeInference": "FROM_DETECTION_TIME_WITH_LOOKBACK",

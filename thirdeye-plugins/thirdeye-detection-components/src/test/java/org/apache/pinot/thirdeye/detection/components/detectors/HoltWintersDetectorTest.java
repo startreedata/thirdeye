@@ -79,7 +79,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setPeriod(3);
     spec.setSensitivity(0); // corresponds to zscore of 1
@@ -146,7 +146,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setPeriod(3);
     spec.setSensitivity(0); // corresponds to zscore of 1
@@ -181,7 +181,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setPeriod(3);
     spec.setSensitivity(0); // corresponds to zscore of 1
@@ -221,7 +221,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
     spec.setLookback(10);
     spec.setPeriod(3);
@@ -262,7 +262,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
     spec.setLookback(10);
     spec.setPeriod(3);

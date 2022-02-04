@@ -16,7 +16,7 @@ Content-Type: application/json
           "params": {
             "type": "THRESHOLD",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.max": "${max}",
@@ -100,7 +100,7 @@ Content-Type: application/json
           "params": {
             "type": "HOLT_WINTERS",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.pattern": "${pattern}",
@@ -183,7 +183,7 @@ Content-Type: application/json
           "params": {
             "type": "ABSOLUTE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.absoluteChange": "${absoluteChange}",
@@ -302,7 +302,7 @@ Content-Type: application/json
           "params": {
             "type": "MEAN_VARIANCE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.lookback": "${lookbackDetector}",
@@ -385,7 +385,7 @@ Content-Type: application/json
           "params": {
             "type": "PERCENTAGE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.percentageChange": "${percentageChange}",

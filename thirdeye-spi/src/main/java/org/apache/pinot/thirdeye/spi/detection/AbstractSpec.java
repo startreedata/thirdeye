@@ -38,6 +38,9 @@ public abstract class AbstractSpec implements Serializable {
   private String timezone = DEFAULT_TIMEZONE;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
+  /**
+   * Period in Java ISO8601 standard. Eg 'P1D' or 'PT1H'.
+   */
   private @Nullable String monitoringGranularity = null;
 
   /**

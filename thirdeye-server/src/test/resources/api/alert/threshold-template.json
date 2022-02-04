@@ -10,7 +10,7 @@
         "params": {
             "type": "THRESHOLD",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.max": "${max}",

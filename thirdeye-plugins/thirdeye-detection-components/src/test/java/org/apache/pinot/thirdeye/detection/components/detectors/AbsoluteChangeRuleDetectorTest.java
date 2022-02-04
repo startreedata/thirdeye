@@ -44,7 +44,7 @@ public class AbsoluteChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     AbsoluteChangeRuleDetectorSpec spec = new AbsoluteChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double absoluteChange = 50.0;
     spec.setAbsoluteChange(absoluteChange);
     AbsoluteChangeRuleDetector detector = new AbsoluteChangeRuleDetector();
@@ -99,7 +99,7 @@ public class AbsoluteChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     AbsoluteChangeRuleDetectorSpec spec = new AbsoluteChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double absoluteChange = 1.0;
     spec.setAbsoluteChange(absoluteChange);
     AbsoluteChangeRuleDetector detector = new AbsoluteChangeRuleDetector();
@@ -131,7 +131,7 @@ public class AbsoluteChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     AbsoluteChangeRuleDetectorSpec spec = new AbsoluteChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double absoluteChange = 50.0;
     spec.setAbsoluteChange(absoluteChange);
     AbsoluteChangeRuleDetector detector = new AbsoluteChangeRuleDetector();
@@ -169,7 +169,7 @@ public class AbsoluteChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     AbsoluteChangeRuleDetectorSpec spec = new AbsoluteChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern("UP");
     double absoluteChange = 50.0;
     spec.setAbsoluteChange(absoluteChange);
@@ -208,7 +208,7 @@ public class AbsoluteChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     AbsoluteChangeRuleDetectorSpec spec = new AbsoluteChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern("DOWN");
     double absoluteChange = 50.0;
     spec.setAbsoluteChange(absoluteChange);

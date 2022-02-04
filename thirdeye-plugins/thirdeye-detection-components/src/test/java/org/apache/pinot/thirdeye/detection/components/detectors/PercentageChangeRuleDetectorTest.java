@@ -44,7 +44,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -101,7 +101,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double percentageChange = 0.01;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -132,7 +132,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -170,7 +170,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern("UP");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
@@ -209,7 +209,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern("DOWN");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);

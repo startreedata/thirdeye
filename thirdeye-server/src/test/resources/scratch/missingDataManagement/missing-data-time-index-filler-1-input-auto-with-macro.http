@@ -20,7 +20,7 @@ Content-Type: application/json
           "params": {
             "type": "HOLT_WINTERS",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
             "component.pattern": "${pattern}",

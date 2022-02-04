@@ -78,7 +78,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setSensitivity(0); // corresponds to multiplying std by 1.5 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
@@ -158,7 +158,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setSensitivity(0);
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
@@ -192,7 +192,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
@@ -230,7 +230,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
     spec.setLookback(10);
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
@@ -269,7 +269,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
     spec.setLookback(10);
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds

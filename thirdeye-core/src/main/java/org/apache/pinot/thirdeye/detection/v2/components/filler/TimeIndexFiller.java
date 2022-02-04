@@ -11,6 +11,7 @@ import static org.apache.pinot.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMES
 import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.pinot.thirdeye.detection.v2.spec.TimeIndexFillerSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
@@ -19,7 +20,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.Series;
 import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
 import org.apache.pinot.thirdeye.spi.detection.IndexFiller;
 import org.apache.pinot.thirdeye.spi.detection.NullReplacer;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.joda.time.DateTime;
@@ -75,15 +75,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
       timeColumn = properties.getOrDefault(TIME_COLUMN.toString(), DEFAULT_TIMESTAMP);
     }
 
-    String granularitySpec = spec.getMonitoringGranularity();
-    if (granularitySpec != null) {
-      granularity = TimeGranularity.fromString(granularitySpec).toPeriod();
-    } else if (properties.containsKey(GRANULARITY.toString())) {
-      granularity = parseIsoPeriod(properties.get(GRANULARITY.toString()));
-    } else {
-      throw new IllegalArgumentException(
-          "monitoringGranularity is missing from spec and DataTable properties");
-    }
+
+    String granularitySpec = Optional.ofNullable(spec.getMonitoringGranularity())
+        .orElseGet(() -> Optional.ofNullable(properties.get(GRANULARITY.toString()))
+            .orElseThrow(() -> new IllegalArgumentException(
+                "monitoringGranularity is missing from spec and DataTable properties")));
+    granularity = Period.parse(granularitySpec, ISOPeriodFormat.standard());
 
     nullReplacer = new NullReplacerRegistry().buildNullReplacer(
         spec.getFillNullMethod().toUpperCase(), spec.getFillNullParams());
@@ -129,10 +126,6 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
       Period lookback) {
     return strategy != TimeLimitInferenceStrategy.FROM_DETECTION_TIME_WITH_LOOKBACK
         || !lookback.equals(Period.ZERO);
-  }
-
-  private static Period parseIsoPeriod(String periodString) {
-    return Period.parse(periodString, ISOPeriodFormat.standard());
   }
 
   @Override

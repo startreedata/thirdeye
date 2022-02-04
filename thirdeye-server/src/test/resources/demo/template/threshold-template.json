@@ -8,7 +8,7 @@
       "type": "AnomalyDetector",
       "params": {
         "component.min": "${min}",
-        "component.monitoringGranularity": "2_HOURS",
+        "component.monitoringGranularity": "PT2H",
         "component.metric": "met",
         "component.max": "${max}",
         "component.timestamp": "ts",

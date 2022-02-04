@@ -15,7 +15,7 @@
         "params": {
           "type": "PERCENTAGE_CHANGE",
           "component.timezone": "US/Pacific",
-          "component.monitoringGranularity": "1_DAYS",
+          "component.monitoringGranularity": "P1D",
           "component.timestamp": "ts",
           "component.metric": "met",
           "component.percentageChange": "${percentageChange}",

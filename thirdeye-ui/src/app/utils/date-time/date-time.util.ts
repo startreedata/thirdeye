@@ -3,6 +3,8 @@ import { isNil, round } from "lodash";
 import { DateTime, Interval } from "luxon";
 import { formatNumber } from "../number/number.util";
 
+export const WEEK_IN_MILLISECONDS = 604800000;
+
 // Returns most appropriate formatted string representation of interval between start and end time
 // For example:
 // 1 second

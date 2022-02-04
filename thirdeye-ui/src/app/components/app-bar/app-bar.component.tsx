@@ -35,12 +35,14 @@ export const AppBar: FunctionComponent = () => {
 
     return (
         <NavBarV1
+            data-testid="nav-bar"
             maximizeLabel={t("label.maximize")}
             minimizeLabel={t("label.minimize")}
         >
             <NavBarPrimaryContainerV1>
                 {/* Home */}
                 <NavBarLinkV1
+                    data-testid="nav-bar-link-home"
                     href={getBasePath()}
                     selected={isRouteCurrent(AppRoute.HOME)}
                 >
@@ -52,6 +54,7 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Alerts */}
                 <NavBarLinkV1
+                    data-testid="nav-bar-link-alerts"
                     href={getAlertsPath()}
                     selected={isRouteCurrent(AppRoute.ALERTS)}
                 >
@@ -63,6 +66,7 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Anomalies */}
                 <NavBarLinkV1
+                    data-testid="nav-bar-link-anomalies"
                     href={getAnomaliesAllPath()}
                     selected={isRouteCurrent(AppRoute.ANOMALIES)}
                 >
@@ -74,6 +78,7 @@ export const AppBar: FunctionComponent = () => {
 
                 {/* Configuration */}
                 <NavBarLinkV1
+                    data-testid="nav-bar-link-configuration"
                     href={getConfigurationPath()}
                     selected={isRouteCurrent(AppRoute.CONFIGURATION)}
                 >

@@ -1,5 +1,5 @@
 describe("Home Page", () => {
-    it("user should navigate to appropriate page after clicking on tile buttons", () => {
+    it("user should navigate to appropriate page when clicked on tile buttons", () => {
         const pageHeaderTextSelector = "[data-testid='page-header-text']";
         const homePageTileButtonSelector =
             "[data-testid='home-page-tile-buttons']";
@@ -56,7 +56,7 @@ describe("Home Page", () => {
         cy.get(pageHeaderTextSelector).contains("Configuration");
     });
 
-    it("user should navigate to appropriate create page when clicked on create button", () => {
+    it("user should navigate to appropriate create page when clicked on create button options", () => {
         const pageHeaderActionsSelector = "[data-testid='page-header-actions']";
         const pageHeaderTextSelector = "[data-testid='page-header-text']";
 
@@ -100,5 +100,36 @@ describe("Home Page", () => {
             "/configuration/datasources/create"
         );
         cy.get(pageHeaderTextSelector).contains("Create Datasource");
+    });
+
+    it("user should navigate to appropriate page when clicked on nav bar links", () => {
+        const pageHeaderTextSelector = "[data-testid='page-header-text']";
+
+        cy.visit("/home");
+
+        cy.get("[data-testid=nav-bar-link-home]").click();
+        cy.location("pathname").should("eq", "/home");
+        cy.get(pageHeaderTextSelector).contains("Home");
+
+        cy.go("back");
+
+        cy.get("[data-testid=nav-bar-link-alerts]").click();
+        cy.location("pathname").should("eq", "/alerts/all");
+        cy.get(pageHeaderTextSelector).contains("Alerts");
+
+        cy.go("back");
+
+        cy.get("[data-testid=nav-bar-link-anomalies]").click();
+        cy.location("pathname").should("eq", "/anomalies/all");
+        cy.get(pageHeaderTextSelector).contains("Anomalies");
+
+        cy.go("back");
+
+        cy.get("[data-testid=nav-bar-link-configuration]").click();
+        cy.location("pathname").should(
+            "eq",
+            "/configuration/subscription-groups/all"
+        );
+        cy.get(pageHeaderTextSelector).contains("Configuration");
     });
 });

@@ -22,7 +22,7 @@ package org.apache.pinot.thirdeye.spi.detection;
 
 import java.io.Serializable;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
@@ -38,9 +38,7 @@ public abstract class AbstractSpec implements Serializable {
   private String timezone = DEFAULT_TIMEZONE;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
-  private String monitoringGranularity = MetricSlice
-      .NATIVE_GRANULARITY
-      .toAggregationGranularityString(); // use native granularity by default
+  private @Nullable String monitoringGranularity = null;
 
   /**
    * Helper for creating spec pojos from Map.class
@@ -86,7 +84,7 @@ public abstract class AbstractSpec implements Serializable {
     return this;
   }
 
-  public String getMonitoringGranularity() {
+  public @Nullable String getMonitoringGranularity() {
     return monitoringGranularity;
   }
 

@@ -42,7 +42,6 @@ import org.apache.pinot.thirdeye.spi.api.HeatMapResultApi;
 import org.apache.pinot.thirdeye.spi.api.HeatMapResultApi.HeatMapBreakdownApi;
 import org.apache.pinot.thirdeye.spi.api.MetricApi;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -56,7 +55,6 @@ import org.apache.pinot.thirdeye.spi.rootcause.timeseries.Baseline;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
 import org.apache.pinot.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import org.apache.pinot.thirdeye.spi.rootcause.util.EntityUtils;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -348,39 +346,6 @@ public class RootCauseMetricResource {
           formatter.print(slices.get(i).getStart()),
           formatter.print(slices.get(i).getEnd()));
     }
-  }
-
-  /**
-   * Generates expected timestamps for the underlying time series and merges them with the
-   * actual time series. This allows the front end to distinguish between un-expected and
-   * missing data.
-   * This allows to fill missing data points with null values.
-   *
-   * @param data time series dataframe
-   * @param slice metric slice
-   * @return time series dataframe with nulls for expected but missing data
-   */
-  private DataFrame fillIndex(DataFrame data, MetricSlice slice,
-      DateTimeZone timezone) {
-    if (data.size() <= 1) {
-      return data;
-    }
-    TimeGranularity granularity = slice.getGranularity();
-
-    long startMillis = data.getLongs(DataFrame.COL_TIME).min().longValue();
-    long endMillis = slice.getEnd();
-    Period stepSize = granularity.toPeriod();
-    DateTime startDt = new DateTime(startMillis, timezone);
-    List<Long> expectedTimestamps = new ArrayList<>();
-    while (startDt.getMillis() < endMillis) {
-      expectedTimestamps.add(startDt.getMillis());
-      startDt = startDt.plus(stepSize);
-    }
-
-    DataFrame expectedTimestampsDf = new DataFrame(DataFrame.COL_TIME,
-        LongSeries.buildFrom(expectedTimestamps.stream().mapToLong(l -> l).toArray()));
-
-    return data.joinOuter(expectedTimestampsDf).sortedBy(DataFrame.COL_TIME);
   }
 
   private Map<String, Map<String, Double>> computeBreakdown(

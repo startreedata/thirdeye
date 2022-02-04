@@ -19,7 +19,10 @@ import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
-import { formatDateAndTime } from "../../utils/date-time/date-time.util";
+import {
+    formatDateAndTime,
+    WEEK_IN_MILLISECONDS,
+} from "../../utils/date-time/date-time.util";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
@@ -34,7 +37,6 @@ import {
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
-const WEEK_IN_MILLISECONDS = 604800000;
 const OFFSET_TO_MILLISECONDS = {
     [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
     [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: WEEK_IN_MILLISECONDS,

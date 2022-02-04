@@ -11,7 +11,7 @@ export const getAnomalyMetricBreakdown = async (
     params: AnomalyBreakdownRequest
 ): Promise<AnomalyBreakdown> => {
     const response = await axios.get(
-        `${BASE_URL_RCA}/metrics/breakdown/anomaly/${id}`,
+        `${BASE_URL_RCA}/metrics/heatmap/anomaly/${id}`,
         {
             params,
             paramsSerializer: (params) => {

@@ -30,7 +30,8 @@ describe("RCA Actions", () => {
 
             await act(async () => {
                 const promise = result.current.getMetricBreakdown(123, {
-                    offset: AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+                    baselineOffset:
+                        AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
                 });
 
                 // Wait for state update

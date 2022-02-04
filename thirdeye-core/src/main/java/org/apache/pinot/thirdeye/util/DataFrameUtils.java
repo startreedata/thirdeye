@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -244,10 +245,8 @@ public class DataFrameUtils {
         metric.getDefaultAggFunction(), metric.getDataset(),
         thirdEyeCacheRegistry);
 
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())) {
-      granularity = slice.getGranularity();
-    }
+    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
+        .orElse(dataset.bucketTimeGranularity());
 
     DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();
@@ -304,10 +303,8 @@ public class DataFrameUtils {
         metric.getDefaultAggFunction(), metric.getDataset(),
         thirdEyeCacheRegistry);
 
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())) {
-      granularity = slice.getGranularity();
-    }
+    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
+        .orElse(dataset.bucketTimeGranularity());
 
     DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();

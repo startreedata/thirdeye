@@ -1,6 +1,5 @@
 package org.apache.pinot.thirdeye.detection.v2.operator;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_TIME;
@@ -17,7 +16,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
@@ -63,9 +61,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     genericDetectorSpec = AbstractSpec.fromProperties(componentSpec, GenericDetectorSpec.class);
     requireNonNull(genericDetectorSpec.getMonitoringGranularity(),
         "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-            genericDetectorSpec.getMonitoringGranularity()),
-        "NATIVE_GRANULARITY not supported in v2 interface");
 
     return new DetectionRegistry()
         .buildDetectorV2(type, new AnomalyDetectorFactoryV2Context().setProperties(componentSpec));

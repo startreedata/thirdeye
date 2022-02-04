@@ -2,7 +2,6 @@ package org.apache.pinot.thirdeye.detection.v2.components.filler;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.pinot.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
-import static org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice.NATIVE_GRANULARITY;
 import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static org.apache.pinot.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
@@ -77,9 +76,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     }
 
     String granularitySpec = spec.getMonitoringGranularity();
-    boolean granularityIsCustom = granularitySpec != null
-        && !NATIVE_GRANULARITY.equals(TimeGranularity.fromString(granularitySpec));
-    if (granularityIsCustom) {
+    if (granularitySpec != null) {
       granularity = TimeGranularity.fromString(granularitySpec).toPeriod();
     } else if (properties.containsKey(GRANULARITY.toString())) {
       granularity = parseIsoPeriod(properties.get(GRANULARITY.toString()));

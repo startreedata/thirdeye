@@ -26,10 +26,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.rootcause.util.FilterPredicate;
 import org.apache.pinot.thirdeye.spi.rootcause.util.ParsedUrn;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 
 /**
@@ -38,14 +38,11 @@ import org.joda.time.DateTime;
  */
 public final class MetricSlice {
 
-  public static final TimeGranularity NATIVE_GRANULARITY = new TimeGranularity(0,
-      TimeUnit.MILLISECONDS);
-
   private final long metricId;
   private final long start;
   private final long end;
   private final Multimap<String, String> filters;
-  private final TimeGranularity granularity;
+  private final @Nullable TimeGranularity granularity;
 
   MetricSlice(long metricId, long start, long end, Multimap<String, String> filters,
       TimeGranularity granularity) {
@@ -57,18 +54,17 @@ public final class MetricSlice {
   }
 
   public static MetricSlice from(long metricId, long start, long end) {
-    return new MetricSlice(metricId, start, end, ArrayListMultimap.create(),
-        NATIVE_GRANULARITY);
+    return new MetricSlice(metricId, start, end, ArrayListMultimap.create(), null);
   }
 
   public static MetricSlice from(long metricId, long start, long end,
       Multimap<String, String> filters) {
-    return new MetricSlice(metricId, start, end, filters, NATIVE_GRANULARITY);
+    return new MetricSlice(metricId, start, end, filters, null);
   }
 
   /**
    * Filters in format dim1=val1, dim2!=val2
-   * */
+   */
   public static MetricSlice from(long metricId, long start, long end,
       List<String> filters, TimeGranularity granularity) {
     List<FilterPredicate> predicates = extractFilterPredicates(filters);
@@ -97,7 +93,7 @@ public final class MetricSlice {
     return filters;
   }
 
-  public TimeGranularity getGranularity() {
+  public @Nullable TimeGranularity getGranularity() {
     return granularity;
   }
 

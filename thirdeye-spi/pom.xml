@@ -116,6 +116,13 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- checkers -->
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker-qual</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>

@@ -2,6 +2,7 @@ package org.apache.pinot.thirdeye.spi;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import java.security.Principal;
+import java.text.ParseException;
 
 public class ThirdEyePrincipal implements Principal {
 
@@ -16,7 +17,11 @@ public class ThirdEyePrincipal implements Principal {
 
   @Override
   public String getName() {
-    return claims.getSubject();
+    try {
+      return claims.getStringClaim("email");
+    } catch (ParseException e) {
+      return null;
+    }
   }
 
   public JWTClaimsSet getClaims() {

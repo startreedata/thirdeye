@@ -21,10 +21,8 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
@@ -35,14 +33,15 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   public static final String DEFAULT_TIMESTAMP = "timestamp";
+  public static final String DEFAULT_METRIC = "value";
 
   private String timezone = DEFAULT_TIMEZONE;
   private String timestamp = DEFAULT_TIMESTAMP;
-  private String metric = "value";
-  private List<String> dimensions = Collections.emptyList();
-  private String monitoringGranularity = MetricSlice
-      .NATIVE_GRANULARITY
-      .toAggregationGranularityString(); // use native granularity by default
+  private String metric = DEFAULT_METRIC;
+  /**
+   * Period in Java ISO8601 standard. Eg 'P1D' or 'PT1H'.
+   */
+  private @Nullable String monitoringGranularity = null;
 
   /**
    * Helper for creating spec pojos from Map.class
@@ -88,16 +87,7 @@ public abstract class AbstractSpec implements Serializable {
     return this;
   }
 
-  public List<String> getDimensions() {
-    return dimensions;
-  }
-
-  public AbstractSpec setDimensions(final List<String> dimensions) {
-    this.dimensions = dimensions;
-    return this;
-  }
-
-  public String getMonitoringGranularity() {
+  public @Nullable String getMonitoringGranularity() {
     return monitoringGranularity;
   }
 

@@ -327,17 +327,12 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 <>
                                     {/* Detection configuration editor */}
                                     <Grid item sm={12}>
-                                        <JSONEditorV1
+                                        <JSONEditorV1<Alert>
                                             error={detectionConfigurationError}
                                             helperText={
                                                 detectionConfigurationHelperText
                                             }
-                                            value={
-                                                (newAlert as unknown) as Record<
-                                                    string,
-                                                    unknown
-                                                >
-                                            }
+                                            value={newAlert}
                                             onChange={
                                                 onDetectionConfigurationChange
                                             }
@@ -388,14 +383,9 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 <>
                                     {/* Alert information */}
                                     <Grid item sm={12}>
-                                        <JSONEditorV1
+                                        <JSONEditorV1<Alert>
                                             readOnly
-                                            value={
-                                                (newAlert as unknown) as Record<
-                                                    string,
-                                                    unknown
-                                                >
-                                            }
+                                            value={newAlert}
                                         />
                                     </Grid>
 

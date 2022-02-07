@@ -249,7 +249,21 @@ const mockAnomaly4 = {
     id: 12,
 } as Anomaly;
 
-const mockAnomalies = [mockAnomaly1, mockAnomaly2, mockAnomaly3, mockAnomaly4];
+const mockAnomaly5 = {
+    id: 1,
+    startTime: 100,
+    endTime: 110,
+    avgCurrentVal: 0,
+    avgBaselineVal: 5,
+} as Anomaly;
+
+const mockAnomalies = [
+    mockAnomaly1,
+    mockAnomaly2,
+    mockAnomaly3,
+    mockAnomaly4,
+    mockAnomaly5,
+];
 
 const mockUiAnomaly1 = {
     id: 1,
@@ -307,11 +321,26 @@ const mockUiAnomaly4 = {
     endTime: "label.no-data-marker",
 };
 
+const mockUiAnomaly5 = {
+    id: 1,
+    name: "label.anomaly label.entity-id",
+    alertId: -1,
+    alertName: "label.no-data-marker",
+    current: "0",
+    predicted: "5",
+    deviation: "-1",
+    negativeDeviation: true,
+    duration: "100 110",
+    startTime: "100",
+    endTime: "110",
+};
+
 const mockUiAnomalies = [
     mockUiAnomaly1,
     mockUiAnomaly2,
     mockUiAnomaly3,
     mockUiAnomaly4,
+    mockUiAnomaly5,
 ];
 
 const mockSearchWords = ["testNameAlert6", "8 9"];

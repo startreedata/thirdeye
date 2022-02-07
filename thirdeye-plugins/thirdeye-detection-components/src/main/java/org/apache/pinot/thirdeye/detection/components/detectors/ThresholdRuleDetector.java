@@ -19,8 +19,6 @@
 
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
@@ -35,19 +33,12 @@ import org.apache.pinot.thirdeye.detection.components.SimpleAnomalyDetectorV2Res
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
-import org.apache.pinot.thirdeye.spi.detection.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
 
 /**
@@ -59,29 +50,17 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
   private static final String COL_TOO_HIGH = "tooHigh";
   private static final String COL_TOO_LOW = "tooLow";
 
-  private InputDataFetcher dataFetcher;
   private ThresholdRuleDetectorSpec spec;
-  private Period monitoringGranularityPeriod;
 
   @Override
   public void init(final ThresholdRuleDetectorSpec spec) {
     this.spec = spec;
-
-    // todo cyril refactor this
-    final String monitoringGranularity = spec.getMonitoringGranularity();
-  }
-
-  @Override
-  public void init(final ThresholdRuleDetectorSpec spec, final InputDataFetcher dataFetcher) {
-    init(spec);
-    this.dataFetcher = dataFetcher;
   }
 
   @Override
   public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
-    setMonitoringGranularityPeriod();
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame();
     currentDf
@@ -90,17 +69,6 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
         .setIndex(COL_TIME);
 
     return runDetectionOnSingleDataTable(currentDf, interval);
-  }
-
-  private void setMonitoringGranularityPeriod() {
-    requireNonNull(spec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
-        spec.getMonitoringGranularity(),
-        null);
   }
 
   private BooleanSeries valueTooHigh(DoubleSeries values) {
@@ -128,22 +96,7 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
         .addSeries(COL_TOO_LOW, valueTooLow(inputDf.getDoubles(COL_CURRENT)))
         .mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
-    return new SimpleAnomalyDetectorV2Result(inputDf,
-        spec.getTimezone(),
-        monitoringGranularityPeriod);
-  }
-
-  @Override
-  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
-    final InputData data = dataFetcher.fetchData(new InputDataSpec()
-        .withTimeseriesSlices(singletonList(slice)));
-    final DataFrame df = data.getTimeseries().get(slice);
-    final DataFrame baselineDf = computeBaseline(df);
-    df
-        .renameSeries(COL_VALUE, COL_CURRENT)
-        .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND);
-
-    return TimeSeries.fromDataFrame(df);
+    return new SimpleAnomalyDetectorV2Result(inputDf);
   }
 
   private DataFrame computeBaseline(final DataFrame inputDf) {

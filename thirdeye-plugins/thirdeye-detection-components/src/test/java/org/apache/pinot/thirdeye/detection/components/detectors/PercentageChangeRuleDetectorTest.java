@@ -9,14 +9,12 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.testng.annotations.Test;
 
 public class PercentageChangeRuleDetectorTest {
@@ -46,18 +44,13 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -108,7 +101,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double percentageChange = 0.01;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
@@ -139,18 +132,13 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -182,7 +170,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern("UP");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
@@ -190,11 +178,6 @@ public class PercentageChangeRuleDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -226,7 +209,7 @@ public class PercentageChangeRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern("DOWN");
     double percentageChange = 0.2;
     spec.setPercentageChange(percentageChange);
@@ -234,11 +217,6 @@ public class PercentageChangeRuleDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 

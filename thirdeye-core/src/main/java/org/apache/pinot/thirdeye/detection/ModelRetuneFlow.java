@@ -71,6 +71,7 @@ public class ModelRetuneFlow implements ModelMaintenanceFlow {
     }
 
     if (isTunable(config)) {
+      // todo cyril no model is tunable in v2 - remove ?
       // if the pipeline is tunable, get the model evaluators
       Collection<? extends ModelEvaluator<? extends AbstractSpec>> modelEvaluators = getModelEvaluators(
           config);

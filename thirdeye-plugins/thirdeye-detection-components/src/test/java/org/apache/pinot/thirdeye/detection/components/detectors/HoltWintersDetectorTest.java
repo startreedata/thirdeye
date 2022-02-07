@@ -8,7 +8,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -17,7 +16,6 @@ import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.assertj.core.data.Offset;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.testng.annotations.Test;
 
 public class HoltWintersDetectorTest {
@@ -81,7 +79,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setPeriod(3);
     spec.setSensitivity(0); // corresponds to zscore of 1
@@ -89,11 +87,6 @@ public class HoltWintersDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -153,7 +146,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setPeriod(3);
     spec.setSensitivity(0); // corresponds to zscore of 1
@@ -188,7 +181,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setPeriod(3);
     spec.setSensitivity(0); // corresponds to zscore of 1
@@ -196,11 +189,6 @@ public class HoltWintersDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -233,7 +221,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
     spec.setLookback(10);
     spec.setPeriod(3);
@@ -242,11 +230,6 @@ public class HoltWintersDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -279,7 +262,7 @@ public class HoltWintersDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
     spec.setLookback(10);
     spec.setPeriod(3);
@@ -288,11 +271,6 @@ public class HoltWintersDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 

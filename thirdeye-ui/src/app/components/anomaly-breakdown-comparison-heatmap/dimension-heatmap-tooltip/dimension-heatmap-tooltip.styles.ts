@@ -7,12 +7,6 @@ export const useDimensionHeatmapTooltipStyles = makeStyles((theme) => ({
     dataDisplayList: {
         minWidth: "300px;",
     },
-    decreased: {
-        color: theme.palette.error.dark,
-    },
-    increased: {
-        color: theme.palette.success.dark,
-    },
     dataDisplayItem: {
         marginTop: 0,
         marginBottom: 0,

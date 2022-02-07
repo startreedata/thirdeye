@@ -17,7 +17,6 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 import java.util.Map;
-import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 
 public class TestSpec extends AbstractSpec {
@@ -25,7 +24,6 @@ public class TestSpec extends AbstractSpec {
   private int a = 123;
   private double b = 456.7;
   private String c = "default";
-  private RuleBaselineProvider baselineProvider;
   private Map<String, String> configuration;
   private double threshold = 0.1;
   private double upThreshold;
@@ -37,14 +35,6 @@ public class TestSpec extends AbstractSpec {
 
   public void setConfiguration(Map<String, String> configuration) {
     this.configuration = configuration;
-  }
-
-  public RuleBaselineProvider getBaselineProvider() {
-    return baselineProvider;
-  }
-
-  public void setBaselineProvider(RuleBaselineProvider baselineProvider) {
-    this.baselineProvider = baselineProvider;
   }
 
   public int getA() {

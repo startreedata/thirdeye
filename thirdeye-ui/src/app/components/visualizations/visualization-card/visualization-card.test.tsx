@@ -48,6 +48,16 @@ describe("VisualizationCard", () => {
             expect(mockFunction).toHaveBeenCalledTimes(2);
         });
 
+        it("should be able to click the restore button", async () => {
+            render(<VisualizationCard {...mockDefaultProps} />);
+
+            expect(mockFunction).toHaveBeenCalled();
+
+            fireEvent.click(screen.getByTestId("restore-button-maximized"));
+
+            expect(mockFunction).toHaveBeenCalledTimes(2);
+        });
+
         it("should not show the refresh button if it's variable is true", async () => {
             const props = {
                 ...mockDefaultProps,
@@ -111,6 +121,24 @@ describe("VisualizationCard", () => {
         expect(
             screen.queryByTestId("maximized-visualization-card-placeholder")
         ).not.toBeInTheDocument();
+    });
+
+    it("when the escape button is pressed, onRestore should be called", async () => {
+        const props = {
+            ...mockDefaultProps,
+            maximized: false,
+        } as VisualizationCardProps;
+
+        render(<VisualizationCard {...props} />);
+
+        fireEvent.keyDown(await screen.findByText("TestChildren"), {
+            key: "Escape",
+            code: "Escape",
+            keyCode: 27,
+            charCode: 27,
+        });
+
+        expect(mockFunction).toHaveBeenCalledTimes(1);
     });
 });
 

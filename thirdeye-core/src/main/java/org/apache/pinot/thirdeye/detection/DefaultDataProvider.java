@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -255,10 +256,8 @@ public class DefaultDataProvider implements DataProvider {
               slice.getMetricId()));
     }
 
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.getGranularity())) {
-      granularity = slice.getGranularity();
-    }
+    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
+        .orElse(dataset.bucketTimeGranularity());
 
     // align to time buckets and request time zone
     // if granularity is more than 1 day, align to the daily boundary
@@ -277,15 +276,5 @@ public class DefaultDataProvider implements DataProvider {
     List<DatasetConfigDTO> dataset = this.datasetDAO
         .findByPredicate(Predicate.EQ("displayName", datasetDisplayName));
     return dataset;
-  }
-
-  public void cleanCache() {
-    if (timeseriesCache != null) {
-      timeseriesCache.cleanCache();
-    }
-
-    if (anomaliesCache != null) {
-      anomaliesCache.cleanCache();
-    }
   }
 }

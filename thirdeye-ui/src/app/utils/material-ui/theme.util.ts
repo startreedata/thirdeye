@@ -1,4 +1,4 @@
-import { createMuiTheme, Theme } from "@material-ui/core";
+import { createTheme, Theme } from "@material-ui/core";
 import { buttonClasses } from "./button.util";
 import { cssBaselineClasses } from "./css-baseline.util";
 import { gridProps } from "./grid.util";
@@ -11,7 +11,7 @@ import { shapeOptions } from "./shape.util";
 import { typographyOptions } from "./typography.util";
 
 // Material-UI theme
-export const theme: Theme = createMuiTheme({
+export const theme: Theme = createTheme({
     palette: paletteOptions,
     props: {
         MuiLink: linkProps,

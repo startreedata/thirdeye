@@ -9,6 +9,7 @@ import {
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
+import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import { formatLargeNumber } from "../../../utils/number/number.util";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
@@ -24,6 +25,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
     props: TreemapData<AnomalyBreakdownComparisonData & DimensionDisplayData>
 ) => {
     const dimensionHeatmapTooltipStyles = useDimensionHeatmapTooltipStyles();
+    const commonClasses = useCommonStyles();
     const { t } = useTranslation();
     let metricValueDiffDisplay;
     let metricValueChangeColorClass;
@@ -41,19 +43,15 @@ export const DimensionHeatmapTooltip: FunctionComponent<
         }
 
         if (props.extraData.metricValueDiff > 0) {
-            metricValueChangeColorClass =
-                dimensionHeatmapTooltipStyles.increased;
+            metricValueChangeColorClass = commonClasses.increased;
         } else if (props.extraData.metricValueDiff < 0) {
-            metricValueChangeColorClass =
-                dimensionHeatmapTooltipStyles.decreased;
+            metricValueChangeColorClass = commonClasses.decreased;
         }
 
         if (props.extraData.contributionDiff > 0) {
-            contributionChangeColorClass =
-                dimensionHeatmapTooltipStyles.increased;
+            contributionChangeColorClass = commonClasses.increased;
         } else if (props.extraData.contributionDiff < 0) {
-            contributionChangeColorClass =
-                dimensionHeatmapTooltipStyles.decreased;
+            contributionChangeColorClass = commonClasses.decreased;
         }
     }
 

@@ -18,7 +18,6 @@
  */
 package org.apache.pinot.thirdeye.detection.components.detectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pinot.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static org.apache.pinot.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
@@ -34,10 +33,8 @@ import static org.apache.pinot.thirdeye.spi.util.SpiUtils.optional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
@@ -52,27 +49,13 @@ import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.Series.LongConditional;
-import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.BaselineProvider;
-import org.apache.pinot.thirdeye.spi.detection.DetectionUtils;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
-import org.apache.pinot.thirdeye.spi.detection.InputDataFetcher;
 import org.apache.pinot.thirdeye.spi.detection.Pattern;
-import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
-import org.apache.pinot.thirdeye.spi.detection.model.InputData;
-import org.apache.pinot.thirdeye.spi.detection.model.InputDataSpec;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,20 +72,14 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
   private static final String COL_ERROR = "error";
-  private static final long KERNEL_PERIOD = 3600000L;
 
-  private InputDataFetcher dataFetcher;
   private int period;
   private double alpha;
   private double beta;
   private double gamma;
   private Pattern pattern;
   private double sensitivity;
-  private boolean smoothing;
-  private String monitoringGranularity;
-  private TimeGranularity timeGranularity;
   private HoltWintersDetectorSpec spec;
-  private Period monitoringGranularityPeriod;
   private int lookback = 60;
 
   private static double calculateInitialLevel(final double[] y) {
@@ -205,68 +182,16 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     gamma = spec.getGamma();
     pattern = requireNonNull(spec.getPattern(),
         "pattern is null. Allowed values : " + Arrays.toString(Pattern.values()));
-    smoothing = spec.isSmoothing();
     sensitivity = spec.getSensitivity();
-    monitoringGranularity = spec.getMonitoringGranularity();
 
-    if (monitoringGranularity.endsWith(TimeGranularity.MONTHS) || monitoringGranularity
-        .endsWith(TimeGranularity.WEEKS)) {
-      timeGranularity = MetricSlice.NATIVE_GRANULARITY;
-    } else {
-      timeGranularity = TimeGranularity.fromString(monitoringGranularity);
-    }
     optional(spec.getLookback())
         .ifPresent(lookback -> this.lookback = lookback);
-  }
-
-  @Override
-  public void init(final HoltWintersDetectorSpec spec, final InputDataFetcher dataFetcher) {
-    init(spec);
-    this.dataFetcher = dataFetcher;
-  }
-
-  @Override
-  public TimeSeries computePredictedTimeSeries(final MetricSlice slice) {
-    // todo cyril - not used - may be broken
-    final MetricEntity metricEntity = MetricEntity.fromSlice(slice, 0);
-    final Interval window = new Interval(slice.getStart(), slice.getEnd());
-    final DateTime trainStart = getTrainingStartTime(window.getStart());
-
-    final DatasetConfigDTO datasetConfig = dataFetcher.fetchData(new InputDataSpec()
-            .withMetricIdsForDataset(Collections.singleton(metricEntity.getId())))
-        .getDatasetForMetricId()
-        .get(metricEntity.getId());
-
-    final DataFrame inputDf = fetchData(metricEntity, trainStart.getMillis(), window.getEndMillis(),
-        datasetConfig);
-    DataFrame resultDF = computeBaseline(inputDf, window.getStartMillis(),
-        datasetConfig.getTimezone());
-    resultDF = resultDF.joinLeft(inputDf.renameSeries(COL_VALUE, COL_CURRENT), COL_TIME);
-
-    // Exclude the end because baseline calculation should not contain the end
-    if (resultDF.size() > 1) {
-      resultDF = resultDF.head(resultDF.size() - 1);
-    }
-
-    return TimeSeries.fromDataFrame(resultDF);
-  }
-
-  private DateTime getTrainingStartTime(final DateTime windowStart) {
-    if (isMultiDayGranularity()) {
-      return windowStart.minusDays(timeGranularity.getSize() * lookback);
-    } else if (monitoringGranularity.endsWith(TimeGranularity.MONTHS)) {
-      return windowStart.minusMonths(lookback);
-    } else if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      return windowStart.minusWeeks(lookback);
-    }
-    return windowStart.minusDays(lookback);
   }
 
   @Override
   public AnomalyDetectorV2Result runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
-    setMonitoringGranularityPeriod();
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame();
     currentDf
@@ -277,25 +202,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     return runDetectionOnSingleDataTable(currentDf, interval);
   }
 
-  private void setMonitoringGranularityPeriod() {
-    requireNonNull(spec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
-    checkArgument(!MetricSlice.NATIVE_GRANULARITY.toAggregationGranularityString().equals(
-        spec.getMonitoringGranularity()), "NATIVE_GRANULARITY not supported in v2 interface");
-
-    monitoringGranularityPeriod = DetectionUtils.getMonitoringGranularityPeriod(
-        spec.getMonitoringGranularity(),
-        null);
-  }
-
   private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    // Kernel smoothing
-    if (smoothing) {
-      smoothInputDf(inputDf);
-    }
-    DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis(),
-        spec.getTimezone());
+    DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
         // rename current which is still called "value" to "current"
         .renameSeries(COL_VALUE, COL_CURRENT)
@@ -308,65 +217,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return
-        new SimpleAnomalyDetectorV2Result(inputDf, spec.getTimezone(), monitoringGranularityPeriod);
-  }
-
-  /**
-   * In place smoothing of inputDF
-   */
-  // fixme cyril - kept this logic, but not very good because original values are lost
-  // fixme cyril this will be confusing when anomaly is displayed
-  private void smoothInputDf(final DataFrame inputDf) {
-    final int kernelSize = (int) (
-        KERNEL_PERIOD / monitoringGranularityPeriod.toStandardDuration().getMillis()
-    );
-    if (kernelSize > 1) {
-      final int kernelOffset = kernelSize / 2;
-      final double[] values = inputDf.getDoubles(COL_VALUE).values();
-      for (int i = 0; i <= values.length - kernelSize; i++) {
-        values[i + kernelOffset] = AlgorithmUtils.robustMean(inputDf.getDoubles(COL_VALUE)
-            .slice(i, i + kernelSize), kernelSize).getDouble(kernelSize - 1);
-      }
-      inputDf.addSeries(COL_VALUE, values);
-    }
-  }
-
-  /**
-   * Fetch data from metric
-   *
-   * @param metricEntity metric entity
-   * @param start start timestamp
-   * @param end end timestamp
-   * @param datasetConfig the dataset config
-   * @return Data Frame that has data from start to end
-   */
-  private DataFrame fetchData(final MetricEntity metricEntity, final long start, final long end,
-      final DatasetConfigDTO datasetConfig) {
-
-    final List<MetricSlice> slices = new ArrayList<>();
-    final MetricSlice sliceData = MetricSlice.from(metricEntity.getId(), start, end,
-        metricEntity.getFilters(), timeGranularity);
-    slices.add(sliceData);
-    LOG.info("Getting data for" + sliceData);
-    final InputData data = dataFetcher.fetchData(new InputDataSpec().withTimeseriesSlices(slices)
-        .withMetricIdsForDataset(Collections.singletonList(metricEntity.getId()))
-        .withMetricIds(Collections.singletonList(metricEntity.getId())));
-    final MetricConfigDTO metricConfig = data.getMetrics().get(metricEntity.getId());
-    DataFrame df = data.getTimeseries().get(sliceData);
-
-    // aggregate data to specified weekly granularity
-    if (monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-      final Period monitoringGranularityPeriod =
-          DetectionUtils.getMonitoringGranularityPeriod(monitoringGranularity, datasetConfig);
-      final long latestDataTimeStamp = df.getLong(COL_TIME, df.size() - 1);
-      df = DetectionUtils.aggregateByPeriod(df,
-          new DateTime(start, DateTimeZone.forID(datasetConfig.getTimezone())),
-          monitoringGranularityPeriod, metricConfig.getDefaultAggFunction());
-      df = DetectionUtils.filterIncompleteAggregation(df, latestDataTimeStamp,
-          datasetConfig.bucketTimeGranularity(),
-          monitoringGranularityPeriod);
-    }
-    return df;
+        new SimpleAnomalyDetectorV2Result(inputDf);
   }
 
   /**
@@ -385,56 +236,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final int indexStart = Math.max(0, indexFinish - lookback);
       df = df.append(originalDF.slice(indexStart, indexFinish));
     }
-    return df;
-  }
-
-  /**
-   * Returns a data frame containing the same time daily data, based on input time
-   *
-   * @param originalDF the original dataframe
-   * @param time the prediction time, in unix timestamp
-   * @return DataFrame containing same time of daily data for lookback number of days
-   */
-  private DataFrame getDailyDF(final DataFrame originalDF, final Long time, final String timezone) {
-    final LongSeries longSeries = (LongSeries) originalDF.get(COL_TIME);
-    final long start = longSeries.getLong(0);
-    DateTime dt = new DateTime(time).withZone(DateTimeZone.forID(timezone));
-    DataFrame df = DataFrame.builder(COL_TIME, COL_VALUE).build();
-
-    for (int i = 0; i < lookback; i++) {
-      DateTime subDt = dt.minusDays(1);
-      final long t = subDt.getMillis();
-      if (t < start) {
-        break;
-      }
-      int index = longSeries.find(t);
-      if (index != -1) {
-        df = df.append(originalDF.slice(index, index + 1));
-      } else {
-        int backtrackCounter = 0;
-        // If the 1 day look back data doesn't exist, use the data one period before till backtrackCounter greater than 4
-        while (index == -1 && backtrackCounter <= 4) {
-          subDt = subDt.minusDays(period);
-          final long timestamp = subDt.getMillis();
-          index = longSeries.find(timestamp);
-          backtrackCounter++;
-        }
-
-        if (index != -1) {
-          df = df.append(originalDF.slice(index, index + 1));
-        } else {
-          // If not found value up to 4 weeks, insert the last value
-          final double lastVal = (originalDF.get(COL_VALUE))
-              .getDouble(longSeries.find(dt.getMillis()));
-          final DateTime nextDt = dt.minusDays(1);
-          final DataFrame appendDf = DataFrame.builder(COL_TIME, COL_VALUE)
-              .append(nextDt, lastVal).build();
-          df = df.append(appendDf);
-        }
-      }
-      dt = dt.minusDays(1);
-    }
-    df = df.reverse();
     return df;
   }
 
@@ -504,8 +305,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @param windowStartTime prediction start time
    * @return DataFrame with timestamp, baseline, error bound
    */
-  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime,
-      final String timezone) {
+  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
 
     final DataFrame resultDF = new DataFrame();
     final DataFrame forecastDF = inputDF
@@ -524,14 +324,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double lastGamma = gamma;
 
     for (int k = 0; k < size; k++) {
-      final DataFrame trainingDF;
-      if (timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
-          && !monitoringGranularity.endsWith(TimeGranularity.MONTHS)
-          && !monitoringGranularity.endsWith(TimeGranularity.WEEKS)) {
-        trainingDF = getDailyDF(inputDF, forecastDF.getLong(COL_TIME, k), timezone);
-      } else {
-        trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
-      }
+      final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
       // We need at least 2 periods of data
       if (trainingDF.size() < 2 * period) {
@@ -618,12 +411,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma);
     }
     return params;
-  }
-
-  // Check whether monitoring timeGranularity is multiple days
-  private boolean isMultiDayGranularity() {
-    return !timeGranularity.equals(MetricSlice.NATIVE_GRANULARITY)
-        && timeGranularity.getUnit() == TimeUnit.DAYS;
   }
 
   /**

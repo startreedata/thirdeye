@@ -31,9 +31,6 @@ import org.joda.time.PeriodType;
 
 public class TimeGranularity {
 
-  public static final String WEEKS = "WEEKS";
-  public static final String MONTHS = "MONTHS";
-
   private final int size;
   private final TimeUnit unit;
 
@@ -178,17 +175,6 @@ public class TimeGranularity {
     }
   }
 
-  /**
-   * Return the string representation of this time granularity, in which duration and unit are
-   * separated by "_".
-   *
-   * @return the string representation of this time granularity, in which duration and unit are
-   *     separated by "_".
-   */
-  public String toAggregationGranularityString() {
-    return size + "_" + unit;
-  }
-
   public Duration toDuration() {
     return Duration.ofMillis(toMillis());
   }
@@ -200,9 +186,6 @@ public class TimeGranularity {
   /**
    * Return the string representation of this time granularity, in which duration and unit are
    * separated by "-".
-   *
-   * @return the string representation of this time granularity, in which duration and unit are
-   *     separated by "-".
    */
   @Override
   public String toString() {

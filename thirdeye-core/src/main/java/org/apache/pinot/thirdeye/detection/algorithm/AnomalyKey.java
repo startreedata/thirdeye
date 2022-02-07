@@ -1,7 +1,6 @@
 package org.apache.pinot.thirdeye.detection.algorithm;
 
 import java.util.Objects;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyType;
 import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
 
@@ -23,24 +22,6 @@ public class AnomalyKey {
     this.mergeKey = mergeKey;
     this.componentKey = componentKey;
     this.type = type;
-  }
-
-  public static AnomalyKey from(MergedAnomalyResultDTO anomaly) {
-    // Anomalies having the same mergeKey or groupKey should be merged
-    String mergeKey = "";
-    if (anomaly.getProperties().containsKey(MergeWrapper.PROP_MERGE_KEY)) {
-      mergeKey = anomaly.getProperties().get(MergeWrapper.PROP_MERGE_KEY);
-    } else if (anomaly.getProperties().containsKey(MergeWrapper.PROP_GROUP_KEY)) {
-      mergeKey = anomaly.getProperties().get(MergeWrapper.PROP_GROUP_KEY);
-    }
-
-    String componentKey = "";
-    if (anomaly.getProperties().containsKey(MergeWrapper.PROP_DETECTOR_COMPONENT_NAME)) {
-      componentKey = anomaly.getProperties().get(MergeWrapper.PROP_DETECTOR_COMPONENT_NAME);
-    }
-
-    return new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(), anomaly.getDimensions(),
-        mergeKey, componentKey, anomaly.getType());
   }
 
   @Override

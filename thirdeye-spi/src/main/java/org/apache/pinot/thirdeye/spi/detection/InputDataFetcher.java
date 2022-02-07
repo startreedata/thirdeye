@@ -36,5 +36,6 @@ public interface InputDataFetcher {
   /**
    * fetch data for input data spec
    */
+  @Deprecated
   InputData fetchData(InputDataSpec inputDataSpec);
 }

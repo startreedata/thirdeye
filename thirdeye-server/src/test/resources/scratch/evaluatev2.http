@@ -16,10 +16,9 @@ Content-Type: application/json
           "params": {
             "type": "THRESHOLD",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.max": "${max}",
             "component.min": "${min}",
             "component.offset": "mo1m",
@@ -101,10 +100,9 @@ Content-Type: application/json
           "params": {
             "type": "HOLT_WINTERS",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.pattern": "${pattern}",
             "component.sensitivity": "${sensitivity}",
             "anomaly.metric": "${metric}"
@@ -185,10 +183,9 @@ Content-Type: application/json
           "params": {
             "type": "ABSOLUTE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.absoluteChange": "${absoluteChange}",
             "component.offset": "${offset}",
             "component.pattern": "${pattern}",
@@ -305,10 +302,9 @@ Content-Type: application/json
           "params": {
             "type": "MEAN_VARIANCE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.lookback": "${lookbackDetector}",
             "component.sensitivity": "${sensitivity}",
             "anomaly.metric": "${metric}"
@@ -389,10 +385,9 @@ Content-Type: application/json
           "params": {
             "type": "PERCENTAGE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.percentageChange": "${percentageChange}",
             "component.offset": "${offset}",
             "component.pattern": "${pattern}",

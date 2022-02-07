@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * The data quality job submitted to the scheduler. This job creates data quality tasks which
  * the runners will later pick and execute.
  */
+// todo cyril dead because never launched in DetectionCronScheduler L140
 public class DataQualityPipelineJob extends ThirdEyeAbstractJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataQualityPipelineJob.class);

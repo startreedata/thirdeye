@@ -112,7 +112,7 @@ Content-Type: application/json
           }
         },
         "params": {
-          "monitoringGranularity": "1_DAYS",
+          "monitoringGranularity": "P1D",
           "offset": "wo1w",
           "lookback": 12,
           "sensitivity": 8

@@ -31,7 +31,7 @@ public class TimeIndexFillerOperatorTest {
         .setName("root")
         .setType("TimeIndexFiller")
         .setParams(ImmutableMap.of(
-            "component.monitoringGranularity", "1_DAYS",
+            "component.monitoringGranularity", "P1D",
             "component.timestamp", "ts",
             "component.minTimeInference", "FROM_DATA",
             "component.maxTimeInference", "FROM_DATA"
@@ -78,7 +78,7 @@ public class TimeIndexFillerOperatorTest {
         .setName("root")
         .setType("TimeIndexFiller")
         .setParams(ImmutableMap.of(
-            "component.monitoringGranularity", "1_DAYS",
+            "component.monitoringGranularity", "P1D",
             "component.timestamp", "ts",
             // use detection time to infer bounds
             "component.minTimeInference", "FROM_DETECTION_TIME_WITH_LOOKBACK",

@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { Color } from "../../utils/material-ui/color.util";
 import { ActiveIndicator } from "./active-indicator.component";
@@ -6,9 +6,7 @@ import { ActiveIndicatorProps } from "./active-indicator.interfaces";
 
 describe("ActiveIndicator", () => {
     it("should render an indicator for the active state", async () => {
-        act(() => {
-            render(<ActiveIndicator {...mockActiveIndicatorProps} />);
-        });
+        render(<ActiveIndicator {...mockActiveIndicatorProps} />);
 
         expect(
             await screen.findByTestId("activity-indicator-icon")
@@ -17,9 +15,7 @@ describe("ActiveIndicator", () => {
 
     it("should render an indicator for the inactive state", async () => {
         const props = { ...mockActiveIndicatorProps, active: false };
-        act(() => {
-            render(<ActiveIndicator {...props} />);
-        });
+        render(<ActiveIndicator {...props} />);
 
         expect(
             await screen.findByTestId("activity-indicator-icon")

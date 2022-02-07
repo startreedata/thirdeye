@@ -1,43 +1,131 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import React, { ReactNode } from "react";
 import { VisualizationCard } from "./visualization-card.component";
 import { VisualizationCardProps } from "./visualization-card.interfaces";
 
 describe("VisualizationCard", () => {
-    beforeEach(() => cleanup);
+    describe("when the component is maximized", () => {
+        it("happy path", async () => {
+            act(() => {
+                render(<VisualizationCard {...mockDefaultProps} />);
+            });
 
-    it("component should load correctly when the visualization card is maximized", async () => {
-        const props = { ...mockDefaultProps, maximized: true };
-        act(() => {
-            render(<VisualizationCard {...props} />);
+            expect(mockFunction).toHaveBeenCalled();
+            expect(
+                await screen.findByText("TestHelperText")
+            ).toBeInTheDocument();
+            expect(
+                screen.getByTestId("refresh-button-maximized")
+            ).toBeInTheDocument();
+            expect(
+                screen.getByTestId("restore-button-maximized")
+            ).toBeInTheDocument();
+            expect(await screen.findByText("TestTitle")).toBeInTheDocument();
+            expect(await screen.findByText("TestChildren")).toBeInTheDocument();
+            expect(
+                screen.getByTestId("maximized-visualization-card-placeholder")
+            ).toBeInTheDocument();
         });
 
+        it("should not show the helper text if it's not empty", async () => {
+            const props = {
+                ...mockDefaultProps,
+                helperText: "",
+            } as VisualizationCardProps;
+            render(<VisualizationCard {...props} />);
+
+            expect(mockFunction).toHaveBeenCalled();
+            expect(
+                screen.queryByText("TestHelperText")
+            ).not.toBeInTheDocument();
+        });
+
+        it("should be able to click the refresh button if it's visible", async () => {
+            render(<VisualizationCard {...mockDefaultProps} />);
+
+            expect(mockFunction).toHaveBeenCalled();
+
+            fireEvent.click(screen.getByTestId("refresh-button-maximized"));
+
+            expect(mockFunction).toHaveBeenCalledTimes(2);
+        });
+
+        it("should not show the refresh button if it's variable is true", async () => {
+            const props = {
+                ...mockDefaultProps,
+                hideRefreshButton: true,
+            } as VisualizationCardProps;
+            render(<VisualizationCard {...props} />);
+
+            expect(mockFunction).toHaveBeenCalled();
+            expect(
+                screen.queryByTestId("refresh-button-maximized")
+            ).not.toBeInTheDocument();
+        });
+    });
+
+    describe("when the component is not maximized", () => {
+        it("happy path", async () => {
+            const props = {
+                ...mockDefaultProps,
+                maximized: false,
+            } as VisualizationCardProps;
+
+            render(<VisualizationCard {...props} />);
+
+            expect(mockFunction).toHaveBeenCalled();
+            expect(
+                screen.queryByText("TestHelperText")
+            ).not.toBeInTheDocument();
+            expect(
+                screen.queryByTestId("refresh-button-maximized")
+            ).not.toBeInTheDocument();
+            expect(
+                screen.queryByTestId("restore-button-maximized")
+            ).not.toBeInTheDocument();
+            expect(screen.queryByText("TestTitle")).not.toBeInTheDocument();
+            expect(await screen.findByText("TestChildren")).toBeInTheDocument();
+            expect(
+                screen.queryByTestId("maximized-visualization-card-placeholder")
+            ).not.toBeInTheDocument();
+        });
+    });
+
+    it("when the children is not passed in the component", async () => {
+        const props = {
+            ...mockDefaultProps,
+            maximized: false,
+            children: null,
+        } as VisualizationCardProps;
+
+        render(<VisualizationCard {...props} />);
+
         expect(mockFunction).toHaveBeenCalled();
-        expect(await screen.findByText("TestHelperText")).toBeInTheDocument();
+        expect(screen.queryByText("TestHelperText")).not.toBeInTheDocument();
         expect(
-            screen.getByTestId("refresh-button-maximized")
-        ).toBeInTheDocument();
+            screen.queryByTestId("refresh-button-maximized")
+        ).not.toBeInTheDocument();
         expect(
-            screen.getByTestId("restore-button-maximized")
-        ).toBeInTheDocument();
-        expect(await screen.findByText("TestTitle")).toBeInTheDocument();
-        expect(await screen.findByText("TestChildren")).toBeInTheDocument();
+            screen.queryByTestId("restore-button-maximized")
+        ).not.toBeInTheDocument();
+        expect(screen.queryByText("TestTitle")).not.toBeInTheDocument();
+        expect(screen.queryByText("TestChildren")).not.toBeInTheDocument();
         expect(
-            screen.getByTestId("maximized-visualization-card-placeholder")
-        ).toBeInTheDocument();
+            screen.queryByTestId("maximized-visualization-card-placeholder")
+        ).not.toBeInTheDocument();
     });
 });
 
 const mockFunction = jest.fn();
 
 const mockDefaultProps = {
-    maximized: false,
+    maximized: true,
     visualizationHeight: 10,
     visualizationMaximizedHeight: 10,
-    title: "TestTitle", // Displayed only when maximized
+    title: "TestTitle",
     error: false,
-    helperText: "TestHelperText", // Displayed only when maximized
-    hideRefreshButton: false, // Refresh button displayed only when maximized
+    helperText: "TestHelperText",
+    hideRefreshButton: false,
     onRefresh: mockFunction,
     onMaximize: mockFunction,
     onRestore: mockFunction,

@@ -1,10 +1,4 @@
-import {
-    act,
-    cleanup,
-    fireEvent,
-    render,
-    screen,
-} from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React, { ReactNode } from "react";
 import {
     Alert,
@@ -65,37 +59,21 @@ jest.mock("@startree-ui/platform-ui", () => ({
 }));
 
 describe("AlertListV1", () => {
-    let mockProps = { ...mockDefaultProps };
-
-    beforeEach(() => cleanup);
-
-    afterEach(() => {
-        mockProps = { ...mockDefaultProps };
-    });
-
     it("component should load with no alerts", async () => {
-        const props = { ...mockProps, alerts: [] };
-        act(() => {
-            render(<AlertListV1 {...props} />);
-        });
+        const props = { ...mockDefaultProps, alerts: [] };
+        render(<AlertListV1 {...props} />);
 
         expect(await screen.findByText("NoDataIndicator")).toBeInTheDocument();
     });
 
     it("component should load with alerts", async () => {
-        const props = { ...mockProps };
-        act(() => {
-            render(<AlertListV1 {...props} />);
-        });
+        render(<AlertListV1 {...mockDefaultProps} />);
 
         expect(await screen.findByText("testNameAlert1")).toBeInTheDocument();
     });
 
     it("component should call onChange when Edit is clicked", async () => {
-        const props = { ...mockProps };
-        act(() => {
-            render(<AlertListV1 {...props} />);
-        });
+        render(<AlertListV1 {...mockDefaultProps} />);
 
         fireEvent.click(screen.getByText("Edit1"));
 
@@ -103,10 +81,7 @@ describe("AlertListV1", () => {
     });
 
     it("component should call onDelete when Delete is clicked", async () => {
-        const props = { ...mockProps };
-        act(() => {
-            render(<AlertListV1 {...props} />);
-        });
+        render(<AlertListV1 {...mockDefaultProps} />);
 
         fireEvent.click(screen.getByText("Delete1"));
 

@@ -24,7 +24,7 @@ public class ThirdEyePrincipal implements Principal {
     try {
       return claims.getStringClaim("email");
     } catch (ParseException e) {
-      log.error("Email should be a String!");
+      log.error("Could not get user name. email should be a String", e);
       return null;
     }
   }

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React, { ReactNode } from "react";
 import { VisualizationCard } from "./visualization-card.component";
 import { VisualizationCardProps } from "./visualization-card.interfaces";
@@ -6,9 +6,7 @@ import { VisualizationCardProps } from "./visualization-card.interfaces";
 describe("VisualizationCard", () => {
     describe("when the component is maximized", () => {
         it("happy path", async () => {
-            act(() => {
-                render(<VisualizationCard {...mockDefaultProps} />);
-            });
+            render(<VisualizationCard {...mockDefaultProps} />);
 
             expect(mockFunction).toHaveBeenCalled();
             expect(
@@ -27,7 +25,7 @@ describe("VisualizationCard", () => {
             ).toBeInTheDocument();
         });
 
-        it("should not show the helper text if it's not empty", async () => {
+        it("should not show the helper text if it's empty", async () => {
             const props = {
                 ...mockDefaultProps,
                 helperText: "",

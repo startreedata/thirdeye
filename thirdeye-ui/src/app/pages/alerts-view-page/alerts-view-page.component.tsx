@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
 import {
     AppLoadingIndicatorV1,
     JSONEditorV1,
@@ -16,6 +15,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
@@ -76,6 +76,17 @@ export const AlertsViewPage: FunctionComponent = () => {
         // Fetched alert changed, fetch alert evaluation
         fetchAlertEvaluation();
     }, [uiAlert]);
+
+    useEffect(() => {
+        if (evaluationRequestStatus === ActionStatus.Error) {
+            notify(
+                NotificationTypeV1.Error,
+                t("message.error-while-fetching", {
+                    entity: t("label.anomalies"),
+                })
+            );
+        }
+    }, [evaluationRequestStatus]);
 
     const fetchAlertEvaluation = (): void => {
         if (!uiAlert || !uiAlert.alert) {
@@ -198,14 +209,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                     {evaluationRequestStatus === ActionStatus.Error && (
                         <Card variant="outlined">
                             <CardContent>
-                                <Alert severity="error">
-                                    <AlertTitle>
-                                        Data Retrieval Error
-                                    </AlertTitle>
-                                    An issue was experienced while retrieving
-                                    anomalies for the alert. Please try
-                                    reloading the page.
-                                </Alert>
+                                <NoDataIndicator />
                             </CardContent>
                         </Card>
                     )}

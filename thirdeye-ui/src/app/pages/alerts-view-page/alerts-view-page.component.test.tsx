@@ -1,29 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { rest } from "msw";
-import { setupServer } from "msw/node";
 import React from "react";
 import { MemoryRouter, Route } from "react-router-dom";
 import { AppBreadcrumbsProvider } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppRoute, getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsViewPage } from "./alerts-view-page.component";
-
-const server = setupServer(
-    rest.get("/api/alerts/458076", (_req, res, ctx) => {
-        return res(ctx.json(MOCK_ALERT_PAYLOAD));
-    }),
-    rest.get("/api/subscription-groups", (_req, res, ctx) => {
-        return res(ctx.json(MOCK_SUBSCRIPTION_GROUP_PAYLOAD));
-    }),
-    rest.post("/api/alerts/evaluate", (_req, res, ctx) => {
-        return res(ctx.json(MOCK_EVALUATE_PAYLOAD));
-    })
-);
-
-beforeAll(() => server.listen());
-
-afterEach(() => server.resetHandlers());
-
-afterAll(() => server.close());
 
 jest.mock("@startree-ui/platform-ui", () => ({
     ...(jest.requireActual("@startree-ui/platform-ui") as Record<
@@ -41,6 +21,33 @@ jest.mock("@startree-ui/platform-ui", () => ({
     AppLoadingIndicatorV1: jest
         .fn()
         .mockImplementation(() => <p>loading component</p>),
+    useNotificationProviderV1: jest.fn().mockImplementation(() => ({
+        notify: mockNotify,
+    })),
+}));
+
+jest.mock("../../rest/alerts/alerts.rest", () => ({
+    ...(jest.requireActual("../../rest/alerts/alerts.rest") as Record<
+        string,
+        unknown
+    >),
+    getAlertEvaluation: jest
+        .fn()
+        .mockImplementation(() => mockedGetEvaluateResponse),
+    getAlert: jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(MOCK_ALERT_PAYLOAD)),
+}));
+
+jest.mock("../../rest/subscription-groups/subscription-groups.rest", () => ({
+    ...(jest.requireActual(
+        "../../rest/subscription-groups/subscription-groups.rest"
+    ) as Record<string, unknown>),
+    getAllSubscriptionGroups: jest
+        .fn()
+        .mockImplementation(() =>
+            Promise.resolve(MOCK_SUBSCRIPTION_GROUP_PAYLOAD)
+        ),
 }));
 
 describe("Alerts View Page", () => {
@@ -66,12 +73,9 @@ describe("Alerts View Page", () => {
     });
 
     it("should render error alert id evaluate API fails", async () => {
-        server.use(
-            rest.post("/api/alerts/evaluate", (_req, res, ctx) => {
-                return res(ctx.status(500));
-            })
-        );
-
+        mockedGetEvaluateResponse = Promise.reject({
+            response: { data: { message: "Error message" } },
+        });
         render(
             <AppBreadcrumbsProvider>
                 <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
@@ -91,11 +95,10 @@ describe("Alerts View Page", () => {
 
         expect(anomaliesCountContainer).toBeInTheDocument();
 
-        const errorMsgContainer = await screen.findByText(
-            /An issue was experience/
+        expect(mockNotify).toHaveBeenLastCalledWith(
+            "error",
+            "message.error-while-fetching"
         );
-
-        expect(errorMsgContainer).toBeInTheDocument();
     });
 });
 
@@ -267,3 +270,6 @@ const MOCK_EVALUATE_PAYLOAD = {
         },
     },
 };
+
+const mockNotify = jest.fn();
+let mockedGetEvaluateResponse = Promise.resolve(MOCK_EVALUATE_PAYLOAD);

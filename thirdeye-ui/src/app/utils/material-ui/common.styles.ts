@@ -27,4 +27,10 @@ export const useCommonStyles = makeStyles((theme) => ({
         backgroundColor: Palette.COLOR_BACKGROUND_BACKDROP,
         zIndex: theme.zIndex.drawer + 2, // Backdrop above app bar
     },
+    decreased: {
+        color: theme.palette.error.dark,
+    },
+    increased: {
+        color: theme.palette.success.dark,
+    },
 }));

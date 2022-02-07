@@ -19,10 +19,9 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
     props: SubscriptionGroupListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedSubscriptionGroup,
-        setSelectedSubscriptionGroup,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] = useState<
+        DataGridSelectionModelV1<UiSubscriptionGroup>
+    >();
     const history = useHistory();
 
     const handleSubscriptionGroupDelete = (): void => {
@@ -77,15 +76,11 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiSubscriptionGroup
     ): ReactElement => {
         return (
             <Link
-                onClick={() =>
-                    handleSubscriptionGroupViewDetailsById(
-                        ((data as unknown) as UiSubscriptionGroup).id
-                    )
-                }
+                onClick={() => handleSubscriptionGroupViewDetailsById(data.id)}
             >
                 {cellValue}
             </Link>
@@ -130,15 +125,10 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiSubscriptionGroup>
                     hideBorder
                     columns={subscriptionGroupColumns}
-                    data={
-                        (props.subscriptionGroups as unknown) as Record<
-                            string,
-                            unknown
-                        >[]
-                    }
+                    data={props.subscriptionGroups as UiSubscriptionGroup[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

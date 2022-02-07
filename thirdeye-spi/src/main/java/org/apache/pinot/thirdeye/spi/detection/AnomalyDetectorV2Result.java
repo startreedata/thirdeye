@@ -1,7 +1,6 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
-import org.joda.time.Period;
 
 public interface AnomalyDetectorV2Result {
 
@@ -15,16 +14,4 @@ public interface AnomalyDetectorV2Result {
    * {@value DataFrame#COL_LOWER_BOUND}: baseline lower bound.
    */
   DataFrame getDataFrame();
-
-  /**
-   * Returns the TimeZone string of the detector.
-   * Used to infer the end time of the anomaly if the last point is an anomaly.
-   */
-  String getTimeZone();
-
-  /**
-   * Returns the monitoring granularity of the detector.
-   * Used to infer the end time of the anomaly if the last point is an anomaly.
-   */
-  Period getMonitoringGranularityPeriod();
 }

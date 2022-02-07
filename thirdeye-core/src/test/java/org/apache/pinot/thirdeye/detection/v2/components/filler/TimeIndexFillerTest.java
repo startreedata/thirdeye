@@ -43,7 +43,7 @@ public class TimeIndexFillerTest {
     spec
         .setMinTimeInference(TimeLimitInferenceStrategy.FROM_DATA.toString())
         .setMaxTimeInference(TimeLimitInferenceStrategy.FROM_DATA.toString())
-        .setMonitoringGranularity("1_DAYS")
+        .setMonitoringGranularity("P1D")
         .setTimestamp("ts");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
@@ -77,7 +77,7 @@ public class TimeIndexFillerTest {
     spec
         .setMinTimeInference(TimeLimitInferenceStrategy.FROM_DATA.toString())
         .setMaxTimeInference(TimeLimitInferenceStrategy.FROM_DETECTION_TIME.toString())
-        .setMonitoringGranularity("1_DAYS")
+        .setMonitoringGranularity("P1D")
         .setTimestamp("ts");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
@@ -116,7 +116,7 @@ public class TimeIndexFillerTest {
         .setMaxTimeInference(TimeLimitInferenceStrategy.FROM_DETECTION_TIME_WITH_LOOKBACK.toString())
         // lookback 4 days
         .setLookback("P4D")
-        .setMonitoringGranularity("1_DAYS")
+        .setMonitoringGranularity("P1D")
         .setTimestamp("ts");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
@@ -149,7 +149,7 @@ public class TimeIndexFillerTest {
     spec
         .setMinTimeInference(TimeLimitInferenceStrategy.FROM_DETECTION_TIME.toString())
         .setMaxTimeInference(TimeLimitInferenceStrategy.FROM_DETECTION_TIME.toString())
-        .setMonitoringGranularity("1_DAYS")
+        .setMonitoringGranularity("P1D")
         .setTimestamp("ts");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
@@ -183,7 +183,7 @@ public class TimeIndexFillerTest {
         .setMaxTimeInference(TimeLimitInferenceStrategy.FROM_DATA.toString())
         //keep null when filling index
         .setFillNullMethod("KEEP_NULL")
-        .setMonitoringGranularity("1_DAYS")
+        .setMonitoringGranularity("P1D")
         .setTimestamp("ts");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
@@ -268,7 +268,7 @@ public class TimeIndexFillerTest {
   public void testFillIndexWithTimePropertiesInDataTableGranularityInSpec() {
     // test filling of data with time info obtained from the datatable properties and granularity in config
     final TimeIndexFillerSpec spec = new TimeIndexFillerSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 

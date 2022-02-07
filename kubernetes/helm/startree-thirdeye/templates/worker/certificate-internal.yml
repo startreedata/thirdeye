@@ -1,0 +1,21 @@
+{{- if .Values.tls.enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "thirdeye.worker.fullname" . }}-internal
+  labels:
+    app: {{ include "thirdeye.name" . }}
+    chart: {{ include "thirdeye.chart" . }}
+    component: {{ .Values.worker.name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  secretName: {{ include "thirdeye.worker.fullname" . }}-internal-tls
+  dnsNames:
+  - '*.{{ include "thirdeye.worker.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local'
+  - '*.{{ include "thirdeye.worker.fullname" . }}
+  - 'localhost'
+  issuerRef:
+    name: ca
+    kind: ClusterIssuer
+{{- end }}

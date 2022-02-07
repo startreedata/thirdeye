@@ -4,7 +4,7 @@ export interface AnomaliesViewPageParams {
 
 export enum AnomalyBreakdownAPIOffsetValues {
     CURRENT = "current",
-    ONE_WEEK_AGO = "wo1w",
-    TWO_WEEKS_AGO = "wo2w",
-    THREE_WEEKS_AGO = "wo3w",
+    ONE_WEEK_AGO = "P1W",
+    TWO_WEEKS_AGO = "P2W",
+    THREE_WEEKS_AGO = "P3W",
 }

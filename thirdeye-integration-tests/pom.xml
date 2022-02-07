@@ -23,7 +23,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.26.0-SNAPSHOT</version>
+    <version>1.29.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -82,6 +82,16 @@
       <artifactId>dropwizard-client</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mysql</artifactId>
+      <scope>test</scope>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/io.vertx/vertx-web-client -->
   </dependencies>
 
@@ -90,9 +100,9 @@
       <testResource>
         <directory>src/test/resources</directory>
       </testResource>
-<!--      <testResource>-->
-<!--        <directory>../thirdeye-core/src/main/resources</directory>-->
-<!--      </testResource>-->
+      <!--      <testResource>-->
+      <!--        <directory>../thirdeye-core/src/main/resources</directory>-->
+      <!--      </testResource>-->
     </testResources>
     <plugins>
       <plugin>

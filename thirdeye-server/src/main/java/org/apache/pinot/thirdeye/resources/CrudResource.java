@@ -76,18 +76,29 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final DtoT updated = toDto(api);
 
     // Override system fields.
-    updated
-        .setId(existing.getId())
-        .setCreateTime(existing.getCreateTime())
-        .setCreatedBy(existing.getCreatedBy())
-        .setUpdatedBy(principal.getName())
-        .setUpdateTime(new Timestamp(new Date().getTime()));
+    updated.setId(existing.getId());
+    updateGateKeeper(principal, updated);
 
     // Allow downstream classes to process any additional changes
     prepareUpdatedDto(principal, existing, updated);
 
     // ready to be persisted to db.
     return updated;
+  }
+
+  private DtoT createGateKeeper(final ThirdEyePrincipal principal, final DtoT dto){
+    final Timestamp currentTime = new Timestamp(new Date().getTime());
+    dto.setCreatedBy(principal.getName())
+      .setCreateTime(currentTime)
+      .setUpdatedBy(principal.getName())
+      .setUpdateTime(currentTime);
+    return dto;
+  }
+
+  private DtoT updateGateKeeper(final ThirdEyePrincipal principal, final DtoT dto){
+    dto.setUpdatedBy(principal.getName())
+      .setUpdateTime(new Timestamp(new Date().getTime()));
+    return dto;
   }
 
   /**
@@ -149,6 +160,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     return respondOk(list.stream()
         .peek(api1 -> validate(api1, null))
         .map(api -> createDto(principal, api))
+        .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(this::toApi)

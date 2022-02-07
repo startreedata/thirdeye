@@ -53,7 +53,6 @@ import org.apache.pinot.thirdeye.datalayer.entity.AbstractIndexEntity;
 import org.apache.pinot.thirdeye.datalayer.entity.GenericJsonEntity;
 import org.apache.pinot.thirdeye.datalayer.util.GenericResultSetMapper;
 import org.apache.pinot.thirdeye.datalayer.util.SqlQueryBuilder;
-import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.DaoFilter;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -131,15 +130,8 @@ public class GenericPojoDao {
     return dataSource.getConnection();
   }
 
-  private String getCurrentPrincipal() {
-    return Constants.NO_AUTH_USER;
-  }
-
   public <E extends AbstractDTO> Long put(final E pojo) {
     long tStart = System.nanoTime();
-    String currentUser = getCurrentPrincipal();
-    pojo.setCreatedBy(currentUser);
-    pojo.setUpdatedBy(currentUser);
     try {
       //insert into its base table
       //get the generated id
@@ -214,10 +206,6 @@ public class GenericPojoDao {
     }
 
     long tStart = System.nanoTime();
-    String updateName = getCurrentPrincipal();
-    for (E pojo : pojos) {
-      pojo.setUpdatedBy(updateName);
-    }
     try {
       return runTask(connection -> {
         if (CollectionUtils.isEmpty(pojos)) {
@@ -275,14 +263,13 @@ public class GenericPojoDao {
   public <E extends AbstractDTO> int update(E pojo) {
     if (pojo.getId() == null) {
       throw new IllegalArgumentException(String.format("Need an ID to update the DB entity: %s",
-          pojo.toString()));
+          pojo));
     }
     return update(pojo, Predicate.EQ("id", pojo.getId()));
   }
 
   public <E extends AbstractDTO> int update(final E pojo, final Predicate predicate) {
     long tStart = System.nanoTime();
-    pojo.setUpdatedBy(getCurrentPrincipal());
     try {
       return runTask(connection -> addUpdateToConnection(pojo, predicate, connection), 0);
     } finally {

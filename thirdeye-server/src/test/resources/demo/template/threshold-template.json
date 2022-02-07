@@ -8,14 +8,13 @@
       "type": "AnomalyDetector",
       "params": {
         "component.min": "${min}",
-        "component.monitoringGranularity": "2_HOURS",
+        "component.monitoringGranularity": "PT2H",
         "component.metric": "met",
         "component.max": "${max}",
         "component.timestamp": "ts",
         "anomaly.metric": "${metric}",
         "component.timezone": "US/Pacific",
         "type": "THRESHOLD",
-        "component.dimensions": [],
         "component.offset": "mo1m",
         "component.pattern": "down"
       },

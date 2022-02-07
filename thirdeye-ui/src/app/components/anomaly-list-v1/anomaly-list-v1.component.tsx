@@ -16,35 +16,28 @@ import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     props: AnomalyListV1Props
 ) => {
-    const [
-        selectedAnomaly,
-        setSelectedAnomaly,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedAnomaly, setSelectedAnomaly] = useState<
+        DataGridSelectionModelV1<UiAnomaly>
+    >();
     const { t } = useTranslation();
 
     const anomalyNameRenderer = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAnomaly
     ): ReactNode => {
-        return linkRendererV1(
-            cellValue,
-            getAnomaliesViewIndexPath(data.id as number)
-        );
+        return linkRendererV1(cellValue, getAnomaliesViewIndexPath(data.id));
     };
 
     const alertNameRenderer = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAnomaly
     ): ReactNode => {
-        return linkRendererV1(
-            cellValue,
-            getAlertsViewPath(data.alertId as number)
-        );
+        return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
     };
 
     const deviationRenderer = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAnomaly
     ): ReactNode => {
         return (
             <Typography
@@ -66,11 +59,9 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         }
 
         const anomalyId = selectedAnomaly.rowKeyValues[0];
-        const anomaly = (selectedAnomaly.rowKeyValueMap?.get(
-            anomalyId
-        ) as unknown) as UiAnomaly;
+        const anomaly = selectedAnomaly.rowKeyValueMap?.get(anomalyId);
 
-        props.onDelete && props.onDelete(anomaly);
+        props.onDelete && props.onDelete(anomaly as UiAnomaly);
     };
 
     const anomalyListColumns = useMemo(
@@ -139,10 +130,10 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     );
 
     return (
-        <DataGridV1
+        <DataGridV1<UiAnomaly>
             hideBorder
             columns={anomalyListColumns}
-            data={(props.anomalies as unknown) as Record<string, unknown>[]}
+            data={props.anomalies as UiAnomaly[]}
             rowKey="id"
             searchPlaceholder={t("label.search-entity", {
                 entity: t("label.anomalies"),

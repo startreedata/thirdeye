@@ -137,6 +137,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
               restartJob(config, dataQualityJob);
             }
           } else {
+            // todo cyril dead because data quality is never enabled
             if (DetectionUtils.isDataQualityCheckEnabled(config)) {
               startJob(config, dataQualityJob);
             }

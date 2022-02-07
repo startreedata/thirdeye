@@ -20,6 +20,7 @@ import {
     deleteDatasource,
     getDatasource,
 } from "../../rest/datasources/datasources.rest";
+import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -122,14 +123,9 @@ export const DatasourcesViewPage: FunctionComponent = () => {
 
                 {/* Datasource JSON viewer */}
                 <Grid item sm={12}>
-                    <JSONEditorV1
+                    <JSONEditorV1<Datasource>
                         readOnly
-                        value={
-                            (uiDatasource?.datasource as unknown) as Record<
-                                string,
-                                unknown
-                            >
-                        }
+                        value={uiDatasource?.datasource as Datasource}
                     />
                 </Grid>
             </PageContentsGridV1>

@@ -23,15 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.detection.anomalydetection.AnomalyDetectionUtils;
-import org.apache.pinot.thirdeye.detection.anomalydetection.context.AnomalyDetectionContext;
 import org.apache.pinot.thirdeye.detection.anomalydetection.context.TimeSeries;
-import org.apache.pinot.thirdeye.detection.anomalydetection.context.TimeSeriesKey;
 import org.apache.pinot.thirdeye.metric.MetricTimeSeries;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import org.apache.pinot.thirdeye.spi.detection.dimension.DimensionMap;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 public class BackwardAnomalyFunctionUtils {
@@ -76,51 +69,6 @@ public class BackwardAnomalyFunctionUtils {
       }
     }
     return timeSeriesList;
-  }
-
-  /**
-   * Returns an anomaly detection context from the given information.
-   *
-   * @param anomalyFunction the anomaly function for anomaly detection.
-   * @param timeSeries the given time series.
-   * @param metric the metric name of the given time series.
-   * @param exploredDimensions the dimension map of the given time series.
-   * @param windowStart the start of the interval of the time series.
-   * @param windowEnd the end of the interval of the time series.
-   * @param knownAnomalies the list of historical merged anomalies.
-   * @return an anomaly detection context from the given information.
-   */
-  public static AnomalyDetectionContext buildAnomalyDetectionContext(
-      AnomalyDetectionFunction anomalyFunction, MetricTimeSeries timeSeries, String metric,
-      DimensionMap exploredDimensions, int bucketSize, TimeUnit bucketUnit, DateTime windowStart,
-      DateTime windowEnd, List<MergedAnomalyResultDTO> knownAnomalies) {
-    // Create the anomaly detection context for the new modularized anomaly function
-    AnomalyDetectionContext anomalyDetectionContext = new AnomalyDetectionContext();
-    anomalyDetectionContext
-        .setBucketSizeInMS(AnomalyDetectionUtils.getBucketInMillis(bucketSize, bucketUnit));
-    anomalyDetectionContext.setAnomalyDetectionFunction(anomalyFunction);
-
-    // Construct TimeSeriesKey
-    TimeSeriesKey timeSeriesKey = new TimeSeriesKey();
-    timeSeriesKey.setDimensionMap(exploredDimensions);
-    timeSeriesKey.setMetricName(metric);
-    anomalyDetectionContext.setTimeSeriesKey(timeSeriesKey);
-
-    // set historical anomalies
-    anomalyDetectionContext.setHistoricalAnomalies(knownAnomalies);
-
-    // Split time series to observed time series and baselines for each metric
-    for (String metricName : anomalyFunction.getSpec().getMetrics()) {
-      List<Interval> intervals =
-          anomalyFunction.getTimeSeriesIntervals(windowStart.getMillis(), windowEnd.getMillis());
-      List<TimeSeries> timeSeriesList =
-          BackwardAnomalyFunctionUtils.splitSetsOfTimeSeries(timeSeries, metricName, intervals);
-      anomalyDetectionContext.setCurrent(metricName, timeSeriesList.get(0));
-      timeSeriesList.remove(0);
-      anomalyDetectionContext.setBaselines(metricName, timeSeriesList);
-    }
-
-    return anomalyDetectionContext;
   }
 
   /**

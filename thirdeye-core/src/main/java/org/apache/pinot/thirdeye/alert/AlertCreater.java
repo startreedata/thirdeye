@@ -19,7 +19,7 @@ import org.apache.pinot.thirdeye.spi.datalayer.bao.TaskManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.TaskDTO;
 import org.apache.pinot.thirdeye.spi.task.TaskType;
-import org.apache.pinot.thirdeye.task.YamlOnboardingTaskInfo;
+import org.apache.pinot.thirdeye.task.OnboardingTaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class AlertCreater {
       long tuningWindowStart,
       long tuningWindowEnd
   ) {
-    YamlOnboardingTaskInfo info = new YamlOnboardingTaskInfo();
+    OnboardingTaskInfo info = new OnboardingTaskInfo();
     info.setConfigId(alertDTO.getId());
     if (tuningWindowStart == 0L && tuningWindowEnd == 0L) {
       // default tuning window 28 days
@@ -101,7 +101,7 @@ public class AlertCreater {
       taskInfoJson = new ObjectMapper().writeValueAsString(info);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
-          YamlOnboardingTaskInfo.class.getSimpleName(), info), e);
+          OnboardingTaskInfo.class.getSimpleName(), info), e);
     }
 
     final TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,

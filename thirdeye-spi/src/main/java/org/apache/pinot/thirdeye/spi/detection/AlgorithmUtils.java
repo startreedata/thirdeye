@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
@@ -36,13 +35,10 @@ import org.joda.time.Duration;
 /**
  * Utility class for cross-cutting aspects of detection algorithms such as
  * outlier and change point detection
- *
- * TODO implement all detection methods. all the methods!
  */
 public class AlgorithmUtils {
 
   private static final int FAST_SPLINE_ITERATIONS = 4;
-  private static final long MIN_WINDOW_SIZE = TimeUnit.DAYS.toMillis(1);
 
   private static final String COL_TIME = DataFrame.COL_TIME;
   private static final String COL_VALUE = DataFrame.COL_VALUE;

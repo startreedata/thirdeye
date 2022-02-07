@@ -24,7 +24,6 @@ import static org.apache.pinot.thirdeye.detection.alert.StatefulDetectionAlertFi
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,16 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.IOUtils;
-import org.apache.pinot.thirdeye.datalayer.bao.TestDbEnv;
 import org.apache.pinot.thirdeye.detection.detector.email.filter.AlphaBetaAlertFilter;
-import org.apache.pinot.thirdeye.detection.validators.ConfigValidationException;
-import org.apache.pinot.thirdeye.detection.validators.SubscriptionConfigValidator;
-import org.apache.pinot.thirdeye.detection.yaml.translator.DetectionConfigTranslator;
-import org.apache.pinot.thirdeye.detection.yaml.translator.SubscriptionConfigTranslator;
 import org.apache.pinot.thirdeye.spi.Constants;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.OverrideConfigManager;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -59,7 +51,6 @@ import org.apache.pinot.thirdeye.spi.detection.AnomalyFeedConfig;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyFetcherConfig;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyNotifiedStatus;
 import org.apache.pinot.thirdeye.spi.detection.AnomalySource;
-import org.apache.pinot.thirdeye.spi.detection.DataProvider;
 import org.apache.pinot.thirdeye.spi.detection.MetricAggFunction;
 import org.apache.pinot.thirdeye.spi.detection.metric.MetricType;
 import org.apache.pinot.thirdeye.spi.task.TaskType;
@@ -67,40 +58,6 @@ import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
 
 public class DaoTestUtils {
-
-  public static AlertDTO getTestDetectionConfig(DataProvider provider,
-      String detectionConfigFile)
-      throws IOException, ConfigValidationException {
-    String yamlConfig = IOUtils
-        .toString(DaoTestUtils.class.getResourceAsStream(detectionConfigFile));
-
-    // Translate
-    DetectionConfigTranslator translator = new DetectionConfigTranslator(yamlConfig, provider);
-    AlertDTO detectionConfig = translator.translate();
-
-    Map<String, Object> properties = detectionConfig.getProperties();
-    properties.put("timezone", "UTC");
-    detectionConfig.setProperties(properties);
-    detectionConfig.setCron("0/10 * * * * ?");
-
-    detectionConfig.setLastTimestamp(DateTime.now().minusDays(2).getMillis());
-    return detectionConfig;
-  }
-
-  public static SubscriptionGroupDTO getTestDetectionAlertConfig(String alertConfigFile)
-      throws IOException, ConfigValidationException {
-
-    String yamlConfig = IOUtils.toString(DaoTestUtils.class.getResourceAsStream(alertConfigFile));
-
-    SubscriptionGroupDTO alertConfig = new SubscriptionConfigTranslator(
-        yamlConfig, new SubscriptionConfigValidator(
-        TestDbEnv.getInstance().getDetectionConfigManager(),
-        TestDbEnv.getInstance().getApplicationDAO()), TestDbEnv.getInstance()
-            .getDetectionConfigManager())
-        .translate();
-    alertConfig.setCronExpression("0/10 * * * * ?");
-    return alertConfig;
-  }
 
   public static AnomalyFunctionDTO getTestFunctionSpec(String metricName, String collection) {
     AnomalyFunctionDTO functionSpec = new AnomalyFunctionDTO();

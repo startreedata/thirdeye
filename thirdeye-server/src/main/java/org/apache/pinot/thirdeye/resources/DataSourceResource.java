@@ -74,6 +74,20 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   protected DataSourceApi toApi(final DataSourceDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }
+  
+  @Override
+  protected void deleteDto(DataSourceDTO dto) {
+    super.deleteDto(dto);
+    dataSourceCache.removeDataSource(dto.getName());
+  }
+
+  @Override
+  protected void prepareUpdatedDto(
+    final ThirdEyePrincipal principal,
+    final DataSourceDTO existing,
+    final DataSourceDTO updated) {
+    dataSourceCache.removeDataSource(existing.getName());
+  }
 
   @POST
   @Path("onboard-dataset")

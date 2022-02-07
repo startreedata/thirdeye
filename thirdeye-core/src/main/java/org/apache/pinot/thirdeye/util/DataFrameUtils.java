@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.pinot.thirdeye.datasource.MetricExpression;
 import org.apache.pinot.thirdeye.datasource.ThirdEyeCacheRegistry;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
@@ -40,7 +41,6 @@ import org.apache.pinot.thirdeye.spi.datasource.MetricFunction;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeRequest;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponse;
 import org.apache.pinot.thirdeye.spi.datasource.ThirdEyeResponseRow;
-import org.apache.pinot.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import org.apache.pinot.thirdeye.spi.detection.TimeGranularity;
 import org.apache.pinot.thirdeye.spi.util.SpiUtils;
 import org.joda.time.DateTime;
@@ -126,7 +126,6 @@ public class DataFrameUtils {
    *
    * @param df thirdeye response dataframe
    * @param expressions collection of metric expressions
-   * @param thirdEyeCacheRegistry
    * @return augmented dataframe
    * @throws Exception if the metric expression cannot be computed
    */
@@ -186,7 +185,6 @@ public class DataFrameUtils {
    *
    * @param response thirdeye client response
    * @param rc RequestContainer
-   * @param thirdEyeCacheRegistry
    * @return response as dataframe
    */
   public static DataFrame evaluateResponse(ThirdEyeResponse response, RequestContainer rc,
@@ -204,30 +202,14 @@ public class DataFrameUtils {
    *
    * @param response thirdeye client response
    * @param rc TimeSeriesRequestContainer
-   * @param thirdEyeCacheRegistry
    * @return response as dataframe
    */
   public static DataFrame evaluateResponse(ThirdEyeResponse response, TimeSeriesRequestContainer rc,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     return makeTimestamps(evaluateExpressions(parseResponse(response), rc.getExpressions(),
-        thirdEyeCacheRegistry),
+            thirdEyeCacheRegistry),
         rc.start, rc.getInterval());
-  }
-
-  /**
-   * Returns a map-transformation of a given DataFrame, assuming that all values can be converted
-   * to Double values. The map is keyed by series names.
-   *
-   * @param df dataframe
-   * @return map transformation of dataframe
-   */
-  public static Map<String, List<Double>> toMap(DataFrame df) {
-    Map<String, List<Double>> map = new HashMap<>();
-    for (String series : df.getSeriesNames()) {
-      map.put(series, df.getDoubles(series).toList());
-    }
-    return map;
   }
 
   /**
@@ -240,17 +222,16 @@ public class DataFrameUtils {
    * @param reference unique identifier for request
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
-   * @param thirdEyeCacheRegistry
    * @return TimeSeriesRequestContainer
    */
   public static TimeSeriesRequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
       String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    MetricConfigDTO metric = metricDAO.findById(slice.metricId);
+    MetricConfigDTO metric = metricDAO.findById(slice.getMetricId());
     if (metric == null) {
       throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.metricId));
+          String.format("Could not resolve metric id %d", slice.getMetricId()));
     }
 
     DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
@@ -264,20 +245,23 @@ public class DataFrameUtils {
         metric.getDefaultAggFunction(), metric.getDataset(),
         thirdEyeCacheRegistry);
 
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.granularity)) {
-      granularity = slice.granularity;
-    }
+    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
+        .orElse(dataset.bucketTimeGranularity());
 
     DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();
 
-    DateTime start = new DateTime(slice.start, timezone)
+    DateTime start = new DateTime(slice.getStart(), timezone)
         .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.end, timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = new DateTime(slice.getEnd(),
+        timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
     MetricSlice alignedSlice = MetricSlice
-        .from(slice.metricId, start.getMillis(), end.getMillis(), slice.filters, slice.granularity);
+        .from(slice.getMetricId(),
+            start.getMillis(),
+            end.getMillis(),
+            slice.getFilters(),
+            slice.getGranularity());
 
     ThirdEyeRequest request = makeThirdEyeRequestBuilder(alignedSlice, dataset, expressions,
         thirdEyeCacheRegistry
@@ -296,17 +280,16 @@ public class DataFrameUtils {
    * @param reference unique identifier for request
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
-   * @param thirdEyeCacheRegistry
    * @return TimeSeriesRequestContainer
    */
   public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
       String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    MetricConfigDTO metric = metricDAO.findById(slice.metricId);
+    MetricConfigDTO metric = metricDAO.findById(slice.getMetricId());
     if (metric == null) {
       throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.metricId));
+          String.format("Could not resolve metric id %d", slice.getMetricId()));
     }
 
     DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
@@ -320,17 +303,16 @@ public class DataFrameUtils {
         metric.getDefaultAggFunction(), metric.getDataset(),
         thirdEyeCacheRegistry);
 
-    TimeGranularity granularity = dataset.bucketTimeGranularity();
-    if (!MetricSlice.NATIVE_GRANULARITY.equals(slice.granularity)) {
-      granularity = slice.granularity;
-    }
+    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
+        .orElse(dataset.bucketTimeGranularity());
 
     DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();
 
-    DateTime start = new DateTime(slice.start, timezone)
+    DateTime start = new DateTime(slice.getStart(), timezone)
         .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.end, timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = new DateTime(slice.getEnd(),
+        timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
     ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
         thirdEyeCacheRegistry
@@ -351,7 +333,6 @@ public class DataFrameUtils {
    * @param reference unique identifier for request
    * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
-   * @param thirdEyeCacheRegistry
    * @return RequestContainer
    */
   public static RequestContainer makeAggregateRequest(MetricSlice slice,
@@ -362,10 +343,10 @@ public class DataFrameUtils {
       DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    MetricConfigDTO metric = metricDAO.findById(slice.metricId);
+    MetricConfigDTO metric = metricDAO.findById(slice.getMetricId());
     if (metric == null) {
       throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.metricId));
+          String.format("Could not resolve metric id %d", slice.getMetricId()));
     }
 
     DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
@@ -390,29 +371,11 @@ public class DataFrameUtils {
   }
 
   /**
-   * Returns the series with the period added, given the timezone
-   *
-   * @param s series
-   * @param period time period
-   * @param timezone time zone
-   * @return offset time series
-   */
-  public static LongSeries addPeriod(Series s, final Period period, final DateTimeZone timezone) {
-    return s.map(new Series.LongFunction() {
-      @Override
-      public long apply(long... values) {
-        return new DateTime(values[0], timezone).plus(period).getMillis();
-      }
-    });
-  }
-
-  /**
    * Helper: Returns a pre-populated ThirdeyeRequestBuilder instance. Removes invalid filter values.
    *
    * @param slice metric data slice
    * @param dataset dataset dto
    * @param expressions metric expressions
-   * @param thirdEyeCacheRegistry
    * @return ThirdeyeRequestBuilder
    */
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
@@ -427,52 +390,10 @@ public class DataFrameUtils {
     }
 
     return ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(slice.start)
-        .setEndTimeExclusive(slice.end)
-        .setFilterSet(slice.filters)
+        .setStartTimeInclusive(slice.getStart())
+        .setEndTimeExclusive(slice.getEnd())
+        .setFilterSet(slice.getFilters())
         .setMetricFunctions(functions)
         .setDataSource(dataset.getDataSource());
-  }
-
-  private static Series makeSelectionSeries(ThirdEyeResultSet resultSet, int colIndex) {
-    int rowCount = resultSet.getRowCount();
-    if (rowCount <= 0) {
-      return StringSeries.empty();
-    }
-
-    String[] values = new String[rowCount];
-    for (int i = 0; i < rowCount; i++) {
-      values[i] = resultSet.getString(i, colIndex);
-    }
-
-    return DataFrame.toSeries(values);
-  }
-
-  private static Series makeGroupByValueSeries(ThirdEyeResultSet resultSet) {
-    int rowCount = resultSet.getRowCount();
-    if (rowCount <= 0) {
-      return StringSeries.empty();
-    }
-
-    String[] values = new String[rowCount];
-    for (int i = 0; i < rowCount; i++) {
-      values[i] = resultSet.getString(i, 0);
-    }
-
-    return DataFrame.toSeries(values);
-  }
-
-  private static Series makeGroupByGroupSeries(ThirdEyeResultSet resultSet, int keyIndex) {
-    int rowCount = resultSet.getRowCount();
-    if (rowCount <= 0) {
-      return StringSeries.empty();
-    }
-
-    String[] values = new String[rowCount];
-    for (int i = 0; i < rowCount; i++) {
-      values[i] = resultSet.getGroupKeyColumnValue(i, keyIndex);
-    }
-
-    return DataFrame.toSeries(values);
   }
 }

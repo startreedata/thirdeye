@@ -2,8 +2,13 @@ package org.apache.pinot.thirdeye.spi;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import java.security.Principal;
+import java.text.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThirdEyePrincipal implements Principal {
+
+  private static final Logger log = LoggerFactory.getLogger(ThirdEyePrincipal.class);
 
   private JWTClaimsSet claims;
 
@@ -16,7 +21,12 @@ public class ThirdEyePrincipal implements Principal {
 
   @Override
   public String getName() {
-    return claims.getSubject();
+    try {
+      return claims.getStringClaim("email");
+    } catch (ParseException e) {
+      log.error("Could not get user name. email should be a String", e);
+      return null;
+    }
   }
 
   public JWTClaimsSet getClaims() {

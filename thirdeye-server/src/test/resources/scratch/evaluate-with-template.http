@@ -116,7 +116,7 @@ Content-Type: application/json
             "component.detector.metric": "met",
             "component.detector.dimensions": [],
             "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
+            "component.detector.monitoringGranularity": "P1D",
             "component.detector.type": "THRESHOLD",
             "component.detector.max": "850000",
             "component.detector.min": "300000",

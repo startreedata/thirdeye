@@ -8,14 +8,12 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
@@ -43,7 +41,7 @@ public class ThresholdRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double minValue = 50.;
     double maxValue = 600.;
     spec.setMin(minValue);
@@ -52,11 +50,6 @@ public class ThresholdRuleDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -104,7 +97,7 @@ public class ThresholdRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     // min max not set - not relevant for test
     ThresholdRuleDetector detector = new ThresholdRuleDetector();
     detector.init(spec);
@@ -133,7 +126,7 @@ public class ThresholdRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     double minValue = 150;
     double maxValue = 350.;
     spec.setMin(minValue);

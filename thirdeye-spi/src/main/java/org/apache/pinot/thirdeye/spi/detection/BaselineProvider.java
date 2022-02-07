@@ -25,6 +25,8 @@ import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
 
 /**
  * The baseline provider to calculate predicted baseline.
+ *
+ * todo cyril the abstraction is good but the interface is not compatible with v2
  */
 public interface BaselineProvider<T extends AbstractSpec> extends BaseComponent<T> {
 
@@ -37,7 +39,11 @@ public interface BaselineProvider<T extends AbstractSpec> extends BaseComponent<
    *
    * @return the time series contains predicted baseline.
    */
-  TimeSeries computePredictedTimeSeries(MetricSlice slice);
+  @Deprecated
+  default TimeSeries computePredictedTimeSeries(MetricSlice slice) {
+     // todo cyril drop this method this interface is refactored
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Compute the baseline time series for the metric slice.
@@ -46,6 +52,7 @@ public interface BaselineProvider<T extends AbstractSpec> extends BaseComponent<
    *
    * @return the predicted value.
    */
+  @Deprecated
   default Double computePredictedAggregates(MetricSlice slice,
       Series.DoubleFunction aggregateFunction) {
     try {

@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
-import org.apache.pinot.thirdeye.spi.detection.AnomalyDetector;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Factory;
@@ -171,15 +170,6 @@ public class DetectionRegistry {
 
   public void addEventTriggerFactory(final EventTriggerFactory f) {
     triggerFactoryMap.put(f.name(), f);
-  }
-
-  @Deprecated
-  // always returns null - legacy detector not available anymore
-  // todo cyril remove once DetectionPipeline is removed
-  public AnomalyDetector<AbstractSpec> buildDetector(
-      String factoryName,
-      AnomalyDetectorFactoryV2Context context) {
-    return null;
   }
 
   public AnomalyDetectorV2<AbstractSpec> buildDetectorV2(

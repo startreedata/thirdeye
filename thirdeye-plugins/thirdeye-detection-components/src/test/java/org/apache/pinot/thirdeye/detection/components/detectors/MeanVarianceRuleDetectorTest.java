@@ -8,7 +8,6 @@ import org.apache.pinot.thirdeye.spi.dataframe.BooleanSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.DoubleSeries;
 import org.apache.pinot.thirdeye.spi.dataframe.LongSeries;
-import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2;
 import org.apache.pinot.thirdeye.spi.detection.AnomalyDetectorV2Result;
 import org.apache.pinot.thirdeye.spi.detection.DetectorException;
@@ -16,7 +15,6 @@ import org.apache.pinot.thirdeye.spi.detection.Pattern;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.SimpleDataTable;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.testng.annotations.Test;
 
 public class MeanVarianceRuleDetectorTest {
@@ -80,18 +78,13 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setSensitivity(0); // corresponds to multiplying std by 1.5 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -165,7 +158,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setSensitivity(0);
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
@@ -199,18 +192,13 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setLookback(10);
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -242,7 +230,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
     spec.setLookback(10);
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
@@ -250,11 +238,6 @@ public class MeanVarianceRuleDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -286,7 +269,7 @@ public class MeanVarianceRuleDetectorTest {
     timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
-    spec.setMonitoringGranularity("1_DAYS");
+    spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
     spec.setLookback(10);
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
@@ -294,11 +277,6 @@ public class MeanVarianceRuleDetectorTest {
     detector.init(spec);
 
     AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
-    //assert time fields
-    assertThat(output.getTimeZone()).isEqualTo(AbstractSpec.DEFAULT_TIMEZONE);
-    assertThat(output.getMonitoringGranularityPeriod().toStandardDuration().getMillis())
-        .isEqualTo(Period.days(1).toStandardDuration().getMillis());
-
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 

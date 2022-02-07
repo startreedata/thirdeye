@@ -17,7 +17,6 @@
 package org.apache.pinot.thirdeye.detection.spec;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.pinot.thirdeye.detection.components.RuleBaselineProvider;
 import org.apache.pinot.thirdeye.spi.detection.AbstractSpec;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -36,17 +35,6 @@ public class AbstractSpecTest {
   public void testAbstractSpecMappingIncompleteProperty() {
     TestSpec spec = AbstractSpec.fromProperties(ImmutableMap.of("a", 321), TestSpec.class);
     Assert.assertEquals(spec.getA(), 321);
-    Assert.assertEquals(spec.getB(), 456.7);
-    Assert.assertEquals(spec.getC(), "default");
-  }
-
-  @Test
-  public void testAbstractSpecMappingNestedObject() {
-    RuleBaselineProvider provider = new RuleBaselineProvider();
-    TestSpec spec = AbstractSpec
-        .fromProperties(ImmutableMap.of("baselineProvider", provider), TestSpec.class);
-    Assert.assertEquals(spec.getA(), 123);
-    Assert.assertEquals(spec.getBaselineProvider(), provider);
     Assert.assertEquals(spec.getB(), 456.7);
     Assert.assertEquals(spec.getC(), "default");
   }

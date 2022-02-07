@@ -118,6 +118,7 @@ traefik:
 
 # Persistence layer configuration
 mysql:
+  imageTag: 8.0.28
   mysqlRootPassword: password
   mysqlUser: uthirdeye
   mysqlPassword: pass

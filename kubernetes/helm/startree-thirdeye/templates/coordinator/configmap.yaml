@@ -38,7 +38,7 @@ data:
 
     database:
       # Assuming a local MySQL server running on the default port 3306
-      url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&useSSL=false
+      url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
       driver: com.mysql.cj.jdbc.Driver

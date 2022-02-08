@@ -39,10 +39,14 @@ jest.mock("@startree-ui/platform-ui", () => ({
                             <span key={alert.id}>
                                 {alert.name}
                                 <p
-                                    onClick={() => mockMethod(mockAlert)}
+                                    onClick={() =>
+                                        mockOnChangeMethod(mockAlert)
+                                    }
                                 >{`Edit${alert.id}`}</p>
                                 <p
-                                    onClick={() => mockMethod(mockAlert)}
+                                    onClick={() =>
+                                        mockOnDeleteMethod(mockAlert)
+                                    }
                                 >{`Delete${alert.id}`}</p>
                             </span>
                         );
@@ -59,33 +63,33 @@ jest.mock("@startree-ui/platform-ui", () => ({
 }));
 
 describe("AlertListV1", () => {
-    it("component should load with no alerts", async () => {
+    it("should load with no alerts", async () => {
         const props = { ...mockDefaultProps, alerts: [] };
         render(<AlertListV1 {...props} />);
 
         expect(await screen.findByText("NoDataIndicator")).toBeInTheDocument();
     });
 
-    it("component should load with alerts", async () => {
+    it("should load with alerts", async () => {
         render(<AlertListV1 {...mockDefaultProps} />);
 
         expect(await screen.findByText("testNameAlert1")).toBeInTheDocument();
     });
 
-    it("component should call onChange when Edit is clicked", async () => {
+    it("should call onChange when Edit is clicked", async () => {
         render(<AlertListV1 {...mockDefaultProps} />);
 
         fireEvent.click(screen.getByText("Edit1"));
 
-        expect(mockMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
+        expect(mockOnChangeMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
     });
 
-    it("component should call onDelete when Delete is clicked", async () => {
+    it("should call onDelete when Delete is clicked", async () => {
         render(<AlertListV1 {...mockDefaultProps} />);
 
         fireEvent.click(screen.getByText("Delete1"));
 
-        expect(mockMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
+        expect(mockOnDeleteMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
     });
 });
 
@@ -177,10 +181,12 @@ const mockUiAlert = {
     alert: mockAlert,
 };
 
-const mockMethod = jest.fn();
+const mockOnDeleteMethod = jest.fn();
+
+const mockOnChangeMethod = jest.fn();
 
 const mockDefaultProps = {
     alerts: [mockUiAlert],
-    onChange: mockMethod,
-    onDelete: mockMethod,
+    onChange: mockOnChangeMethod,
+    onDelete: mockOnDeleteMethod,
 } as AlertListV1Props;

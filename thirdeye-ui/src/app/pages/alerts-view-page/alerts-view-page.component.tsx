@@ -191,7 +191,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         <AppLoadingIndicatorV1 />
     ) : (
         <PageV1>
-            <PageHeader showTimeRange title={uiAlert.name} />
+            <PageHeader showCreateButton showTimeRange title={uiAlert.name} />
 
             <PageContentsGridV1>
                 {/* Alert Details Card*/}

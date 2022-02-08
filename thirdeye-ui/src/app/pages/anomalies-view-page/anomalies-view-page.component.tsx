@@ -131,7 +131,11 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader showTimeRange title={uiAnomaly ? uiAnomaly.name : ""} />
+            <PageHeader
+                showCreateButton
+                showTimeRange
+                title={uiAnomaly ? uiAnomaly.name : ""}
+            />
             <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid item xs={12}>

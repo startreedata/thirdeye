@@ -113,18 +113,6 @@ It should be fairly easy to change to TLS without CA check and host check by cha
 
 
 ### JDBC Security configuration recommendation
-In MySQL8, newly created MySQL users have a different authentication mechanism.
-When migrating, this means there is no problem.
-The simplest fix is to have sslMode REQUIRED.
-
-
-Strictest possible jdbc connection parameters matrix:  
-
-|                 | local/dev | prod             |
-|-----------------|-----------|------------------|
-| new MySql8      | allowPublicKeyRetrieval=true&sslMode=DISABLED | sslMode=REQUIRED |
-| migrated MySql8 | sslMode=DISABLED | sslMode=REQUIRED |
-
 JDBC connection parameters for the migration:
 
 |                 | local/dev | prod             |
@@ -132,5 +120,13 @@ JDBC connection parameters for the migration:
 | new MySql8      | allowPublicKeyRetrieval=true&sslMode=DISABLED | allowPublicKeyRetrieval=true&sslMode=DISABLED |
 | migrated MySql8 | allowPublicKeyRetrieval=true&sslMode=DISABLED | allowPublicKeyRetrieval=true&sslMode=DISABLED |
 
-**--> to be validated by Sec Team.**
 
+Strictest possible jdbc connection parameters matrix (without any other change):
+
+|                 | local/dev | prod             |
+|-----------------|-----------|------------------|
+| new MySql8      | allowPublicKeyRetrieval=true&sslMode=DISABLED | sslMode=REQUIRED |
+| migrated MySql8 | sslMode=DISABLED | sslMode=REQUIRED |
+
+sslMode=REQUIRED corresponds to SSL with self-signed certificate.  
+It will be added after the migration.

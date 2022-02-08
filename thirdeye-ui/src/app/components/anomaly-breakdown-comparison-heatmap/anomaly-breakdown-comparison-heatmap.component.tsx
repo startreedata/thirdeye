@@ -104,14 +104,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
     const {
-        anomalyMetricBreakdown: anomalyBreakdownCurrent,
-        getMetricBreakdown: getMetricBreakdownForCurrent,
-        status: anomalyBreakdownCurrentReqStatus,
-    } = useGetAnomalyMetricBreakdown();
-    const {
-        anomalyMetricBreakdown: anomalyBreakdownComparison,
-        getMetricBreakdown: getMetricBreakdownForComparison,
-        status: anomalyBreakdownComparisonReqStatus,
+        anomalyMetricBreakdown,
+        getMetricBreakdown,
+        status: anomalyBreakdownReqStatus,
     } = useGetAnomalyMetricBreakdown();
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
@@ -124,7 +119,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     >([]);
 
     useEffect(() => {
-        if (!anomalyBreakdownCurrent || !anomalyBreakdownComparison) {
+        if (!anomalyMetricBreakdown) {
             setBreakdownComparisonData(null);
 
             return;
@@ -134,10 +129,12 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
         if (!anomalyFilterOptions.length) {
             let optionsMenu: AnomalyFilterOption[] = [];
-            Object.keys(anomalyBreakdownCurrent).forEach(
+            Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
                 (dimensionColumnName) => {
                     const options = Object.keys(
-                        anomalyBreakdownCurrent[dimensionColumnName]
+                        anomalyMetricBreakdown.current.breakdown[
+                            dimensionColumnName
+                        ]
                     ).map((value) => ({
                         key: dimensionColumnName,
                         value,
@@ -148,80 +145,79 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
             setAnomalyFilterOptions(optionsMenu);
         }
 
-        Object.keys(anomalyBreakdownCurrent).forEach((dimensionColumnName) => {
-            const [
-                currentTotal,
-                currentDimensionValuesData,
-            ] = summarizeDimensionValueData(
-                anomalyBreakdownCurrent[dimensionColumnName]
-            );
-            const [
-                baselineTotal,
-                baselineDimensionValuesData,
-            ] = summarizeDimensionValueData(
-                anomalyBreakdownComparison[dimensionColumnName]
-            );
-            const dimensionComparisonData: {
-                [key: string]: AnomalyBreakdownComparisonData;
-            } = {};
+        Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
+            (dimensionColumnName) => {
+                const [
+                    currentTotal,
+                    currentDimensionValuesData,
+                ] = summarizeDimensionValueData(
+                    anomalyMetricBreakdown.current.breakdown[
+                        dimensionColumnName
+                    ]
+                );
+                const [
+                    baselineTotal,
+                    baselineDimensionValuesData,
+                ] = summarizeDimensionValueData(
+                    anomalyMetricBreakdown.baseline.breakdown[
+                        dimensionColumnName
+                    ]
+                );
+                const dimensionComparisonData: {
+                    [key: string]: AnomalyBreakdownComparisonData;
+                } = {};
 
-            Object.keys(currentDimensionValuesData).forEach(
-                (dimension: string) => {
-                    const currentDataForDimension =
-                        currentDimensionValuesData[dimension];
-                    const baselineDataForDimension =
-                        baselineDimensionValuesData[dimension] || {};
-                    const baselineMetricValue =
-                        baselineDataForDimension.count || 0;
+                Object.keys(currentDimensionValuesData).forEach(
+                    (dimension: string) => {
+                        const currentDataForDimension =
+                            currentDimensionValuesData[dimension];
+                        const baselineDataForDimension =
+                            baselineDimensionValuesData[dimension] || {};
+                        const baselineMetricValue =
+                            baselineDataForDimension.count || 0;
 
-                    dimensionComparisonData[dimension] = {
-                        current: currentDataForDimension.count,
-                        baseline: baselineMetricValue,
-                        metricValueDiff:
-                            currentDataForDimension.count - baselineMetricValue,
-                        metricValueDiffPercentage: null,
-                        currentContributionPercentage:
-                            currentDataForDimension.percentage || 0,
-                        baselineContributionPercentage:
-                            baselineDataForDimension.percentage || 0,
-                        contributionDiff:
-                            (currentDataForDimension.percentage || 0) -
-                            (baselineDataForDimension.percentage || 0),
-                        currentTotalCount: currentTotal,
-                        baselineTotalCount: baselineTotal,
-                    };
+                        dimensionComparisonData[dimension] = {
+                            current: currentDataForDimension.count,
+                            baseline: baselineMetricValue,
+                            metricValueDiff:
+                                currentDataForDimension.count -
+                                baselineMetricValue,
+                            metricValueDiffPercentage: null,
+                            currentContributionPercentage:
+                                currentDataForDimension.percentage || 0,
+                            baselineContributionPercentage:
+                                baselineDataForDimension.percentage || 0,
+                            contributionDiff:
+                                (currentDataForDimension.percentage || 0) -
+                                (baselineDataForDimension.percentage || 0),
+                            currentTotalCount: currentTotal,
+                            baselineTotalCount: baselineTotal,
+                        };
 
-                    if (baselineMetricValue > 0) {
-                        dimensionComparisonData[
-                            dimension
-                        ].metricValueDiffPercentage =
-                            ((currentDataForDimension.count -
-                                baselineMetricValue) /
-                                baselineMetricValue) *
-                            100;
+                        if (baselineMetricValue > 0) {
+                            dimensionComparisonData[
+                                dimension
+                            ].metricValueDiffPercentage =
+                                ((currentDataForDimension.count -
+                                    baselineMetricValue) /
+                                    baselineMetricValue) *
+                                100;
+                        }
                     }
-                }
-            );
+                );
 
-            breakdownComparisonDataByDimensionColumn.push({
-                column: dimensionColumnName,
-                dimensionComparisonData,
-            });
-        });
+                breakdownComparisonDataByDimensionColumn.push({
+                    column: dimensionColumnName,
+                    dimensionComparisonData,
+                });
+            }
+        );
         setBreakdownComparisonData(breakdownComparisonDataByDimensionColumn);
-    }, [anomalyBreakdownCurrent, anomalyBreakdownComparison]);
+    }, [anomalyMetricBreakdown]);
 
     useEffect(() => {
-        getMetricBreakdownForCurrent(anomalyId, {
-            filters: [
-                ...anomalyFilters.map(
-                    (option) => `${option.key}=${option.value}`
-                ),
-            ],
-        });
-
-        getMetricBreakdownForComparison(anomalyId, {
-            offset: comparisonOffset,
+        getMetricBreakdown(anomalyId, {
+            baselineOffset: comparisonOffset,
             filters: [
                 ...anomalyFilters.map(
                     (option) => `${option.key}=${option.value}`
@@ -402,17 +398,14 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
             </CardContent>
             <CardContent>
                 {/* Loading Indicator when requests are in flight */}
-                {(anomalyBreakdownCurrentReqStatus === ActionStatus.Working ||
-                    anomalyBreakdownComparisonReqStatus ===
-                        ActionStatus.Working) && (
+                {anomalyBreakdownReqStatus === ActionStatus.Working && (
                     <Box pb={20} pt={20}>
                         <AppLoadingIndicatorV1 />
                     </Box>
                 )}
 
                 {/* If breakdownComparisonData is not empty render treemaps */}
-                {anomalyBreakdownCurrentReqStatus === ActionStatus.Done &&
-                    anomalyBreakdownComparisonReqStatus === ActionStatus.Done &&
+                {anomalyBreakdownReqStatus === ActionStatus.Done &&
                     !isEmpty(breakdownComparisonData) &&
                     React.Children.toArray(
                         breakdownComparisonData &&
@@ -441,8 +434,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                     )}
 
                 {/* Indicate no data if breakdown data is missing and requests are complete */}
-                {anomalyBreakdownCurrentReqStatus === ActionStatus.Done &&
-                    anomalyBreakdownComparisonReqStatus === ActionStatus.Done &&
+                {anomalyBreakdownReqStatus === ActionStatus.Done &&
                     isEmpty(breakdownComparisonData) && (
                         <Grid xs={12}>
                             <Box pb={20} pt={20}>

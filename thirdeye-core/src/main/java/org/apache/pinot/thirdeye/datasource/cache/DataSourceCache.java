@@ -1,31 +1,15 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 
 package org.apache.pinot.thirdeye.datasource.cache;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
+import static org.apache.pinot.thirdeye.util.ResourceUtils.badRequest;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.thirdeye.datasource.DataSourcesLoader;
-import org.apache.pinot.thirdeye.spi.ThirdEyeException;
 import org.apache.pinot.thirdeye.spi.ThirdEyeStatus;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.bao.DataSourceManager;
@@ -55,7 +38,7 @@ public class DataSourceCache {
   private final DataSourcesLoader dataSourcesLoader;
   private final ExecutorService executorService;
 
-  private final Map<String, ThirdEyeDataSource> cache = new HashMap<>();
+  private final Map<String, DataSourceWrapper> cache = new HashMap<>();
 
   private final Counter datasourceExceptionCounter;
   private final Counter datasourceDurationCounter;
@@ -76,20 +59,23 @@ public class DataSourceCache {
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {
-    final ThirdEyeDataSource cachedThirdEyeDataSource = cache.get(name);
-    if (cachedThirdEyeDataSource != null) {
-      return cachedThirdEyeDataSource;
-    }
-
     final Optional<DataSourceDTO> dataSource = findByName(name);
-    if (dataSource.isPresent()) {
-      final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource.get());
 
-      requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + name);
-      cache.put(name, thirdEyeDataSource);
-      return thirdEyeDataSource;
+    // datasource absent in DB
+    if(dataSource.isEmpty()) {
+      // remove redundant cache if datasource was recently deleted
+      removeDataSource(name);
+      throw badRequest(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
     }
-    throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
+    final DataSourceWrapper cachedEntry = cache.get(name);
+    if (cachedEntry != null) {
+      if(cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
+        // cache hit
+        return cachedEntry.getDataSource();
+      }
+    }
+    // cache miss
+    return loadDataSource(dataSource.get());
   }
 
   private Optional<DataSourceDTO> findByName(final String name) {
@@ -98,6 +84,27 @@ public class DataSourceCache {
     checkState(results.size() <= 1, "Multiple data sources found with name: " + name);
 
     return results.stream().findFirst();
+  }
+
+  public void removeDataSource(final String name) {
+    Optional.ofNullable(cache.remove(name)).ifPresent(entry -> {
+      try {
+        entry.getDataSource().close();
+      } catch (Exception e) {
+        LOG.error("Datasource {} was not flushed gracefully.", entry.getDataSource().getName());
+      }
+    });
+  }
+
+  private ThirdEyeDataSource loadDataSource(final DataSourceDTO dataSource) {
+    requireNonNull(dataSource);
+    final String dsName = dataSource.getName();
+    final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource);
+    requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + dsName);
+    // remove outdated cached datasource
+    removeDataSource(dsName);
+    cache.put(dsName, new DataSourceWrapper(thirdEyeDataSource, dataSource.getUpdateTime()));
+    return thirdEyeDataSource;
   }
 
   public ThirdEyeResponse getQueryResult(final ThirdEyeRequest request) throws Exception {
@@ -129,8 +136,8 @@ public class DataSourceCache {
   }
 
   public void clear() throws Exception {
-    for (final ThirdEyeDataSource thirdEyeDataSource : cache.values()) {
-      thirdEyeDataSource.close();
+    for (final DataSourceWrapper dataSourceWrapper : cache.values()) {
+      dataSourceWrapper.getDataSource().close();
     }
     cache.clear();
   }

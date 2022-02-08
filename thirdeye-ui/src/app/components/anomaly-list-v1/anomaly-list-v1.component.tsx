@@ -140,6 +140,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             })}
             toolbarComponent={
                 <Button
+                    data-testid="button-delete"
                     disabled={isActionButtonDisable}
                     variant="contained"
                     onClick={handleAnomalyDelete}

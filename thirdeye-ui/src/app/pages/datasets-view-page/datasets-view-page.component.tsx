@@ -107,7 +107,10 @@ export const DatasetsViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={uiDataset ? uiDataset.name : ""} />
+            <PageHeader
+                showCreateButton
+                title={uiDataset ? uiDataset.name : ""}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {/* Dataset */}

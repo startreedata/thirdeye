@@ -88,7 +88,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader showTimeRange title={t("label.anomalies")} />
+            <PageHeader
+                showCreateButton
+                showTimeRange
+                title={t("label.anomalies")}
+            />
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>

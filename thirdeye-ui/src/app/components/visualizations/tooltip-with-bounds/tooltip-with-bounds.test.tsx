@@ -4,7 +4,7 @@ import { TooltipWithBounds } from "./tooltip-with-bounds.component";
 import { TooltipWithBoundsProps } from "./tooltip-with-bounds.interfaces";
 
 describe("TooltipWithBounds", () => {
-    it("component should load title and children correctly", async () => {
+    it("should load title and children correctly", async () => {
         render(
             <TooltipWithBounds {...mockDefaultProps}>
                 <p>TestChildren</p>
@@ -15,7 +15,7 @@ describe("TooltipWithBounds", () => {
         expect(await screen.findByText("TestChildren")).toBeInTheDocument();
     });
 
-    it("component should not load title if tooltip is not open", async () => {
+    it("should not load title if tooltip is not open", async () => {
         const props = { ...mockDefaultProps, open: false };
         render(
             <TooltipWithBounds {...props}>

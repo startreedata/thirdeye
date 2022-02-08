@@ -4,13 +4,13 @@ import { NoDataIndicator } from "./no-data-indicator.component";
 import { NoDataIndicatorProps } from "./no-data-indicator.interfaces";
 
 describe("NoDataIndicator", () => {
-    it("component should load text prop correctly", async () => {
+    it("should load text prop correctly", async () => {
         render(<NoDataIndicator {...mockDefaultProps} />);
 
         expect(await screen.findByText("TestText")).toBeInTheDocument();
     });
 
-    it("component should not load text if it's not passed", async () => {
+    it("should not load text if it's not passed", async () => {
         const props = { ...mockDefaultProps, text: "" };
         render(<NoDataIndicator {...props} />);
 

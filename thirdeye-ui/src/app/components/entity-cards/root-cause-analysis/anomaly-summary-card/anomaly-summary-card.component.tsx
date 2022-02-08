@@ -97,7 +97,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
                                     {uiAnomaly.predicted}
                                 </div>
                                 <div className={anomalySummaryCardStyles.label}>
-                                    {t("label.predicted")}
+                                    {t("label.baseline")}
                                 </div>
                             </Grid>
                         </Grid>

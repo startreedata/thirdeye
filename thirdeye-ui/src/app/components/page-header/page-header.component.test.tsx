@@ -64,5 +64,23 @@ describe("Page Header", () => {
         const timeSelectorContainer = await screen.queryByText("label.today");
 
         expect(timeSelectorContainer).toBeNull();
+
+        const createMenuButton = await screen.queryByText("label.create");
+
+        expect(createMenuButton).toBeNull();
+    });
+
+    it("should render create menu button if showCreateButton is true", () => {
+        render(
+            <Router history={appHistory}>
+                <TimeRangeProvider>
+                    <PageHeader showCreateButton title="Hello world" />
+                </TimeRangeProvider>
+            </Router>
+        );
+
+        const createMenuButton = screen.getByText("label.create");
+
+        expect(createMenuButton).toBeInTheDocument();
     });
 });

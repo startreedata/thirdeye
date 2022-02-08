@@ -36,7 +36,7 @@ export const HomePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={t("label.home")} />
+            <PageHeader showCreateButton title={t("label.home")} />
 
             <PageContentsGridV1>
                 {/* Alerts */}

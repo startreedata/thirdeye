@@ -97,7 +97,10 @@ export const MetricsViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={uiMetric ? uiMetric.name : ""} />
+            <PageHeader
+                showCreateButton
+                title={uiMetric ? uiMetric.name : ""}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {/* Metric */}

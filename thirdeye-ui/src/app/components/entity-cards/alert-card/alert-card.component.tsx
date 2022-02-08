@@ -80,9 +80,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         handleAlertOptionsClose();
     };
 
-    const anomalies: Anomaly[] =
-        props.alertEvaluation.detectionEvaluations
-            .output_AnomalyDetectorResult_0.anomalies;
+    let anomalies: Anomaly[] = [];
+    if (props.alertEvaluation) {
+        anomalies =
+            props.alertEvaluation.detectionEvaluations
+                .output_AnomalyDetectorResult_0.anomalies;
+    }
 
     return (
         <Card variant="outlined">

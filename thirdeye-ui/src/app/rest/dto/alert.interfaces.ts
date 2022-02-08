@@ -4,6 +4,10 @@ import { SubscriptionGroup } from "./subscription-group.interfaces";
 import { User } from "./user.interfaces";
 
 export interface Alert {
+    templateProperties: {
+        dataset: string;
+        metric: string;
+    };
     id: number;
     name: string;
     description: string;

@@ -109,6 +109,7 @@ auth:
 # Do not remove me.
 config:
   description: placeholder for common configs accross coordinator and worker
+  jdbcParameters: allowPublicKeyRetrieval=true&sslMode=DISABLED
 
 # Optional: Enable for ingress
 traefik:

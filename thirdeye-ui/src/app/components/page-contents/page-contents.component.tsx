@@ -25,13 +25,13 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 import { getDocumentTitle } from "../../utils/page/page.util";
 import { AppBreadcrumbsContext } from "../app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppBreadcrumbs } from "../app-breadcrumbs/app-breadcrumbs/app-breadcrumbs.component";
-import { ID_APP_DRAWER } from "../app-drawer/app-drawer.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import { PageContentsProps } from "./page-contents.interfaces";
 import { usePageContentsStyles } from "./page-contents.styles";
 
 const THRESHOLD_SCROLL_TOP_PAGE_CONTENTS = 95;
+const ID_APP_DRAWER = "ID_APP_DRAWER";
 
 export const PageContents: FunctionComponent<PageContentsProps> = (
     props: PageContentsProps

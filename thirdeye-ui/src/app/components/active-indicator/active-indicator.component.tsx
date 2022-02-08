@@ -21,6 +21,7 @@ export const ActiveIndicator: FunctionComponent<ActiveIndicatorProps> = (
     return (
         <span className={activeIndicatorClasses.indicator}>
             <FiberManualRecordIcon
+                data-testid="activity-indicator-icon"
                 fontSize="small"
                 htmlColor={getIndicatorColor()}
             />

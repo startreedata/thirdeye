@@ -42,7 +42,7 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
                 )}
 
                 {/* Create options button */}
-                <CreateMenuButton />
+                {props.showCreateButton && <CreateMenuButton />}
             </PageHeaderActionsV1>
         </PageHeaderV1>
     );

@@ -111,7 +111,10 @@ export const DatasourcesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title={uiDatasource ? uiDatasource.name : ""} />
+            <PageHeader
+                showCreateButton
+                title={uiDatasource ? uiDatasource.name : ""}
+            />
             <PageContentsGridV1>
                 {/* Datasource */}
                 <Grid item xs={12}>

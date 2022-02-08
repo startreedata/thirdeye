@@ -5,10 +5,10 @@ import { VisualizationCardProps } from "./visualization-card.interfaces";
 
 describe("VisualizationCard", () => {
     describe("when the component is maximized", () => {
-        it("happy path", async () => {
+        it("should render expected elements", async () => {
             render(<VisualizationCard {...mockDefaultProps} />);
 
-            expect(mockFunction).toHaveBeenCalled();
+            expect(mockOnMaximizeFunction).toHaveBeenCalled();
             expect(
                 await screen.findByText("TestHelperText")
             ).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe("VisualizationCard", () => {
             } as VisualizationCardProps;
             render(<VisualizationCard {...props} />);
 
-            expect(mockFunction).toHaveBeenCalled();
+            expect(mockOnMaximizeFunction).toHaveBeenCalled();
             expect(
                 screen.queryByText("TestHelperText")
             ).not.toBeInTheDocument();
@@ -41,21 +41,21 @@ describe("VisualizationCard", () => {
         it("should be able to click the refresh button if it's visible", async () => {
             render(<VisualizationCard {...mockDefaultProps} />);
 
-            expect(mockFunction).toHaveBeenCalled();
+            expect(mockOnMaximizeFunction).toHaveBeenCalled();
 
             fireEvent.click(screen.getByTestId("refresh-button-maximized"));
 
-            expect(mockFunction).toHaveBeenCalledTimes(2);
+            expect(mockOnRefreshFunction).toHaveBeenCalledTimes(2);
         });
 
         it("should be able to click the restore button", async () => {
             render(<VisualizationCard {...mockDefaultProps} />);
 
-            expect(mockFunction).toHaveBeenCalled();
+            expect(mockOnMaximizeFunction).toHaveBeenCalled();
 
             fireEvent.click(screen.getByTestId("restore-button-maximized"));
 
-            expect(mockFunction).toHaveBeenCalledTimes(2);
+            expect(mockOnRestoreFunction).toHaveBeenCalledTimes(2);
         });
 
         it("should not show the refresh button if it's variable is true", async () => {
@@ -65,7 +65,7 @@ describe("VisualizationCard", () => {
             } as VisualizationCardProps;
             render(<VisualizationCard {...props} />);
 
-            expect(mockFunction).toHaveBeenCalled();
+            expect(mockOnMaximizeFunction).toHaveBeenCalled();
             expect(
                 screen.queryByTestId("refresh-button-maximized")
             ).not.toBeInTheDocument();
@@ -73,7 +73,7 @@ describe("VisualizationCard", () => {
     });
 
     describe("when the component is not maximized", () => {
-        it("happy path", async () => {
+        it("should render expected elements", async () => {
             const props = {
                 ...mockDefaultProps,
                 maximized: false,
@@ -81,7 +81,7 @@ describe("VisualizationCard", () => {
 
             render(<VisualizationCard {...props} />);
 
-            expect(mockFunction).toHaveBeenCalled();
+            expect(mockOnRestoreFunction).toHaveBeenCalled();
             expect(
                 screen.queryByText("TestHelperText")
             ).not.toBeInTheDocument();
@@ -99,7 +99,7 @@ describe("VisualizationCard", () => {
         });
     });
 
-    it("when the children is not passed in the component", async () => {
+    it("should render fine if the children is not passed in the component", async () => {
         const props = {
             ...mockDefaultProps,
             maximized: false,
@@ -108,7 +108,7 @@ describe("VisualizationCard", () => {
 
         render(<VisualizationCard {...props} />);
 
-        expect(mockFunction).toHaveBeenCalled();
+        expect(mockOnRestoreFunction).toHaveBeenCalled();
         expect(screen.queryByText("TestHelperText")).not.toBeInTheDocument();
         expect(
             screen.queryByTestId("refresh-button-maximized")
@@ -123,7 +123,7 @@ describe("VisualizationCard", () => {
         ).not.toBeInTheDocument();
     });
 
-    it("when the escape button is pressed, onRestore should be called", async () => {
+    it("should call onRestore when the escape button is pressed", async () => {
         const props = {
             ...mockDefaultProps,
             maximized: false,
@@ -138,11 +138,14 @@ describe("VisualizationCard", () => {
             charCode: 27,
         });
 
-        expect(mockFunction).toHaveBeenCalledTimes(1);
+        expect(mockEventListenerFunction).toHaveBeenCalledTimes(1);
     });
 });
 
-const mockFunction = jest.fn();
+const mockOnRefreshFunction = jest.fn();
+const mockOnMaximizeFunction = jest.fn();
+const mockOnRestoreFunction = jest.fn();
+const mockEventListenerFunction = jest.fn();
 
 const mockDefaultProps = {
     maximized: true,
@@ -152,8 +155,8 @@ const mockDefaultProps = {
     error: false,
     helperText: "TestHelperText",
     hideRefreshButton: false,
-    onRefresh: mockFunction,
-    onMaximize: mockFunction,
-    onRestore: mockFunction,
+    onRefresh: mockOnRefreshFunction,
+    onMaximize: mockOnMaximizeFunction,
+    onRestore: mockOnRestoreFunction,
     children: (<p>TestChildren</p>) as ReactNode,
 } as VisualizationCardProps;

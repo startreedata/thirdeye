@@ -125,7 +125,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
     // Legend height
     // Legend items wrap to new line when parent container width is roughly equal to screen width xs
     const legendHeight =
-        props.parentWidth < theme.breakpoints.width("sm")
+        props.parentWidth < theme.breakpoints.values.sm
             ? HEIGHT_LEGEND_XS
             : HEIGHT_LEGEND_SM_UP;
 

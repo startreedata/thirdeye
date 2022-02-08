@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { LogoutPage } from "./logout-page.component";
 
@@ -37,33 +37,25 @@ jest.mock("react-i18next", () => ({
 
 describe("Logout Page", () => {
     it("should set appropriate page breadcrumbs", async () => {
-        act(() => {
-            render(<LogoutPage />);
-        });
+        render(<LogoutPage />);
 
         expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
     it("should set appropriate page title", async () => {
-        act(() => {
-            render(<LogoutPage />);
-        });
+        render(<LogoutPage />);
 
         expect(await screen.findByText("label.logout")).toBeInTheDocument();
     });
 
     it("should logout", async () => {
-        act(() => {
-            render(<LogoutPage />);
-        });
+        render(<LogoutPage />);
 
         expect(mockLogout).toHaveBeenCalled();
     });
 
     it("should render loading indicator", async () => {
-        act(() => {
-            render(<LogoutPage />);
-        });
+        render(<LogoutPage />);
 
         expect(
             await screen.findByText("testAppLoadingIndicatorV1")

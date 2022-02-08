@@ -70,7 +70,7 @@ describe("Page Header", () => {
         expect(createMenuButton).toBeNull();
     });
 
-    it("should render create menu button if showCreateButton is true", async () => {
+    it("should render create menu button if showCreateButton is true", () => {
         render(
             <Router history={appHistory}>
                 <TimeRangeProvider>
@@ -79,7 +79,7 @@ describe("Page Header", () => {
             </Router>
         );
 
-        const createMenuButton = await screen.getByText("label.create");
+        const createMenuButton = screen.getByText("label.create");
 
         expect(createMenuButton).toBeInTheDocument();
     });

@@ -31,7 +31,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
                 {uiAnomaly && (
                     <Grid container spacing={4}>
                         {/* Alert */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item lg={3} sm={6} xs={12}>
                             <div className={anomalySummaryCardStyles.valueText}>
                                 {status === ActionStatus.Working && (
                                     <span>Loading ...</span>
@@ -54,7 +54,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
                         </Grid>
 
                         {/* Current and Predicted */}
-                        <Grid container item md={4} xs={6}>
+                        <Grid container item lg={4} sm={6} xs={12}>
                             <Grid item>
                                 <div
                                     className={
@@ -103,7 +103,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
                         </Grid>
 
                         {/* Start */}
-                        <Grid item md={4} xs={6}>
+                        <Grid item lg={4} sm={6} xs={12}>
                             <div className={anomalySummaryCardStyles.valueText}>
                                 {uiAnomaly.startTime}
                             </div>
@@ -113,7 +113,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
                         </Grid>
 
                         {/* Duration */}
-                        <Grid item md xs={6}>
+                        <Grid item lg sm={6} xs={12}>
                             <div className={anomalySummaryCardStyles.valueText}>
                                 {uiAnomaly.duration}
                             </div>

@@ -45,7 +45,7 @@ describe("VisualizationCard", () => {
 
             fireEvent.click(screen.getByTestId("refresh-button-maximized"));
 
-            expect(mockOnRefreshFunction).toHaveBeenCalledTimes(2);
+            expect(mockOnRefreshFunction).toHaveBeenCalledTimes(1);
         });
 
         it("should be able to click the restore button", async () => {
@@ -55,7 +55,7 @@ describe("VisualizationCard", () => {
 
             fireEvent.click(screen.getByTestId("restore-button-maximized"));
 
-            expect(mockOnRestoreFunction).toHaveBeenCalledTimes(2);
+            expect(mockOnRestoreFunction).toHaveBeenCalledTimes(1);
         });
 
         it("should not show the refresh button if it's variable is true", async () => {
@@ -138,14 +138,13 @@ describe("VisualizationCard", () => {
             charCode: 27,
         });
 
-        expect(mockEventListenerFunction).toHaveBeenCalledTimes(1);
+        expect(mockOnRestoreFunction).toHaveBeenCalledTimes(1);
     });
 });
 
 const mockOnRefreshFunction = jest.fn();
 const mockOnMaximizeFunction = jest.fn();
 const mockOnRestoreFunction = jest.fn();
-const mockEventListenerFunction = jest.fn();
 
 const mockDefaultProps = {
     maximized: true,

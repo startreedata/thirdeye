@@ -95,7 +95,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                 {!props.hideRefreshButton && (
                                     <Grid item>
                                         <IconButton onClick={props.onRefresh}>
-                                            <RefreshIcon />
+                                            <RefreshIcon data-testid="refresh-button-maximized" />
                                         </IconButton>
                                     </Grid>
                                 )}
@@ -105,7 +105,7 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
                                     <IconButton
                                         onClick={handleVisualizationCardRestore}
                                     >
-                                        <FullscreenExitIcon />
+                                        <FullscreenExitIcon data-testid="restore-button-maximized" />
                                     </IconButton>
                                 </Grid>
                             </Grid>
@@ -131,7 +131,10 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
 
             {/* Placeholder while the visualization card is maximized */}
             {maximized && (
-                <div className={visualizationCardClasses.visualizationCard} />
+                <div
+                    className={visualizationCardClasses.visualizationCard}
+                    data-testid="maximized-visualization-card-placeholder"
+                />
             )}
         </>
     );

@@ -13,7 +13,7 @@ spec:
   secretName: {{ include "thirdeye.worker.fullname" . }}-internal-tls
   dnsNames:
   - '*.{{ include "thirdeye.worker.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local'
-  - '*.{{ include "thirdeye.worker.fullname" . }}
+  - '*.{{ include "thirdeye.worker.fullname" . }}'
   - 'localhost'
   issuerRef:
     name: ca

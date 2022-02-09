@@ -37,6 +37,9 @@ export const AppRoute = {
     METRICS_UPDATE: `/configuration/metrics/update/id/${PLACEHOLDER_ROUTE_ID}`,
     LOGIN: "/login",
     LOGOUT: "/logout",
+    ROOT_CAUSE_ANALYSIS: `/root-cause-analysis`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `/root-cause-analysis/anomaly/${PLACEHOLDER_ROUTE_ID}`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX: `/root-cause-analysis/anomaly/${PLACEHOLDER_ROUTE_ID}/index`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -202,6 +205,13 @@ export const getMetricsCreatePath = (): string => {
 
 export const getMetricsUpdatePath = (id: number): string => {
     let path: string = AppRoute.METRICS_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getRootCauseAnalysisForAnomalyPath = (id: number): string => {
+    let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

@@ -17,12 +17,13 @@ data:
       applicationConnectors:
         {{- if .Values.tls.enabled }}
         - type: https
+          port: 443
+          idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
           keyStoreType: {{ .Values.tls.type }}
-        {{- else }}
-        - type: http
         {{- end }}
+        - type: http
           port: {{ .Values.coordinator.port }}
           idleTimeout: 620s
 

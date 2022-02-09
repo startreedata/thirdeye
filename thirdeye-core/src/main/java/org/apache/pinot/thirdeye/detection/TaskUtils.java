@@ -101,11 +101,16 @@ public class TaskUtils {
       final AlertManager detectionConfigManager,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
-    Long id = getIdFromJobKey(jobKey.getName());
-    AlertDTO configDTO = detectionConfigManager.findById(id);
+    final JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
+    final Long id = getIdFromJobKey(jobKey.getName());
+    final AlertDTO alert = detectionConfigManager.findById(id);
 
-    return buildTaskInfoFromDetectionConfig(configDTO,
+    if (alert == null) {
+      // no task needs to be created if alert does not exist!
+      return null;
+    }
+
+    return buildTaskInfoFromDetectionConfig(alert,
         System.currentTimeMillis(),
         thirdEyeCacheRegistry,
         datasetConfigManager,

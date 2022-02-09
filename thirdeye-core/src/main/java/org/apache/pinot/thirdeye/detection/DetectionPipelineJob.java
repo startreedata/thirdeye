@@ -50,6 +50,11 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
         getInstance(ctx, DatasetConfigManager.class),
         getInstance(ctx, MetricConfigManager.class));
 
+    if (taskInfo == null) {
+      // Possible if the alert has been deleted, the task has no use.
+      return;
+    }
+
     final TaskManager taskManager = getInstance(ctx, TaskManager.class);
 
     // if a task is pending and not time out yet, don't schedule more

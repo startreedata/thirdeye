@@ -2,7 +2,7 @@ package org.apache.pinot.thirdeye.detection.v2.operator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-import static org.apache.pinot.thirdeye.alert.AlertEvaluatorV2.EVALUATION_FILTERS_KEY;
+import static org.apache.pinot.thirdeye.alert.AlertEvaluator.EVALUATION_FILTERS_KEY;
 import static org.apache.pinot.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
 
 import java.util.List;

@@ -1,7 +1,8 @@
 package org.apache.pinot.thirdeye.alert;
 
-import static org.apache.pinot.thirdeye.alert.AlertEvaluatorV2.EVALUATION_FILTERS_KEY;
+import static org.apache.pinot.thirdeye.alert.AlertEvaluator.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.apache.pinot.thirdeye.detection.v2.plan.DataFetcherPlanNode;
 import org.apache.pinot.thirdeye.detection.v2.plan.IndexFillerPlanNode;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate;
 import org.apache.pinot.thirdeye.spi.datalayer.Predicate.OPER;
+import org.apache.pinot.thirdeye.spi.datalayer.bao.AlertManager;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
@@ -17,7 +19,7 @@ import org.apache.pinot.thirdeye.spi.detection.v2.TimeseriesFilter;
 import org.apache.pinot.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
 import org.testng.annotations.Test;
 
-public class AlertEvaluatorV2Test {
+public class AlertEvaluatorTest {
 
   private static final String DATASET_NAME = "dataset";
   private static final String ANOMALY_DETECTOR_TYPE = new AnomalyDetectorPlanNode().getType();
@@ -26,7 +28,8 @@ public class AlertEvaluatorV2Test {
 
   @Test
   public void testInjectFilters() {
-    AlertEvaluatorV2 evaluatorV2 = new AlertEvaluatorV2(null, null);
+    AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null,
+        mock(AlertManager.class));
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
         .setRca(new RcaMetadataDTO().setDataset(DATASET_NAME))
         .setNodes(List.of(

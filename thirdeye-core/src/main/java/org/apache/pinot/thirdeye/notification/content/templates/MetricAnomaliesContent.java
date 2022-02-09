@@ -146,31 +146,11 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
         id = config.getId();
       }
 
-      final Properties props = new Properties();
-      props.putAll(anomaly.getProperties());
-      final double lift = BaseNotificationContent
-          .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
-      final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-          getAnomalyURL(anomaly, context.getUiPublicUrl()),
-          getPredictedValue(anomaly),
-          getCurrentValue(anomaly),
-          getFormattedLiftValue(anomaly, lift),
-          getLiftDirection(lift),
-          0d,
-          getDimensionsList(anomaly.getDimensionMap()),
-          getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
+      final AnomalyReportEntity anomalyReport = buildAnomalyReportEntity(
+          anomaly,
           feedbackVal,
           functionName,
-          funcDescription,
-          anomaly.getMetric(),
-          getDateString(anomaly.getStartTime(), dateTimeZone),
-          getDateString(anomaly.getEndTime(), dateTimeZone),
-          getTimezoneString(dateTimeZone),
-          getIssueType(anomaly),
-          anomaly.getType().getLabel(),
-          SpiUtils.encodeCompactedProperties(props),
-          anomaly.getMetricUrn()
-      );
+          funcDescription);
 
       // dimension filters / values
       for (final Map.Entry<String, String> entry : anomaly.getDimensions().entrySet()) {
@@ -241,5 +221,35 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     }*/
 
     return templateData;
+  }
+
+  private AnomalyReportEntity buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
+      final String feedbackVal, final String functionName, final String funcDescription) {
+    final Properties props = new Properties();
+    props.putAll(anomaly.getProperties());
+    final double lift = BaseNotificationContent
+        .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
+    final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
+        getAnomalyURL(anomaly, context.getUiPublicUrl()),
+        getPredictedValue(anomaly),
+        getCurrentValue(anomaly),
+        getFormattedLiftValue(anomaly, lift),
+        getLiftDirection(lift),
+        0d,
+        getDimensionsList(anomaly.getDimensionMap()),
+        getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
+        feedbackVal,
+        functionName,
+        funcDescription,
+        anomaly.getMetric(),
+        getDateString(anomaly.getStartTime(), dateTimeZone),
+        getDateString(anomaly.getEndTime(), dateTimeZone),
+        getTimezoneString(dateTimeZone),
+        getIssueType(anomaly),
+        anomaly.getType().getLabel(),
+        SpiUtils.encodeCompactedProperties(props),
+        anomaly.getMetricUrn()
+    );
+    return anomalyReport;
   }
 }

@@ -86,7 +86,7 @@ public abstract class BaseNotificationContent implements NotificationContent {
   private static final String TIME_ZONE = "timezone";
   private static final String DEFAULT_INCLUDE_SENT_ANOMALY_ONLY = "false";
   private static final String DEFAULT_INCLUDE_SUMMARY = "false";
-  private static final String DEFAULT_DATE_PATTERN = "MMM dd, HH:mm";
+  private static final String DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
   private static final String DEFAULT_TIME_ZONE = "America/Los_Angeles";
   private static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
   static final String RAW_VALUE_FORMAT = "%.0f";

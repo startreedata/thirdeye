@@ -38,7 +38,7 @@
         "name": "baselineDataFetcher",
         "type": "DataFetcher",
         "params": {
-          "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+          "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
           "component.pinot.dataSource": "pinotQuickStartLocal",
           "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" < 20200214 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
           "component.pinot.tableName": "pageviews",
@@ -57,7 +57,7 @@
         "name": "currentDataFetcher",
         "type": "DataFetcher",
         "params": {
-          "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+          "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
           "component.pinot.dataSource": "pinotQuickStartLocal",
           "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200302 AND \"date\" < 20200314 GROUP BY \"date\" ORDER BY \"date\" LIMIT 100",
           "component.pinot.tableName": "pageviews",

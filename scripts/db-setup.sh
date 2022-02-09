@@ -9,7 +9,7 @@ DB_SCRIPTS="${TE_REPO}/thirdeye-persistence/src/main/resources/db"
 DB_INIT_SQL_FILE="${DB_SCRIPTS}/db-init.sql"
 CREATE_SCHEMA_SQL_FILE="${DB_SCRIPTS}/create-schema.sql"
 
-MYSQL_PORT=${MYSQL_PORT:="3308"}
+MYSQL_PORT=${MYSQL_PORT:="3306"}
 MYSQL_HOST=${MYSQL_HOST:="127.0.0.1"}
 
 # Create a database called thirdeye_test for use with thirdeye

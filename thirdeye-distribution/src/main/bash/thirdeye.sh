@@ -38,24 +38,22 @@ for filepath in "${LIB_DIR}"/*; do
 done
 
 if [ -z "$JAVA_OPTS" ] ; then
-  # no java opts: empty string
   ALL_JAVA_OPTS=""
 else
-  # some java opts: add quotes to avoid globbing/word splitting
-  ALL_JAVA_OPTS=$(printf '"%s"' "${JAVA_OPTS}")
+  ALL_JAVA_OPTS="${JAVA_OPTS}"
 fi
 
 function start_server {
   class_ref="ai.startree.thirdeye.ThirdEyeServer"
 
   echo "Starting Thirdeye server.. config_dir: ${CONFIG_DIR}"
-  java ${ALL_JAVA_OPTS} -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/server.yaml
+  java ${ALL_JAVA_OPTS:+"$ALL_JAVA_OPTS"}  -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/server.yaml
 }
 
 function start_ui {
   class_ref="ai.startree.thirdeye.ThirdEyeUiServer"
 
-  java ${ALL_JAVA_OPTS} -cp "${CLASSPATH}" ${class_ref} --port 8081 --proxyHostPort localhost:8080 --resourceBase "${UI_DIR}"
+  java ${ALL_JAVA_OPTS:+"$ALL_JAVA_OPTS"} -cp "${CLASSPATH}" ${class_ref} --port 8081 --proxyHostPort localhost:8080 --resourceBase "${UI_DIR}"
 }
 
 MODE=$1

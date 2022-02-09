@@ -121,25 +121,23 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void executeInternal(final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
-    final DetectionAlertFilterResult result = notificationSchemeFactory
-        .getDetectionAlertFilterResult(subscriptionGroupDTO);
+    final DetectionAlertFilterResult result = requireNonNull(notificationSchemeFactory
+        .getDetectionAlertFilterResult(subscriptionGroupDTO), "DetectionAlertFilterResult is null");
 
-    // TODO: The old UI relies on notified tag to display the anomalies. After the migration
-    // we need to clean up all references to notified tag.
-    for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
-      anomaly.setNotified(true);
-      mergedAnomalyResultManager.update(anomaly);
-    }
-
-    requireNonNull(result);
     if (result.getAllAnomalies().size() == 0) {
-      LOG.debug("Zero anomalies found, skipping webhook alert for {}",
+      LOG.debug("Zero anomalies found, skipping notification for subscription group: {}",
           subscriptionGroupDTO.getId());
       return;
     }
 
+    /* Dispatch notifications */
     notificationDispatcher.dispatch(subscriptionGroupDTO, result);
 
+    /* Record watermarks and update entities */
+    for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
+      anomaly.setNotified(true);
+      mergedAnomalyResultManager.update(anomaly);
+    }
     updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
   }
 }

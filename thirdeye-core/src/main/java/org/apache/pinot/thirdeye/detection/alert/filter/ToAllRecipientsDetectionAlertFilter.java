@@ -47,28 +47,27 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
 
   final Map<String, List<String>> recipients;
-  List<Long> detectionConfigIds;
+  final List<Long> alertIds;
 
-  public ToAllRecipientsDetectionAlertFilter(DataProvider provider,
-      SubscriptionGroupDTO config,
-      long endTime,
+  public ToAllRecipientsDetectionAlertFilter(final DataProvider provider,
+      final SubscriptionGroupDTO config,
+      final long endTime,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
     super(provider, config, endTime, mergedAnomalyResultManager,
         detectionConfigManager);
 
     final Map<String, Object> properties = this.config.getProperties();
-    this.recipients = ConfigUtils.getMap(properties.get(PROP_RECIPIENTS));
-    this.detectionConfigIds = ConfigUtils.getLongs(properties.get(PROP_DETECTION_CONFIG_IDS));
+    recipients = ConfigUtils.getMap(properties.get(PROP_RECIPIENTS));
+    alertIds = ConfigUtils.getLongs(properties.get(PROP_DETECTION_CONFIG_IDS));
   }
 
   @Override
   public DetectionAlertFilterResult run() {
-    DetectionAlertFilterResult result = new DetectionAlertFilterResult();
+    final DetectionAlertFilterResult result = new DetectionAlertFilterResult();
 
     // Fetch all the anomalies to be notified to the recipients
-    Set<MergedAnomalyResultDTO> anomalies = this
-        .filter(makeVectorClocks(detectionConfigIds));
+    final Set<MergedAnomalyResultDTO> anomalies = filter(makeVectorClocks(alertIds));
 
     // Handle legacy recipients yaml syntax
     if (SubscriptionUtils.isEmptyEmailRecipients(config) && CollectionUtils

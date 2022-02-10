@@ -109,7 +109,10 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 startAdornment: (
                     // Search icon
                     <InputAdornment position="start">
-                        <SearchIcon fontSize="small" />
+                        <SearchIcon
+                            data-testid="search-icon-font"
+                            fontSize="small"
+                        />
                     </InputAdornment>
                 ),
                 endAdornment: (
@@ -124,7 +127,10 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                         {/* Clear button */}
                         <InputAdornment position="end">
                             <IconButton onClick={handleClearClick}>
-                                <CloseIcon fontSize="small" />
+                                <CloseIcon
+                                    data-testid="close-icon-font"
+                                    fontSize="small"
+                                />
                             </IconButton>
                         </InputAdornment>
                     </>

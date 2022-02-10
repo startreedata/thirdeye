@@ -1,9 +1,9 @@
 package ai.startree.thirdeye.detection.components;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 
 public class GenericAnomalyDetectorFactory<T extends AbstractSpec> implements

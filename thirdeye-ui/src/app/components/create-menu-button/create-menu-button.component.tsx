@@ -70,10 +70,7 @@ export const CreateMenuButton: FunctionComponent = () => {
         },
     ];
 
-    const handleShortcutCreateOnclick = (
-        id: number | string,
-        _: string
-    ): void => {
+    const handleShortcutCreateOnclick = (id: number | string): void => {
         switch (id) {
             case "createAlert":
                 handleCreateAlert();

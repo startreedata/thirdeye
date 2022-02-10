@@ -8,7 +8,7 @@ import {
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { AppRoute } from "../../utils/routes/routes.util";
-import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
+import { CreateMenuButton } from "../create-menu-button/create-menu-button.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
 
 export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderProps> = (

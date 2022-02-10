@@ -2,7 +2,7 @@ package ai.startree.thirdeye.spi.detection;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 
-public interface AnomalyDetectorV2Result {
+public interface AnomalyDetectorResult {
 
   /**
   * Returns a DataFrame with columns:

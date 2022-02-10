@@ -23,9 +23,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
@@ -76,7 +76,7 @@ public class DetectionRegistry {
   private static final String KEY_CLASS_NAME = "className";
   private static final String KEY_ANNOTATION = "annotation";
   private static final String KEY_IS_BASELINE_PROVIDER = "isBaselineProvider";
-  private static final Map<String, AnomalyDetectorV2Factory> anomalyDetectorV2FactoryMap = new HashMap<>();
+  private static final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
   private static final Map<String, EventTriggerFactory> triggerFactoryMap = new HashMap<>();
 
   static {
@@ -164,22 +164,22 @@ public class DetectionRegistry {
     }
   }
 
-  public void addAnomalyDetectorV2Factory(final AnomalyDetectorV2Factory f) {
-    anomalyDetectorV2FactoryMap.put(f.name(), f);
+  public void addAnomalyDetectorV2Factory(final AnomalyDetectorFactory f) {
+    anomalyDetectorFactoryMap.put(f.name(), f);
   }
 
   public void addEventTriggerFactory(final EventTriggerFactory f) {
     triggerFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyDetectorV2<AbstractSpec> buildDetectorV2(
+  public AnomalyDetector<AbstractSpec> buildDetector(
       String factoryName,
-      AnomalyDetectorFactoryV2Context context) {
-    checkArgument(anomalyDetectorV2FactoryMap.containsKey(factoryName),
+      AnomalyDetectorFactoryContext context) {
+    checkArgument(anomalyDetectorFactoryMap.containsKey(factoryName),
         String.format("Detector type not registered: %s. Available detectors: %s",
             factoryName,
-            anomalyDetectorV2FactoryMap.keySet()));
-    return anomalyDetectorV2FactoryMap.get(factoryName).build(context);
+            anomalyDetectorFactoryMap.keySet()));
+    return anomalyDetectorFactoryMap.get(factoryName).build(context);
   }
 
   public EventTrigger<AbstractSpec> buildTrigger(

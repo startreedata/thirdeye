@@ -1,21 +1,21 @@
 package ai.startree.thirdeye.detection.components;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 
-public class GenericAnomalyDetectorV2Factory<T extends AbstractSpec> implements
-    AnomalyDetectorV2Factory {
+public class GenericAnomalyDetectorFactory<T extends AbstractSpec> implements
+    AnomalyDetectorFactory {
 
   private final String name;
   private final Class<T> specClazz;
-  private final Class<? extends AnomalyDetectorV2<T>> clazz;
+  private final Class<? extends AnomalyDetector<T>> clazz;
 
-  public GenericAnomalyDetectorV2Factory(final String name,
+  public GenericAnomalyDetectorFactory(final String name,
       final Class<T> specClazz,
-      final Class<? extends AnomalyDetectorV2<T>> clazz) {
+      final Class<? extends AnomalyDetector<T>> clazz) {
     this.clazz = clazz;
     this.specClazz = specClazz;
     this.name = name;
@@ -28,9 +28,9 @@ public class GenericAnomalyDetectorV2Factory<T extends AbstractSpec> implements
 
   @SuppressWarnings("unchecked")
   @Override
-  public AnomalyDetectorV2<T> build(final AnomalyDetectorFactoryV2Context context) {
+  public AnomalyDetector<T> build(final AnomalyDetectorFactoryContext context) {
     try {
-      final AnomalyDetectorV2<T> detector = clazz.newInstance();
+      final AnomalyDetector<T> detector = clazz.newInstance();
       detector.init(buildSpec(context));
       return detector;
     } catch (Exception e) {
@@ -38,7 +38,7 @@ public class GenericAnomalyDetectorV2Factory<T extends AbstractSpec> implements
     }
   }
 
-  private T buildSpec(final AnomalyDetectorFactoryV2Context context) {
+  private T buildSpec(final AnomalyDetectorFactoryContext context) {
     return AbstractSpec.fromProperties(context.getProperties(), specClazz);
   }
 

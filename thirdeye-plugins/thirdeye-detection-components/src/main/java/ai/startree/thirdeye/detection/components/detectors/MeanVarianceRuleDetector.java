@@ -33,13 +33,13 @@ import static ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
+import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * History mean and standard deviation based forecasting and detection.
  * Forecast using history mean and standard deviation.
  */
-public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceRuleDetectorSpec>,
+public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRuleDetectorSpec>,
     BaselineProvider<MeanVarianceRuleDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
@@ -86,7 +86,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
   }
 
   @Override
-  public AnomalyDetectorV2Result runDetection(final Interval window,
+  public AnomalyDetectorResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
@@ -99,7 +99,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
     return runDetectionOnSingleDataTable(currentDf, window);
   }
 
-  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
@@ -113,7 +113,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetectorV2<MeanVarianceR
             inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
-    return new SimpleAnomalyDetectorV2Result(inputDf);
+    return new SimpleAnomalyDetectorResult(inputDf);
   }
 
   //todo cyril move this as utils/shared method

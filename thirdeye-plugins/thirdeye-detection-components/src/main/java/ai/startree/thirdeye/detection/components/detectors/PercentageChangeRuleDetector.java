@@ -41,13 +41,13 @@ import static ai.startree.thirdeye.spi.detection.Pattern.valueOf;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
+import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
@@ -60,7 +60,7 @@ import org.joda.time.ReadableInterval;
  * Computes a multi-week aggregate baseline and compares the current value based on relative change.
  */
 public class PercentageChangeRuleDetector implements
-    AnomalyDetectorV2<PercentageChangeRuleDetectorSpec>,
+    AnomalyDetector<PercentageChangeRuleDetectorSpec>,
     BaselineProvider<PercentageChangeRuleDetectorSpec> {
 
   private double percentageChange;
@@ -76,7 +76,7 @@ public class PercentageChangeRuleDetector implements
   }
 
   @Override
-  public AnomalyDetectorV2Result runDetection(final Interval window,
+  public AnomalyDetectorResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap) throws DetectorException {
     final DataTable baseline = requireNonNull(timeSeriesMap.get(KEY_BASELINE), "baseline is null");
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
@@ -91,7 +91,7 @@ public class PercentageChangeRuleDetector implements
     return runDetectionOnSingleDataTable(currentDf, window);
   }
 
-  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     inputDf
         // calculate percentage change
@@ -106,7 +106,7 @@ public class PercentageChangeRuleDetector implements
     addBoundaries(inputDf);
 
     return
-        new SimpleAnomalyDetectorV2Result(inputDf);
+        new SimpleAnomalyDetectorResult(inputDf);
   }
 
   private Series percentageChanges(final DataFrame inputDf) {

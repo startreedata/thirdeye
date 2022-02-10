@@ -1,12 +1,12 @@
 package ai.startree.thirdeye.spi.detection;
 
-public interface AnomalyDetectorV2Factory {
+public interface AnomalyDetectorFactory {
 
   String name();
 
   <T extends AbstractSpec>
-  AnomalyDetectorV2<T> build(
-      AnomalyDetectorFactoryV2Context context);
+  AnomalyDetector<T> build(
+      AnomalyDetectorFactoryContext context);
 
   boolean isBaselineProvider();
 }

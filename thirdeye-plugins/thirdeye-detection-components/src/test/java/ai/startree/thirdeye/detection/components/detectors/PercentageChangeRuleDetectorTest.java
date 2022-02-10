@@ -7,8 +7,8 @@ import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -27,7 +27,7 @@ public class PercentageChangeRuleDetectorTest {
 
   @Test
   public void testNoAnomalies() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -40,8 +40,8 @@ public class PercentageChangeRuleDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
     DataFrame baselineDf = new DataFrame()
         .addSeries(DataFrame.COL_VALUE, 99., 199., 299., 399., 499.);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -50,7 +50,7 @@ public class PercentageChangeRuleDetectorTest {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -97,8 +97,8 @@ public class PercentageChangeRuleDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
     DataFrame baselineDf = new DataFrame()
         .addSeries(DataFrame.COL_VALUE, 10., 10., 10., 10., 10.);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -107,7 +107,7 @@ public class PercentageChangeRuleDetectorTest {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
     BooleanSeries outputTimeSeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
     assertThat(outputTimeSeries.sliceTo(2)).isEqualTo(BooleanSeries.fillValues( 2, BooleanSeries.FALSE));
@@ -128,8 +128,8 @@ public class PercentageChangeRuleDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
     DataFrame baselineDf = new DataFrame()
         .addSeries(DataFrame.COL_VALUE, 130, 199., 299., 310., 390);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -138,7 +138,7 @@ public class PercentageChangeRuleDetectorTest {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -166,8 +166,8 @@ public class PercentageChangeRuleDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
     DataFrame baselineDf = new DataFrame()
         .addSeries(DataFrame.COL_VALUE, 130, 199., 299., 320., 400);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -177,7 +177,7 @@ public class PercentageChangeRuleDetectorTest {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -205,8 +205,8 @@ public class PercentageChangeRuleDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
     DataFrame baselineDf = new DataFrame()
         .addSeries(DataFrame.COL_VALUE, 130, 199., 299., 320., 400);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_BASELINE, SimpleDataTable.fromDataFrame(baselineDf));
 
     PercentageChangeRuleDetectorSpec spec = new PercentageChangeRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -216,7 +216,7 @@ public class PercentageChangeRuleDetectorTest {
     PercentageChangeRuleDetector detector = new PercentageChangeRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 

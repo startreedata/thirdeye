@@ -6,8 +6,8 @@ import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -27,7 +27,7 @@ public class ThresholdRuleDetectorTest {
 
   @Test
   public void testNoAnomalies() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -38,7 +38,7 @@ public class ThresholdRuleDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -49,7 +49,7 @@ public class ThresholdRuleDetectorTest {
     ThresholdRuleDetector detector = new ThresholdRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -94,7 +94,7 @@ public class ThresholdRuleDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -102,7 +102,7 @@ public class ThresholdRuleDetectorTest {
     ThresholdRuleDetector detector = new ThresholdRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
     LongSeries outputTimeSeries = outputDf.getLongs(DataFrame.COL_TIME);
     LongSeries expectedTimeSeries = LongSeries.buildFrom(JANUARY_3_2021,
@@ -123,7 +123,7 @@ public class ThresholdRuleDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 100., 200., 300., 400., 500.);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -134,7 +134,7 @@ public class ThresholdRuleDetectorTest {
     ThresholdRuleDetector detector = new ThresholdRuleDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
 
     DoubleSeries outputValueSeries = outputDf.getDoubles(DataFrame.COL_VALUE);

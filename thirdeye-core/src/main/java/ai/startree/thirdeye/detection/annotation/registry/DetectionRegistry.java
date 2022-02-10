@@ -23,9 +23,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.EventTrigger;

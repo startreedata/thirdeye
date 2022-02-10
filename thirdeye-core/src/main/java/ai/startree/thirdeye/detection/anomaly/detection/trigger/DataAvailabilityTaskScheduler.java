@@ -19,7 +19,6 @@
 
 package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 
-import static ai.startree.thirdeye.detection.TaskUtils.createDataQualityTask;
 import static ai.startree.thirdeye.detection.TaskUtils.createDetectionTask;
 
 import ai.startree.thirdeye.CoreConstants;
@@ -34,7 +33,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
@@ -146,12 +144,6 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
             createDetectionTask(taskInfo, taskManager);
-            if (DetectionUtils.isDataQualityCheckEnabled(detectionConfig)) {
-              createDataQualityTask(taskInfo, taskManager);
-              LOG.info(
-                  "Scheduling a task for data sla check on detection config {} due to the fallback mechanism.",
-                  detectionConfigId);
-            }
 
             detectionIdToLastTaskEndTimeMap.put(detectionConfig.getId(), taskInfo.getEnd());
             ThirdeyeMetricsUtil.eventScheduledTaskFallbackCounter.inc();

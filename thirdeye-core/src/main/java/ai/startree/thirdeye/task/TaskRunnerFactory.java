@@ -20,7 +20,6 @@
 package ai.startree.thirdeye.task;
 
 import ai.startree.thirdeye.spi.task.TaskType;
-import ai.startree.thirdeye.task.runner.DataQualityPipelineTaskRunner;
 import ai.startree.thirdeye.task.runner.DetectionPipelineTaskRunner;
 import ai.startree.thirdeye.task.runner.MonitorTaskRunner;
 import ai.startree.thirdeye.task.runner.NotificationTaskRunner;
@@ -32,7 +31,6 @@ import com.google.inject.Singleton;
 public class TaskRunnerFactory {
 
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
-  private final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner;
   private final NotificationTaskRunner notificationTaskRunner;
   private final OnboardingTaskRunner onboardingTaskRunner;
   private final MonitorTaskRunner monitorTaskRunner;
@@ -40,12 +38,10 @@ public class TaskRunnerFactory {
   @Inject
   public TaskRunnerFactory(
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
-      final DataQualityPipelineTaskRunner dataQualityPipelineTaskRunner,
       final NotificationTaskRunner notificationTaskRunner,
       final OnboardingTaskRunner onboardingTaskRunner,
       final MonitorTaskRunner monitorTaskRunner) {
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
-    this.dataQualityPipelineTaskRunner = dataQualityPipelineTaskRunner;
     this.notificationTaskRunner = notificationTaskRunner;
     this.onboardingTaskRunner = onboardingTaskRunner;
     this.monitorTaskRunner = monitorTaskRunner;
@@ -53,8 +49,6 @@ public class TaskRunnerFactory {
 
   public TaskRunner get(TaskType taskType) {
     switch (taskType) {
-      case DATA_QUALITY:
-        return dataQualityPipelineTaskRunner;
       case DETECTION:
         return detectionPipelineTaskRunner;
       case NOTIFICATION:

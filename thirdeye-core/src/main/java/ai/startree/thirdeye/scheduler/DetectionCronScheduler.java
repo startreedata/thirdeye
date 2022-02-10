@@ -22,11 +22,9 @@ package ai.startree.thirdeye.scheduler;
 import ai.startree.thirdeye.detection.DetectionPipelineJob;
 import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
-import ai.startree.thirdeye.detection.dataquality.DataQualityPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -101,11 +99,6 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
           LOG.debug("Detection config " + config.getId() + " is inactive. Skipping.");
           continue;
         }
-        if (config.isDataAvailabilitySchedule()) {
-          LOG.debug("Detection config " + config.getId()
-              + " is enabled for data availability scheduling. Skipping.");
-          continue;
-        }
 
         try {
           // Schedule detection jobs
@@ -124,24 +117,6 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
             startJob(config, detectionJob);
           }
 
-          // Schedule data quality jobs
-          JobKey dataQualityJobKey = new JobKey(
-              getJobKey(config.getId(), TaskType.DATA_QUALITY),
-              QUARTZ_DETECTION_GROUPER);
-          JobDetail dataQualityJob = JobBuilder.newJob(DataQualityPipelineJob.class)
-              .withIdentity(dataQualityJobKey).build();
-          if (scheduler.checkExists(dataQualityJobKey)) {
-            LOG.info("Detection config " + dataQualityJobKey.getName()
-                + " is already scheduled for data quality");
-            if (isJobUpdated(config, dataQualityJobKey)) {
-              restartJob(config, dataQualityJob);
-            }
-          } else {
-            // todo cyril dead because data quality is never enabled
-            if (DetectionUtils.isDataQualityCheckEnabled(config)) {
-              startJob(config, dataQualityJob);
-            }
-          }
         } catch (Exception e) {
           LOG.error("Error creating/updating job key for detection config {}", config.getId());
         }
@@ -161,10 +136,6 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
             LOG.info("Found a scheduled detection config task, but has been deactivated {}", id);
             stopJob(jobKey);
             continue;
-          }
-          if (detectionDTO.isDataAvailabilitySchedule()) {
-            LOG.info("Found a scheduled pipeline enabled for data availability scheduling.");
-            stopJob(jobKey);
           }
         } catch (Exception e) {
           LOG.error("Error removing job key {}", jobKey);

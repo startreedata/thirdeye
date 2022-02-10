@@ -30,12 +30,6 @@ public class ThirdeyeMetricsUtil {
 
   private static final MetricRegistry metricRegistry = new MetricRegistry();
 
-  public static final Counter dataQualityTaskCounter =
-      metricRegistry.counter("dataQualityTaskCounter");
-  public static final Counter dataQualityTaskSuccessCounter =
-      metricRegistry.counter("dataQualityTaskSuccessCounter");
-  public static final Counter dataQualityTaskExceptionCounter =
-      metricRegistry.counter("dataQualityTaskExceptionCounter");
   public static final Counter couchbaseCallCounter =
       metricRegistry.counter("couchbaseCallCounter");
   public static final Counter couchbaseWriteCounter =

@@ -43,10 +43,6 @@ public class AlertDTO extends AbstractDTO {
   Map<String, Object> componentSpecs;
   DetectionHealth health;
 
-  // Stores properties related to data SLA rules for every metric
-  @Deprecated
-  Map<String, Object> dataQualityProperties;
-
   // The alert template
   AlertTemplateDTO template;
 
@@ -128,14 +124,6 @@ public class AlertDTO extends AbstractDTO {
     this.active = active;
   }
 
-  public Map<String, Object> getDataQualityProperties() {
-    return dataQualityProperties;
-  }
-
-  public void setDataQualityProperties(Map<String, Object> dataQualityProperties) {
-    this.dataQualityProperties = dataQualityProperties;
-  }
-
   public boolean isDataAvailabilitySchedule() {
     return isDataAvailabilitySchedule;
   }
@@ -203,7 +191,6 @@ public class AlertDTO extends AbstractDTO {
         && Objects.equals(cron, that.cron)
         && Objects.equals(name, that.name)
         && Objects.equals(properties, that.properties)
-        && Objects.equals(dataQualityProperties, that.dataQualityProperties)
         && Objects.equals(isDataAvailabilitySchedule, that.isDataAvailabilitySchedule)
         && Objects.equals(taskTriggerFallBackTimeInSec, that.taskTriggerFallBackTimeInSec)
         ;

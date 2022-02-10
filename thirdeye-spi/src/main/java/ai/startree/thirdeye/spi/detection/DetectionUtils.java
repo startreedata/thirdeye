@@ -21,7 +21,6 @@ package ai.startree.thirdeye.spi.detection;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -96,14 +95,6 @@ public class DetectionUtils {
     // Sort by increasing order of anomaly start time
     anomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
     return anomalies;
-  }
-
-  /**
-   * Verify if this detection has data quality checks enabled
-   */
-  public static boolean isDataQualityCheckEnabled(final AlertDTO detectionConfig) {
-    return detectionConfig.getDataQualityProperties() != null
-        && !detectionConfig.getDataQualityProperties().isEmpty();
   }
 
   public static Predicate AND(final Collection<Predicate> predicates) {

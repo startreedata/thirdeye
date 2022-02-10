@@ -3,6 +3,7 @@ import React, { FunctionComponent } from "react";
 
 export interface TreemapProps<Data> {
     name: string;
+    shouldTruncateText?: boolean;
     treemapData: TreemapData<Data>[];
     onDimensionClickHandler?: (
         treeMapNode: HierarchyNode<TreemapData<Data>>

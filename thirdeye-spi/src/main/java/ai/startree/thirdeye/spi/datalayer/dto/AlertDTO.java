@@ -188,6 +188,7 @@ public class AlertDTO extends AbstractDTO {
     this.components = components;
   }
 
+  //fixme make sure equals and hashCode implems are correct
   @Override
   public boolean equals(Object o) {
     if (this == o) {

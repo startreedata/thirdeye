@@ -94,7 +94,7 @@ public class PluginLoader {
       dataSourcesLoader.addThirdEyeDataSourceFactory(f);
     }
     for (AnomalyDetectorFactory f : plugin.getAnomalyDetectorFactories()) {
-      detectionRegistry.addAnomalyDetectorV2Factory(f);
+      detectionRegistry.addAnomalyDetectorFactory(f);
     }
     for (EventTriggerFactory f : plugin.getEventTriggerFactories()) {
       detectionRegistry.addEventTriggerFactory(f);

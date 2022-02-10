@@ -164,7 +164,7 @@ public class DetectionRegistry {
     }
   }
 
-  public void addAnomalyDetectorV2Factory(final AnomalyDetectorFactory f) {
+  public void addAnomalyDetectorFactory(final AnomalyDetectorFactory f) {
     anomalyDetectorFactoryMap.put(f.name(), f);
   }
 

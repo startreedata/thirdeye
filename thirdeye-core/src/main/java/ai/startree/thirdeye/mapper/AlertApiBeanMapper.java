@@ -32,10 +32,6 @@ public class AlertApiBeanMapper {
         .orElse(0L));
     dto.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 
-    optional(api.getNodes())
-        .map(ApiBeanMapper::toAlertNodeMap)
-        .ifPresent(dto::setNodes);
-
     optional(api.getTemplate())
         .map(ApiBeanMapper::toAlertTemplateDto)
         .ifPresent(dto::setTemplate);
@@ -47,10 +43,6 @@ public class AlertApiBeanMapper {
     optional(api.getOwner())
         .map(UserApi::getPrincipal)
         .ifPresent(dto::setCreatedBy);
-
-    if (api.getNodes() != null) {
-      LOG.error("nodes field is not null, but legacy detection config is not supported anymore. Parsing skipped");
-    }
 
     return dto;
   }

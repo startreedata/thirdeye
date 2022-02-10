@@ -4,7 +4,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.detection.v2.plan.PlanNodeFactory;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -28,22 +27,6 @@ public class PlanExecutor {
   @Inject
   public PlanExecutor(final PlanNodeFactory planNodeFactory) {
     this.planNodeFactory = planNodeFactory;
-  }
-
-  /**
-   * For compatibility with Heatmap, legacy pipeline can contain template:rca field
-   * template name and template node is specific to v2.
-   *
-   * todo cyril remove compatibility with v1 later
-   *
-   * @param alert the alert DTO
-   * @return true if this is a v2 alert.
-   */
-  public static boolean isV2Alert(final AlertDTO alert) {
-    if (alert.getTemplate() == null) {
-      return false;
-    }
-    return alert.getTemplate().getName() != null || alert.getTemplate().getNodes() != null;
   }
 
   @VisibleForTesting

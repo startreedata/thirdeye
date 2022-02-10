@@ -38,8 +38,10 @@ public class AlertDTO extends AbstractDTO {
   long lastTuningTimestamp;
   boolean isDataAvailabilitySchedule;
   long taskTriggerFallBackTimeInSec;
+  @Deprecated
   String yaml;
 
+  @Deprecated
   Map<String, Objects> filters;
   List<String> owners;
   Map<String, Object> properties;
@@ -49,10 +51,6 @@ public class AlertDTO extends AbstractDTO {
   // Stores properties related to data SLA rules for every metric
   @Deprecated
   Map<String, Object> dataQualityProperties;
-
-  // The legacy execution dag
-  @Deprecated
-  Map<String, AlertNode> nodes;
 
   // The alert template
   AlertTemplateDTO template;
@@ -182,18 +180,6 @@ public class AlertDTO extends AbstractDTO {
 
   public void setHealth(DetectionHealth health) {
     this.health = health;
-  }
-
-  @Deprecated
-  public Map<String, AlertNode> getNodes() {
-    return nodes;
-  }
-
-  @Deprecated
-  public AlertDTO setNodes(
-      final Map<String, AlertNode> nodes) {
-    this.nodes = nodes;
-    return this;
   }
 
   public AlertTemplateDTO getTemplate() {

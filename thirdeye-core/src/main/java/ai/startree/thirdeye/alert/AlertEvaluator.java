@@ -3,8 +3,6 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detection.v2.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -16,7 +14,6 @@ import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -113,9 +110,6 @@ public class AlertEvaluator {
 
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
-    checkArgument(isV2Evaluation(request.getAlert()),
-        "Support for Legacy detection pipeline has been removed.");
-
     try {
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
@@ -233,22 +227,5 @@ public class AlertEvaluator {
       map.put(String.valueOf(i), detectionEvaluationApi);
     }
     return map;
-  }
-
-  /**
-   * For compatibility with Heatmap, legacy pipeline can contain template:rca field
-   * template name and template node is specific to v2.
-   *
-   * todo cyril remove this check a few months after legacy pipeline is removed
-   */
-  public boolean isV2Evaluation(final AlertApi alert) {
-    if (alert.getId() != null) {
-      AlertDTO alertDTO = ensureExists(alertManager.findById(alert.getId()));
-      return PlanExecutor.isV2Alert(alertDTO);
-    }
-    if (alert.getTemplate() == null) {
-      return false;
-    }
-    return alert.getTemplate().getName() != null || alert.getTemplate().getNodes() != null;
   }
 }

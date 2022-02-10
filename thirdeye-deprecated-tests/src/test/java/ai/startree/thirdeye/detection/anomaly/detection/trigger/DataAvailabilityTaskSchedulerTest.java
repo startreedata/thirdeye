@@ -34,7 +34,6 @@ import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -215,11 +214,9 @@ public class DataAvailabilityTaskSchedulerTest {
 
   @Test
   public void testScheduleOutOfSchedulingWindow() {
-    List<Long> metrics1 = Collections.singletonList(metricId1);
     long oneDayAgo = TEST_TIME - TimeUnit.DAYS.toMillis(1);
     long halfHourAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(30);
     long tenMinAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(10);
-    long detection1 = createDetection(1, metrics1, halfHourAgo, 0);
     List<Long> metrics2 = Arrays.asList(metricId1, metricId2);
     long detection2 = createDetection(2, metrics2, oneDayAgo, 0);
     createDataset(1, TEST_TIME, halfHourAgo);
@@ -250,37 +247,6 @@ public class DataAvailabilityTaskSchedulerTest {
     Assert.assertEquals(waitingTasks.size(), 1);
     Assert.assertEquals(TaskType.DETECTION.toString() + "_" + detection1,
         waitingTasks.get(0).getJobName());
-  }
-
-  @Test
-  public void testDetectionsWithDataAvailabilityRules() {
-    List<Long> metrics1 = Collections.singletonList(metricId1);
-    long oneDayAgo = TEST_TIME - TimeUnit.DAYS.toMillis(1);
-    AlertDTO detection = generateDetectionConfig(1, metrics1, oneDayAgo, 0);
-    Map<String, Object> metricSla = new HashMap<>();
-    Map<String, Object> props = new HashMap<>();
-    props.put("testMetricUrn", metricSla);
-    detection.setDataQualityProperties(props);
-    long detection1 = detectionConfigDAO.save(detection);
-    long halfHourAgo = TEST_TIME - TimeUnit.MINUTES.toMillis(30);
-    createDataset(1, TEST_TIME, halfHourAgo);
-    createDetectionTask(detection1, oneDayAgo - 60_000, TaskStatus.COMPLETED);
-    TaskManager taskManager = TestDbEnv.getInstance().getTaskDAO();
-    dataAvailabilityTaskScheduler.run();
-    List<TaskDTO> tasks = taskManager.findAll();
-    List<TaskDTO> waitingTasks = tasks.stream()
-        .filter(t -> t.getStatus() == TaskStatus.WAITING).collect(
-            Collectors.toList());
-
-    // 2 tasks should be created (detection & availability)
-    Assert.assertEquals(waitingTasks.size(), 2);
-    List<String> jobNames = new ArrayList<>();
-    jobNames.add(waitingTasks.get(0).getJobName());
-    jobNames.add(waitingTasks.get(1).getJobName());
-    Assert.assertTrue(
-        jobNames.contains(TaskType.DETECTION.toString() + "_" + detection1));
-    Assert.assertTrue(
-        jobNames.contains(TaskType.DATA_QUALITY.toString() + "_" + detection1));
   }
 
   @Test

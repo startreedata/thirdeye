@@ -19,7 +19,6 @@
 
 package ai.startree.thirdeye.task;
 
-import static ai.startree.thirdeye.spi.task.TaskType.DATA_QUALITY;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.task.TaskType.MONITOR;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
@@ -45,7 +44,6 @@ public class TaskInfoFactory {
 
   private static final ImmutableMap<TaskType, Class<? extends TaskInfo>> TASK_TYPE_POJO_MAP =
       ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
-          .put(DATA_QUALITY, DetectionPipelineTaskInfo.class)
           .put(DETECTION, DetectionPipelineTaskInfo.class)
           .put(NOTIFICATION, DetectionAlertTaskInfo.class)
           .put(ONBOARDING, OnboardingTaskInfo.class)

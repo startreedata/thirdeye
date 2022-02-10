@@ -86,8 +86,6 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
               && (anomaly.getAnomalyResultSource()
               .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
               anomaly.getAnomalyResultSource()
-                  .equals(AnomalyResultSource.DATA_QUALITY_DETECTION) ||
-              anomaly.getAnomalyResultSource()
                   .equals(AnomalyResultSource.ANOMALY_REPLAY)));
 
       allAnomalies.addAll(anomalies);

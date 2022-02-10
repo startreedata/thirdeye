@@ -28,12 +28,12 @@ import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
+import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -44,7 +44,7 @@ import org.joda.time.ReadableInterval;
 /**
  * Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.
  */
-public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDetectorSpec>,
+public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec>,
     BaselineProvider<ThresholdRuleDetectorSpec> {
 
   private static final String COL_TOO_HIGH = "tooHigh";
@@ -58,7 +58,7 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
   }
 
   @Override
-  public AnomalyDetectorV2Result runDetection(final Interval interval,
+  public AnomalyDetectorResult runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
@@ -85,7 +85,7 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
     return values.lt(spec.getMin());
   }
 
-  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     DataFrame baselineDf = computeBaseline(inputDf);
     inputDf
@@ -96,7 +96,7 @@ public class ThresholdRuleDetector implements AnomalyDetectorV2<ThresholdRuleDet
         .addSeries(COL_TOO_LOW, valueTooLow(inputDf.getDoubles(COL_CURRENT)))
         .mapInPlace(BooleanSeries.HAS_TRUE, COL_ANOMALY, COL_TOO_HIGH, COL_TOO_LOW);
 
-    return new SimpleAnomalyDetectorV2Result(inputDf);
+    return new SimpleAnomalyDetectorResult(inputDf);
   }
 
   private DataFrame computeBaseline(final DataFrame inputDf) {

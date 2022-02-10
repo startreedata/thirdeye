@@ -38,21 +38,10 @@ public class AlertDTO extends AbstractDTO {
   long lastTuningTimestamp;
   boolean isDataAvailabilitySchedule;
   long taskTriggerFallBackTimeInSec;
-  String yaml;
-
-  Map<String, Objects> filters;
   List<String> owners;
   Map<String, Object> properties;
   Map<String, Object> componentSpecs;
   DetectionHealth health;
-
-  // Stores properties related to data SLA rules for every metric
-  @Deprecated
-  Map<String, Object> dataQualityProperties;
-
-  // The legacy execution dag
-  @Deprecated
-  Map<String, AlertNode> nodes;
 
   // The alert template
   AlertTemplateDTO template;
@@ -71,29 +60,12 @@ public class AlertDTO extends AbstractDTO {
     this.owners = owners;
   }
 
-  public Map<String, Objects> getFilters() {
-    return filters;
-  }
-
-  public AlertDTO setFilters(Map<String, Objects> filters) {
-    this.filters = filters;
-    return this;
-  }
-
   public Map<String, Object> getComponentSpecs() {
     return componentSpecs;
   }
 
   public void setComponentSpecs(Map<String, Object> componentSpecs) {
     this.componentSpecs = componentSpecs;
-  }
-
-  public String getYaml() {
-    return yaml;
-  }
-
-  public void setYaml(String yaml) {
-    this.yaml = yaml;
   }
 
   public String getName() {
@@ -152,14 +124,6 @@ public class AlertDTO extends AbstractDTO {
     this.active = active;
   }
 
-  public Map<String, Object> getDataQualityProperties() {
-    return dataQualityProperties;
-  }
-
-  public void setDataQualityProperties(Map<String, Object> dataQualityProperties) {
-    this.dataQualityProperties = dataQualityProperties;
-  }
-
   public boolean isDataAvailabilitySchedule() {
     return isDataAvailabilitySchedule;
   }
@@ -182,18 +146,6 @@ public class AlertDTO extends AbstractDTO {
 
   public void setHealth(DetectionHealth health) {
     this.health = health;
-  }
-
-  @Deprecated
-  public Map<String, AlertNode> getNodes() {
-    return nodes;
-  }
-
-  @Deprecated
-  public AlertDTO setNodes(
-      final Map<String, AlertNode> nodes) {
-    this.nodes = nodes;
-    return this;
   }
 
   public AlertTemplateDTO getTemplate() {
@@ -224,6 +176,7 @@ public class AlertDTO extends AbstractDTO {
     this.components = components;
   }
 
+  //fixme make sure equals and hashCode implems are correct
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -238,8 +191,6 @@ public class AlertDTO extends AbstractDTO {
         && Objects.equals(cron, that.cron)
         && Objects.equals(name, that.name)
         && Objects.equals(properties, that.properties)
-        && Objects.equals(yaml, that.yaml)
-        && Objects.equals(dataQualityProperties, that.dataQualityProperties)
         && Objects.equals(isDataAvailabilitySchedule, that.isDataAvailabilitySchedule)
         && Objects.equals(taskTriggerFallBackTimeInSec, that.taskTriggerFallBackTimeInSec)
         ;
@@ -247,6 +198,6 @@ public class AlertDTO extends AbstractDTO {
 
   @Override
   public int hashCode() {
-    return Objects.hash(cron, name, lastTimestamp, properties, active, yaml);
+    return Objects.hash(cron, name, lastTimestamp, properties, active);
   }
 }

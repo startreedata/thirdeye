@@ -36,14 +36,11 @@ public class DetectionPipelineRunner {
       final long end) throws Exception {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), new Date(start), new Date(end)));
-    if (PlanExecutor.isV2Alert(alert)) {
-      return executeV2Plan(alert, start, end);
-    } else {
-      throw new RuntimeException("V1 detection pipeline is not supported anymore.");
-    }
+
+    return executePlan(alert, start, end);
   }
 
-  private DetectionPipelineResult executeV2Plan(final AlertDTO alert,
+  private DetectionPipelineResult executePlan(final AlertDTO alert,
       final long start,
       final long end) throws Exception {
 

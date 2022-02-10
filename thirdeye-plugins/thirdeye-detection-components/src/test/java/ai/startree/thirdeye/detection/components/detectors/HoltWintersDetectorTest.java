@@ -6,8 +6,8 @@ import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -63,7 +63,7 @@ public class HoltWintersDetectorTest {
 
   @Test
   public void testNoAnomalies() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -76,7 +76,7 @@ public class HoltWintersDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 120, 80, 100, 120, 80)
         .append(historicalData)
         .sortedBy(DataFrame.COL_TIME);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -86,7 +86,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -143,7 +143,7 @@ public class HoltWintersDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 120, 80, 100, 120, 80)
         .append(historicalData)
         .sortedBy(DataFrame.COL_TIME);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -153,7 +153,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
     BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
     // out of window is null
@@ -165,7 +165,7 @@ public class HoltWintersDetectorTest {
 
   @Test
   public void testAnomaliesUpAndDown() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -178,7 +178,7 @@ public class HoltWintersDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
         .append(historicalData)
         .sortedBy(DataFrame.COL_TIME);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -188,7 +188,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -205,7 +205,7 @@ public class HoltWintersDetectorTest {
 
   @Test
   public void testAnomaliesUpOnly() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -218,7 +218,7 @@ public class HoltWintersDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
         .append(historicalData)
         .sortedBy(DataFrame.COL_TIME);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -229,7 +229,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
@@ -246,7 +246,7 @@ public class HoltWintersDetectorTest {
 
   @Test
   public void testAnomaliesDownOnly() throws DetectorException {
-    // test all dataframes columns expected in a AnomalyDetectorV2Result dataframe
+    // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -259,7 +259,7 @@ public class HoltWintersDetectorTest {
         .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
         .append(historicalData)
         .sortedBy(DataFrame.COL_TIME);
-    timeSeriesMap.put(AnomalyDetectorV2.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
@@ -270,7 +270,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
 
-    AnomalyDetectorV2Result output = detector.runDetection(interval, timeSeriesMap);
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 

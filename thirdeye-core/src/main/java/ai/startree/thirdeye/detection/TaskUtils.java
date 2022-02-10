@@ -143,12 +143,6 @@ public class TaskUtils {
         taskManager);
   }
 
-  public static long createDataQualityTask(DetectionPipelineTaskInfo taskInfo,
-      final TaskManager taskManager) {
-    return TaskUtils.createTask(TaskType.DATA_QUALITY, taskInfo,
-        taskManager);
-  }
-
   /**
    * Creates a generic task and saves it.
    */

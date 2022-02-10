@@ -1,17 +1,17 @@
 package ai.startree.thirdeye.detection.components;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 
 /**
- * Simple dataclass for AnomalyDetectorV2Result.
+ * Simple dataclass for AnomalyDetectorResult.
  * Does not perform protective copies.
  * */
-public class SimpleAnomalyDetectorV2Result implements AnomalyDetectorV2Result {
+public class SimpleAnomalyDetectorResult implements AnomalyDetectorResult {
 
   private final DataFrame dataFrame;
 
-  public SimpleAnomalyDetectorV2Result(
+  public SimpleAnomalyDetectorResult(
       final DataFrame dataFrame) {
     this.dataFrame = dataFrame;
   }

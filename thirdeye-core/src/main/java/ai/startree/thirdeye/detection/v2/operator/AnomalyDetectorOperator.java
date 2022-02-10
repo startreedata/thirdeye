@@ -12,9 +12,9 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryV2Context;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
@@ -37,7 +37,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
 
-  private AnomalyDetectorV2<? extends AbstractSpec> detector;
+  private AnomalyDetector<? extends AbstractSpec> detector;
   private AbstractSpec genericDetectorSpec;
 
   public AnomalyDetectorOperator() {
@@ -50,7 +50,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     detector = createDetector(planNode.getParams());
   }
 
-  private AnomalyDetectorV2<? extends AbstractSpec> createDetector(
+  private AnomalyDetector<? extends AbstractSpec> createDetector(
       final Map<String, Object> params) {
     final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
         "Must have 'type' in detector config");
@@ -62,14 +62,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "monitoringGranularity is mandatory in v2 interface");
 
     return new DetectionRegistry()
-        .buildDetectorV2(type, new AnomalyDetectorFactoryV2Context().setProperties(componentSpec));
+        .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 
   @Override
   public void execute() throws Exception {
     for (final Interval interval : getMonitoringWindows()) {
       final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-      final AnomalyDetectorV2Result detectorResult = detector
+      final AnomalyDetectorResult detectorResult = detector
           .runDetection(interval, timeSeriesMap);
 
       DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
@@ -108,7 +108,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   private DetectionResult buildDetectionResult(
-      final AnomalyDetectorV2Result detectorV2Result) {
+      final AnomalyDetectorResult detectorV2Result) {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame(),

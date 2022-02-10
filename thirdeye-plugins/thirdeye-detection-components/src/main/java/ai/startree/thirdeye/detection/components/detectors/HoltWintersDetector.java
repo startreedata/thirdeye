@@ -31,14 +31,14 @@ import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorV2Result;
+import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Result;
+import ai.startree.thirdeye.spi.detection.AnomalyDetector;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * https://otexts.com/fpp2/holt-winters.html
  */
 public class HoltWintersDetector implements BaselineProvider<HoltWintersDetectorSpec>,
-    AnomalyDetectorV2<HoltWintersDetectorSpec> {
+    AnomalyDetector<HoltWintersDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
   private static final String COL_ERROR = "error";
@@ -189,7 +189,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   }
 
   @Override
-  public AnomalyDetectorV2Result runDetection(final Interval interval,
+  public AnomalyDetectorResult runDetection(final Interval interval,
       final Map<String, DataTable> timeSeriesMap
   ) throws DetectorException {
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
@@ -202,7 +202,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     return runDetectionOnSingleDataTable(currentDf, interval);
   }
 
-  private AnomalyDetectorV2Result runDetectionOnSingleDataTable(final DataFrame inputDf,
+  private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
     DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
     inputDf
@@ -217,7 +217,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return
-        new SimpleAnomalyDetectorV2Result(inputDf);
+        new SimpleAnomalyDetectorResult(inputDf);
   }
 
   /**

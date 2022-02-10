@@ -22,7 +22,7 @@ data:
     logging:
       level: INFO
       loggers:
-        org.apache.pinot.thirdeye: DEBUG
+        ai.startree.thirdeye: DEBUG
         org.apache.zookeeper: WARN
 
     auth:
@@ -50,7 +50,7 @@ data:
       enabled: true
 
       # package to scan for jersey resources
-      resourcePackage: org.apache.pinot.thirdeye.resources
+      resourcePackage: ai.startree.thirdeye.resources
 
     # Start the Task Driver. This module runs the detection and notification tasks
     taskDriver:
@@ -88,27 +88,27 @@ data:
         identity:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.NullPipeline
+            className: ai.startree.thirdeye.rootcause.impl.NullPipeline
 
         metricRelated:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.MetricMappingPipeline
+            className: ai.startree.thirdeye.rootcause.impl.MetricMappingPipeline
 
         metricAnalysis:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.MetricAnalysisPipeline
+            className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
 
         metricBreakdown:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.MetricBreakdownPipeline
+            className: ai.startree.thirdeye.rootcause.impl.MetricBreakdownPipeline
 
         metricComponentAnalysis:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
+            className: ai.startree.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
             properties:
               excludeDimensions: [ "environment", "continent" ]
               parallelism: 5
@@ -117,7 +117,7 @@ data:
         eventExperiment:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
             properties:
               strategy: COMPOUND
               k: 500
@@ -126,11 +126,11 @@ data:
         eventHoliday:
           - outputName: METRIC_RELATED
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.MetricAnalysisPipeline
+            className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
 
           - outputName: OUTPUT
             inputNames: [ INPUT, METRIC_RELATED ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
             properties:
               strategy: COMPOUND
               k: 500
@@ -139,7 +139,7 @@ data:
         eventCustom:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
             properties:
               strategy: COMPOUND
               k: 500
@@ -148,9 +148,9 @@ data:
         eventAnomaly:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventsPipeline
+            className: ai.startree.thirdeye.rootcause.impl.AnomalyEventsPipeline
             properties:
-              strategyClass: org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventsPipeline$TimeRangeScoreStrategy
+              strategyClass: ai.startree.thirdeye.rootcause.impl.AnomalyEventsPipeline$TimeRangeScoreStrategy
               strategyProperties:
                 type: HYPERBOLA
               k: 500
@@ -158,12 +158,12 @@ data:
         eventIssue:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.EmptyPipeline
+            className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
 
         eventChange:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
             properties:
               strategy: COMPOUND
               k: 500
@@ -172,7 +172,7 @@ data:
         eventDeployment:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
             properties:
               strategy: COMPOUND
               k: 500
@@ -181,7 +181,7 @@ data:
         eventAC:
           - outputName: OUTPUT
             inputNames: [ INPUT ]
-            className: org.apache.pinot.thirdeye.rootcause.impl.EmptyPipeline
+            className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
 
     cache:
       useInMemoryCache: true
@@ -196,7 +196,7 @@ data:
         cacheDataStoreName: 'couchbase'
         cacheDataSources:
           couchbase:
-            className: org.apache.pinot.thirdeye.detection.cache.CouchbaseCacheDAO
+            className: ai.startree.thirdeye.detection.cache.CouchbaseCacheDAO
             config:
               useCertificateBasedAuthentication: false
               # at least 1 host needed

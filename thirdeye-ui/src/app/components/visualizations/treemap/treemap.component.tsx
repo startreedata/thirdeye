@@ -256,12 +256,15 @@ function TreemapInternal<Data>({
                                                             x={nodeWidth / 2}
                                                             y={nodeHeight / 2}
                                                         >
-                                                            {getShortText(
-                                                                node.data.id ||
-                                                                    EMPTY_STRING_DISPLAY,
-                                                                nodeWidth,
-                                                                nodeHeight
-                                                            )}
+                                                            {props.shouldTruncateText
+                                                                ? getShortText(
+                                                                      node.data
+                                                                          .id ||
+                                                                          EMPTY_STRING_DISPLAY,
+                                                                      nodeWidth,
+                                                                      nodeHeight
+                                                                  )
+                                                                : node.data.id}
                                                         </Text>
                                                     </>
                                                 )}

@@ -22,7 +22,7 @@ server:
 logging:
   level: INFO
   loggers:
-    org.apache.pinot.thirdeye: DEBUG
+    ai.startree.thirdeye: DEBUG
     org.apache.zookeeper: WARN
 
 auth:
@@ -40,4 +40,4 @@ swagger:
   enabled: true
 
   # package to scan for jersey resources
-  resourcePackage: org.apache.pinot.thirdeye.resources
+  resourcePackage: ai.startree.thirdeye.resources

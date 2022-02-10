@@ -17,7 +17,7 @@
           "me@company.com"
         ]
       },
-      "className": "org.apache.pinot.thirdeye.detection.alert.scheme.DetectionEmailAlerter"
+      "className": "ai.startree.thirdeye.detection.alert.scheme.DetectionEmailAlerter"
     }
   },
   "alertSuppressors": {},
@@ -31,7 +31,7 @@
       7590,
       7597
     ],
-    "className": "org.apache.pinot.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter"
+    "className": "ai.startree.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter"
   },
   "owners": [],
   "referenceLinks": {}

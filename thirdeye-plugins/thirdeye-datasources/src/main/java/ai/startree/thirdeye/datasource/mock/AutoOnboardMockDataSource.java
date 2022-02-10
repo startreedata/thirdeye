@@ -11,15 +11,12 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.AutoOnboard;
-import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
-import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,16 +64,11 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
           (Collection<String>) dataset.get("dimensions"));
       Collections.sort(sortedDimensions);
 
-      Period granularity = ConfigUtils
-          .parsePeriod(MapUtils.getString(dataset, "granularity", "1hour"));
-
       DatasetConfigDTO datasetConfig = new DatasetConfigDTO();
       datasetConfig.setDataset(datasetName);
       datasetConfig.setDataSource(this.dataSourceName);
       datasetConfig.setDimensions(sortedDimensions);
       datasetConfig.setTimezone(MapUtils.getString(dataset, "timezone", "America/Los_Angeles"));
-      datasetConfig.setTimeDuration(DataSourceUtils.getTimeDuration(granularity));
-      datasetConfig.setTimeUnit(DataSourceUtils.getTimeUnit(granularity));
 
       datasetConfigs.add(datasetConfig);
 

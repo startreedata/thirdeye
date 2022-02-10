@@ -489,7 +489,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
           DateTimeZone.forID(MapUtils.getString(map, "timezone", "America/Los_Angeles")),
           ConfigUtils.getList(map.get("dimensions")),
           ConfigUtils.getMap(map.get("metrics")),
-          ConfigUtils.parsePeriod(MapUtils.getString(map, "granularity", "1hour")));
+          Period.hours(1));
     }
   }
 

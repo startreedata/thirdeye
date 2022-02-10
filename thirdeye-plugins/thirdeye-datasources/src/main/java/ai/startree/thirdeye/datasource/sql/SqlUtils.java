@@ -12,7 +12,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
@@ -36,7 +35,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
-import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -176,8 +174,6 @@ public class SqlUtils {
     List<String> sortedDimensions = dataset.getDimensions();
     Collections.sort(sortedDimensions);
 
-    Period granularity = ConfigUtils.parsePeriod(dataset.getGranularity());
-
     DatasetConfigDTO datasetConfig = datasetConfigManager.findByDataset(datasetName);
 
     if (datasetConfig == null) {
@@ -188,8 +184,6 @@ public class SqlUtils {
     datasetConfig.setDataSource(SqlThirdEyeDataSource.class.getSimpleName());
     datasetConfig.setDimensions(sortedDimensions);
     datasetConfig.setTimezone(dataset.getTimezone());
-    datasetConfig.setTimeDuration(DataSourceUtils.getTimeDuration(granularity));
-    datasetConfig.setTimeUnit(DataSourceUtils.getTimeUnit(granularity));
     datasetConfig.setTimeColumn(dataset.getTimeColumn());
     datasetConfig.setTimeFormat(dataset.getTimeFormat());
 

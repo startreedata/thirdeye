@@ -58,8 +58,8 @@ public class ThirdEyeServerDebug {
     final DetectionComponentsPlugin detectionComponentsPlugin = new DetectionComponentsPlugin();
 
     detectionComponentsPlugin
-        .getAnomalyDetectorV2Factories()
-        .forEach(detectionRegistry::addAnomalyDetectorV2Factory);
+        .getAnomalyDetectorFactories()
+        .forEach(detectionRegistry::addAnomalyDetectorFactory);
 
     detectionComponentsPlugin
         .getEventTriggerFactories()

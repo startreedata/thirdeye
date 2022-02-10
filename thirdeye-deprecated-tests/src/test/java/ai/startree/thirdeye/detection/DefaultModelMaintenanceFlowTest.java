@@ -98,7 +98,6 @@ public class DefaultModelMaintenanceFlowTest {
         "MOCK_TUNABLE");
     AlertDTO configDTO = new AlertDTO();
     configDTO.setId(this.configId);
-    configDTO.setYaml(String.format("metric: %s\ndataset: %s\n", METRIC_NAME, DATASET_NAME));
     ModelEvaluator evaluator = new MockModelEvaluator();
     MockModelEvaluatorSpec spec = new MockModelEvaluatorSpec();
     spec.setMockModelStatus(ModelStatus.BAD);

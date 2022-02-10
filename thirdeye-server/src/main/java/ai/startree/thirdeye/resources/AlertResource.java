@@ -14,12 +14,8 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.api.AlertNodeApi;
-import ai.startree.thirdeye.spi.api.DatasetApi;
-import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
@@ -32,7 +28,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -59,7 +54,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final String CRON_EVERY_1MIN = "0 */1 * * * ?";
 
-  private final MetricConfigManager metricConfigManager;
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
   private final AlertApiBeanMapper alertApiBeanMapper;
@@ -68,13 +62,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Inject
   public AlertResource(
       final AlertManager alertManager,
-      final MetricConfigManager metricConfigManager,
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
       final AlertEvaluator alertEvaluator) {
     super(alertManager, ImmutableMap.of());
-    this.metricConfigManager = metricConfigManager;
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertApiBeanMapper = alertApiBeanMapper;
@@ -125,22 +117,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Override
   protected AlertApi toApi(final AlertDTO dto) {
-    final AlertApi api = ApiBeanMapper.toApi(dto);
-
-    // Add metric and dataset info
-    optional(api.getNodes())
-        .map(Map::values)
-        .ifPresent(nodes -> nodes.stream()
-            .map(AlertNodeApi::getMetric)
-            .forEach(metricApi -> optional(metricApi)
-                .map(MetricApi::getId)
-                .map(metricConfigManager::findById)
-                .ifPresent(metricDto -> metricApi
-                    .setName(metricDto.getName())
-                    .setDataset(new DatasetApi()
-                        .setName(metricDto.getDataset())))));
-
-    return api;
+    return ApiBeanMapper.toApi(dto);
   }
 
   @Path("{id}/run")

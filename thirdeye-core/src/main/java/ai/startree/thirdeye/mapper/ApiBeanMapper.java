@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertNode;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.ApplicationDTO;
@@ -154,9 +153,6 @@ public abstract class ApiBeanMapper {
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
-        .setNodes(optional(dto.getNodes())
-            .map(ApiBeanMapper::toAlertNodeApiMap)
-            .orElse(null))
         .setTemplate(optional(dto.getTemplate())
             .map(ApiBeanMapper::toAlertTemplateApi)
             .orElse(null))
@@ -170,59 +166,6 @@ public abstract class ApiBeanMapper {
 
   public static AlertTemplateApi toAlertTemplateApi(final AlertTemplateDTO alertTemplateDTO) {
     return AlertTemplateMapper.INSTANCE.toApi(alertTemplateDTO);
-  }
-
-  @Deprecated
-  private static Map<String, AlertNodeApi> toAlertNodeApiMap(
-      final Map<String, AlertNode> nodes) {
-    Map<String, AlertNodeApi> map = new HashMap<>(nodes.size());
-    for (Map.Entry<String, AlertNode> e : nodes.entrySet()) {
-      map.put(e.getKey(), toAlertNodeApi(e.getValue()));
-    }
-    return map;
-  }
-
-  @Deprecated
-  private static AlertNodeApi toAlertNodeApi(final AlertNode dto) {
-    return new AlertNodeApi()
-        .setName(dto.getName())
-        .setType(dto.getType())
-        .setSubType(dto.getSubType())
-        .setDependsOn(dto.getDependsOn())
-        .setParams(dto.getParams())
-        .setMetric(optional(dto.getMetric())
-            .map(ApiBeanMapper::toApi)
-            .map(m -> m // TODO suvodeep fix hack. The
-                .setRollupThreshold(null)
-                .setAggregationFunction(null)
-                .setActive(null))
-            .orElse(null))
-        ;
-  }
-
-  @Deprecated
-  public static Map<String, AlertNode> toAlertNodeMap(
-      final Map<String, AlertNodeApi> nodes) {
-    Map<String, AlertNode> map = new HashMap<>(nodes.size());
-    for (Map.Entry<String, AlertNodeApi> e : nodes.entrySet()) {
-      map.put(e.getKey(), toAlertNode(e.getValue()));
-    }
-    return map;
-  }
-
-  @Deprecated
-  public static AlertNode toAlertNode(final AlertNodeApi api) {
-    return new AlertNode()
-        .setName(api.getName())
-        .setType(api.getType())
-        .setSubType(api.getSubType())
-        .setDependsOn(api.getDependsOn())
-        .setParams(api.getParams())
-        .setMetric(optional(api.getMetric())
-            .map(ApiBeanMapper::toMetricConfigDto)
-            .orElse(null)
-        )
-        ;
   }
 
   public static DatasetConfigDTO toDatasetConfigDto(final DatasetApi api) {

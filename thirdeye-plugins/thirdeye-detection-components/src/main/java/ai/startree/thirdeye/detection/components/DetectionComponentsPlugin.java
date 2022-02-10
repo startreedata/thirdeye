@@ -14,36 +14,36 @@ import ai.startree.thirdeye.detection.components.triggers.ConsoleOutputTrigger;
 import ai.startree.thirdeye.detection.components.triggers.ConsoleOutputTriggerSpec;
 import ai.startree.thirdeye.detection.components.triggers.GenericEventTriggerFactory;
 import ai.startree.thirdeye.spi.Plugin;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import com.google.common.collect.ImmutableList;
 
 public class DetectionComponentsPlugin implements Plugin {
 
   @Override
-  public Iterable<AnomalyDetectorV2Factory> getAnomalyDetectorV2Factories() {
+  public Iterable<AnomalyDetectorFactory> getAnomalyDetectorFactories() {
     return ImmutableList.of(
-        new GenericAnomalyDetectorV2Factory<>(
+        new GenericAnomalyDetectorFactory<>(
             "PERCENTAGE_CHANGE",
             PercentageChangeRuleDetectorSpec.class,
             PercentageChangeRuleDetector.class
         ),
-        new GenericAnomalyDetectorV2Factory<>(
+        new GenericAnomalyDetectorFactory<>(
             "HOLT_WINTERS",
             HoltWintersDetectorSpec.class,
             HoltWintersDetector.class
         ),
-        new GenericAnomalyDetectorV2Factory<>(
+        new GenericAnomalyDetectorFactory<>(
             "ABSOLUTE_CHANGE",
             AbsoluteChangeRuleDetectorSpec.class,
             AbsoluteChangeRuleDetector.class
         ),
-        new GenericAnomalyDetectorV2Factory<>(
+        new GenericAnomalyDetectorFactory<>(
             "THRESHOLD",
             ThresholdRuleDetectorSpec.class,
             ThresholdRuleDetector.class
         ),
-        new GenericAnomalyDetectorV2Factory<>(
+        new GenericAnomalyDetectorFactory<>(
             "MEAN_VARIANCE",
             MeanVarianceRuleDetectorSpec.class,
             MeanVarianceRuleDetector.class

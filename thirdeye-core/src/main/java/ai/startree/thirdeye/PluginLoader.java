@@ -9,7 +9,7 @@ import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
-import ai.startree.thirdeye.spi.detection.AnomalyDetectorV2Factory;
+import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import com.google.inject.Inject;
@@ -93,8 +93,8 @@ public class PluginLoader {
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
       dataSourcesLoader.addThirdEyeDataSourceFactory(f);
     }
-    for (AnomalyDetectorV2Factory f : plugin.getAnomalyDetectorV2Factories()) {
-      detectionRegistry.addAnomalyDetectorV2Factory(f);
+    for (AnomalyDetectorFactory f : plugin.getAnomalyDetectorFactories()) {
+      detectionRegistry.addAnomalyDetectorFactory(f);
     }
     for (EventTriggerFactory f : plugin.getEventTriggerFactories()) {
       detectionRegistry.addEventTriggerFactory(f);

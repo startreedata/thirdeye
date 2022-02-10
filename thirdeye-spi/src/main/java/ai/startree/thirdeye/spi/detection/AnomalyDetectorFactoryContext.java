@@ -2,7 +2,7 @@ package ai.startree.thirdeye.spi.detection;
 
 import java.util.Map;
 
-public class AnomalyDetectorFactoryV2Context {
+public class AnomalyDetectorFactoryContext {
 
   private Map<String, Object> properties;
 
@@ -10,7 +10,7 @@ public class AnomalyDetectorFactoryV2Context {
     return properties;
   }
 
-  public AnomalyDetectorFactoryV2Context setProperties(
+  public AnomalyDetectorFactoryContext setProperties(
       final Map<String, Object> properties) {
     this.properties = properties;
     return this;

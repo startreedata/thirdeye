@@ -17,10 +17,6 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private Date created;
   private Date updated;
   private UserApi owner;
-  private Map<String, List<String>> filters;
-  @Deprecated
-  // legacy detection config field
-  private Map<String, AlertNodeApi> nodes;
   private List<SubscriptionGroupApi> subscriptionGroups;
 
 
@@ -121,28 +117,6 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   public AlertApi setOwner(final UserApi owner) {
     this.owner = owner;
-    return this;
-  }
-
-  public Map<String, List<String>> getFilters() {
-    return filters;
-  }
-
-  public AlertApi setFilters(
-      final Map<String, List<String>> filters) {
-    this.filters = filters;
-    return this;
-  }
-
-  @Deprecated
-  public Map<String, AlertNodeApi> getNodes() {
-    return nodes;
-  }
-
-  @Deprecated
-  public AlertApi setNodes(
-      final Map<String, AlertNodeApi> nodes) {
-    this.nodes = nodes;
     return this;
   }
 

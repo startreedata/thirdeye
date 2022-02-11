@@ -14,11 +14,11 @@ import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesConten
 import ai.startree.thirdeye.notification.formatter.channels.EmailContentBuilder;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.EmailEntityApi;
+import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import ai.startree.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -99,7 +99,7 @@ public class NotificationPayloadBuilder {
     requireNonNull(emailScheme.getTo(), "to field in email scheme is null");
     checkArgument(emailScheme.getTo().size() > 0, "'to' field in email scheme is empty");
 
-    final DetectionAlertFilterRecipients recipients = new DetectionAlertFilterRecipients(
+    final EmailRecipientsApi recipients = new EmailRecipientsApi(
         emailScheme.getTo(),
         emailScheme.getCc(),
         emailScheme.getBcc());

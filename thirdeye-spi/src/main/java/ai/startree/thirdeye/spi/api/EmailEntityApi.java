@@ -5,12 +5,10 @@
 
 package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
-
 public class EmailEntityApi {
 
   private String from;
-  private DetectionAlertFilterRecipients to;
+  private EmailRecipientsApi to;
   private String subject;
   private String htmlContent;
   private String snapshotPath;
@@ -24,12 +22,12 @@ public class EmailEntityApi {
     return this;
   }
 
-  public DetectionAlertFilterRecipients getTo() {
+  public EmailRecipientsApi getTo() {
     return to;
   }
 
   public EmailEntityApi setTo(
-      final DetectionAlertFilterRecipients to) {
+      final EmailRecipientsApi to) {
     this.to = to;
     return this;
   }

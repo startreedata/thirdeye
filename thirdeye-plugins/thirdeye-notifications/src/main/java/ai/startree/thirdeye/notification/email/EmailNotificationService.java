@@ -6,8 +6,8 @@
 package ai.startree.thirdeye.notification.email;
 
 import ai.startree.thirdeye.spi.api.EmailEntityApi;
+import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
-import ai.startree.thirdeye.spi.detection.alert.DetectionAlertFilterRecipients;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
@@ -68,7 +68,7 @@ public class EmailNotificationService implements NotificationService {
   private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
       throws EmailException {
     final HtmlEmail email = new HtmlEmail();
-    final DetectionAlertFilterRecipients recipients = emailEntity.getTo();
+    final EmailRecipientsApi recipients = emailEntity.getTo();
 
     email.setSubject(emailEntity.getSubject());
     email.setFrom(emailEntity.getFrom());

@@ -149,7 +149,8 @@
         "value": "Value",
         "alert-performance": "Alert Performance",
         "root-cause-analysis": "Root Cause Analysis",
-        "heatmap-data": "Heatmap Data"
+        "heatmap-data": "Heatmap Data",
+        "chart-data": "Chart Data"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

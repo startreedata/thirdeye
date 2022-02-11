@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 package ai.startree.thirdeye.detection.v2.operator.sql;
 
 import ai.startree.thirdeye.dataframe.calcite.DataFrameSchema;

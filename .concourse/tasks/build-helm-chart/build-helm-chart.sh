@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Copyright (c) 2022 StarTree Inc. All rights reserved.
+# Confidential and Proprietary Information of StarTree Inc.
+#
+
 if [ -z "$CHART_DIR" ]; then
   echo "CHART_DIR is undefined." 1>&2
   exit 1

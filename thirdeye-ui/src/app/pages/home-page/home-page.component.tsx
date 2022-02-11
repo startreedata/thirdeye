@@ -1,4 +1,6 @@
 import { Grid, useTheme } from "@material-ui/core";
+import GridOnIcon from "@material-ui/icons/GridOn";
+import StorageIcon from "@material-ui/icons/Storage";
 import {
     PageContentsGridV1,
     PageV1,
@@ -93,9 +95,7 @@ export const HomePage: FunctionComponent = () => {
                 <Grid item>
                     <TileButtonV1 href={getDatasetsPath()}>
                         <TileButtonIconV1>
-                            <SubscriptionGroupIcon
-                                fill={theme.palette.primary.main}
-                            />
+                            <GridOnIcon color="primary" />
                         </TileButtonIconV1>
                         <TileButtonTextV1>
                             {t("label.datasets")}
@@ -107,9 +107,7 @@ export const HomePage: FunctionComponent = () => {
                 <Grid item>
                     <TileButtonV1 href={getDatasourcesPath()}>
                         <TileButtonIconV1>
-                            <SubscriptionGroupIcon
-                                fill={theme.palette.primary.main}
-                            />
+                            <StorageIcon color="primary" />
                         </TileButtonIconV1>
                         <TileButtonTextV1>
                             {t("label.datasources")}

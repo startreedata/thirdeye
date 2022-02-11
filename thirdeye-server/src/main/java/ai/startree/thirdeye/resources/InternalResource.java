@@ -15,6 +15,7 @@ import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.notification.NotificationContext;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
+import ai.startree.thirdeye.notification.formatter.channels.EmailContentBuilder;
 import ai.startree.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -114,10 +115,9 @@ public class InternalResource {
   ) {
     ensureExists(alertId, "Query parameter required: alertId !");
     final Map<String, Object> templateData = buildTemplateData(alertId);
-    final String templateName = EmailContentFormatter.TEMPLATE_MAP.get(
-        metricAnomaliesContent.getTemplate());
-
-    final String emailHtml = emailContentFormatter.buildHtml(templateName, templateData);
+    final String emailHtml = new EmailContentBuilder().buildHtml(
+        metricAnomaliesContent.getTemplate(),
+        templateData);
     return Response.ok(emailHtml).build();
   }
 

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
     JSONEditorV1,
@@ -209,7 +209,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                     {evaluationRequestStatus === ActionStatus.Error && (
                         <Card variant="outlined">
                             <CardContent>
-                                <NoDataIndicator />
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator />
+                                </Box>
                             </CardContent>
                         </Card>
                     )}

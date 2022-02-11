@@ -1,4 +1,4 @@
-import { Card, CardContent, Grid, Paper } from "@material-ui/core";
+import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -35,7 +35,11 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         getAnomaly,
         status: getAnomalyRequestStatus,
     } = useGetAnomaly();
-    const { evaluation, getEvaluation } = useGetEvaluation();
+    const {
+        evaluation,
+        getEvaluation,
+        status: getEvaluationRequestStatus,
+    } = useGetEvaluation();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [
         alertEvaluation,
@@ -67,6 +71,17 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     useEffect(() => {
         fetchAlertEvaluation();
     }, [uiAnomaly]);
+
+    useEffect(() => {
+        if (getEvaluationRequestStatus === ActionStatus.Error) {
+            notify(
+                NotificationTypeV1.Error,
+                t("message.error-while-fetching", {
+                    entity: t("label.chart-data"),
+                })
+            );
+        }
+    }, [getEvaluationRequestStatus]);
 
     useEffect(() => {
         if (evaluation && anomaly) {
@@ -143,12 +158,23 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                 {/* Trending */}
                 <Grid item xs={12}>
                     <Paper elevation={0}>
-                        <AlertEvaluationTimeSeriesCard
-                            alertEvaluation={alertEvaluation}
-                            alertEvaluationTimeSeriesHeight={500}
-                            maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                            onRefresh={fetchAlertEvaluation}
-                        />
+                        {getEvaluationRequestStatus === ActionStatus.Error && (
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Box pb={20} pt={20}>
+                                        <NoDataIndicator />
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        )}
+                        {getEvaluationRequestStatus === ActionStatus.Done && (
+                            <AlertEvaluationTimeSeriesCard
+                                alertEvaluation={alertEvaluation}
+                                alertEvaluationTimeSeriesHeight={500}
+                                maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
+                                onRefresh={fetchAlertEvaluation}
+                            />
+                        )}
                     </Paper>
                 </Grid>
 

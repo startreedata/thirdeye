@@ -441,29 +441,6 @@ public abstract class BaseNotificationContent implements NotificationContent {
   /**
    * Taking advantage of event data provider, extract the events around the given start and end time
    *
-   * @param eventTypes the list of event types
-   * @param start the start time of the event, preEventCrawlOffset is added before the given
-   *     date time
-   * @param end the end time of the event, postEventCrawlOffset is added after the given date
-   *     time
-   * @param metricName the affected metric name
-   * @param serviceName the affected service name
-   * @param targetDimensions the affected dimensions
-   * @return a list of related events
-   */
-  protected List<EventDTO> getRelatedEvents(List<EventType> eventTypes, DateTime start,
-      DateTime end, String metricName, String serviceName,
-      Map<String, List<String>> targetDimensions) {
-    List<EventDTO> relatedEvents = new ArrayList<>();
-    for (EventType eventType : eventTypes) {
-      relatedEvents.addAll(getHolidayEvents(start, end, targetDimensions));
-    }
-    return relatedEvents;
-  }
-
-  /**
-   * Taking advantage of event data provider, extract the events around the given start and end time
-   *
    * @param start the start time of the event, preEventCrawlOffset is added before the given
    *     date time
    * @param end the end time of the event, postEventCrawlOffset is added after the given date

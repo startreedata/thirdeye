@@ -145,6 +145,38 @@ public class EmailEntityBuilder {
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
+    final DetectionAlertFilterRecipients recipients = buildDetectionAlertFilterRecipients(
+        sg,
+        sortedAnomalyResults);
+
+    final Properties emailConfig = new Properties();
+    final NotificationContent content = getNotificationContent(emailConfig);
+    final NotificationContext notificationContext = new NotificationContext()
+        .setProperties(emailConfig)
+        .setUiPublicUrl(uiConfig.getExternalUrl());
+    content.init(notificationContext);
+
+    if (Strings.isNullOrEmpty(sg.getFrom())) {
+      final String fromAddress = smtpConfig.getUser();
+      if (Strings.isNullOrEmpty(fromAddress)) {
+        throw new IllegalArgumentException("Invalid sender's email");
+      }
+
+      // TODO spyne Investigate and remove logic where email send is updating dto object temporarily
+      sg.setFrom(fromAddress);
+    }
+
+    final EmailEntityApi emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
+        content,
+        sg,
+        sortedAnomalyResults);
+    return emailEntity
+        .setTo(recipients)
+        .setFrom(sg.getFrom());
+  }
+
+  private DetectionAlertFilterRecipients buildDetectionAlertFilterRecipients(
+      final SubscriptionGroupDTO sg, final List<AnomalyResult> sortedAnomalyResults) {
     final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
 
     if (emailScheme.getTo() == null || emailScheme.getTo().isEmpty()) {
@@ -152,7 +184,6 @@ public class EmailEntityBuilder {
           "No email recipients found in subscription group " + sg.getId());
     }
 
-    final Properties emailConfig = new Properties();
 //    TODO accommodate all required properties in EmailSchemeDto
 //    emailConfig.putAll(ConfigUtils.getMap(sg.getNotificationSchemes().getEmailScheme()));
 
@@ -165,30 +196,6 @@ public class EmailEntityBuilder {
     whitelistRecipients(recipients);
     blacklistRecipients(recipients);
     validateAlert(recipients, sortedAnomalyResults);
-
-    final NotificationContent content = getNotificationContent(emailConfig);
-    final NotificationContext notificationContext = new NotificationContext()
-        .setProperties(emailConfig)
-        .setUiPublicUrl(uiConfig.getExternalUrl());
-    content.init(notificationContext);
-
-    final EmailEntityApi emailEntity = emailContentFormatter.getEmailEntity(notificationContext,
-        content,
-        sg,
-        sortedAnomalyResults);
-    emailEntity.setTo(recipients);
-
-    if (Strings.isNullOrEmpty(sg.getFrom())) {
-      final String fromAddress = smtpConfig.getUser();
-      if (Strings.isNullOrEmpty(fromAddress)) {
-        throw new IllegalArgumentException("Invalid sender's email");
-      }
-
-      // TODO spyne Investigate and remove logic where email send is updating dto object temporarily
-      sg.setFrom(fromAddress);
-    }
-    emailEntity.setFrom(sg.getFrom());
-
-    return emailEntity;
+    return recipients;
   }
 }

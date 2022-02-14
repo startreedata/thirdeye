@@ -76,7 +76,10 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
                         <Grid container alignItems="center" spacing={0}>
                             <Grid item>
                                 {/* Dataset options button */}
-                                <IconButton onClick={handleDatasetOptionsClick}>
+                                <IconButton
+                                    color="secondary"
+                                    onClick={handleDatasetOptionsClick}
+                                >
                                     <MoreVertIcon />
                                 </IconButton>
 

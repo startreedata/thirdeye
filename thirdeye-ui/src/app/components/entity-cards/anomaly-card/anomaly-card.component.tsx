@@ -82,7 +82,10 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                     action={
                         <>
                             {/* Anomaly options button */}
-                            <IconButton onClick={handleAnomalyOptionsClick}>
+                            <IconButton
+                                color="secondary"
+                                onClick={handleAnomalyOptionsClick}
+                            >
                                 <MoreVertIcon />
                             </IconButton>
 

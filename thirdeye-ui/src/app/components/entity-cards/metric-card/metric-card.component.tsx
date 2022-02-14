@@ -101,7 +101,10 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
 
                             <Grid item>
                                 {/* Metric options button */}
-                                <IconButton onClick={handleMetricOptionsClick}>
+                                <IconButton
+                                    color="secondary"
+                                    onClick={handleMetricOptionsClick}
+                                >
                                     <MoreVertIcon />
                                 </IconButton>
 

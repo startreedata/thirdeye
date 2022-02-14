@@ -77,6 +77,7 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
                             <Grid item>
                                 {/* Datasource options button */}
                                 <IconButton
+                                    color="secondary"
                                     onClick={handleDatasourceOptionsClick}
                                 >
                                     <MoreVertIcon />

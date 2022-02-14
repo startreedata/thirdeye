@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
 import ai.startree.thirdeye.spi.detection.annotation.Components;
-import ai.startree.thirdeye.spi.detection.annotation.Tune;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,14 +49,6 @@ public class DetectionRegistry {
   // Deprecated in favor of new plugin implementation
   @Deprecated
   private static final Map<String, Map> REGISTRY_MAP = new HashMap<>();
-
-  // component class name to tuner annotation
-  // Deprecated in favor of new plugin implementation
-  @Deprecated
-  private static final Map<String, Tune> TUNE_MAP = new HashMap<>();
-
-  // yaml pipeline type to yaml converter class name
-  private static final Map<String, String> YAML_MAP = new HashMap<>();
 
   private static final String KEY_CLASS_NAME = "className";
   private static final String KEY_ANNOTATION = "annotation";
@@ -96,11 +87,6 @@ public class DetectionRegistry {
                     BaselineProvider.isBaselineProvider(Class.forName(className))));
             LOG.info("Registered component {} - {}", componentsAnnotation.type(), className);
           }
-          if (annotation instanceof Tune) {
-            Tune tunableAnnotation = (Tune) annotation;
-            TUNE_MAP.put(className, tunableAnnotation);
-            LOG.info("Registered tuner {} - {}", className, tunableAnnotation.tunable());
-          }
         }
       }
     } catch (Exception e) {
@@ -118,33 +104,6 @@ public class DetectionRegistry {
               KEY_IS_BASELINE_PROVIDER,
               BaselineProvider.isBaselineProvider(clazz)));
       LOG.info("Registered component {} {}", type, className);
-    } catch (Exception e) {
-      LOG.warn("Encountered exception when registering component {}", className, e);
-    }
-  }
-
-  public static void registerTunableComponent(String className, String tunable, String type) {
-    try {
-      Class<? extends BaseComponent> clazz = (Class<? extends BaseComponent>) Class
-          .forName(className);
-      REGISTRY_MAP.put(type, ImmutableMap
-          .of(KEY_CLASS_NAME,
-              className,
-              KEY_IS_BASELINE_PROVIDER,
-              BaselineProvider.isBaselineProvider(clazz)));
-      Tune tune = new Tune() {
-        @Override
-        public String tunable() {
-          return tunable;
-        }
-
-        @Override
-        public Class<? extends Annotation> annotationType() {
-          return Tune.class;
-        }
-      };
-      TUNE_MAP.put(className, tune);
-      LOG.info("Registered tunable component {} {}", type, className);
     } catch (Exception e) {
       LOG.warn("Encountered exception when registering component {}", className, e);
     }
@@ -189,32 +148,10 @@ public class DetectionRegistry {
     return MapUtils.getString(REGISTRY_MAP.get(type), KEY_CLASS_NAME);
   }
 
-  /**
-   * is type contained in REGISTRY_MAP.
-   * REGISTRY_MAP is built from annotated classes and doesn't contain any plugins
-   */
-  public boolean isAnnotatedType(String type) {
-    validate(type);
-    return REGISTRY_MAP.containsKey(type);
-  }
 
   private void validate(final String type) {
     requireNonNull(type, "type is null");
     checkArgument(REGISTRY_MAP.containsKey(type), type + " not found in registry");
-  }
-
-  /**
-   * Look up the tunable class name for a component class name
-   *
-   * @return tunable class name
-   */
-  public String lookupTunable(String type) {
-    checkArgument(TUNE_MAP.containsKey(type), type + " not found in registry");
-    return this.lookup(TUNE_MAP.get(type).tunable());
-  }
-
-  public boolean isTunable(String className) {
-    return TUNE_MAP.containsKey(className);
   }
 
   public boolean isBaselineProvider(String type) {
@@ -236,9 +173,5 @@ public class DetectionRegistry {
       }
     }
     return annotations;
-  }
-
-  public String printAnnotations() {
-    return String.join(", ", YAML_MAP.keySet());
   }
 }

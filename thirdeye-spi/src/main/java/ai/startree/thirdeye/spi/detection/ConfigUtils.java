@@ -5,31 +5,18 @@
 
 package ai.startree.thirdeye.spi.detection;
 
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MULTIPLE_DATASETS_FOUND;
-
-import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 
 /**
  * Utility class for (semi-)safely extracting complex config values.
  */
 public class ConfigUtils {
-
-  private static final Pattern PATTERN_PERIOD = Pattern.compile("([0-9]+)\\s*(\\S*)");
 
   private ConfigUtils() {
     // left blank
@@ -177,93 +164,5 @@ public class ConfigUtils {
       }
     }
     return output;
-  }
-
-  /**
-   * Helper for parsing a period string from config (e.g. '3 days', '1min', '3600000')
-   */
-  public static Period parsePeriod(String period) {
-    Matcher m = PATTERN_PERIOD.matcher(period);
-    if (!m.find()) {
-      throw new IllegalArgumentException(
-          String.format("Could not parse period expression '%s'", period));
-    }
-
-    int size = Integer.valueOf(m.group(1).trim());
-
-    PeriodType t = PeriodType.millis();
-    if (m.group(2).length() > 0) {
-      t = parsePeriodType(m.group(2).trim());
-    }
-
-    return new Period().withFieldAdded(t.getFieldType(0), size);
-  }
-
-  /**
-   * Helper for heuristically parsing period unit from config (e.g. 'millis', 'hour', 'd')
-   *
-   * @param type period type string
-   * @return PeriodType
-   */
-  static PeriodType parsePeriodType(String type) {
-    type = type.toLowerCase();
-
-    if (type.startsWith("y") || type.startsWith("a")) {
-      return PeriodType.years();
-    }
-    if (type.startsWith("mo")) {
-      return PeriodType.months();
-    }
-    if (type.startsWith("w")) {
-      return PeriodType.weeks();
-    }
-    if (type.startsWith("d")) {
-      return PeriodType.days();
-    }
-    if (type.startsWith("h")) {
-      return PeriodType.hours();
-    }
-    if (type.startsWith("s")) {
-      return PeriodType.seconds();
-    }
-    if (type.startsWith("mill") || type.startsWith("ms")) {
-      return PeriodType.millis();
-    }
-    if (type.startsWith("m")) {
-      return PeriodType.minutes();
-    }
-
-    throw new IllegalArgumentException(String.format("Invalid period type '%s'", type));
-  }
-
-  /**
-   * Fetch dataset config DTO using the dataset name and data provider. Lookup based on dataset name
-   * first, if not found,
-   * lookup based on the dataset display name.
-   *
-   * @param provider the data provider
-   * @param datasetName the dataset name, can be either dataset's key or display name
-   * @return the dataset config DTO
-   */
-  public static DatasetConfigDTO fetchDatasetConfigDTO(DataProvider provider, String datasetName) {
-    DatasetConfigDTO datasetConfig = provider.fetchDatasets(Collections.singletonList(datasetName))
-        .get(datasetName);
-    // if dataset cannot be located in database by real dataset name (usually the pinot table name), they might be using the display name
-    if (datasetConfig == null) {
-      List<DatasetConfigDTO> datasetConfigs = provider.fetchDatasetByDisplayName(datasetName);
-      if (datasetConfigs.isEmpty()) {
-        throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName);
-      }
-      if (datasetConfigs.size() > 1) {
-        throw new ThirdEyeException(ERR_MULTIPLE_DATASETS_FOUND,
-            datasetName,
-            datasetConfigs.stream()
-                .map(DatasetConfigDTO::getDataset)
-                .collect(Collectors.joining(", "))
-        );
-      }
-      datasetConfig = datasetConfigs.get(0);
-    }
-    return datasetConfig;
   }
 }

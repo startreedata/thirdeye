@@ -11,9 +11,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.DurationFieldType;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -74,53 +71,5 @@ public class ConfigUtilsTest {
     Map<String, String> map = ConfigUtils.getMap(null, defaultMap);
     map.put("key", "value");
     Assert.assertNotEquals(map, defaultMap);
-  }
-
-  @Test
-  public void testPeriodParser() {
-    Assert.assertEquals(ConfigUtils.parsePeriod("3600"),
-        new Period().withField(DurationFieldType.millis(), 3600));
-    Assert.assertEquals(ConfigUtils.parsePeriod("1d"),
-        new Period().withField(DurationFieldType.days(), 1));
-    Assert.assertEquals(ConfigUtils.parsePeriod("2hours"),
-        new Period().withField(DurationFieldType.hours(), 2));
-    Assert.assertEquals(ConfigUtils.parsePeriod("24 hrs"),
-        new Period().withField(DurationFieldType.hours(), 24));
-    Assert.assertEquals(ConfigUtils.parsePeriod("1 year"),
-        new Period().withField(DurationFieldType.years(), 1));
-    Assert.assertEquals(ConfigUtils.parsePeriod("  3   w  "),
-        new Period().withField(DurationFieldType.weeks(), 3));
-  }
-
-  @Test
-  public void testPeriodTypeParser() {
-    Assert.assertEquals(ConfigUtils.parsePeriodType("ms"), PeriodType.millis());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("millis"), PeriodType.millis());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("s"), PeriodType.seconds());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("sec"), PeriodType.seconds());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("secs"), PeriodType.seconds());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("seconds"), PeriodType.seconds());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("m"), PeriodType.minutes());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("min"), PeriodType.minutes());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("mins"), PeriodType.minutes());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("minutes"), PeriodType.minutes());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("h"), PeriodType.hours());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("hour"), PeriodType.hours());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("hours"), PeriodType.hours());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("d"), PeriodType.days());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("day"), PeriodType.days());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("days"), PeriodType.days());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("w"), PeriodType.weeks());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("week"), PeriodType.weeks());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("weeks"), PeriodType.weeks());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("mon"), PeriodType.months());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("mons"), PeriodType.months());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("month"), PeriodType.months());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("months"), PeriodType.months());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("y"), PeriodType.years());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("year"), PeriodType.years());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("years"), PeriodType.years());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("a"), PeriodType.years());
-    Assert.assertEquals(ConfigUtils.parsePeriodType("ans"), PeriodType.years());
   }
 }

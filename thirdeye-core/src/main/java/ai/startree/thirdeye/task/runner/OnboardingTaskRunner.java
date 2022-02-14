@@ -7,13 +7,11 @@ package ai.startree.thirdeye.task.runner;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.yaml.DetectionConfigTuner;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
-import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.task.OnboardingTaskInfo;
@@ -39,18 +37,15 @@ public class OnboardingTaskRunner implements TaskRunner {
 
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DataProvider provider;
   private final DetectionPipelineRunner detectionPipelineRunner;
 
   @Inject
-  public OnboardingTaskRunner(final DataProvider provider,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
+  public OnboardingTaskRunner(final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
       final DetectionPipelineRunner detectionPipelineRunner) {
     this.detectionPipelineRunner = detectionPipelineRunner;
     this.alertManager = alertManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.provider = provider;
   }
 
   @Override
@@ -83,13 +78,7 @@ public class OnboardingTaskRunner implements TaskRunner {
       }
     }
 
-    // re-tune the detection pipeline because tuning is depend on replay result. e.g. algorithm-based alert filter
-    final DetectionConfigTuner detectionConfigTuner = new DetectionConfigTuner(alert, provider);
-    final AlertDTO tunedConfig = detectionConfigTuner
-        .tune(info.getTuningWindowStart(), info.getTuningWindowEnd());
-    alertManager.save(tunedConfig);
-
-    LOG.info("Yaml detection onboarding task for id {} completed", alertId);
+    LOG.info("Detection onboarding task for id {} completed", alertId);
     return Collections.emptyList();
   }
 }

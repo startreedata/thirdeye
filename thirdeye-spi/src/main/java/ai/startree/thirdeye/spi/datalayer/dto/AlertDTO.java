@@ -25,7 +25,6 @@ public class AlertDTO extends AbstractDTO {
   long taskTriggerFallBackTimeInSec;
   List<String> owners;
   Map<String, Object> properties;
-  Map<String, Object> componentSpecs;
   DetectionHealth health;
 
   // The alert template
@@ -43,14 +42,6 @@ public class AlertDTO extends AbstractDTO {
 
   public void setOwners(List<String> owners) {
     this.owners = owners;
-  }
-
-  public Map<String, Object> getComponentSpecs() {
-    return componentSpecs;
-  }
-
-  public void setComponentSpecs(Map<String, Object> componentSpecs) {
-    this.componentSpecs = componentSpecs;
   }
 
   public String getName() {

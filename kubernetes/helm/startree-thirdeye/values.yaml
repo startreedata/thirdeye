@@ -109,6 +109,7 @@ auth:
 # Do not remove me.
 config:
   description: placeholder for common configs accross coordinator and worker
+  jdbcParameters: allowPublicKeyRetrieval=true&sslMode=DISABLED
 
 # Optional: Enable for ingress
 traefik:
@@ -118,6 +119,7 @@ traefik:
 
 # Persistence layer configuration
 mysql:
+  imageTag: 8.0.28
   mysqlRootPassword: password
   mysqlUser: uthirdeye
   mysqlPassword: pass

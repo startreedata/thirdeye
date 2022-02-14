@@ -67,7 +67,7 @@ public class HappyPathTest {
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
-  private static final String MYSQL_DOCKER_IMAGE = "mysql:5.7.37";
+  private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
   private static final String INGESTION_JOB_SPEC_FILENAME = "batch-job-spec.yml";
   private static final String SCHEMA_FILENAME = "schema.json";
@@ -137,7 +137,7 @@ public class HappyPathTest {
         resourceFilePath("happypath/config/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", persistenceDbContainer.getJdbcUrl() + "?autoreconnect=true"),
+        config("database.url", persistenceDbContainer.getJdbcUrl() + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED"),
         config("database.user", persistenceDbContainer.getUsername()),
         config("database.password", persistenceDbContainer.getPassword()),
         config("database.driver", persistenceDbContainer.getDriverClassName())
@@ -225,7 +225,6 @@ public class HappyPathTest {
 
     Response response = request("api/alerts/evaluate")
         .post(Entity.json(alertEvaluationApi));
-
     assertThat(response.getStatus()).isEqualTo(200);
   }
 

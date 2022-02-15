@@ -27,13 +27,13 @@ describe("Datasources Util", () => {
     });
 
     it("getUiDatasource should return empty UI datasource for invalid datasource", () => {
-        expect(getUiDatasource((null as unknown) as Datasource)).toEqual(
+        expect(getUiDatasource(null as unknown as Datasource)).toEqual(
             mockEmptyUiDatasource
         );
     });
 
     it("getUiDatasources should return empty array for invalid datasources", () => {
-        expect(getUiDatasources((null as unknown) as Datasource[])).toEqual([]);
+        expect(getUiDatasources(null as unknown as Datasource[])).toEqual([]);
     });
 
     it("getUiDatasources should return empty array for empty datasources", () => {
@@ -55,7 +55,7 @@ describe("Datasources Util", () => {
     it("filterDatasources should return empty array for invalid UI datasources", () => {
         expect(
             filterDatasources(
-                (null as unknown) as UiDatasource[],
+                null as unknown as UiDatasource[],
                 mockSearchWords
             )
         ).toEqual([]);
@@ -67,7 +67,7 @@ describe("Datasources Util", () => {
 
     it("filterDatasources should return appropriate UI datasources for UI datasources and invalid search words", () => {
         expect(
-            filterDatasources(mockUiDatasources, (null as unknown) as string[])
+            filterDatasources(mockUiDatasources, null as unknown as string[])
         ).toEqual(mockUiDatasources);
     });
 

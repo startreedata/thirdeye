@@ -19,9 +19,8 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     props: DatasetListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedDataset, setSelectedDataset] = useState<
-        DataGridSelectionModelV1<UiDataset>
-    >();
+    const [selectedDataset, setSelectedDataset] =
+        useState<DataGridSelectionModelV1<UiDataset>>();
     const history = useHistory();
 
     const handleDatasetDelete = (): void => {

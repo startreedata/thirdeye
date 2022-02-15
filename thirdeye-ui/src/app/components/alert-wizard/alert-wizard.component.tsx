@@ -42,10 +42,8 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         JSON.stringify(editableAlert || createDefaultAlert())
     );
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [
-        detectionConfigurationError,
-        setDetectionConfigurationError,
-    ] = useState(false);
+    const [detectionConfigurationError, setDetectionConfigurationError] =
+        useState(false);
     const [
         detectionConfigurationHelperText,
         setDetectionConfigurationHelperText,
@@ -55,10 +53,8 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         SubscriptionGroup[]
     >([]);
     const [selecteddSubs, setSelectedSubs] = useState<SubscriptionGroup[]>([]);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
         AlertWizardStep.DETECTION_CONFIGURATION
     );

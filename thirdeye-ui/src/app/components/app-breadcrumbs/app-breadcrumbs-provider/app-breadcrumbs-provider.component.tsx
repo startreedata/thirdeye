@@ -7,9 +7,9 @@ import {
     UseAppBreadcrumbsProps,
 } from "./app-breadcrumbs-provider.interfaces";
 
-export const AppBreadcrumbsProvider: FunctionComponent<AppBreadcrumbsProviderProps> = (
-    props: AppBreadcrumbsProviderProps
-) => {
+export const AppBreadcrumbsProvider: FunctionComponent<
+    AppBreadcrumbsProviderProps
+> = (props: AppBreadcrumbsProviderProps) => {
     const [
         routerBreadcrumbs,
         pageBreadcrumbs,

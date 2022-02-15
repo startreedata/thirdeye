@@ -29,10 +29,8 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
     props: MetricCardProps
 ) => {
     const metricCardClasses = useMetricCardStyles();
-    const [
-        metricOptionsAnchorElement,
-        setMetricOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
+    const [metricOptionsAnchorElement, setMetricOptionsAnchorElement] =
+        useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 

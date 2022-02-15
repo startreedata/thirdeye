@@ -6,7 +6,8 @@ import { useAlertEvaluationTimeSeriesTooltipStyles } from "../alert-evaluation-t
 import { TreemapData } from "./treemap.interfaces";
 
 function GenericTreemapTooltip<Data>(props: TreemapData<Data>): JSX.Element {
-    const alertEvaluationTimeSeriesTooltipClasses = useAlertEvaluationTimeSeriesTooltipStyles();
+    const alertEvaluationTimeSeriesTooltipClasses =
+        useAlertEvaluationTimeSeriesTooltipStyles();
 
     return (
         <Grid

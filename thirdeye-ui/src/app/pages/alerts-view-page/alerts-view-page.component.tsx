@@ -48,10 +48,8 @@ export const AlertsViewPage: FunctionComponent = () => {
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
@@ -237,7 +235,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                             <JSONEditorV1
                                 readOnly
                                 value={
-                                    (uiAlert.alert as unknown) as Record<
+                                    uiAlert.alert as unknown as Record<
                                         string,
                                         unknown
                                     >

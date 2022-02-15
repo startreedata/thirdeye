@@ -24,10 +24,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
     const [newDataset, setNewDataset] = useState<Dataset>(
         props.dataset || createEmptyDataset()
     );
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasetWizardStep>(DatasetWizardStep.DATASET_PROPERTIES);
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasetWizardStep>(DatasetWizardStep.DATASET_PROPERTIES);
     const { t } = useTranslation();
 
     useEffect(() => {

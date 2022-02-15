@@ -65,9 +65,9 @@ const HEIGHT_LEGEND_XS = 55;
 const HEIGHT_LEGEND_SM_UP = 25;
 
 // Simple wrapper to capture parent container dimensions
-export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSeriesProps> = (
-    props: AlertEvaluationTimeSeriesProps
-) => {
+export const AlertEvaluationTimeSeries: FunctionComponent<
+    AlertEvaluationTimeSeriesProps
+> = (props: AlertEvaluationTimeSeriesProps) => {
     return (
         <ParentSize>
             {(parent) => (
@@ -82,10 +82,11 @@ export const AlertEvaluationTimeSeries: FunctionComponent<AlertEvaluationTimeSer
     );
 };
 
-const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSeriesInternalProps> = (
-    props: AlertEvaluationTimeSeriesInternalProps
-) => {
-    const alertEvaluationTimeSeriesClasses = useAlertEvaluationTimeSeriesStyles();
+const AlertEvaluationTimeSeriesInternal: FunctionComponent<
+    AlertEvaluationTimeSeriesInternalProps
+> = (props: AlertEvaluationTimeSeriesInternalProps) => {
+    const alertEvaluationTimeSeriesClasses =
+        useAlertEvaluationTimeSeriesStyles();
     const [
         {
             loading,
@@ -112,13 +113,8 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         upperAndLowerBoundPlotVisible: false,
         anomaliesPlotVisible: true,
     });
-    const {
-        tooltipTop,
-        tooltipLeft,
-        tooltipData,
-        showTooltip,
-        hideTooltip,
-    } = useTooltip<AlertEvaluationTimeSeriesTooltipPoint>();
+    const { tooltipTop, tooltipLeft, tooltipData, showTooltip, hideTooltip } =
+        useTooltip<AlertEvaluationTimeSeriesTooltipPoint>();
     const brushRef = useRef<BaseBrush>(null);
     const theme = useTheme();
 
@@ -236,9 +232,8 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             return;
         }
 
-        const newAlertEvaluationTimeSeriesPoints = getAlertEvaluationTimeSeriesPoints(
-            props.alertEvaluation
-        );
+        const newAlertEvaluationTimeSeriesPoints =
+            getAlertEvaluationTimeSeriesPoints(props.alertEvaluation);
         const newAlertEvaluationAnomalies = getAlertEvaluationAnomalies(
             props.alertEvaluation
         );
@@ -259,8 +254,10 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             payload: {
                 loading: false,
                 noData: false,
-                alertEvaluationTimeSeriesPoints: newAlertEvaluationTimeSeriesPoints,
-                filteredAlertEvaluationTimeSeriesPoints: newAlertEvaluationTimeSeriesPoints,
+                alertEvaluationTimeSeriesPoints:
+                    newAlertEvaluationTimeSeriesPoints,
+                filteredAlertEvaluationTimeSeriesPoints:
+                    newAlertEvaluationTimeSeriesPoints,
                 alertEvaluationAnomalies: newAlertEvaluationAnomalies,
                 filteredAlertEvaluationAnomalies: newAlertEvaluationAnomalies,
             },
@@ -334,10 +331,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             }
 
             // Get data at this point
-            const alertEvaluationTimeSeriesPoint = getAlertEvaluationTimeSeriesPointAtTime(
-                filteredAlertEvaluationTimeSeriesPoints,
-                xValue.getTime()
-            );
+            const alertEvaluationTimeSeriesPoint =
+                getAlertEvaluationTimeSeriesPointAtTime(
+                    filteredAlertEvaluationTimeSeriesPoints,
+                    xValue.getTime()
+                );
             if (!alertEvaluationTimeSeriesPoint) {
                 hideTooltip();
 
@@ -377,8 +375,10 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                 dispatch({
                     type: AlertEvaluationTimeSeriesStateAction.UPDATE,
                     payload: {
-                        filteredAlertEvaluationTimeSeriesPoints: alertEvaluationTimeSeriesPoints,
-                        filteredAlertEvaluationAnomalies: alertEvaluationAnomalies,
+                        filteredAlertEvaluationTimeSeriesPoints:
+                            alertEvaluationTimeSeriesPoints,
+                        filteredAlertEvaluationAnomalies:
+                            alertEvaluationAnomalies,
                     },
                 });
 
@@ -386,11 +386,12 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             }
 
             // Filter time series based on brush selection
-            const newFilteredAlertEvaluationTimeSeriesPoints = filterAlertEvaluationTimeSeriesPointsByTime(
-                alertEvaluationTimeSeriesPoints,
-                domain.x0,
-                domain.x1
-            );
+            const newFilteredAlertEvaluationTimeSeriesPoints =
+                filterAlertEvaluationTimeSeriesPointsByTime(
+                    alertEvaluationTimeSeriesPoints,
+                    domain.x0,
+                    domain.x1
+                );
             // Filter anomalies based on brush selection
             const newFilteredAlertEvaluationAnomalies = filterAnomaliesByTime(
                 alertEvaluationAnomalies,
@@ -401,8 +402,10 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
             dispatch({
                 type: AlertEvaluationTimeSeriesStateAction.UPDATE,
                 payload: {
-                    filteredAlertEvaluationTimeSeriesPoints: newFilteredAlertEvaluationTimeSeriesPoints,
-                    filteredAlertEvaluationAnomalies: newFilteredAlertEvaluationAnomalies,
+                    filteredAlertEvaluationTimeSeriesPoints:
+                        newFilteredAlertEvaluationTimeSeriesPoints,
+                    filteredAlertEvaluationAnomalies:
+                        newFilteredAlertEvaluationAnomalies,
                 },
             });
         }, 1),
@@ -415,32 +418,28 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         switch (alertEvaluationTimeSeriesPlotLine) {
             case AlertEvaluationTimeSeriesPlotLine.CURRENT: {
                 dispatch({
-                    type:
-                        AlertEvaluationTimeSeriesStateAction.TOGGLE_CURRENT_PLOT_VISIBLE,
+                    type: AlertEvaluationTimeSeriesStateAction.TOGGLE_CURRENT_PLOT_VISIBLE,
                 });
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlotLine.BASELINE: {
                 dispatch({
-                    type:
-                        AlertEvaluationTimeSeriesStateAction.TOGGLE_BASELINE_PLOT_VISIBLE,
+                    type: AlertEvaluationTimeSeriesStateAction.TOGGLE_BASELINE_PLOT_VISIBLE,
                 });
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlotLine.UPPER_AND_LOWER_BOUND: {
                 dispatch({
-                    type:
-                        AlertEvaluationTimeSeriesStateAction.TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE,
+                    type: AlertEvaluationTimeSeriesStateAction.TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE,
                 });
 
                 break;
             }
             case AlertEvaluationTimeSeriesPlotLine.ANOMALIES: {
                 dispatch({
-                    type:
-                        AlertEvaluationTimeSeriesStateAction.TOGGLE_ANOMALIES_PLOT_VISIBLE,
+                    type: AlertEvaluationTimeSeriesStateAction.TOGGLE_ANOMALIES_PLOT_VISIBLE,
                 });
 
                 break;
@@ -553,8 +552,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                                 fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
                                 fillOpacity: 0.4,
                                 strokeOpacity: 1,
-                                stroke:
-                                    Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
                                 strokeWidth:
                                     Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
                             }}

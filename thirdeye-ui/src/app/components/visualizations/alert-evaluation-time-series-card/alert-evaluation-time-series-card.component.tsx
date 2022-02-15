@@ -13,10 +13,11 @@ import { VisualizationCard } from "../visualization-card/visualization-card.comp
 import { AlertEvaluationTimeSeriesCardProps } from "./alert-evaluation-time-series-card.interfaces";
 import { useAlertEvaluationTimeSeriesCardStyles } from "./alert-evaluation-time-series-card.styles";
 
-export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTimeSeriesCardProps> = (
-    props: AlertEvaluationTimeSeriesCardProps
-) => {
-    const alertEvaluationTimeSeriesCardClasses = useAlertEvaluationTimeSeriesCardStyles();
+export const AlertEvaluationTimeSeriesCard: FunctionComponent<
+    AlertEvaluationTimeSeriesCardProps
+> = (props: AlertEvaluationTimeSeriesCardProps) => {
+    const alertEvaluationTimeSeriesCardClasses =
+        useAlertEvaluationTimeSeriesCardStyles();
 
     return (
         <Card variant="outlined">

@@ -30,7 +30,9 @@ import { TimeRangeSelectorControls } from "../time-range-selector/time-range-sel
 import { TimeRangeSelectorPopoverProps } from "./time-range-selector-popover-content.interfaces";
 import { useTimeRangeSelectorPopoverStyles } from "./time-range-selector-popover-content.styles";
 
-export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelectorPopoverProps> = ({
+export const TimeRangeSelectorPopoverContent: FunctionComponent<
+    TimeRangeSelectorPopoverProps
+> = ({
     timeRangeDuration,
     onClose,
     ...props
@@ -39,12 +41,10 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelecto
     const commonClasses = useCommonStyles();
     const { t } = useTranslation();
 
-    const [
-        componentTimeRangeDuration,
-        setComponentTimeRangeDuration,
-    ] = useState<TimeRangeDuration>(
-        timeRangeDuration || getDefaultTimeRangeDuration()
-    );
+    const [componentTimeRangeDuration, setComponentTimeRangeDuration] =
+        useState<TimeRangeDuration>(
+            timeRangeDuration || getDefaultTimeRangeDuration()
+        );
 
     /**
      * Update the timerange if it externally changes

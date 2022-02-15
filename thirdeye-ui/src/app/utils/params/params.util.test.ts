@@ -95,9 +95,7 @@ describe("Params Util", () => {
 
     it("setTimeRangeDurationInQueryString should not set invalid time range duration in query string", () => {
         location.search = "";
-        setTimeRangeDurationInQueryString(
-            (null as unknown) as TimeRangeDuration
-        );
+        setTimeRangeDurationInQueryString(null as unknown as TimeRangeDuration);
 
         expect(location.search).toEqual("");
     });
@@ -163,7 +161,7 @@ describe("Params Util", () => {
 
     it("setQueryString should not set query string for invalid key", () => {
         location.search = "";
-        setQueryString((null as unknown) as string, "testValue");
+        setQueryString(null as unknown as string, "testValue");
 
         expect(location.search).toEqual("");
     });
@@ -213,7 +211,7 @@ describe("Params Util", () => {
     });
 
     it("isValidNumberId should return false for invalid string", () => {
-        expect(isValidNumberId((null as unknown) as string)).toBeFalsy();
+        expect(isValidNumberId(null as unknown as string)).toBeFalsy();
     });
 
     it("isValidNumberId should return false for empty string", () => {

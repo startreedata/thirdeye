@@ -43,7 +43,9 @@ import {
 } from "./anomaly-breakdown-comparison-heatmap.utils";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
-export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = ({
+export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
+    AnomalyBreakdownComparisonHeatmapProps
+> = ({
     anomalyId,
     comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
     anomaly,
@@ -74,7 +76,8 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
             return;
         }
 
-        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] = [];
+        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
+            [];
 
         if (anomalyFilterOptions.length === 0) {
             let optionsMenu: AnomalyFilterOption[] = [];
@@ -96,22 +99,18 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
         Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
             (dimensionColumnName) => {
-                const [
-                    currentTotal,
-                    currentDimensionValuesData,
-                ] = summarizeDimensionValueData(
-                    anomalyMetricBreakdown.current.breakdown[
-                        dimensionColumnName
-                    ]
-                );
-                const [
-                    baselineTotal,
-                    baselineDimensionValuesData,
-                ] = summarizeDimensionValueData(
-                    anomalyMetricBreakdown.baseline.breakdown[
-                        dimensionColumnName
-                    ]
-                );
+                const [currentTotal, currentDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.current.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
+                const [baselineTotal, baselineDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.baseline.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
                 const dimensionComparisonData: {
                     [key: string]: AnomalyBreakdownComparisonData;
                 } = {};

@@ -26,7 +26,8 @@ export const alertEvaluationTimeSeriesReducer = (
 
                 return;
             case AlertEvaluationTimeSeriesStateAction.TOGGLE_UPPER_AND_LOWER_BOUND_PLOT_VISIBLE:
-                draft.upperAndLowerBoundPlotVisible = !draft.upperAndLowerBoundPlotVisible;
+                draft.upperAndLowerBoundPlotVisible =
+                    !draft.upperAndLowerBoundPlotVisible;
 
                 return;
             case AlertEvaluationTimeSeriesStateAction.TOGGLE_ANOMALIES_PLOT_VISIBLE:

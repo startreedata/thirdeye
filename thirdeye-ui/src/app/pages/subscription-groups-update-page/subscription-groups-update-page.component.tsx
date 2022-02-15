@@ -27,10 +27,8 @@ import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [
-        subscriptionGroup,
-        setSubscriptionGroup,
-    ] = useState<SubscriptionGroup>();
+    const [subscriptionGroup, setSubscriptionGroup] =
+        useState<SubscriptionGroup>();
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<SubscriptionGroupsUpdatePageParams>();

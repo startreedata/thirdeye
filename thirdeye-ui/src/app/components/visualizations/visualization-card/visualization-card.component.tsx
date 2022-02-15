@@ -120,9 +120,12 @@ export const VisualizationCard: FunctionComponent<VisualizationCardProps> = (
 
                 <CardContent
                     className={classnames({
-                        [visualizationCardClasses.visualizationCardContentsMaximized]: maximized,
-                        [visualizationCardClasses.visualizationCardContents]: !maximized,
-                        [commonClasses.cardContentBottomPaddingRemoved]: !maximized,
+                        [visualizationCardClasses.visualizationCardContentsMaximized]:
+                            maximized,
+                        [visualizationCardClasses.visualizationCardContents]:
+                            !maximized,
+                        [commonClasses.cardContentBottomPaddingRemoved]:
+                            !maximized,
                     })}
                 >
                     {props.children}

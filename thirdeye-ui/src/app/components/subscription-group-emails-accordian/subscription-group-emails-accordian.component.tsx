@@ -11,9 +11,9 @@ import { validateEmail } from "../../utils/validation/validation.util";
 import { EditableList } from "../editable-list/editable-list.component";
 import { SubscriptionGroupEmailsAccordianProps } from "./subscription-group-emails-accordian.interfaces";
 
-export const SubscriptionGroupEmailsAccordian: FunctionComponent<SubscriptionGroupEmailsAccordianProps> = (
-    props: SubscriptionGroupEmailsAccordianProps
-) => {
+export const SubscriptionGroupEmailsAccordian: FunctionComponent<
+    SubscriptionGroupEmailsAccordianProps
+> = (props: SubscriptionGroupEmailsAccordianProps) => {
     const { t } = useTranslation();
 
     return (

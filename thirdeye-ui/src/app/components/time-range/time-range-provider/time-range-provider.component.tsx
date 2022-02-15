@@ -16,15 +16,12 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
     props: TimeRangeProviderProps
 ) => {
     const [loading, setLoading] = useState(true);
-    const [
-        timeRangeDuration,
-        setTimeRangeDuration,
-        refreshTimeRange,
-    ] = useTimeRangeStore((state) => [
-        state.timeRangeDuration,
-        state.setTimeRangeDuration,
-        state.refreshTimeRange,
-    ]);
+    const [timeRangeDuration, setTimeRangeDuration, refreshTimeRange] =
+        useTimeRangeStore((state) => [
+            state.timeRangeDuration,
+            state.setTimeRangeDuration,
+            state.refreshTimeRange,
+        ]);
     const location = useLocation();
 
     useEffect(() => {
@@ -53,7 +50,8 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
 
     const initTimeRange = (): void => {
         // Pick up time range duration from query string
-        const queryStringTimeRageDuration = getTimeRangeDurationFromQueryString();
+        const queryStringTimeRageDuration =
+            getTimeRangeDurationFromQueryString();
         // If time range duration from query string is available and different from current time
         // range duration, update it to time range store as a custom time range duration
         if (

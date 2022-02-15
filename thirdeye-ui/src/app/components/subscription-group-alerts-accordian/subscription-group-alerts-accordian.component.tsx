@@ -17,9 +17,9 @@ import {
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupAlertsAccordianProps } from "./subscription-group-alerts-accordian.interfaces";
 
-export const SubscriptionGroupAlertsAccordian: FunctionComponent<SubscriptionGroupAlertsAccordianProps> = (
-    props: SubscriptionGroupAlertsAccordianProps
-) => {
+export const SubscriptionGroupAlertsAccordian: FunctionComponent<
+    SubscriptionGroupAlertsAccordianProps
+> = (props: SubscriptionGroupAlertsAccordianProps) => {
     const history = useHistory();
     const { t } = useTranslation();
 

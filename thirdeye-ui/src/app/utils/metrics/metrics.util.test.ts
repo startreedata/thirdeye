@@ -33,7 +33,7 @@ describe("Metrics Util", () => {
     });
 
     it("getUiMetric should return empty UI metric for invalid metric", () => {
-        expect(getUiMetric((null as unknown) as Metric)).toEqual(
+        expect(getUiMetric(null as unknown as Metric)).toEqual(
             mockEmptyUiMetric
         );
     });
@@ -43,7 +43,7 @@ describe("Metrics Util", () => {
     });
 
     it("getUiMetrics should return empty array for invalid metric", () => {
-        expect(getUiMetrics((null as unknown) as Metric[])).toEqual([]);
+        expect(getUiMetrics(null as unknown as Metric[])).toEqual([]);
     });
 
     it("getUiMetrics should return empty array for empty metrics", () => {
@@ -56,7 +56,7 @@ describe("Metrics Util", () => {
 
     it("filterMetrics should return empty array for invalid UI metrics", () => {
         expect(
-            filterMetrics((null as unknown) as UiMetric[], mockSearchWords)
+            filterMetrics(null as unknown as UiMetric[], mockSearchWords)
         ).toEqual([]);
     });
 
@@ -66,7 +66,7 @@ describe("Metrics Util", () => {
 
     it("filterMetrics should return appropriate UI metrics for UI metrics and invalid search words", () => {
         expect(
-            filterMetrics(mockUiMetrics, (null as unknown) as string[])
+            filterMetrics(mockUiMetrics, null as unknown as string[])
         ).toEqual(mockUiMetrics);
     });
 

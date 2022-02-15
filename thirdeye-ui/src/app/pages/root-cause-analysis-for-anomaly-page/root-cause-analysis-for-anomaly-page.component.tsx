@@ -41,16 +41,13 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         status: getEvaluationRequestStatus,
     } = useGetEvaluation();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { notify } = useNotificationProviderV1();
-    const {
-        id: anomalyId,
-    } = useParams<RootCauseAnalysisForAnomalyPageParams>();
+    const { id: anomalyId } =
+        useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { t } = useTranslation();
     const pageTitle = `${t("label.root-cause-analysis")}: ${t(
         "label.anomaly"

@@ -13,7 +13,7 @@ function LinkCell<T>(props: LinkCellProps<T>): ReactElement {
     const [align, setAlign] = useState("");
 
     useEffect(() => {
-        setValue(props.params && ((props.params.value as unknown) as T));
+        setValue(props.params && (props.params.value as unknown as T));
         setRowId(
             toNumber(props.params && props.params.row && props.params.row.id)
         );

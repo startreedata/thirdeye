@@ -29,20 +29,16 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
     const [newDatasourceJSON, setNewDatasourceJSON] = useState(
         JSON.stringify(props.datasource || createDefaultDatasource())
     );
-    const [
-        datasourceConfigurationError,
-        setDatasourceConfigurationError,
-    ] = useState(false);
+    const [datasourceConfigurationError, setDatasourceConfigurationError] =
+        useState(false);
     const [
         datasourceConfigurationHelperText,
         setDatasourceConfigurationHelperText,
     ] = useState("");
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasourceWizardStep>(
-        DatasourceWizardStep.DATASOURCE_CONFIGURATION
-    );
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasourceWizardStep>(
+            DatasourceWizardStep.DATASOURCE_CONFIGURATION
+        );
     const { t } = useTranslation();
 
     const onDatasourceConfigurationChange = (value: string): void => {

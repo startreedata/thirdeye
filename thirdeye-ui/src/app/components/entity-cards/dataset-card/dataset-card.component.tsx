@@ -24,10 +24,8 @@ import { DatasetCardProps } from "./dataset-card.interfaces";
 export const DatasetCard: FunctionComponent<DatasetCardProps> = (
     props: DatasetCardProps
 ) => {
-    const [
-        datasetOptionsAnchorElement,
-        setDatasetOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
+    const [datasetOptionsAnchorElement, setDatasetOptionsAnchorElement] =
+        useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 

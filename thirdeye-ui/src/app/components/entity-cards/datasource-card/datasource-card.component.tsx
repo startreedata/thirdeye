@@ -24,10 +24,8 @@ import { DatasourceCardProps } from "./datasource-card.interfaces";
 export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
     props: DatasourceCardProps
 ) => {
-    const [
-        datasourceOptionsAnchorElement,
-        setDatasourceOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
+    const [datasourceOptionsAnchorElement, setDatasourceOptionsAnchorElement] =
+        useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 

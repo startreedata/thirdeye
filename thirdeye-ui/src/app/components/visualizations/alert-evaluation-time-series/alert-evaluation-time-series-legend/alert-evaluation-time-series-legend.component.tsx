@@ -10,10 +10,11 @@ import { AlertEvaluationTimeSeriesPlotLine } from "../alert-evaluation-time-seri
 import { AlertEvaluationTimeSeriesLegendProps } from "./alert-evaluation-time-series-legend.interfaces";
 import { useAlertEvaluationTimeSeriesLegendStyles } from "./alert-evaluation-time-series-legend.styles";
 
-export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationTimeSeriesLegendProps> = (
-    props: AlertEvaluationTimeSeriesLegendProps
-) => {
-    const alertEvaluationTimeSeriesLegendClasses = useAlertEvaluationTimeSeriesLegendStyles();
+export const AlertEvaluationTimeSeriesLegend: FunctionComponent<
+    AlertEvaluationTimeSeriesLegendProps
+> = (props: AlertEvaluationTimeSeriesLegendProps) => {
+    const alertEvaluationTimeSeriesLegendClasses =
+        useAlertEvaluationTimeSeriesLegendStyles();
     const theme = useTheme();
     const { t } = useTranslation();
 
@@ -119,9 +120,10 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<AlertEvaluationT
                                         className={classnames(
                                             alertEvaluationTimeSeriesLegendClasses.legendLabel,
                                             {
-                                                [alertEvaluationTimeSeriesLegendClasses.legendLabelDisabled]: !getLegendItemState(
-                                                    label.text as AlertEvaluationTimeSeriesPlotLine
-                                                ),
+                                                [alertEvaluationTimeSeriesLegendClasses.legendLabelDisabled]:
+                                                    !getLegendItemState(
+                                                        label.text as AlertEvaluationTimeSeriesPlotLine
+                                                    ),
                                             }
                                         )}
                                     >

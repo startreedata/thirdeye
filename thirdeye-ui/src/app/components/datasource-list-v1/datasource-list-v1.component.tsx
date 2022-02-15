@@ -19,9 +19,8 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedDatasource, setSelectedDatasource] = useState<
-        DataGridSelectionModelV1<UiDatasource>
-    >();
+    const [selectedDatasource, setSelectedDatasource] =
+        useState<DataGridSelectionModelV1<UiDatasource>>();
     const history = useHistory();
 
     const handleDatasourceDelete = (): void => {

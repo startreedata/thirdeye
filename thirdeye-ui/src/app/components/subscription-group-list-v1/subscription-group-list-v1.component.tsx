@@ -15,13 +15,12 @@ import {
 } from "../../utils/routes/routes.util";
 import { SubscriptionGroupListV1Props } from "./subscription-group-list-v1.interfaces";
 
-export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1Props> = (
-    props: SubscriptionGroupListV1Props
-) => {
+export const SubscriptionGroupListV1: FunctionComponent<
+    SubscriptionGroupListV1Props
+> = (props: SubscriptionGroupListV1Props) => {
     const { t } = useTranslation();
-    const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] = useState<
-        DataGridSelectionModelV1<UiSubscriptionGroup>
-    >();
+    const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] =
+        useState<DataGridSelectionModelV1<UiSubscriptionGroup>>();
     const history = useHistory();
 
     const handleSubscriptionGroupDelete = (): void => {

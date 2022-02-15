@@ -18,9 +18,9 @@ import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { createEmptyDataset } from "../../../utils/datasets/datasets.util";
 import { DatasetPropertiesFormProps } from "./dataset-properties-form.interfaces";
 
-export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps> = (
-    props: DatasetPropertiesFormProps
-) => {
+export const DatasetPropertiesForm: FunctionComponent<
+    DatasetPropertiesFormProps
+> = (props: DatasetPropertiesFormProps) => {
     const { t } = useTranslation();
     const defaultValues = props.dataset || createEmptyDataset();
     const { register, handleSubmit, errors, control } = useForm<Dataset>({

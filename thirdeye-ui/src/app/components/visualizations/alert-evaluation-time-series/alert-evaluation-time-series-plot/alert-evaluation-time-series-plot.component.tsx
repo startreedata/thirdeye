@@ -5,9 +5,9 @@ import { Palette } from "../../../../utils/material-ui/palette.util";
 import { AnomaliesPlot } from "../../anomalies-plot/anomalies-plot.component";
 import { AlertEvaluationTimeSeriesPlotProps } from "./alert-evaluation-time-series-plot.interfaces";
 
-export const AlertEvaluationTimeSeriesPlot: FunctionComponent<AlertEvaluationTimeSeriesPlotProps> = (
-    props: AlertEvaluationTimeSeriesPlotProps
-) => {
+export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
+    AlertEvaluationTimeSeriesPlotProps
+> = (props: AlertEvaluationTimeSeriesPlotProps) => {
     return (
         <>
             {/* Anomalies */}

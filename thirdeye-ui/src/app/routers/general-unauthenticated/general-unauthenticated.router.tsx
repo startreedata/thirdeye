@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { AppLoadingIndicatorV1 } from "../../components/platform-ui/components";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRoute, getLoginPath } from "../../utils/routes/routes.util";
 
 const LoginPage = lazy(() =>

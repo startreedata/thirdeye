@@ -56,6 +56,11 @@ data:
     swagger:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
       enabled: true
+      schemes:
+        - http
+        {{- if .Values.tls.enabled }}
+        - https
+        {{- end }}
 
       # package to scan for jersey resources
       resourcePackage: ai.startree.thirdeye.resources

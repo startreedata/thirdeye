@@ -7,7 +7,7 @@ import {
     PageHeaderV1,
     PageNotFoundIndicatorV1,
     PageV1,
-} from "../../components/platform-ui/components";
+} from "../../platform/components";
 
 export const PageNotFoundPage: FunctionComponent = () => {
     const { t } = useTranslation();

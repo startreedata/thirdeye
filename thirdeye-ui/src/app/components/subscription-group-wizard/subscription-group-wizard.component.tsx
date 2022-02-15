@@ -2,6 +2,7 @@ import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
@@ -19,7 +20,6 @@ import {
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { validateEmail } from "../../utils/validation/validation.util";
 import { EditableList } from "../editable-list/editable-list.component";
-import { PageContentsCardV1, StepperV1 } from "../platform-ui/components";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
 import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";
@@ -32,22 +32,18 @@ import { useSubscriptionGroupWizardStyles } from "./subscription-group-wizard.st
 const FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES =
     "FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES";
 
-export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardProps> = (
-    props: SubscriptionGroupWizardProps
-) => {
+export const SubscriptionGroupWizard: FunctionComponent<
+    SubscriptionGroupWizardProps
+> = (props: SubscriptionGroupWizardProps) => {
     const subscriptionGroupWizardClasses = useSubscriptionGroupWizardStyles();
-    const [
-        newSubscriptionGroup,
-        setNewSubscriptionGroup,
-    ] = useState<SubscriptionGroup>(
-        props.subscriptionGroup || createEmptySubscriptionGroup()
-    );
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<SubscriptionGroupWizardStep>(
-        SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
-    );
+    const [newSubscriptionGroup, setNewSubscriptionGroup] =
+        useState<SubscriptionGroup>(
+            props.subscriptionGroup || createEmptySubscriptionGroup()
+        );
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<SubscriptionGroupWizardStep>(
+            SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
+        );
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -82,32 +78,28 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
     ): void => {
         // Update subscription group with subscribed alerts
-        setNewSubscriptionGroup(
-            (newSubscriptionGroup): SubscriptionGroup => {
-                newSubscriptionGroup.alerts = uiSubscriptionGroupAlerts as Alert[];
+        setNewSubscriptionGroup((newSubscriptionGroup): SubscriptionGroup => {
+            newSubscriptionGroup.alerts = uiSubscriptionGroupAlerts as Alert[];
 
-                return newSubscriptionGroup;
-            }
-        );
+            return newSubscriptionGroup;
+        });
     };
 
     const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
         // Update subscription group with subscribed emails
-        setNewSubscriptionGroup(
-            (newSubscriptionGroup): SubscriptionGroup => {
-                if (newSubscriptionGroup.notificationSchemes.email) {
-                    // Add to existing email settings
-                    newSubscriptionGroup.notificationSchemes.email.to = emails;
-                } else {
-                    // Create and add to email settings
-                    newSubscriptionGroup.notificationSchemes.email = {
-                        to: emails,
-                    } as EmailScheme;
-                }
-
-                return newSubscriptionGroup;
+        setNewSubscriptionGroup((newSubscriptionGroup): SubscriptionGroup => {
+            if (newSubscriptionGroup.notificationSchemes.email) {
+                // Add to existing email settings
+                newSubscriptionGroup.notificationSchemes.email.to = emails;
+            } else {
+                // Create and add to email settings
+                newSubscriptionGroup.notificationSchemes.email = {
+                    to: emails,
+                } as EmailScheme;
             }
-        );
+
+            return newSubscriptionGroup;
+        });
     };
 
     const onCancel = (): void => {

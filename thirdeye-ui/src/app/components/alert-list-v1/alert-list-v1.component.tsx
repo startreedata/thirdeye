@@ -7,6 +7,12 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+} from "../../platform/components";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsUpdatePath,
@@ -14,20 +20,13 @@ import {
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "../platform-ui/components";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     props: AlertListV1Props
 ) => {
-    const [selectedAlert, setSelectedAlert] = useState<
-        DataGridSelectionModelV1<UiAlert>
-    >();
+    const [selectedAlert, setSelectedAlert] =
+        useState<DataGridSelectionModelV1<UiAlert>>();
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
     const history = useHistory();
 

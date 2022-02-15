@@ -3,7 +3,7 @@ import { Route, Switch } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
-} from "../../components/platform-ui/components";
+} from "../../platform/components";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisRouter } from "../root-cause-analysis/rca.router";
 

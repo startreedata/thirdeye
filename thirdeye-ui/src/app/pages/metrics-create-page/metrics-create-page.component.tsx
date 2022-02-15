@@ -11,7 +11,7 @@ import {
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
+} from "../../platform/components";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric } from "../../rest/dto/metric.interfaces";

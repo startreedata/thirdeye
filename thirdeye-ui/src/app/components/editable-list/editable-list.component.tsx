@@ -23,8 +23,8 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
-import { AppLoadingIndicatorV1 } from "../platform-ui/components";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
 

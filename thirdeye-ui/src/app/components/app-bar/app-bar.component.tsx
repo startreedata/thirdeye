@@ -6,6 +6,15 @@ import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
 import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import {
+    NavBarLinkIconV1,
+    NavBarLinkTextV1,
+    NavBarLinkV1,
+    NavBarPrimaryContainerV1,
+    NavBarSecondaryContainerV1,
+    NavBarV1,
+    useAuthProviderV1,
+} from "../../platform/components";
+import {
     AppRoute,
     getAlertsPath,
     getAnomaliesAllPath,
@@ -14,15 +23,6 @@ import {
     getLoginPath,
     getLogoutPath,
 } from "../../utils/routes/routes.util";
-import {
-    NavBarLinkIconV1,
-    NavBarLinkTextV1,
-    NavBarLinkV1,
-    NavBarPrimaryContainerV1,
-    NavBarSecondaryContainerV1,
-    NavBarV1,
-    useAuthProviderV1,
-} from "../platform-ui/components";
 
 export const AppBar: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();

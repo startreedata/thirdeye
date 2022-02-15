@@ -6,14 +6,14 @@ import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+} from "../../platform/components";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -27,10 +27,8 @@ import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [
-        subscriptionGroup,
-        setSubscriptionGroup,
-    ] = useState<SubscriptionGroup>();
+    const [subscriptionGroup, setSubscriptionGroup] =
+        useState<SubscriptionGroup>();
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<SubscriptionGroupsUpdatePageParams>();

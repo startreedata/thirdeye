@@ -1,11 +1,11 @@
 import { useMediaQuery, useTheme } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import {
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageHeaderV1,
-} from "../platform-ui/components";
+} from "../../platform/components";
+import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import { PageHeaderProps } from "./page-header.interfaces";

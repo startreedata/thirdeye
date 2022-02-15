@@ -2,27 +2,26 @@ import { Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+} from "../../platform/components";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import {
     getMetricsUpdatePath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "../platform-ui/components";
 import { MetricListV1Props } from "./metric-list-v1.interfaces";
 
 export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     props: MetricListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedMetric, setSelectedMetric] = useState<
-        DataGridSelectionModelV1<UiMetric>
-    >();
+    const [selectedMetric, setSelectedMetric] =
+        useState<DataGridSelectionModelV1<UiMetric>>();
     const history = useHistory();
 
     const handleMetricDelete = (): void => {

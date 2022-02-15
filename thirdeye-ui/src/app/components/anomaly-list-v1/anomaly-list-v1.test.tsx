@@ -1,4 +1,3 @@
-import { DataGridColumnV1 } from "@startree-ui/platform-ui";
 import {
     act,
     cleanup,
@@ -7,6 +6,7 @@ import {
     screen,
 } from "@testing-library/react";
 import React from "react";
+import { DataGridColumnV1 } from "../../platform/components/data-grid-v1/data-grid-v1";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { AnomalyListV1 } from "./anomaly-list-v1.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
@@ -51,9 +51,9 @@ jest.mock("@startree-ui/platform-ui", () => ({
                                       (column: DataGridColumnV1<UiAnomaly>) =>
                                           column.customCellRenderer &&
                                           column.customCellRenderer(
-                                              (anomaly[
+                                              anomaly[
                                                   column.key as keyof UiAnomaly
-                                              ] as unknown) as Record<
+                                              ] as unknown as Record<
                                                   string,
                                                   unknown
                                               >,

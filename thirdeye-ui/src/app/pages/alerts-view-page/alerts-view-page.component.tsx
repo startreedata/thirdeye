@@ -9,6 +9,8 @@ import { DialogType } from "../../components/dialogs/dialog-provider/dialog-prov
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     AppLoadingIndicatorV1,
     JSONEditorV1,
@@ -16,9 +18,7 @@ import {
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
-import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
@@ -48,10 +48,8 @@ export const AlertsViewPage: FunctionComponent = () => {
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
@@ -237,7 +235,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                             <JSONEditorV1
                                 readOnly
                                 value={
-                                    (uiAlert.alert as unknown) as Record<
+                                    uiAlert.alert as unknown as Record<
                                         string,
                                         unknown
                                     >

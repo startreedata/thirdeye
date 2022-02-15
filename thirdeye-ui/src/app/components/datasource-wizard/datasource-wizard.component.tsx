@@ -3,16 +3,16 @@ import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    JSONEditorV1,
+    PageContentsCardV1,
+    StepperV1,
+} from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
-import {
-    JSONEditorV1,
-    PageContentsCardV1,
-    StepperV1,
-} from "../platform-ui/components";
 import {
     DatasourceWizardProps,
     DatasourceWizardStep,
@@ -29,20 +29,16 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
     const [newDatasourceJSON, setNewDatasourceJSON] = useState(
         JSON.stringify(props.datasource || createDefaultDatasource())
     );
-    const [
-        datasourceConfigurationError,
-        setDatasourceConfigurationError,
-    ] = useState(false);
+    const [datasourceConfigurationError, setDatasourceConfigurationError] =
+        useState(false);
     const [
         datasourceConfigurationHelperText,
         setDatasourceConfigurationHelperText,
     ] = useState("");
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasourceWizardStep>(
-        DatasourceWizardStep.DATASOURCE_CONFIGURATION
-    );
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasourceWizardStep>(
+            DatasourceWizardStep.DATASOURCE_CONFIGURATION
+        );
     const { t } = useTranslation();
 
     const onDatasourceConfigurationChange = (value: string): void => {

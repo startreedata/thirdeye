@@ -7,7 +7,7 @@ import {
     PageHeaderV1,
     PageV1,
     useAuthProviderV1,
-} from "../../components/platform-ui/components";
+} from "../../platform/components";
 
 export const LogoutPage: FunctionComponent = () => {
     const { logout } = useAuthProviderV1();

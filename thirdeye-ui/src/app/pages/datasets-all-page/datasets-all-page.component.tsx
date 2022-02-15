@@ -5,13 +5,13 @@ import { ConfigurationPageHeader } from "../../components/configuration-page-hea
 import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import {
     deleteDataset,
     getAllDatasets,

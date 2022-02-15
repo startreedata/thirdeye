@@ -8,14 +8,14 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import {
     deleteDatasource,
     getDatasource,

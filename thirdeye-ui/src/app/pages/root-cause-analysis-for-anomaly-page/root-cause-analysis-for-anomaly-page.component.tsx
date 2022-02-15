@@ -8,15 +8,15 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
-import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
@@ -41,16 +41,13 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         status: getEvaluationRequestStatus,
     } = useGetEvaluation();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { notify } = useNotificationProviderV1();
-    const {
-        id: anomalyId,
-    } = useParams<RootCauseAnalysisForAnomalyPageParams>();
+    const { id: anomalyId } =
+        useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { t } = useTranslation();
     const pageTitle = `${t("label.root-cause-analysis")}: ${t(
         "label.anomaly"

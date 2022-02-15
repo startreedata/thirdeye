@@ -6,13 +6,13 @@ import { useHistory } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { createAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
@@ -88,7 +88,8 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
+        let newSubscriptionGroup: SubscriptionGroup =
+            null as unknown as SubscriptionGroup;
 
         if (!subscriptionGroup) {
             return newSubscriptionGroup;

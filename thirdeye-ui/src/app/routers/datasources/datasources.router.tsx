@@ -8,7 +8,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { AppLoadingIndicatorV1 } from "../../components/platform-ui/components";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
     AppRoute,
     getDatasourcesAllPath,

@@ -12,7 +12,7 @@ import {
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
+} from "../../platform/components";
 import {
     getDatasource,
     updateDatasource,

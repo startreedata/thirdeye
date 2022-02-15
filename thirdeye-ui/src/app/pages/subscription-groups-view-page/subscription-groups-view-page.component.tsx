@@ -8,15 +8,15 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
+import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
-import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
@@ -35,10 +35,8 @@ import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscrip
 import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
 
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
-    const [
-        uiSubscriptionGroup,
-        setUiSubscriptionGroup,
-    ] = useState<UiSubscriptionGroup | null>(null);
+    const [uiSubscriptionGroup, setUiSubscriptionGroup] =
+        useState<UiSubscriptionGroup | null>(null);
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();

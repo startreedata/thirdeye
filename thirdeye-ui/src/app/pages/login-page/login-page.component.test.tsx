@@ -1,6 +1,6 @@
-import { AuthExceptionCodeV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { AuthExceptionCodeV1 } from "../../platform/components/auth-provider-v1/auth-provider-v1.interfaces";
 import { LoginPage } from "./login-page.component";
 
 jest.mock("@startree-ui/platform-ui", () => ({

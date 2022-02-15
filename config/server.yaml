@@ -46,7 +46,9 @@ database:
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
   enabled: true
-
+  schemes:
+    - http
+    - https
   # package to scan for jersey resources
   resourcePackage: ai.startree.thirdeye.resources
 

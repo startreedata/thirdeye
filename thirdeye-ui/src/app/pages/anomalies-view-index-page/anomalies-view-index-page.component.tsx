@@ -1,9 +1,9 @@
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../components/platform-ui/components";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { TimeRange } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { WEEK_IN_MILLISECONDS } from "../../utils/date-time/date-time.util";
 import { isValidNumberId } from "../../utils/params/params.util";

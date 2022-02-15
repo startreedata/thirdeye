@@ -8,7 +8,7 @@ import {
     NotificationTypeV1,
     useAuthProviderV1,
     useNotificationProviderV1,
-} from "./components/platform-ui/components";
+} from "./platform/components";
 import { AppRouter } from "./routers/app/app.router";
 
 // ThirdEye UI app

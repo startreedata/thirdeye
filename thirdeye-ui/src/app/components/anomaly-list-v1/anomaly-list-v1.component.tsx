@@ -1,24 +1,23 @@
 import { Button, Typography } from "@material-ui/core";
 import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    DataGridSelectionModelV1,
+    DataGridV1,
+} from "../../platform/components";
+import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
     getAnomaliesViewIndexPath,
 } from "../../utils/routes/routes.util";
-import {
-    DataGridSelectionModelV1,
-    DataGridV1,
-} from "../platform-ui/components";
-import { linkRendererV1 } from "../platform-ui/utils";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     props: AnomalyListV1Props
 ) => {
-    const [selectedAnomaly, setSelectedAnomaly] = useState<
-        DataGridSelectionModelV1<UiAnomaly>
-    >();
+    const [selectedAnomaly, setSelectedAnomaly] =
+        useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
 
     const anomalyNameRenderer = (

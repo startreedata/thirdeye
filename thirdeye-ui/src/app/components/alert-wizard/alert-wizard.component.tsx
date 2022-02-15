@@ -3,6 +3,12 @@ import { Alert as MuiAlert } from "@material-ui/lab";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    AppLoadingIndicatorV1,
+    JSONEditorV1,
+    PageContentsCardV1,
+    StepperV1,
+} from "../../platform/components";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
@@ -13,12 +19,6 @@ import {
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
-import {
-    AppLoadingIndicatorV1,
-    JSONEditorV1,
-    PageContentsCardV1,
-    StepperV1,
-} from "../platform-ui/components";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
@@ -42,10 +42,8 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         JSON.stringify(editableAlert || createDefaultAlert())
     );
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [
-        detectionConfigurationError,
-        setDetectionConfigurationError,
-    ] = useState(false);
+    const [detectionConfigurationError, setDetectionConfigurationError] =
+        useState(false);
     const [
         detectionConfigurationHelperText,
         setDetectionConfigurationHelperText,
@@ -55,10 +53,8 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         SubscriptionGroup[]
     >([]);
     const [selecteddSubs, setSelectedSubs] = useState<SubscriptionGroup[]>([]);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
         AlertWizardStep.DETECTION_CONFIGURATION
     );

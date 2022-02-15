@@ -1,6 +1,6 @@
-import { PageContentsGridV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { PageContentsGridV1 } from "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1";
 import { PageNotFoundPage } from "./page-not-found-page.component";
 
 jest.mock("react-i18next", () => ({

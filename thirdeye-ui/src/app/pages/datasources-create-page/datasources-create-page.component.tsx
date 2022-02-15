@@ -10,7 +10,7 @@ import {
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
+} from "../../platform/components";
 import { createDatasource } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";

@@ -10,8 +10,8 @@ import {
     PageV1,
     useAuthProviderV1,
     useNotificationProviderV1,
-} from "../../components/platform-ui/components";
-import { isBlockingAuthExceptionV1 } from "../../components/platform-ui/utils";
+} from "../../platform/components";
+import { isBlockingAuthExceptionV1 } from "../../platform/utils";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");

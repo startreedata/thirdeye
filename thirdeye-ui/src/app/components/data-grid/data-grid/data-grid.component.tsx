@@ -14,9 +14,9 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { AppLoadingIndicatorV1 } from "../../../platform/components";
 import { ErrorIndicator } from "../../error-indicator/error-indicator.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
-import { AppLoadingIndicatorV1 } from "../../platform-ui/components";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { DataGridProps } from "./data-grid.interfaces";
 import { useDataGridStyles } from "./data-grid.styles";

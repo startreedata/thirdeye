@@ -15,16 +15,16 @@ import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
 import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../platform-ui/components";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
@@ -43,7 +43,9 @@ import {
 } from "./anomaly-breakdown-comparison-heatmap.utils";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
-export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = ({
+export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
+    AnomalyBreakdownComparisonHeatmapProps
+> = ({
     anomalyId,
     comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
     anomaly,
@@ -74,7 +76,8 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
             return;
         }
 
-        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] = [];
+        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
+            [];
 
         if (anomalyFilterOptions.length === 0) {
             let optionsMenu: AnomalyFilterOption[] = [];
@@ -96,22 +99,18 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
         Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
             (dimensionColumnName) => {
-                const [
-                    currentTotal,
-                    currentDimensionValuesData,
-                ] = summarizeDimensionValueData(
-                    anomalyMetricBreakdown.current.breakdown[
-                        dimensionColumnName
-                    ]
-                );
-                const [
-                    baselineTotal,
-                    baselineDimensionValuesData,
-                ] = summarizeDimensionValueData(
-                    anomalyMetricBreakdown.baseline.breakdown[
-                        dimensionColumnName
-                    ]
-                );
+                const [currentTotal, currentDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.current.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
+                const [baselineTotal, baselineDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.baseline.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
                 const dimensionComparisonData: {
                     [key: string]: AnomalyBreakdownComparisonData;
                 } = {};

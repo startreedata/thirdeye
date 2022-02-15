@@ -1,5 +1,4 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { PageContentsCardV1, StepperV1 } from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +8,7 @@ import { Palette } from "../../utils/material-ui/palette.util";
 import { createEmptyMetric } from "../../utils/metrics/metrics.util";
 import { MetricsPropertiesForm } from "../metrics-wizard/metrics-properties-form/metrics-renderer-form.component";
 import { MetricRenderer } from "../metrics-wizard/metrics-renderer/metrics-renderer.component";
+import { PageContentsCardV1, StepperV1 } from "../platform-ui/components";
 import {
     MetricsWizardProps,
     MetricsWizardStep,

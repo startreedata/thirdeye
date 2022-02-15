@@ -1,6 +1,7 @@
 // Copyright 2021 StarTree Inc.
 // All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { createTheme, Theme } from "@material-ui/core";
+import { cssBaselineClasses } from "../../../../utils/material-ui/css-baseline.util";
 import { alertClassesV1, alertPropsV1 } from "./alert.util";
 import {
     autocompleteClassesV1,
@@ -13,7 +14,6 @@ import {
 } from "./button.util";
 import { cardClassesV1, cardContentClassesV1, cardPropsV1 } from "./card.util";
 import { chipClassesV1, chipPropsV1 } from "./chip.util";
-import { cssBaselineClassesV1 } from "./css-baseline.util";
 import {
     dialogActionsClassesV1,
     dialogClassesV1,
@@ -60,7 +60,7 @@ export const lightV1: Theme = createTheme({
         MuiButton: buttonClassesV1,
         MuiCard: cardClassesV1,
         MuiCardContent: cardContentClassesV1,
-        MuiCssBaseline: cssBaselineClassesV1,
+        MuiCssBaseline: cssBaselineClasses,
         MuiChip: chipClassesV1,
         MuiDialog: dialogClassesV1,
         MuiDialogActions: dialogActionsClassesV1,

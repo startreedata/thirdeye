@@ -1,10 +1,4 @@
 import { Button, Grid, Link } from "@material-ui/core";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -20,6 +14,12 @@ import {
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+} from "../platform-ui/components";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (

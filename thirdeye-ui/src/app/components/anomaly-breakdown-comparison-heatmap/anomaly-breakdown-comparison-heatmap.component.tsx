@@ -10,11 +10,6 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -25,6 +20,11 @@ import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
 import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../platform-ui/components";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {

@@ -1,10 +1,5 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import {
-    JSONEditorV1,
-    PageContentsCardV1,
-    StepperV1,
-} from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +8,11 @@ import { createDefaultDatasource } from "../../utils/datasources/datasources.uti
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
+import {
+    JSONEditorV1,
+    PageContentsCardV1,
+    StepperV1,
+} from "../platform-ui/components";
 import {
     DatasourceWizardProps,
     DatasourceWizardStep,

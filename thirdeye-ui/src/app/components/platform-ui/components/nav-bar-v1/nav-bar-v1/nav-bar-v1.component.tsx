@@ -10,8 +10,7 @@ import React, {
     useContext,
     useEffect,
 } from "react";
-import { ReactComponent as StarTree } from "../../../assets/images/startree-dark.svg";
-import { ReactComponent as StarTreeIcon } from "../../../assets/images/startree-icon-dark.svg";
+import { ReactComponent as ThirdEye } from "../../../../../../assets/images/thirdeye.svg";
 import { useNavBarV1 as useNavBarStoreV1 } from "../../../stores/nav-bar-v1/nav-bar-v1.store";
 import { LinkV1 } from "../../link-v1/link-v1.component";
 import { NavBarLinkIconV1 } from "../nav-bar-link-v1/nav-bar-link-icon-v1/nav-bar-link-icon-v1.component";
@@ -136,13 +135,13 @@ export const NavBarV1: FunctionComponent<NavBarV1Props> = ({
                             )}
                         >
                             {navBarMinimized && (
-                                <StarTreeIcon
+                                <ThirdEye
                                     className={navBarV1Classes.navBarHeaderLogo}
                                 />
                             )}
 
                             {!navBarMinimized && (
-                                <StarTree
+                                <ThirdEye
                                     className={navBarV1Classes.navBarHeaderLogo}
                                 />
                             )}

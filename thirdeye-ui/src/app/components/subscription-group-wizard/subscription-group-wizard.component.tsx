@@ -1,5 +1,4 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { PageContentsCardV1, StepperV1 } from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +19,7 @@ import {
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { validateEmail } from "../../utils/validation/validation.util";
 import { EditableList } from "../editable-list/editable-list.component";
+import { PageContentsCardV1, StepperV1 } from "../platform-ui/components";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
 import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";

@@ -1,10 +1,4 @@
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
-import {
-    AuthProviderV1,
-    AuthRedirectMethodV1,
-    lightV1,
-    NotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import "@startree-ui/platform-ui/assets/styles/fonts.scss";
 import "@startree-ui/platform-ui/assets/styles/layout.scss";
 import { enableAllPlugins } from "immer";
@@ -14,6 +8,12 @@ import { Router } from "react-router-dom";
 import { App } from "./app";
 import { AppBreadcrumbsProvider } from "./components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
+import {
+    AuthProviderV1,
+    AuthRedirectMethodV1,
+    NotificationProviderV1,
+} from "./components/platform-ui/components";
+import { lightV1 } from "./components/platform-ui/utils";
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
 import { appHistory } from "./utils/history/history.util";
 import { initLocale } from "./utils/locale/locale.util";

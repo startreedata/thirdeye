@@ -1,7 +1,7 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
+import { AppLoadingIndicatorV1 } from "../../components/platform-ui/components";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { TimeRange } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";

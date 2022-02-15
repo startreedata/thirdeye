@@ -1,11 +1,5 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import {
-    AppLoadingIndicatorV1,
-    JSONEditorV1,
-    PageContentsCardV1,
-    StepperV1,
-} from "@startree-ui/platform-ui";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,6 +13,12 @@ import {
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
+import {
+    AppLoadingIndicatorV1,
+    JSONEditorV1,
+    PageContentsCardV1,
+    StepperV1,
+} from "../platform-ui/components";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";

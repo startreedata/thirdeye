@@ -1,8 +1,8 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, lazy, Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { AppLoadingIndicatorV1 } from "../../components/platform-ui/components";
 import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
 
 const SubscriptionGroupsRouter = lazy(() =>

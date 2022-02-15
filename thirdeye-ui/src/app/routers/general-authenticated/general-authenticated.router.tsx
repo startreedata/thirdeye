@@ -1,4 +1,3 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     lazy,
@@ -8,6 +7,7 @@ import React, {
 } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { AppLoadingIndicatorV1 } from "../../components/platform-ui/components";
 import {
     AppRoute,
     getBasePath,

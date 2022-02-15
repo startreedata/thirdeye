@@ -1,11 +1,4 @@
 import { Grid, useTheme } from "@material-ui/core";
-import {
-    PageContentsGridV1,
-    PageV1,
-    TileButtonIconV1,
-    TileButtonTextV1,
-    TileButtonV1,
-} from "@startree-ui/platform-ui";
 import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
@@ -15,6 +8,13 @@ import { ReactComponent as MetricIcon } from "../../../assets/images/metric.svg"
 import { ReactComponent as SubscriptionGroupIcon } from "../../../assets/images/subscription-group.svg";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import {
+    PageContentsGridV1,
+    PageV1,
+    TileButtonIconV1,
+    TileButtonTextV1,
+    TileButtonV1,
+} from "../../components/platform-ui/components";
 import {
     getAlertsPath,
     getAnomaliesPath,

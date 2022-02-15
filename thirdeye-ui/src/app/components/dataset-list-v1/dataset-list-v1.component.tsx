@@ -1,10 +1,4 @@
 import { Button, Grid, Link } from "@material-ui/core";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -13,6 +7,12 @@ import {
     getDatasetsUpdatePath,
     getDatasetsViewPath,
 } from "../../utils/routes/routes.util";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+} from "../platform-ui/components";
 import { DatasetListV1Props } from "./dataset-list-v1.interfaces";
 
 export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (

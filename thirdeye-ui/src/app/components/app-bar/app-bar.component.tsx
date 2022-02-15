@@ -1,13 +1,4 @@
 import { ExitToApp, Home, LockOpen } from "@material-ui/icons";
-import {
-    NavBarLinkIconV1,
-    NavBarLinkTextV1,
-    NavBarLinkV1,
-    NavBarPrimaryContainerV1,
-    NavBarSecondaryContainerV1,
-    NavBarV1,
-    useAuthProviderV1,
-} from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -23,6 +14,15 @@ import {
     getLoginPath,
     getLogoutPath,
 } from "../../utils/routes/routes.util";
+import {
+    NavBarLinkIconV1,
+    NavBarLinkTextV1,
+    NavBarLinkV1,
+    NavBarPrimaryContainerV1,
+    NavBarSecondaryContainerV1,
+    NavBarV1,
+    useAuthProviderV1,
+} from "../platform-ui/components";
 
 export const AppBar: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();

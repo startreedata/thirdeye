@@ -1,9 +1,9 @@
+import React, { FunctionComponent, lazy, Suspense } from "react";
+import { Route, Switch } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Switch } from "react-router-dom";
+} from "../../components/platform-ui/components";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisRouter } from "../root-cause-analysis/rca.router";
 

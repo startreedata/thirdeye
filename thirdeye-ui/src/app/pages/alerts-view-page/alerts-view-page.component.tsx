@@ -1,12 +1,4 @@
 import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
-import {
-    AppLoadingIndicatorV1,
-    JSONEditorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +9,14 @@ import { DialogType } from "../../components/dialogs/dialog-provider/dialog-prov
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import {
+    AppLoadingIndicatorV1,
+    JSONEditorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../components/platform-ui/components";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { ActionStatus } from "../../rest/actions.interfaces";

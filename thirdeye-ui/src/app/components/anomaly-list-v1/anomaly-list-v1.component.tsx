@@ -1,9 +1,4 @@
 import { Button, Typography } from "@material-ui/core";
-import {
-    DataGridSelectionModelV1,
-    DataGridV1,
-    linkRendererV1,
-} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
@@ -11,6 +6,11 @@ import {
     getAlertsViewPath,
     getAnomaliesViewIndexPath,
 } from "../../utils/routes/routes.util";
+import {
+    DataGridSelectionModelV1,
+    DataGridV1,
+} from "../platform-ui/components";
+import { linkRendererV1 } from "../platform-ui/utils";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (

@@ -1,7 +1,3 @@
-import {
-    DropdownButtonTypeV1,
-    DropdownButtonV1,
-} from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router";
@@ -12,6 +8,10 @@ import {
     getMetricsCreatePath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
+import {
+    DropdownButtonTypeV1,
+    DropdownButtonV1,
+} from "../platform-ui/components";
 
 export const CreateMenuButton: FunctionComponent = () => {
     const { t } = useTranslation();

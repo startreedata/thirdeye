@@ -1,5 +1,4 @@
 import { List, ListItem, ListItemText, ListSubheader } from "@material-ui/core";
-import { TooltipV1 } from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +6,7 @@ import {
     formatTimeRange,
     formatTimeRangeDuration,
 } from "../../../utils/time-range/time-range.util";
+import { TooltipV1 } from "../../platform-ui/components";
 import { TimeRange } from "../time-range-provider/time-range-provider.interfaces";
 import { TimeRangeListProps } from "./time-range-list.interfaces";
 

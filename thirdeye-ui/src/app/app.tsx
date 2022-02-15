@@ -1,14 +1,14 @@
+import { delay } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AppBar } from "./components/app-bar/app-bar.component";
 import {
     AppContainerV1,
     NotificationScopeV1,
     NotificationTypeV1,
     useAuthProviderV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import { delay } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { AppBar } from "./components/app-bar/app-bar.component";
+} from "./components/platform-ui/components";
 import { AppRouter } from "./routers/app/app.router";
 
 // ThirdEye UI app

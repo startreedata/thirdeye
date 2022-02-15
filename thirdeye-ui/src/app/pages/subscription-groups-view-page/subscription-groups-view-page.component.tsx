@@ -3,7 +3,6 @@ import { cloneDeep, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
@@ -38,17 +37,12 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     useEffect(() => {
         // Time range refreshed, fetch subscription group

@@ -3,7 +3,6 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -26,25 +25,11 @@ export const MetricsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [metric, setMetric] = useState<Metric>();
     const [datasets, setDatasets] = useState<Dataset[]>([]);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+
     const params = useParams<MetricsUpdatePageParams>();
     const history = useHistory();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        // Fetched metric changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: metric ? metric.name : "",
-                onClick: (): void => {
-                    if (metric) {
-                        history.push(getMetricsViewPath(metric.id));
-                    }
-                },
-            },
-        ]);
-    }, [metric]);
 
     useEffect(() => {
         fetchMetric();

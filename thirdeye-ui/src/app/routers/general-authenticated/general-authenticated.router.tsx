@@ -1,12 +1,5 @@
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
+import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
     AppRoute,
@@ -33,18 +26,6 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-
-    useEffect(() => {
-        setRouterBreadcrumbs([]);
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Switch>

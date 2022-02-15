@@ -1,0 +1,10 @@
+// HTML body and app container to occupy entire height and width so that contained components can
+// be horizontally/vertically centered if required
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}

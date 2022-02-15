@@ -1,0 +1,35 @@
+// Load fonts from @startree-ui/platform-ui package
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 200;
+    src: url("../fonts/inter-extra-light-200.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 300;
+    src: url("../fonts/inter-light-300.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/inter-regular-400.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 500;
+    src: url("../fonts/inter-medium-500.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Roboto Mono;
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/roboto-mono-regular-400.ttf") format("truetype");
+}

@@ -2,7 +2,7 @@
 // All rights reserved. Confidential and proprietary information of StarTree Inc.
 import classNames from "classnames";
 import React, { FunctionComponent } from "react";
-import { useTileButtonV1 } from "../tile-button-v1";
+import { useTileButtonV1 } from "../tile-button-v1/tile-button-v1.component";
 import { TileButtonIconV1Props } from "./tile-button-icon-v1.interfaces";
 import { useTileButtonIconV1Styles } from "./tile-button-icon-v1.styles";
 

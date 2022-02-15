@@ -43,7 +43,8 @@ export const useTimeRangeStore = create<TimeRangeStore>(
                     );
 
                     set({
-                        recentCustomTimeRangeDurations: newRecentCustomTimeRangeDurations,
+                        recentCustomTimeRangeDurations:
+                            newRecentCustomTimeRangeDurations,
                     });
                 }
             },

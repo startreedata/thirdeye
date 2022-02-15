@@ -100,14 +100,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 );
 
                 // Remove alert from subscription groups
-                const subscriptionGroupsToBeOmitted = omittedSubscriptionGroups.map(
-                    (subscriptionGroup) => ({
+                const subscriptionGroupsToBeOmitted =
+                    omittedSubscriptionGroups.map((subscriptionGroup) => ({
                         ...subscriptionGroup,
                         alerts: subscriptionGroup.alerts.filter(
                             (subGroupAlert) => subGroupAlert.id !== alert.id // Remove alert from list
                         ),
-                    })
-                );
+                    }));
 
                 const subscriptionGroupsToBeUpdated = [
                     ...subscriptionGroupsToBeAdded,
@@ -147,7 +146,8 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
+        let newSubscriptionGroup: SubscriptionGroup =
+            null as unknown as SubscriptionGroup;
 
         if (!subscriptionGroup) {
             return newSubscriptionGroup;

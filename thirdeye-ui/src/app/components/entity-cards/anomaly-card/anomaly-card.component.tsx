@@ -28,10 +28,8 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     props: AnomalyCardProps
 ) => {
     const anomalyCardClasses = useAnomalyCardStyles();
-    const [
-        anomalyOptionsAnchorElement,
-        setAnomalyOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
+    const [anomalyOptionsAnchorElement, setAnomalyOptionsAnchorElement] =
+        useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 

@@ -88,7 +88,8 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
+        let newSubscriptionGroup: SubscriptionGroup =
+            null as unknown as SubscriptionGroup;
 
         if (!subscriptionGroup) {
             return newSubscriptionGroup;

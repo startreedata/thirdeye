@@ -28,10 +28,8 @@ import { AlertCardProps } from "./alert-card.interfaces";
 export const AlertCard: FunctionComponent<AlertCardProps> = (
     props: AlertCardProps
 ) => {
-    const [
-        alertOptionsAnchorElement,
-        setAlertOptionsAnchorElement,
-    ] = useState<HTMLElement | null>();
+    const [alertOptionsAnchorElement, setAlertOptionsAnchorElement] =
+        useState<HTMLElement | null>();
     const history = useHistory();
     const { t } = useTranslation();
 

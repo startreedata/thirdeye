@@ -16,9 +16,8 @@ import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     props: AnomalyListV1Props
 ) => {
-    const [selectedAnomaly, setSelectedAnomaly] = useState<
-        DataGridSelectionModelV1<UiAnomaly>
-    >();
+    const [selectedAnomaly, setSelectedAnomaly] =
+        useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
 
     const anomalyNameRenderer = (

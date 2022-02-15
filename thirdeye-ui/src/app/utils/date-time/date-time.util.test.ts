@@ -38,13 +38,10 @@ describe("Date Time Util", () => {
     });
 
     it("formatDuration should return empty string for invalid start and end time", () => {
-        expect(formatDuration((null as unknown) as number, 1)).toEqual("");
-        expect(formatDuration(1, (null as unknown) as number)).toEqual("");
+        expect(formatDuration(null as unknown as number, 1)).toEqual("");
+        expect(formatDuration(1, null as unknown as number)).toEqual("");
         expect(
-            formatDuration(
-                (null as unknown) as number,
-                (null as unknown) as number
-            )
+            formatDuration(null as unknown as number, null as unknown as number)
         ).toEqual("");
     });
 
@@ -124,7 +121,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatDateAndTime should return empty string for invalid date", () => {
-        expect(formatDateAndTime((null as unknown) as number)).toEqual("");
+        expect(formatDateAndTime(null as unknown as number)).toEqual("");
     });
 
     it("formatDateAndTime should return appropriate string for date", () => {
@@ -134,7 +131,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatDate should return empty string for invalid date", () => {
-        expect(formatDate((null as unknown) as number)).toEqual("");
+        expect(formatDate(null as unknown as number)).toEqual("");
     });
 
     it("formatDate should return appropriate string for date", () => {
@@ -142,7 +139,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatTime should return empty string for invalid date", () => {
-        expect(formatTime((null as unknown) as number)).toEqual("");
+        expect(formatTime(null as unknown as number)).toEqual("");
     });
 
     it("formatTime should return appropriate string for date", () => {
@@ -150,7 +147,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatYear should return empty string for invalid date", () => {
-        expect(formatYear((null as unknown) as number)).toEqual("");
+        expect(formatYear(null as unknown as number)).toEqual("");
     });
 
     it("formatYear should return appropriate string for date", () => {
@@ -158,7 +155,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatMonth should return empty string for invalid date", () => {
-        expect(formatMonth((null as unknown) as number)).toEqual("");
+        expect(formatMonth(null as unknown as number)).toEqual("");
     });
 
     it("formatMonth should return appropriate string for date", () => {
@@ -166,7 +163,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatMonthOfYear should return empty string for invalid date", () => {
-        expect(formatMonthOfYear((null as unknown) as number)).toEqual("");
+        expect(formatMonthOfYear(null as unknown as number)).toEqual("");
     });
 
     it("formatMonthOfYear should return appropriate string for date", () => {
@@ -174,7 +171,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatDay should return empty string for invalid date", () => {
-        expect(formatDay((null as unknown) as number)).toEqual("");
+        expect(formatDay(null as unknown as number)).toEqual("");
     });
 
     it("formatDay should return appropriate string for date", () => {
@@ -182,7 +179,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatHour should return empty string for invalid date", () => {
-        expect(formatHour((null as unknown) as number)).toEqual("");
+        expect(formatHour(null as unknown as number)).toEqual("");
     });
 
     it("formatHour should return appropriate string for date", () => {
@@ -190,7 +187,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatMinute should return empty string for invalid date", () => {
-        expect(formatMinute((null as unknown) as number)).toEqual("");
+        expect(formatMinute(null as unknown as number)).toEqual("");
     });
 
     it("formatMinute should return appropriate string for date", () => {
@@ -198,7 +195,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatSecond should return empty string for invalid date", () => {
-        expect(formatSecond((null as unknown) as number)).toEqual("");
+        expect(formatSecond(null as unknown as number)).toEqual("");
     });
 
     it("formatSecond should return appropriate string for date", () => {
@@ -206,7 +203,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatMillisecond should return empty string for invalid date", () => {
-        expect(formatMillisecond((null as unknown) as number)).toEqual("");
+        expect(formatMillisecond(null as unknown as number)).toEqual("");
     });
 
     it("formatMillisecond should return appropriate string for date", () => {
@@ -214,7 +211,7 @@ describe("Date Time Util", () => {
     });
 
     it("formatMeridiem should return empty string for invalid date", () => {
-        expect(formatMeridiem((null as unknown) as number)).toEqual("");
+        expect(formatMeridiem(null as unknown as number)).toEqual("");
     });
 
     it("formatMeridiem should return appropriate string for date", () => {
@@ -222,7 +219,7 @@ describe("Date Time Util", () => {
     });
 
     it("switchMeridiem should return -1 for invalid date", () => {
-        expect(switchMeridiem((null as unknown) as number)).toEqual(-1);
+        expect(switchMeridiem(null as unknown as number)).toEqual(-1);
     });
 
     it("switchMeridiem should return appropriate date with switched meridiem for date", () => {

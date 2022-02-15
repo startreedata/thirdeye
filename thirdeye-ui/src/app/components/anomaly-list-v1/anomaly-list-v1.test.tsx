@@ -51,9 +51,9 @@ jest.mock("@startree-ui/platform-ui", () => ({
                                       (column: DataGridColumnV1<UiAnomaly>) =>
                                           column.customCellRenderer &&
                                           column.customCellRenderer(
-                                              (anomaly[
+                                              anomaly[
                                                   column.key as keyof UiAnomaly
-                                              ] as unknown) as Record<
+                                              ] as unknown as Record<
                                                   string,
                                                   unknown
                                               >,

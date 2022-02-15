@@ -20,9 +20,8 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     props: MetricListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedMetric, setSelectedMetric] = useState<
-        DataGridSelectionModelV1<UiMetric>
-    >();
+    const [selectedMetric, setSelectedMetric] =
+        useState<DataGridSelectionModelV1<UiMetric>>();
     const history = useHistory();
 
     const handleMetricDelete = (): void => {

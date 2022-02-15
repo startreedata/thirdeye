@@ -4,9 +4,8 @@ import { getAnomaly as getAnomalyRest } from "./anomalies.rest";
 import { GetAnomaly } from "./anomaly.interfaces";
 
 export const useGetAnomaly = (): GetAnomaly => {
-    const { data, makeRequest, status, errorMessage } = useHTTPAction<Anomaly>(
-        getAnomalyRest
-    );
+    const { data, makeRequest, status, errorMessage } =
+        useHTTPAction<Anomaly>(getAnomalyRest);
 
     const getAnomaly = (id: number): Promise<Anomaly | undefined> => {
         return makeRequest(id);

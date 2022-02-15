@@ -12,10 +12,11 @@ import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-f
 import { AlertEvaluationTimeSeriesTooltipProps } from "./alert-evaluation-time-series-tooltip.interfaces";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "./alert-evaluation-time-series-tooltip.styles";
 
-export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<AlertEvaluationTimeSeriesTooltipProps> = (
-    props: AlertEvaluationTimeSeriesTooltipProps
-) => {
-    const alertEvaluationTimeSeriesTooltipClasses = useAlertEvaluationTimeSeriesTooltipStyles();
+export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
+    AlertEvaluationTimeSeriesTooltipProps
+> = (props: AlertEvaluationTimeSeriesTooltipProps) => {
+    const alertEvaluationTimeSeriesTooltipClasses =
+        useAlertEvaluationTimeSeriesTooltipStyles();
     const { t } = useTranslation();
 
     return (

@@ -7,12 +7,8 @@ import { GetAnomalyMetricBreakdown } from "./rca.interfaces";
 import { getAnomalyMetricBreakdown } from "./rca.rest";
 
 export const useGetAnomalyMetricBreakdown = (): GetAnomalyMetricBreakdown => {
-    const {
-        data,
-        makeRequest,
-        status,
-        errorMessage,
-    } = useHTTPAction<AnomalyBreakdown>(getAnomalyMetricBreakdown);
+    const { data, makeRequest, status, errorMessage } =
+        useHTTPAction<AnomalyBreakdown>(getAnomalyMetricBreakdown);
 
     const getMetricBreakdown = (
         id: number,

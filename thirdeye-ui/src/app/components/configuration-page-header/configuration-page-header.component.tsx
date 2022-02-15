@@ -11,9 +11,9 @@ import { AppRoute } from "../../utils/routes/routes.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
 
-export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderProps> = (
-    props: ConfigurationPageHeaderProps
-) => {
+export const ConfigurationPageHeader: FunctionComponent<
+    ConfigurationPageHeaderProps
+> = (props: ConfigurationPageHeaderProps) => {
     const { t } = useTranslation();
 
     return (

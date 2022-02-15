@@ -24,10 +24,8 @@ export const MetricsWizard: FunctionComponent<MetricsWizardProps> = (
     const [newMetric, setNewMetric] = useState<LogicalMetric>(
         props.metric || createEmptyMetric()
     );
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<MetricsWizardStep>(MetricsWizardStep.METRIC_PROPERTIES);
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<MetricsWizardStep>(MetricsWizardStep.METRIC_PROPERTIES);
     const { t } = useTranslation();
 
     useEffect(() => {

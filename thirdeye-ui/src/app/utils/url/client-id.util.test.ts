@@ -2,7 +2,7 @@ import { getClientIdFromUrl } from "./client-id.util";
 
 describe("Get Client ID Util (getClientIdFromUrl)", () => {
     it("should return null if passed null", () => {
-        expect(getClientIdFromUrl((null as unknown) as string)).toBeNull();
+        expect(getClientIdFromUrl(null as unknown as string)).toBeNull();
     });
 
     it("should return null if passed empty string", () => {

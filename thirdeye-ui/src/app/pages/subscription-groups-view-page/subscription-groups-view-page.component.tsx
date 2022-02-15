@@ -35,10 +35,8 @@ import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscrip
 import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
 
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
-    const [
-        uiSubscriptionGroup,
-        setUiSubscriptionGroup,
-    ] = useState<UiSubscriptionGroup | null>(null);
+    const [uiSubscriptionGroup, setUiSubscriptionGroup] =
+        useState<UiSubscriptionGroup | null>(null);
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();

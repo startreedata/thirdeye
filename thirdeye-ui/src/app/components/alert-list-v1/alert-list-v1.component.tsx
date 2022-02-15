@@ -25,9 +25,8 @@ import { AlertListV1Props } from "./alert-list-v1.interfaces";
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     props: AlertListV1Props
 ) => {
-    const [selectedAlert, setSelectedAlert] = useState<
-        DataGridSelectionModelV1<UiAlert>
-    >();
+    const [selectedAlert, setSelectedAlert] =
+        useState<DataGridSelectionModelV1<UiAlert>>();
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
     const history = useHistory();
 

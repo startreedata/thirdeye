@@ -9,9 +9,9 @@ describe("Page Util", () => {
     it("getDocumentTitle should return appropriate document title for invalid router breadcrumb text, invalid page title and invalid page breadcrumb text", () => {
         expect(
             getDocumentTitle(
-                (null as unknown) as string,
-                (null as unknown) as string,
-                (null as unknown) as string
+                null as unknown as string,
+                null as unknown as string,
+                null as unknown as string
             )
         ).toEqual("label.thirdeye");
         expect(i18n.t).toHaveBeenNthCalledWith(1, "label.thirdeye");

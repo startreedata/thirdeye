@@ -20,9 +20,9 @@ import { LogicalMetric } from "../../../rest/dto/metric.interfaces";
 import { createEmptyMetric } from "../../../utils/metrics/metrics.util";
 import { MetricsPropertiesFormProps } from "./metrics-renderer-form.interfaces";
 
-export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps> = (
-    props: MetricsPropertiesFormProps
-) => {
+export const MetricsPropertiesForm: FunctionComponent<
+    MetricsPropertiesFormProps
+> = (props: MetricsPropertiesFormProps) => {
     const { t } = useTranslation();
     const defaultValues = props.metric || createEmptyMetric();
     const { register, handleSubmit, errors, control } = useForm<LogicalMetric>({

@@ -41,10 +41,8 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     } = useGetEvaluation();
     const { anomaly, getAnomaly } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();

@@ -25,7 +25,7 @@ export const SearchInputV1: FunctionComponent<SearchInputV1Props> = ({
     onChangeDelay = DELAY_ON_CHANGE_DEFAULT,
     onChange,
     ...otherProps
-}: SearchInputV1Props) => {
+}) => {
     const [valueInternal, setValueInternal] = useState(value || "");
     const searchInputRef = useRef<HTMLInputElement>(null);
 

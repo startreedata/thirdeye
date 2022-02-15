@@ -16,7 +16,7 @@ export const PageHeaderTabV1: FunctionComponent<PageHeaderTabV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageHeaderTabV1Props) => {
+}) => {
     const { headerVisible, setCurrentHeaderTab } = usePageV1();
 
     useEffect(() => {

@@ -7,14 +7,9 @@ import classNames from "classnames";
 import React, { FunctionComponent } from "react";
 import { DataGridExpandIconV1Props } from "./data-grid-expand-icon-v1.interfaces";
 
-export const DataGridExpandIconV1: FunctionComponent<DataGridExpandIconV1Props> = ({
-    depth,
-    expandable,
-    expanded,
-    className,
-    onExpand,
-    ...otherProps
-}: DataGridExpandIconV1Props) => {
+export const DataGridExpandIconV1: FunctionComponent<
+    DataGridExpandIconV1Props
+> = ({ depth, expandable, expanded, className, onExpand, ...otherProps }) => {
     const theme = useTheme();
 
     const handleClick = (): void => {

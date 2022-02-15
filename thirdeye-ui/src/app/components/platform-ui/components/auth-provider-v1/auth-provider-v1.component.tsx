@@ -52,18 +52,15 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     className,
     children,
     ...otherProps
-}: AuthProviderV1Props) => {
+}) => {
     const [authProviderLoading, setAuthProviderLoading] = useState(true);
     const [axiosLoading, setAxiosLoading] = useState(true);
     const [oidcIssuerUrl, setOidcIssuerUrl] = useState("");
     const [authorizationEndpoint, setAuthorizationEndpoint] = useState("");
-    const [axiosRequestInterceptorId, setAxiosRequestInterceptorId] = useState(
-        0
-    );
-    const [
-        axiosResponseInterceptorId,
-        setAxiosResponseInterceptorId,
-    ] = useState(0);
+    const [axiosRequestInterceptorId, setAxiosRequestInterceptorId] =
+        useState(0);
+    const [axiosResponseInterceptorId, setAxiosResponseInterceptorId] =
+        useState(0);
     const loginFormRef = useRef<HTMLFormElement>(null);
     const logoutFormRef = useRef<HTMLFormElement>(null);
     const [

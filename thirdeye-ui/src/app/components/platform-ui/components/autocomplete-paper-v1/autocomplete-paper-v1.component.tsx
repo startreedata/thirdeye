@@ -11,7 +11,7 @@ import { useAutocompletePaperV1Styles } from "./autocomplete-paper-v1.styles";
 
 export const AutocompletePaper: FunctionComponent<
     PropsWithChildren<HTMLAttributes<HTMLElement>>
-> = ({ children }: PropsWithChildren<HTMLAttributes<HTMLElement>>) => {
+> = ({ children }) => {
     const autocompletePaperV1Classes = useAutocompletePaperV1Styles();
 
     return (

@@ -16,7 +16,7 @@ export const LinkButtonV1: FunctionComponent<LinkButtonV1Props> = ({
     className,
     children,
     ...otherProps
-}: LinkButtonV1Props) => {
+}) => {
     return (
         <>
             {externalLink && (

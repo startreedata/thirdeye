@@ -6,12 +6,11 @@ import React, { FunctionComponent } from "react";
 import { NavBarSecondaryContainerV1Props } from "./nav-bar-secondary-container-v1.interfaces";
 import { useNavBarSecondaryContainerV1Styles } from "./nav-bar-secondary-container-v1.styles";
 
-export const NavBarSecondaryContainerV1: FunctionComponent<NavBarSecondaryContainerV1Props> = ({
-    className,
-    children,
-    ...otherProps
-}: NavBarSecondaryContainerV1Props) => {
-    const navBarSecondaryContainerV1Classes = useNavBarSecondaryContainerV1Styles();
+export const NavBarSecondaryContainerV1: FunctionComponent<
+    NavBarSecondaryContainerV1Props
+> = ({ className, children, ...otherProps }) => {
+    const navBarSecondaryContainerV1Classes =
+        useNavBarSecondaryContainerV1Styles();
 
     return (
         <List

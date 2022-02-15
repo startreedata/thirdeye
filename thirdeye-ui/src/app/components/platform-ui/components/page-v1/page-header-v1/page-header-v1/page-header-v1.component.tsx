@@ -15,7 +15,7 @@ export const PageHeaderV1: FunctionComponent<PageHeaderV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageHeaderV1Props) => {
+}) => {
     const pageHeaderV1Classes = usePageHeaderV1Styles();
     const { notifications } = useNotificationProviderV1();
     const { setHeaderVisible } = usePageV1();
@@ -33,7 +33,8 @@ export const PageHeaderV1: FunctionComponent<PageHeaderV1Props> = ({
                 className={classNames(
                     pageHeaderV1Classes.pageHeader,
                     {
-                        [pageHeaderV1Classes.pageHeaderHidden]: notificationsOnly,
+                        [pageHeaderV1Classes.pageHeaderHidden]:
+                            notificationsOnly,
                     },
                     className,
                     "page-header-v1"

@@ -12,7 +12,7 @@ export const PageContentsGridV1: FunctionComponent<PageContentsGridV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageContentsGridV1Props) => {
+}) => {
     const pageContentsGridV1Classes = usePageContentsGridV1Styles();
 
     return (
@@ -21,7 +21,8 @@ export const PageContentsGridV1: FunctionComponent<PageContentsGridV1Props> = ({
             className={classNames(
                 pageContentsGridV1Classes.pageContentsGrid,
                 {
-                    [pageContentsGridV1Classes.pageContentsGridFullHeight]: fullHeight,
+                    [pageContentsGridV1Classes.pageContentsGridFullHeight]:
+                        fullHeight,
                 },
                 className,
                 "page-contents-grid-v1"
@@ -31,7 +32,8 @@ export const PageContentsGridV1: FunctionComponent<PageContentsGridV1Props> = ({
                 container
                 className={classNames(
                     {
-                        [pageContentsGridV1Classes.pageContentsGridFullHeight]: fullHeight,
+                        [pageContentsGridV1Classes.pageContentsGridFullHeight]:
+                            fullHeight,
                     },
                     "page-contents-grid-v1-grid"
                 )}

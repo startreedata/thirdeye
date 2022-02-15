@@ -18,7 +18,7 @@ export const PageV1: FunctionComponent<PageV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageV1Props) => {
+}) => {
     const pageV1Classes = usePageV1Styles();
     const [headerVisible, setHeaderVisible] = useState(true);
     const [headerText, setHeaderText] = useState<ReactNode>("");

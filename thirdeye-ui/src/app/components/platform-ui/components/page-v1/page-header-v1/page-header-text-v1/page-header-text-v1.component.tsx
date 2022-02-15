@@ -12,7 +12,7 @@ export const PageHeaderTextV1: FunctionComponent<PageHeaderTextV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageHeaderTextV1Props) => {
+}) => {
     const pageHeaderTextV1Classes = usePageHeaderTextV1Styles();
     const { headerVisible, setHeaderText } = usePageV1();
 

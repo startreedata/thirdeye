@@ -19,7 +19,7 @@ export const StepperV1: FunctionComponent<StepperV1Props> = ({
     disabled,
     className,
     ...otherProps
-}: StepperV1Props) => {
+}) => {
     const stepperV1Classes = useStepperV1Styles();
     const theme = useTheme();
     const smUp = useMediaQuery(theme.breakpoints.up("sm"));

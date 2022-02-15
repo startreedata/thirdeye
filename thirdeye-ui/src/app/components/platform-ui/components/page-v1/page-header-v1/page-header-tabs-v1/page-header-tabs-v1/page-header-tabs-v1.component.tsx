@@ -11,7 +11,7 @@ export const PageHeaderTabsV1: FunctionComponent<PageHeaderTabsV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageHeaderTabsV1Props) => {
+}) => {
     const pageHeaderTabsV1Classes = usePageHeaderTabsV1Styles();
 
     return (

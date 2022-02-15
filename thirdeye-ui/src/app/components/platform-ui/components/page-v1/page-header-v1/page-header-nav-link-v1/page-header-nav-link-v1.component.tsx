@@ -9,14 +9,9 @@ import { usePageV1 } from "../../page-v1/page-v1.component";
 import { PageHeaderNavLinkV1Props } from "./page-header-nav-link-v1.interfaces";
 import { usePageHeaderNavLinkV1Styles } from "./page-header-nav-link-v1.styles";
 
-export const PageHeaderNavLinkV1: FunctionComponent<PageHeaderNavLinkV1Props> = ({
-    href,
-    externalLink,
-    target,
-    className,
-    children,
-    ...otherProps
-}: PageHeaderNavLinkV1Props) => {
+export const PageHeaderNavLinkV1: FunctionComponent<
+    PageHeaderNavLinkV1Props
+> = ({ href, externalLink, target, className, children, ...otherProps }) => {
     const pageHeaderNavLinkV1Classes = usePageHeaderNavLinkV1Styles();
     const { headerVisible } = usePageV1();
 

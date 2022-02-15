@@ -12,7 +12,7 @@ export const NavBarLinkTextV1: FunctionComponent<NavBarLinkTextV1Props> = ({
     className,
     children,
     ...otherProps
-}: NavBarLinkTextV1Props) => {
+}) => {
     const navBarLinkTextV1Classes = useNavBarLinkTextV1Styles();
     const { navBarMinimized } = useNavBarV1();
     const { hover, selected, setTooltip } = useNavBarLinkV1();

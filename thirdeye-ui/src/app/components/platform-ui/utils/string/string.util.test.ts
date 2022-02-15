@@ -4,7 +4,7 @@ import { parseBooleanV1 } from "./string.util";
 
 describe("String Util", () => {
     it("parseBooleanV1 should return false for invalid string", () => {
-        expect(parseBooleanV1((null as unknown) as string)).toBeFalsy();
+        expect(parseBooleanV1(null as unknown as string)).toBeFalsy();
     });
 
     it("parseBooleanV1 should return false for empty string", () => {

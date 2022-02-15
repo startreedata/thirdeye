@@ -5,10 +5,9 @@ import classNames from "classnames";
 import React, { FunctionComponent } from "react";
 import { PageContentsSpacerV1Props } from "./page-contents-spacer-v1.interfaces";
 
-export const PageContentsSpacerV1: FunctionComponent<PageContentsSpacerV1Props> = ({
-    className,
-    ...otherProps
-}: PageContentsSpacerV1Props) => {
+export const PageContentsSpacerV1: FunctionComponent<
+    PageContentsSpacerV1Props
+> = ({ className, ...otherProps }) => {
     return (
         <Box
             {...otherProps}

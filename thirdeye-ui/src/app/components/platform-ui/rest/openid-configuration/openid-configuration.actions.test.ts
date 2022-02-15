@@ -37,9 +37,8 @@ describe("OpenID Configuration Actions", () => {
             useGetOpenIDConfigurationV1()
         );
         await act(async () => {
-            const promise = result.current.getOpenIDConfigurationV1(
-                "testOidcIssuerUrl"
-            );
+            const promise =
+                result.current.getOpenIDConfigurationV1("testOidcIssuerUrl");
 
             // Wait for state update
             await waitFor(() => result.current.status === ActionStatus.Initial);
@@ -68,9 +67,8 @@ describe("OpenID Configuration Actions", () => {
             useGetOpenIDConfigurationV1()
         );
         await act(async () => {
-            const promise = result.current.getOpenIDConfigurationV1(
-                "testOidcIssuerUrl"
-            );
+            const promise =
+                result.current.getOpenIDConfigurationV1("testOidcIssuerUrl");
 
             // Wait for state update
             await waitFor(() => result.current.status === ActionStatus.Initial);

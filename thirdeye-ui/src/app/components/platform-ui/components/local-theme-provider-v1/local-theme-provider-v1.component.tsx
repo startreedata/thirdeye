@@ -5,10 +5,9 @@ import { cloneDeep } from "lodash";
 import React, { FunctionComponent } from "react";
 import { LocalThemeProviderV1Props } from "./local-theme-provider-v1.interfaces";
 
-export const LocalThemeProviderV1: FunctionComponent<LocalThemeProviderV1Props> = ({
-    primary,
-    children,
-}: LocalThemeProviderV1Props) => {
+export const LocalThemeProviderV1: FunctionComponent<
+    LocalThemeProviderV1Props
+> = ({ primary, children }) => {
     const theme = useTheme();
     const localTheme = cloneDeep(theme);
 

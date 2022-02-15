@@ -8,10 +8,8 @@ import { GetOpenIDConfigurationV1 } from "./openid-configuration.interfaces";
 import { getOpenIDConfigurationV1 as getOpenIDConfigurationV1REST } from "./openid-configuration.rest";
 
 export const useGetOpenIDConfigurationV1 = (): GetOpenIDConfigurationV1 => {
-    const [
-        openIDConfigurationV1,
-        setOpenIDConfigurationV1,
-    ] = useState<OpenIDConfigurationV1 | null>(null);
+    const [openIDConfigurationV1, setOpenIDConfigurationV1] =
+        useState<OpenIDConfigurationV1 | null>(null);
     const [status, setStatus] = useState(ActionStatus.Initial);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -19,9 +17,8 @@ export const useGetOpenIDConfigurationV1 = (): GetOpenIDConfigurationV1 => {
         async (oidcIssuerUrl: string) => {
             setStatus(ActionStatus.Working);
             try {
-                const fetchedOpenIDConfigurationV1 = await getOpenIDConfigurationV1REST(
-                    oidcIssuerUrl
-                );
+                const fetchedOpenIDConfigurationV1 =
+                    await getOpenIDConfigurationV1REST(oidcIssuerUrl);
                 setOpenIDConfigurationV1(fetchedOpenIDConfigurationV1);
                 setStatus(ActionStatus.Done);
                 setErrorMessage("");

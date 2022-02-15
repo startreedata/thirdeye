@@ -21,7 +21,7 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
     className,
     children,
     ...otherProps
-}: DialogProviderV1Props) => {
+}) => {
     const [visible, setVisible] = useState(false);
     const [dialogData, setDialogData] = useState<DialogDataV1 | null>(null);
 

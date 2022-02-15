@@ -12,7 +12,7 @@ export const PageContentsCardV1: FunctionComponent<PageContentsCardV1Props> = ({
     className,
     children,
     ...otherProps
-}: PageContentsCardV1Props) => {
+}) => {
     const pageContentsCardV1Classes = usePageContentsCardV1Styles();
 
     return (
@@ -21,8 +21,10 @@ export const PageContentsCardV1: FunctionComponent<PageContentsCardV1Props> = ({
             className={classNames(
                 pageContentsCardV1Classes.pageContentsCard,
                 {
-                    [pageContentsCardV1Classes.pageContentsCardFullHeight]: fullHeight,
-                    [pageContentsCardV1Classes.pageContentsCardPaddingDisabled]: disablePadding,
+                    [pageContentsCardV1Classes.pageContentsCardFullHeight]:
+                        fullHeight,
+                    [pageContentsCardV1Classes.pageContentsCardPaddingDisabled]:
+                        disablePadding,
                 },
                 className,
                 "page-contents-card-v1"
@@ -31,8 +33,10 @@ export const PageContentsCardV1: FunctionComponent<PageContentsCardV1Props> = ({
             <CardContent
                 className={classNames(
                     {
-                        [pageContentsCardV1Classes.pageContentsCardFullHeight]: fullHeight,
-                        [pageContentsCardV1Classes.pageContentsCardPaddingDisabled]: disablePadding,
+                        [pageContentsCardV1Classes.pageContentsCardFullHeight]:
+                            fullHeight,
+                        [pageContentsCardV1Classes.pageContentsCardPaddingDisabled]:
+                            disablePadding,
                     },
                     "page-contents-card-v1-contents"
                 )}

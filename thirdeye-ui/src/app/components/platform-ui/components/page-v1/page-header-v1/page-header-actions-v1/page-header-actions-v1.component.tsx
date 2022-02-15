@@ -5,11 +5,9 @@ import React, { FunctionComponent } from "react";
 import { PageHeaderActionsV1Props } from "./page-header-actions-v1.interfaces";
 import { usePageHeaderActionsV1Styles } from "./page-header-actions-v1.styles";
 
-export const PageHeaderActionsV1: FunctionComponent<PageHeaderActionsV1Props> = ({
-    className,
-    children,
-    ...otherProps
-}: PageHeaderActionsV1Props) => {
+export const PageHeaderActionsV1: FunctionComponent<
+    PageHeaderActionsV1Props
+> = ({ className, children, ...otherProps }) => {
     const pageHeaderActionsV1Classes = usePageHeaderActionsV1Styles();
 
     return (

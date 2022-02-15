@@ -11,7 +11,7 @@ export const PasswordInputV1: FunctionComponent<PasswordInputV1Props> = ({
     allowShowPassword,
     className,
     ...otherProps
-}: PasswordInputV1Props) => {
+}) => {
     const [type, setType] = useState("password");
 
     const handleShowPasswordClick = (): void => {

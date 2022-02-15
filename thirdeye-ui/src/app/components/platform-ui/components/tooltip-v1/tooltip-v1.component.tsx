@@ -19,7 +19,7 @@ export const TooltipV1: FunctionComponent<TooltipV1Props> = ({
     className,
     children,
     ...otherProps
-}: TooltipV1Props) => {
+}) => {
     const tooltipV1Classes = useTooltipV1Styles();
 
     return (

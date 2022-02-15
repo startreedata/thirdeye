@@ -10,10 +10,9 @@ import { NotificationV1 } from "../notification-provider-v1/notification-provide
 import { NotificationDisplayV1Props } from "./notification-display-v1.interfaces";
 import { useNotificationDisplayV1Styles } from "./notification-display-v1.styles";
 
-export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props> = ({
-    className,
-    ...otherProps
-}: NotificationDisplayV1Props) => {
+export const NotificationDisplayV1: FunctionComponent<
+    NotificationDisplayV1Props
+> = ({ className, ...otherProps }) => {
     const notificationDisplayV1Classes = useNotificationDisplayV1Styles();
     const [notification, setNotification] = useState<NotificationV1 | null>(
         null

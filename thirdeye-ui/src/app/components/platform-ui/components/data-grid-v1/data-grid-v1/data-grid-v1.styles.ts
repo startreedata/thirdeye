@@ -24,18 +24,22 @@ export const useDataGridV1Styles = makeStyles((theme) => ({
         "& .BaseTable__header-cell-text": {
             whiteSpace: "nowrap",
         },
-        "& .BaseTable__table-main .BaseTable__header-cell:first-child, .BaseTable__table-main .BaseTable__row-cell:first-child": {
-            paddingLeft: theme.spacing(2),
-        },
-        "& .BaseTable__table-main .BaseTable__header-cell:last-child, .BaseTable__table-main .BaseTable__row-cell:last-child": {
-            paddingRight: theme.spacing(2),
-        },
-        "& .BaseTable__table-frozen-left .BaseTable__header-cell:first-child, .BaseTable__table-frozen-left .BaseTable__row-cell:first-child": {
-            paddingLeft: theme.spacing(2),
-        },
-        "& .BaseTable__table-frozen-right .BaseTable__header-cell:last-child, .BaseTable__table-frozen-right .BaseTable__row-cell:last-child": {
-            paddingRight: theme.spacing(2),
-        },
+        "& .BaseTable__table-main .BaseTable__header-cell:first-child, .BaseTable__table-main .BaseTable__row-cell:first-child":
+            {
+                paddingLeft: theme.spacing(2),
+            },
+        "& .BaseTable__table-main .BaseTable__header-cell:last-child, .BaseTable__table-main .BaseTable__row-cell:last-child":
+            {
+                paddingRight: theme.spacing(2),
+            },
+        "& .BaseTable__table-frozen-left .BaseTable__header-cell:first-child, .BaseTable__table-frozen-left .BaseTable__row-cell:first-child":
+            {
+                paddingLeft: theme.spacing(2),
+            },
+        "& .BaseTable__table-frozen-right .BaseTable__header-cell:last-child, .BaseTable__table-frozen-right .BaseTable__row-cell:last-child":
+            {
+                paddingRight: theme.spacing(2),
+            },
         "& .BaseTable__sort-indicator": {
             marginLeft: 4,
         },

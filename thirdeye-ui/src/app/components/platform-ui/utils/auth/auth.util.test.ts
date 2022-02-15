@@ -6,7 +6,7 @@ import { isBlockingAuthExceptionV1 } from "./auth.util";
 describe("Auth Util", () => {
     it("isBlockingAuthExceptionV1 should return false for invalid auth exception code", () => {
         expect(
-            isBlockingAuthExceptionV1((null as unknown) as AuthExceptionCodeV1)
+            isBlockingAuthExceptionV1(null as unknown as AuthExceptionCodeV1)
         ).toBeFalsy();
     });
 

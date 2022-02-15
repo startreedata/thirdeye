@@ -6,12 +6,9 @@ import React, { FunctionComponent } from "react";
 import { PageNotFoundIndicatorV1Props } from "./page-not-found-indicator-v1.inerfaces";
 import { usePageNotFoundIndicatorV1Styles } from "./page-not-found-indicator-v1.styles";
 
-export const PageNotFoundIndicatorV1: FunctionComponent<PageNotFoundIndicatorV1Props> = ({
-    headerText,
-    messageText,
-    className,
-    ...otherProps
-}: PageNotFoundIndicatorV1Props) => {
+export const PageNotFoundIndicatorV1: FunctionComponent<
+    PageNotFoundIndicatorV1Props
+> = ({ headerText, messageText, className, ...otherProps }) => {
     const pageNotFoundIndicatorV1Classes = usePageNotFoundIndicatorV1Styles();
 
     return (

@@ -7,11 +7,9 @@ import React, { FunctionComponent } from "react";
 import { DataGridSortOrderV1 } from "../data-grid-v1/data-grid-v1.interfaces";
 import { DataGridSortIndicatorV1Props } from "./data-grid-sort-indicator-v1.interfaces";
 
-export const DataGridSortIndicatorV1: FunctionComponent<DataGridSortIndicatorV1Props> = ({
-    sortOrder,
-    className,
-    ...otherProps
-}: DataGridSortIndicatorV1Props) => {
+export const DataGridSortIndicatorV1: FunctionComponent<
+    DataGridSortIndicatorV1Props
+> = ({ sortOrder, className, ...otherProps }) => {
     return (
         <div
             {...otherProps}

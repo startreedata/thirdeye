@@ -10,7 +10,7 @@ export const TileButtonTextV1: FunctionComponent<TileButtonTextV1Props> = ({
     className,
     children,
     ...otherProps
-}: TileButtonTextV1Props) => {
+}) => {
     const tileButtonTextV1Classes = useTileButtonTextV1Styles();
 
     return (

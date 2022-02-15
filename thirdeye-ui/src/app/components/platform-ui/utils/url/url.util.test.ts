@@ -9,7 +9,7 @@ import {
 
 describe("URL Util", () => {
     it("addLeadingForwardSlashV1 should return appropriate string for invalid url", () => {
-        expect(addLeadingForwardSlashV1((null as unknown) as string)).toEqual(
+        expect(addLeadingForwardSlashV1(null as unknown as string)).toEqual(
             "/"
         );
     });
@@ -24,9 +24,9 @@ describe("URL Util", () => {
     });
 
     it("removeLeadingForwardSlashV1 should return appropriate string for invalid url", () => {
-        expect(
-            removeLeadingForwardSlashV1((null as unknown) as string)
-        ).toEqual("");
+        expect(removeLeadingForwardSlashV1(null as unknown as string)).toEqual(
+            ""
+        );
     });
 
     it("removeLeadingForwardSlashV1 should return appropriate string for empty url", () => {
@@ -39,7 +39,7 @@ describe("URL Util", () => {
     });
 
     it("addTrailingForwardSlashV1 should return appropriate string for invalid url", () => {
-        expect(addTrailingForwardSlashV1((null as unknown) as string)).toEqual(
+        expect(addTrailingForwardSlashV1(null as unknown as string)).toEqual(
             "/"
         );
     });
@@ -58,9 +58,9 @@ describe("URL Util", () => {
     });
 
     it("removeTrailingForwardSlashV1 should return appropriate string for invalid url", () => {
-        expect(
-            removeTrailingForwardSlashV1((null as unknown) as string)
-        ).toEqual("");
+        expect(removeTrailingForwardSlashV1(null as unknown as string)).toEqual(
+            ""
+        );
     });
 
     it("removeTrailingForwardSlashV1 should return appropriate string for empty url", () => {

@@ -17,9 +17,9 @@ import {
     NotificationV1,
 } from "./notification-provider-v1.interfaces";
 
-export const NotificationProviderV1: FunctionComponent<NotificationProviderV1Props> = ({
-    children,
-}: NotificationProviderV1Props) => {
+export const NotificationProviderV1: FunctionComponent<
+    NotificationProviderV1Props
+> = ({ children }) => {
     const [notifications, setNotifications] = useState<NotificationV1[]>([]);
     const location = useLocation();
 
@@ -128,10 +128,12 @@ export const NotificationProviderV1: FunctionComponent<NotificationProviderV1Pro
     );
 };
 
-const NotificationProviderV1Context = createContext<NotificationProviderV1ContextProps>(
-    {} as NotificationProviderV1ContextProps
-);
+const NotificationProviderV1Context =
+    createContext<NotificationProviderV1ContextProps>(
+        {} as NotificationProviderV1ContextProps
+    );
 
-export const useNotificationProviderV1 = (): NotificationProviderV1ContextProps => {
-    return useContext(NotificationProviderV1Context);
-};
+export const useNotificationProviderV1 =
+    (): NotificationProviderV1ContextProps => {
+        return useContext(NotificationProviderV1Context);
+    };

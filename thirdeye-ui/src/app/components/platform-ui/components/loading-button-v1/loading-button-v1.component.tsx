@@ -11,7 +11,7 @@ export const LoadingButtonV1: FunctionComponent<LoadingButtonV1Props> = ({
     className,
     children,
     ...otherProps
-}: LoadingButtonV1Props) => {
+}) => {
     const [loadingInternal, setLoadingInternal] = useState(false); // Start with non-loading state to capture button dimensions
     const [buttonHeight, setButtonHeight] = useState(0);
     const [buttonWidth, setButtonWidth] = useState(0);

@@ -6,10 +6,9 @@ import React, { FunctionComponent } from "react";
 import { AppLoadingIndicatorV1Props } from "./app-loading-indicator-v1.interfaces";
 import { useAppLoadingIndicatorV1Styles } from "./app-loading-indicator-v1.styles";
 
-export const AppLoadingIndicatorV1: FunctionComponent<AppLoadingIndicatorV1Props> = ({
-    className,
-    ...otherProps
-}: AppLoadingIndicatorV1Props) => {
+export const AppLoadingIndicatorV1: FunctionComponent<
+    AppLoadingIndicatorV1Props
+> = ({ className, ...otherProps }) => {
     const appLoadingIndicatorV1Classes = useAppLoadingIndicatorV1Styles();
 
     return (

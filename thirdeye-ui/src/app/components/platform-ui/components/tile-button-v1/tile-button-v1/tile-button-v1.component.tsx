@@ -20,7 +20,7 @@ export const TileButtonV1: FunctionComponent<TileButtonV1Props> = ({
     onClick,
     children,
     ...otherProps
-}: TileButtonV1Props) => {
+}) => {
     const tileButtonV1Classes = useTileButtonV1Styles();
 
     const tileButtonV1Context = {

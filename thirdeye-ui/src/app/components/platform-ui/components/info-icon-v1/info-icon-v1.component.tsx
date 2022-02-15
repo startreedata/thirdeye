@@ -15,7 +15,7 @@ export const InfoIconV1: FunctionComponent<InfoIconV1Props> = ({
     className,
     children,
     ...otherProps
-}: InfoIconV1Props) => {
+}) => {
     const infoIconV1Classes = useInfoIconV1Styles();
     const [infoElement, setInfoElement] = useState<HTMLElement | null>();
 

@@ -31,7 +31,7 @@ export const NavBarV1: FunctionComponent<NavBarV1Props> = ({
     className,
     children,
     ...otherProps
-}: NavBarV1Props) => {
+}) => {
     const navBarV1Classes = useNavBarV1Styles();
     const [
         navBarMinimized,

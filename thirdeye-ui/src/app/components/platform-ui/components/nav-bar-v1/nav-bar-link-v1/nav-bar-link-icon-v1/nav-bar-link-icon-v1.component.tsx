@@ -11,7 +11,7 @@ export const NavBarLinkIconV1: FunctionComponent<NavBarLinkIconV1Props> = ({
     className,
     children,
     ...otherProps
-}: NavBarLinkIconV1Props) => {
+}) => {
     const navBarLinkIconV1Classes = useNavBarLinkIconV1Styles();
     const { hover, selected } = useNavBarLinkV1();
 

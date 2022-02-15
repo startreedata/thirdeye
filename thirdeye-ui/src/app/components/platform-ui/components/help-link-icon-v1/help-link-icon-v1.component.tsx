@@ -14,7 +14,7 @@ export const HelpLinkIconV1: FunctionComponent<HelpLinkIconV1Props> = ({
     enablePadding,
     className,
     ...otherProps
-}: HelpLinkIconV1Props) => {
+}) => {
     const helpLinkIconV1Classes = useHelpLinkIconV1Styles();
 
     return (

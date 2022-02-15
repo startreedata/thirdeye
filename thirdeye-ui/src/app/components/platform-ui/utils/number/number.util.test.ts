@@ -15,7 +15,7 @@ jest.mock("numbro", () =>
 
 describe("Number Util", () => {
     it("formatNumberV1 should return empty string for invalid number", () => {
-        expect(formatNumberV1((null as unknown) as number)).toEqual("");
+        expect(formatNumberV1(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 
@@ -44,7 +44,7 @@ describe("Number Util", () => {
     });
 
     it("formatLargeNumberV1 should return empty string for invalid number", () => {
-        expect(formatLargeNumberV1((null as unknown) as number)).toEqual("");
+        expect(formatLargeNumberV1(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 
@@ -76,7 +76,7 @@ describe("Number Util", () => {
     });
 
     it("formatPercentageV1 should return empty string for invalid number", () => {
-        expect(formatPercentageV1((null as unknown) as number)).toEqual("");
+        expect(formatPercentageV1(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 
@@ -108,7 +108,7 @@ describe("Number Util", () => {
     });
 
     it("stylePercentageV1 should return empty string for invalid number", () => {
-        expect(stylePercentageV1((null as unknown) as number)).toEqual("");
+        expect(stylePercentageV1(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 

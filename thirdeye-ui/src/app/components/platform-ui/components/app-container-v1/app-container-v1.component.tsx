@@ -14,7 +14,7 @@ export const AppContainerV1: FunctionComponent<AppContainerV1Props> = ({
     className,
     children,
     ...otherProps
-}: AppContainerV1Props) => {
+}) => {
     const appContainerV1Classes = useAppContainerV1Styles();
 
     const appContainerV1Context = {

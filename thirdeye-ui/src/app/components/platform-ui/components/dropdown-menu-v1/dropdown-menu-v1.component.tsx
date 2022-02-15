@@ -17,7 +17,7 @@ export const DropdownMenuV1: FunctionComponent<DropdownMenuV1Props> = ({
     onClose,
     onClick,
     ...otherProps
-}: DropdownMenuV1Props) => {
+}) => {
     const handleMenuItemClick = (menuItem: DropdownMenuItemV1): void => {
         onClick && onClick(menuItem.id, menuItem.text);
     };

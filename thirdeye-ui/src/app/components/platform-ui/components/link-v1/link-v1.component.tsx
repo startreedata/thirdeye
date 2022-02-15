@@ -21,7 +21,7 @@ export const LinkV1: FunctionComponent<LinkV1Props> = ({
     onClick,
     children,
     ...otherProps
-}: LinkV1Props) => {
+}) => {
     const linkV1Classes = useLinkV1Styles();
 
     return (

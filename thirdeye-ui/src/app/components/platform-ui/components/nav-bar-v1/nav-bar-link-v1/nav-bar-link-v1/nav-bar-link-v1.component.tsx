@@ -29,7 +29,7 @@ export const NavBarLinkV1: FunctionComponent<NavBarLinkV1Props> = ({
     onClick,
     children,
     ...otherProps
-}: NavBarLinkV1Props) => {
+}) => {
     const navBarLinkV1Classes = useNavBarLinkV1Styles();
     const [hover, setHover] = useState(false);
     const [tooltip, setTooltip] = useState<ReactNode>("");

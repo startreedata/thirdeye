@@ -21,7 +21,7 @@ export const DropdownButtonV1: FunctionComponent<DropdownButtonV1Props> = ({
     onClick,
     children,
     ...otherProps
-}: DropdownButtonV1Props) => {
+}) => {
     const [menuElement, setMenuElement] = useState<HTMLElement | null>();
 
     const handleButtonClick = (event: MouseEvent<HTMLElement>): void => {

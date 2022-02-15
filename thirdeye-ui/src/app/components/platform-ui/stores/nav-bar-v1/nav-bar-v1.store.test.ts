@@ -34,7 +34,7 @@ describe("Nav Bar V1", () => {
     it("setNavBarUserPreference should update store appropriately for invalid user preference", () => {
         const { result } = renderHook(() => useNavBarV1());
         act(() => {
-            result.current.setNavBarUserPreference((null as unknown) as number);
+            result.current.setNavBarUserPreference(null as unknown as number);
         });
 
         expect(result.current.navBarMinimized).toBeFalsy();

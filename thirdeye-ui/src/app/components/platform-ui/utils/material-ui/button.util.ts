@@ -8,7 +8,16 @@ export const buttonClassesV1 = {
     contained: {
         border: BorderV1.BorderDefault,
     },
+    outlined: {
+        border: BorderV1.BorderDefault,
+    },
     containedSizeLarge: {
+        paddingTop: 8,
+        paddingBottom: 8,
+        paddingLeft: 16,
+        paddingRight: 16,
+    },
+    outlinedSizeLarge: {
         paddingTop: 8,
         paddingBottom: 8,
         paddingLeft: 16,

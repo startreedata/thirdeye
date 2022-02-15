@@ -98,10 +98,8 @@ export function DataGridV1<T>({
         rowKeyValues: new Set(),
         rowKeyValueMap: new Map(),
     });
-    const [
-        filteredDataSelectionCount,
-        setFilteredDataSelectionCount,
-    ] = useState(0);
+    const [filteredDataSelectionCount, setFilteredDataSelectionCount] =
+        useState(0);
     const [rowsRenderedState, setRowsRenderedState] = useState(false);
     const [gridContainerHeight, setGridContainerHeight] = useState<
         number | string

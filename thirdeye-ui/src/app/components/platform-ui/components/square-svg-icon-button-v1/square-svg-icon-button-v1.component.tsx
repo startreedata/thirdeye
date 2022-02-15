@@ -8,7 +8,9 @@ import { Link as RouterLink } from "react-router-dom";
 import { SquareSvgIconButtonV1Props } from "./square-svg-icon-button-v1.interfaces";
 import { useSquareSvgIconButtonV1Styles } from "./square-svg-icon-button-v1.styles";
 
-export const SquareSvgIconButtonV1: FunctionComponent<SquareSvgIconButtonV1Props> = ({
+export const SquareSvgIconButtonV1: FunctionComponent<
+    SquareSvgIconButtonV1Props
+> = ({
     href,
     externalLink,
     target,
@@ -18,7 +20,7 @@ export const SquareSvgIconButtonV1: FunctionComponent<SquareSvgIconButtonV1Props
     className,
     onClick,
     ...otherProps
-}: SquareSvgIconButtonV1Props) => {
+}) => {
     const squareSvgIconButtonV1Classes = useSquareSvgIconButtonV1Styles();
 
     return (

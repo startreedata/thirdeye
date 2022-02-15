@@ -45,7 +45,7 @@ describe("Params Util", () => {
     it("getQueryParamV1 should return empty string for invalid key", () => {
         location.search = "";
 
-        expect(getQueryParamV1((null as unknown) as string)).toEqual("");
+        expect(getQueryParamV1(null as unknown as string)).toEqual("");
     });
 
     it("getQueryParamV1 should return empty string for empty key", () => {
@@ -69,7 +69,7 @@ describe("Params Util", () => {
     it("setQueryParamV1 should not set query parameter for invalid key", () => {
         location.search = "";
         location.hash = "";
-        setQueryParamV1((null as unknown) as string, "testValue");
+        setQueryParamV1(null as unknown as string, "testValue");
 
         expect(location.search).toEqual("");
         expect(location.hash).toEqual("");
@@ -107,7 +107,7 @@ describe("Params Util", () => {
     it("clearQueryParamV1 should not clear query parameter for invalid key", () => {
         location.search = "testKey=testValue";
         location.hash = "";
-        clearQueryParamV1((null as unknown) as string);
+        clearQueryParamV1(null as unknown as string);
 
         expect(location.search).toEqual("testKey=testValue");
         expect(location.hash).toEqual("");
@@ -143,7 +143,7 @@ describe("Params Util", () => {
     it("getHashParamV1 should return empty string for invalid key", () => {
         location.hash = "";
 
-        expect(getHashParamV1((null as unknown) as string)).toEqual("");
+        expect(getHashParamV1(null as unknown as string)).toEqual("");
     });
 
     it("getHashParamV1 should return empty string for empty key", () => {
@@ -167,7 +167,7 @@ describe("Params Util", () => {
     it("setHashParamV1 should not set hash parameter for invalid key", () => {
         location.search = "";
         location.hash = "";
-        setHashParamV1((null as unknown) as string, "testValue");
+        setHashParamV1(null as unknown as string, "testValue");
 
         expect(location.search).toEqual("");
         expect(location.hash).toEqual("");
@@ -205,7 +205,7 @@ describe("Params Util", () => {
     it("clearHashParamV1 should not clear hash parameter for invalid key", () => {
         location.search = "";
         location.hash = "#testKey=testValue";
-        clearHashParamV1((null as unknown) as string);
+        clearHashParamV1(null as unknown as string);
 
         expect(location.search).toEqual("");
         expect(location.hash).toEqual("#testKey=testValue");

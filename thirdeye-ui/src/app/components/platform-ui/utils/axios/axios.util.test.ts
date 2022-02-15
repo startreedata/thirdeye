@@ -14,7 +14,7 @@ describe("Axios Util", () => {
 
     it("axios request interceptor should not attach invalid access token to request header", () => {
         const requestInterceptor = getRequestInterceptorV1(
-            (null as unknown) as string
+            null as unknown as string
         );
 
         expect(requestInterceptor({})).toEqual({});

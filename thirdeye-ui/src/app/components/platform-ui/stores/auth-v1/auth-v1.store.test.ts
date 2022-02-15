@@ -68,7 +68,7 @@ describe("Auth V1", () => {
     it("setAccessToken should update store appropriately for invalid token", () => {
         const { result } = renderHook(() => useAuthV1());
         act(() => {
-            result.current.setAccessToken((null as unknown) as string);
+            result.current.setAccessToken(null as unknown as string);
         });
 
         expect(result.current.authenticated).toBeFalsy();
@@ -116,7 +116,7 @@ describe("Auth V1", () => {
     it("clearAuth should update store appropriately for invalid exception code", () => {
         const { result } = renderHook(() => useAuthV1());
         act(() => {
-            result.current.clearAuth((null as unknown) as string);
+            result.current.clearAuth(null as unknown as string);
         });
 
         expect(result.current.authenticated).toBeFalsy();
@@ -213,8 +213,8 @@ describe("Auth V1", () => {
         const { result } = renderHook(() => useAuthV1());
         act(() => {
             result.current.setAuthAction(
-                (null as unknown) as string,
-                (null as unknown) as string
+                null as unknown as string,
+                null as unknown as string
             );
         });
 

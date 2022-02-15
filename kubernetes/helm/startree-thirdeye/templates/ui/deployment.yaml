@@ -65,6 +65,16 @@ spec:
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-Forwarded-Host $server_name;
               }
+              location /swagger {
+                proxy_pass ${THIRDEYE_API_BASE_URL}/swagger;
+                resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+                proxy_ssl_server_name on;
+                proxy_redirect off;
+                proxy_set_header Host $proxy_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Host $server_name;
+              }
               location / {
                   try_files $uri $uri/ /index.html;
               }

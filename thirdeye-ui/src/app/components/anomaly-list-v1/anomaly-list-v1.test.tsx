@@ -17,8 +17,8 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+jest.mock("../../platform/components", () => ({
+    ...(jest.requireActual("../../platform/components") as Record<
         string,
         unknown
     >),

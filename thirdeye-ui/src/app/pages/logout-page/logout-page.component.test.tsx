@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { LogoutPage } from "./logout-page.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+jest.mock("../../platform/components", () => ({
+    ...(jest.requireActual("../../platform/components") as Record<
         string,
         unknown
     >),

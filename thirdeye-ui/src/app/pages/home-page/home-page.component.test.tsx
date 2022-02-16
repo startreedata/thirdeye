@@ -3,13 +3,23 @@ import React from "react";
 import { PageContentsGridV1 } from "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1";
 import { HomePage } from "./home-page.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
-        string,
-        unknown
-    >),
-    PageContentsGridV1: jest.fn().mockImplementation((props) => props.children),
-    PageV1: jest.fn().mockImplementation((props) => props.children),
+jest.mock(
+    "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1/page-contents-grid-v1.component",
+    () => ({
+        PageContentsGridV1: jest
+            .fn()
+            .mockImplementation((props) => props.children),
+    })
+);
+
+jest.mock(
+    "../../platform/components/page-v1/page-v1/page-v1.component",
+    () => ({
+        PageV1: jest.fn().mockImplementation((props) => props.children),
+    })
+);
+
+jest.mock("../../platform/components/tile-button-v1", () => ({
     TileButtonIconV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonTextV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonV1: jest.fn().mockImplementation((props) => (
@@ -17,6 +27,10 @@ jest.mock("@startree-ui/platform-ui", () => ({
             {props.children}
         </a>
     )),
+}));
+
+jest.mock("../../components/page-header/page-header.component", () => ({
+    PageHeader: jest.fn().mockImplementation((props) => props.title),
 }));
 
 jest.mock(
@@ -27,10 +41,6 @@ jest.mock(
         })),
     })
 );
-
-jest.mock("../../components/page-header/page-header.component", () => ({
-    PageHeader: jest.fn().mockReturnValue("label.home"),
-}));
 
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({

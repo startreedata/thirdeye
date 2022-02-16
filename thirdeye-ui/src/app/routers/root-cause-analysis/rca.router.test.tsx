@@ -26,9 +26,14 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
-}));
+jest.mock(
+    "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component",
+    () => ({
+        AppLoadingIndicatorV1: jest
+            .fn()
+            .mockReturnValue("testLoadingIndicatorV1"),
+    })
+);
 
 jest.mock(
     "../../pages/page-not-found-page/page-not-found-page.component",

@@ -36,9 +36,14 @@ jest.mock("../../utils/routes/routes.util", () => ({
     getMetricsPath: jest.fn().mockReturnValue("testMetricsPath"),
 }));
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
-}));
+jest.mock(
+    "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component",
+    () => ({
+        AppLoadingIndicatorV1: jest
+            .fn()
+            .mockReturnValue("testLoadingIndicatorV1"),
+    })
+);
 
 jest.mock(
     "../../pages/metrics-create-page/metrics-create-page.component",

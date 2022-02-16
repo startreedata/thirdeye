@@ -10,7 +10,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.Constants.SubjectType;
-import ai.startree.thirdeye.spi.api.EmailEntityApi;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
@@ -68,7 +67,7 @@ public class EmailNotificationService implements NotificationService {
       final EmailEntityApi emailEntity = buildEmailEntityApi(api.getSubscriptionGroup(),
           DEFAULT_EMAIL_TEMPLATE,
           api.getEmailTemplateData(),
-          api.getTo());
+          api.getEmailRecipients());
 
       final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);

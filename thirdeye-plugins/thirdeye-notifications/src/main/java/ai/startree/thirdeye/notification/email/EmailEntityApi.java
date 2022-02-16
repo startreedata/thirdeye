@@ -3,7 +3,9 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.api;
+package ai.startree.thirdeye.notification.email;
+
+import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 
 public class EmailEntityApi {
 

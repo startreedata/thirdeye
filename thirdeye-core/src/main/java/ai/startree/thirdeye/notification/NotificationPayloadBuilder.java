@@ -60,7 +60,7 @@ public class NotificationPayloadBuilder {
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
         .setAnomalyReports(toAnomalyReports(anomalyResults))
         .setEmailTemplateData(templateData)
-        .setTo(recipients);
+        .setEmailRecipients(recipients);
   }
 
   private List<AnomalyReportApi> toAnomalyReports(final List<MergedAnomalyResultDTO> anomalies) {

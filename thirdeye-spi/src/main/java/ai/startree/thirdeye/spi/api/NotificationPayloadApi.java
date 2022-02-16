@@ -16,8 +16,11 @@ public class NotificationPayloadApi implements ThirdEyeApi {
 
   private SubscriptionGroupApi subscriptionGroup;
   private List<AnomalyReportApi> anomalyReports;
-  private EmailEntityApi emailEntity;
-  private EmailRecipientsApi to;
+
+  // TODO spyne remove email specific parameters and generify
+  private EmailRecipientsApi emailRecipients;
+
+  // TODO spyne remove email specific parameters. Introduce pojo and generify.
   private Map<String, Object> emailTemplateData;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
@@ -39,22 +42,12 @@ public class NotificationPayloadApi implements ThirdEyeApi {
     return this;
   }
 
-  public EmailEntityApi getEmailEntity() {
-    return emailEntity;
+  public EmailRecipientsApi getEmailRecipients() {
+    return emailRecipients;
   }
 
-  public NotificationPayloadApi setEmailEntity(
-      final EmailEntityApi emailEntity) {
-    this.emailEntity = emailEntity;
-    return this;
-  }
-
-  public EmailRecipientsApi getTo() {
-    return to;
-  }
-
-  public NotificationPayloadApi setTo(final EmailRecipientsApi to) {
-    this.to = to;
+  public NotificationPayloadApi setEmailRecipients(final EmailRecipientsApi emailRecipients) {
+    this.emailRecipients = emailRecipients;
     return this;
   }
 

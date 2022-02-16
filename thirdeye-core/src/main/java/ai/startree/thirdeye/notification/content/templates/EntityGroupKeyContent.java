@@ -90,7 +90,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
 
   @Override
   public String getTemplate() {
-    return EntityGroupKeyContent.class.getSimpleName();
+    return "entity-groupkey";
   }
 
   @Override

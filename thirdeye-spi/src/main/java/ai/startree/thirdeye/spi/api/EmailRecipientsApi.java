@@ -17,15 +17,25 @@ import java.util.Set;
  */
 public class EmailRecipientsApi {
 
-  Set<String> to;
-  Set<String> cc;
-  Set<String> bcc;
+  private String from;
+  private Set<String> to;
+  private Set<String> cc;
+  private Set<String> bcc;
 
   public EmailRecipientsApi(Collection<String> to, Collection<String> cc,
       Collection<String> bcc) {
     this.to = new HashSet<>(to);
     this.cc = cc != null ? new HashSet<>(cc) : new HashSet<>();
     this.bcc = bcc != null ? new HashSet<>(bcc) : new HashSet<>();
+  }
+
+  public String getFrom() {
+    return from;
+  }
+
+  public EmailRecipientsApi setFrom(final String from) {
+    this.from = from;
+    return this;
   }
 
   public Set<String> getTo() {

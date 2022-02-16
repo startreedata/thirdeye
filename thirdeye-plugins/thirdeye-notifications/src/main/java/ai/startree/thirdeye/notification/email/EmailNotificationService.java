@@ -5,13 +5,20 @@
 
 package ai.startree.thirdeye.notification.email;
 
+import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
+import ai.startree.thirdeye.spi.Constants.SubjectType;
 import ai.startree.thirdeye.spi.api.EmailEntityApi;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
+import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.collections4.CollectionUtils;
@@ -58,11 +65,38 @@ public class EmailNotificationService implements NotificationService {
   @Override
   public void notify(final NotificationPayloadApi api) {
     try {
-      final HtmlEmail email = buildHtmlEmail(api.getEmailEntity());
+      final EmailEntityApi emailEntity = buildEmailEntityApi(api.getSubscriptionGroup(),
+          DEFAULT_EMAIL_TEMPLATE,
+          api.getEmailTemplateData(),
+          api.getTo());
+
+      final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
     } catch (Exception e) {
       LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
     }
+  }
+
+  public EmailEntityApi buildEmailEntityApi(final SubscriptionGroupApi subscriptionGroup,
+      final String templateKey,
+      final Map<String, Object> templateData,
+      final EmailRecipientsApi recipients) {
+    requireNonNull(recipients.getTo(), "to field in email scheme is null");
+    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
+
+    final EmailContentBuilder builder = new EmailContentBuilder();
+    final String htmlText = builder.buildHtml(templateKey, templateData);
+
+    final String subject = builder.makeSubject(SubjectType.ALERT,
+        templateData.get("metrics"),
+        templateData.get("datasets"),
+        subscriptionGroup.getName());
+
+    return new EmailEntityApi()
+        .setSubject(subject)
+        .setHtmlContent(htmlText)
+        .setTo(recipients)
+        .setFrom(recipients.getFrom());
   }
 
   private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
@@ -109,5 +143,12 @@ public class EmailNotificationService implements NotificationService {
         email.getToAddresses().size() + email.getCcAddresses().size() + email.getBccAddresses()
             .size();
     LOG.info("Email sent with subject '{}' to {} recipients", email.getSubject(), recipientCount);
+  }
+
+  @Override
+  public Object toHtml(final NotificationPayloadApi api) {
+    return new EmailContentBuilder().buildHtml(
+        DEFAULT_EMAIL_TEMPLATE,
+        api.getEmailTemplateData());
   }
 }

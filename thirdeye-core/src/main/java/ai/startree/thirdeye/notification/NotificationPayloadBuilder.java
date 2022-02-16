@@ -5,15 +5,9 @@
 
 package ai.startree.thirdeye.notification;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import ai.startree.thirdeye.notification.formatter.channels.EmailContentBuilder;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
-import ai.startree.thirdeye.spi.api.EmailEntityApi;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
@@ -37,16 +31,13 @@ public class NotificationPayloadBuilder {
 
   private final UiConfiguration uiConfiguration;
   private final EmailEntityBuilder emailEntityBuilder;
-  private final MetricAnomaliesContent metricAnomaliesContent;
 
   @Inject
   public NotificationPayloadBuilder(
       final UiConfiguration uiConfiguration,
-      final EmailEntityBuilder emailEntityBuilder,
-      final MetricAnomaliesContent metricAnomaliesContent) {
+      final EmailEntityBuilder emailEntityBuilder) {
     this.uiConfiguration = uiConfiguration;
     this.emailEntityBuilder = emailEntityBuilder;
-    this.metricAnomaliesContent = metricAnomaliesContent;
   }
 
   public NotificationPayloadApi buildNotificationPayload(
@@ -58,15 +49,18 @@ public class NotificationPayloadBuilder {
     final Map<String, Object> templateData = emailEntityBuilder.buildTemplateData(subscriptionGroup,
         new ArrayList<>(anomalies));
 
-    final EmailEntityApi emailEntity = buildEmailEntityApi(subscriptionGroup,
-        metricAnomaliesContent.getTemplate(),
-        templateData
-    );
+    final EmailSchemeDto emailScheme = subscriptionGroup.getNotificationSchemes().getEmailScheme();
+    final EmailRecipientsApi recipients = emailScheme == null ? null : new EmailRecipientsApi(
+        emailScheme.getTo(),
+        emailScheme.getCc(),
+        emailScheme.getBcc()
+    ).setFrom(subscriptionGroup.getFrom());
 
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
         .setAnomalyReports(toAnomalyReports(anomalyResults))
-        .setEmailEntity(emailEntity);
+        .setEmailTemplateData(templateData)
+        .setTo(recipients);
   }
 
   private List<AnomalyReportApi> toAnomalyReports(final List<MergedAnomalyResultDTO> anomalies) {
@@ -82,32 +76,5 @@ public class NotificationPayloadBuilder {
       extUrl += "/";
     }
     return String.format("%s%s%s", extUrl, ANOMALY_DASHBOARD_PREFIX, id);
-  }
-
-  public EmailEntityApi buildEmailEntityApi(final SubscriptionGroupDTO subscriptionGroup,
-      final String templateKey,
-      final Map<String, Object> templateData) {
-    final EmailContentBuilder builder = new EmailContentBuilder();
-    final String htmlText = builder.buildHtml(templateKey, templateData);
-
-    final String subject = builder.makeSubject(subscriptionGroup.getSubjectType(),
-        templateData.get("metrics"),
-        templateData.get("datasets"),
-        subscriptionGroup.getName());
-
-    final EmailSchemeDto emailScheme = subscriptionGroup.getNotificationSchemes().getEmailScheme();
-    requireNonNull(emailScheme.getTo(), "to field in email scheme is null");
-    checkArgument(emailScheme.getTo().size() > 0, "'to' field in email scheme is empty");
-
-    final EmailRecipientsApi recipients = new EmailRecipientsApi(
-        emailScheme.getTo(),
-        emailScheme.getCc(),
-        emailScheme.getBcc());
-
-    return new EmailEntityApi()
-        .setSubject(subject)
-        .setHtmlContent(htmlText)
-        .setTo(recipients)
-        .setFrom(subscriptionGroup.getFrom());
   }
 }

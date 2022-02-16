@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Objects;
 import java.util.List;
+import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
 public class NotificationPayloadApi implements ThirdEyeApi {
@@ -16,6 +17,8 @@ public class NotificationPayloadApi implements ThirdEyeApi {
   private SubscriptionGroupApi subscriptionGroup;
   private List<AnomalyReportApi> anomalyReports;
   private EmailEntityApi emailEntity;
+  private EmailRecipientsApi to;
+  private Map<String, Object> emailTemplateData;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
@@ -43,6 +46,25 @@ public class NotificationPayloadApi implements ThirdEyeApi {
   public NotificationPayloadApi setEmailEntity(
       final EmailEntityApi emailEntity) {
     this.emailEntity = emailEntity;
+    return this;
+  }
+
+  public EmailRecipientsApi getTo() {
+    return to;
+  }
+
+  public NotificationPayloadApi setTo(final EmailRecipientsApi to) {
+    this.to = to;
+    return this;
+  }
+
+  public Map<String, Object> getEmailTemplateData() {
+    return emailTemplateData;
+  }
+
+  public NotificationPayloadApi setEmailTemplateData(
+      final Map<String, Object> emailTemplateData) {
+    this.emailTemplateData = emailTemplateData;
     return this;
   }
 

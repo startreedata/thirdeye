@@ -5,24 +5,25 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
+import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.notification.NotificationContext;
+import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
+import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
+import ai.startree.thirdeye.notification.EmailEntityBuilder;
+import ai.startree.thirdeye.notification.NotificationDispatcher;
+import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import ai.startree.thirdeye.notification.formatter.channels.EmailContentBuilder;
-import ai.startree.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.task.runner.NotificationTaskRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -40,7 +41,6 @@ import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -65,28 +65,34 @@ public class InternalResource {
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final DatabaseAdminResource databaseAdminResource;
-  private final MetricAnomaliesContent metricAnomaliesContent;
-  private final ThirdEyeServerConfiguration configuration;
-  private final EmailContentFormatter emailContentFormatter;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationTaskRunner notificationTaskRunner;
+  private final EmailEntityBuilder emailEntityBuilder;
+  private final NotificationDispatcher notificationDispatcher;
+  private final NotificationPayloadBuilder notificationPayloadBuilder;
+  private final SubscriptionGroupManager subscriptionGroupManager;
+  private final NotificationSchemeFactory notificationSchemeFactory;
 
   @Inject
   public InternalResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final DatabaseAdminResource databaseAdminResource,
-      final MetricAnomaliesContent metricAnomaliesContent,
-      final ThirdEyeServerConfiguration configuration,
-      final EmailContentFormatter emailContentFormatter,
       final NotificationServiceRegistry notificationServiceRegistry,
-      final NotificationTaskRunner notificationTaskRunner) {
+      final NotificationTaskRunner notificationTaskRunner,
+      final EmailEntityBuilder emailEntityBuilder,
+      final NotificationDispatcher notificationDispatcher,
+      final NotificationPayloadBuilder notificationPayloadBuilder,
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final NotificationSchemeFactory notificationSchemeFactory) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.databaseAdminResource = databaseAdminResource;
-    this.metricAnomaliesContent = metricAnomaliesContent;
-    this.configuration = configuration;
-    this.emailContentFormatter = emailContentFormatter;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
+    this.emailEntityBuilder = emailEntityBuilder;
+    this.notificationDispatcher = notificationDispatcher;
+    this.notificationPayloadBuilder = notificationPayloadBuilder;
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.notificationSchemeFactory = notificationSchemeFactory;
   }
 
   @Path("db-admin")
@@ -111,13 +117,21 @@ public class InternalResource {
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam("alertId") Long alertId
-  ) {
-    ensureExists(alertId, "Query parameter required: alertId !");
-    final Map<String, Object> templateData = buildTemplateData(alertId);
-    final String emailHtml = new EmailContentBuilder().buildHtml(
-        metricAnomaliesContent.getTemplate(),
-        templateData);
+      @QueryParam("subscriptionGroupId") Long subscriptionGroupManagerById
+  ) throws Exception {
+    ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
+
+    final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
+    final DetectionAlertFilterResult result = requireNonNull(notificationSchemeFactory
+        .getDetectionAlertFilterResult(sg), "DetectionAlertFilterResult is null");
+
+    final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
+        sg,
+        notificationDispatcher.getAnomalies(sg, result));
+
+    final NotificationService emailNotificationService = notificationServiceRegistry.get("email",
+        notificationDispatcher.buildEmailProperties());
+    final String emailHtml = emailNotificationService.toHtml(payload).toString();
     return Response.ok(emailHtml).build();
   }
 
@@ -137,20 +151,9 @@ public class InternalResource {
     final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
         mergedAnomalyResultManager.findByDetectionConfigId(alertId));
 
-    final SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO()
-        .setName("report-generation");
-
-    metricAnomaliesContent.init(new NotificationContext()
-        .setProperties(new Properties())
-        .setUiPublicUrl(optional(configuration)
-            .map(ThirdEyeServerConfiguration::getUiConfiguration)
-            .map(UiConfiguration::getExternalUrl)
-            .orElse("")));
-    final Map<String, Object> templateData = metricAnomaliesContent.format(
-        new ArrayList<>(anomalies),
-        subscriptionGroup);
-    templateData.put("dashboardHost", configuration.getUiConfiguration().getExternalUrl());
-    return templateData;
+    return emailEntityBuilder.buildTemplateData(
+        new SubscriptionGroupDTO().setName("report-generation"),
+        new ArrayList<>(anomalies));
   }
 
   @GET

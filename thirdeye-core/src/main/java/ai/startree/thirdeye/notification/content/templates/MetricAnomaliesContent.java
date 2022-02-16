@@ -75,7 +75,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
 
   @Override
   public String getTemplate() {
-    return MetricAnomaliesContent.class.getSimpleName();
+    return "metric-anomalies";
   }
 
   @Override

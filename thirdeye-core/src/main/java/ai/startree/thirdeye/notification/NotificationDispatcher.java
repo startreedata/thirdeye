@@ -68,7 +68,7 @@ public class NotificationDispatcher {
     }
   }
 
-  private Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
+  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
       final DetectionAlertFilterResult results) {
     return results
         .getResult()
@@ -80,7 +80,7 @@ public class NotificationDispatcher {
         .orElse(null);
   }
 
-  private Map<String, String> buildEmailProperties() {
+  public Map<String, String> buildEmailProperties() {
     final Map<String, String> properties = new HashMap<>();
     properties.put("host", smtpConfig.getHost());
     properties.put("port", String.valueOf(smtpConfig.getPort()));

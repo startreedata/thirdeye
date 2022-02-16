@@ -49,7 +49,7 @@ public class EmailEntityBuilder {
   }
 
   public Map<String, Object> buildTemplateData(final SubscriptionGroupDTO sg,
-      final List<AnomalyResult> anomalyResults) {
+      final List<? extends AnomalyResult> anomalyResults) {
     requireNonNull(anomalyResults, "anomalyResults is null");
     checkArgument(anomalyResults.size() > 0, "anomalyResults is empty");
 

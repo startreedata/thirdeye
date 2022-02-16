@@ -3,11 +3,8 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.formatter.channels;
+package ai.startree.thirdeye.notification.email;
 
-import ai.startree.thirdeye.notification.content.templates.EntityGroupKeyContent;
-import ai.startree.thirdeye.notification.content.templates.HierarchicalAnomaliesContent;
-import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import ai.startree.thirdeye.spi.Constants.SubjectType;
 import com.google.common.collect.ImmutableMap;
 import freemarker.template.Configuration;
@@ -20,12 +17,13 @@ import java.util.Map;
 
 public class EmailContentBuilder {
 
+  public static final String DEFAULT_EMAIL_TEMPLATE = "metric-anomalies";
   private static final String BASE_PACKAGE_PATH = "/ai/startree/thirdeye/detection/detector";
   private static final String CHARSET = "UTF-8";
   private static final Map<String, String> TEMPLATE_MAP = ImmutableMap.<String, String>builder()
-      .put(MetricAnomaliesContent.class.getSimpleName(), "metric-anomalies-template.ftl")
-      .put(EntityGroupKeyContent.class.getSimpleName(), "entity-groupkey-anomaly-report.ftl")
-      .put(HierarchicalAnomaliesContent.class.getSimpleName(),
+      .put(DEFAULT_EMAIL_TEMPLATE, "metric-anomalies-template.ftl")
+      .put("entity-groupkey", "entity-groupkey-anomaly-report.ftl")
+      .put("hierarchical-anomalies",
           "hierarchical-anomalies-email-template.ftl")
       .build();
 

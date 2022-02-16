@@ -90,7 +90,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
 
   @Override
   public String getTemplate() {
-    return HierarchicalAnomaliesContent.class.getSimpleName();
+    return "hierarchical-anomalies";
   }
 
   @Override

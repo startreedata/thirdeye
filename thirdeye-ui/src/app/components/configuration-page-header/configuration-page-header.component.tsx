@@ -1,12 +1,12 @@
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import {
     PageHeaderActionsV1,
     PageHeaderTabsV1,
     PageHeaderTabV1,
     PageHeaderTextV1,
     PageHeaderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
+} from "../../platform/components";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";

@@ -10,16 +10,16 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";

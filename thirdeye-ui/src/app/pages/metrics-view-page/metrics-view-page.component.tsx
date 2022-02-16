@@ -1,10 +1,4 @@
 import { Grid } from "@material-ui/core";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +9,12 @@ import { DialogType } from "../../components/dialogs/dialog-provider/dialog-prov
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
 import { getUiMetric } from "../../utils/metrics/metrics.util";

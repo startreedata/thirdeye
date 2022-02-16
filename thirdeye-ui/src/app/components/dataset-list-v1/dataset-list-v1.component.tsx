@@ -1,13 +1,13 @@
 import { Button, Grid, Link } from "@material-ui/core";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+} from "../../platform/components";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import {
     getDatasetsUpdatePath,

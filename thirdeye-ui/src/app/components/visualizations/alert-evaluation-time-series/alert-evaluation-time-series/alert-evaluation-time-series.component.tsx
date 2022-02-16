@@ -1,5 +1,4 @@
 import { Box, useTheme } from "@material-ui/core";
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
 import {
@@ -22,6 +21,7 @@ import React, {
     useReducer,
     useRef,
 } from "react";
+import { AppLoadingIndicatorV1 } from "../../../../platform/components";
 import {
     filterAnomaliesByTime,
     getAnomaliesAtTime,

@@ -7,7 +7,6 @@ import {
     GridRowId,
     GridSelectionModelChangeParams,
 } from "@material-ui/data-grid";
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { cloneDeep } from "lodash";
 import React, {
     FunctionComponent,
@@ -15,6 +14,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { AppLoadingIndicatorV1 } from "../../../platform/components";
 import { ErrorIndicator } from "../../error-indicator/error-indicator.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";

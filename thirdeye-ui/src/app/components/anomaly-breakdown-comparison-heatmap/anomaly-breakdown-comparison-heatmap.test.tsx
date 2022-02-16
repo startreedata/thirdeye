@@ -3,8 +3,8 @@ import React from "react";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+jest.mock("../../platform/components", () => ({
+    ...(jest.requireActual("../../platform/components") as Record<
         string,
         unknown
     >),

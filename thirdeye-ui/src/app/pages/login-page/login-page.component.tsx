@@ -1,17 +1,17 @@
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import {
     AppLoadingIndicatorV1,
     AuthExceptionCodeV1,
-    isBlockingAuthExceptionV1,
     NotificationTypeV1,
     PageHeaderTextV1,
     PageHeaderV1,
     PageV1,
     useAuthProviderV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+} from "../../platform/components";
+import { isBlockingAuthExceptionV1 } from "../../platform/utils";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");

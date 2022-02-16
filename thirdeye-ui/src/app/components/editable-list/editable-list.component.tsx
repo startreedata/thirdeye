@@ -14,7 +14,6 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import React, {
     FunctionComponent,
@@ -24,6 +23,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";

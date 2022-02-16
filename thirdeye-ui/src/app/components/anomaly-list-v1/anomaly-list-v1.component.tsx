@@ -1,11 +1,11 @@
 import { Button, Typography } from "@material-ui/core";
+import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
     DataGridV1,
-    linkRendererV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+} from "../../platform/components";
+import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,

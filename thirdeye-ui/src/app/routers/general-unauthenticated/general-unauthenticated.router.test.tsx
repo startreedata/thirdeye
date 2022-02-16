@@ -1,7 +1,7 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
+import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated.router";
 
@@ -14,9 +14,14 @@ jest.mock(
     })
 );
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
-}));
+jest.mock(
+    "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component",
+    () => ({
+        AppLoadingIndicatorV1: jest
+            .fn()
+            .mockReturnValue("testLoadingIndicatorV1"),
+    })
+);
 
 jest.mock("../../pages/login-page/login-page.component", () => ({
     LoginPage: jest.fn().mockReturnValue("testLoginPage"),

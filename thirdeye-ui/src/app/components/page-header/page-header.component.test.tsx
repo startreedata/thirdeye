@@ -5,8 +5,8 @@ import { appHistory } from "../../utils/history/history.util";
 import { TimeRangeProvider } from "../time-range/time-range-provider/time-range-provider.component";
 import { PageHeader } from "./page-header.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+jest.mock("../../platform/components", () => ({
+    ...(jest.requireActual("../../platform/components") as Record<
         string,
         unknown
     >),

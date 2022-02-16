@@ -1,10 +1,4 @@
 import { Button, Grid, Link } from "@material-ui/core";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -13,6 +7,12 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+} from "../../platform/components";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsUpdatePath,

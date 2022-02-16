@@ -1,14 +1,14 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
+import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
-} from "@startree-ui/platform-ui";
-import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+} from "../../platform/components";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {

@@ -81,7 +81,7 @@ public class AnomalyReportEntity {
     this.funcDescription = funcDescription;
     this.swi = "";
     if (swi != null) {
-      this.swi = String.format(BaseNotificationContent.PERCENTAGE_FORMAT, swi * 100);
+      this.swi = String.format(NotificationContent.PERCENTAGE_FORMAT, swi * 100);
     }
     if (baselineVal.equals("-")) {
       this.lift = "";
@@ -103,23 +103,23 @@ public class AnomalyReportEntity {
     double lift = BaseNotificationContent.getLift(current, seasonalValue);
     switch (compareMode) {
       case Wo4W:
-        this.wo4wValue = String.format(BaseNotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wo4wLift = String.format(BaseNotificationContent.PERCENTAGE_FORMAT, lift);
+        this.wo4wValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
+        this.wo4wLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift);
         this.positiveWo4WLift = BaseNotificationContent.getLiftDirection(lift);
         break;
       case Wo3W:
-        this.wo3wValue = String.format(BaseNotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wo3wLift = String.format(BaseNotificationContent.PERCENTAGE_FORMAT, lift * 100);
+        this.wo3wValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
+        this.wo3wLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift * 100);
         this.positiveWo3WLift = BaseNotificationContent.getLiftDirection(lift);
         break;
       case Wo2W:
-        this.wo2wValue = String.format(BaseNotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wo2wLift = String.format(BaseNotificationContent.PERCENTAGE_FORMAT, lift * 100);
+        this.wo2wValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
+        this.wo2wLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift * 100);
         this.positiveWo2WLift = BaseNotificationContent.getLiftDirection(lift);
         break;
       case WoW:
-        this.wowValue = String.format(BaseNotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wowLift = String.format(BaseNotificationContent.PERCENTAGE_FORMAT, lift * 100);
+        this.wowValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
+        this.wowLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift * 100);
         this.positiveWoWLift = BaseNotificationContent.getLiftDirection(lift);
         break;
       default:

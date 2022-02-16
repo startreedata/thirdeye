@@ -12,7 +12,6 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.notification.commons.SmtpConfiguration;
 import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
-import ai.startree.thirdeye.notification.formatter.channels.EmailContentFormatter;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import com.google.common.base.Strings;
@@ -33,7 +32,6 @@ public class EmailEntityBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailEntityBuilder.class);
 
-  private final EmailContentFormatter emailContentFormatter;
   private final SmtpConfiguration smtpConfig;
   private final UiConfiguration uiConfig;
   private final MetricAnomaliesContent metricAnomaliesContent;
@@ -43,7 +41,6 @@ public class EmailEntityBuilder {
       final MetricAnomaliesContent metricAnomaliesContent) {
     this.metricAnomaliesContent = metricAnomaliesContent;
 
-    emailContentFormatter = new EmailContentFormatter();
     smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
     uiConfig = configuration.getUiConfiguration();
   }
@@ -71,10 +68,10 @@ public class EmailEntityBuilder {
       sg.setFrom(fromAddress);
     }
 
-    return emailContentFormatter.buildTemplateData(
-        notificationContext,
-        metricAnomaliesContent,
-        sg,
-        sortedAnomalyResults);
+    final Map<String, Object> templateData = metricAnomaliesContent.format(
+        sortedAnomalyResults,
+        sg);
+    templateData.put("dashboardHost", notificationContext.getUiPublicUrl());
+    return templateData;
   }
 }

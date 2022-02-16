@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.formatter.channels;
+package ai.startree.thirdeye.notification.formatter;
 
 import static ai.startree.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_ASSIGNEE;
 import static ai.startree.thirdeye.notification.commons.ThirdEyeJiraClient.PROP_COMPONENTS;

@@ -58,25 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseNotificationContent implements NotificationContent {
 
-  protected static final String EVENT_FILTER_COUNTRY = "countryCode";
   private static final Logger LOG = LoggerFactory.getLogger(BaseNotificationContent.class);
-  /*  The Event Crawl Offset takes the standard period format, ex: P1D for 1 day, P1W for 1 week
-  Y: years     M: months              W: weeks
-  D: days      H: hours (after T)     M: minutes (after T)
-  S: seconds along with milliseconds (after T) */
-  private static final String EVENT_CRAWL_OFFSET = "eventCrawlOffset";
-  private static final String PRE_EVENT_CRAWL_OFFSET = "preEventCrawlOffset";
-  private static final String POST_EVENT_CRAWL_OFFSET = "postEventCrawlOffset";
-  private static final String INCLUDE_SENT_ANOMALY_ONLY = "includeSentAnomaliesOnly";
-  private static final String INCLUDE_SUMMARY = "includeSummary";
-  private static final String TIME_ZONE = "timezone";
-  private static final String DEFAULT_INCLUDE_SENT_ANOMALY_ONLY = "false";
-  private static final String DEFAULT_INCLUDE_SUMMARY = "false";
-  private static final String DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
-  private static final String DEFAULT_TIME_ZONE = "America/Los_Angeles";
-  private static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
-  static final String RAW_VALUE_FORMAT = "%.0f";
-  static final String PERCENTAGE_FORMAT = "%.2f %%";
   protected final MetricConfigManager metricConfigManager;
   private final EventManager eventManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;

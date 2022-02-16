@@ -14,7 +14,7 @@ import ai.startree.thirdeye.notification.commons.JiraConfiguration;
 import ai.startree.thirdeye.notification.commons.JiraEntity;
 import ai.startree.thirdeye.notification.commons.ThirdEyeJiraClient;
 import ai.startree.thirdeye.notification.content.NotificationContent;
-import ai.startree.thirdeye.notification.formatter.channels.JiraContentFormatter;
+import ai.startree.thirdeye.notification.formatter.JiraContentFormatter;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;

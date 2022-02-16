@@ -5,7 +5,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRoute, getLoginPath } from "../../utils/routes/routes.util";
@@ -31,13 +31,13 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Login path */}
-                <Route exact component={LoginPage} path={AppRoute.LOGIN} />
+                <Route element={LoginPage} path={AppRoute.LOGIN} />
 
                 {/* No match found, redirect to login path */}
-                <Redirect to={getLoginPath()} />
-            </Switch>
+                <Navigate replace to={getLoginPath()} />
+            </Routes>
         </Suspense>
     );
 };

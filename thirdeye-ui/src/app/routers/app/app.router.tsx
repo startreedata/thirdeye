@@ -1,5 +1,5 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
@@ -43,31 +43,31 @@ export const AppRouter: FunctionComponent = () => {
     if (authDisabled || authenticated) {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
-                <Switch>
+                <Routes>
                     {/* Direct all alerts paths to alerts router */}
-                    <Route component={AlertsRouter} path={AppRoute.ALERTS} />
+                    <Route element={AlertsRouter} path={AppRoute.ALERTS} />
 
                     {/* Direct all anomalies paths to anomalies router */}
                     <Route
-                        component={AnomaliesRouter}
+                        element={AnomaliesRouter}
                         path={AppRoute.ANOMALIES}
                     />
 
                     {/* Direct all configuration paths to configuration router */}
                     <Route
-                        component={ConfigurationRouter}
+                        element={ConfigurationRouter}
                         path={AppRoute.CONFIGURATION}
                     />
 
                     {/* Direct all rca paths root cause analysis router */}
                     <Route
-                        component={RootCauseAnalysisRouter}
+                        element={RootCauseAnalysisRouter}
                         path={AppRoute.ROOT_CAUSE_ANALYSIS}
                     />
 
                     {/* Direct all other paths to general authenticated router */}
-                    <Route component={GeneralAuthenticatedRouter} />
-                </Switch>
+                    <Route element={GeneralAuthenticatedRouter} />
+                </Routes>
             </Suspense>
         );
     }

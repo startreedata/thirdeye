@@ -5,7 +5,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
@@ -47,28 +47,28 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Base path */}
-                <Route exact path={AppRoute.BASE}>
+                <Route path={AppRoute.BASE}>
                     {/* Redirect to home path */}
-                    <Redirect to={getHomePath()} />
+                    <Navigate replace to={getHomePath()} />
                 </Route>
 
                 {/* Home path */}
-                <Route exact component={HomePage} path={AppRoute.HOME} />
+                <Route element={HomePage} path={AppRoute.HOME} />
 
                 {/* Login path */}
-                <Route exact path={AppRoute.LOGIN}>
+                <Route path={AppRoute.LOGIN}>
                     {/* Already authenticated, redirect to base path */}
-                    <Redirect to={getBasePath()} />
+                    <Navigate replace to={getBasePath()} />
                 </Route>
 
                 {/* Logout path */}
-                <Route exact component={LogoutPage} path={AppRoute.LOGOUT} />
+                <Route element={LogoutPage} path={AppRoute.LOGOUT} />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={PageNotFoundPage} />
+            </Routes>
         </Suspense>
     );
 };

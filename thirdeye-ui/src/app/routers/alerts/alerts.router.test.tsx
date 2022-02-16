@@ -16,9 +16,7 @@ jest.mock(
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -104,7 +102,7 @@ describe("Alerts Router", () => {
         expect(breadcrumbs).toHaveLength(1);
         expect(breadcrumbs[0].text).toEqual("label.alerts");
         expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith("testAlertsPath");
+        expect(mockNavigate).toHaveBeenCalledWith("testAlertsPath");
     });
 
     it("should render alerts all page at exact alerts path", async () => {
@@ -258,4 +256,4 @@ describe("Alerts Router", () => {
 
 const mockSetRouterBreadcrumbs = jest.fn();
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

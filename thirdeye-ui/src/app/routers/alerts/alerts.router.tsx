@@ -6,7 +6,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
@@ -48,14 +48,14 @@ const PageNotFoundPage = lazy(() =>
 export const AlertsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     useEffect(() => {
         setRouterBreadcrumbs([
             {
                 text: t("label.alerts"),
-                onClick: () => history.push(getAlertsPath()),
+                onClick: () => navigate(getAlertsPath()),
             },
         ]);
         setLoading(false);
@@ -67,44 +67,34 @@ export const AlertsRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Alerts path */}
-                <Route exact path={AppRoute.ALERTS}>
+                <Route path={AppRoute.ALERTS}>
                     {/* Redirect to alerts all path */}
-                    <Redirect to={getAlertsAllPath()} />
+                    <Navigate replace to={getAlertsAllPath()} />
                 </Route>
 
                 {/* Alerts all path */}
-                <Route
-                    exact
-                    component={AlertsAllPage}
-                    path={AppRoute.ALERTS_ALL}
-                />
+                <Route element={AlertsAllPage} path={AppRoute.ALERTS_ALL} />
 
                 {/* Alerts view path */}
-                <Route
-                    exact
-                    component={AlertsViewPage}
-                    path={AppRoute.ALERTS_VIEW}
-                />
+                <Route element={AlertsViewPage} path={AppRoute.ALERTS_VIEW} />
 
                 {/* Alerts create path */}
                 <Route
-                    exact
-                    component={AlertsCreatePage}
+                    element={AlertsCreatePage}
                     path={AppRoute.ALERTS_CREATE}
                 />
 
                 {/* Alerts update path */}
                 <Route
-                    exact
-                    component={AlertsUpdatePage}
+                    element={AlertsUpdatePage}
                     path={AppRoute.ALERTS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={PageNotFoundPage} />
+            </Routes>
         </Suspense>
     );
 };

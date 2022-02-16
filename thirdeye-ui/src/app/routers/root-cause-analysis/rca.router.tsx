@@ -6,7 +6,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Switch, useHistory } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRoute } from "../../utils/routes/routes.util";
@@ -34,7 +34,7 @@ const PageNotFoundPage = lazy(() =>
 export const RootCauseAnalysisRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -42,7 +42,7 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
             {
                 text: t("label.root-cause-analysis"),
                 onClick: () =>
-                    history.push(AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY),
+                    navigate(AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY),
             },
         ]);
         setLoading(false);
@@ -54,24 +54,22 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Root cause for an anomaly index path. */}
                 <Route
-                    exact
-                    component={RootCauseAnalysisForAnomalyIndexPage}
+                    element={RootCauseAnalysisForAnomalyIndexPage}
                     path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX}
                 />
 
                 {/* Root cause for an anomaly path */}
                 <Route
-                    exact
-                    component={RootCauseAnalysisForAnomalyPage}
+                    element={RootCauseAnalysisForAnomalyPage}
                     path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={PageNotFoundPage} />
+            </Routes>
         </Suspense>
     );
 };

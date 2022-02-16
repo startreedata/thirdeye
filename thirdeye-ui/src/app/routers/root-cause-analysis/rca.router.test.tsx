@@ -15,9 +15,7 @@ jest.mock(
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -73,7 +71,7 @@ describe("Root Cause Analysis Router", () => {
         expect(breadcrumbs).toHaveLength(1);
         expect(breadcrumbs[0].text).toEqual("label.root-cause-analysis");
         expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith(
+        expect(mockNavigate).toHaveBeenCalledWith(
             "/root-cause-analysis/anomaly/:id"
         );
     });
@@ -105,4 +103,4 @@ describe("Root Cause Analysis Router", () => {
 
 const mockSetRouterBreadcrumbs = jest.fn();
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

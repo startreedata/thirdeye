@@ -16,9 +16,7 @@ jest.mock(
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -114,10 +112,13 @@ describe("Datasets Router", () => {
         expect(breadcrumbs).toHaveLength(2);
         expect(breadcrumbs[0].text).toEqual("label.configuration");
         expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenNthCalledWith(1, "testConfigurationPath");
+        expect(mockNavigate).toHaveBeenNthCalledWith(
+            1,
+            "testConfigurationPath"
+        );
         expect(breadcrumbs[1].text).toEqual("label.datasets");
         expect(breadcrumbs[1].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenNthCalledWith(2, "testDatasetsPath");
+        expect(mockNavigate).toHaveBeenNthCalledWith(2, "testDatasetsPath");
     });
 
     it("should render datasets all page at exact datasets path", async () => {
@@ -275,4 +276,4 @@ describe("Datasets Router", () => {
 
 const mockSetRouterBreadcrumbs = jest.fn();
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

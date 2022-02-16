@@ -1,6 +1,6 @@
 import React, { FunctionComponent, lazy, Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
@@ -37,47 +37,47 @@ const PageNotFoundPage = lazy(() =>
 
 export const ConfigurationRouter: FunctionComponent = () => {
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     useEffect(() => {
         setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
-                onClick: () => history.push(getConfigurationPath()),
+                onClick: () => navigate(getConfigurationPath()),
             },
         ]);
     }, []);
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Configuration path */}
-                <Route exact path={AppRoute.CONFIGURATION}>
-                    <Redirect to={AppRoute.SUBSCRIPTION_GROUPS} />
+                <Route path={AppRoute.CONFIGURATION}>
+                    <Navigate replace to={AppRoute.SUBSCRIPTION_GROUPS} />
                 </Route>
 
                 {/* Direct all subscription groups paths to subscription groups router */}
                 <Route
-                    component={SubscriptionGroupsRouter}
+                    element={SubscriptionGroupsRouter}
                     path={AppRoute.SUBSCRIPTION_GROUPS}
                 />
 
                 {/* Direct all datasets paths to datasets router */}
-                <Route component={DatasetsRouter} path={AppRoute.DATASETS} />
+                <Route element={DatasetsRouter} path={AppRoute.DATASETS} />
 
                 {/* Direct all datasource paths to datasources router */}
                 <Route
-                    component={DatasourcesRouter}
+                    element={DatasourcesRouter}
                     path={AppRoute.DATASOURCES}
                 />
 
                 {/* Direct all metrics paths to metrics router */}
-                <Route component={MetricsRouter} path={AppRoute.METRICS} />
+                <Route element={MetricsRouter} path={AppRoute.METRICS} />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={PageNotFoundPage} />
+            </Routes>
         </Suspense>
     );
 };

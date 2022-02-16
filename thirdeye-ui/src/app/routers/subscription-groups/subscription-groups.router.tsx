@@ -6,7 +6,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
@@ -49,18 +49,18 @@ const PageNotFoundPage = lazy(() =>
 export const SubscriptionGroupsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     useEffect(() => {
         setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
-                onClick: () => history.push(getConfigurationPath()),
+                onClick: () => navigate(getConfigurationPath()),
             },
             {
                 text: t("label.subscription-groups"),
-                onClick: () => history.push(getSubscriptionGroupsPath()),
+                onClick: () => navigate(getSubscriptionGroupsPath()),
             },
         ]);
         setLoading(false);
@@ -72,44 +72,40 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Subscription groups path */}
-                <Route exact path={AppRoute.SUBSCRIPTION_GROUPS}>
+                <Route path={AppRoute.SUBSCRIPTION_GROUPS}>
                     {/* Redirect to subscription groups all path */}
-                    <Redirect to={getSubscriptionGroupsAllPath()} />
+                    <Navigate replace to={getSubscriptionGroupsAllPath()} />
                 </Route>
 
                 {/* Subscription groups all path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsAllPage}
+                    element={SubscriptionGroupsAllPage}
                     path={AppRoute.SUBSCRIPTION_GROUPS_ALL}
                 />
 
                 {/* Subscription groups view path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsViewPage}
+                    element={SubscriptionGroupsViewPage}
                     path={AppRoute.SUBSCRIPTION_GROUPS_VIEW}
                 />
 
                 {/* Subscription groups create path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsCreatePage}
+                    element={SubscriptionGroupsCreatePage}
                     path={AppRoute.SUBSCRIPTION_GROUPS_CREATE}
                 />
 
                 {/* Subscription groups update path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsUpdatePage}
+                    element={SubscriptionGroupsUpdatePage}
                     path={AppRoute.SUBSCRIPTION_GROUPS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={PageNotFoundPage} />
+            </Routes>
         </Suspense>
     );
 };

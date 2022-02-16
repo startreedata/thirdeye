@@ -15,9 +15,7 @@ jest.mock(
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -72,7 +70,7 @@ describe("Configuration Router", () => {
         expect(breadcrumbs).toHaveLength(1);
         expect(breadcrumbs[0].text).toEqual("label.configuration");
         expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
+        expect(mockNavigate).toHaveBeenCalledWith("testConfigurationPath");
     });
 
     it("should render configuration page at exact configuration path", async () => {
@@ -178,4 +176,4 @@ describe("Configuration Router", () => {
 
 const mockSetRouterBreadcrumbs = jest.fn();
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

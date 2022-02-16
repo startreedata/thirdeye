@@ -6,7 +6,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
@@ -49,18 +49,18 @@ const MetricsUpdatePage = lazy(() =>
 export const MetricsRouter: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     useEffect(() => {
         setRouterBreadcrumbs([
             {
                 text: t("label.configuration"),
-                onClick: () => history.push(getConfigurationPath()),
+                onClick: () => navigate(getConfigurationPath()),
             },
             {
                 text: t("label.metrics"),
-                onClick: () => history.push(getMetricsPath()),
+                onClick: () => navigate(getMetricsPath()),
             },
         ]);
         setLoading(false);
@@ -72,44 +72,34 @@ export const MetricsRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Metrics path */}
-                <Route exact path={AppRoute.METRICS}>
+                <Route path={AppRoute.METRICS}>
                     {/* Redirect to metrics all path */}
-                    <Redirect to={getMetricsAllPath()} />
+                    <Navigate replace to={getMetricsAllPath()} />
                 </Route>
 
                 {/* Metrics all path */}
-                <Route
-                    exact
-                    component={MetricsAllPage}
-                    path={AppRoute.METRICS_ALL}
-                />
+                <Route element={MetricsAllPage} path={AppRoute.METRICS_ALL} />
 
                 {/* Metrics view path */}
-                <Route
-                    exact
-                    component={MetricsViewPage}
-                    path={AppRoute.METRICS_VIEW}
-                />
+                <Route element={MetricsViewPage} path={AppRoute.METRICS_VIEW} />
 
                 {/* Metrics create path */}
                 <Route
-                    exact
-                    component={MetricsCreatePage}
+                    element={MetricsCreatePage}
                     path={AppRoute.METRICS_CREATE}
                 />
 
                 {/* Metrics update path */}
                 <Route
-                    exact
-                    component={MetricsUpdatePage}
+                    element={MetricsUpdatePage}
                     path={AppRoute.METRICS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={PageNotFoundPage} />
+            </Routes>
         </Suspense>
     );
 };

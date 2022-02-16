@@ -16,9 +16,7 @@ jest.mock(
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -96,7 +94,7 @@ describe("Anomalies Router", () => {
         expect(breadcrumbs).toHaveLength(1);
         expect(breadcrumbs[0].text).toEqual("label.anomalies");
         expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
+        expect(mockNavigate).toHaveBeenCalledWith("testAnomaliesPath");
     });
 
     it("should render anomalies all page at exact anomalies path", async () => {
@@ -202,4 +200,4 @@ describe("Anomalies Router", () => {
 
 const mockSetRouterBreadcrumbs = jest.fn();
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

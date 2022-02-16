@@ -2,7 +2,7 @@ import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import { enableAllPlugins } from "immer";
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
-import { Router } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { App } from "./app";
 import { AppBreadcrumbsProvider } from "./components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
@@ -15,7 +15,6 @@ import {
     NotificationProviderV1,
 } from "./platform/components";
 import { lightV1 } from "./platform/utils";
-import { appHistory } from "./utils/history/history.util";
 import { initLocale } from "./utils/locale/locale.util";
 import { AppRoute } from "./utils/routes/routes.util";
 import { getClientIdFromUrl } from "./utils/url/client-id.util";
@@ -34,7 +33,7 @@ ReactDOM.render(
             <CssBaseline />
 
             {/* App rendered by a router to allow navigation using app bar */}
-            <Router history={appHistory}>
+            <BrowserRouter>
                 <NotificationProviderV1>
                     <AuthProviderV1
                         clientId={
@@ -55,7 +54,7 @@ ReactDOM.render(
                         </TimeRangeProvider>
                     </AuthProviderV1>
                 </NotificationProviderV1>
-            </Router>
+            </BrowserRouter>
         </ThemeProvider>
     </StrictMode>,
     document.getElementById("root") as HTMLElement

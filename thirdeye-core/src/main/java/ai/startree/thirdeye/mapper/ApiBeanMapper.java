@@ -53,9 +53,7 @@ import java.util.stream.Collectors;
 
 public abstract class ApiBeanMapper {
 
-  private static final String DEFAULT_ALERTER_PIPELINE_CLASS_NAME = "ai.startree.thirdeye.detection.alert.filter.ToAllRecipientsDetectionAlertFilter";
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
-  private static final String PROP_CLASS_NAME = "className";
 
   private static Boolean boolApi(final boolean value) {
     return value ? true : null;
@@ -287,7 +285,7 @@ public abstract class ApiBeanMapper {
     // TODO spyne implement translation of alert schemes, suppressors etc.
 
     dto.setType(optional(api.getType()).orElse(DEFAULT_ALERTER_PIPELINE));
-    dto.setProperties(buildProperties());
+    dto.setProperties(new HashMap<>());
 
     final List<Long> alertIds = optional(api.getAlerts())
         .orElse(Collections.emptyList())
@@ -305,12 +303,6 @@ public abstract class ApiBeanMapper {
     dto.setVectorClocks(toVectorClocks(alertIds));
     dto.setAlertSuppressors(toAlertSuppressors(api.getAlertSuppressors()));
     return dto;
-  }
-
-  private static Map<String, Object> buildProperties() {
-    Map<String, Object> properties = new HashMap<>();
-    properties.put(PROP_CLASS_NAME, DEFAULT_ALERTER_PIPELINE_CLASS_NAME);
-    return properties;
   }
 
   private static Map<Long, Long> toVectorClocks(List<Long> detectionIds) {

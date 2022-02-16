@@ -117,14 +117,22 @@ public class InternalResource {
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam("subscriptionGroupId") Long subscriptionGroupManagerById
+      @QueryParam("subscriptionGroupId") Long subscriptionGroupManagerById,
+      @QueryParam("reset") Boolean reset
   ) throws Exception {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
-
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
+    if (reset == Boolean.TRUE) {
+      sg.setVectorClocks(null);
+      subscriptionGroupManager.save(sg);
+    }
+
     final DetectionAlertFilterResult result = requireNonNull(notificationSchemeFactory
         .getDetectionAlertFilterResult(sg), "DetectionAlertFilterResult is null");
 
+    if (result.getAllAnomalies().size() == 0) {
+      return Response.ok("No anomalies!").build();
+    }
     final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
         sg,
         notificationDispatcher.getAnomalies(sg, result));

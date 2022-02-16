@@ -3,24 +3,32 @@ import React from "react";
 import { AuthExceptionCodeV1 } from "../../platform/components/auth-provider-v1/auth-provider-v1.interfaces";
 import { LoginPage } from "./login-page.component";
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
-        string,
-        unknown
-    >),
+jest.mock("../../platform/components/app-loading-indicator-v1", () => ({
+    AppLoadingIndicatorV1: jest
+        .fn()
+        .mockReturnValue("testAppLoadingIndicatorV1"),
+}));
+
+jest.mock("../../platform/components/auth-provider-v1", () => ({
     useAuthProviderV1: jest.fn().mockImplementation(() => ({
         authExceptionCode: mockAuthExceptionCode,
         login: mockLogin,
     })),
-    AppLoadingIndicatorV1: jest
-        .fn()
-        .mockReturnValue("testAppLoadingIndicatorV1"),
-    PageV1: jest.fn().mockImplementation((props) => props.children),
-    PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
-    PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),
+}));
+
+jest.mock("../../platform/components/notification-provider-v1", () => ({
     useNotificationProviderV1: jest
         .fn()
         .mockImplementation(() => ({ notify: mockNotify })),
+    NotificationTypeV1: {
+        Error: "error",
+    },
+}));
+
+jest.mock("../../platform/components/page-v1", () => ({
+    PageV1: jest.fn().mockImplementation((props) => props.children),
+    PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
+    PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),
 }));
 
 jest.mock("react-i18next", () => ({

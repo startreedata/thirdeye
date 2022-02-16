@@ -17,12 +17,19 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
-        string,
-        unknown
-    >),
+jest.mock("../../platform/components/page-v1", () => ({
     PageContentsCardV1: jest.fn().mockImplementation((props) => props.children),
+}));
+
+jest.mock("../../platform/utils", () => ({
+    linkRendererV1: jest
+        .fn()
+        .mockImplementation((value: string, id: number) => (
+            <a href={`testHref${id}`}>{value}</a>
+        )),
+}));
+
+jest.mock("../../platform/components/data-grid-v1", () => ({
     DataGridV1: jest.fn().mockImplementation((props) => (
         <>
             {Array.isArray(props.data) && props.data.length ? (
@@ -73,11 +80,6 @@ jest.mock("../../platform/components", () => ({
     DataGridScrollV1: {
         Body: jest.fn().mockImplementation((props) => props.children),
     },
-    linkRendererV1: jest
-        .fn()
-        .mockImplementation((value: string, id: number) => (
-            <a href={`testHref${id}`}>{value}</a>
-        )),
 }));
 
 jest.mock("../../utils/routes/routes.util", () => ({

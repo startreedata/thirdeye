@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import {
     getAlertsViewPath,
@@ -31,7 +31,7 @@ export const SubscriptionGroupCard: FunctionComponent<
         subscriptionGroupOptionsAnchorElement,
         setSubscriptionGroupOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleSubscriptionGroupOptionsClick = (
@@ -49,9 +49,7 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        history.push(
-            getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id)
-        );
+        navigate(getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id));
         handleSubscriptionGroupOptionsClose();
     };
 
@@ -60,9 +58,7 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        history.push(
-            getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id)
-        );
+        navigate(getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id));
         handleSubscriptionGroupOptionsClose();
     };
 
@@ -82,7 +78,7 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        history.push(getAlertsViewPath(uiSubscriptionGroupAlert.id));
+        navigate(getAlertsViewPath(uiSubscriptionGroupAlert.id));
     };
 
     return (

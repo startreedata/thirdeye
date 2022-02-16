@@ -2,7 +2,7 @@ import { Box, Card, CardContent, Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
@@ -47,7 +47,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<AnomaliesViewPageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -57,7 +57,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly
-        isValidNumberId(params.id) && getAnomaly(toNumber(params.id));
+        params.id &&
+            isValidNumberId(params.id) &&
+            getAnomaly(toNumber(params.id));
     }, [timeRangeDuration]);
 
     useEffect(() => {
@@ -95,7 +97,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         }
     }, [getEvaluationRequestStatus]);
 
-    if (!isValidNumberId(params.id)) {
+    if (params.id && !isValidNumberId(params.id)) {
         // Invalid id
         notify(
             NotificationTypeV1.Error,
@@ -140,7 +142,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             );
 
             // Redirect to anomalies all path
-            history.push(getAnomaliesAllPath());
+            navigate(getAnomaliesAllPath());
         });
     };
 

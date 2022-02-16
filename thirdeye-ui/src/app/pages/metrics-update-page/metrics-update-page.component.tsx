@@ -2,7 +2,7 @@ import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -28,7 +28,7 @@ export const MetricsUpdatePage: FunctionComponent = () => {
     const [datasets, setDatasets] = useState<Dataset[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<MetricsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -39,7 +39,7 @@ export const MetricsUpdatePage: FunctionComponent = () => {
                 text: metric ? metric.name : "",
                 onClick: (): void => {
                     if (metric) {
-                        history.push(getMetricsViewPath(metric.id));
+                        navigate(getMetricsViewPath(metric.id));
                     }
                 },
             },
@@ -64,13 +64,13 @@ export const MetricsUpdatePage: FunctionComponent = () => {
             );
 
             // Redirect to metric detail path
-            history.push(getMetricsViewPath(newMetric.id || 0));
+            navigate(getMetricsViewPath(newMetric.id || 0));
         });
     };
 
     const fetchMetric = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {

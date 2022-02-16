@@ -2,7 +2,7 @@ import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -32,7 +32,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -43,7 +43,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 text: subscriptionGroup ? subscriptionGroup.name : "",
                 onClick: (): void => {
                     if (subscriptionGroup) {
-                        history.push(
+                        navigate(
                             getSubscriptionGroupsViewPath(subscriptionGroup.id)
                         );
                     }
@@ -73,16 +73,14 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 );
 
                 // Redirect to subscription groups detail path
-                history.push(
-                    getSubscriptionGroupsViewPath(subscriptionGroup.id)
-                );
+                navigate(getSubscriptionGroupsViewPath(subscriptionGroup.id));
             }
         );
     };
 
     const fetchSubscriptionGroup = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {

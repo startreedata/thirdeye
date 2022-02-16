@@ -13,7 +13,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     getAlertsViewPath,
     getAnomaliesViewPath,
@@ -30,7 +30,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     const anomalyCardClasses = useAnomalyCardStyles();
     const [anomalyOptionsAnchorElement, setAnomalyOptionsAnchorElement] =
         useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleAnomalyOptionsClick = (
@@ -48,7 +48,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        history.push(getAnomaliesViewPath(props.uiAnomaly.id));
+        navigate(getAnomaliesViewPath(props.uiAnomaly.id));
         handleAnomalyOptionsClose();
     };
 
@@ -70,7 +70,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        history.push(getAlertsViewPath(props.uiAnomaly.alertId));
+        navigate(getAlertsViewPath(props.uiAnomaly.alertId));
     };
 
     return (

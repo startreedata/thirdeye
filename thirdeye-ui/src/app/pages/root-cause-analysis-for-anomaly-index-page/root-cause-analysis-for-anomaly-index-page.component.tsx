@@ -1,6 +1,6 @@
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { TimeRange } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
@@ -14,10 +14,12 @@ export const RootCauseAnalysisForAnomalyIndexPage: FunctionComponent = () => {
     const { anomaly, getAnomaly } = useGetAnomaly();
     const { setTimeRangeDuration } = useTimeRange();
     const params = useParams<AnomaliesViewPageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        isValidNumberId(params.id) && getAnomaly(toNumber(params.id));
+        !!params.id &&
+            isValidNumberId(params.id) &&
+            getAnomaly(toNumber(params.id));
     }, []);
 
     useEffect(() => {
@@ -27,9 +29,9 @@ export const RootCauseAnalysisForAnomalyIndexPage: FunctionComponent = () => {
                 startTime: anomaly.startTime - WEEK_IN_MILLISECONDS * 2,
                 endTime: anomaly.endTime + WEEK_IN_MILLISECONDS * 2,
             });
-            history.replace(
-                getRootCauseAnalysisForAnomalyPath(toNumber(params.id))
-            );
+            navigate(getRootCauseAnalysisForAnomalyPath(toNumber(params.id)), {
+                replace: true,
+            });
         }
     }, [anomaly]);
 

@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     getDatasetsUpdatePath,
     getDatasetsViewPath,
@@ -26,7 +26,7 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
 ) => {
     const [datasetOptionsAnchorElement, setDatasetOptionsAnchorElement] =
         useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleDatasetOptionsClick = (
@@ -44,7 +44,7 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
             return;
         }
 
-        history.push(getDatasetsViewPath(props.uiDataset.id));
+        navigate(getDatasetsViewPath(props.uiDataset.id));
         handleDatasetOptionsClose();
     };
 
@@ -53,7 +53,7 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
             return;
         }
 
-        history.push(getDatasetsUpdatePath(props.uiDataset.id));
+        navigate(getDatasetsUpdatePath(props.uiDataset.id));
         handleDatasetOptionsClose();
     };
 

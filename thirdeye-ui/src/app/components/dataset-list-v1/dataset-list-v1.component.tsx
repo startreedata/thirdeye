@@ -1,7 +1,7 @@
 import { Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -21,16 +21,16 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     const { t } = useTranslation();
     const [selectedDataset, setSelectedDataset] =
         useState<DataGridSelectionModelV1<UiDataset>>();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleDatasetDelete = (): void => {
         if (!selectedDataset) {
             return;
         }
 
-        const selectedSubScriptionGroupId = selectedDataset
+        const selectedSubScriptingGroupId = selectedDataset
             .rowKeyValues[0] as number;
-        const uiDataset = getUiDataset(selectedSubScriptionGroupId);
+        const uiDataset = getUiDataset(selectedSubScriptingGroupId);
         if (!uiDataset) {
             return;
         }
@@ -53,7 +53,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         const selectedSubScriptionGroupId = selectedDataset
             .rowKeyValues[0] as number;
 
-        history.push(getDatasetsUpdatePath(selectedSubScriptionGroupId));
+        navigate(getDatasetsUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -61,7 +61,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     );
 
     const handleDatasetViewDetailsById = (id: number): void => {
-        history.push(getDatasetsViewPath(id));
+        navigate(getDatasetsViewPath(id));
     };
 
     const renderLink = (

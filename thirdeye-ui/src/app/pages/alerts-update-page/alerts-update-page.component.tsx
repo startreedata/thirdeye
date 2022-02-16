@@ -2,7 +2,7 @@ import { Grid } from "@material-ui/core";
 import { assign, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -39,7 +39,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const params = useParams<AlertsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -50,7 +50,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 text: alert ? alert.name : "",
                 onClick: (): void => {
                     if (alert) {
-                        history.push(getAlertsViewPath(alert.id));
+                        navigate(getAlertsViewPath(alert.id));
                     }
                 },
             },
@@ -84,7 +84,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                     isEmpty(omittedSubscriptionGroups)
                 ) {
                     // Redirect to alerts detail path
-                    history.push(getAlertsViewPath(alert.id));
+                    navigate(getAlertsViewPath(alert.id));
 
                     return;
                 }
@@ -132,7 +132,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                     })
                     .finally((): void => {
                         // Redirect to alerts detail path
-                        history.push(getAlertsViewPath(alert.id));
+                        navigate(getAlertsViewPath(alert.id));
                     });
             })
             .catch((): void => {
@@ -220,7 +220,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
     const fetchAlert = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {

@@ -14,7 +14,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     getAlertsUpdatePath,
@@ -30,7 +30,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
 ) => {
     const [alertOptionsAnchorElement, setAlertOptionsAnchorElement] =
         useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
@@ -46,7 +46,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        history.push(getAlertsViewPath(props.uiAlert.id));
+        navigate(getAlertsViewPath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
@@ -65,7 +65,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        history.push(getAlertsUpdatePath(props.uiAlert.id));
+        navigate(getAlertsUpdatePath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 

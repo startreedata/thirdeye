@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
     DropdownButtonTypeV1,
     DropdownButtonV1,
@@ -15,26 +15,26 @@ import {
 
 export const CreateMenuButton: FunctionComponent = () => {
     const { t } = useTranslation();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleCreateAlert = (): void => {
-        history.push(getAlertsCreatePath());
+        navigate(getAlertsCreatePath());
     };
 
     const handleCreateSubscriptionGroup = (): void => {
-        history.push(getSubscriptionGroupsCreatePath());
+        navigate(getSubscriptionGroupsCreatePath());
     };
 
     const handleCreateMetric = (): void => {
-        history.push(getMetricsCreatePath());
+        navigate(getMetricsCreatePath());
     };
 
     const handleOnBoardDataset = (): void => {
-        history.push(getDatasetsOnboardPath());
+        navigate(getDatasetsOnboardPath());
     };
 
     const handleCreateDatasource = (): void => {
-        history.push(getDatasourcesCreatePath());
+        navigate(getDatasourcesCreatePath());
     };
 
     const shortcutCreateMenuItems = [

@@ -2,7 +2,7 @@ import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -28,7 +28,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     const [datasources, setDatasources] = useState<Datasource[]>([]);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<DatasetsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -39,7 +39,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 text: dataset ? dataset.name : "",
                 onClick: (): void => {
                     if (dataset) {
-                        history.push(getDatasetsViewPath(dataset.id));
+                        navigate(getDatasetsViewPath(dataset.id));
                     }
                 },
             },
@@ -65,7 +65,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 );
 
                 // Redirect to datasets detail path
-                history.push(getDatasetsViewPath(dataset.id));
+                navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((): void => {
                 notify(
@@ -79,7 +79,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
 
     const fetchDataset = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {

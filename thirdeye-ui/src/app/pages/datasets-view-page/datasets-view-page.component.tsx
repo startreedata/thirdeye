@@ -2,7 +2,7 @@ import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -31,7 +31,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<DatasetsViewPageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -48,7 +48,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
         setUiDataset(null);
         let fetchedUiDataset = {} as UiDataset;
 
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             // Invalid id
             notify(
                 NotificationTypeV1.Error,
@@ -91,7 +91,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 );
 
                 // Redirect to datasets all path
-                history.push(getDatasetsAllPath());
+                navigate(getDatasetsAllPath());
             })
             .catch(() =>
                 notify(
@@ -102,7 +102,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
     };
 
     const handleDatasetEdit = (id: number): void => {
-        history.push(getDatasetsUpdatePath(id));
+        navigate(getDatasetsUpdatePath(id));
     };
 
     return (

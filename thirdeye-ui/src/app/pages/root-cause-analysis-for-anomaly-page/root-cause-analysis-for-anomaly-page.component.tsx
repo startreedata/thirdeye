@@ -58,7 +58,9 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        isValidNumberId(anomalyId) && getAnomaly(toNumber(anomalyId));
+        !!anomalyId &&
+            isValidNumberId(anomalyId) &&
+            getAnomaly(toNumber(anomalyId));
     }, [anomalyId]);
 
     useEffect(() => {
@@ -96,7 +98,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         }
     }, [evaluation]);
 
-    if (!isValidNumberId(anomalyId)) {
+    if (!!anomalyId && !isValidNumberId(anomalyId)) {
         // Invalid id
         notify(
             NotificationTypeV1.Error,

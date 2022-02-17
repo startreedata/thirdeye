@@ -1,8 +1,7 @@
 import { Grid } from "@material-ui/core";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -16,14 +15,9 @@ import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 
 export const DatasourcesCreatePage: FunctionComponent = () => {
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const history = useHistory();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     const onDatasourceWizardFinish = (datasource: Datasource): void => {
         if (!datasource) {

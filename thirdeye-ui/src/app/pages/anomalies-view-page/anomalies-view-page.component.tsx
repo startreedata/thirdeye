@@ -4,7 +4,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
@@ -43,17 +42,12 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<AnomaliesViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly

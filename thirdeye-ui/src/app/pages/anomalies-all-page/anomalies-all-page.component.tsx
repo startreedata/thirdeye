@@ -2,7 +2,6 @@ import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -24,15 +23,10 @@ import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     useEffect(() => {
         // Time range refreshed, fetch anomalies

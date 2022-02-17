@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter, Route } from "react-router-dom";
-import { AppBreadcrumbsProvider } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppRoute, getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsViewPage } from "./alerts-view-page.component";
 
@@ -53,13 +52,11 @@ jest.mock("../../rest/subscription-groups/subscription-groups.rest", () => ({
 describe("Alerts View Page", () => {
     it("should render expected components after successful API calls", async () => {
         render(
-            <AppBreadcrumbsProvider>
-                <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
-                    <Route path={AppRoute.ALERTS_VIEW}>
-                        <AlertsViewPage />
-                    </Route>
-                </MemoryRouter>
-            </AppBreadcrumbsProvider>
+            <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
+                <Route path={AppRoute.ALERTS_VIEW}>
+                    <AlertsViewPage />
+                </Route>
+            </MemoryRouter>
         );
 
         const jsonEditorComponent = await screen.findByText("JSONEditor");
@@ -77,13 +74,11 @@ describe("Alerts View Page", () => {
             response: { data: { message: "Error message" } },
         });
         render(
-            <AppBreadcrumbsProvider>
-                <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
-                    <Route path={AppRoute.ALERTS_VIEW}>
-                        <AlertsViewPage />
-                    </Route>
-                </MemoryRouter>
-            </AppBreadcrumbsProvider>
+            <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
+                <Route path={AppRoute.ALERTS_VIEW}>
+                    <AlertsViewPage />
+                </Route>
+            </MemoryRouter>
         );
 
         const jsonEditorComponent = await screen.findByText("JSONEditor");

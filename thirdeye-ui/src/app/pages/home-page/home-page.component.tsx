@@ -1,10 +1,9 @@
 import { Grid, useTheme } from "@material-ui/core";
-import { default as React, FunctionComponent, useEffect } from "react";
+import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
 import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
 import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     PageContentsGridV1,
@@ -20,13 +19,8 @@ import {
 } from "../../utils/routes/routes.util";
 
 export const HomePage: FunctionComponent = () => {
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const theme = useTheme();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     return (
         <PageV1>

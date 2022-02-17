@@ -5,15 +5,6 @@ import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { DatasetsRouter } from "./datasets.router";
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-        })),
-    })
-);
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useHistory: jest.fn().mockImplementation(() => ({
@@ -88,36 +79,6 @@ describe("Datasets Router", () => {
         );
 
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
-    });
-
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <DatasetsRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
-
-        // Get router breadcrumbs
-        const breadcrumbs = mockSetRouterBreadcrumbs.mock.calls[0][0];
-        // Also invoke the click handlers
-        breadcrumbs &&
-            breadcrumbs[0] &&
-            breadcrumbs[0].onClick &&
-            breadcrumbs[0].onClick();
-        breadcrumbs &&
-            breadcrumbs[1] &&
-            breadcrumbs[1].onClick &&
-            breadcrumbs[1].onClick();
-
-        expect(breadcrumbs).toHaveLength(2);
-        expect(breadcrumbs[0].text).toEqual("label.configuration");
-        expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenNthCalledWith(1, "testConfigurationPath");
-        expect(breadcrumbs[1].text).toEqual("label.datasets");
-        expect(breadcrumbs[1].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenNthCalledWith(2, "testDatasetsPath");
     });
 
     it("should render datasets all page at exact datasets path", async () => {
@@ -272,7 +233,5 @@ describe("Datasets Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockPush = jest.fn();

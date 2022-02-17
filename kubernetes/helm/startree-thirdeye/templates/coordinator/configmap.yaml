@@ -109,7 +109,7 @@ data:
 
     # Prometheus compatible metrics will be exposed at /admin/prometheus
     prometheus:
-      enabled: {{ .Values.coordinator.prometheus.enabled | quote }}
+      enabled: {{ .Values.prometheus.enabled }}
 
     notifications:
       smtp:

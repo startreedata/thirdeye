@@ -23,8 +23,8 @@ spec:
         release: {{ .Release.Name }}
         component: {{ .Values.coordinator.name }}
       annotations:
-        prometheus.io/port: {{ .Values.coordinator.port | quote }}
-        prometheus.io/path: "/admin/prometheus"
+        prometheus.io/port: "8081"
+        prometheus.io/scrape: {{ .Values.prometheus.enabled | quote }}
         {{- toYaml .Values.coordinator.podAnnotations | nindent 8 }}
     spec:
       {{- if .Values.image.pullSecretsName }}

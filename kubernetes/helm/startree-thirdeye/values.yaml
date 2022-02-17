@@ -36,10 +36,7 @@ coordinator:
   tolerations: []
   affinity: {}
   podAnnotations:
-    prometheus.io/scrape: "false"
-  # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
-  prometheus:
-    enabled: false
+    prometheus.io/path: "/admin/prometheus"
 
 scheduler:
   enabled: true
@@ -52,10 +49,7 @@ scheduler:
   tolerations: []
   affinity: {}
   podAnnotations:
-    prometheus.io/scrape: "false"
-  # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
-  prometheus:
-    enabled: false
+    prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
 
@@ -70,10 +64,7 @@ worker:
   tolerations: []
   affinity: {}
   podAnnotations:
-    prometheus.io/scrape: "false"
-  # Expose prometheus metrics. Should be true if prometheus.io/scrape (above) is true.
-  prometheus:
-    enabled: false
+    prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
 
@@ -95,6 +86,10 @@ tls:
   enabled: false
   password: password
   type: PKCS12
+
+# Expose prometheus metrics.
+prometheus:
+  enabled: false
 
 auth:
   enabled: false

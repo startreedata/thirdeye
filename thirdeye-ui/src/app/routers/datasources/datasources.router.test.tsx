@@ -5,15 +5,6 @@ import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-ind
 import { AppRoute } from "../../utils/routes/routes.util";
 import { DatasourcesRouter } from "./datasources.router";
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-        })),
-    })
-);
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useHistory: jest.fn().mockImplementation(() => ({
@@ -94,29 +85,6 @@ describe("Datasources Router", () => {
         );
 
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
-    });
-
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <DatasourcesRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
-
-        // Get router breadcrumbs
-        const breadcrumbs = mockSetRouterBreadcrumbs.mock.calls[0][0];
-        // Also invoke the click handlers
-        breadcrumbs &&
-            breadcrumbs[0] &&
-            breadcrumbs[0].onClick &&
-            breadcrumbs[0].onClick();
-
-        expect(breadcrumbs).toHaveLength(1);
-        expect(breadcrumbs[0].text).toEqual("label.datasources");
-        expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith("testDatasourcesPath");
     });
 
     it("should render datasources all page at exact datasources path", async () => {
@@ -271,7 +239,5 @@ describe("Datasources Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockPush = jest.fn();

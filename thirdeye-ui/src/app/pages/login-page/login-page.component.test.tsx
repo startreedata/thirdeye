@@ -37,15 +37,6 @@ jest.mock("react-i18next", () => ({
     })),
 }));
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setPageBreadcrumbs: jest.fn().mockReturnValue({}),
-        })),
-    })
-);
-
 describe("Login Page", () => {
     it("should invoke login when no blocking auth exception", () => {
         mockAuthExceptionCode = AuthExceptionCodeV1.UnauthorizedAccess;

@@ -22,8 +22,8 @@ describe("SearchBar", () => {
 
         const input = screen.getByPlaceholderText("TestSearchLabel");
 
-        expect(screen.getByTestId("close-icon-font")).toBeInTheDocument();
-        expect(screen.getByTestId("search-icon-font")).toBeInTheDocument();
+        expect(screen.getByTestId("close-icon")).toBeInTheDocument();
+        expect(screen.getByTestId("search-icon")).toBeInTheDocument();
         expect(
             await screen.findByText("TestSearchStatusLabel")
         ).toBeInTheDocument();
@@ -31,7 +31,7 @@ describe("SearchBar", () => {
         expect(input).toHaveAttribute("placeholder", "TestSearchLabel");
     });
 
-    it("should load not show label, search text and label if they are not empty", async () => {
+    it("should not show label, search text, and label if they are empty", async () => {
         const props = {
             ...mockDefaultProps,
             searchText: undefined,
@@ -72,7 +72,7 @@ describe("SearchBar", () => {
 
         const input = screen.getByPlaceholderText("TestSearchLabel");
 
-        fireEvent.click(screen.getByTestId("close-icon-font"));
+        fireEvent.click(screen.getByTestId("close-icon"));
 
         expect(input).toHaveAttribute("value", "");
     });

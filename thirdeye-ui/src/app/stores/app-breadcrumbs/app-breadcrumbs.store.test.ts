@@ -18,7 +18,7 @@ describe("App Breadcrumbs Store", () => {
 
         act(() => {
             result.current.setRouterBreadcrumbs(
-                (null as unknown) as Breadcrumb[]
+                null as unknown as Breadcrumb[]
             );
         });
 
@@ -33,9 +33,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
 
         act(() => {
-            result.current.setPageBreadcrumbs(
-                (null as unknown) as Breadcrumb[]
-            );
+            result.current.setPageBreadcrumbs(null as unknown as Breadcrumb[]);
         });
 
         expect(result.current.routerBreadcrumbs).toEqual([]);
@@ -49,7 +47,7 @@ describe("App Breadcrumbs Store", () => {
         expect(result.current.pageBreadcrumbs).toEqual([]);
 
         act(() => {
-            result.current.pushPageBreadcrumb((null as unknown) as Breadcrumb);
+            result.current.pushPageBreadcrumb(null as unknown as Breadcrumb);
         });
 
         expect(result.current.routerBreadcrumbs).toEqual([]);

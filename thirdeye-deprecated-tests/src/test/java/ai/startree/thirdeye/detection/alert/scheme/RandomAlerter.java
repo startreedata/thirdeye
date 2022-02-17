@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 package ai.startree.thirdeye.detection.alert.scheme;
 
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;

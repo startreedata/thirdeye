@@ -1,11 +1,4 @@
 import { Grid } from "@material-ui/core";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +7,13 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { getDataset, updateDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";

@@ -1,9 +1,3 @@
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
@@ -12,6 +6,12 @@ import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import {
     deleteDataset,
     getAllDatasets,

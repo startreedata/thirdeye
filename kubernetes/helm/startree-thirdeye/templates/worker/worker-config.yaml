@@ -15,6 +15,14 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
+        {{- if .Values.worker.tls.enabled }}
+        - type: https
+          port: 443
+          idleTimeout: 620s
+          keyStorePath: /opt/thirdeye/server/keystore/keystore
+          keyStorePassword: {{ .Values.tls.password }}
+          keyStoreType: {{ .Values.tls.type }}
+        {{- end }}
         - type: http
           port: {{ .Values.worker.port }}
           idleTimeout: 620s
@@ -40,7 +48,7 @@ data:
 
     database:
       # Assuming a local MySQL server running on the default port 3306
-      url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&useSSL=false
+      url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&{{ .Values.config.jdbcParameters }}
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
       driver: com.mysql.cj.jdbc.Driver
@@ -48,6 +56,11 @@ data:
     swagger:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
       enabled: true
+      schemes:
+        - http
+        {{- if .Values.tls.enabled }}
+        - https
+        {{- end }}
 
       # package to scan for jersey resources
       resourcePackage: ai.startree.thirdeye.resources

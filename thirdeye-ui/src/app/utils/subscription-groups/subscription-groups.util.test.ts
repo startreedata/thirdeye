@@ -48,7 +48,7 @@ describe("Subscription Groups Util", () => {
     it("getUiSubscriptionGroup should return empty UI subscription group for invalid subscription group", () => {
         expect(
             getUiSubscriptionGroup(
-                (null as unknown) as SubscriptionGroup,
+                null as unknown as SubscriptionGroup,
                 mockAlerts
             )
         ).toEqual(mockEmptyUiSubscriptionGroup);
@@ -62,7 +62,7 @@ describe("Subscription Groups Util", () => {
         expect(
             getUiSubscriptionGroup(
                 mockSubscriptionGroup1,
-                (null as unknown) as Alert[]
+                null as unknown as Alert[]
             )
         ).toEqual(expectedUiSubscriptionGroup);
     });
@@ -86,7 +86,7 @@ describe("Subscription Groups Util", () => {
     it("getUiSubscriptionGroups should return empty array for invalid subscription groups", () => {
         expect(
             getUiSubscriptionGroups(
-                (null as unknown) as SubscriptionGroup[],
+                null as unknown as SubscriptionGroup[],
                 mockAlerts
             )
         ).toEqual([]);
@@ -116,7 +116,7 @@ describe("Subscription Groups Util", () => {
         expect(
             getUiSubscriptionGroups(
                 mockSubscriptionGroups,
-                (null as unknown) as Alert[]
+                null as unknown as Alert[]
             )
         ).toEqual([
             expectedUiSubscriptionGroup1,
@@ -156,7 +156,7 @@ describe("Subscription Groups Util", () => {
     });
 
     it("getUiSubscriptionGroupAlert should return empty UI subscription group alert for invalid alert", () => {
-        expect(getUiSubscriptionGroupAlert((null as unknown) as Alert)).toEqual(
+        expect(getUiSubscriptionGroupAlert(null as unknown as Alert)).toEqual(
             mockEmptyUiSubscriptionGroupAlert
         );
     });
@@ -169,7 +169,7 @@ describe("Subscription Groups Util", () => {
 
     it("getUiSubscriptionGroupAlerts should return empty array for invalid alerts", () => {
         expect(
-            getUiSubscriptionGroupAlerts((null as unknown) as Alert[])
+            getUiSubscriptionGroupAlerts(null as unknown as Alert[])
         ).toEqual([]);
     });
 
@@ -186,7 +186,7 @@ describe("Subscription Groups Util", () => {
     it("getUiSubscriptionGroupAlertId should return -1 for invalid UI subscription group alert", () => {
         expect(
             getUiSubscriptionGroupAlertId(
-                (null as unknown) as UiSubscriptionGroupAlert
+                null as unknown as UiSubscriptionGroupAlert
             )
         ).toEqual(-1);
     });
@@ -200,7 +200,7 @@ describe("Subscription Groups Util", () => {
     it("getUiSubscriptionGroupAlertName should return empty string for invalid UI subscription group alert", () => {
         expect(
             getUiSubscriptionGroupAlertName(
-                (null as unknown) as UiSubscriptionGroupAlert
+                null as unknown as UiSubscriptionGroupAlert
             )
         ).toEqual("");
     });
@@ -214,7 +214,7 @@ describe("Subscription Groups Util", () => {
     it("filterSubscriptionGroups should return empty array for invalid UI subscription groups", () => {
         expect(
             filterSubscriptionGroups(
-                (null as unknown) as UiSubscriptionGroup[],
+                null as unknown as UiSubscriptionGroup[],
                 mockSearchWords
             )
         ).toEqual([]);
@@ -228,7 +228,7 @@ describe("Subscription Groups Util", () => {
         expect(
             filterSubscriptionGroups(
                 mockUiSubscriptionGroups,
-                (null as unknown) as string[]
+                null as unknown as string[]
             )
         ).toEqual(mockUiSubscriptionGroups);
     });

@@ -1,13 +1,13 @@
 import { Button, Grid, Link } from "@material-ui/core";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+} from "../../platform/components";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import {
     getDatasourcesUpdatePath,
@@ -19,9 +19,8 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedDatasource, setSelectedDatasource] = useState<
-        DataGridSelectionModelV1<UiDatasource>
-    >();
+    const [selectedDatasource, setSelectedDatasource] =
+        useState<DataGridSelectionModelV1<UiDatasource>>();
     const history = useHistory();
 
     const handleDatasourceDelete = (): void => {

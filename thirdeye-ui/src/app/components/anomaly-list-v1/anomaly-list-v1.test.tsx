@@ -1,4 +1,3 @@
-import { DataGridColumnV1 } from "@startree-ui/platform-ui";
 import {
     act,
     cleanup,
@@ -7,6 +6,7 @@ import {
     screen,
 } from "@testing-library/react";
 import React from "react";
+import { DataGridColumnV1 } from "../../platform/components/data-grid-v1/data-grid-v1";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { AnomalyListV1 } from "./anomaly-list-v1.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
@@ -17,12 +17,19 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
-        string,
-        unknown
-    >),
+jest.mock("../../platform/components/page-v1", () => ({
     PageContentsCardV1: jest.fn().mockImplementation((props) => props.children),
+}));
+
+jest.mock("../../platform/utils", () => ({
+    linkRendererV1: jest
+        .fn()
+        .mockImplementation((value: string, id: number) => (
+            <a href={`testHref${id}`}>{value}</a>
+        )),
+}));
+
+jest.mock("../../platform/components/data-grid-v1", () => ({
     DataGridV1: jest.fn().mockImplementation((props) => (
         <>
             {Array.isArray(props.data) && props.data.length ? (
@@ -51,9 +58,9 @@ jest.mock("@startree-ui/platform-ui", () => ({
                                       (column: DataGridColumnV1<UiAnomaly>) =>
                                           column.customCellRenderer &&
                                           column.customCellRenderer(
-                                              (anomaly[
+                                              anomaly[
                                                   column.key as keyof UiAnomaly
-                                              ] as unknown) as Record<
+                                              ] as unknown as Record<
                                                   string,
                                                   unknown
                                               >,
@@ -73,11 +80,6 @@ jest.mock("@startree-ui/platform-ui", () => ({
     DataGridScrollV1: {
         Body: jest.fn().mockImplementation((props) => props.children),
     },
-    linkRendererV1: jest
-        .fn()
-        .mockImplementation((value: string, id: number) => (
-            <a href={`testHref${id}`}>{value}</a>
-        )),
 }));
 
 jest.mock("../../utils/routes/routes.util", () => ({

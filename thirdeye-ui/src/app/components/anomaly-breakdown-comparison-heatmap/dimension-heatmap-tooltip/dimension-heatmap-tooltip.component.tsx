@@ -56,7 +56,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
     }
 
     if (!props.extraData) {
-        return <span />;
+        return <span data-testid="empty-dimension-tooltip" />;
     }
 
     return (

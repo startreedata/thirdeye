@@ -55,23 +55,25 @@ export const createEmptyUiAlert = (): UiAlert => {
     };
 };
 
-export const createEmptyUiAlertDatasetAndMetric = (): UiAlertDatasetAndMetric => {
-    const noDataMarker = i18n.t("label.no-data-marker");
+export const createEmptyUiAlertDatasetAndMetric =
+    (): UiAlertDatasetAndMetric => {
+        const noDataMarker = i18n.t("label.no-data-marker");
 
-    return {
-        datasetId: -1,
-        datasetName: noDataMarker,
-        metricId: -1,
-        metricName: noDataMarker,
+        return {
+            datasetId: -1,
+            datasetName: noDataMarker,
+            metricId: -1,
+            metricName: noDataMarker,
+        };
     };
-};
 
-export const createEmptyUiAlertSubscriptionGroup = (): UiAlertSubscriptionGroup => {
-    return {
-        id: -1,
-        name: i18n.t("label.no-data-marker"),
+export const createEmptyUiAlertSubscriptionGroup =
+    (): UiAlertSubscriptionGroup => {
+        return {
+            id: -1,
+            name: i18n.t("label.no-data-marker"),
+        };
     };
-};
 
 export const createAlertEvaluation = (
     alert: Alert,
@@ -94,9 +96,8 @@ export const getUiAlert = (
     }
 
     // Map subscription groups to alert ids
-    const subscriptionGroupsToAlertIdsMap = mapSubscriptionGroupsToAlertIds(
-        subscriptionGroups
-    );
+    const subscriptionGroupsToAlertIdsMap =
+        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
 
     return getUiAlertInternal(alert, subscriptionGroupsToAlertIdsMap);
 };
@@ -110,9 +111,8 @@ export const getUiAlerts = (
     }
 
     // Map subscription groups to alert ids
-    const subscriptionGroupsToAlertIdsMap = mapSubscriptionGroupsToAlertIds(
-        subscriptionGroups
-    );
+    const subscriptionGroupsToAlertIdsMap =
+        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
 
     const uiAlerts = [];
     for (const alert of alerts) {

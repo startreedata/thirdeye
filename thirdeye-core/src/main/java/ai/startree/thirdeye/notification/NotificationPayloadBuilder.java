@@ -1,16 +1,23 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
-import ai.startree.thirdeye.spi.api.EmailEntityApi;
+import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
+import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -39,13 +46,21 @@ public class NotificationPayloadBuilder {
     final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(anomalies);
     anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final EmailEntityApi emailEntity = emailEntityBuilder.buildEmailEntity(subscriptionGroup,
+    final Map<String, Object> templateData = emailEntityBuilder.buildTemplateData(subscriptionGroup,
         new ArrayList<>(anomalies));
+
+    final EmailSchemeDto emailScheme = subscriptionGroup.getNotificationSchemes().getEmailScheme();
+    final EmailRecipientsApi recipients = emailScheme == null ? null : new EmailRecipientsApi(
+        emailScheme.getTo(),
+        emailScheme.getCc(),
+        emailScheme.getBcc()
+    ).setFrom(subscriptionGroup.getFrom());
 
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
         .setAnomalyReports(toAnomalyReports(anomalyResults))
-        .setEmailEntity(emailEntity);
+        .setEmailTemplateData(templateData)
+        .setEmailRecipients(recipients);
   }
 
   private List<AnomalyReportApi> toAnomalyReports(final List<MergedAnomalyResultDTO> anomalies) {

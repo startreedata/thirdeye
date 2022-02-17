@@ -1,8 +1,8 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { PageContentsCardV1, StepperV1 } from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { createEmptyDataset } from "../../utils/datasets/datasets.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
@@ -24,10 +24,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
     const [newDataset, setNewDataset] = useState<Dataset>(
         props.dataset || createEmptyDataset()
     );
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasetWizardStep>(DatasetWizardStep.DATASET_PROPERTIES);
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasetWizardStep>(DatasetWizardStep.DATASET_PROPERTIES);
     const { t } = useTranslation();
 
     useEffect(() => {

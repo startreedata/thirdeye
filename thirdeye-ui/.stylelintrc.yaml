@@ -1,6 +1,7 @@
 ---
 extends:
     - stylelint-config-recommended
+    - stylelint-config-recommended-scss
     - prettier
     - stylelint-config-prettier
 

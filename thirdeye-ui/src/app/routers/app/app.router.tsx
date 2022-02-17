@@ -1,10 +1,11 @@
+import React, { FunctionComponent, lazy, Suspense } from "react";
+import { Route, Switch } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Switch } from "react-router-dom";
+} from "../../platform/components";
 import { AppRoute } from "../../utils/routes/routes.util";
+import { RootCauseAnalysisRouter } from "../root-cause-analysis/rca.router";
 
 const AlertsRouter = lazy(() =>
     import(
@@ -56,6 +57,12 @@ export const AppRouter: FunctionComponent = () => {
                     <Route
                         component={ConfigurationRouter}
                         path={AppRoute.CONFIGURATION}
+                    />
+
+                    {/* Direct all rca paths root cause analysis router */}
+                    <Route
+                        component={RootCauseAnalysisRouter}
+                        path={AppRoute.ROOT_CAUSE_ANALYSIS}
                     />
 
                     {/* Direct all other paths to general authenticated router */}

@@ -1,20 +1,6 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
  */
 
 package ai.startree.thirdeye.task.runner;
@@ -22,8 +8,6 @@ package ai.startree.thirdeye.task.runner;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.ModelMaintenanceFlow;
-import ai.startree.thirdeye.detection.ModelRetuneFlow;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
@@ -44,7 +28,6 @@ import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +42,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private final AlertManager alertManager;
   private final EvaluationManager evaluationManager;
-  private final ModelMaintenanceFlow modelMaintenanceFlow;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
   private final DetectionPipelineRunner detectionPipelineRunner;
   private final AnomalyMerger anomalyMerger;
@@ -67,14 +49,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final EvaluationManager evaluationManager,
-      final ModelRetuneFlow modelMaintenanceFlow,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
       final MetricRegistry metricRegistry,
       final DetectionPipelineRunner detectionPipelineRunner,
       final AnomalyMerger anomalyMerger) {
     this.alertManager = alertManager;
     this.evaluationManager = evaluationManager;
-    this.modelMaintenanceFlow = modelMaintenanceFlow;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.detectionPipelineRunner = detectionPipelineRunner;
 
@@ -88,7 +68,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
     detectionTaskCounter.inc();
-
     try {
       final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
@@ -131,27 +110,17 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private void postExecution(final DetectionPipelineTaskInfo taskInfo,
       final AlertDTO alert, final DetectionPipelineResult result) {
     alert.setLastTimestamp(result.getLastTimestamp());
-
     anomalyMerger.mergeAndSave(taskInfo, alert, result.getAnomalies());
 
     for (final EvaluationDTO evaluationDTO : result.getEvaluations()) {
       evaluationManager.save(evaluationDTO);
     }
 
-    try {
-      // run maintenance flow to update model
-      final AlertDTO updatedConfig = modelMaintenanceFlow.maintain(alert, Instant.now());
-      alertManager.update(updatedConfig);
-    } catch (final Exception e) {
-      LOG.warn("Re-tune pipeline {} failed", alert.getId(), e);
-    }
-
     // re-notify the anomalies if any
     for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {
-        DetectionUtils.renotifyAnomaly(anomaly,
-            anomalySubscriptionGroupNotificationManager);
+        DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
       }
     }
   }

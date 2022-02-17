@@ -26,7 +26,7 @@ describe("Auth Store", () => {
     it("setAccessToken should update store appropriately for invalid token", () => {
         const { result } = renderHook(() => useAuthStore());
         act(() => {
-            result.current.setAccessToken((null as unknown) as string);
+            result.current.setAccessToken(null as unknown as string);
         });
 
         expect(result.current.authDisabled).toBeFalsy();

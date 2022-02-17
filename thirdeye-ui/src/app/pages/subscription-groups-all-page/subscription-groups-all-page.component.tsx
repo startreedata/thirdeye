@@ -1,9 +1,3 @@
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
@@ -12,6 +6,12 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";

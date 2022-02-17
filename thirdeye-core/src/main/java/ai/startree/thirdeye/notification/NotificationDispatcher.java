@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -63,7 +68,7 @@ public class NotificationDispatcher {
     }
   }
 
-  private Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
+  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
       final DetectionAlertFilterResult results) {
     return results
         .getResult()
@@ -75,7 +80,7 @@ public class NotificationDispatcher {
         .orElse(null);
   }
 
-  private Map<String, String> buildEmailProperties() {
+  public Map<String, String> buildEmailProperties() {
     final Map<String, String> properties = new HashMap<>();
     properties.put("host", smtpConfig.getHost());
     properties.put("port", String.valueOf(smtpConfig.getPort()));

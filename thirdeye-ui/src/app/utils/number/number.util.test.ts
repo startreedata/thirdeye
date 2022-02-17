@@ -12,7 +12,7 @@ jest.mock("numbro", () =>
 
 describe("Number Util", () => {
     it("formatNumber should return empty string for invald number", () => {
-        expect(formatNumber((null as unknown) as number)).toEqual("");
+        expect(formatNumber(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 
@@ -41,7 +41,7 @@ describe("Number Util", () => {
     });
 
     it("formatLargeNumber should return empty string for invald number", () => {
-        expect(formatLargeNumber((null as unknown) as number)).toEqual("");
+        expect(formatLargeNumber(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 
@@ -73,7 +73,7 @@ describe("Number Util", () => {
     });
 
     it("formatPercentage should return empty string for invalid number", () => {
-        expect(formatPercentage((null as unknown) as number)).toEqual("");
+        expect(formatPercentage(null as unknown as number)).toEqual("");
         expect(mockFormat).not.toHaveBeenCalled();
     });
 

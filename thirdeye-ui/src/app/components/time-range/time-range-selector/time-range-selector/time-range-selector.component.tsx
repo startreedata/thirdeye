@@ -15,10 +15,8 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     props: TimeRangeSelectorProps
 ) => {
     const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
-    const [
-        timeRangeSelectorAnchorElement,
-        setTimeRangeSelectorAnchorElement,
-    ] = useState<HTMLElement | null>();
+    const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
+        useState<HTMLElement | null>();
 
     const handleTimeRangeSelectorClick = (
         event: MouseEvent<HTMLElement>

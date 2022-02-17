@@ -1,16 +1,27 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 package ai.startree.thirdeye.spi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Objects;
 import java.util.List;
+import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
 public class NotificationPayloadApi implements ThirdEyeApi {
 
   private SubscriptionGroupApi subscriptionGroup;
   private List<AnomalyReportApi> anomalyReports;
-  private EmailEntityApi emailEntity;
+
+  // TODO spyne remove email specific parameters and generify
+  private EmailRecipientsApi emailRecipients;
+
+  // TODO spyne remove email specific parameters. Introduce pojo and generify.
+  private Map<String, Object> emailTemplateData;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
@@ -31,13 +42,22 @@ public class NotificationPayloadApi implements ThirdEyeApi {
     return this;
   }
 
-  public EmailEntityApi getEmailEntity() {
-    return emailEntity;
+  public EmailRecipientsApi getEmailRecipients() {
+    return emailRecipients;
   }
 
-  public NotificationPayloadApi setEmailEntity(
-      final EmailEntityApi emailEntity) {
-    this.emailEntity = emailEntity;
+  public NotificationPayloadApi setEmailRecipients(final EmailRecipientsApi emailRecipients) {
+    this.emailRecipients = emailRecipients;
+    return this;
+  }
+
+  public Map<String, Object> getEmailTemplateData() {
+    return emailTemplateData;
+  }
+
+  public NotificationPayloadApi setEmailTemplateData(
+      final Map<String, Object> emailTemplateData) {
+    this.emailTemplateData = emailTemplateData;
     return this;
   }
 

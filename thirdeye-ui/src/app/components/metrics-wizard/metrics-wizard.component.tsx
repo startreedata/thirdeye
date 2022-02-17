@@ -1,8 +1,8 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { PageContentsCardV1, StepperV1 } from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { LogicalMetric } from "../../rest/dto/metric.interfaces";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
@@ -24,10 +24,8 @@ export const MetricsWizard: FunctionComponent<MetricsWizardProps> = (
     const [newMetric, setNewMetric] = useState<LogicalMetric>(
         props.metric || createEmptyMetric()
     );
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<MetricsWizardStep>(MetricsWizardStep.METRIC_PROPERTIES);
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<MetricsWizardStep>(MetricsWizardStep.METRIC_PROPERTIES);
     const { t } = useTranslation();
 
     useEffect(() => {

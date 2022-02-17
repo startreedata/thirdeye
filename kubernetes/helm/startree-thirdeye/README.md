@@ -4,7 +4,7 @@
 
 This helm chart installs ThirdEye with a Pinot Quickstart Cluster. 
 It sets up the following components.
-- MySQL 5.7 server
+- MySQL 8.0 server
 - ThirdEye Frontend server
 - ThirdEye Backend server
 

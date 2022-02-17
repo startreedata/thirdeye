@@ -57,40 +57,41 @@ export const setTimeRangeDurationInQueryString = (
     );
 };
 
-export const getTimeRangeDurationFromQueryString = (): TimeRangeDuration | null => {
-    const timeRangeString = getQueryString(
-        TimeRangeQueryStringKey.TIME_RANGE.toLowerCase()
-    );
+export const getTimeRangeDurationFromQueryString =
+    (): TimeRangeDuration | null => {
+        const timeRangeString = getQueryString(
+            TimeRangeQueryStringKey.TIME_RANGE.toLowerCase()
+        );
 
-    const startTimeString = getQueryString(
-        TimeRangeQueryStringKey.START_TIME.toLowerCase()
-    );
-    const startTime = toNumber(startTimeString);
+        const startTimeString = getQueryString(
+            TimeRangeQueryStringKey.START_TIME.toLowerCase()
+        );
+        const startTime = toNumber(startTimeString);
 
-    const endTimeString = getQueryString(
-        TimeRangeQueryStringKey.END_TIME.toLowerCase()
-    );
-    const endTime = toNumber(endTimeString);
+        const endTimeString = getQueryString(
+            TimeRangeQueryStringKey.END_TIME.toLowerCase()
+        );
+        const endTime = toNumber(endTimeString);
 
-    // Validate time range duration
-    if (
-        !TimeRange[timeRangeString as keyof typeof TimeRange] ||
-        !startTimeString ||
-        !isInteger(startTime) ||
-        startTime < 0 ||
-        !endTimeString ||
-        !isInteger(endTime) ||
-        endTime < 0
-    ) {
-        return null;
-    }
+        // Validate time range duration
+        if (
+            !TimeRange[timeRangeString as keyof typeof TimeRange] ||
+            !startTimeString ||
+            !isInteger(startTime) ||
+            startTime < 0 ||
+            !endTimeString ||
+            !isInteger(endTime) ||
+            endTime < 0
+        ) {
+            return null;
+        }
 
-    return createTimeRangeDuration(
-        TimeRange[timeRangeString as keyof typeof TimeRange],
-        startTime,
-        endTime
-    );
-};
+        return createTimeRangeDuration(
+            TimeRange[timeRangeString as keyof typeof TimeRange],
+            startTime,
+            endTime
+        );
+    };
 
 export const setQueryString = (key: string, value: string): void => {
     if (!key) {

@@ -1,4 +1,10 @@
 import { ExitToApp, Home, LockOpen } from "@material-ui/icons";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
+import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
+import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import {
     NavBarLinkIconV1,
     NavBarLinkTextV1,
@@ -7,13 +13,7 @@ import {
     NavBarSecondaryContainerV1,
     NavBarV1,
     useAuthProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
-import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
-import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
-import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
+} from "../../platform/components";
 import {
     AppRoute,
     getAlertsPath,

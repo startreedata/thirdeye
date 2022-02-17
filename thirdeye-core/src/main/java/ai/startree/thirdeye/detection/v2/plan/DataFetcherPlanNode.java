@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 package ai.startree.thirdeye.detection.v2.plan;
 
 import static ai.startree.thirdeye.detection.v2.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;

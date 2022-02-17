@@ -1,11 +1,4 @@
 import { Grid } from "@material-ui/core";
-import {
-    JSONEditorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +9,13 @@ import { DialogType } from "../../components/dialogs/dialog-provider/dialog-prov
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    JSONEditorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import {
     deleteDatasource,
     getDatasource,

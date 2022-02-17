@@ -1,10 +1,4 @@
 import { Grid } from "@material-ui/core";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +7,12 @@ import { AlertWizard } from "../../components/alert-wizard/alert-wizard.componen
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { createAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
@@ -88,7 +88,8 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
+        let newSubscriptionGroup: SubscriptionGroup =
+            null as unknown as SubscriptionGroup;
 
         if (!subscriptionGroup) {
             return newSubscriptionGroup;

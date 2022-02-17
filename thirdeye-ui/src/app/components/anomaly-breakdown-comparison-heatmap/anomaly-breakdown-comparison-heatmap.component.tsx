@@ -10,19 +10,21 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { HierarchyNode } from "d3-hierarchy";
-import { isEmpty, isString, map, pull } from "lodash";
+import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
-import {
-    formatDateAndTime,
-    WEEK_IN_MILLISECONDS,
-} from "../../utils/date-time/date-time.util";
+import { formatDateAndTime } from "../../utils/date-time/date-time.util";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
@@ -31,75 +33,23 @@ import {
     AnomalyBreakdownComparisonHeatmapProps,
     AnomalyFilterOption,
     DimensionDisplayData,
-    SummarizeDataFunctionParams,
-    SummaryData,
 } from "./anomaly-breakdown-comparison-heatmap.interfaces";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
+import {
+    formatTreemapData,
+    OFFSET_TO_HUMAN_READABLE,
+    OFFSET_TO_MILLISECONDS,
+    summarizeDimensionValueData,
+} from "./anomaly-breakdown-comparison-heatmap.utils";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
-const OFFSET_TO_MILLISECONDS = {
-    [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
-    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: WEEK_IN_MILLISECONDS,
-    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2 * WEEK_IN_MILLISECONDS,
-    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3 * WEEK_IN_MILLISECONDS,
-};
-const OFFSET_TO_HUMAN_READABLE = {
-    [AnomalyBreakdownAPIOffsetValues.CURRENT]: "",
-    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: "One Week Ago",
-    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: "Two Weeks Ago",
-    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: "Three Weeks Ago",
-};
-
-function summarizeDimensionValueData(
-    dimensionValueData: SummarizeDataFunctionParams
-): [number, SummaryData] {
-    const summarized: SummaryData = {};
-    if (isEmpty(dimensionValueData)) {
-        return [0, summarized];
-    }
-
-    const totalCount = Object.keys(dimensionValueData).reduce(
-        (total, dimensionValueKey) =>
-            total + dimensionValueData[dimensionValueKey],
-        0
-    );
-
-    Object.keys(dimensionValueData).forEach((dimension: string) => {
-        summarized[dimension] = {
-            count: dimensionValueData[dimension],
-            percentage: dimensionValueData[dimension] / totalCount,
-            totalCount,
-        };
-    });
-
-    return [totalCount, summarized];
-}
-
-function formatTreemapData(
-    dimensionData: AnomalyBreakdownComparisonDataByDimensionColumn,
-    columnName: string
-): TreemapData<AnomalyBreakdownComparisonData & DimensionDisplayData>[] {
-    const parentId = `${dimensionData.column}-parent`;
-
-    return [
-        { id: parentId, size: 0, parent: null },
-        ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
-            const comparisonAndDisplayData = { ...comparisonData, columnName };
-
-            return {
-                id: k,
-                size: comparisonData.current,
-                parent: parentId,
-                extraData: comparisonAndDisplayData,
-            };
-        }),
-    ];
-}
-
-export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdownComparisonHeatmapProps> = ({
+export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
+    AnomalyBreakdownComparisonHeatmapProps
+> = ({
     anomalyId,
     comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
     anomaly,
+    shouldTruncateText = true,
 }: AnomalyBreakdownComparisonHeatmapProps) => {
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
@@ -117,6 +67,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
     const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
         AnomalyFilterOption[]
     >([]);
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         if (!anomalyMetricBreakdown) {
@@ -125,9 +76,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
             return;
         }
 
-        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] = [];
+        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
+            [];
 
-        if (!anomalyFilterOptions.length) {
+        if (anomalyFilterOptions.length === 0) {
             let optionsMenu: AnomalyFilterOption[] = [];
             Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
                 (dimensionColumnName) => {
@@ -147,22 +99,18 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
 
         Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
             (dimensionColumnName) => {
-                const [
-                    currentTotal,
-                    currentDimensionValuesData,
-                ] = summarizeDimensionValueData(
-                    anomalyMetricBreakdown.current.breakdown[
-                        dimensionColumnName
-                    ]
-                );
-                const [
-                    baselineTotal,
-                    baselineDimensionValuesData,
-                ] = summarizeDimensionValueData(
-                    anomalyMetricBreakdown.baseline.breakdown[
-                        dimensionColumnName
-                    ]
-                );
+                const [currentTotal, currentDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.current.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
+                const [baselineTotal, baselineDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.baseline.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
                 const dimensionComparisonData: {
                     [key: string]: AnomalyBreakdownComparisonData;
                 } = {};
@@ -225,6 +173,17 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
             ],
         });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
+
+    useEffect(() => {
+        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
+            notify(
+                NotificationTypeV1.Error,
+                t("message.error-while-fetching", {
+                    entity: t("label.heatmap-data"),
+                })
+            );
+        }
+    }, [anomalyBreakdownReqStatus]);
 
     const handleNodeClick = (
         tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
@@ -420,6 +379,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                             colorChangeValueAccessor
                                         }
                                         name={data.column}
+                                        shouldTruncateText={shouldTruncateText}
                                         tooltipElement={DimensionHeatmapTooltip}
                                         treemapData={formatTreemapData(
                                             data,
@@ -436,7 +396,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                 {/* Indicate no data if breakdown data is missing and requests are complete */}
                 {anomalyBreakdownReqStatus === ActionStatus.Done &&
                     isEmpty(breakdownComparisonData) && (
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <Box pb={20} pt={20}>
                                 <Typography align="center" variant="body1">
                                     {t("message.no-data")}
@@ -444,6 +404,15 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                             </Box>
                         </Grid>
                     )}
+
+                {/* Indicate no data if there was an error */}
+                {anomalyBreakdownReqStatus === ActionStatus.Error && (
+                    <Grid item xs={12}>
+                        <Box pb={20} pt={20}>
+                            <NoDataIndicator />
+                        </Box>
+                    </Grid>
+                )}
             </CardContent>
         </Card>
     );

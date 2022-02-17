@@ -63,7 +63,7 @@ describe("Alerts Util", () => {
 
     it("getUiAlert should return empty UI alert for invalid alert", () => {
         expect(
-            getUiAlert((null as unknown) as Alert, mockSubscriptionGroups)
+            getUiAlert(null as unknown as Alert, mockSubscriptionGroups)
         ).toEqual(mockEmptyUiAlert);
     });
 
@@ -72,7 +72,7 @@ describe("Alerts Util", () => {
         expectedUiAlert.subscriptionGroups = [];
 
         expect(
-            getUiAlert(mockAlert1, (null as unknown) as SubscriptionGroup[])
+            getUiAlert(mockAlert1, null as unknown as SubscriptionGroup[])
         ).toEqual(expectedUiAlert);
     });
 
@@ -91,7 +91,7 @@ describe("Alerts Util", () => {
 
     it("getUiAlerts should return empty array for invalid alerts", () => {
         expect(
-            getUiAlerts((null as unknown) as Alert[], mockSubscriptionGroups)
+            getUiAlerts(null as unknown as Alert[], mockSubscriptionGroups)
         ).toEqual([]);
     });
 
@@ -108,7 +108,7 @@ describe("Alerts Util", () => {
         expectedUiAlert3.subscriptionGroups = [];
 
         expect(
-            getUiAlerts(mockAlerts, (null as unknown) as SubscriptionGroup[])
+            getUiAlerts(mockAlerts, null as unknown as SubscriptionGroup[])
         ).toEqual([expectedUiAlert1, expectedUiAlert2, expectedUiAlert3]);
     });
 
@@ -135,7 +135,7 @@ describe("Alerts Util", () => {
 
     it("filterAlerts should return empty array for invalid UI alerts", () => {
         expect(
-            filterAlerts((null as unknown) as UiAlert[], mockSearchWords)
+            filterAlerts(null as unknown as UiAlert[], mockSearchWords)
         ).toEqual([]);
     });
 
@@ -144,9 +144,9 @@ describe("Alerts Util", () => {
     });
 
     it("filterAlerts should return appropriate UI alerts for UI alerts and invalid search words", () => {
-        expect(
-            filterAlerts(mockUiAlerts, (null as unknown) as string[])
-        ).toEqual(mockUiAlerts);
+        expect(filterAlerts(mockUiAlerts, null as unknown as string[])).toEqual(
+            mockUiAlerts
+        );
     });
 
     it("filterAlerts should return appropriate UI alerts for UI alerts and empty search words", () => {

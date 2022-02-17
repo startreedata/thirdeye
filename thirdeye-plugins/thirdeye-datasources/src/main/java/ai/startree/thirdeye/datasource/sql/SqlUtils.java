@@ -1,20 +1,6 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
  */
 
 package ai.startree.thirdeye.datasource.sql;
@@ -26,7 +12,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
@@ -50,7 +35,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
-import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -190,8 +174,6 @@ public class SqlUtils {
     List<String> sortedDimensions = dataset.getDimensions();
     Collections.sort(sortedDimensions);
 
-    Period granularity = ConfigUtils.parsePeriod(dataset.getGranularity());
-
     DatasetConfigDTO datasetConfig = datasetConfigManager.findByDataset(datasetName);
 
     if (datasetConfig == null) {
@@ -202,8 +184,6 @@ public class SqlUtils {
     datasetConfig.setDataSource(SqlThirdEyeDataSource.class.getSimpleName());
     datasetConfig.setDimensions(sortedDimensions);
     datasetConfig.setTimezone(dataset.getTimezone());
-    datasetConfig.setTimeDuration(DataSourceUtils.getTimeDuration(granularity));
-    datasetConfig.setTimeUnit(DataSourceUtils.getTimeUnit(granularity));
     datasetConfig.setTimeColumn(dataset.getTimeColumn());
     datasetConfig.setTimeFormat(dataset.getTimeFormat());
 

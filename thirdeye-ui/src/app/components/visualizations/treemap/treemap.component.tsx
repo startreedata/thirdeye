@@ -77,13 +77,8 @@ function TreemapInternal<Data>({
     const treemapClasses = useTreemapStyles();
     const theme = useTheme();
 
-    const {
-        tooltipTop,
-        tooltipLeft,
-        tooltipData,
-        showTooltip,
-        hideTooltip,
-    } = useTooltip<TreemapData<Data>>();
+    const { tooltipTop, tooltipLeft, tooltipData, showTooltip, hideTooltip } =
+        useTooltip<TreemapData<Data>>();
 
     const isOtherDimension = (id: string | undefined): boolean => {
         if (!id) {
@@ -199,9 +194,10 @@ function TreemapInternal<Data>({
 
                                         if (!isOtherDimension(node.data.id)) {
                                             if (node.data.data) {
-                                                colorValue = colorChangeValueAccessor(
-                                                    node.data.data
-                                                );
+                                                colorValue =
+                                                    colorChangeValueAccessor(
+                                                        node.data.data
+                                                    );
                                             } else if (node.value) {
                                                 colorValue = node.value;
                                             }
@@ -256,12 +252,15 @@ function TreemapInternal<Data>({
                                                             x={nodeWidth / 2}
                                                             y={nodeHeight / 2}
                                                         >
-                                                            {getShortText(
-                                                                node.data.id ||
-                                                                    EMPTY_STRING_DISPLAY,
-                                                                nodeWidth,
-                                                                nodeHeight
-                                                            )}
+                                                            {props.shouldTruncateText
+                                                                ? getShortText(
+                                                                      node.data
+                                                                          .id ||
+                                                                          EMPTY_STRING_DISPLAY,
+                                                                      nodeWidth,
+                                                                      nodeHeight
+                                                                  )
+                                                                : node.data.id}
                                                         </Text>
                                                     </>
                                                 )}

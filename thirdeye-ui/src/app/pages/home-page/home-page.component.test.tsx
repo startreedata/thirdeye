@@ -1,15 +1,25 @@
-import { PageContentsGridV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { PageContentsGridV1 } from "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1";
 import { HomePage } from "./home-page.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
-        string,
-        unknown
-    >),
-    PageContentsGridV1: jest.fn().mockImplementation((props) => props.children),
-    PageV1: jest.fn().mockImplementation((props) => props.children),
+jest.mock(
+    "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1/page-contents-grid-v1.component",
+    () => ({
+        PageContentsGridV1: jest
+            .fn()
+            .mockImplementation((props) => props.children),
+    })
+);
+
+jest.mock(
+    "../../platform/components/page-v1/page-v1/page-v1.component",
+    () => ({
+        PageV1: jest.fn().mockImplementation((props) => props.children),
+    })
+);
+
+jest.mock("../../platform/components/tile-button-v1", () => ({
     TileButtonIconV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonTextV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonV1: jest.fn().mockImplementation((props) => (
@@ -17,6 +27,10 @@ jest.mock("@startree-ui/platform-ui", () => ({
             {props.children}
         </a>
     )),
+}));
+
+jest.mock("../../components/page-header/page-header.component", () => ({
+    PageHeader: jest.fn().mockImplementation((props) => props.title),
 }));
 
 jest.mock(
@@ -27,10 +41,6 @@ jest.mock(
         })),
     })
 );
-
-jest.mock("../../components/page-header/page-header.component", () => ({
-    PageHeader: jest.fn().mockReturnValue("label.home"),
-}));
 
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
@@ -80,12 +90,6 @@ describe("Home Page", () => {
         expect(screen.getByText("label.alerts")).toBeInTheDocument();
         expect(screen.getByText("label.anomalies")).toBeInTheDocument();
         expect(screen.getByText("label.configuration")).toBeInTheDocument();
-        expect(
-            screen.getByText("label.subscription-groups")
-        ).toBeInTheDocument();
-        expect(screen.getByText("label.datasets")).toBeInTheDocument();
-        expect(screen.getByText("label.datasources")).toBeInTheDocument();
-        expect(screen.getByText("label.metrics")).toBeInTheDocument();
     });
 
     it("should have proper link to alerts path on alerts icon button", async () => {
@@ -118,49 +122,6 @@ describe("Home Page", () => {
         expect(screen.getByTestId(TEST_PATHS.configuration)).toHaveAttribute(
             "href",
             TEST_PATHS.configuration
-        );
-    });
-
-    it("should have proper link to subscription groups path on subscription groups icon button", async () => {
-        act(() => {
-            render(<HomePage />);
-        });
-
-        expect(
-            screen.getByTestId(TEST_PATHS.subscriptionGroups)
-        ).toHaveAttribute("href", TEST_PATHS.subscriptionGroups);
-    });
-
-    it("should have proper link to datasets path on datasets icon button", async () => {
-        act(() => {
-            render(<HomePage />);
-        });
-
-        expect(screen.getByTestId(TEST_PATHS.datasets)).toHaveAttribute(
-            "href",
-            TEST_PATHS.datasets
-        );
-    });
-
-    it("should have proper link to datasources path on datasources icon button", async () => {
-        act(() => {
-            render(<HomePage />);
-        });
-
-        expect(screen.getByTestId(TEST_PATHS.datasources)).toHaveAttribute(
-            "href",
-            TEST_PATHS.datasources
-        );
-    });
-
-    it("should have proper link to metrics path on metrics icon button", async () => {
-        act(() => {
-            render(<HomePage />);
-        });
-
-        expect(screen.getByTestId(TEST_PATHS.metrics)).toHaveAttribute(
-            "href",
-            TEST_PATHS.metrics
         );
     });
 });

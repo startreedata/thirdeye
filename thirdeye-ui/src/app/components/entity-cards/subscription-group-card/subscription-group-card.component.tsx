@@ -24,9 +24,9 @@ import { TextHighlighter } from "../../text-highlighter/text-highlighter.compone
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { SubscriptionGroupCardProps } from "./subscription-group-card.interfaces";
 
-export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps> = (
-    props: SubscriptionGroupCardProps
-) => {
+export const SubscriptionGroupCard: FunctionComponent<
+    SubscriptionGroupCardProps
+> = (props: SubscriptionGroupCardProps) => {
     const [
         subscriptionGroupOptionsAnchorElement,
         setSubscriptionGroupOptionsAnchorElement,

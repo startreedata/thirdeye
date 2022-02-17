@@ -4,9 +4,9 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SubscriptionGroupRendererProps } from "./subscription-group-renderer.interfaces";
 
-export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRendererProps> = (
-    props: SubscriptionGroupRendererProps
-) => {
+export const SubscriptionGroupRenderer: FunctionComponent<
+    SubscriptionGroupRendererProps
+> = (props: SubscriptionGroupRendererProps) => {
     const { t } = useTranslation();
 
     return (

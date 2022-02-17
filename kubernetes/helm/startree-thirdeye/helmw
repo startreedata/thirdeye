@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+#
+# Copyright (c) 2022 StarTree Inc. All rights reserved.
+# Confidential and Proprietary Information of StarTree Inc.
+#
+
 base_dir=$(dirname "$0")
 cd "${base_dir}" || exit 1
 

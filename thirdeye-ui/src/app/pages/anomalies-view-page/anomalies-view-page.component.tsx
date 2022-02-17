@@ -1,10 +1,4 @@
-import { Grid } from "@material-ui/core";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
+import { Box, Card, CardContent, Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,9 +8,17 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
@@ -32,13 +34,15 @@ import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
-    const { evaluation, getEvaluation } = useGetEvaluation();
+    const {
+        evaluation,
+        getEvaluation,
+        status: getEvaluationRequestStatus,
+    } = useGetEvaluation();
     const { anomaly, getAnomaly } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
@@ -79,6 +83,17 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         // Fetched alert changed, fetch alert evaluation
         fetchAlertEvaluation();
     }, [anomaly]);
+
+    useEffect(() => {
+        if (getEvaluationRequestStatus === ActionStatus.Error) {
+            notify(
+                NotificationTypeV1.Error,
+                t("message.error-while-fetching", {
+                    entity: t("label.chart-data"),
+                })
+            );
+        }
+    }, [getEvaluationRequestStatus]);
 
     if (!isValidNumberId(params.id)) {
         // Invalid id
@@ -147,12 +162,23 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    <AlertEvaluationTimeSeriesCard
-                        alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={500}
-                        maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                        onRefresh={fetchAlertEvaluation}
-                    />
+                    {getEvaluationRequestStatus === ActionStatus.Error && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator />
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {getEvaluationRequestStatus === ActionStatus.Done && (
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                            alertEvaluationTimeSeriesHeight={500}
+                            maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
+                            onRefresh={fetchAlertEvaluation}
+                        />
+                    )}
                 </Grid>
 
                 <Grid item xs={12}>

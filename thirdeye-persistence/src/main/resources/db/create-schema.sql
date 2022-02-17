@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 CREATE TABLE IF NOT EXISTS generic_json_entity
 (
     id          bigint(20) PRIMARY KEY AUTO_INCREMENT,

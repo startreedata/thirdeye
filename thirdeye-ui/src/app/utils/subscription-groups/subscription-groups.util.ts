@@ -18,9 +18,9 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
         cron: "",
         alerts: [] as Alert[],
         notificationSchemes: {
-            email: ({
+            email: {
                 to: [],
-            } as unknown) as EmailScheme,
+            } as unknown as EmailScheme,
         },
     } as SubscriptionGroup;
 };
@@ -38,12 +38,13 @@ export const createEmptyUiSubscriptionGroup = (): UiSubscriptionGroup => {
     };
 };
 
-export const createEmptyUiSubscriptionGroupAlert = (): UiSubscriptionGroupAlert => {
-    return {
-        id: -1,
-        name: i18n.t("label.no-data-marker"),
+export const createEmptyUiSubscriptionGroupAlert =
+    (): UiSubscriptionGroupAlert => {
+        return {
+            id: -1,
+            name: i18n.t("label.no-data-marker"),
+        };
     };
-};
 
 export const getUiSubscriptionGroup = (
     subscriptionGroup: SubscriptionGroup,
@@ -242,9 +243,8 @@ const mapAlertsToSubscriptionGroupIds = (
                 continue;
             }
 
-            const uiSubscriptionGroupAlerts = alertsToSubscriptionGroupIdsMap.get(
-                subscriptionGroup.id
-            );
+            const uiSubscriptionGroupAlerts =
+                alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id);
             if (uiSubscriptionGroupAlerts) {
                 // Add to existing list
                 uiSubscriptionGroupAlerts.push(mappedAlert);

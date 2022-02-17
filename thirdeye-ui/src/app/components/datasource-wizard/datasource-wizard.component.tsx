@@ -1,13 +1,13 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
+import { kebabCase } from "lodash";
+import React, { FunctionComponent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
-} from "@startree-ui/platform-ui";
-import { kebabCase } from "lodash";
-import React, { FunctionComponent, useState } from "react";
-import { useTranslation } from "react-i18next";
+} from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
@@ -29,20 +29,16 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
     const [newDatasourceJSON, setNewDatasourceJSON] = useState(
         JSON.stringify(props.datasource || createDefaultDatasource())
     );
-    const [
-        datasourceConfigurationError,
-        setDatasourceConfigurationError,
-    ] = useState(false);
+    const [datasourceConfigurationError, setDatasourceConfigurationError] =
+        useState(false);
     const [
         datasourceConfigurationHelperText,
         setDatasourceConfigurationHelperText,
     ] = useState("");
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasourceWizardStep>(
-        DatasourceWizardStep.DATASOURCE_CONFIGURATION
-    );
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasourceWizardStep>(
+            DatasourceWizardStep.DATASOURCE_CONFIGURATION
+        );
     const { t } = useTranslation();
 
     const onDatasourceConfigurationChange = (value: string): void => {

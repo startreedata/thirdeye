@@ -5,8 +5,8 @@ import { AppBreadcrumbsProvider } from "../../components/app-breadcrumbs/app-bre
 import { AppRoute, getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsViewPage } from "./alerts-view-page.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
+jest.mock("../../platform/components", () => ({
+    ...(jest.requireActual("../../platform/components") as Record<
         string,
         unknown
     >),

@@ -6,10 +6,12 @@
 package ai.startree.thirdeye.notification.email;
 
 import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.Constants.SubjectType;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
@@ -62,7 +64,7 @@ public class EmailNotificationService implements NotificationService {
   }
 
   @Override
-  public void notify(final NotificationPayloadApi api) {
+  public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     try {
       final EmailEntityApi emailEntity = buildEmailEntityApi(api.getSubscriptionGroup(),
           DEFAULT_EMAIL_TEMPLATE,
@@ -72,7 +74,7 @@ public class EmailNotificationService implements NotificationService {
       final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
     } catch (Exception e) {
-      LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
+      throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "Email dispatch failed!");
     }
   }
 

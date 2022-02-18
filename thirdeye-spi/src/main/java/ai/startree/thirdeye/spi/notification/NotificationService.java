@@ -5,11 +5,12 @@
 
 package ai.startree.thirdeye.spi.notification;
 
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 
 public interface NotificationService {
 
-  void notify(NotificationPayloadApi api);
+  void notify(NotificationPayloadApi api) throws ThirdEyeException;
 
   /**
    * Currently used to debug email notification service

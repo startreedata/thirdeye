@@ -186,16 +186,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             <PageHeader showCreateButton showTimeRange title={uiAlert.name} />
 
             <PageContentsGridV1>
-                {/* Alert Details Card*/}
-                <Grid item xs={12}>
-                    <AlertCard
-                        alertEvaluation={alertEvaluation}
-                        uiAlert={uiAlert}
-                        onChange={handleAlertChange}
-                        onDelete={handleAlertDelete}
-                    />
-                </Grid>
-
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
                     {evaluationRequestStatus === ActionStatus.Error && (
@@ -216,6 +206,16 @@ export const AlertsViewPage: FunctionComponent = () => {
                             onRefresh={fetchAlertEvaluation}
                         />
                     )}
+                </Grid>
+
+                {/* Alert Details Card*/}
+                <Grid item xs={12}>
+                    <AlertCard
+                        alertEvaluation={alertEvaluation}
+                        uiAlert={uiAlert}
+                        onChange={handleAlertChange}
+                        onDelete={handleAlertDelete}
+                    />
                 </Grid>
 
                 {/* Readonly detection configuration */}

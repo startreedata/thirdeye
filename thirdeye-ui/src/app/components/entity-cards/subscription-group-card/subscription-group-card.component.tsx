@@ -93,6 +93,7 @@ export const SubscriptionGroupCard: FunctionComponent<
                         <>
                             {/* Subscription group options button */}
                             <IconButton
+                                color="secondary"
                                 onClick={handleSubscriptionGroupOptionsClick}
                             >
                                 <MoreVertIcon />

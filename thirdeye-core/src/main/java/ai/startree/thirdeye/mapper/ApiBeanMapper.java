@@ -91,11 +91,11 @@ public abstract class ApiBeanMapper {
   }
 
   public static DatasetApi toApi(final DatasetConfigDTO dto) {
-    return AlertTemplateMapper.INSTANCE.toApi(dto);
+    return DatasetMapper.INSTANCE.toApi(dto);
   }
 
   public static MetricApi toApi(final MetricConfigDTO dto) {
-    return AlertTemplateMapper.INSTANCE.toApi(dto);
+    return MetricMapper.INSTANCE.toApi(dto);
   }
 
   public static AlertApi toApi(final AlertDTO dto) {
@@ -121,11 +121,11 @@ public abstract class ApiBeanMapper {
   }
 
   public static DatasetConfigDTO toDatasetConfigDto(final DatasetApi api) {
-    return AlertTemplateMapper.INSTANCE.toBean(api);
+    return DatasetMapper.INSTANCE.toBean(api);
   }
 
   public static MetricConfigDTO toMetricConfigDto(final MetricApi api) {
-    return AlertTemplateMapper.INSTANCE.toBean(api);
+    return MetricMapper.INSTANCE.toBean(api);
   }
 
   private static AlertNodeApi toDetectionAlertNodeApi(final String detectorComponentName) {

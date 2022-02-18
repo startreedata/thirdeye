@@ -16,6 +16,7 @@ import java.util.Map;
  * It is put in the AlertTemplate. This is a solution to implement RCA quickly.
  */
 @JsonInclude(Include.NON_NULL)
+@Deprecated // use AlertMetadataDTO
 public class RcaMetadataDTO {
 
   private String datasource;
@@ -34,55 +35,67 @@ public class RcaMetadataDTO {
    */
   private Map<String, Object> properties;
 
+  @Deprecated
   public String getDatasource() {
     return datasource;
   }
 
+  @Deprecated
   public RcaMetadataDTO setDatasource(final String datasource) {
     this.datasource = datasource;
     return this;
   }
 
+  @Deprecated
   public String getDataset() {
     return dataset;
   }
 
+  @Deprecated
   public RcaMetadataDTO setDataset(final String dataset) {
     this.dataset = dataset;
     return this;
   }
 
+  @Deprecated
   public String getMetric() {
     return metric;
   }
 
+  @Deprecated
   public RcaMetadataDTO setMetric(final String metric) {
     this.metric = metric;
     return this;
   }
 
+  @Deprecated
   public String getAggregationFunction() {
     return aggregationFunction;
   }
 
+  @Deprecated
   public RcaMetadataDTO setAggregationFunction(final String aggregationFunction) {
     this.aggregationFunction = aggregationFunction;
     return this;
   }
 
+  @Deprecated
   public String getGranularity() {
     return granularity;
   }
 
+  @Deprecated
   public RcaMetadataDTO setGranularity(final String granularity) {
     this.granularity = granularity;
     return this;
   }
 
+  @Deprecated
   public Map<String, Object> getProperties() {
     return properties;
   }
 
+  @Deprecated
   public RcaMetadataDTO setProperties(final Map<String, Object> properties) {
     this.properties = properties;
     return this;

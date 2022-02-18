@@ -17,7 +17,9 @@ public class AlertTemplateDTO extends AbstractDTO {
   private Date updated;
   private UserBean owner;
   private List<PlanNodeBean> nodes;
+  @Deprecated  // use AlertMetadataDTO
   private RcaMetadataDTO rca;
+  private AlertMetadataDTO metadata;
 
   public String getName() {
     return name;
@@ -83,13 +85,25 @@ public class AlertTemplateDTO extends AbstractDTO {
     return this;
   }
 
+  @Deprecated
   public RcaMetadataDTO getRca() {
     return rca;
   }
 
+  @Deprecated
   public AlertTemplateDTO setRca(
       final RcaMetadataDTO rca) {
     this.rca = rca;
+    return this;
+  }
+
+  public AlertMetadataDTO getMetadata() {
+    return metadata;
+  }
+
+  public AlertTemplateDTO setMetadata(
+      final AlertMetadataDTO metadata) {
+    this.metadata = metadata;
     return this;
   }
 }

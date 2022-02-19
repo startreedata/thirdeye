@@ -15,6 +15,7 @@ import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.notification.email.EmailNotificationServiceFactory;
+import ai.startree.thirdeye.notification.email.SendgridNotificationServiceFactory;
 import ai.startree.thirdeye.notification.webhook.WebhookNotificationServiceFactory;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
@@ -72,7 +73,10 @@ public class ThirdEyeServerDebug {
   }
 
   static void loadNotificationServiceFactories(final NotificationServiceRegistry instance) {
-    instance.addNotificationServiceFactory(new WebhookNotificationServiceFactory());
-    instance.addNotificationServiceFactory(new EmailNotificationServiceFactory());
+    Stream.of(
+        new WebhookNotificationServiceFactory(),
+        new EmailNotificationServiceFactory(),
+        new SendgridNotificationServiceFactory()
+    ).forEach(instance::addNotificationServiceFactory);
   }
 }

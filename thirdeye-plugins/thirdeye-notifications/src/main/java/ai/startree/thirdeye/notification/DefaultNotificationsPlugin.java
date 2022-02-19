@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.notification.email.EmailNotificationServiceFactory;
+import ai.startree.thirdeye.notification.email.SendgridNotificationServiceFactory;
 import ai.startree.thirdeye.notification.webhook.WebhookNotificationServiceFactory;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
@@ -17,7 +18,8 @@ public class DefaultNotificationsPlugin implements Plugin {
   public Iterable<NotificationServiceFactory> getNotificationServiceFactories() {
     return Arrays.asList(
         new WebhookNotificationServiceFactory(),
-        new EmailNotificationServiceFactory()
+        new EmailNotificationServiceFactory(),
+        new SendgridNotificationServiceFactory()
     );
   }
 }

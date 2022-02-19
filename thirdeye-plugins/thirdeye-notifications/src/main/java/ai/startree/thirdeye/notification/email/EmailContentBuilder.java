@@ -5,7 +5,12 @@
 
 package ai.startree.thirdeye.notification.email;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import ai.startree.thirdeye.spi.Constants.SubjectType;
+import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
+import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import com.google.common.collect.ImmutableMap;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -51,7 +56,7 @@ public class EmailContentBuilder {
     }
   }
 
-  public String buildHtml(final String templateFile, final Map<String, Object> templateValues) {
+  String buildHtml(final String templateFile, final Map<String, Object> templateValues) {
     final String templateName = TEMPLATE_MAP.get(templateFile);
 
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -69,5 +74,26 @@ public class EmailContentBuilder {
     } catch (final Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public EmailEntityApi buildEmailEntityApi(final SubscriptionGroupApi subscriptionGroup,
+      final String templateKey,
+      final Map<String, Object> templateData,
+      final EmailRecipientsApi recipients) {
+    requireNonNull(recipients.getTo(), "to field in email scheme is null");
+    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
+
+    final String htmlText = buildHtml(templateKey, templateData);
+
+    final String subject = makeSubject(SubjectType.ALERT,
+        templateData.get("metrics"),
+        templateData.get("datasets"),
+        subscriptionGroup.getName());
+
+    return new EmailEntityApi()
+        .setSubject(subject)
+        .setHtmlContent(htmlText)
+        .setTo(recipients)
+        .setFrom(recipients.getFrom());
   }
 }

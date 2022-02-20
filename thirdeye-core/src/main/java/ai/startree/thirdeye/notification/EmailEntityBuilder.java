@@ -8,9 +8,7 @@ package ai.startree.thirdeye.notification;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.notification.commons.SmtpConfiguration;
 import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
@@ -37,12 +35,13 @@ public class EmailEntityBuilder {
   private final MetricAnomaliesContent metricAnomaliesContent;
 
   @Inject
-  public EmailEntityBuilder(final ThirdEyeServerConfiguration configuration,
-      final MetricAnomaliesContent metricAnomaliesContent) {
+  public EmailEntityBuilder(final UiConfiguration uiConfig,
+      final MetricAnomaliesContent metricAnomaliesContent,
+      final NotificationConfiguration notificationConfiguration) {
     this.metricAnomaliesContent = metricAnomaliesContent;
+    this.uiConfig = uiConfig;
 
-    smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
-    uiConfig = configuration.getUiConfiguration();
+    smtpConfig = notificationConfiguration.getSmtpConfiguration();
   }
 
   public Map<String, Object> buildTemplateData(final SubscriptionGroupDTO sg,

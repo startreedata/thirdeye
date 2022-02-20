@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.notification;
 
-import ai.startree.thirdeye.notification.commons.SmtpConfiguration;
 import ai.startree.thirdeye.notification.content.NotificationContent;
 import com.codahale.metrics.MetricRegistry;
 

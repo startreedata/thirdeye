@@ -44,7 +44,7 @@ public class SendgridNotificationService implements NotificationService {
   private void sendEmail(final EmailEntityApi emailEntity) throws IOException {
     final Email from = new Email(emailEntity.getFrom());
     final String subject = emailEntity.getSubject();
-    final Email to = new Email(emailEntity.getTo().getTo().iterator().next());
+    final Email to = new Email(emailEntity.getRecipients().getTo().iterator().next());
     final Content content = new Content("text/html", emailEntity.getHtmlContent());
     final Mail mail = new Mail(from, subject, to, content);
 

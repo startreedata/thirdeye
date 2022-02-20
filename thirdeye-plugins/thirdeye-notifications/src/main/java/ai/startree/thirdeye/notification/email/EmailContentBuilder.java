@@ -93,7 +93,7 @@ public class EmailContentBuilder {
     return new EmailEntityApi()
         .setSubject(subject)
         .setHtmlContent(htmlText)
-        .setTo(recipients)
+        .setRecipients(recipients)
         .setFrom(recipients.getFrom());
   }
 }

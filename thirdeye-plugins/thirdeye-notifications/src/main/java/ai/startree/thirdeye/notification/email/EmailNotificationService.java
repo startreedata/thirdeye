@@ -77,7 +77,7 @@ public class EmailNotificationService implements NotificationService {
   private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
       throws EmailException {
     final HtmlEmail email = new HtmlEmail();
-    final EmailRecipientsApi recipients = emailEntity.getTo();
+    final EmailRecipientsApi recipients = emailEntity.getRecipients();
 
     email.setSubject(emailEntity.getSubject());
     email.setFrom(emailEntity.getFrom());

@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { isNil, round } from "lodash";
 import { DateTime, Interval } from "luxon";
-import { formatNumber } from "../number/number.util";
+import { formatNumberV1 } from "../../platform/utils";
 
 export const WEEK_IN_MILLISECONDS = 604800000;
 
@@ -23,7 +23,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
     let durationInUnits;
     if ((durationInUnits = round(duration.as("years"), 1)) >= 1) {
         // Duration in years
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.year-lowercase")
                 : i18n.t("label.years-lowercase")
@@ -32,7 +32,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 
     if ((durationInUnits = round(duration.as("months"), 1)) >= 1) {
         // Duration in months
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.month-lowercase")
                 : i18n.t("label.months-lowercase")
@@ -41,7 +41,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 
     if ((durationInUnits = round(duration.as("weeks"), 1)) >= 1) {
         // Duration in weeks
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.week-lowercase")
                 : i18n.t("label.weeks-lowercase")
@@ -50,7 +50,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 
     if ((durationInUnits = round(duration.as("days"), 1)) >= 1) {
         // Duration in days
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.day-lowercase")
                 : i18n.t("label.days-lowercase")
@@ -59,7 +59,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 
     if ((durationInUnits = round(duration.as("hours"), 1)) >= 1) {
         // Duration in hours
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.hour-lowercase")
                 : i18n.t("label.hours-lowercase")
@@ -68,7 +68,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 
     if ((durationInUnits = round(duration.as("minutes"), 1)) >= 1) {
         // Duration in minutes
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.minute-lowercase")
                 : i18n.t("label.minutes-lowercase")
@@ -77,7 +77,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
 
     if ((durationInUnits = round(duration.as("seconds"), 1)) >= 1) {
         // Duration in seconds
-        return `${formatNumber(durationInUnits, 1)} ${
+        return `${formatNumberV1(durationInUnits, 1)} ${
             durationInUnits === 1
                 ? i18n.t("label.second-lowercase")
                 : i18n.t("label.seconds-lowercase")
@@ -87,7 +87,7 @@ export const formatDuration = (startTime: number, endTime: number): string => {
     // Duration in milliseconds
     durationInUnits = round(duration.as("milliseconds"), 1);
 
-    return `${formatNumber(durationInUnits, 1)} ${
+    return `${formatNumberV1(durationInUnits, 1)} ${
         durationInUnits === 1
             ? i18n.t("label.millisecond-lowercase")
             : i18n.t("label.milliseconds-lowercase")

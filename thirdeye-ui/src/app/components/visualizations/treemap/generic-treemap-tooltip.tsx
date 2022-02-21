@@ -1,6 +1,6 @@
 import { Grid, Typography } from "@material-ui/core";
 import React from "react";
-import { formatLargeNumber } from "../../../utils/number/number.util";
+import { formatLargeNumberV1 } from "../../../platform/utils";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "../alert-evaluation-time-series/alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.styles";
 import { TreemapData } from "./treemap.interfaces";
@@ -40,7 +40,7 @@ function GenericTreemapTooltip<Data>(props: TreemapData<Data>): JSX.Element {
             >
                 {/* Value */}
                 <Typography variant="overline">
-                    {formatLargeNumber(props.size)}
+                    {formatLargeNumberV1(props.size)}
                 </Typography>
             </Grid>
 

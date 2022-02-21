@@ -3,6 +3,7 @@ import { ScaleTime } from "d3-scale";
 import { isEmpty, isNil } from "lodash";
 import { Interval } from "luxon";
 import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
+import { formatLargeNumberV1 } from "../../platform/utils";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
@@ -11,7 +12,6 @@ import {
     formatTime,
     formatYear,
 } from "../date-time/date-time.util";
-import { formatLargeNumber } from "../number/number.util";
 
 export const SEPARATOR_DATE_TIME = "@";
 export const NUM_TICKS = 8;
@@ -36,7 +36,7 @@ export const formatLargeNumberForVisualization = (
         return "";
     }
 
-    return formatLargeNumber(targetNum);
+    return formatLargeNumberV1(targetNum);
 };
 
 // Returns formatted string representation of date based on scale domain interval

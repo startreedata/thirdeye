@@ -2,12 +2,12 @@ import { Grid, Typography } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    formatLargeNumberV1,
+    formatNumberV1,
+} from "../../../../platform/utils";
 import { getAnomalyName } from "../../../../utils/anomalies/anomalies.util";
 import { formatDateAndTime } from "../../../../utils/date-time/date-time.util";
-import {
-    formatLargeNumber,
-    formatNumber,
-} from "../../../../utils/number/number.util";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { AlertEvaluationTimeSeriesTooltipProps } from "./alert-evaluation-time-series-tooltip.interfaces";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "./alert-evaluation-time-series-tooltip.styles";
@@ -80,7 +80,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                 }
                                 variant="overline"
                             >
-                                {formatLargeNumber(
+                                {formatLargeNumberV1(
                                     props.alertEvaluationTimeSeriesTooltipPoint
                                         .current
                                 )}
@@ -115,7 +115,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                 }
                                 variant="overline"
                             >
-                                {formatLargeNumber(
+                                {formatLargeNumberV1(
                                     props.alertEvaluationTimeSeriesTooltipPoint
                                         .expected
                                 )}
@@ -150,7 +150,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                 }
                                 variant="overline"
                             >
-                                {formatLargeNumber(
+                                {formatLargeNumberV1(
                                     props.alertEvaluationTimeSeriesTooltipPoint
                                         .upperBound
                                 )}
@@ -185,7 +185,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                 }
                                 variant="overline"
                             >
-                                {formatLargeNumber(
+                                {formatLargeNumberV1(
                                     props.alertEvaluationTimeSeriesTooltipPoint
                                         .lowerBound
                                 )}
@@ -305,7 +305,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                         <Grid item>
                                             <Typography variant="subtitle2">
                                                 {t("label.more-count", {
-                                                    count: formatNumber(
+                                                    count: formatNumberV1(
                                                         props
                                                             .alertEvaluationTimeSeriesTooltipPoint
                                                             .anomalies.length -

@@ -5,7 +5,13 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+
+import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.OAuthManager;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
@@ -20,16 +26,22 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthInfoResource {
   private final OAuthManager oAuthManager;
+  private final AuthConfiguration authConfig;
 
   @Inject
-  public AuthInfoResource(OAuthManager oAuthManager){
+  public AuthInfoResource(OAuthManager oAuthManager, AuthConfiguration authConfig){
     this.oAuthManager = oAuthManager;
+    this.authConfig = authConfig;
   }
 
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    return Response.ok(oAuthManager.getInfo()).build();
+    AuthInfoApi info = oAuthManager.getInfo();
+    if(authConfig.isEnabled() && info == null) {
+      throw serverError(ThirdEyeStatus.ERR_UNKNOWN, "Auth server is not responding");
+    }
+    return respondOk(info);
   }
 }

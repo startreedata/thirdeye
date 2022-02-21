@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import {
     AppLoadingIndicatorV1,
     PageHeaderTextV1,
@@ -11,11 +10,9 @@ import {
 
 export const LogoutPage: FunctionComponent = () => {
     const { logout } = useAuthProviderV1();
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { t } = useTranslation();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
         logout();
     }, []);
 

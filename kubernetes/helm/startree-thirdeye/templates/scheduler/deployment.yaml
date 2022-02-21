@@ -24,8 +24,8 @@ spec:
         release: {{ .Release.Name }}
         component: {{ .Values.scheduler.name }}
       annotations:
-        prometheus.io/port: {{ .Values.scheduler.port | quote }}
-        prometheus.io/path: "/admin/prometheus"
+        prometheus.io/port: "8081"
+        prometheus.io/scrape: {{ .Values.prometheus.enabled | quote }}
         {{- toYaml .Values.scheduler.podAnnotations | nindent 8 }}
     spec:
       {{- if .Values.image.pullSecretsName }}

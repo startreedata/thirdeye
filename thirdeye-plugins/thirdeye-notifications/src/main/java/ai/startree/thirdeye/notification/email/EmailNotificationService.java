@@ -6,18 +6,15 @@
 package ai.startree.thirdeye.notification.email;
 
 import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
 
-import ai.startree.thirdeye.spi.Constants.SubjectType;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
-import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.collections4.CollectionUtils;
@@ -62,9 +59,10 @@ public class EmailNotificationService implements NotificationService {
   }
 
   @Override
-  public void notify(final NotificationPayloadApi api) {
+  public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     try {
-      final EmailEntityApi emailEntity = buildEmailEntityApi(api.getSubscriptionGroup(),
+      final EmailEntityApi emailEntity = new EmailContentBuilder().buildEmailEntityApi(
+          api.getSubscriptionGroup(),
           DEFAULT_EMAIL_TEMPLATE,
           api.getEmailTemplateData(),
           api.getEmailRecipients());
@@ -72,36 +70,14 @@ public class EmailNotificationService implements NotificationService {
       final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
     } catch (Exception e) {
-      LOG.error("Skipping! Found illegal arguments while sending alert. ", e);
+      throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "Email dispatch failed!");
     }
-  }
-
-  public EmailEntityApi buildEmailEntityApi(final SubscriptionGroupApi subscriptionGroup,
-      final String templateKey,
-      final Map<String, Object> templateData,
-      final EmailRecipientsApi recipients) {
-    requireNonNull(recipients.getTo(), "to field in email scheme is null");
-    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
-
-    final EmailContentBuilder builder = new EmailContentBuilder();
-    final String htmlText = builder.buildHtml(templateKey, templateData);
-
-    final String subject = builder.makeSubject(SubjectType.ALERT,
-        templateData.get("metrics"),
-        templateData.get("datasets"),
-        subscriptionGroup.getName());
-
-    return new EmailEntityApi()
-        .setSubject(subject)
-        .setHtmlContent(htmlText)
-        .setTo(recipients)
-        .setFrom(recipients.getFrom());
   }
 
   private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
       throws EmailException {
     final HtmlEmail email = new HtmlEmail();
-    final EmailRecipientsApi recipients = emailEntity.getTo();
+    final EmailRecipientsApi recipients = emailEntity.getRecipients();
 
     email.setSubject(emailEntity.getSubject());
     email.setFrom(emailEntity.getFrom());

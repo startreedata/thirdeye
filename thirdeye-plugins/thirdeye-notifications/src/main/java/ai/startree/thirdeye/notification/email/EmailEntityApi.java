@@ -10,7 +10,7 @@ import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 public class EmailEntityApi {
 
   private String from;
-  private EmailRecipientsApi to;
+  private EmailRecipientsApi recipients;
   private String subject;
   private String htmlContent;
   private String snapshotPath;
@@ -24,13 +24,13 @@ public class EmailEntityApi {
     return this;
   }
 
-  public EmailRecipientsApi getTo() {
-    return to;
+  public EmailRecipientsApi getRecipients() {
+    return recipients;
   }
 
-  public EmailEntityApi setTo(
-      final EmailRecipientsApi to) {
-    this.to = to;
+  public EmailEntityApi setRecipients(
+      final EmailRecipientsApi recipients) {
+    this.recipients = recipients;
     return this;
   }
 

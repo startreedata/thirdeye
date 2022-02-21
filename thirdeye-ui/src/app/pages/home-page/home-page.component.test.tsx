@@ -33,15 +33,6 @@ jest.mock("../../components/page-header/page-header.component", () => ({
     PageHeader: jest.fn().mockImplementation((props) => props.title),
 }));
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setPageBreadcrumbs: mockSetPageBreadcrumbs,
-        })),
-    })
-);
-
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
         t: (key: string) => key,
@@ -61,14 +52,6 @@ jest.mock("../../utils/routes/routes.util", () => ({
 }));
 
 describe("Home Page", () => {
-    it("should set appropriate page breadcrumbs", async () => {
-        act(() => {
-            render(<HomePage />);
-        });
-
-        expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
-    });
-
     it("should set appropriate page title", async () => {
         act(() => {
             render(<HomePage />);
@@ -125,8 +108,6 @@ describe("Home Page", () => {
         );
     });
 });
-
-const mockSetPageBreadcrumbs = jest.fn();
 
 const TEST_PATHS = {
     alerts: "testAlertsPath",

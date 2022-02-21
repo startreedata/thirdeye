@@ -4,15 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { ConfigurationRouter } from "./configuration.router";
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-        })),
-    })
-);
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useHistory: jest.fn().mockImplementation(() => ({
@@ -52,29 +43,6 @@ jest.mock(
 );
 
 describe("Configuration Router", () => {
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
-
-        // Get router breadcrumbs
-        const breadcrumbs = mockSetRouterBreadcrumbs.mock.calls[0][0];
-        // Also invoke the click handlers
-        breadcrumbs &&
-            breadcrumbs[0] &&
-            breadcrumbs[0].onClick &&
-            breadcrumbs[0].onClick();
-
-        expect(breadcrumbs).toHaveLength(1);
-        expect(breadcrumbs[0].text).toEqual("label.configuration");
-        expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
-    });
-
     it("should render configuration page at exact configuration path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
@@ -175,7 +143,5 @@ describe("Configuration Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockPush = jest.fn();

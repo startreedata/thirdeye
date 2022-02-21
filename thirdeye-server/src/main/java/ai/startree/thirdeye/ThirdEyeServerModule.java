@@ -19,8 +19,10 @@ public class ThirdEyeServerModule extends AbstractModule {
   private final DataSource dataSource;
   private final MetricRegistry metricRegistry;
 
-  public ThirdEyeServerModule(final ThirdEyeServerConfiguration configuration,
-    final DataSource dataSource, final MetricRegistry metricRegistry) {
+  public ThirdEyeServerModule(
+      final ThirdEyeServerConfiguration configuration,
+      final DataSource dataSource,
+      final MetricRegistry metricRegistry) {
     this.configuration = configuration;
     this.dataSource = dataSource;
     this.metricRegistry = metricRegistry;

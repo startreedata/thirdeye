@@ -4,7 +4,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -43,7 +42,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { notify } = useNotificationProviderV1();
     const { id: anomalyId } =
@@ -52,10 +50,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const pageTitle = `${t("label.root-cause-analysis")}: ${t(
         "label.anomaly"
     )} #${anomalyId}`;
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     useEffect(() => {
         isValidNumberId(anomalyId) && getAnomaly(toNumber(anomalyId));

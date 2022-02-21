@@ -4,7 +4,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
@@ -36,26 +35,11 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const { getEvaluation } = useGetEvaluation();
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState<Alert>();
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const params = useParams<AlertsUpdatePageParams>();
     const history = useHistory();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: alert ? alert.name : "",
-                onClick: (): void => {
-                    if (alert) {
-                        history.push(getAlertsViewPath(alert.id));
-                    }
-                },
-            },
-        ]);
-    }, [alert]);
 
     useEffect(() => {
         fetchAlert();

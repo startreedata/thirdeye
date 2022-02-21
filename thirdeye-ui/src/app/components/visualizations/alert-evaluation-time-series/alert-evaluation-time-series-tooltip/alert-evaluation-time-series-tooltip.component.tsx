@@ -3,11 +3,11 @@ import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    formatDateAndTimeV1,
     formatLargeNumberV1,
     formatNumberV1,
 } from "../../../../platform/utils";
 import { getAnomalyName } from "../../../../utils/anomalies/anomalies.util";
-import { formatDateAndTime } from "../../../../utils/date-time/date-time.util";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { AlertEvaluationTimeSeriesTooltipProps } from "./alert-evaluation-time-series-tooltip.interfaces";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "./alert-evaluation-time-series-tooltip.styles";
@@ -43,7 +43,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                         >
                             <Grid item>
                                 <Typography variant="overline">
-                                    {formatDateAndTime(
+                                    {formatDateAndTimeV1(
                                         props
                                             .alertEvaluationTimeSeriesTooltipPoint
                                             .timestamp
@@ -247,7 +247,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                     }
                                     variant="overline"
                                 >
-                                    {formatDateAndTime(
+                                    {formatDateAndTimeV1(
                                         props
                                             .alertEvaluationTimeSeriesTooltipPoint
                                             .anomalies[0].startTime
@@ -279,7 +279,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                     }
                                     variant="overline"
                                 >
-                                    {formatDateAndTime(
+                                    {formatDateAndTimeV1(
                                         props
                                             .alertEvaluationTimeSeriesTooltipPoint
                                             .anomalies[0].endTime

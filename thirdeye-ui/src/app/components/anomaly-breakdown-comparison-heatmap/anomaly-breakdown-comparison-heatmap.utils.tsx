@@ -1,6 +1,6 @@
 import { isEmpty, map } from "lodash";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { WEEK_IN_MILLISECONDS } from "../../utils/date-time/date-time.util";
+import { WEEK_IN_MILLISECONDS } from "../../utils/time/time.util";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
     AnomalyBreakdownComparisonData,

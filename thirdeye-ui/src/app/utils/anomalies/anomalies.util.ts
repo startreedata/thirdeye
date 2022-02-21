@@ -1,11 +1,15 @@
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
 import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
-import { formatLargeNumberV1, formatPercentageV1 } from "../../platform/utils";
+import {
+    formatDateAndTimeV1,
+    formatDurationV1,
+    formatLargeNumberV1,
+    formatPercentageV1,
+} from "../../platform/utils";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { formatDateAndTime, formatDuration } from "../date-time/date-time.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const EMPTY_STRING_DISPLAY = "<EMPTY_VALUE>";
@@ -90,15 +94,18 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
 
     // Start and end time
     if (anomaly.startTime) {
-        uiAnomaly.startTime = formatDateAndTime(anomaly.startTime);
+        uiAnomaly.startTime = formatDateAndTimeV1(anomaly.startTime);
     }
     if (anomaly.endTime) {
-        uiAnomaly.endTime = formatDateAndTime(anomaly.endTime);
+        uiAnomaly.endTime = formatDateAndTimeV1(anomaly.endTime);
     }
 
     // Duration
     if (anomaly.startTime && anomaly.endTime) {
-        uiAnomaly.duration = formatDuration(anomaly.startTime, anomaly.endTime);
+        uiAnomaly.duration = formatDurationV1(
+            anomaly.startTime,
+            anomaly.endTime
+        );
     }
 
     return uiAnomaly;

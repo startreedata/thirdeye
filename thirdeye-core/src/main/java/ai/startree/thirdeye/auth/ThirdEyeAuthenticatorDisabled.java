@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.ThirdEyePrincipal.NAME_CLAIM;
+
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import com.nimbusds.jwt.JWTClaimsSet;
 import io.dropwizard.auth.AuthenticationException;
@@ -15,7 +17,7 @@ public class ThirdEyeAuthenticatorDisabled implements Authenticator<String, Thir
 
   @Override
   public Optional<ThirdEyePrincipal> authenticate(final String s) throws AuthenticationException {
-    return Optional.of(new ThirdEyePrincipal(new JWTClaimsSet.Builder().subject(s)
+    return Optional.of(new ThirdEyePrincipal(new JWTClaimsSet.Builder().claim(NAME_CLAIM, s)
         .build()));
   }
 }

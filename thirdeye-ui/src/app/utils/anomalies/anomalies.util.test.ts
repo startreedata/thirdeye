@@ -26,9 +26,9 @@ jest.mock("../date-time/date-time.util", () => ({
         ),
 }));
 
-jest.mock("../number/number.util", () => ({
-    formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
-    formatPercentage: jest.fn().mockImplementation((num) => num.toString()),
+jest.mock("../../platform/utils", () => ({
+    formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
+    formatPercentageV1: jest.fn().mockImplementation((num) => num.toString()),
 }));
 
 describe("Anomalies Util", () => {

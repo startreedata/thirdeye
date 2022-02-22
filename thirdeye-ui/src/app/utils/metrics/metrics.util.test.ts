@@ -13,8 +13,8 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../number/number.util", () => ({
-    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
+jest.mock("../../platform/utils", () => ({
+    formatNumberV1: jest.fn().mockImplementation((num) => num.toString()),
 }));
 
 describe("Metrics Util", () => {

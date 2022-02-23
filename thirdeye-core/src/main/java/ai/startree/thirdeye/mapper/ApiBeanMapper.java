@@ -13,7 +13,6 @@ import ai.startree.thirdeye.spi.api.AlertNodeApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
-import ai.startree.thirdeye.spi.api.ApplicationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DataSourceMetaApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
@@ -28,7 +27,6 @@ import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -57,20 +55,6 @@ public abstract class ApiBeanMapper {
 
   private static Boolean boolApi(final boolean value) {
     return value ? true : null;
-  }
-
-  public static ApplicationApi toApi(final ApplicationDTO o) {
-    return new ApplicationApi()
-        .setId(o.getId())
-        .setName(o.getApplication())
-        ;
-  }
-
-  public static ApplicationDTO toApplicationDto(final ApplicationApi applicationApi) {
-    final ApplicationDTO applicationDTO = new ApplicationDTO();
-    applicationDTO.setApplication(applicationApi.getName());
-    applicationDTO.setRecipients("");
-    return applicationDTO;
   }
 
   public static DataSourceApi toApi(final DataSourceDTO dto) {
@@ -266,8 +250,6 @@ public abstract class ApiBeanMapper {
         .setId(dto.getId())
         .setName(dto.getName())
         .setCron(dto.getCronExpression())
-        .setApplication(new ApplicationApi()
-            .setName(dto.getApplication()))
         .setAlerts(alertApis)
         .setNotificationSchemes(toApi(dto.getNotificationSchemes()));
   }
@@ -277,10 +259,6 @@ public abstract class ApiBeanMapper {
     dto.setId(api.getId());
     dto.setName(api.getName());
     dto.setActive(optional(api.getActive()).orElse(true));
-
-    optional(api.getApplication())
-        .map(ApplicationApi::getName)
-        .ifPresent(dto::setApplication);
 
     // TODO spyne implement translation of alert schemes, suppressors etc.
 

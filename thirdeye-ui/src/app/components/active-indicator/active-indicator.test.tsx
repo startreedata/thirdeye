@@ -1,12 +1,18 @@
+import { ThemeProvider } from "@material-ui/core";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { Color } from "../../utils/material-ui/color.util";
+import { lightV1 } from "../../platform/utils";
+import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 import { ActiveIndicator } from "./active-indicator.component";
 import { ActiveIndicatorProps } from "./active-indicator.interfaces";
 
 describe("ActiveIndicator", () => {
     it("should render an indicator for the active state", async () => {
-        render(<ActiveIndicator {...mockActiveIndicatorProps} />);
+        render(
+            <ThemeProvider theme={lightV1}>
+                <ActiveIndicator {...mockActiveIndicatorProps} />
+            </ThemeProvider>
+        );
 
         expect(
             await screen.findByTestId("activity-indicator-icon")
@@ -15,7 +21,11 @@ describe("ActiveIndicator", () => {
 
     it("should render an indicator for the inactive state", async () => {
         const props = { ...mockActiveIndicatorProps, active: false };
-        render(<ActiveIndicator {...props} />);
+        render(
+            <ThemeProvider theme={lightV1}>
+                <ActiveIndicator {...props} />
+            </ThemeProvider>
+        );
 
         expect(
             await screen.findByTestId("activity-indicator-icon")
@@ -27,5 +37,5 @@ const mockActiveIndicatorProps = {
     active: true,
 } as ActiveIndicatorProps;
 
-const expectedActiveColor: string = Color.GREEN_5.toLowerCase();
-const expectedInactiveColor: string = Color.RED_2.toLowerCase();
+const expectedActiveColor: string = ColorV1.Green2;
+const expectedInactiveColor: string = ColorV1.Red2;

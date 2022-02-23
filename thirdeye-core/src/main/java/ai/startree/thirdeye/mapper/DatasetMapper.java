@@ -23,6 +23,9 @@ public interface DatasetMapper {
   DatasetMapper INSTANCE = Mappers.getMapper(DatasetMapper.class);
 
   default DatasetConfigDTO toBean(DatasetApi api) {
+    if ( api == null ) {
+      return null;
+    }
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     optional(api.getDataSource())
         .map(DataSourceApi::getName)
@@ -46,6 +49,9 @@ public interface DatasetMapper {
   }
 
   default DatasetApi toApi(DatasetConfigDTO dto) {
+    if ( dto == null ) {
+      return null;
+    }
     return new DatasetApi()
         .setId(dto.getId())
         .setActive(dto.isActive())
@@ -54,7 +60,7 @@ public interface DatasetMapper {
         .setName(dto.getDataset())
         .setTimeColumn(new TimeColumnApi()
             .setName(dto.getTimeColumn())
-            .setInterval(dto.bucketTimeGranularity().toDuration())
+            .setInterval(optional(dto.bucketTimeGranularity()).map(TimeGranularity::toDuration).orElse(null))
             .setFormat(dto.getTimeFormat())
             .setTimezone(dto.getTimezone())
         )

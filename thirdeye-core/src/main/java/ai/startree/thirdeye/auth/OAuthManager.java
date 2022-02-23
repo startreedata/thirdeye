@@ -48,12 +48,13 @@ public class OAuthManager {
     if(oAuthConfig != null && oAuthConfig.getServerUrl() != null) {
       try {
         Map<String, Object> info = openidConfigCache.get(oAuthConfig.getServerUrl());
-        Optional.ofNullable(info.get(AuthConfiguration.ISSUER_KEY)).ifPresent(issuer -> {
+        Optional.of(info.get(AuthConfiguration.ISSUER_KEY)).ifPresent(issuer -> {
           authInfo.setOidcIssuerUrl(issuer.toString());
           authInfo.setOpenidConfiguration(info);
         });
-      } catch (ExecutionException e) {
+      } catch (ExecutionException | NullPointerException e) {
         e.printStackTrace();
+        return null;
       }
     }
     return authInfo;

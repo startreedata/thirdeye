@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyePrincipal implements Principal {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyePrincipal.class);
+  public static final String NAME_CLAIM = "email";
 
   private JWTClaimsSet claims;
 
@@ -27,7 +28,7 @@ public class ThirdEyePrincipal implements Principal {
   @Override
   public String getName() {
     try {
-      return claims.getStringClaim("email");
+      return claims.getStringClaim(NAME_CLAIM);
     } catch (ParseException e) {
       log.error("Could not get user name. email should be a String", e);
       return null;

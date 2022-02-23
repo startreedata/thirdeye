@@ -1,12 +1,11 @@
 package ai.startree.thirdeye.resources;
 
-import static org.mockito.Matchers.any;
+import static ai.startree.thirdeye.spi.ThirdEyePrincipal.NAME_CLAIM;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
@@ -16,75 +15,87 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet;
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CrudResourceTest {
+
   final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
-  private GenericPojoDao dao;
   private DummyManager manager;
   private DummyResource resource;
 
   @BeforeClass
   public void setup() {
-    dao = mock(GenericPojoDao.class);
-    when(dao.put(any())).thenReturn(1L);
-    manager = new DummyManager(dao);
+    manager = mock(DummyManager.class);// new DummyManager(dao);
+    when(manager.save(any(DummyDto.class))).thenAnswer((Answer<Long>) invocationOnMock -> {
+      ((DummyDto) invocationOnMock.getArgument(0)).setId(1L);
+      return 1L;
+    });
+    when(manager.update(any(DummyDto.class))).thenReturn(1);
     resource = new DummyResource(manager, ImmutableMap.of());
   }
 
   @Test
   public void createUserInfoTest() {
-    final ThirdEyePrincipal principal = new ThirdEyePrincipal(new JWTClaimsSet.Builder()
-      .claim("email", emails.get(0)).build());
+    final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
     final DummyApi api = new DummyApi().setData("testData");
 
-    final Timestamp before = new Timestamp(new Date().getTime());
-    List<DummyApi> response = (List<DummyApi>) resource.createMultiple(principal, Collections.singletonList(api)).getEntity();
+    final Timestamp before = getCurrentTime();
+    List<DummyApi> response = (List<DummyApi>) resource.createMultiple(owner, singletonList(api)).getEntity();
 
-    assertNotNull(response);
-    assertFalse(response.isEmpty());
+    assertThat(response).isNotNull();
+    assertThat(response.isEmpty()).isFalse();
     final DummyApi responseApi = response.get(0);
-    assertEquals(responseApi.getCreatedBy(), emails.get(0));
-    assertEquals(responseApi.getUpdatedBy(), emails.get(0));
-    assertTrue(responseApi.getCreateTime().after(before));
-    assertEquals(responseApi.getCreateTime(), responseApi.getUpdateTime());
+    assertThat(responseApi.getCreatedBy()).isEqualTo(emails.get(0));
+    assertThat(responseApi.getUpdatedBy()).isEqualTo(emails.get(0));
+    assertThat(responseApi.getCreateTime().after(before)).isTrue();
+    assertThat(responseApi.getCreateTime()).isEqualTo(responseApi.getUpdateTime());
   }
 
   @Test
   public void updateUserInfoTest() {
-    final Timestamp before = new Timestamp(new Date().getTime());
+    final Timestamp before = getCurrentTime();
+    final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
+    final ThirdEyePrincipal updater = getPrincipal(emails.get(1));
+
     final DummyDto dbDto = new DummyDto().setData("testData");
     dbDto.setId(1L)
-      .setCreatedBy(emails.get(0))
+      .setCreatedBy(owner.getName())
       .setCreateTime(before)
-      .setUpdatedBy(emails.get(0))
+      .setUpdatedBy(owner.getName())
       .setUpdateTime(before);
-    when(dao.get(1L, DummyDto.class)).thenReturn(dbDto);
-
+    when(manager.findById(1L)).thenReturn(dbDto);
     final DummyApi api = new DummyApi()
       .setId(1L)
       .setData("updateTestData");
-    final ThirdEyePrincipal principal = new ThirdEyePrincipal(new JWTClaimsSet.Builder()
-      .claim("email", emails.get(1)).build());
-    List<DummyApi> response = (List<DummyApi>) resource.editMultiple(principal, Collections.singletonList(api)).getEntity();
 
-    assertNotNull(response);
-    assertFalse(response.isEmpty());
+    List<DummyApi> response = (List<DummyApi>) resource.editMultiple(updater, singletonList(api)).getEntity();
+
+    assertThat(response).isNotNull();
+    assertThat(response.isEmpty()).isFalse();
     final DummyApi responseApi = response.get(0);
-    assertEquals(responseApi.getData(), "updateTestData");
-    assertEquals(responseApi.getCreatedBy(), emails.get(0));
-    assertEquals(responseApi.getUpdatedBy(), emails.get(1));
-    assertTrue(responseApi.getCreateTime().before(responseApi.getUpdateTime()));
+    assertThat(responseApi.getData()).isEqualTo("updateTestData");
+    assertThat(responseApi.getCreatedBy()).isEqualTo(owner.getName());
+    assertThat(responseApi.getUpdatedBy()).isEqualTo(updater.getName());
+    assertThat(responseApi.getCreateTime().before(responseApi.getUpdateTime())).isTrue();
+  }
+
+  private ThirdEyePrincipal getPrincipal(String name) {
+    return new ThirdEyePrincipal(new JWTClaimsSet.Builder().claim(NAME_CLAIM, name).build());
+  }
+
+  private Timestamp getCurrentTime() {
+    return new Timestamp(new Date().getTime());
   }
 }
 
 class DummyDto extends AbstractDTO {
+
   private String data;
 
   public String getData() {
@@ -98,6 +109,7 @@ class DummyDto extends AbstractDTO {
 }
 
 class DummyApi implements ThirdEyeCrudApi<DummyApi> {
+
   private Long id;
   private Timestamp createTime;
   private String createdBy;

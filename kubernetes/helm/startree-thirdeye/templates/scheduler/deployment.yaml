@@ -84,7 +84,7 @@ spec:
             subPath: "server.yaml"
             readOnly: true
           {{- if .Values.config.holidayLoaderKey }}
-          - name: thirdeye-config
+          - name: holiday-loader-key
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
             subPath: "holiday-loader-key.json"
             readOnly: true
@@ -107,5 +107,10 @@ spec:
             secretName: {{ include "thirdeye.scheduler.fullname" . }}-internal-tls
         - name: keystore
           emptyDir: {}
+        {{- end }}
+        {{- if .Values.config.holidayLoaderKey }}
+        - name: holiday-loader-key
+          secret:
+            secretName: holiday-loader-key
         {{- end }}
 {{ end }}

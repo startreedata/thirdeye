@@ -5,15 +5,6 @@ import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-ind
 import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsRouter } from "./subscription-groups.router";
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-        })),
-    })
-);
-
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
     useNavigate: jest.fn().mockImplementation(() => mockNavigate),
@@ -97,42 +88,6 @@ describe("Subscription Groups Router", () => {
         );
 
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
-    });
-
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <SubscriptionGroupsRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
-
-        // Get router breadcrumbs
-        const breadcrumbs = mockSetRouterBreadcrumbs.mock.calls[0][0];
-        // Also invoke the click handlers
-        breadcrumbs &&
-            breadcrumbs[0] &&
-            breadcrumbs[0].onClick &&
-            breadcrumbs[0].onClick();
-        breadcrumbs &&
-            breadcrumbs[1] &&
-            breadcrumbs[1].onClick &&
-            breadcrumbs[1].onClick();
-
-        expect(breadcrumbs).toHaveLength(2);
-        expect(breadcrumbs[0].text).toEqual("label.configuration");
-        expect(breadcrumbs[0].onClick).toBeDefined();
-        expect(mockNavigate).toHaveBeenNthCalledWith(
-            1,
-            "testConfigurationPath"
-        );
-        expect(breadcrumbs[1].text).toEqual("label.subscription-groups");
-        expect(breadcrumbs[1].onClick).toBeDefined();
-        expect(mockNavigate).toHaveBeenNthCalledWith(
-            2,
-            "testSubscriptionGroupsPath"
-        );
     });
 
     it("should render subscription groups all page at exact subscription groups path", async () => {
@@ -331,7 +286,5 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockSetRouterBreadcrumbs = jest.fn();
 
 const mockNavigate = jest.fn();

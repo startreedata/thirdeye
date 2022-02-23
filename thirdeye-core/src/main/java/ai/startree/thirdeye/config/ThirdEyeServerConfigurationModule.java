@@ -11,6 +11,7 @@ import ai.startree.thirdeye.datasource.AutoOnboardConfiguration;
 import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
+import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.impl.RCAConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
@@ -51,8 +52,12 @@ public class ThirdEyeServerConfigurationModule extends AbstractModule {
         .in(Scopes.SINGLETON);
 
     bind(AuthConfiguration.class)
-      .toProvider(configuration::getAuthConfiguration)
-      .in(Scopes.SINGLETON);
+        .toProvider(configuration::getAuthConfiguration)
+        .in(Scopes.SINGLETON);
+
+    bind(NotificationConfiguration.class)
+        .toProvider(configuration::getNotificationConfiguration)
+        .in(Scopes.SINGLETON);
   }
 
   @Singleton
@@ -79,7 +84,7 @@ public class ThirdEyeServerConfigurationModule extends AbstractModule {
   @Singleton
   @Provides
   public OAuthConfiguration getOAuthConfig(
-    AuthConfiguration authConfiguration) {
+      AuthConfiguration authConfiguration) {
     return authConfiguration.getOAuthConfig();
   }
 }

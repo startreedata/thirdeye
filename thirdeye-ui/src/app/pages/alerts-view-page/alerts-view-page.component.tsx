@@ -3,7 +3,6 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
@@ -50,17 +49,12 @@ export const AlertsViewPage: FunctionComponent = () => {
     >([]);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { id: alertId } = useParams<AlertsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     useEffect(() => {
         fetchAlert();
@@ -192,16 +186,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             <PageHeader showCreateButton showTimeRange title={uiAlert.name} />
 
             <PageContentsGridV1>
-                {/* Alert Details Card*/}
-                <Grid item xs={12}>
-                    <AlertCard
-                        alertEvaluation={alertEvaluation}
-                        uiAlert={uiAlert}
-                        onChange={handleAlertChange}
-                        onDelete={handleAlertDelete}
-                    />
-                </Grid>
-
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
                     {evaluationRequestStatus === ActionStatus.Error && (
@@ -222,6 +206,16 @@ export const AlertsViewPage: FunctionComponent = () => {
                             onRefresh={fetchAlertEvaluation}
                         />
                     )}
+                </Grid>
+
+                {/* Alert Details Card*/}
+                <Grid item xs={12}>
+                    <AlertCard
+                        alertEvaluation={alertEvaluation}
+                        uiAlert={uiAlert}
+                        onChange={handleAlertChange}
+                        onDelete={handleAlertDelete}
+                    />
                 </Grid>
 
                 {/* Readonly detection configuration */}

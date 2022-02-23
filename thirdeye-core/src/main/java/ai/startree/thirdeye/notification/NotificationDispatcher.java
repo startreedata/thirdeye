@@ -5,9 +5,7 @@
 
 package ai.startree.thirdeye.notification;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
-import ai.startree.thirdeye.notification.commons.SmtpConfiguration;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -33,10 +31,10 @@ public class NotificationDispatcher {
   public NotificationDispatcher(
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final NotificationServiceRegistry notificationServiceRegistry,
-      final ThirdEyeServerConfiguration configuration) {
+      final NotificationConfiguration notificationConfiguration) {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.notificationServiceRegistry = notificationServiceRegistry;
-    this.smtpConfig = configuration.getNotificationConfiguration().getSmtpConfiguration();
+    this.smtpConfig = notificationConfiguration.getSmtpConfiguration();
   }
 
   public void dispatch(

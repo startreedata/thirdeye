@@ -11,7 +11,7 @@ import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvaila
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.events.MockEventsConfiguration;
 import ai.startree.thirdeye.metric.PrometheusConfiguration;
-import ai.startree.thirdeye.notification.commons.NotificationConfiguration;
+import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import ai.startree.thirdeye.rootcause.impl.RCAConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;

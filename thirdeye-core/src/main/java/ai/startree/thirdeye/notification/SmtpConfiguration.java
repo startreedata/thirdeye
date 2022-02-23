@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.commons;
+package ai.startree.thirdeye.notification;
 
 import com.google.common.base.MoreObjects;
 import java.util.Objects;

@@ -3,7 +3,6 @@ import { assign, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -26,26 +25,11 @@ import { DatasourcesUpdatePageParams } from "./datasources-update-page.interface
 export const DatasourcesUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasource, setDatasource] = useState<Datasource>();
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<DatasourcesUpdatePageParams>();
     const { notify } = useNotificationProviderV1();
 
     const navigate = useNavigate();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: datasource ? datasource.name : "",
-                onClick: (): void => {
-                    if (datasource) {
-                        navigate(getDatasourcesViewPath(datasource.id));
-                    }
-                },
-            },
-        ]);
-    }, [datasource]);
 
     useEffect(() => {
         const init = async (): Promise<void> => {

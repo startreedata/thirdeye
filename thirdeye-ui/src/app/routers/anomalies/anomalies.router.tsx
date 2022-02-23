@@ -1,18 +1,7 @@
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
-import { useTranslation } from "react-i18next";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { default as React, FunctionComponent, lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import {
-    AppRouteRelative,
-    getAnomaliesPath,
-} from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const AnomaliesAllPage = lazy(() =>
     import(
@@ -39,25 +28,6 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const AnomaliesRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const navigate = useNavigate();
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        setRouterBreadcrumbs([
-            {
-                text: t("label.anomalies"),
-                onClick: () => navigate(getAnomaliesPath()),
-            },
-        ]);
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>

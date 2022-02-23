@@ -1,15 +1,7 @@
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
-import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import React, { FunctionComponent, lazy, Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const RootCauseAnalysisForAnomalyIndexPage = lazy(() =>
     import(
@@ -32,26 +24,6 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const RootCauseAnalysisRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const navigate = useNavigate();
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        setRouterBreadcrumbs([
-            {
-                text: t("label.root-cause-analysis"),
-                onClick: () =>
-                    navigate(AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY),
-            },
-        ]);
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>

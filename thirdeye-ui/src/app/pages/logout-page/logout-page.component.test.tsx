@@ -20,15 +20,6 @@ jest.mock("../../platform/components", () => ({
         .mockImplementation((props) => <p>{props.children}</p>),
 }));
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setPageBreadcrumbs: mockSetPageBreadcrumbs,
-        })),
-    })
-);
-
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
         t: (key: string) => key,
@@ -36,12 +27,6 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("Logout Page", () => {
-    it("should set appropriate page breadcrumbs", async () => {
-        render(<LogoutPage />);
-
-        expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
-    });
-
     it("should set appropriate page title", async () => {
         render(<LogoutPage />);
 
@@ -62,7 +47,5 @@ describe("Logout Page", () => {
         ).toBeInTheDocument();
     });
 });
-
-const mockSetPageBreadcrumbs = jest.fn();
 
 const mockLogout = jest.fn();

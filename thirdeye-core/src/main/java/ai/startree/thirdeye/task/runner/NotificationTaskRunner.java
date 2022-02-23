@@ -24,7 +24,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,18 +92,14 @@ public class NotificationTaskRunner implements TaskRunner {
     return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId());
   }
 
-  public ArrayList<TaskResult> execute(final long subscriptionGroupId)
-      throws Exception {
+  public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
     notificationTaskCounter.inc();
 
-    try {
-      final SubscriptionGroupDTO subscriptionGroupDTO = getSubscriptionGroupDTO(subscriptionGroupId);
+    final SubscriptionGroupDTO subscriptionGroupDTO = getSubscriptionGroupDTO(subscriptionGroupId);
 
-      executeInternal(subscriptionGroupDTO);
-      return new ArrayList<>();
-    } finally {
-      notificationTaskSuccessCounter.inc();
-    }
+    executeInternal(subscriptionGroupDTO);
+    notificationTaskSuccessCounter.inc();
+    return Collections.emptyList();
   }
 
   private void executeInternal(final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {

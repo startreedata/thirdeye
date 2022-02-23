@@ -3,7 +3,6 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
@@ -27,17 +26,13 @@ import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 
 export const MetricsViewPage: FunctionComponent = () => {
     const [uiMetric, setUiMetric] = useState<UiMetric | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<MetricsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     useEffect(() => {
         // Time range refreshed, fetch metric

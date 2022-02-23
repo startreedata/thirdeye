@@ -188,8 +188,15 @@ public class InternalResource {
 
   @POST
   @Path("notify")
-  public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @FormParam("subscriptionGroupId") Long subscriptionGroupId) throws Exception {
+  public Response notify(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @FormParam("subscriptionGroupId") Long subscriptionGroupId,
+      @QueryParam("reset") Boolean reset) throws Exception {
+    ensureExists(subscriptionGroupId, "Query parameter required: alertId !");
+    final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupId);
+    if (reset == Boolean.TRUE) {
+      sg.setVectorClocks(null);
+      subscriptionGroupManager.save(sg);
+    }
     notificationTaskRunner.execute(subscriptionGroupId);
     return Response.ok().build();
   }

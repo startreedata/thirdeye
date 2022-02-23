@@ -6,15 +6,6 @@ import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { GeneralAuthenticatedRouter } from "./general-authenticated.router";
 
 jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-        })),
-    })
-);
-
-jest.mock(
     "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component",
     () => ({
         AppLoadingIndicatorV1: jest
@@ -47,16 +38,6 @@ describe("General Authenticated Router", () => {
         );
 
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
-    });
-
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <GeneralAuthenticatedRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
     it("should render home page at exact base path", async () => {
@@ -181,5 +162,3 @@ describe("General Authenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockSetRouterBreadcrumbs = jest.fn();

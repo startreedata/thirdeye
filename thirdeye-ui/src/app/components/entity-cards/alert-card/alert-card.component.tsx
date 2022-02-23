@@ -115,7 +115,10 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
 
                             <Grid item>
                                 {/* Alert options button */}
-                                <IconButton onClick={handleAlertOptionsClick}>
+                                <IconButton
+                                    color="secondary"
+                                    onClick={handleAlertOptionsClick}
+                                >
                                     <MoreVertIcon />
                                 </IconButton>
 

@@ -35,6 +35,10 @@
       <artifactId>retrofit</artifactId>
       <version>${retrofit2.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sendgrid</groupId>
+      <artifactId>sendgrid-java</artifactId>
+    </dependency>
 
     <!--    Firing webhooks -->
     <dependency>

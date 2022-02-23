@@ -4,7 +4,6 @@ import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./app";
-import { AppBreadcrumbsProvider } from "./components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
 import "./platform/assets/styles/fonts.scss";
@@ -46,11 +45,9 @@ ReactDOM.render(
                         ]}
                     >
                         <TimeRangeProvider>
-                            <AppBreadcrumbsProvider>
-                                <DialogProvider>
-                                    <App />
-                                </DialogProvider>
-                            </AppBreadcrumbsProvider>
+                            <DialogProvider>
+                                <App />
+                            </DialogProvider>
                         </TimeRangeProvider>
                     </AuthProviderV1>
                 </NotificationProviderV1>

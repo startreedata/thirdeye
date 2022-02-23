@@ -21,8 +21,7 @@ import {
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
-
-const SEARCH_TERM_QUERY_PARAM_KEY = "searchTerm";
+import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();

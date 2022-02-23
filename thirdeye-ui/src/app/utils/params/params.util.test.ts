@@ -5,7 +5,7 @@ import {
 import {
     getAccessTokenFromHashParams,
     getQueryString,
-    getRecognizedQueryString,
+    getRecognizedQuery,
     getSearchFromQueryString,
     getSearchTextFromQueryString,
     getTimeRangeDurationFromQueryString,
@@ -225,7 +225,7 @@ describe("Params Util", () => {
         location.search =
             "time_range=CUSTOM&start_time=1&end_time=2&search=testSearchValue&testKey=testValue";
 
-        expect(getRecognizedQueryString()).toEqual(
+        expect(getRecognizedQuery().toString()).toEqual(
             "time_range=CUSTOM&start_time=1&end_time=2"
         );
     });

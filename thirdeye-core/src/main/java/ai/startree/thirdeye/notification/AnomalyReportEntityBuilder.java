@@ -10,6 +10,7 @@ import ai.startree.thirdeye.spi.Constants.CompareMode;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
+import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
@@ -25,14 +27,47 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.Weeks;
 
-public class NotificationContentUtils {
+public class AnomalyReportEntityBuilder {
+
+  public static AnomalyReportEntity buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
+      final String feedbackVal,
+      final String functionName,
+      final String funcDescription,
+      final DateTimeZone dateTimeZone,
+      final String uiPublicUrl) {
+    final Properties props = new Properties();
+    props.putAll(anomaly.getProperties());
+    final double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
+    return new AnomalyReportEntity(String.valueOf(anomaly.getId()),
+        getAnomalyURL(anomaly, uiPublicUrl),
+        getPredictedValue(anomaly),
+        getCurrentValue(anomaly),
+        getFormattedLiftValue(anomaly, lift),
+        getLiftDirection(lift),
+        0d,
+        getDimensionsList(anomaly.getDimensionMap()),
+        getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
+        feedbackVal,
+        functionName,
+        funcDescription,
+        anomaly.getMetric(),
+        getDateString(anomaly.getStartTime(), dateTimeZone),
+        getDateString(anomaly.getEndTime(), dateTimeZone),
+        getTimezoneString(dateTimeZone),
+        getIssueType(anomaly),
+        anomaly.getType().getLabel(),
+        SpiUtils.encodeCompactedProperties(props),
+        anomaly.getMetricUrn()
+    );
+  }
 
   public static String getDateString(DateTime dateTime) {
     return dateTime.toString(AnomalyEmailContentBuilder.DEFAULT_DATE_PATTERN);
   }
 
   public static String getDateString(long millis, DateTimeZone dateTimeZone) {
-    return (new DateTime(millis, dateTimeZone)).toString(AnomalyEmailContentBuilder.DEFAULT_DATE_PATTERN);
+    return (new DateTime(millis,
+        dateTimeZone)).toString(AnomalyEmailContentBuilder.DEFAULT_DATE_PATTERN);
   }
 
   public static double getLift(double current, double expected) {

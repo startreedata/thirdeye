@@ -5,20 +5,12 @@
 
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getAnomalyURL;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getCurrentValue;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getDateString;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getDimensionsList;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getFeedbackValue;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getFormattedLiftValue;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getIssueType;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getLift;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getLiftDirection;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getPredictedValue;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getTimeDiffInHours;
-import static ai.startree.thirdeye.notification.NotificationContentUtils.getTimezoneString;
+import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getDateString;
+import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getFeedbackValue;
+import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
 import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
@@ -36,7 +28,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import ai.startree.thirdeye.spi.detection.events.EventType;
-import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -90,48 +81,46 @@ public class AnomalyEmailContentBuilder {
 
   private final MetricConfigManager metricConfigManager;
   private final AlertManager alertManager;
+  private final UiConfiguration uiConfiguration;
   private final EventManager eventManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private boolean includeSentAnomaliesOnly;
+  private final boolean includeSentAnomaliesOnly;
 
-  private DateTimeZone dateTimeZone;
-  private boolean includeSummary;
+  private final DateTimeZone dateTimeZone;
+  private final boolean includeSummary;
   private Period preEventCrawlOffset;
   private Period postEventCrawlOffset;
   private String imgPath = null;
-  private NotificationContext context;
 
   @Inject
   public AnomalyEmailContentBuilder(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final AlertManager detectionConfigManager) {
+      final AlertManager detectionConfigManager,
+      final UiConfiguration uiConfiguration) {
     this.metricConfigManager = metricConfigManager;
     this.eventManager = eventManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
 
     alertManager = detectionConfigManager;
-  }
+    this.uiConfiguration = uiConfiguration;
 
-  public void init(NotificationContext context) {
-    this.context = context;
-    Properties properties = context.getProperties();
-
-    this.includeSentAnomaliesOnly = Boolean.parseBoolean(
+    final Properties properties = new Properties();
+    includeSentAnomaliesOnly = Boolean.parseBoolean(
         properties.getProperty(INCLUDE_SENT_ANOMALY_ONLY, DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
-    this.includeSummary = Boolean.parseBoolean(
+    includeSummary = Boolean.parseBoolean(
         properties.getProperty(INCLUDE_SUMMARY, DEFAULT_INCLUDE_SUMMARY));
-    this.dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
+    dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
 
-    Period defaultPeriod = Period
+    final Period defaultPeriod = Period
         .parse(properties.getProperty(EVENT_CRAWL_OFFSET, DEFAULT_EVENT_CRAWL_OFFSET));
-    this.preEventCrawlOffset = defaultPeriod;
-    this.postEventCrawlOffset = defaultPeriod;
+    preEventCrawlOffset = defaultPeriod;
+    postEventCrawlOffset = defaultPeriod;
     if (properties.getProperty(PRE_EVENT_CRAWL_OFFSET) != null) {
-      this.preEventCrawlOffset = Period.parse(properties.getProperty(PRE_EVENT_CRAWL_OFFSET));
+      preEventCrawlOffset = Period.parse(properties.getProperty(PRE_EVENT_CRAWL_OFFSET));
     }
     if (properties.getProperty(POST_EVENT_CRAWL_OFFSET) != null) {
-      this.postEventCrawlOffset = Period.parse(properties.getProperty(POST_EVENT_CRAWL_OFFSET));
+      postEventCrawlOffset = Period.parse(properties.getProperty(POST_EVENT_CRAWL_OFFSET));
     }
   }
 
@@ -139,28 +128,28 @@ public class AnomalyEmailContentBuilder {
     if (StringUtils.isNotBlank(imgPath)) {
       try {
         Files.deleteIfExists(new File(imgPath).toPath());
-      } catch (IOException e) {
+      } catch (final IOException e) {
         LOG.error("Exception in deleting screenshot {}", imgPath, e);
       }
     }
   }
 
-  private void enrichMetricInfo(Map<String, Object> templateData,
-      Collection<AnomalyResult> anomalies) {
-    Set<String> metrics = new TreeSet<>();
-    Set<String> datasets = new TreeSet<>();
+  private void enrichMetricInfo(final Map<String, Object> templateData,
+      final Collection<AnomalyResult> anomalies) {
+    final Set<String> metrics = new TreeSet<>();
+    final Set<String> datasets = new TreeSet<>();
 
-    Map<String, MetricConfigDTO> metricsMap = new TreeMap<>();
-    for (AnomalyResult anomalyResult : anomalies) {
+    final Map<String, MetricConfigDTO> metricsMap = new TreeMap<>();
+    for (final AnomalyResult anomalyResult : anomalies) {
       if (anomalyResult instanceof MergedAnomalyResultDTO) {
-        MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
+        final MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
 
         optional(mergedAnomaly.getCollection()).ifPresent(datasets::add);
 
         final String metricName = mergedAnomaly.getMetric();
         if (metricName != null) {
           metrics.add(metricName);
-          MetricConfigDTO metric = this.metricConfigManager
+          final MetricConfigDTO metric = metricConfigManager
               .findByMetricAndDataset(metricName, mergedAnomaly.getCollection());
           if (metric != null) {
             metricsMap.put(metric.getId().toString(), metric);
@@ -176,18 +165,18 @@ public class AnomalyEmailContentBuilder {
     templateData.put("metricsMap", metricsMap);
   }
 
-  private Map<String, Object> getTemplateData(SubscriptionGroupDTO notificationConfig,
-      Collection<AnomalyResult> anomalies) {
-    Map<String, Object> templateData = new HashMap<>();
+  private Map<String, Object> getTemplateData(final SubscriptionGroupDTO notificationConfig,
+      final Collection<AnomalyResult> anomalies) {
+    final Map<String, Object> templateData = new HashMap<>();
 
-    List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
+    final List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
     DateTime startTime = DateTime.now();
     DateTime endTime = new DateTime(0L);
-    for (AnomalyResult anomalyResult : anomalies) {
+    for (final AnomalyResult anomalyResult : anomalies) {
       if (anomalyResult instanceof MergedAnomalyResultDTO) {
-        MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
+        final MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
         mergedAnomalyResults.add(mergedAnomaly);
       }
       if (anomalyResult.getStartTime() < startTime.getMillis()) {
@@ -198,7 +187,7 @@ public class AnomalyEmailContentBuilder {
       }
     }
 
-    PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
+    final PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
         mergedAnomalyResults, new DummyAlertFilter(),
         mergedAnomalyResultManager);
 
@@ -236,9 +225,9 @@ public class AnomalyEmailContentBuilder {
    * @param targetDimensions the affected dimensions
    * @return a list of related events
    */
-  private List<EventDTO> getHolidayEvents(DateTime start, DateTime end,
-      Map<String, List<String>> targetDimensions) {
-    EventFilter eventFilter = new EventFilter();
+  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end,
+      final Map<String, List<String>> targetDimensions) {
+    final EventFilter eventFilter = new EventFilter();
     eventFilter.setEventType(EventType.HOLIDAY.name());
     eventFilter.setStartTime(start.minus(preEventCrawlOffset).getMillis());
     eventFilter.setEndTime(end.plus(postEventCrawlOffset).getMillis());
@@ -306,11 +295,13 @@ public class AnomalyEmailContentBuilder {
         id = config.getId();
       }
 
-      final AnomalyReportEntity anomalyReport = buildAnomalyReportEntity(
+      final AnomalyReportEntity anomalyReport = AnomalyReportEntityBuilder.buildAnomalyReportEntity(
           anomaly,
           feedbackVal,
           functionName,
-          funcDescription);
+          funcDescription,
+          dateTimeZone,
+          uiConfiguration.getExternalUrl());
 
       // dimension filters / values
       for (final Map.Entry<String, String> entry : anomaly.getDimensions().entrySet()) {
@@ -341,7 +332,7 @@ public class AnomalyEmailContentBuilder {
       try {
         imgPath = AlertScreenshotHelper
             .takeGraphScreenShot(singleAnomaly.getAnomalyId(),
-                context.getUiPublicUrl());
+                uiConfiguration.getExternalUrl());
       } catch (final Exception e) {
         LOG.error("Exception while embedding screenshot for anomaly {}",
             singleAnomaly.getAnomalyId(), e);
@@ -356,34 +347,5 @@ public class AnomalyEmailContentBuilder {
     templateData.put("functionToId", functionToId);
 
     return templateData;
-  }
-
-  private AnomalyReportEntity buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
-      final String feedbackVal, final String functionName, final String funcDescription) {
-    final Properties props = new Properties();
-    props.putAll(anomaly.getProperties());
-    final double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
-    final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-        getAnomalyURL(anomaly, context.getUiPublicUrl()),
-        getPredictedValue(anomaly),
-        getCurrentValue(anomaly),
-        getFormattedLiftValue(anomaly, lift),
-        getLiftDirection(lift),
-        0d,
-        getDimensionsList(anomaly.getDimensionMap()),
-        getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
-        feedbackVal,
-        functionName,
-        funcDescription,
-        anomaly.getMetric(),
-        getDateString(anomaly.getStartTime(), dateTimeZone),
-        getDateString(anomaly.getEndTime(), dateTimeZone),
-        getTimezoneString(dateTimeZone),
-        getIssueType(anomaly),
-        anomaly.getType().getLabel(),
-        SpiUtils.encodeCompactedProperties(props),
-        anomaly.getMetricUrn()
-    );
-    return anomalyReport;
   }
 }

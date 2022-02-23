@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +50,6 @@ public class EmailEntityBuilder {
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final NotificationContext notificationContext = new NotificationContext()
-        .setProperties(new Properties())
-        .setUiPublicUrl(uiConfig.getExternalUrl());
-    anomalyEmailContentBuilder.init(notificationContext);
-
     if (Strings.isNullOrEmpty(sg.getFrom())) {
       final String fromAddress = smtpConfig.getUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
@@ -69,7 +63,7 @@ public class EmailEntityBuilder {
     final Map<String, Object> templateData = anomalyEmailContentBuilder.format(
         sortedAnomalyResults,
         sg);
-    templateData.put("dashboardHost", notificationContext.getUiPublicUrl());
+    templateData.put("dashboardHost", uiConfig.getExternalUrl());
     return templateData;
   }
 }

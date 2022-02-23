@@ -103,27 +103,27 @@ public class AnomalyReportEntity {
   }
 
   public void setSeasonalValues(CompareMode compareMode, double seasonalValue, double current) {
-    double lift = NotificationContentUtils.getLift(current, seasonalValue);
+    double lift = AnomalyReportEntityBuilder.getLift(current, seasonalValue);
     switch (compareMode) {
       case Wo4W:
         this.wo4wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
         this.wo4wLift = String.format(PERCENTAGE_FORMAT, lift);
-        this.positiveWo4WLift = NotificationContentUtils.getLiftDirection(lift);
+        this.positiveWo4WLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       case Wo3W:
         this.wo3wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
         this.wo3wLift = String.format(PERCENTAGE_FORMAT, lift * 100);
-        this.positiveWo3WLift = NotificationContentUtils.getLiftDirection(lift);
+        this.positiveWo3WLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       case Wo2W:
         this.wo2wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
         this.wo2wLift = String.format(PERCENTAGE_FORMAT, lift * 100);
-        this.positiveWo2WLift = NotificationContentUtils.getLiftDirection(lift);
+        this.positiveWo2WLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       case WoW:
         this.wowValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
         this.wowLift = String.format(PERCENTAGE_FORMAT, lift * 100);
-        this.positiveWoWLift = NotificationContentUtils.getLiftDirection(lift);
+        this.positiveWoWLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       default:
     }

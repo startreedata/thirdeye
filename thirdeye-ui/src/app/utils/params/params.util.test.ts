@@ -18,8 +18,8 @@ import {
 
 const systemLocation = location;
 
-jest.mock("../history/history.util", () => ({
-    appHistory: {
+jest.mock("../../platform/utils", () => ({
+    historyV1: {
         replace: jest.fn().mockImplementation((locationObject) => {
             location.hash = locationObject.hash;
             location.search = locationObject.search;

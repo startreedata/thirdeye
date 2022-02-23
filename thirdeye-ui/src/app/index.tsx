@@ -13,8 +13,7 @@ import {
     AuthRedirectMethodV1,
     NotificationProviderV1,
 } from "./platform/components";
-import { lightV1 } from "./platform/utils";
-import { appHistory } from "./utils/history/history.util";
+import { historyV1, lightV1 } from "./platform/utils";
 import { initLocale } from "./utils/locale/locale.util";
 import { AppRoute } from "./utils/routes/routes.util";
 import { getClientIdFromUrl } from "./utils/url/client-id.util";
@@ -33,7 +32,7 @@ ReactDOM.render(
             <CssBaseline />
 
             {/* App rendered by a router to allow navigation using app bar */}
-            <Router history={appHistory}>
+            <Router history={historyV1}>
                 <NotificationProviderV1>
                     <AuthProviderV1
                         clientId={

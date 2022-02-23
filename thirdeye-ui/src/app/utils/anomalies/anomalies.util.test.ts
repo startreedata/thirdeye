@@ -16,19 +16,18 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../date-time/date-time.util", () => ({
-    formatDateAndTime: jest.fn().mockImplementation((date) => date.toString()),
-    formatDuration: jest
+jest.mock("../../platform/utils", () => ({
+    formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
+    formatPercentageV1: jest.fn().mockImplementation((num) => num.toString()),
+    formatDateAndTimeV1: jest
+        .fn()
+        .mockImplementation((date) => date.toString()),
+    formatDurationV1: jest
         .fn()
         .mockImplementation(
             (startTime, endTime) =>
                 `${startTime.toString()} ${endTime.toString()}`
         ),
-}));
-
-jest.mock("../number/number.util", () => ({
-    formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
-    formatPercentage: jest.fn().mockImplementation((num) => num.toString()),
 }));
 
 describe("Anomalies Util", () => {

@@ -19,8 +19,10 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../date-time/date-time.util", () => ({
-    formatDateAndTime: jest.fn().mockImplementation((date) => date.toString()),
+jest.mock("../../platform/utils/date-time/date-time.util", () => ({
+    formatDateAndTimeV1: jest
+        .fn()
+        .mockImplementation((date) => date.toString()),
 }));
 
 describe("Time Range Util", () => {

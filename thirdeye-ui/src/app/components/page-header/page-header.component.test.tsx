@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { Router } from "react-router-dom";
-import { appHistory } from "../../utils/history/history.util";
+import { historyV1 } from "../../platform/utils";
 import { TimeRangeProvider } from "../time-range/time-range-provider/time-range-provider.component";
 import { PageHeader } from "./page-header.component";
 
@@ -32,7 +32,7 @@ jest.mock("i18next", () => ({
 describe("Page Header", () => {
     it("should render passed title and time range selector", async () => {
         render(
-            <Router history={appHistory}>
+            <Router history={historyV1}>
                 <TimeRangeProvider>
                     <PageHeader showTimeRange title="Hello world" />
                 </TimeRangeProvider>
@@ -50,7 +50,7 @@ describe("Page Header", () => {
 
     it("should render without time range selector", async () => {
         render(
-            <Router history={appHistory}>
+            <Router history={historyV1}>
                 <TimeRangeProvider>
                     <PageHeader title="Hello world" />
                 </TimeRangeProvider>
@@ -72,7 +72,7 @@ describe("Page Header", () => {
 
     it("should render create menu button if showCreateButton is true", () => {
         render(
-            <Router history={appHistory}>
+            <Router history={historyV1}>
                 <TimeRangeProvider>
                     <PageHeader showCreateButton title="Hello world" />
                 </TimeRangeProvider>

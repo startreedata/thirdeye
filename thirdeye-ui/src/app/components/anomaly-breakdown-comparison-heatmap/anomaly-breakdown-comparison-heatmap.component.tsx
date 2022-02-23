@@ -20,10 +20,10 @@ import {
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { formatDateAndTimeV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
-import { formatDateAndTime } from "../../utils/date-time/date-time.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
@@ -247,9 +247,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                     Data Date Range
                                 </div>
                                 <div>
-                                    {formatDateAndTime(anomaly.startTime)}
+                                    {formatDateAndTimeV1(anomaly.startTime)}
                                     <strong> to </strong>
-                                    {formatDateAndTime(anomaly.endTime)}
+                                    {formatDateAndTimeV1(anomaly.endTime)}
                                 </div>
                             </Grid>
                             <Grid item xs={6}>
@@ -269,14 +269,14 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                     </span>
                                 </div>
                                 <div>
-                                    {formatDateAndTime(
+                                    {formatDateAndTimeV1(
                                         anomaly.startTime -
                                             OFFSET_TO_MILLISECONDS[
                                                 comparisonOffset
                                             ]
                                     )}
                                     <strong> to </strong>
-                                    {formatDateAndTime(
+                                    {formatDateAndTimeV1(
                                         anomaly.endTime -
                                             OFFSET_TO_MILLISECONDS[
                                                 comparisonOffset

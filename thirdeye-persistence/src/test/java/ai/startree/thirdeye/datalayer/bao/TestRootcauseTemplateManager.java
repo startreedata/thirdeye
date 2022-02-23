@@ -16,9 +16,8 @@ import org.testng.annotations.Test;
 
 public class TestRootcauseTemplateManager {
 
-  private RootcauseTemplateManager templateDao;
   private final static String TEMPLATE_NAME = "test_template_";
-  private final static String APPLICATION_NAME = "test-app";
+  private RootcauseTemplateManager templateDao;
 
   @BeforeMethod
   void beforeMethod() {
@@ -32,12 +31,9 @@ public class TestRootcauseTemplateManager {
     List<RootcauseTemplateDTO> res1 = templateDao.findAll();
     Assert.assertEquals(res1.size(), 1);
     Assert.assertEquals(res1.get(0).getName(), TEMPLATE_NAME + 1);
-    Assert.assertEquals(res1.get(0).getApplication(), APPLICATION_NAME);
-    template.setApplication(APPLICATION_NAME + "-1");
     templateDao.saveOrUpdate(template);
     List<RootcauseTemplateDTO> res2 = templateDao.findAll();
     Assert.assertEquals(res2.size(), 1);
-    Assert.assertEquals(res2.get(0).getApplication(), APPLICATION_NAME + "-1");
   }
 
   @Test
@@ -57,7 +53,6 @@ public class TestRootcauseTemplateManager {
     RootcauseTemplateDTO rootcauseTemplateDTO = new RootcauseTemplateDTO();
     rootcauseTemplateDTO.setName(TEMPLATE_NAME + metricId);
     rootcauseTemplateDTO.setOwner("tester");
-    rootcauseTemplateDTO.setApplication(APPLICATION_NAME);
     rootcauseTemplateDTO.setMetricId(metricId);
     rootcauseTemplateDTO.setModules(new ArrayList<>());
     return rootcauseTemplateDTO;

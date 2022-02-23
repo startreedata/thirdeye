@@ -13,7 +13,6 @@ import ai.startree.thirdeye.datalayer.bao.AlertSnapshotManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalyFunctionManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.ApplicationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DataSourceManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DetectionStatusManagerImpl;
@@ -35,7 +34,6 @@ import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AlertTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
-import ai.startree.thirdeye.datalayer.entity.ApplicationIndex;
 import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
@@ -60,7 +58,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.ApplicationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
@@ -97,7 +94,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       AlertTemplateIndex.class,
       AnomalyFeedbackIndex.class,
       AnomalySubscriptionGroupNotificationIndex.class,
-      ApplicationIndex.class,
       DataSourceIndex.class,
       DatasetConfigIndex.class,
       DetectionAlertConfigIndex.class,
@@ -149,7 +145,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
         .in(Scopes.SINGLETON);
     bind(OnboardDatasetMetricManager.class).to(OnboardDatasetMetricManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(ApplicationManager.class).to(ApplicationManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertSnapshotManager.class).to(AlertSnapshotManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseSessionManager.class).to(RootcauseSessionManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)

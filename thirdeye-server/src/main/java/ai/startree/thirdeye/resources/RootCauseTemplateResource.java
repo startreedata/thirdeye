@@ -47,7 +47,6 @@ public class RootCauseTemplateResource {
 
   private final static String DIM_ANALYSIS_TEMPLATE_NAME_PREFIX = "dim_analysis::";
   private final static String DIM_ANALYSIS_MODULE_NAME_PREFIX = "dim_analysis::";
-  private final static String POC_APPLICATION = "thirdeye-poc";
   private final static String RCA_MODULE_NAME = "name";
   private final static String RCA_MODULE_CONFIG = "configuration";
 
@@ -117,7 +116,6 @@ public class RootCauseTemplateResource {
     rootcauseTemplateDTO.setName(templateName);
     rootcauseTemplateDTO.setOwner(username);
     rootcauseTemplateDTO.setMetricId(metricEntity.getId());
-    rootcauseTemplateDTO.setApplication(POC_APPLICATION);
     List<Map<String, Object>> modules = new ArrayList<>();
     Map<String, Object> dimAnalysisModule = new HashMap<>();
     dimAnalysisModule

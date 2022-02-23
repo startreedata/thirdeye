@@ -31,7 +31,6 @@ public class SubscriptionUtils {
     subsConfig.setActive(parentConfig.isActive());
     subsConfig.setOwners(parentConfig.getOwners());
     subsConfig.setYaml(parentConfig.getYaml());
-    subsConfig.setApplication(parentConfig.getApplication());
     subsConfig.setName(parentConfig.getName());
     subsConfig.setSubjectType(parentConfig.getSubjectType());
     subsConfig.setProperties(parentConfig.getProperties());

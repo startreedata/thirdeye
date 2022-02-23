@@ -19,10 +19,8 @@ import ai.startree.thirdeye.detection.alert.DetectionAlertFilterNotification;
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionAlertRegistry;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.ApplicationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
@@ -56,17 +54,15 @@ public class DimensionsRecipientAlertFilterTest {
   private static final List<String> PROP_TO_FOR_ANOTHER_VALUE =
       Arrays.asList("myTest@example.net");
   private static final List<Map<String, Object>> PROP_DIMENSION_RECIPIENTS_VALUE = new ArrayList<>();
-
+  private static List<Long> PROP_ID_VALUE;
   private DetectionAlertFilter alertFilter;
   private MockDataProvider provider;
   private SubscriptionGroupDTO alertConfig;
   private TestDbEnv testDAOProvider;
-
   private long detectionConfigId1;
   private long detectionConfigId2;
   private long detectionConfigId3;
   private List<MergedAnomalyResultDTO> detectedAnomalies;
-  private static List<Long> PROP_ID_VALUE;
   private long baseTime;
 
   @BeforeMethod
@@ -75,12 +71,6 @@ public class DimensionsRecipientAlertFilterTest {
 
     DetectionAlertRegistry.getInstance().registerAlertFilter("DIMENSIONS_ALERTER_PIPELINE",
         DimensionsRecipientAlertFilter.class.getName());
-
-    ApplicationManager appDAO = TestDbEnv.getInstance().getApplicationDAO();
-    ApplicationDTO app = new ApplicationDTO();
-    app.setApplication("test_application");
-    app.setRecipients("test@thirdeye.com");
-    appDAO.save(app);
 
     AlertManager detDAO = TestDbEnv.getInstance().getDetectionConfigManager();
     AlertDTO detectionConfig1 = new AlertDTO();
@@ -177,10 +167,10 @@ public class DimensionsRecipientAlertFilterTest {
     SubscriptionGroupDTO alertConfig = new SubscriptionGroupDTO();
 
     alertConfig.setNotificationSchemes(new NotificationSchemesDto()
-    .setEmailScheme(new EmailSchemeDto()
-    .setTo(PROP_TO_VALUE)
-    .setCc(PROP_CC_VALUE)
-    .setBcc(PROP_BCC_VALUE)));
+        .setEmailScheme(new EmailSchemeDto()
+            .setTo(PROP_TO_VALUE)
+            .setCc(PROP_CC_VALUE)
+            .setBcc(PROP_BCC_VALUE)));
 
     Map<String, Object> properties = new HashMap<>();
 
@@ -207,7 +197,7 @@ public class DimensionsRecipientAlertFilterTest {
   public void testAlertFilterRecipients() throws Exception {
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
         this.baseTime + 350L, TestDbEnv.getInstance()
-            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
+        .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
 
     // Send anomalies on un-configured dimensions to default recipients
@@ -256,7 +246,7 @@ public class DimensionsRecipientAlertFilterTest {
         .put(PROP_DETECTION_CONFIG_IDS, Collections.singletonList(detectionConfigId2));
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
         this.baseTime + 250L, TestDbEnv.getInstance()
-            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
+        .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
 
     // Check if there are 2 anomalies in this window
     DetectionAlertFilterResult result = this.alertFilter.run();
@@ -310,7 +300,7 @@ public class DimensionsRecipientAlertFilterTest {
 
     this.alertFilter = new DimensionsRecipientAlertFilter(provider, alertConfig,
         System.currentTimeMillis(), TestDbEnv.getInstance()
-            .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
+        .getMergedAnomalyResultDAO(), TestDbEnv.getInstance().getDetectionConfigManager());
     DetectionAlertFilterResult result = this.alertFilter.run();
     Assert.assertEquals(result.getResult().size(), 2);
 

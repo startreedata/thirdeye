@@ -7,7 +7,6 @@ package ai.startree.thirdeye.datasource;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.ApplicationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
@@ -26,7 +25,6 @@ public class DAORegistry {
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
   private final EventManager eventManager;
-  private final ApplicationManager applicationManager;
   private final AlertManager alertManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EvaluationManager evaluationManager;
@@ -39,7 +37,6 @@ public class DAORegistry {
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
-      final ApplicationManager applicationManager,
       final AlertManager alertManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EvaluationManager evaluationManager,
@@ -49,7 +46,6 @@ public class DAORegistry {
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
     this.eventManager = eventManager;
-    this.applicationManager = applicationManager;
     this.alertManager = alertManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.evaluationManager = evaluationManager;
@@ -74,10 +70,6 @@ public class DAORegistry {
 
   public EventManager getEventDAO() {
     return eventManager;
-  }
-
-  public ApplicationManager getApplicationDAO() {
-    return applicationManager;
   }
 
   public AlertManager getDetectionConfigManager() {

@@ -14,7 +14,6 @@ public class RootcauseTemplateDTO extends AbstractDTO {
 
   String name;
   String owner;
-  String application;
   long metricId;
   List<Map<String, Object>> modules;
 
@@ -32,14 +31,6 @@ public class RootcauseTemplateDTO extends AbstractDTO {
 
   public void setOwner(String owner) {
     this.owner = owner;
-  }
-
-  public String getApplication() {
-    return application;
-  }
-
-  public void setApplication(String application) {
-    this.application = application;
   }
 
   public long getMetricId() {

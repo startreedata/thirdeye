@@ -248,16 +248,6 @@ CREATE INDEX onboard_datasource_idx ON onboard_dataset_metric_index (data_source
 CREATE INDEX onboard_onboarded_idx ON onboard_dataset_metric_index (onboarded);
 CREATE INDEX onboard_dataset_metric_base_id_idx ON onboard_dataset_metric_index (base_id);
 
-CREATE TABLE application_index
-(
-    base_id     bigint(20)    NOT NULL,
-    create_time timestamp,
-    update_time timestamp DEFAULT CURRENT_TIMESTAMP,
-    application VARCHAR(200)  NOT NULL,
-    recipients  VARCHAR(1000) NOT NULL
-);
-CREATE INDEX application_application_idx ON application_index (application);
-
 CREATE TABLE IF NOT EXISTS rootcause_session_index
 (
     base_id             bigint(20) NOT NULL,
@@ -314,7 +304,6 @@ CREATE INDEX detection_config_created_by_index ON detection_config_index (create
 CREATE TABLE IF NOT EXISTS detection_alert_config_index
 (
     base_id     bigint(20)   NOT NULL,
-    application VARCHAR(128),
     `name`      VARCHAR(256) NOT NULL,
     create_time timestamp,
     update_time timestamp DEFAULT CURRENT_TIMESTAMP,
@@ -324,7 +313,6 @@ ALTER TABLE `detection_alert_config_index`
     ADD UNIQUE `detection_alert_config_unique_index` (`name`);
 CREATE INDEX detection_alert_config_base_id_idx ON detection_alert_config_index (base_id);
 CREATE INDEX detection_alert_config_name_idx ON detection_alert_config_index (`name`);
-CREATE INDEX detection_alert_config_application_idx ON detection_alert_config_index (`application`);
 
 CREATE TABLE IF NOT EXISTS evaluation_index
 (
@@ -348,7 +336,6 @@ CREATE TABLE IF NOT EXISTS rootcause_template_index
 (
     base_id     bigint(20)   NOT NULL,
     `name`      VARCHAR(256) NOT NULL,
-    application VARCHAR(128),
     owner       varchar(32)  NOT NULL,
     metric_id   bigint(20)   NOT NULL,
     create_time timestamp,
@@ -360,7 +347,6 @@ ALTER TABLE `rootcause_template_index`
 CREATE INDEX rootcause_template_id_idx ON rootcause_template_index (base_id);
 CREATE INDEX rootcause_template_owner_idx ON rootcause_template_index (owner);
 CREATE INDEX rootcause_template_metric_idx ON rootcause_template_index (metric_id);
-CREATE INDEX rootcause_template_config_application_idx ON rootcause_template_index (`application`);
 
 CREATE TABLE IF NOT EXISTS online_detection_data_index
 (

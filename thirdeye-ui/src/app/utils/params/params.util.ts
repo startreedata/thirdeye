@@ -5,7 +5,7 @@ import {
     TimeRangeDuration,
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { appHistory } from "../history/history.util";
+import { historyV1 } from "../../platform/utils";
 import { createTimeRangeDuration } from "../time-range/time-range.util";
 
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
@@ -103,7 +103,7 @@ export const setQueryString = (key: string, value: string): void => {
     urlSearchParams.set(key, value);
 
     // Update URL
-    appHistory.replace({
+    historyV1.replace({
         search: urlSearchParams.toString(),
     });
 };

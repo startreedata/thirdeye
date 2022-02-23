@@ -266,7 +266,3 @@ data:
               trustStoreFilePath: 'trust/store/path/truststore_file' # e.g. '/etc/riddler/cacerts'
               trustStorePassword: ''
           # add your store of choice here
-
-  {{- if .Values.config.holidayLoaderKey }}
-  holiday-loader-key.json: {{ .Values.config.holidayLoaderKey | toPrettyJson }}
-  {{- end }}

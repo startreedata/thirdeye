@@ -73,17 +73,6 @@ describe("Alerts Router", () => {
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
     });
 
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <AlertsRouter />
-            </MemoryRouter>
-        );
-
-        // Also invoke the click handlers
-        expect(mockNavigate).toHaveBeenCalledWith("testAlertsPath");
-    });
-
     it("should render alerts all page at exact alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>

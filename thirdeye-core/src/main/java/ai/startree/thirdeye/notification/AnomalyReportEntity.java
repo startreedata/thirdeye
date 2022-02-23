@@ -3,10 +3,10 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.content;
+package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent.PERCENTAGE_FORMAT;
-import static ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent.RAW_VALUE_FORMAT;
+import static ai.startree.thirdeye.notification.AnomalyEmailContentBuilder.PERCENTAGE_FORMAT;
+import static ai.startree.thirdeye.notification.AnomalyEmailContentBuilder.RAW_VALUE_FORMAT;
 
 import ai.startree.thirdeye.spi.Constants.CompareMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

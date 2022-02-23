@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.formatter;
+package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import java.util.HashSet;

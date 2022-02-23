@@ -14,7 +14,7 @@ import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
-import ai.startree.thirdeye.notification.formatter.DetectionConfigFormatter;
+import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;

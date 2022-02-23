@@ -3,20 +3,20 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.content.templates;
+package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getAnomalyURL;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getCurrentValue;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDateString;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDimensionsList;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFeedbackValue;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFormattedLiftValue;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getIssueType;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLift;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLiftDirection;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getPredictedValue;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimeDiffInHours;
-import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimezoneString;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getAnomalyURL;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getCurrentValue;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getDateString;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getDimensionsList;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getFeedbackValue;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getFormattedLiftValue;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getIssueType;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getLift;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getLiftDirection;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getPredictedValue;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getTimeDiffInHours;
+import static ai.startree.thirdeye.notification.NotificationContentUtils.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
@@ -24,8 +24,6 @@ import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
 import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
-import ai.startree.thirdeye.notification.NotificationContext;
-import ai.startree.thirdeye.notification.content.AnomalyReportEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -69,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * This email formatter lists the anomalies by their functions or metric.
  */
 @Singleton
-public class MetricAnomaliesContent {
+public class AnomalyEmailContentBuilder {
 
   /*  The Event Crawl Offset takes the standard period format, ex: P1D for 1 day, P1W for 1 week
     Y: years     M: months              W: weeks
@@ -88,7 +86,7 @@ public class MetricAnomaliesContent {
   public static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
   public static final String RAW_VALUE_FORMAT = "%.0f";
   public static final String PERCENTAGE_FORMAT = "%.2f %%";
-  private static final Logger LOG = LoggerFactory.getLogger(MetricAnomaliesContent.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AnomalyEmailContentBuilder.class);
 
   private final MetricConfigManager metricConfigManager;
   private final AlertManager alertManager;
@@ -104,7 +102,7 @@ public class MetricAnomaliesContent {
   private NotificationContext context;
 
   @Inject
-  public MetricAnomaliesContent(final MetricConfigManager metricConfigManager,
+  public AnomalyEmailContentBuilder(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {

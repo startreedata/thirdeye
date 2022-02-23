@@ -12,7 +12,6 @@ public class ApiResource {
 
   private final AuthResource authResource;
   private final AuthInfoResource authInfoResource;
-  private final ApplicationResource applicationResource;
   private final DataSourceResource dataSourceResource;
   private final DatasetResource datasetResource;
   private final MetricResource metricResource;
@@ -28,7 +27,6 @@ public class ApiResource {
   @Inject
   public ApiResource(final AuthResource authResource,
       final AuthInfoResource authInfoResource,
-      final ApplicationResource applicationResource,
       final DataSourceResource dataSourceResource,
       final DatasetResource datasetResource,
       final MetricResource metricResource,
@@ -42,7 +40,6 @@ public class ApiResource {
       final TaskResource taskResource) {
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
-    this.applicationResource = applicationResource;
     this.dataSourceResource = dataSourceResource;
     this.datasetResource = datasetResource;
     this.metricResource = metricResource;
@@ -64,11 +61,6 @@ public class ApiResource {
   @Path("info")
   public AuthInfoResource getAuthInfoResource() {
     return authInfoResource;
-  }
-
-  @Path("applications")
-  public ApplicationResource getApplicationResource() {
-    return applicationResource;
   }
 
   @Path("data-sources")

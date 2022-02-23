@@ -11,7 +11,7 @@ import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import ai.startree.thirdeye.notification.formatter.DetectionConfigFormatter;
+import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;

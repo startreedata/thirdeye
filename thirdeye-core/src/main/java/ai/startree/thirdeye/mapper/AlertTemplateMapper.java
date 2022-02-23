@@ -10,7 +10,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses={DatasetMapper.class, MetricMapper.class})
 public interface AlertTemplateMapper {
 
   AlertTemplateMapper INSTANCE = Mappers.getMapper(AlertTemplateMapper.class);
@@ -18,4 +18,5 @@ public interface AlertTemplateMapper {
   AlertTemplateDTO toBean(AlertTemplateApi api);
 
   AlertTemplateApi toApi(AlertTemplateDTO dto);
+
 }

@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { cloneDeep, isEmpty } from "lodash";
+import { formatNumberV1 } from "../../platform/utils";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
@@ -9,7 +10,6 @@ import {
     UiSubscriptionGroup,
     UiSubscriptionGroupAlert,
 } from "../../rest/dto/ui-subscription-group.interfaces";
-import { formatNumber } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
@@ -31,9 +31,9 @@ export const createEmptyUiSubscriptionGroup = (): UiSubscriptionGroup => {
         name: i18n.t("label.no-data-marker"),
         cron: i18n.t("label.no-data-marker"),
         alerts: [],
-        alertCount: formatNumber(0),
+        alertCount: formatNumberV1(0),
         emails: [],
-        emailCount: formatNumber(0),
+        emailCount: formatNumberV1(0),
         subscriptionGroup: null,
     };
 };
@@ -204,7 +204,7 @@ const getUiSubscriptionGroupInternal = (
         (alertsToSubscriptionGroupIdsMap &&
             alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id)) ||
         [];
-    uiSubscriptionGroup.alertCount = formatNumber(
+    uiSubscriptionGroup.alertCount = formatNumberV1(
         uiSubscriptionGroup.alerts.length
     );
 
@@ -214,7 +214,7 @@ const getUiSubscriptionGroupInternal = (
             subscriptionGroup.notificationSchemes.email &&
             subscriptionGroup.notificationSchemes.email.to) ||
         [];
-    uiSubscriptionGroup.emailCount = formatNumber(
+    uiSubscriptionGroup.emailCount = formatNumberV1(
         uiSubscriptionGroup.emails.length
     );
 

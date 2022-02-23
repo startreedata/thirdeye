@@ -8,9 +8,9 @@ import {
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { formatLargeNumberV1 } from "../../../platform/utils";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { useCommonStyles } from "../../../utils/material-ui/common.styles";
-import { formatLargeNumber } from "../../../utils/number/number.util";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
 import {
@@ -32,7 +32,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
     let contributionChangeColorClass;
 
     if (props.extraData) {
-        metricValueDiffDisplay = formatLargeNumber(
+        metricValueDiffDisplay = formatLargeNumberV1(
             props.extraData.metricValueDiff
         );
 
@@ -111,7 +111,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 className={
                                     dimensionHeatmapTooltipStyles.dataDisplayText
                                 }
-                                primary={`${formatLargeNumber(
+                                primary={`${formatLargeNumberV1(
                                     props.extraData.current
                                 )}`}
                                 primaryTypographyProps={{
@@ -138,7 +138,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 className={
                                     dimensionHeatmapTooltipStyles.dataDisplayText
                                 }
-                                primary={`${formatLargeNumber(
+                                primary={`${formatLargeNumberV1(
                                     props.extraData.baseline
                                 )}`}
                                 primaryTypographyProps={{
@@ -202,7 +202,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 className={
                                     dimensionHeatmapTooltipStyles.dataDisplayText
                                 }
-                                primary={`${formatLargeNumber(
+                                primary={`${formatLargeNumberV1(
                                     props.extraData
                                         .currentContributionPercentage * 100
                                 )}%`}
@@ -230,7 +230,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                                 className={
                                     dimensionHeatmapTooltipStyles.dataDisplayText
                                 }
-                                primary={`${formatLargeNumber(
+                                primary={`${formatLargeNumberV1(
                                     props.extraData
                                         .baselineContributionPercentage * 100
                                 )}%`}
@@ -254,7 +254,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                             />
                             <ListItemText
                                 className={`${dimensionHeatmapTooltipStyles.dataDisplayText} ${contributionChangeColorClass}`}
-                                primary={`${formatLargeNumber(
+                                primary={`${formatLargeNumberV1(
                                     props.extraData.contributionDiff * 100
                                 )}%`}
                                 primaryTypographyProps={{

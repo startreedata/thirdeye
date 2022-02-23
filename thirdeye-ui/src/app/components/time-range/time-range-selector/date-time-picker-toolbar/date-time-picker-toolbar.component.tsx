@@ -4,14 +4,14 @@ import classnames from "classnames";
 import { DateTime } from "luxon";
 import React, { FunctionComponent } from "react";
 import {
-    formatDay,
-    formatHour,
-    formatMeridiem,
-    formatMinute,
-    formatMonth,
-    formatYear,
-    switchMeridiem,
-} from "../../../../utils/date-time/date-time.util";
+    formatDayV1,
+    formatHourV1,
+    formatMeridiemV1,
+    formatMinuteV1,
+    formatMonthV1,
+    formatYearV1,
+    switchMeridiemV1,
+} from "../../../../platform/utils";
 import { useDateTimePickerToolbarStyles } from "./date-time-picker-toolbar.styles";
 
 export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
@@ -46,7 +46,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
 
         props.onChange &&
             props.onChange(
-                DateTime.fromMillis(switchMeridiem(props.date.toMillis()))
+                DateTime.fromMillis(switchMeridiemV1(props.date.toMillis()))
             );
     };
 
@@ -67,7 +67,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleMonthClick}
             >
-                {props.date && formatMonth(props.date.toMillis())}
+                {props.date && formatMonthV1(props.date.toMillis())}
             </Link>
 
             {/* Day */}
@@ -79,7 +79,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleDayClick}
             >
-                {props.date && formatDay(props.date.toMillis())}
+                {props.date && formatDayV1(props.date.toMillis())}
             </Link>
 
             {/* Year */}
@@ -91,7 +91,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleYearClick}
             >
-                {props.date && formatYear(props.date.toMillis())}
+                {props.date && formatYearV1(props.date.toMillis())}
             </Link>
 
             {/* Hour */}
@@ -107,7 +107,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleHourClick}
             >
-                {props.date && formatHour(props.date.toMillis())}
+                {props.date && formatHourV1(props.date.toMillis())}
             </Link>
 
             {/* Minute */}
@@ -119,7 +119,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleMinuteClick}
             >
-                {props.date && formatMinute(props.date.toMillis())}
+                {props.date && formatMinuteV1(props.date.toMillis())}
             </Link>
 
             {/* Meridiem */}
@@ -128,7 +128,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleMeridiemClick}
             >
-                {props.date && formatMeridiem(props.date.toMillis())}
+                {props.date && formatMeridiemV1(props.date.toMillis())}
             </Link>
         </Toolbar>
     );

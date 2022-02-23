@@ -9,7 +9,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import com.google.common.base.Strings;
@@ -18,7 +17,6 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +30,13 @@ public class EmailEntityBuilder {
 
   private final SmtpConfiguration smtpConfig;
   private final UiConfiguration uiConfig;
-  private final MetricAnomaliesContent metricAnomaliesContent;
+  private final AnomalyEmailContentBuilder anomalyEmailContentBuilder;
 
   @Inject
   public EmailEntityBuilder(final UiConfiguration uiConfig,
-      final MetricAnomaliesContent metricAnomaliesContent,
+      final AnomalyEmailContentBuilder anomalyEmailContentBuilder,
       final NotificationConfiguration notificationConfiguration) {
-    this.metricAnomaliesContent = metricAnomaliesContent;
+    this.anomalyEmailContentBuilder = anomalyEmailContentBuilder;
     this.uiConfig = uiConfig;
 
     smtpConfig = notificationConfiguration.getSmtpConfiguration();
@@ -52,11 +50,6 @@ public class EmailEntityBuilder {
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalyResults);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final NotificationContext notificationContext = new NotificationContext()
-        .setProperties(new Properties())
-        .setUiPublicUrl(uiConfig.getExternalUrl());
-    metricAnomaliesContent.init(notificationContext);
-
     if (Strings.isNullOrEmpty(sg.getFrom())) {
       final String fromAddress = smtpConfig.getUser();
       if (Strings.isNullOrEmpty(fromAddress)) {
@@ -67,10 +60,10 @@ public class EmailEntityBuilder {
       sg.setFrom(fromAddress);
     }
 
-    final Map<String, Object> templateData = metricAnomaliesContent.format(
+    final Map<String, Object> templateData = anomalyEmailContentBuilder.format(
         sortedAnomalyResults,
         sg);
-    templateData.put("dashboardHost", notificationContext.getUiPublicUrl());
+    templateData.put("dashboardHost", uiConfig.getExternalUrl());
     return templateData;
   }
 }

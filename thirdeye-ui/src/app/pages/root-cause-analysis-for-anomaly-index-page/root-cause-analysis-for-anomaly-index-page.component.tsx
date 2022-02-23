@@ -5,9 +5,9 @@ import { useTimeRange } from "../../components/time-range/time-range-provider/ti
 import { TimeRange } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
-import { WEEK_IN_MILLISECONDS } from "../../utils/date-time/date-time.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getRootCauseAnalysisForAnomalyPath } from "../../utils/routes/routes.util";
+import { WEEK_IN_MILLISECONDS } from "../../utils/time/time.util";
 import { AnomaliesViewPageParams } from "../anomalies-view-page/anomalies-view-page.interfaces";
 
 export const RootCauseAnalysisForAnomalyIndexPage: FunctionComponent = () => {

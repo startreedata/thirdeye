@@ -18,7 +18,6 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   private Boolean active;
   private String type;
 
-  private ApplicationApi application;
   private List<AlertApi> alerts;
   private String cron;
 
@@ -62,16 +61,6 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
 
   public SubscriptionGroupApi setName(final String name) {
     this.name = name;
-    return this;
-  }
-
-  public ApplicationApi getApplication() {
-    return application;
-  }
-
-  public SubscriptionGroupApi setApplication(
-      final ApplicationApi application) {
-    this.application = application;
     return this;
   }
 

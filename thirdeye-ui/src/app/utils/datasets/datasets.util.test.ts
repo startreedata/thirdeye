@@ -12,10 +12,6 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../number/number.util", () => ({
-    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
-}));
-
 describe("Datasets Util", () => {
     it("createEmptyUiDataset should create appropriate UI dataset", () => {
         expect(createEmptyUiDataset()).toEqual(mockEmptyUiDataset);

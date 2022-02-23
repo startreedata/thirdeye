@@ -24,21 +24,18 @@ import {
 const systemLocale = Settings.defaultLocale;
 const systemZoneName = Settings.defaultZoneName;
 
-jest.mock("../number/number.util", () => ({
-    formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
-}));
-
-jest.mock("../date-time/date-time.util", () => ({
-    formatYear: jest
+jest.mock("../../platform/utils", () => ({
+    formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
+    formatYearV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}year`),
-    formatMonthOfYear: jest
+    formatMonthOfYearV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}monthOfYear`),
-    formatDate: jest
+    formatDateV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}date`),
-    formatTime: jest
+    formatTimeV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}time`),
 }));

@@ -24,7 +24,6 @@ public class SubscriptionGroupDTO extends AbstractDTO {
   String name;
   String from;
   String cronExpression;
-  String application;
   String yaml;
   String type;
 
@@ -72,15 +71,6 @@ public class SubscriptionGroupDTO extends AbstractDTO {
 
   public SubscriptionGroupDTO setCronExpression(final String cronExpression) {
     this.cronExpression = cronExpression;
-    return this;
-  }
-
-  public String getApplication() {
-    return application;
-  }
-
-  public SubscriptionGroupDTO setApplication(final String application) {
-    this.application = application;
     return this;
   }
 
@@ -183,7 +173,6 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     return active == that.active && Objects.equal(name, that.name)
         && Objects.equal(from, that.from)
         && Objects.equal(cronExpression, that.cronExpression)
-        && Objects.equal(application, that.application)
         && Objects.equal(yaml, that.yaml)
         && Objects.equal(type, that.type)
         && Objects.equal(notificationSchemes, that.notificationSchemes)
@@ -201,7 +190,6 @@ public class SubscriptionGroupDTO extends AbstractDTO {
         name,
         from,
         cronExpression,
-        application,
         yaml,
         type,
         notificationSchemes,

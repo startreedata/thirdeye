@@ -11,7 +11,6 @@ import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.AlertTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
-import ai.startree.thirdeye.datalayer.entity.ApplicationIndex;
 import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
@@ -35,7 +34,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.ApplicationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -74,7 +72,6 @@ public class SubEntities {
         .put(AnomalyFeedbackDTO.class, AnomalyFeedbackIndex.class)
         .put(AnomalySubscriptionGroupNotificationDTO.class,
             AnomalySubscriptionGroupNotificationIndex.class)
-        .put(ApplicationDTO.class, ApplicationIndex.class)
         .put(DataSourceDTO.class, DataSourceIndex.class)
         .put(DatasetConfigDTO.class, DatasetConfigIndex.class)
         .put(DetectionStatusDTO.class, DetectionStatusIndex.class)
@@ -101,7 +98,6 @@ public class SubEntities {
         .put(AnomalyFeedbackDTO.class, SubEntityType.ANOMALY_FEEDBACK)
         .put(AnomalySubscriptionGroupNotificationDTO.class,
             SubEntityType.ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
-        .put(ApplicationDTO.class, SubEntityType.APPLICATION)
         .put(DataSourceDTO.class, SubEntityType.DATA_SOURCE)
         .put(DatasetConfigDTO.class, SubEntityType.DATASET)
         .put(DetectionStatusDTO.class, SubEntityType.DETECTION_STATUS)

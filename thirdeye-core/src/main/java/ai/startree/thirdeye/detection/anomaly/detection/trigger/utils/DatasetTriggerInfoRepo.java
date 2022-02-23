@@ -6,7 +6,7 @@
 package ai.startree.thirdeye.detection.anomaly.detection.trigger.utils;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
-import ai.startree.thirdeye.notification.formatter.DetectionConfigFormatter;
+import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;

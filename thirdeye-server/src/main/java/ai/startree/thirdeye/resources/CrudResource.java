@@ -80,12 +80,12 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
     final DtoT updated = toDto(api);
 
-    // Override system fields.
-    updated.setId(existing.getId());
-    updateGateKeeper(principal, updated);
-
     // Allow downstream classes to process any additional changes
     prepareUpdatedDto(principal, existing, updated);
+
+    // Override system fields.
+    updated.setId(id);
+    updateGateKeeper(principal, existing, updated);
 
     // ready to be persisted to db.
     return updated;
@@ -100,10 +100,12 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     return dto;
   }
 
-  private DtoT updateGateKeeper(final ThirdEyePrincipal principal, final DtoT dto){
-    dto.setUpdatedBy(principal.getName())
+  private DtoT updateGateKeeper(final ThirdEyePrincipal principal, final DtoT existing, final DtoT updated){
+    updated.setCreatedBy(existing.getCreatedBy())
+      .setCreateTime(existing.getCreateTime())
+      .setUpdatedBy(principal.getName())
       .setUpdateTime(new Timestamp(new Date().getTime()));
-    return dto;
+    return updated;
   }
 
   /**

@@ -77,6 +77,8 @@ export function DataGridV1<T>({
     onSelectionChange,
     searchAndSelectionTextFn,
     onRowExpand,
+    searchFilterValue,
+    onSearchFilterValueChange,
     ...otherProps
 }: DataGridV1Props<T>): ReactElement {
     const dataGridV1Classes = useDataGridV1Styles();
@@ -84,7 +86,7 @@ export function DataGridV1<T>({
     const [searchDataKeysInternal, setSearchDataKeysInternal] = useState<
         string[]
     >([]);
-    const [searchValue, setSearchValue] = useState("");
+    const [searchValue, setSearchValue] = useState(searchFilterValue || "");
     const [filteredData, setFilteredData] = useState<T[]>([]);
     const [sortState, setSortState] = useState<DataGridSortStateV1>(
         initialSortState || ({} as DataGridSortStateV1)
@@ -828,6 +830,11 @@ export function DataGridV1<T>({
         rowKeyValueMap,
     ]);
 
+    const onSearchInputChange = (value: string): void => {
+        onSearchFilterValueChange && onSearchFilterValueChange(value);
+        setSearchValue(value);
+    };
+
     return (
         <Box
             {...otherProps}
@@ -893,7 +900,7 @@ export function DataGridV1<T>({
                                     className="data-grid-v1-search-input"
                                     placeholder={searchPlaceholder}
                                     value={searchValue}
-                                    onChange={setSearchValue}
+                                    onChange={onSearchInputChange}
                                     onChangeDelay={searchDelay}
                                 />
                             </div>

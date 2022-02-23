@@ -134,6 +134,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             columns={anomalyListColumns}
             data={props.anomalies as UiAnomaly[]}
             rowKey="id"
+            searchFilterValue={props.searchFilterValue}
             searchPlaceholder={t("label.search-entity", {
                 entity: t("label.anomalies"),
             })}
@@ -147,6 +148,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                     {t("label.delete")}
                 </Button>
             }
+            onSearchFilterValueChange={props.onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}
         />
     );

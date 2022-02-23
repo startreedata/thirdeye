@@ -10,6 +10,8 @@ export interface DataGridV1Props<T> {
     searchDataKeys?: string[]; // Properties of data object to search and filter, defaults to all the string/number/boolean type data object properties rendered in cells
     searchPlaceholder?: string; // Placeholder for search input
     searchDelay?: number; // Delay in milliseconds before search triggers
+    searchFilterValue?: string | null;
+    onSearchFilterValueChange?: (value: string) => void;
     disableSearch?: boolean;
     toolbarComponent?: ReactNode; // Toolbar items
     hideToolbar?: boolean;

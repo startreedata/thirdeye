@@ -1,6 +1,7 @@
 import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
@@ -21,7 +22,10 @@ import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
 
+const SEARCH_TERM_QUERY_PARAM_KEY = "searchTerm";
+
 export const AnomaliesAllPage: FunctionComponent = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
@@ -80,6 +84,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         );
     };
 
+    const onSearchFilterValueChange = (value: string): void => {
+        if (value) {
+            searchParams.set(SEARCH_TERM_QUERY_PARAM_KEY, value);
+        } else {
+            searchParams.delete(SEARCH_TERM_QUERY_PARAM_KEY);
+        }
+        setSearchParams(searchParams);
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -94,7 +107,13 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                         {/* Anomaly list */}
                         <AnomalyListV1
                             anomalies={uiAnomalies}
+                            searchFilterValue={searchParams.get(
+                                SEARCH_TERM_QUERY_PARAM_KEY
+                            )}
                             onDelete={handleAnomalyDelete}
+                            onSearchFilterValueChange={
+                                onSearchFilterValueChange
+                            }
                         />
                     </PageContentsCardV1>
                 </Grid>

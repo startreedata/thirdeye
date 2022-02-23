@@ -330,7 +330,8 @@ public class DatasetConfigDTO extends AbstractDTO {
           getNonAdditiveBucketSize() != null ? getNonAdditiveBucketSize() : getTimeDuration();
       TimeUnit timeUnit =
           getNonAdditiveBucketUnit() != null ? getNonAdditiveBucketUnit() : getTimeUnit();
-      bucketTimeGranularity = (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit): null;
+      bucketTimeGranularity =
+          (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit) : null;
     }
     return bucketTimeGranularity;
   }

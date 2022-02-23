@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,9 +35,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class SqlQueryBuilder {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SqlQueryBuilder.class);
 
   private static final String BASE_ID = "base_id";
   private static final String NAME_REGEX = "[a-z][_a-z0-9]*";
@@ -375,8 +380,9 @@ public class SqlQueryBuilder {
       case IN:
         Object rhs = predicate.getRhs();
         if (rhs != null) {
-          if(!rhs.getClass().isArray())
+          if (!rhs.getClass().isArray()) {
             rhs = rhs.toString().split(",");
+          }
           whereClause.append(columnName).append(" ").append(Predicate.OPER.IN.toString())
               .append("(");
           delim = "";
@@ -469,8 +475,15 @@ public class SqlQueryBuilder {
     LinkedHashMap<String, Object> parameterMap = new LinkedHashMap<>();
     for (ColumnInfo columnInfo : columnInfoMap.values()) {
       String columnNameInDB = columnInfo.columnNameInDB;
-      if (!columnNameInDB.equalsIgnoreCase(BASE_ID) && !AUTO_UPDATE_COLUMN_SET.contains(columnNameInDB)) {
-        Object val = columnInfo.field.get(entity);
+      if (!columnNameInDB.equalsIgnoreCase(BASE_ID) && !AUTO_UPDATE_COLUMN_SET.contains(
+          columnNameInDB)) {
+        final Field field = columnInfo.field;
+        if (field == null) {
+          LOG.error(String.format("DB schema update required. field %s is no longer in table: %s",
+              columnNameInDB, tableName));
+          continue;
+        }
+        Object val = field.get(entity);
         if (val != null) {
           if (Enum.class.isAssignableFrom(val.getClass())) {
             val = val.toString();

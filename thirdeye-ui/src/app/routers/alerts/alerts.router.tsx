@@ -10,8 +10,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
-    getAlertsAllPath,
+    AppRouteRelative,
     getAlertsPath,
 } from "../../utils/routes/routes.util";
 
@@ -69,31 +68,38 @@ export const AlertsRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Alerts path */}
-                <Route path={AppRoute.ALERTS}>
-                    {/* Redirect to alerts all path */}
-                    <Navigate replace to={getAlertsAllPath()} />
-                </Route>
+                {/* Redirect to alerts all path */}
+                <Route
+                    index
+                    element={<Navigate to={AppRouteRelative.ALERTS_ALL} />}
+                />
 
                 {/* Alerts all path */}
-                <Route element={AlertsAllPage} path={AppRoute.ALERTS_ALL} />
+                <Route
+                    element={<AlertsAllPage />}
+                    path={AppRouteRelative.ALERTS_ALL}
+                />
 
                 {/* Alerts view path */}
-                <Route element={AlertsViewPage} path={AppRoute.ALERTS_VIEW} />
+                <Route
+                    element={<AlertsViewPage />}
+                    path={AppRouteRelative.ALERTS_VIEW}
+                />
 
                 {/* Alerts create path */}
                 <Route
-                    element={AlertsCreatePage}
-                    path={AppRoute.ALERTS_CREATE}
+                    element={<AlertsCreatePage />}
+                    path={AppRouteRelative.ALERTS_CREATE}
                 />
 
                 {/* Alerts update path */}
                 <Route
-                    element={AlertsUpdatePage}
-                    path={AppRoute.ALERTS_UPDATE}
+                    element={<AlertsUpdatePage />}
+                    path={AppRouteRelative.ALERTS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
+import {
+    AppRouteRelative,
+    getConfigurationPath,
+} from "../../utils/routes/routes.util";
 
 const SubscriptionGroupsRouter = lazy(() =>
     import(
@@ -53,30 +56,42 @@ export const ConfigurationRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Configuration path */}
-                <Route path={AppRoute.CONFIGURATION}>
-                    <Navigate replace to={AppRoute.SUBSCRIPTION_GROUPS} />
-                </Route>
+                <Route
+                    index
+                    element={
+                        <Navigate
+                            replace
+                            to={AppRouteRelative.SUBSCRIPTION_GROUPS}
+                        />
+                    }
+                />
 
                 {/* Direct all subscription groups paths to subscription groups router */}
                 <Route
-                    element={SubscriptionGroupsRouter}
-                    path={AppRoute.SUBSCRIPTION_GROUPS}
+                    element={<SubscriptionGroupsRouter />}
+                    path={`${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
                 />
 
                 {/* Direct all datasets paths to datasets router */}
-                <Route element={DatasetsRouter} path={AppRoute.DATASETS} />
+                <Route
+                    element={<DatasetsRouter />}
+                    path={`${AppRouteRelative.DATASETS}/*`}
+                />
 
                 {/* Direct all datasource paths to datasources router */}
                 <Route
-                    element={DatasourcesRouter}
-                    path={AppRoute.DATASOURCES}
+                    element={<DatasourcesRouter />}
+                    path={`${AppRouteRelative.DATASOURCES}/*`}
                 />
 
                 {/* Direct all metrics paths to metrics router */}
-                <Route element={MetricsRouter} path={AppRoute.METRICS} />
+                <Route
+                    element={<MetricsRouter />}
+                    path={`${AppRouteRelative.METRICS}/*`}
+                />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { MemoryRouter } from "react-router-dom";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { ConfigurationRouter } from "./configuration.router";
 
 jest.mock(
@@ -76,7 +76,12 @@ describe("Configuration Router", () => {
     it("should render configuration page at exact configuration path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
-                <ConfigurationRouter />
+                <Routes>
+                    <Route
+                        element={<ConfigurationRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -90,7 +95,12 @@ describe("Configuration Router", () => {
             <MemoryRouter
                 initialEntries={[`${AppRoute.CONFIGURATION}/testPath`]}
             >
-                <ConfigurationRouter />
+                <Routes>
+                    <Route
+                        element={<ConfigurationRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -102,7 +112,12 @@ describe("Configuration Router", () => {
     it("should direct exact subscription groups path to subscription groups router", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
-                <ConfigurationRouter />
+                <Routes>
+                    <Route
+                        element={<ConfigurationRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -116,7 +131,12 @@ describe("Configuration Router", () => {
             <MemoryRouter
                 initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
             >
-                <ConfigurationRouter />
+                <Routes>
+                    <Route
+                        element={<ConfigurationRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -128,7 +148,12 @@ describe("Configuration Router", () => {
     it("should direct exact metrics path to metrics router", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.METRICS]}>
-                <ConfigurationRouter />
+                <Routes>
+                    <Route
+                        element={<ConfigurationRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -140,36 +165,17 @@ describe("Configuration Router", () => {
     it("should direct metrics path to metrics router", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.METRICS}/testPath`]}>
-                <ConfigurationRouter />
+                <Routes>
+                    <Route
+                        element={<ConfigurationRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
         await expect(
             screen.findByText("testMetricsRouter")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page at any other path", async () => {
-        render(
-            <MemoryRouter initialEntries={["/testPath"]}>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page by default", async () => {
-        render(
-            <MemoryRouter>
-                <ConfigurationRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
         ).resolves.toBeInTheDocument();
     });
 });

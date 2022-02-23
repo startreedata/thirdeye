@@ -10,8 +10,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
-    getAnomaliesAllPath,
+    AppRouteRelative,
     getAnomaliesPath,
 } from "../../utils/routes/routes.util";
 
@@ -63,31 +62,34 @@ export const AnomaliesRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Anomalies path */}
-                <Route path={AppRoute.ANOMALIES}>
-                    {/* Redirect to anomalies all path */}
-                    <Navigate replace to={getAnomaliesAllPath()} />
-                </Route>
+                {/* Redirect to anomalies all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate replace to={AppRouteRelative.ANOMALIES_ALL} />
+                    }
+                />
 
                 {/* Anomalies all path */}
                 <Route
-                    element={AnomaliesAllPage}
-                    path={AppRoute.ANOMALIES_ALL}
+                    element={<AnomaliesAllPage />}
+                    path={AppRouteRelative.ANOMALIES_ALL}
                 />
 
                 {/* Anomalies view index path to change time range*/}
                 <Route
-                    element={AnomaliesViewIndexPage}
-                    path={AppRoute.ANOMALIES_VIEW_INDEX}
+                    element={<AnomaliesViewIndexPage />}
+                    path={AppRouteRelative.ANOMALIES_VIEW_INDEX}
                 />
 
                 {/* Anomalies view path */}
                 <Route
-                    element={AnomaliesViewPage}
-                    path={AppRoute.ANOMALIES_VIEW}
+                    element={<AnomaliesViewPage />}
+                    path={AppRouteRelative.ANOMALIES_VIEW}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

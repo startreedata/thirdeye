@@ -15,6 +15,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
     getSearchFromQueryString,
     getSearchTextFromQueryString,
@@ -31,6 +32,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 ) => {
     const [searchText, setSearchText] = useState(props.searchText || "");
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const [, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         // Pick up search from query string if search text not provided
@@ -90,9 +92,10 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
         // Set search in query string
         if (props.setSearchQueryString) {
-            setSearchInQueryString(props.searchLabel);
+            setSearchInQueryString(props.searchLabel, setSearchParams);
             setSearchTextInQueryString(
-                searchWords.join(DELIMITER_SEARCH_WORDS)
+                searchWords.join(DELIMITER_SEARCH_WORDS),
+                setSearchParams
             );
         }
     };

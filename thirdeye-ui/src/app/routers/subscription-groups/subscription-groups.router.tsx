@@ -10,7 +10,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
+    AppRouteRelative,
     getConfigurationPath,
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsPath,
@@ -74,37 +74,40 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Subscription groups path */}
-                <Route path={AppRoute.SUBSCRIPTION_GROUPS}>
-                    {/* Redirect to subscription groups all path */}
-                    <Navigate replace to={getSubscriptionGroupsAllPath()} />
-                </Route>
+                {/* Redirect to subscription groups all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate replace to={getSubscriptionGroupsAllPath()} />
+                    }
+                />
 
                 {/* Subscription groups all path */}
                 <Route
-                    element={SubscriptionGroupsAllPage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_ALL}
+                    element={<SubscriptionGroupsAllPage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}
                 />
 
                 {/* Subscription groups view path */}
                 <Route
-                    element={SubscriptionGroupsViewPage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_VIEW}
+                    element={<SubscriptionGroupsViewPage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_VIEW}
                 />
 
                 {/* Subscription groups create path */}
                 <Route
-                    element={SubscriptionGroupsCreatePage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_CREATE}
+                    element={<SubscriptionGroupsCreatePage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}
                 />
 
                 {/* Subscription groups update path */}
                 <Route
-                    element={SubscriptionGroupsUpdatePage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_UPDATE}
+                    element={<SubscriptionGroupsUpdatePage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

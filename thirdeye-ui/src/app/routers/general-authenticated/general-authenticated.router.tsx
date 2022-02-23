@@ -10,6 +10,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
     AppRoute,
+    AppRouteRelative,
     getBasePath,
     getHomePath,
 } from "../../utils/routes/routes.util";
@@ -49,25 +50,30 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Base path */}
-                <Route path={AppRoute.BASE}>
-                    {/* Redirect to home path */}
-                    <Navigate replace to={getHomePath()} />
-                </Route>
+                {/* Redirect to home path */}
+                <Route
+                    element={<Navigate replace to={getHomePath()} />}
+                    path={AppRoute.BASE}
+                />
 
                 {/* Home path */}
-                <Route element={HomePage} path={AppRoute.HOME} />
+                <Route element={<HomePage />} path={AppRouteRelative.HOME} />
 
                 {/* Login path */}
-                <Route path={AppRoute.LOGIN}>
-                    {/* Already authenticated, redirect to base path */}
-                    <Navigate replace to={getBasePath()} />
-                </Route>
+                {/* Already authenticated, redirect to base path */}
+                <Route
+                    element={<Navigate replace to={getBasePath()} />}
+                    path={AppRouteRelative.LOGIN}
+                />
 
                 {/* Logout path */}
-                <Route element={LogoutPage} path={AppRoute.LOGOUT} />
+                <Route
+                    element={<LogoutPage />}
+                    path={AppRouteRelative.LOGOUT}
+                />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

@@ -1,12 +1,19 @@
 import { isInteger, toNumber } from "lodash";
+import { URLSearchParamsInit } from "react-router-dom";
 import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
 import {
     TimeRange,
     TimeRangeDuration,
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { appHistory } from "../history/history.util";
 import { createTimeRangeDuration } from "../time-range/time-range.util";
+
+type SetQueryStringFunc = (
+    nextInit: URLSearchParamsInit,
+    navigateOptions?: {
+        replace?: boolean | undefined;
+    }
+) => void;
 
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
 
@@ -20,16 +27,30 @@ export const getAccessTokenFromHashParams = (): string => {
     return accessToken;
 };
 
-export const setSearchInQueryString = (search: string): void => {
-    setQueryString(SearchQueryStringKey.SEARCH.toLowerCase(), search);
+export const setSearchInQueryString = (
+    search: string,
+    setQueryStringFunc: SetQueryStringFunc
+): void => {
+    setQueryString(
+        SearchQueryStringKey.SEARCH.toLowerCase(),
+        search,
+        setQueryStringFunc
+    );
 };
 
 export const getSearchFromQueryString = (): string => {
     return getQueryString(SearchQueryStringKey.SEARCH.toLowerCase());
 };
 
-export const setSearchTextInQueryString = (searchText: string): void => {
-    setQueryString(SearchQueryStringKey.SEARCH_TEXT.toLowerCase(), searchText);
+export const setSearchTextInQueryString = (
+    searchText: string,
+    setQueryStringFunc: SetQueryStringFunc
+): void => {
+    setQueryString(
+        SearchQueryStringKey.SEARCH_TEXT.toLowerCase(),
+        searchText,
+        setQueryStringFunc
+    );
 };
 
 export const getSearchTextFromQueryString = (): string => {
@@ -37,7 +58,8 @@ export const getSearchTextFromQueryString = (): string => {
 };
 
 export const setTimeRangeDurationInQueryString = (
-    timeRangeDuration: TimeRangeDuration
+    timeRangeDuration: TimeRangeDuration,
+    setQueryStringFunc: SetQueryStringFunc
 ): void => {
     if (!timeRangeDuration) {
         return;
@@ -45,15 +67,18 @@ export const setTimeRangeDurationInQueryString = (
 
     setQueryString(
         TimeRangeQueryStringKey.TIME_RANGE.toLowerCase(),
-        timeRangeDuration.timeRange
+        timeRangeDuration.timeRange,
+        setQueryStringFunc
     );
     setQueryString(
         TimeRangeQueryStringKey.START_TIME.toLowerCase(),
-        timeRangeDuration.startTime.toString()
+        timeRangeDuration.startTime.toString(),
+        setQueryStringFunc
     );
     setQueryString(
         TimeRangeQueryStringKey.END_TIME.toLowerCase(),
-        timeRangeDuration.endTime.toString()
+        timeRangeDuration.endTime.toString(),
+        setQueryStringFunc
     );
 };
 
@@ -93,7 +118,11 @@ export const getTimeRangeDurationFromQueryString =
         );
     };
 
-export const setQueryString = (key: string, value: string): void => {
+export const setQueryString = (
+    key: string,
+    value: string,
+    setQueryStringFunc: SetQueryStringFunc
+): void => {
     if (!key) {
         return;
     }
@@ -103,9 +132,7 @@ export const setQueryString = (key: string, value: string): void => {
     urlSearchParams.set(key, value);
 
     // Update URL
-    appHistory.replace({
-        search: urlSearchParams.toString(),
-    });
+    setQueryStringFunc(urlSearchParams, { replace: true });
 };
 
 export const getQueryString = (key: string): string => {

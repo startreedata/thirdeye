@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsRouter } from "./alerts.router";
 
 jest.mock(
@@ -108,7 +108,12 @@ describe("Alerts Router", () => {
     it("should render alerts all page at exact alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -120,7 +125,12 @@ describe("Alerts Router", () => {
     it("should render page not found page at invalid alerts path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -132,7 +142,12 @@ describe("Alerts Router", () => {
     it("should render alerts all page at exact alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_ALL]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -144,7 +159,12 @@ describe("Alerts Router", () => {
     it("should render page not found page at invalid alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_ALL}/testPath`]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -156,7 +176,12 @@ describe("Alerts Router", () => {
     it("should render alerts view page at exact alerts view path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_VIEW]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -168,7 +193,12 @@ describe("Alerts Router", () => {
     it("should render page not found page at invalid alerts view path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_VIEW}/testPath`]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -180,7 +210,12 @@ describe("Alerts Router", () => {
     it("should render alerts create page at exact alerts create path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_CREATE]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -194,7 +229,12 @@ describe("Alerts Router", () => {
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_CREATE}/testPath`]}
             >
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -206,7 +246,12 @@ describe("Alerts Router", () => {
     it("should render alerts update page at exact alerts update path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.ALERTS_UPDATE]}>
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -220,7 +265,12 @@ describe("Alerts Router", () => {
             <MemoryRouter
                 initialEntries={[`${AppRoute.ALERTS_UPDATE}/testPath`]}
             >
-                <AlertsRouter />
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -231,20 +281,13 @@ describe("Alerts Router", () => {
 
     it("should render page not found page at any other path", async () => {
         render(
-            <MemoryRouter initialEntries={["/testPath"]}>
-                <AlertsRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page by default", async () => {
-        render(
-            <MemoryRouter>
-                <AlertsRouter />
+            <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
+                <Routes>
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRouteRelative.ALERTS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 

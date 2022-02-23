@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 
 const RootCauseAnalysisForAnomalyIndexPage = lazy(() =>
     import(
@@ -57,18 +57,20 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
             <Routes>
                 {/* Root cause for an anomaly index path. */}
                 <Route
-                    element={RootCauseAnalysisForAnomalyIndexPage}
-                    path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX}
+                    element={<RootCauseAnalysisForAnomalyIndexPage />}
+                    path={
+                        AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX
+                    }
                 />
 
                 {/* Root cause for an anomaly path */}
                 <Route
-                    element={RootCauseAnalysisForAnomalyPage}
-                    path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
+                    element={<RootCauseAnalysisForAnomalyPage />}
+                    path={AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

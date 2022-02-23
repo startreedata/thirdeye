@@ -10,8 +10,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
-    getDatasourcesAllPath,
+    AppRouteRelative,
     getDatasourcesPath,
 } from "../../utils/routes/routes.util";
 
@@ -69,37 +68,43 @@ export const DatasourcesRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Datasources path */}
-                <Route path={AppRoute.DATASOURCES}>
-                    {/* Redirect to datasources all path */}
-                    <Navigate replace to={getDatasourcesAllPath()} />
-                </Route>
+                {/* Redirect to datasources all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate
+                            replace
+                            to={AppRouteRelative.DATASOURCES_ALL}
+                        />
+                    }
+                />
 
                 {/* Datasources all path */}
                 <Route
-                    element={DatasourcesAllPage}
-                    path={AppRoute.DATASOURCES_ALL}
+                    element={<DatasourcesAllPage />}
+                    path={AppRouteRelative.DATASOURCES_ALL}
                 />
 
                 {/* Datasources view path */}
                 <Route
-                    element={DatasourcesViewPage}
-                    path={AppRoute.DATASOURCES_VIEW}
+                    element={<DatasourcesViewPage />}
+                    path={AppRouteRelative.DATASOURCES_VIEW}
                 />
 
                 {/* Datasources create path */}
                 <Route
-                    element={DatasourcesCreatePage}
-                    path={AppRoute.DATASOURCES_CREATE}
+                    element={<DatasourcesCreatePage />}
+                    path={AppRouteRelative.DATASOURCES_CREATE}
                 />
 
                 {/* Datasources update path */}
                 <Route
-                    element={DatasourcesUpdatePage}
-                    path={AppRoute.DATASOURCES_UPDATE}
+                    element={<DatasourcesUpdatePage />}
+                    path={AppRouteRelative.DATASOURCES_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

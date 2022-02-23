@@ -10,9 +10,8 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
+    AppRouteRelative,
     getConfigurationPath,
-    getDatasetsAllPath,
     getDatasetsPath,
 } from "../../utils/routes/routes.util";
 
@@ -74,34 +73,40 @@ export const DatasetsRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Datasets path */}
-                <Route path={AppRoute.DATASETS}>
-                    {/* Redirect to datasets all path */}
-                    <Navigate replace to={getDatasetsAllPath()} />
-                </Route>
+                {/* Redirect to datasets all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate replace to={AppRouteRelative.DATASETS_ALL} />
+                    }
+                />
 
                 {/* Datasets all path */}
-                <Route element={DatasetsAllPage} path={AppRoute.DATASETS_ALL} />
+                <Route
+                    element={<DatasetsAllPage />}
+                    path={AppRouteRelative.DATASETS_ALL}
+                />
 
                 {/* Datasets view path */}
                 <Route
-                    element={DatasetsViewPage}
-                    path={AppRoute.DATASETS_VIEW}
+                    element={<DatasetsViewPage />}
+                    path={AppRouteRelative.DATASETS_VIEW}
                 />
 
                 {/* Datasets onboard path */}
                 <Route
-                    element={DatasetsOnboardPage}
-                    path={AppRoute.DATASETS_ONBOARD}
+                    element={<DatasetsOnboardPage />}
+                    path={AppRouteRelative.DATASETS_ONBOARD}
                 />
 
                 {/* Datasets update path */}
                 <Route
-                    element={DatasetsUpdatePage}
-                    path={AppRoute.DATASETS_UPDATE}
+                    element={<DatasetsUpdatePage />}
+                    path={AppRouteRelative.DATASETS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

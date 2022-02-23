@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { DatasourcesRouter } from "./datasources.router";
 
 jest.mock(
@@ -119,7 +119,7 @@ describe("Datasources Router", () => {
 
     it("should render datasources all page at exact datasources path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASOURCES]}>
+            <MemoryRouter initialEntries={[`/`]}>
                 <DatasourcesRouter />
             </MemoryRouter>
         );
@@ -131,7 +131,9 @@ describe("Datasources Router", () => {
 
     it("should render page not found page at invalid datasources path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.DATASOURCES}/testPath`]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASOURCES}/testPath`]}
+            >
                 <DatasourcesRouter />
             </MemoryRouter>
         );
@@ -143,7 +145,9 @@ describe("Datasources Router", () => {
 
     it("should render datasources all page at exact datasources all path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASOURCES_ALL]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASOURCES_ALL}`]}
+            >
                 <DatasourcesRouter />
             </MemoryRouter>
         );
@@ -156,7 +160,9 @@ describe("Datasources Router", () => {
     it("should render page not found page at invalid datasources all path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASOURCES_ALL}/testPath`]}
+                initialEntries={[
+                    `/${AppRouteRelative.DATASOURCES_ALL}/testPath`,
+                ]}
             >
                 <DatasourcesRouter />
             </MemoryRouter>
@@ -169,7 +175,9 @@ describe("Datasources Router", () => {
 
     it("should render datasources view page at exact datasources view path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASOURCES_VIEW]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASOURCES_VIEW}`]}
+            >
                 <DatasourcesRouter />
             </MemoryRouter>
         );
@@ -182,7 +190,9 @@ describe("Datasources Router", () => {
     it("should render page not found page at invalid datasources view path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASOURCES_VIEW}/testPath`]}
+                initialEntries={[
+                    `/${AppRouteRelative.DATASOURCES_VIEW}/testPath`,
+                ]}
             >
                 <DatasourcesRouter />
             </MemoryRouter>
@@ -195,7 +205,9 @@ describe("Datasources Router", () => {
 
     it("should render datasources create page at exact datasources create path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASOURCES_CREATE]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASOURCES_CREATE}`]}
+            >
                 <DatasourcesRouter />
             </MemoryRouter>
         );
@@ -208,7 +220,9 @@ describe("Datasources Router", () => {
     it("should render page not found page at invalid datasources create path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASOURCES_CREATE}/testPath`]}
+                initialEntries={[
+                    `/${AppRouteRelative.DATASOURCES_CREATE}/testPath`,
+                ]}
             >
                 <DatasourcesRouter />
             </MemoryRouter>
@@ -221,7 +235,9 @@ describe("Datasources Router", () => {
 
     it("should render datasources update page at exact datasources update path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASOURCES_UPDATE]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASETS_UPDATE}`]}
+            >
                 <DatasourcesRouter />
             </MemoryRouter>
         );
@@ -248,18 +264,6 @@ describe("Datasources Router", () => {
     it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
-                <DatasourcesRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page by default", async () => {
-        render(
-            <MemoryRouter>
                 <DatasourcesRouter />
             </MemoryRouter>
         );

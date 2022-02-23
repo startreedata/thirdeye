@@ -8,7 +8,7 @@ import React, {
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute, getLoginPath } from "../../utils/routes/routes.util";
+import { AppRoute } from "../../utils/routes/routes.util";
 
 const LoginPage = lazy(() =>
     import(
@@ -33,10 +33,13 @@ export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Login path */}
-                <Route element={LoginPage} path={AppRoute.LOGIN} />
+                <Route element={<LoginPage />} path={AppRoute.LOGIN} />
 
                 {/* No match found, redirect to login path */}
-                <Navigate replace to={getLoginPath()} />
+                <Route
+                    element={<Navigate replace to={AppRoute.LOGIN} />}
+                    path="*"
+                />
             </Routes>
         </Suspense>
     );

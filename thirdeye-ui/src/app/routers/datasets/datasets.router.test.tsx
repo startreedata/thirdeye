@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { DatasetsRouter } from "./datasets.router";
 
 jest.mock(
@@ -123,7 +123,7 @@ describe("Datasets Router", () => {
 
     it("should render datasets all page at exact datasets path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASETS]}>
+            <MemoryRouter>
                 <DatasetsRouter />
             </MemoryRouter>
         );
@@ -135,7 +135,7 @@ describe("Datasets Router", () => {
 
     it("should render page not found page at invalid datasets path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.DATASETS}/testPath`]}>
+            <MemoryRouter initialEntries={["/testPath"]}>
                 <DatasetsRouter />
             </MemoryRouter>
         );
@@ -147,7 +147,9 @@ describe("Datasets Router", () => {
 
     it("should render datasets all page at exact datasets all path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASETS_ALL]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASETS_ALL}`]}
+            >
                 <DatasetsRouter />
             </MemoryRouter>
         );
@@ -160,7 +162,7 @@ describe("Datasets Router", () => {
     it("should render page not found page at invalid datasets all path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASETS_ALL}/testPath`]}
+                initialEntries={[`/${AppRouteRelative.DATASETS_ALL}/testPath`]}
             >
                 <DatasetsRouter />
             </MemoryRouter>
@@ -173,7 +175,9 @@ describe("Datasets Router", () => {
 
     it("should render datasets view page at exact datasets view path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASETS_VIEW]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASETS_VIEW}`]}
+            >
                 <DatasetsRouter />
             </MemoryRouter>
         );
@@ -186,7 +190,7 @@ describe("Datasets Router", () => {
     it("should render page not found page at invalid datasets view path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASETS_VIEW}/testPath`]}
+                initialEntries={[`/${AppRouteRelative.DATASETS_VIEW}/testPath`]}
             >
                 <DatasetsRouter />
             </MemoryRouter>
@@ -199,7 +203,9 @@ describe("Datasets Router", () => {
 
     it("should render datasets onboard page at exact datasets onboard path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASETS_ONBOARD]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASETS_ONBOARD}`]}
+            >
                 <DatasetsRouter />
             </MemoryRouter>
         );
@@ -212,7 +218,9 @@ describe("Datasets Router", () => {
     it("should render page not found page at invalid datasets onboard path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASETS_ONBOARD}/testPath`]}
+                initialEntries={[
+                    `/${AppRouteRelative.DATASETS_ONBOARD}/testPath`,
+                ]}
             >
                 <DatasetsRouter />
             </MemoryRouter>
@@ -225,7 +233,9 @@ describe("Datasets Router", () => {
 
     it("should render datasets update page at exact datasets update path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.DATASETS_UPDATE]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.DATASETS_UPDATE}`]}
+            >
                 <DatasetsRouter />
             </MemoryRouter>
         );
@@ -238,7 +248,9 @@ describe("Datasets Router", () => {
     it("should render page not found page at invalid datasets update path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.DATASETS_UPDATE}/testPath`]}
+                initialEntries={[
+                    `/${AppRouteRelative.DATASETS_UPDATE}/testPath`,
+                ]}
             >
                 <DatasetsRouter />
             </MemoryRouter>
@@ -252,18 +264,6 @@ describe("Datasets Router", () => {
     it("should render page not found page at any other path", async () => {
         render(
             <MemoryRouter initialEntries={["/testPath"]}>
-                <DatasetsRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page by default", async () => {
-        render(
-            <MemoryRouter>
                 <DatasetsRouter />
             </MemoryRouter>
         );

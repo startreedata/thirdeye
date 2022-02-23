@@ -10,9 +10,8 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
+    AppRouteRelative,
     getConfigurationPath,
-    getMetricsAllPath,
     getMetricsPath,
 } from "../../utils/routes/routes.util";
 
@@ -74,31 +73,40 @@ export const MetricsRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Metrics path */}
-                <Route path={AppRoute.METRICS}>
-                    {/* Redirect to metrics all path */}
-                    <Navigate replace to={getMetricsAllPath()} />
-                </Route>
+                {/* Redirect to metrics all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate replace to={AppRouteRelative.METRICS_ALL} />
+                    }
+                />
 
                 {/* Metrics all path */}
-                <Route element={MetricsAllPage} path={AppRoute.METRICS_ALL} />
+                <Route
+                    element={<MetricsAllPage />}
+                    path={AppRouteRelative.METRICS_ALL}
+                />
 
                 {/* Metrics view path */}
-                <Route element={MetricsViewPage} path={AppRoute.METRICS_VIEW} />
+                <Route
+                    element={<MetricsViewPage />}
+                    path={AppRouteRelative.METRICS_VIEW}
+                />
 
                 {/* Metrics create path */}
                 <Route
-                    element={MetricsCreatePage}
-                    path={AppRoute.METRICS_CREATE}
+                    element={<MetricsCreatePage />}
+                    path={AppRouteRelative.METRICS_CREATE}
                 />
 
                 {/* Metrics update path */}
                 <Route
-                    element={MetricsUpdatePage}
-                    path={AppRoute.METRICS_UPDATE}
+                    element={<MetricsUpdatePage />}
+                    path={AppRouteRelative.METRICS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={PageNotFoundPage} />
+                <Route element={<PageNotFoundPage />} path="*" />
             </Routes>
         </Suspense>
     );

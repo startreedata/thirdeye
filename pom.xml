@@ -67,7 +67,7 @@
     <jfreechart.version>1.0.19</jfreechart.version>
     <jodatime.version>2.7</jodatime.version>
     <json-schema-validator.version>2.2.14</json-schema-validator.version>
-    <mockito.version>1.8.4</mockito.version>
+    <mockito.version>4.3.1</mockito.version>
     <mysql.connector.version>8.0.27</mysql.connector.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <parsii.version>1.5</parsii.version>
@@ -720,7 +720,7 @@
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
+        <artifactId>mockito-core</artifactId>
         <version>${mockito.version}</version>
       </dependency>
       <dependency>

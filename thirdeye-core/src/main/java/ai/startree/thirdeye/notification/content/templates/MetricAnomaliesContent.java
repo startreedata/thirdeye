@@ -5,10 +5,21 @@
 
 package ai.startree.thirdeye.notification.content.templates;
 
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getAnomalyURL;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getCurrentValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDateString;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDimensionsList;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFeedbackValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFormattedLiftValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getIssueType;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLift;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLiftDirection;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getPredictedValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimeDiffInHours;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
-import ai.startree.thirdeye.notification.NotificationContext;
 import ai.startree.thirdeye.notification.content.AnomalyReportEntity;
 import ai.startree.thirdeye.notification.content.BaseNotificationContent;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -56,21 +67,6 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       final AlertManager detectionConfigManager) {
     super(metricConfigManager, eventManager, mergedAnomalyResultManager);
     alertManager = detectionConfigManager;
-  }
-
-  @Override
-  public void init(final NotificationContext context) {
-    super.init(context);
-
-    // TODO spyne Investigate if rcaClient is required. Else remove.
-//    if (this.rcaClient == null) {
-//      final ThirdEyePrincipal principal = new ThirdEyePrincipal(
-//          this.thirdEyeAnomalyConfig.getTeRestConfig().getAdminUser(),
-//          this.thirdEyeAnomalyConfig.getTeRestConfig().getSessionKey()
-//      );
-//      this.rcaClient = new ThirdEyeRcaRestClient(principal,
-//          this.thirdEyeAnomalyConfig.getUiConfiguration().getExternalUrl());
-//    }
   }
 
   @Override
@@ -158,11 +154,6 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
     final Map<String, List<String>> targetDimensions = new HashMap<>();
 
-    // TODO spyne understand and restore HolidayContriesWhiteList feature
-//    if (thirdEyeAnomalyConfig.getHolidayCountriesWhitelist() != null) {
-//      targetDimensions
-//          .put(EVENT_FILTER_COUNTRY, thirdEyeAnomalyConfig.getHolidayCountriesWhitelist());
-//    }
     final List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
     holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
 
@@ -186,26 +177,6 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
     templateData.put("metricToAnomalyDetailsMap", metricAnomalyReports.asMap());
     templateData.put("functionToId", functionToId);
 
-    // Display RCA highlights in email only if report contains anomalies belonging to a single metric.
-    // Note: Once we have a sophisticated rca highlight support and users start seeing value, we'll
-    // enable it for all the metrics.
-    //TODO: the API's for RCA had changed. Need to migrate
-/*    if (this.rcaClient != null && metricAnomalyReports.keySet().size() == 1) {
-      String anomalyId = metricAnomalyReports.values().iterator().next().getAnomalyId();
-      try {
-        Map<String, Object> rcaHighlights = this.rcaClient
-            .getRootCauseHighlights(Long.parseLong(anomalyId));
-        templateData.put("cubeDimensions",
-            ConfigUtils.getMap(rcaHighlights.get("cubeResults")).get("dimensions"));
-        templateData.put("cubeResponseRows",
-            ConfigUtils.getMap(rcaHighlights.get("cubeResults")).get("responseRows"));
-      } catch (Exception e) {
-        // alert notification shouldn't fail if rca insights are not available
-        LOG.error("Skip Embedding RCA in email. Failed to retrieve the RCA Highlights for anomaly "
-            + anomalyId, e);
-      }
-    }*/
-
     return templateData;
   }
 
@@ -213,8 +184,7 @@ public class MetricAnomaliesContent extends BaseNotificationContent {
       final String feedbackVal, final String functionName, final String funcDescription) {
     final Properties props = new Properties();
     props.putAll(anomaly.getProperties());
-    final double lift = BaseNotificationContent
-        .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
+    final double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
     final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
         getAnomalyURL(anomaly, context.getUiPublicUrl()),
         getPredictedValue(anomaly),

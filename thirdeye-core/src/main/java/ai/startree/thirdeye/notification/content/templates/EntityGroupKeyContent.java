@@ -5,6 +5,19 @@
 
 package ai.startree.thirdeye.notification.content.templates;
 
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getAnomalyURL;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getCurrentValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDateString;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDimensionsList;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFeedbackValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFormattedLiftValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getIssueType;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLift;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLiftDirection;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getPredictedValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimeDiffInHours;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimezoneString;
+
 import ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
 import ai.startree.thirdeye.notification.NotificationContext;
 import ai.startree.thirdeye.notification.content.AnomalyReportEntity;
@@ -159,8 +172,7 @@ public class EntityGroupKeyContent extends BaseNotificationContent {
       final AlertDTO detectionConfig) {
     final Properties props = new Properties();
     props.putAll(anomaly.getProperties());
-    final double lift = BaseNotificationContent
-        .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
+    final double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
     final AnomalyReportEntity anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
         getAnomalyURL(anomaly, context.getUiPublicUrl()),
         getPredictedValue(anomaly),

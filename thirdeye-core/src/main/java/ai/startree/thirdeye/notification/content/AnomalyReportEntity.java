@@ -5,6 +5,9 @@
 
 package ai.startree.thirdeye.notification.content;
 
+import static ai.startree.thirdeye.notification.content.NotificationContent.PERCENTAGE_FORMAT;
+import static ai.startree.thirdeye.notification.content.NotificationContent.RAW_VALUE_FORMAT;
+
 import ai.startree.thirdeye.spi.Constants.CompareMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
@@ -81,7 +84,7 @@ public class AnomalyReportEntity {
     this.funcDescription = funcDescription;
     this.swi = "";
     if (swi != null) {
-      this.swi = String.format(NotificationContent.PERCENTAGE_FORMAT, swi * 100);
+      this.swi = String.format(PERCENTAGE_FORMAT, swi * 100);
     }
     if (baselineVal.equals("-")) {
       this.lift = "";
@@ -100,27 +103,27 @@ public class AnomalyReportEntity {
   }
 
   public void setSeasonalValues(CompareMode compareMode, double seasonalValue, double current) {
-    double lift = BaseNotificationContent.getLift(current, seasonalValue);
+    double lift = NotificationContentUtils.getLift(current, seasonalValue);
     switch (compareMode) {
       case Wo4W:
-        this.wo4wValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wo4wLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift);
-        this.positiveWo4WLift = BaseNotificationContent.getLiftDirection(lift);
+        this.wo4wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
+        this.wo4wLift = String.format(PERCENTAGE_FORMAT, lift);
+        this.positiveWo4WLift = NotificationContentUtils.getLiftDirection(lift);
         break;
       case Wo3W:
-        this.wo3wValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wo3wLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift * 100);
-        this.positiveWo3WLift = BaseNotificationContent.getLiftDirection(lift);
+        this.wo3wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
+        this.wo3wLift = String.format(PERCENTAGE_FORMAT, lift * 100);
+        this.positiveWo3WLift = NotificationContentUtils.getLiftDirection(lift);
         break;
       case Wo2W:
-        this.wo2wValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wo2wLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift * 100);
-        this.positiveWo2WLift = BaseNotificationContent.getLiftDirection(lift);
+        this.wo2wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
+        this.wo2wLift = String.format(PERCENTAGE_FORMAT, lift * 100);
+        this.positiveWo2WLift = NotificationContentUtils.getLiftDirection(lift);
         break;
       case WoW:
-        this.wowValue = String.format(NotificationContent.RAW_VALUE_FORMAT, seasonalValue);
-        this.wowLift = String.format(NotificationContent.PERCENTAGE_FORMAT, lift * 100);
-        this.positiveWoWLift = BaseNotificationContent.getLiftDirection(lift);
+        this.wowValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
+        this.wowLift = String.format(PERCENTAGE_FORMAT, lift * 100);
+        this.positiveWoWLift = NotificationContentUtils.getLiftDirection(lift);
         break;
       default:
     }

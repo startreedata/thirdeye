@@ -5,6 +5,20 @@
 
 package ai.startree.thirdeye.notification.content.templates;
 
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getAnomalyURL;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getBaselinePeriod;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getCurrentValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDateString;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getDimensionsList;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFeedbackValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getFormattedLiftValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getIssueType;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLift;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getLiftDirection;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getMatchedFilterValues;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getPredictedValue;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimeDiffInHours;
+import static ai.startree.thirdeye.notification.content.NotificationContentUtils.getTimezoneString;
 import static java.util.Comparator.comparingDouble;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -150,8 +164,7 @@ public class HierarchicalAnomaliesContent extends BaseNotificationContent {
 
     Properties props = new Properties();
     props.putAll(anomaly.getProperties());
-    double lift = BaseNotificationContent
-        .getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
+    double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
     AnomalyReportEntity
         anomalyReport = new AnomalyReportEntity(String.valueOf(anomaly.getId()),
         getAnomalyURL(anomaly, dashboardHost),

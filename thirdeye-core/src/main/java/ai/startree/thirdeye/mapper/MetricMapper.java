@@ -20,12 +20,18 @@ public interface MetricMapper {
   MetricMapper INSTANCE = Mappers.getMapper(MetricMapper.class);
 
   default MetricConfigDTO toBean(MetricApi api) {
+    if ( api == null ) {
+      return null;
+    }
     final MetricConfigDTO dto = new MetricConfigDTO();
-
+    String alias = null;
+    if (api.getName()!= null && api.getDataset() != null && api.getDataset().getName() != null) {
+      alias = SpiUtils.constructMetricAlias(api.getDataset().getName(), api.getName());
+    }
     dto.setId(api.getId());
     dto
         .setName(api.getName())
-        .setAlias(SpiUtils.constructMetricAlias(api.getDataset().getName(), api.getName()))
+        .setAlias(alias)
         .setDataset(optional(api.getDataset())
             .map(DatasetApi::getName)
             .orElse(null))
@@ -43,6 +49,9 @@ public interface MetricMapper {
   }
 
   default MetricApi toApi(MetricConfigDTO dto) {
+    if ( dto == null ) {
+      return null;
+    }
     return new MetricApi()
         .setId(dto.getId())
         .setActive(boolApi(dto.isActive()))

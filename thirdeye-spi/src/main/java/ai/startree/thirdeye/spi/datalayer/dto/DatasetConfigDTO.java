@@ -323,13 +323,14 @@ public class DatasetConfigDTO extends AbstractDTO {
    *
    * @return the granularity of a bucket (a data point) of this dataset.
    */
+  @Deprecated
   public TimeGranularity bucketTimeGranularity() {
     if (bucketTimeGranularity == null) {
-      int size =
+      Integer size =
           getNonAdditiveBucketSize() != null ? getNonAdditiveBucketSize() : getTimeDuration();
       TimeUnit timeUnit =
           getNonAdditiveBucketUnit() != null ? getNonAdditiveBucketUnit() : getTimeUnit();
-      bucketTimeGranularity = new TimeGranularity(size, timeUnit);
+      bucketTimeGranularity = (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit): null;
     }
     return bucketTimeGranularity;
   }

@@ -16,6 +16,7 @@ import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
 import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -60,23 +61,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AnomalyEmailContentBuilder {
 
-  /*  The Event Crawl Offset takes the standard period format, ex: P1D for 1 day, P1W for 1 week
-    Y: years     M: months              W: weeks
-    D: days      H: hours (after T)     M: minutes (after T)
-    S: seconds along with milliseconds (after T) */
-  public static final String EVENT_CRAWL_OFFSET = "eventCrawlOffset";
-  public static final String PRE_EVENT_CRAWL_OFFSET = "preEventCrawlOffset";
-  public static final String POST_EVENT_CRAWL_OFFSET = "postEventCrawlOffset";
-  public static final String INCLUDE_SENT_ANOMALY_ONLY = "includeSentAnomaliesOnly";
-  public static final String INCLUDE_SUMMARY = "includeSummary";
-  public static final String TIME_ZONE = "timezone";
-  public static final String DEFAULT_INCLUDE_SENT_ANOMALY_ONLY = "false";
-  public static final String DEFAULT_INCLUDE_SUMMARY = "false";
-  public static final String DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
-  public static final String DEFAULT_TIME_ZONE = "America/Los_Angeles";
-  public static final String DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
-  public static final String RAW_VALUE_FORMAT = "%.0f";
-  public static final String PERCENTAGE_FORMAT = "%.2f %%";
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyEmailContentBuilder.class);
 
   private final MetricConfigManager metricConfigManager;
@@ -107,20 +91,24 @@ public class AnomalyEmailContentBuilder {
 
     final Properties properties = new Properties();
     includeSentAnomaliesOnly = Boolean.parseBoolean(
-        properties.getProperty(INCLUDE_SENT_ANOMALY_ONLY, DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
+        properties.getProperty(Constants.NOTIFICATIONS_INCLUDE_SENT_ANOMALY_ONLY,
+            Constants.NOTIFICATIONS_DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
     includeSummary = Boolean.parseBoolean(
-        properties.getProperty(INCLUDE_SUMMARY, DEFAULT_INCLUDE_SUMMARY));
-    dateTimeZone = DateTimeZone.forID(properties.getProperty(TIME_ZONE, DEFAULT_TIME_ZONE));
+        properties.getProperty(Constants.NOTIFICATIONS_INCLUDE_SUMMARY, Constants.NOTIFICATIONS_DEFAULT_INCLUDE_SUMMARY));
+    dateTimeZone = DateTimeZone.forID(properties.getProperty(Constants.NOTIFICATIONS_TIME_ZONE,
+        Constants.NOTIFICATIONS_DEFAULT_TIME_ZONE));
 
     final Period defaultPeriod = Period
-        .parse(properties.getProperty(EVENT_CRAWL_OFFSET, DEFAULT_EVENT_CRAWL_OFFSET));
+        .parse(properties.getProperty(Constants.NOTIFICATIONS_EVENT_CRAWL_OFFSET,
+            Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET));
     preEventCrawlOffset = defaultPeriod;
     postEventCrawlOffset = defaultPeriod;
-    if (properties.getProperty(PRE_EVENT_CRAWL_OFFSET) != null) {
-      preEventCrawlOffset = Period.parse(properties.getProperty(PRE_EVENT_CRAWL_OFFSET));
+    if (properties.getProperty(Constants.NOTIFICATIONS_PRE_EVENT_CRAWL_OFFSET) != null) {
+      preEventCrawlOffset = Period.parse(properties.getProperty(Constants.NOTIFICATIONS_PRE_EVENT_CRAWL_OFFSET));
     }
-    if (properties.getProperty(POST_EVENT_CRAWL_OFFSET) != null) {
-      postEventCrawlOffset = Period.parse(properties.getProperty(POST_EVENT_CRAWL_OFFSET));
+    if (properties.getProperty(Constants.NOTIFICATIONS_POST_EVENT_CRAWL_OFFSET) != null) {
+      postEventCrawlOffset = Period.parse(properties.getProperty(
+          Constants.NOTIFICATIONS_POST_EVENT_CRAWL_OFFSET));
     }
   }
 

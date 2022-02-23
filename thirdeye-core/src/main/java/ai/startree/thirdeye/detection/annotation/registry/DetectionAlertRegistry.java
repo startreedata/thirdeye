@@ -6,10 +6,8 @@
 package ai.startree.thirdeye.detection.annotation.registry;
 
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilter;
-import ai.startree.thirdeye.detection.alert.scheme.NotificationScheme;
 import ai.startree.thirdeye.detection.alert.suppress.DetectionAlertSuppressor;
 import ai.startree.thirdeye.spi.detection.annotation.AlertFilter;
-import ai.startree.thirdeye.spi.detection.annotation.AlertScheme;
 import ai.startree.thirdeye.spi.detection.annotation.AlertSuppressor;
 import com.google.common.base.Preconditions;
 import io.github.classgraph.AnnotationInfo;
@@ -41,16 +39,16 @@ public class DetectionAlertRegistry {
 
   private static DetectionAlertRegistry INSTANCE;
 
+  private DetectionAlertRegistry() {
+    init();
+  }
+
   public static DetectionAlertRegistry getInstance() {
     if (INSTANCE == null) {
       INSTANCE = new DetectionAlertRegistry();
     }
 
     return INSTANCE;
-  }
-
-  private DetectionAlertRegistry() {
-    init();
   }
 
   /**
@@ -67,19 +65,6 @@ public class DetectionAlertRegistry {
             Annotation annotation = annotationInfo.loadClassAndInstantiate();
             ALERT_FILTER_MAP.put(((AlertFilter) annotation).type(), classInfo.getName());
             LOG.info("Registered Alter Filter {}", classInfo.getName());
-          }
-        }
-      }
-
-      // register alert schemes
-      ClassInfoList alertSchemeClasses = scanResult
-          .getSubclasses(NotificationScheme.class.getName());
-      for (ClassInfo classInfo : alertSchemeClasses) {
-        for (AnnotationInfo annotationInfo : classInfo.getAnnotationInfo()) {
-          if (annotationInfo.getName().equals(AlertScheme.class.getName())) {
-            Annotation annotation = annotationInfo.loadClassAndInstantiate();
-            ALERT_SCHEME_MAP.put(((AlertScheme) annotation).type(), classInfo.getName());
-            LOG.info("Registered Alter Scheme {}", classInfo.getName());
           }
         }
       }

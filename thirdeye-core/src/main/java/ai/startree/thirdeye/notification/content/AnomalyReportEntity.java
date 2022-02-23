@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.notification.content;
 
-import static ai.startree.thirdeye.notification.content.NotificationContent.PERCENTAGE_FORMAT;
-import static ai.startree.thirdeye.notification.content.NotificationContent.RAW_VALUE_FORMAT;
+import static ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent.PERCENTAGE_FORMAT;
+import static ai.startree.thirdeye.notification.content.templates.MetricAnomaliesContent.RAW_VALUE_FORMAT;
 
 import ai.startree.thirdeye.spi.Constants.CompareMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

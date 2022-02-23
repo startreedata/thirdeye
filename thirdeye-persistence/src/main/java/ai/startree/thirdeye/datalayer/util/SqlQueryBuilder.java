@@ -469,8 +469,7 @@ public class SqlQueryBuilder {
     LinkedHashMap<String, Object> parameterMap = new LinkedHashMap<>();
     for (ColumnInfo columnInfo : columnInfoMap.values()) {
       String columnNameInDB = columnInfo.columnNameInDB;
-      if (!columnNameInDB.equalsIgnoreCase(BASE_ID)
-          && !AUTO_UPDATE_COLUMN_SET.contains(columnNameInDB)) {
+      if (!columnNameInDB.equalsIgnoreCase(BASE_ID) && !AUTO_UPDATE_COLUMN_SET.contains(columnNameInDB)) {
         Object val = columnInfo.field.get(entity);
         if (val != null) {
           if (Enum.class.isAssignableFrom(val.getClass())) {

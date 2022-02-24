@@ -1,7 +1,7 @@
 {
   "name": "pageviews",
   "description": "This is a sample detection",
-  "cron": "0 */1 * * * ?",
+  "cron": "0 0 0 1/1 * ? *",
   "template": {
     "rca": {
       "datasource": "${dataSource}",

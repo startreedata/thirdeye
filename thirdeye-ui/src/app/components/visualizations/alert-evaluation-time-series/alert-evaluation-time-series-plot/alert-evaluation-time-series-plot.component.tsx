@@ -16,6 +16,7 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                     anomalies={props.alertEvaluationAnomalies}
                     xScale={props.xScale}
                     yScale={props.yScale}
+                    onAnomalyBarClick={props.onAnomalyBarClick}
                 />
             )}
 

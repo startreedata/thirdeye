@@ -76,6 +76,7 @@ export const AlertEvaluationTimeSeries: FunctionComponent<
                     hideBrush={props.hideBrush}
                     parentHeight={parent.height}
                     parentWidth={parent.width}
+                    onAnomalyBarClick={props.onAnomalyBarClick}
                 />
             )}
         </ParentSize>
@@ -471,22 +472,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
                 <svg className={alertEvaluationTimeSeriesClasses.svg}>
                     {/* Time series */}
                     <Group left={PADDING_LEFT_SVG} top={PADDING_TOP_SVG}>
-                        {/* Time series plot */}
-                        <AlertEvaluationTimeSeriesPlot
-                            alertEvaluationAnomalies={
-                                filteredAlertEvaluationAnomalies
-                            }
-                            alertEvaluationTimeSeriesPoints={
-                                filteredAlertEvaluationTimeSeriesPoints
-                            }
-                            anomalies={anomaliesPlotVisible}
-                            baseline={baselinePlotVisible}
-                            current={currentPlotVisible}
-                            upperAndLowerBound={upperAndLowerBoundPlotVisible}
-                            xScale={timeSeriesXScale}
-                            yScale={timeSeriesYScale}
-                        />
-
                         {/* X axis */}
                         <TimeAxisBottom
                             parentWidth={props.parentWidth}
@@ -505,6 +490,23 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
                             yScale={timeSeriesYScale}
                             onMouseLeave={handleTimeSeriesMouseLeave}
                             onMouseMove={handleTimeSeriesMouseMove}
+                        />
+
+                        {/* Time series plot */}
+                        <AlertEvaluationTimeSeriesPlot
+                            alertEvaluationAnomalies={
+                                filteredAlertEvaluationAnomalies
+                            }
+                            alertEvaluationTimeSeriesPoints={
+                                filteredAlertEvaluationTimeSeriesPoints
+                            }
+                            anomalies={anomaliesPlotVisible}
+                            baseline={baselinePlotVisible}
+                            current={currentPlotVisible}
+                            upperAndLowerBound={upperAndLowerBoundPlotVisible}
+                            xScale={timeSeriesXScale}
+                            yScale={timeSeriesYScale}
+                            onAnomalyBarClick={props.onAnomalyBarClick}
                         />
                     </Group>
 

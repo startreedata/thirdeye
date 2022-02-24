@@ -67,6 +67,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                     <AlertEvaluationTimeSeries
                         hideBrush
                         alertEvaluation={props.alertEvaluation}
+                        onAnomalyBarClick={props.onAnomalyBarClick}
                     />
                 </VisualizationCard>
             </CardContent>

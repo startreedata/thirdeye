@@ -17,6 +17,7 @@ import {
     getMetricsAllPath,
     getMetricsPath,
     getMetricsViewPath,
+    getRootCauseAnalysisForAnomalyIndexPath,
     getRootCauseAnalysisForAnomalyPath,
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsCreatePath,
@@ -26,7 +27,9 @@ import {
 } from "./routes.util";
 
 jest.mock("../params/params.util", () => ({
-    getRecognizedQueryString: jest.fn().mockReturnValue("testQueryString"),
+    getRecognizedQuery: jest.fn().mockReturnValue({
+        toString: jest.fn().mockReturnValue("testQueryString"),
+    }),
 }));
 
 describe("Routes Util", () => {
@@ -139,6 +142,12 @@ describe("Routes Util", () => {
     it("getRootCauseAnalysisForAnomalyPath should return appropriate path with appropriate query string for anomaly id", () => {
         expect(getRootCauseAnalysisForAnomalyPath(1)).toEqual(
             "/root-cause-analysis/anomaly/1?testQueryString"
+        );
+    });
+
+    it("getRootCauseAnalysisForAnomalyIndexPath should return appropriate path with appropriate query string for anomaly id", () => {
+        expect(getRootCauseAnalysisForAnomalyIndexPath(1)).toEqual(
+            "/root-cause-analysis/anomaly/1/index?testQueryString"
         );
     });
 

@@ -26,6 +26,7 @@ import {
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
@@ -34,7 +35,10 @@ import {
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getAlertsAllPath } from "../../utils/routes/routes.util";
+import {
+    getAlertsAllPath,
+    getRootCauseAnalysisForAnomalyIndexPath,
+} from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
@@ -179,6 +183,10 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
+    const onAnomalyBarClick = (anomaly: Anomaly): void => {
+        navigate(getRootCauseAnalysisForAnomalyIndexPath(anomaly.id));
+    };
+
     return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
         <AppLoadingIndicatorV1 />
     ) : (
@@ -203,6 +211,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                             alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
                             title={uiAlert.name}
+                            onAnomalyBarClick={onAnomalyBarClick}
                             onRefresh={fetchAlertEvaluation}
                         />
                     )}

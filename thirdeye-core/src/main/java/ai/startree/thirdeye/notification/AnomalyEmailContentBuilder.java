@@ -44,7 +44,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -62,54 +61,36 @@ import org.slf4j.LoggerFactory;
 public class AnomalyEmailContentBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyEmailContentBuilder.class);
+  private static final boolean INCLUDE_SUMMARY = false;
 
   private final MetricConfigManager metricConfigManager;
   private final AlertManager alertManager;
   private final UiConfiguration uiConfiguration;
   private final EventManager eventManager;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final boolean includeSentAnomaliesOnly;
 
   private final DateTimeZone dateTimeZone;
-  private final boolean includeSummary;
-  private Period preEventCrawlOffset;
-  private Period postEventCrawlOffset;
+  private final Period preEventCrawlOffset;
+  private final Period postEventCrawlOffset;
   private String imgPath = null;
 
   @Inject
   public AnomalyEmailContentBuilder(final MetricConfigManager metricConfigManager,
       final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final AlertManager detectionConfigManager,
+      final AlertManager alertManager,
       final UiConfiguration uiConfiguration) {
     this.metricConfigManager = metricConfigManager;
     this.eventManager = eventManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-
-    alertManager = detectionConfigManager;
+    this.alertManager = alertManager;
     this.uiConfiguration = uiConfiguration;
 
-    final Properties properties = new Properties();
-    includeSentAnomaliesOnly = Boolean.parseBoolean(
-        properties.getProperty(Constants.NOTIFICATIONS_INCLUDE_SENT_ANOMALY_ONLY,
-            Constants.NOTIFICATIONS_DEFAULT_INCLUDE_SENT_ANOMALY_ONLY));
-    includeSummary = Boolean.parseBoolean(
-        properties.getProperty(Constants.NOTIFICATIONS_INCLUDE_SUMMARY, Constants.NOTIFICATIONS_DEFAULT_INCLUDE_SUMMARY));
-    dateTimeZone = DateTimeZone.forID(properties.getProperty(Constants.NOTIFICATIONS_TIME_ZONE,
-        Constants.NOTIFICATIONS_DEFAULT_TIME_ZONE));
+    dateTimeZone = DateTimeZone.forID(Constants.DEFAULT_TIMEZONE);
 
-    final Period defaultPeriod = Period
-        .parse(properties.getProperty(Constants.NOTIFICATIONS_EVENT_CRAWL_OFFSET,
-            Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET));
+    final Period defaultPeriod = Period.parse(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
     preEventCrawlOffset = defaultPeriod;
     postEventCrawlOffset = defaultPeriod;
-    if (properties.getProperty(Constants.NOTIFICATIONS_PRE_EVENT_CRAWL_OFFSET) != null) {
-      preEventCrawlOffset = Period.parse(properties.getProperty(Constants.NOTIFICATIONS_PRE_EVENT_CRAWL_OFFSET));
-    }
-    if (properties.getProperty(Constants.NOTIFICATIONS_POST_EVENT_CRAWL_OFFSET) != null) {
-      postEventCrawlOffset = Period.parse(properties.getProperty(
-          Constants.NOTIFICATIONS_POST_EVENT_CRAWL_OFFSET));
-    }
   }
 
   public void cleanup() {
@@ -189,7 +170,7 @@ public class AnomalyEmailContentBuilder {
     templateData.put("falseAlertCount", precisionRecallEvaluator.getFalseAlarm());
     templateData.put("newTrendCount", precisionRecallEvaluator.getTrueAnomalyNewTrend());
     templateData.put("alertConfigName", notificationConfig.getName());
-    templateData.put("includeSummary", includeSummary);
+    templateData.put("includeSummary", INCLUDE_SUMMARY);
     templateData.put("reportGenerationTimeMillis", System.currentTimeMillis());
     if (precisionRecallEvaluator.getTotalResponses() > 0) {
       templateData.put("precision", precisionRecallEvaluator.getPrecisionInResponse());
@@ -297,13 +278,11 @@ public class AnomalyEmailContentBuilder {
       }
 
       // include notified alerts only in the email
-      if (!includeSentAnomaliesOnly || anomaly.isNotified()) {
-        anomalyDetails.add(anomalyReport);
-        anomalyIds.add(anomalyReport.getAnomalyId());
-        functionAnomalyReports.put(functionName, anomalyReport);
-        metricAnomalyReports.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
-        functionToId.put(functionName, id);
-      }
+      anomalyDetails.add(anomalyReport);
+      anomalyIds.add(anomalyReport.getAnomalyId());
+      functionAnomalyReports.put(functionName, anomalyReport);
+      metricAnomalyReports.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
+      functionToId.put(functionName, id);
     }
 
     // holidays

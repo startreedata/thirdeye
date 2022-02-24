@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 public interface Constants {
 
+  String DEFAULT_TIMEZONE = "America/Los_Angeles";
+
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
   String AUTH_BEARER = "Bearer";
@@ -35,20 +37,7 @@ public interface Constants {
   // Time beyond which we do not want to notify anomalies
   long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(1400);
 
-  /*  The Event Crawl Offset takes the standard period format, ex: P1D for 1 day, P1W for 1 week
-      Y: years     M: months              W: weeks
-      D: days      H: hours (after T)     M: minutes (after T)
-      S: seconds along with milliseconds (after T) */
-  String NOTIFICATIONS_EVENT_CRAWL_OFFSET = "eventCrawlOffset";
-  String NOTIFICATIONS_PRE_EVENT_CRAWL_OFFSET = "preEventCrawlOffset";
-  String NOTIFICATIONS_POST_EVENT_CRAWL_OFFSET = "postEventCrawlOffset";
-  String NOTIFICATIONS_INCLUDE_SENT_ANOMALY_ONLY = "includeSentAnomaliesOnly";
-  String NOTIFICATIONS_INCLUDE_SUMMARY = "includeSummary";
-  String NOTIFICATIONS_TIME_ZONE = "timezone";
-  String NOTIFICATIONS_DEFAULT_INCLUDE_SENT_ANOMALY_ONLY = "false";
-  String NOTIFICATIONS_DEFAULT_INCLUDE_SUMMARY = "false";
   String NOTIFICATIONS_DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
-  String NOTIFICATIONS_DEFAULT_TIME_ZONE = "America/Los_Angeles";
   String NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
   String NOTIFICATIONS_RAW_VALUE_FORMAT = "%.0f";
   String NOTIFICATIONS_PERCENTAGE_FORMAT = "%.2f %%";

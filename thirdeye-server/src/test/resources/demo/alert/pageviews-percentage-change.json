@@ -1,7 +1,7 @@
 {
   "name": "pageviews-percentage-change",
   "description": "This is the detection used by online service",
-  "cron": "0 */1 * * * ?",
+  "cron": "0 0 0 1/1 * ? *",
   "template": {
     "nodes": [
       {

@@ -1,4 +1,4 @@
-import { useMediaQuery, useTheme } from "@material-ui/core";
+import { Grid, useMediaQuery, useTheme } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import {
     PageHeaderActionsV1,
@@ -25,25 +25,30 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
 
     return (
         <PageHeaderV1>
-            <PageHeaderTextV1>{props.title}</PageHeaderTextV1>
+            <Grid container justifyContent="space-between">
+                <Grid item>
+                    <PageHeaderTextV1>{props.title}</PageHeaderTextV1>
+                </Grid>
+                <Grid item>
+                    <PageHeaderActionsV1>
+                        {/* Time range selector */}
+                        {props.showTimeRange && (
+                            <TimeRangeSelector
+                                hideTimeRange={!screenWidthSmUp}
+                                recentCustomTimeRangeDurations={
+                                    recentCustomTimeRangeDurations
+                                }
+                                timeRangeDuration={timeRangeDuration}
+                                onChange={setTimeRangeDuration}
+                                onRefresh={refreshTimeRange}
+                            />
+                        )}
 
-            <PageHeaderActionsV1>
-                {/* Time range selector */}
-                {props.showTimeRange && (
-                    <TimeRangeSelector
-                        hideTimeRange={!screenWidthSmUp}
-                        recentCustomTimeRangeDurations={
-                            recentCustomTimeRangeDurations
-                        }
-                        timeRangeDuration={timeRangeDuration}
-                        onChange={setTimeRangeDuration}
-                        onRefresh={refreshTimeRange}
-                    />
-                )}
-
-                {/* Create options button */}
-                {props.showCreateButton && <CreateMenuButton />}
-            </PageHeaderActionsV1>
+                        {/* Create options button */}
+                        {props.showCreateButton && <CreateMenuButton />}
+                    </PageHeaderActionsV1>
+                </Grid>
+            </Grid>
         </PageHeaderV1>
     );
 };

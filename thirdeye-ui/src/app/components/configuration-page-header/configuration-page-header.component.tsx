@@ -7,7 +7,12 @@ import {
     PageHeaderTextV1,
     PageHeaderV1,
 } from "../../platform/components";
-import { AppRoute } from "../../utils/routes/routes.util";
+import {
+    getDatasetsPath,
+    getDatasourcesPath,
+    getMetricsPath,
+    getSubscriptionGroupsPath,
+} from "../../utils/routes/routes.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
 
@@ -25,16 +30,16 @@ export const ConfigurationPageHeader: FunctionComponent<
             </PageHeaderActionsV1>
 
             <PageHeaderTabsV1 selectedIndex={props.selectedIndex}>
-                <PageHeaderTabV1 href={AppRoute.SUBSCRIPTION_GROUPS}>
+                <PageHeaderTabV1 href={getSubscriptionGroupsPath()}>
                     {t("label.subscription-groups")}
                 </PageHeaderTabV1>
-                <PageHeaderTabV1 href={AppRoute.DATASETS}>
+                <PageHeaderTabV1 href={getDatasetsPath()}>
                     {t("label.datasets")}
                 </PageHeaderTabV1>
-                <PageHeaderTabV1 href={AppRoute.DATASOURCES}>
+                <PageHeaderTabV1 href={getDatasourcesPath()}>
                     {t("label.datasources")}
                 </PageHeaderTabV1>
-                <PageHeaderTabV1 href={AppRoute.METRICS}>
+                <PageHeaderTabV1 href={getMetricsPath()}>
                     {t("label.metrics")}
                 </PageHeaderTabV1>
             </PageHeaderTabsV1>

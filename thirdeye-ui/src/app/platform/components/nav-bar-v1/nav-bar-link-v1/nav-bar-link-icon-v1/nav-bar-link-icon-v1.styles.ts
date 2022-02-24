@@ -18,11 +18,13 @@ export const useNavBarLinkIconV1Styles = makeStyles((theme) => ({
     navBarLinkIconRegular: {
         "& svg": {
             color: theme.palette.secondary.main,
+            fill: theme.palette.secondary.main,
         },
     },
     navBarLinkIconHover: {
         "& svg": {
             color: theme.palette.primary.contrastText,
+            fill: theme.palette.primary.contrastText,
         },
     },
 }));

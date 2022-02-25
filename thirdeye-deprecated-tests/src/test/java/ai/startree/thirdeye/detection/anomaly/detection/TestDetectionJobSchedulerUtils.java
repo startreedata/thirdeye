@@ -9,6 +9,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
+import ai.startree.thirdeye.spi.detection.TimeSpec;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
@@ -30,6 +31,7 @@ public class TestDetectionJobSchedulerUtils {
     datasetConfig.setTimeColumn("Date");
     datasetConfig.setTimeUnit(TimeUnit.HOURS);
     datasetConfig.setTimeDuration(1);
+    datasetConfig.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
     DateTimeZone dateTimeZone = DateTimeZone.UTC;
 
     AnomalyFunctionDTO anomalyFunction = new AnomalyFunctionDTO();
@@ -99,6 +101,7 @@ public class TestDetectionJobSchedulerUtils {
     datasetConfig.setTimeColumn("Date");
     datasetConfig.setTimeUnit(TimeUnit.MINUTES);
     datasetConfig.setTimeDuration(5);
+    datasetConfig.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
     DateTimeZone dateTimeZone = DateTimeZone.UTC;
 
     AnomalyFunctionDTO anomalyFunction = new AnomalyFunctionDTO();
@@ -171,6 +174,7 @@ public class TestDetectionJobSchedulerUtils {
     datasetConfig.setTimeColumn("Date");
     datasetConfig.setTimeUnit(TimeUnit.DAYS);
     datasetConfig.setTimeDuration(1);
+    datasetConfig.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
     DateTimeZone dateTimeZone = DateTimeZone.UTC;
 
     AnomalyFunctionDTO anomalyFunction = new AnomalyFunctionDTO();
@@ -240,6 +244,7 @@ public class TestDetectionJobSchedulerUtils {
     datasetConfig.setTimeColumn("Date");
     datasetConfig.setTimeUnit(TimeUnit.DAYS);
     datasetConfig.setTimeDuration(1);
+    datasetConfig.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
     DateTimeZone dateTimeZone = DateTimeZone.UTC;
 
     AnomalyFunctionDTO anomalyFunction = new AnomalyFunctionDTO();
@@ -310,6 +315,7 @@ public class TestDetectionJobSchedulerUtils {
     datasetConfig.setTimeColumn("Date");
     datasetConfig.setTimeUnit(TimeUnit.DAYS);
     datasetConfig.setTimeDuration(1);
+    datasetConfig.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
     DateTimeZone dateTimeZone = DateTimeZone.UTC;
 
     AnomalyFunctionDTO anomalyFunction = new AnomalyFunctionDTO();

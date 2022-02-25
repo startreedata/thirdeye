@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 public interface Constants {
 
+  String DEFAULT_TIMEZONE = "America/Los_Angeles";
+
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
   String AUTH_BEARER = "Bearer";
@@ -34,6 +36,11 @@ public interface Constants {
 
   // Time beyond which we do not want to notify anomalies
   long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(1400);
+
+  String NOTIFICATIONS_DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
+  String NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
+  String NOTIFICATIONS_RAW_VALUE_FORMAT = "%.0f";
+  String NOTIFICATIONS_PERCENTAGE_FORMAT = "%.2f %%";
 
   enum JobStatus {
     SCHEDULED,

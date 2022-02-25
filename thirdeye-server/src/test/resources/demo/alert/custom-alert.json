@@ -1,7 +1,7 @@
 {
   "name": "custom-alert",
   "description": "This is an alert you can customize.",
-  "cron": "0 */1 * * * ?",
+  "cron": "0 0 0 1/1 * ? *",
   "template": {
     "rca": {
       "datasource": "${dataSource}",

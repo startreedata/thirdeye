@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.detection;
 
+import ai.startree.thirdeye.spi.Constants;
 import java.io.Serializable;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -16,11 +17,10 @@ import org.modelmapper.convention.MatchingStrategies;
  */
 public abstract class AbstractSpec implements Serializable {
 
-  public static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
 
-  private String timezone = DEFAULT_TIMEZONE;
+  private String timezone = Constants.DEFAULT_TIMEZONE;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
   /**

@@ -2,7 +2,7 @@
   {
     "name": "us_monthly_air_passengers_simplified-holtwinters-usingtemplate",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "name": "holtwinters-template"
     },

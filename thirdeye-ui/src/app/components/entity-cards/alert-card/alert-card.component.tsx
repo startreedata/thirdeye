@@ -187,7 +187,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         {/* Created by */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<string>
-                                name={t("label.anomalies")}
+                                name={`${t("label.anomalies")} in ${t(
+                                    "label.time-range"
+                                )}`}
                                 searchWords={props.searchWords}
                                 values={[`${anomalies ? anomalies.length : 0}`]}
                             />

@@ -25,6 +25,7 @@ import {
     getAlert,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
+import { useGetAnomalyByAlertIdAndTime } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -37,7 +38,7 @@ import {
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
     getAlertsAllPath,
-    getRootCauseAnalysisForAnomalyIndexPath,
+    getAnomaliesViewIndexPath,
 } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
@@ -47,6 +48,8 @@ export const AlertsViewPage: FunctionComponent = () => {
         getEvaluation,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
+    const { anomalies, getAnomalyByAlertIdAndTime } =
+        useGetAnomalyByAlertIdAndTime();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -65,8 +68,14 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [alertId]);
 
     useEffect(() => {
-        !!evaluation && setAlertEvaluation(evaluation);
-    }, [evaluation]);
+        if (evaluation) {
+            if (anomalies) {
+                evaluation.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies =
+                    anomalies;
+            }
+            setAlertEvaluation(evaluation);
+        }
+    }, [evaluation, anomalies]);
 
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
@@ -90,6 +99,11 @@ export const AlertsViewPage: FunctionComponent = () => {
 
             return;
         }
+        getAnomalyByAlertIdAndTime(
+            uiAlert.alert.id,
+            timeRangeDuration.startTime,
+            timeRangeDuration.endTime
+        );
         getEvaluation(
             createAlertEvaluation(
                 uiAlert.alert,
@@ -184,7 +198,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     };
 
     const onAnomalyBarClick = (anomaly: Anomaly): void => {
-        navigate(getRootCauseAnalysisForAnomalyIndexPath(anomaly.id));
+        navigate(getAnomaliesViewIndexPath(anomaly.id));
     };
 
     return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
@@ -220,7 +234,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                 {/* Alert Details Card*/}
                 <Grid item xs={12}>
                     <AlertCard
-                        alertEvaluation={alertEvaluation}
+                        anomalies={anomalies}
                         uiAlert={uiAlert}
                         onChange={handleAlertChange}
                         onDelete={handleAlertDelete}

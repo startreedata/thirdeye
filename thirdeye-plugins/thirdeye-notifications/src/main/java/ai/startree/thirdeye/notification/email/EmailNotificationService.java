@@ -15,6 +15,7 @@ import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,7 +31,7 @@ public class EmailNotificationService implements NotificationService {
   private final SmtpConfiguration smtpConfiguration;
 
   public EmailNotificationService(final SmtpConfiguration configuration) {
-    this.smtpConfiguration = configuration;
+    smtpConfiguration = configuration;
   }
 
   /**
@@ -41,7 +42,7 @@ public class EmailNotificationService implements NotificationService {
    * @param emailCollection collection of email address strings
    * @return filtered collection of InternetAddress objects
    */
-  public static Collection<InternetAddress> toAddress(Collection<String> emailCollection) {
+  public static Collection<InternetAddress> toAddress(final Collection<String> emailCollection) {
     if (CollectionUtils.isEmpty(emailCollection)) {
       return Collections.emptySet();
     }
@@ -53,23 +54,20 @@ public class EmailNotificationService implements NotificationService {
   private static InternetAddress toInternetAddress(final String s) {
     try {
       return new InternetAddress(s);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return null;
     }
   }
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
+    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
     try {
-      final EmailEntityApi emailEntity = new EmailContentBuilder().buildEmailEntityApi(
-          api.getSubscriptionGroup(),
-          DEFAULT_EMAIL_TEMPLATE,
-          api.getEmailTemplateData(),
-          api.getEmailRecipients());
+      final EmailEntityApi emailEntity = emailContentBuilder.buildEmailEntityApi(api);
 
       final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "Email dispatch failed!");
     }
   }
@@ -122,8 +120,10 @@ public class EmailNotificationService implements NotificationService {
 
   @Override
   public Object toHtml(final NotificationPayloadApi api) {
-    return new EmailContentBuilder().buildHtml(
+    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
+    final Map<String, Object> templateData = emailContentBuilder.constructTemplateData(api);
+    return emailContentBuilder.buildHtml(
         DEFAULT_EMAIL_TEMPLATE,
-        api.getEmailTemplateData());
+        templateData);
   }
 }

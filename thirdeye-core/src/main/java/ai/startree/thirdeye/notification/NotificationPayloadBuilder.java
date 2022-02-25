@@ -10,6 +10,7 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
+import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -31,13 +32,16 @@ public class NotificationPayloadBuilder {
 
   private final UiConfiguration uiConfiguration;
   private final EmailEntityBuilder emailEntityBuilder;
+  private final AnomalyEmailContentBuilder anomalyEmailContentBuilder;
 
   @Inject
   public NotificationPayloadBuilder(
       final UiConfiguration uiConfiguration,
-      final EmailEntityBuilder emailEntityBuilder) {
+      final EmailEntityBuilder emailEntityBuilder,
+      final AnomalyEmailContentBuilder anomalyEmailContentBuilder) {
     this.uiConfiguration = uiConfiguration;
     this.emailEntityBuilder = emailEntityBuilder;
+    this.anomalyEmailContentBuilder = anomalyEmailContentBuilder;
   }
 
   public NotificationPayloadApi buildNotificationPayload(
@@ -56,8 +60,15 @@ public class NotificationPayloadBuilder {
         emailScheme.getBcc()
     ).setFrom(subscriptionGroup.getFrom());
 
+    final NotificationReportApi report = anomalyEmailContentBuilder.buildNotificationReportApi(
+        subscriptionGroup,
+        anomalies);
+
+    report.setRelatedEvents(anomalyEmailContentBuilder.getRelatedEvents(anomalies));
+
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
+        .setReport(report)
         .setAnomalyReports(toAnomalyReports(anomalyResults))
         .setEmailTemplateData(templateData)
         .setEmailRecipients(recipients);

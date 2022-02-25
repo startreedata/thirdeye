@@ -5,18 +5,21 @@
 
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper.takeGraphScreenShot;
 import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getDateString;
 import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getFeedbackValue;
 import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper;
 import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
 import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
+import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.api.EventApi;
+import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -29,7 +32,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import ai.startree.thirdeye.spi.detection.events.EventType;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -44,9 +46,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -103,21 +104,15 @@ public class AnomalyEmailContentBuilder {
     }
   }
 
-  private void enrichMetricInfo(final Map<String, Object> templateData,
+  private Map<String, MetricConfigDTO> buildMetricsMap(
       final Collection<AnomalyResult> anomalies) {
-    final Set<String> metrics = new TreeSet<>();
-    final Set<String> datasets = new TreeSet<>();
-
     final Map<String, MetricConfigDTO> metricsMap = new TreeMap<>();
     for (final AnomalyResult anomalyResult : anomalies) {
       if (anomalyResult instanceof MergedAnomalyResultDTO) {
         final MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
 
-        optional(mergedAnomaly.getCollection()).ifPresent(datasets::add);
-
         final String metricName = mergedAnomaly.getMetric();
         if (metricName != null) {
-          metrics.add(metricName);
           final MetricConfigDTO metric = metricConfigManager
               .findByMetricAndDataset(metricName, mergedAnomaly.getCollection());
           if (metric != null) {
@@ -126,17 +121,12 @@ public class AnomalyEmailContentBuilder {
         }
       }
     }
-
-    templateData.put("datasetsCount", datasets.size());
-    templateData.put("datasets", StringUtils.join(datasets, ", "));
-    templateData.put("metricsCount", metrics.size());
-    templateData.put("metrics", StringUtils.join(metrics, ", "));
-    templateData.put("metricsMap", metricsMap);
+    return metricsMap;
   }
 
-  private Map<String, Object> getTemplateData(final SubscriptionGroupDTO notificationConfig,
-      final Collection<AnomalyResult> anomalies) {
-    final Map<String, Object> templateData = new HashMap<>();
+  public NotificationReportApi buildNotificationReportApi(
+      final SubscriptionGroupDTO notificationConfig,
+      final Collection<? extends AnomalyResult> anomalies) {
 
     final List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
 
@@ -160,28 +150,31 @@ public class AnomalyEmailContentBuilder {
         mergedAnomalyResults, new DummyAlertFilter(),
         mergedAnomalyResultManager);
 
-    templateData.put("anomalyCount", anomalies.size());
-    templateData.put("startTime", getDateString(startTime));
-    templateData.put("endTime", getDateString(endTime));
-    templateData.put("timeZone", getTimezoneString(dateTimeZone));
-    templateData.put("notifiedCount", precisionRecallEvaluator.getTotalAlerts());
-    templateData.put("feedbackCount", precisionRecallEvaluator.getTotalResponses());
-    templateData.put("trueAlertCount", precisionRecallEvaluator.getTrueAnomalies());
-    templateData.put("falseAlertCount", precisionRecallEvaluator.getFalseAlarm());
-    templateData.put("newTrendCount", precisionRecallEvaluator.getTrueAnomalyNewTrend());
-    templateData.put("alertConfigName", notificationConfig.getName());
-    templateData.put("includeSummary", INCLUDE_SUMMARY);
-    templateData.put("reportGenerationTimeMillis", System.currentTimeMillis());
+    final NotificationReportApi report = new NotificationReportApi();
+
+    report.setStartTime(getDateString(startTime));
+    report.setEndTime(getDateString(endTime));
+    report.setTimeZone(getTimezoneString(dateTimeZone));
+    report.setNotifiedCount(precisionRecallEvaluator.getTotalAlerts());
+    report.setFeedbackCount(precisionRecallEvaluator.getTotalResponses());
+    report.setTrueAlertCount(precisionRecallEvaluator.getTrueAnomalies());
+    report.setFalseAlertCount(precisionRecallEvaluator.getFalseAlarm());
+    report.setNewTrendCount(precisionRecallEvaluator.getTrueAnomalyNewTrend());
+    report.setAlertConfigName(notificationConfig.getName());
+    report.setIncludeSummary(INCLUDE_SUMMARY);
+    report.setReportGenerationTimeMillis(System.currentTimeMillis());
+
     if (precisionRecallEvaluator.getTotalResponses() > 0) {
-      templateData.put("precision", precisionRecallEvaluator.getPrecisionInResponse());
-      templateData.put("recall", precisionRecallEvaluator.getRecall());
-      templateData.put("falseNegative", precisionRecallEvaluator.getFalseNegativeRate());
+      report.setPrecision(precisionRecallEvaluator.getPrecisionInResponse());
+      report.setRecall(precisionRecallEvaluator.getRecall());
+      report.setFalseNegative(precisionRecallEvaluator.getFalseNegativeRate());
     }
     if (notificationConfig.getRefLinks() != null) {
-      templateData.put("referenceLinks", notificationConfig.getRefLinks());
+      report.setReferenceLinks(notificationConfig.getRefLinks());
     }
+    report.setDashboardHost(uiConfiguration.getExternalUrl());
 
-    return templateData;
+    return report;
   }
 
   /**
@@ -211,23 +204,9 @@ public class AnomalyEmailContentBuilder {
     return "metric-anomalies";
   }
 
-  public Map<String, Object> format(final Collection<AnomalyResult> anomalies,
-      final SubscriptionGroupDTO subsConfig) {
-    final Map<String, Object> templateData = getTemplateData(subsConfig, anomalies);
-    enrichMetricInfo(templateData, anomalies);
-
+  public List<EventApi> getRelatedEvents(final Collection<? extends AnomalyResult> anomalies) {
     DateTime windowStart = DateTime.now();
     DateTime windowEnd = new DateTime(0);
-
-    final Map<String, Long> functionToId = new HashMap<>();
-    final Multimap<String, String> anomalyDimensions = ArrayListMultimap.create();
-    final Multimap<String, AnomalyReportEntity> functionAnomalyReports = ArrayListMultimap.create();
-    final Multimap<String, AnomalyReportEntity> metricAnomalyReports = ArrayListMultimap.create();
-    final List<AnomalyReportEntity> anomalyDetails = new ArrayList<>();
-    final List<String> anomalyIds = new ArrayList<>();
-
-    final List<AnomalyResult> sortedAnomalies = new ArrayList<>(anomalies);
-    sortedAnomalies.sort(Comparator.comparingDouble(AnomalyResult::getWeight));
 
     for (final AnomalyResult anomalyResult : anomalies) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
@@ -246,29 +225,56 @@ public class AnomalyEmailContentBuilder {
       if (anomalyEndTime.isAfter(windowEnd)) {
         windowEnd = anomalyEndTime;
       }
+    }
 
+    // holidays
+    final DateTime eventStart = windowStart.minus(preEventCrawlOffset);
+    final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
+    final List<EventDTO> holidays = getHolidayEvents(
+        eventStart,
+        eventEnd,
+        new HashMap<>());
+    holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
+
+    return holidays.stream()
+        .map(ApiBeanMapper::toApi)
+        .collect(Collectors.toList());
+  }
+
+  public Map<String, Object> format(final Collection<AnomalyResult> anomalies) {
+    final Multimap<String, String> anomalyDimensions = ArrayListMultimap.create();
+    final Multimap<String, AnomalyReportEntity> alertAnomalyReportsMap = ArrayListMultimap.create();
+    final Multimap<String, AnomalyReportEntity> metricAnomalyReportsMap = ArrayListMultimap.create();
+
+    final List<AnomalyResult> sortedAnomalies = new ArrayList<>(anomalies);
+    sortedAnomalies.sort(Comparator.comparingDouble(AnomalyResult::getWeight));
+
+    for (final AnomalyResult anomalyResult : anomalies) {
+      if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
+        LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
+            anomalyResult);
+        continue;
+      }
+      final MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
       final AnomalyFeedback feedback = anomaly.getFeedback();
-
       final String feedbackVal = getFeedbackValue(feedback);
 
-      String functionName = "Alerts";
-      String funcDescription = "";
-      Long id = -1L;
+      String alertName = "Alerts";
+      String alertDescription = "";
 
       if (anomaly.getDetectionConfigId() != null) {
-        final AlertDTO config = alertManager.findById(anomaly.getDetectionConfigId());
-        Preconditions.checkNotNull(config,
+        final AlertDTO alert = alertManager.findById(anomaly.getDetectionConfigId());
+        Preconditions.checkNotNull(alert,
             String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
-        functionName = config.getName();
-        funcDescription = config.getDescription() == null ? "" : config.getDescription();
-        id = config.getId();
+        alertName = alert.getName();
+        alertDescription = alert.getDescription() == null ? "" : alert.getDescription();
       }
 
       final AnomalyReportEntity anomalyReport = AnomalyReportEntityBuilder.buildAnomalyReportEntity(
           anomaly,
           feedbackVal,
-          functionName,
-          funcDescription,
+          alertName,
+          alertDescription,
           dateTimeZone,
           uiConfiguration.getExternalUrl());
 
@@ -278,41 +284,31 @@ public class AnomalyEmailContentBuilder {
       }
 
       // include notified alerts only in the email
-      anomalyDetails.add(anomalyReport);
-      anomalyIds.add(anomalyReport.getAnomalyId());
-      functionAnomalyReports.put(functionName, anomalyReport);
-      metricAnomalyReports.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
-      functionToId.put(functionName, id);
+      alertAnomalyReportsMap.put(alertName, anomalyReport);
+      metricAnomalyReportsMap.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
     }
 
-    // holidays
-    final DateTime eventStart = windowStart.minus(preEventCrawlOffset);
-    final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
-    final Map<String, List<String>> targetDimensions = new HashMap<>();
-
-    final List<EventDTO> holidays = getHolidayEvents(eventStart, eventEnd, targetDimensions);
-    holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
-
     // Insert anomaly snapshot image
+//    this.imgPath = buildScreenshot(anomalyReports);
+
+    final Map<String, Object> templateData = new HashMap<>();
+    templateData.put("detectionToAnomalyDetailsMap", alertAnomalyReportsMap.asMap());
+    templateData.put("metricToAnomalyDetailsMap", metricAnomalyReportsMap.asMap());
+    return templateData;
+  }
+
+  private String buildScreenshot(final List<AnomalyReportEntity> anomalyDetails) {
     if (anomalyDetails.size() == 1) {
       final AnomalyReportEntity singleAnomaly = anomalyDetails.get(0);
       try {
-        imgPath = AlertScreenshotHelper
-            .takeGraphScreenShot(singleAnomaly.getAnomalyId(),
-                uiConfiguration.getExternalUrl());
+        return takeGraphScreenShot(
+            singleAnomaly.getAnomalyId(),
+            uiConfiguration.getExternalUrl());
       } catch (final Exception e) {
         LOG.error("Exception while embedding screenshot for anomaly {}",
             singleAnomaly.getAnomalyId(), e);
       }
     }
-
-    templateData.put("anomalyDetails", anomalyDetails);
-    templateData.put("anomalyIds", Joiner.on(",").join(anomalyIds));
-    templateData.put("holidays", holidays);
-    templateData.put("detectionToAnomalyDetailsMap", functionAnomalyReports.asMap());
-    templateData.put("metricToAnomalyDetailsMap", metricAnomalyReports.asMap());
-    templateData.put("functionToId", functionToId);
-
-    return templateData;
+    return null;
   }
 }

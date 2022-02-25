@@ -8,7 +8,6 @@ package ai.startree.thirdeye.notification;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import com.google.common.base.Strings;
@@ -29,15 +28,12 @@ public class EmailEntityBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(EmailEntityBuilder.class);
 
   private final SmtpConfiguration smtpConfig;
-  private final UiConfiguration uiConfig;
   private final AnomalyEmailContentBuilder anomalyEmailContentBuilder;
 
   @Inject
-  public EmailEntityBuilder(final UiConfiguration uiConfig,
-      final AnomalyEmailContentBuilder anomalyEmailContentBuilder,
+  public EmailEntityBuilder(final AnomalyEmailContentBuilder anomalyEmailContentBuilder,
       final NotificationConfiguration notificationConfiguration) {
     this.anomalyEmailContentBuilder = anomalyEmailContentBuilder;
-    this.uiConfig = uiConfig;
 
     smtpConfig = notificationConfiguration.getSmtpConfiguration();
   }
@@ -60,10 +56,8 @@ public class EmailEntityBuilder {
       sg.setFrom(fromAddress);
     }
 
-    final Map<String, Object> templateData = anomalyEmailContentBuilder.format(
-        sortedAnomalyResults,
-        sg);
-    templateData.put("dashboardHost", uiConfig.getExternalUrl());
-    return templateData;
+    return anomalyEmailContentBuilder.format(
+        sortedAnomalyResults
+    );
   }
 }

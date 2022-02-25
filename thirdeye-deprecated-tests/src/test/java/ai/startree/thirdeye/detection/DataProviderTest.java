@@ -41,6 +41,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.DataProvider;
+import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.spi.detection.model.EventSlice;
 import com.codahale.metrics.MetricRegistry;
@@ -156,6 +157,7 @@ public class DataProviderTest {
     metricDTO.setId(id);
     metricDTO.setName(metric);
     metricDTO.setDataset(dataset);
+    metricDTO.setDefaultAggFunction(MetricAggFunction.SUM);
     metricDTO.setAlias(dataset + "::" + metric);
     return metricDTO;
   }

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.datasource.auto.onboard;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
@@ -79,33 +80,31 @@ public class PinotDatasetOnboarderTest {
   public void testAddNewDataset() throws Exception {
     Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(dataset);
-    Assert.assertEquals(datasetConfig.getDataset(), dataset);
-    Assert.assertEquals(datasetConfig.getDimensions(), schema.getDimensionNames());
-    Assert.assertEquals(datasetConfig.getTimeColumn(), oldTimeColumnName);
+    assertThat(datasetConfig.getDataset()).isEqualTo(dataset);
+    assertThat(datasetConfig.getDimensions()).isEqualTo(schema.getDimensionNames());
+    assertThat(datasetConfig.getTimeColumn()).isEqualTo(oldTimeColumnName);
     DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(oldTimeColumnName);
     DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
-    Assert
-        .assertEquals(datasetConfig.bucketTimeGranularity().getUnit(), formatSpec.getColumnUnit());
-    Assert
-        .assertEquals(datasetConfig.bucketTimeGranularity().getSize(), formatSpec.getColumnSize());
-    Assert.assertEquals(datasetConfig.getTimeFormat(), "EPOCH");
-    Assert.assertEquals(datasetConfig.getTimezone(), "US/Pacific");
-    Assert.assertEquals(datasetConfig.getExpectedDelay().getUnit(), TimeUnit.HOURS);
+    assertThat(datasetConfig.bucketTimeGranularity().getUnit()).isEqualTo(formatSpec.getColumnUnit());
+    assertThat(datasetConfig.bucketTimeGranularity().getSize()).isEqualTo(formatSpec.getColumnSize());
+    assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
+    assertThat(datasetConfig.getTimezone()).isEqualTo("US/Pacific");
+    assertThat(datasetConfig.getExpectedDelay().getUnit()).isEqualTo(TimeUnit.HOURS);
+    assertThat(datasetConfig.isActive()).isTrue();
 
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
     List<String> schemaMetricNames = schema.getMetricNames();
+    // fixme cyril
     List<Long> metricIds = new ArrayList<>();
-    Assert.assertEquals(metricConfigs.size(), schemaMetricNames.size());
+    assertThat(metricConfigs.size()).isEqualTo(schemaMetricNames.size());
     for (MetricConfigDTO metricConfig : metricConfigs) {
-      Assert.assertTrue(schemaMetricNames.contains(metricConfig.getName()));
+      assertThat(schemaMetricNames.contains(metricConfig.getName())).isTrue();
       metricIds.add(metricConfig.getId());
       if (metricConfig.getName().equals("latency_tdigest")) {
-        Assert.assertEquals(metricConfig.getDefaultAggFunction(),
-            MetricConfigDTO.DEFAULT_TDIGEST_AGG_FUNCTION);
-        Assert.assertEquals(metricConfig.getDatatype(), MetricType.DOUBLE);
+        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_TDIGEST_AGG_FUNCTION);
+        assertThat(metricConfig.getDatatype()).isEqualTo(MetricType.DOUBLE);
       } else {
-        Assert.assertEquals(metricConfig.getDefaultAggFunction(),
-            MetricConfigDTO.DEFAULT_AGG_FUNCTION);
+        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_AGG_FUNCTION);
       }
     }
   }
@@ -125,12 +124,12 @@ public class PinotDatasetOnboarderTest {
         new HashMap<>(pinotCustomConfigs),
         datasetConfig,
         DATA_SOURCE_NAME);
-    Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
+    assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     DatasetConfigDTO newDatasetConfig1 = datasetConfigDAO.findByDataset(dataset);
-    Assert.assertEquals(newDatasetConfig1.getDataset(), dataset);
-    Assert.assertEquals(Sets.newHashSet(newDatasetConfig1.getDimensions()),
-        Sets.newHashSet(schema.getDimensionNames()));
-    Assert.assertEquals(newDatasetConfig1.getProperties(), pinotCustomConfigs);
+    assertThat(newDatasetConfig1.getDataset()).isEqualTo(dataset);
+    assertThat(Sets.newHashSet(newDatasetConfig1.getDimensions())).isEqualTo(Sets.newHashSet(schema.getDimensionNames()));
+    assertThat(newDatasetConfig1.getProperties()).isEqualTo(pinotCustomConfigs);
+    assertThat(newDatasetConfig1.isActive()).isTrue();
 
     MetricFieldSpec metricFieldSpec = new MetricFieldSpec("newMetric", FieldSpec.DataType.LONG);
     schema.addField(metricFieldSpec);
@@ -143,13 +142,13 @@ public class PinotDatasetOnboarderTest {
         newDatasetConfig1,
         DATA_SOURCE_NAME);
 
-    Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
+    assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
     List<String> schemaMetricNames = schema.getMetricNames();
     List<Long> metricIds = new ArrayList<>();
-    Assert.assertEquals(metricConfigs.size(), schemaMetricNames.size());
+    assertThat(metricConfigs.size()).isEqualTo(schemaMetricNames.size());
     for (MetricConfigDTO metricConfig : metricConfigs) {
-      Assert.assertTrue(schemaMetricNames.contains(metricConfig.getName()));
+      assertThat(schemaMetricNames.contains(metricConfig.getName())).isTrue();
       metricIds.add(metricConfig.getId());
     }
 
@@ -159,8 +158,8 @@ public class PinotDatasetOnboarderTest {
     for (Map.Entry<String, String> pinotCustomCnofig : pinotCustomConfigs.entrySet()) {
       String configKey = pinotCustomCnofig.getKey();
       String configValue = pinotCustomCnofig.getValue();
-      Assert.assertTrue(datasetCustomConfigs.containsKey(configKey));
-      Assert.assertEquals(datasetCustomConfigs.get(configKey), configValue);
+      assertThat(datasetCustomConfigs.containsKey(configKey)).isTrue();
+      assertThat(datasetCustomConfigs.get(configKey)).isEqualTo(configValue);
     }
 
     DateTimeFieldSpec dateTimeFieldSpec = new DateTimeFieldSpec(newTimeColumnName,
@@ -173,23 +172,23 @@ public class PinotDatasetOnboarderTest {
         new HashMap<>(pinotCustomConfigs),
         newDatasetConfig1,
         DATA_SOURCE_NAME);
-    Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
+    assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     datasetConfig = datasetConfigDAO.findByDataset(dataset);
-    Assert.assertEquals(datasetConfig.bucketTimeGranularity().getUnit(), TimeUnit.MINUTES);
-    Assert.assertEquals(datasetConfig.bucketTimeGranularity().getSize(), 5);
-    Assert.assertEquals(datasetConfig.getTimeUnit(), TimeUnit.MILLISECONDS);
-    Assert.assertEquals(datasetConfig.getTimeDuration().intValue(), 1);
-    Assert.assertEquals(datasetConfig.getTimeFormat(), "EPOCH");
-    Assert.assertEquals(datasetConfig.getTimezone(), "US/Pacific");
-    Assert.assertEquals(datasetConfig.getExpectedDelay().getUnit(), TimeUnit.HOURS);
+    assertThat(datasetConfig.bucketTimeGranularity().getUnit()).isEqualTo(TimeUnit.MINUTES);
+    assertThat(datasetConfig.bucketTimeGranularity().getSize()).isEqualTo(5);
+    assertThat(datasetConfig.getTimeUnit()).isEqualTo(TimeUnit.MILLISECONDS);
+    assertThat(datasetConfig.getTimeDuration().intValue()).isEqualTo(1);
+    assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
+    assertThat(datasetConfig.getTimezone()).isEqualTo("US/Pacific");
+    assertThat(datasetConfig.getExpectedDelay().getUnit()).isEqualTo(TimeUnit.HOURS);
   }
 
   @Test(dependsOnMethods = {"testRefreshDataset"})
   public void testDeactivate() throws Exception {
-    Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
+    assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     pinotDatasetOnboarder.deactivateDatasets(Collections.emptyList(), DATA_SOURCE_NAME);
     List<DatasetConfigDTO> datasets = datasetConfigDAO.findAll();
-    Assert.assertEquals(datasets.size(), 1);
-    Assert.assertFalse(datasets.get(0).isActive());
+    assertThat(datasets.size()).isEqualTo(1);
+    assertThat(datasets.get(0).isActive()).isFalse();
   }
 }

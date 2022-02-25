@@ -23,17 +23,8 @@ import java.util.Objects;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 public class TestTimeSeriesResponseUtils {
-
-  @Test(dataProvider = "toMapProvider")
-  public void toMap(String testName, TimeSeriesResponse response, List<String> schemaDimensions,
-      Map<DimensionKey, MetricTimeSeries> expected) {
-    Map<DimensionKey, MetricTimeSeries> actual = TimeSeriesResponseConverter
-        .toMap(response, schemaDimensions);
-    Assert.assertEquals(actual, expected);
-  }
 
   @DataProvider(name = "toMapProvider")
   public Object[][] toMapProvider() {

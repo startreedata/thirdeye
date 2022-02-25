@@ -21,12 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 public class DatasetConfigDTO extends AbstractDTO {
 
   public static String DEFAULT_PREAGGREGATED_DIMENSION_VALUE = "all";
-  // This is the expected delay for the hourly/daily data source.
-  // 1 hour delay means we always expect to have 1 hour's before's data.
-  public static TimeGranularity DEFAULT_HOURLY_EXPECTED_DELAY = new TimeGranularity(1,
-      TimeUnit.HOURS);
-  public static TimeGranularity DEFAULT_DAILY_EXPECTED_DELAY = new TimeGranularity(24,
-      TimeUnit.HOURS);
 
   private String dataset;
   private String displayName;
@@ -71,7 +65,10 @@ public class DatasetConfigDTO extends AbstractDTO {
   private boolean realtime = false;
 
   // delay expected for a dataset for data to arrive
-  private TimeGranularity expectedDelay = DEFAULT_DAILY_EXPECTED_DELAY;
+  // prefer using delay at the alert level (in metadata)
+  // todo cyril remove once alert delay is implemented
+  @Deprecated
+  private TimeGranularity expectedDelay;
   // latest timestamp of the dataset updated by external events
   private long lastRefreshTime;
   // timestamp of receiving the last update event
@@ -230,10 +227,12 @@ public class DatasetConfigDTO extends AbstractDTO {
     this.realtime = realtime;
   }
 
+  @Deprecated
   public TimeGranularity getExpectedDelay() {
     return expectedDelay;
   }
 
+  @Deprecated
   public void setExpectedDelay(TimeGranularity expectedDelay) {
     this.expectedDelay = expectedDelay;
   }

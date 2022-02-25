@@ -17,7 +17,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getMetricsViewPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -31,7 +31,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
     const metricCardClasses = useMetricCardStyles();
     const [metricOptionsAnchorElement, setMetricOptionsAnchorElement] =
         useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleMetricOptionsClick = (event: MouseEvent<HTMLElement>): void => {
@@ -47,7 +47,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             return;
         }
 
-        history.push(getMetricsViewPath(props.metric.id));
+        navigate(getMetricsViewPath(props.metric.id));
         handleMetricOptionsClose();
     };
 

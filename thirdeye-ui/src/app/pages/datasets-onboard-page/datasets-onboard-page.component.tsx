@@ -1,7 +1,7 @@
 import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -20,7 +20,7 @@ import { getDatasetsViewPath } from "../../utils/routes/routes.util";
 export const DatasetsOnboardPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasources, setDatasources] = useState<Datasource[]>([]);
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -43,7 +43,7 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 );
 
                 // Redirect to datasets detail path
-                history.push(getDatasetsViewPath(dataset.id));
+                navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((): void => {
                 notify(

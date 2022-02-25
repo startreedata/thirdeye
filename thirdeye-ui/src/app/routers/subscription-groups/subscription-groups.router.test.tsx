@@ -1,15 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsRouter } from "./subscription-groups.router";
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -95,7 +93,12 @@ describe("Subscription Groups Router", () => {
     it("should render subscription groups all page at exact subscription groups path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
-                <SubscriptionGroupsRouter />
+                <Routes>
+                    <Route
+                        element={<SubscriptionGroupsRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -121,7 +124,12 @@ describe("Subscription Groups Router", () => {
     it("should render subscription groups all page at exact subscription groups all path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_ALL]}>
-                <SubscriptionGroupsRouter />
+                <Routes>
+                    <Route
+                        element={<SubscriptionGroupsRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -149,7 +157,12 @@ describe("Subscription Groups Router", () => {
     it("should render subscription groups view page at exact subscription groups view path", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_VIEW]}>
-                <SubscriptionGroupsRouter />
+                <Routes>
+                    <Route
+                        element={<SubscriptionGroupsRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -165,7 +178,12 @@ describe("Subscription Groups Router", () => {
                     `${AppRoute.SUBSCRIPTION_GROUPS_VIEW}/testPath`,
                 ]}
             >
-                <SubscriptionGroupsRouter />
+                <Routes>
+                    <Route
+                        element={<SubscriptionGroupsRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -179,7 +197,12 @@ describe("Subscription Groups Router", () => {
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_CREATE]}
             >
-                <SubscriptionGroupsRouter />
+                <Routes>
+                    <Route
+                        element={<SubscriptionGroupsRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -209,7 +232,12 @@ describe("Subscription Groups Router", () => {
             <MemoryRouter
                 initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_UPDATE]}
             >
-                <SubscriptionGroupsRouter />
+                <Routes>
+                    <Route
+                        element={<SubscriptionGroupsRouter />}
+                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -259,4 +287,4 @@ describe("Subscription Groups Router", () => {
     });
 });
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

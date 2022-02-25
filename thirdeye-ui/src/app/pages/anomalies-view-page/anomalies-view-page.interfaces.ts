@@ -1,6 +1,6 @@
-export interface AnomaliesViewPageParams {
+export type AnomaliesViewPageParams = {
     id: string;
-}
+};
 
 export enum AnomalyBreakdownAPIOffsetValues {
     CURRENT = "current",

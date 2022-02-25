@@ -1,7 +1,7 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute, getAlertsAllPath } from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const AlertsAllPage = lazy(() =>
     import(
@@ -36,44 +36,41 @@ const PageNotFoundPage = lazy(() =>
 export const AlertsRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Alerts path */}
-                <Route exact path={AppRoute.ALERTS}>
-                    {/* Redirect to alerts all path */}
-                    <Redirect to={getAlertsAllPath()} />
-                </Route>
+                {/* Redirect to alerts all path */}
+                <Route
+                    index
+                    element={<Navigate to={AppRouteRelative.ALERTS_ALL} />}
+                />
 
                 {/* Alerts all path */}
                 <Route
-                    exact
-                    component={AlertsAllPage}
-                    path={AppRoute.ALERTS_ALL}
+                    element={<AlertsAllPage />}
+                    path={AppRouteRelative.ALERTS_ALL}
                 />
 
                 {/* Alerts view path */}
                 <Route
-                    exact
-                    component={AlertsViewPage}
-                    path={AppRoute.ALERTS_VIEW}
+                    element={<AlertsViewPage />}
+                    path={AppRouteRelative.ALERTS_VIEW}
                 />
 
                 {/* Alerts create path */}
                 <Route
-                    exact
-                    component={AlertsCreatePage}
-                    path={AppRoute.ALERTS_CREATE}
+                    element={<AlertsCreatePage />}
+                    path={AppRouteRelative.ALERTS_CREATE}
                 />
 
                 {/* Alerts update path */}
                 <Route
-                    exact
-                    component={AlertsUpdatePage}
-                    path={AppRoute.ALERTS_UPDATE}
+                    element={<AlertsUpdatePage />}
+                    path={AppRouteRelative.ALERTS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

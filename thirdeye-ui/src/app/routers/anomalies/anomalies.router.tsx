@@ -1,7 +1,7 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { default as React, FunctionComponent, lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute, getAnomaliesAllPath } from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const AnomaliesAllPage = lazy(() =>
     import(
@@ -30,37 +30,37 @@ const PageNotFoundPage = lazy(() =>
 export const AnomaliesRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Anomalies path */}
-                <Route exact path={AppRoute.ANOMALIES}>
-                    {/* Redirect to anomalies all path */}
-                    <Redirect to={getAnomaliesAllPath()} />
-                </Route>
+                {/* Redirect to anomalies all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate replace to={AppRouteRelative.ANOMALIES_ALL} />
+                    }
+                />
 
                 {/* Anomalies all path */}
                 <Route
-                    exact
-                    component={AnomaliesAllPage}
-                    path={AppRoute.ANOMALIES_ALL}
+                    element={<AnomaliesAllPage />}
+                    path={AppRouteRelative.ANOMALIES_ALL}
                 />
 
                 {/* Anomalies view index path to change time range*/}
                 <Route
-                    exact
-                    component={AnomaliesViewIndexPage}
-                    path={AppRoute.ANOMALIES_VIEW_INDEX}
+                    element={<AnomaliesViewIndexPage />}
+                    path={AppRouteRelative.ANOMALIES_VIEW_INDEX}
                 />
 
                 {/* Anomalies view path */}
                 <Route
-                    exact
-                    component={AnomaliesViewPage}
-                    path={AppRoute.ANOMALIES_VIEW}
+                    element={<AnomaliesViewPage />}
+                    path={AppRouteRelative.ANOMALIES_VIEW}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

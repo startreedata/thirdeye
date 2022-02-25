@@ -1,7 +1,7 @@
 import { Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -21,16 +21,16 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     const { t } = useTranslation();
     const [selectedDatasource, setSelectedDatasource] =
         useState<DataGridSelectionModelV1<UiDatasource>>();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleDatasourceDelete = (): void => {
         if (!selectedDatasource) {
             return;
         }
 
-        const selectedSubScriptionGroupId = selectedDatasource
+        const selectedSubScriptingGroupId = selectedDatasource
             .rowKeyValues[0] as number;
-        const uiDatasource = getUiDatasource(selectedSubScriptionGroupId);
+        const uiDatasource = getUiDatasource(selectedSubScriptingGroupId);
         if (!uiDatasource) {
             return;
         }
@@ -55,7 +55,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         const selectedSubScriptionGroupId = selectedDatasource
             .rowKeyValues[0] as number;
 
-        history.push(getDatasourcesUpdatePath(selectedSubScriptionGroupId));
+        navigate(getDatasourcesUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -63,7 +63,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     );
 
     const handleDatasourceViewDetailsById = (id: number): void => {
-        history.push(getDatasourcesViewPath(id));
+        navigate(getDatasourcesViewPath(id));
     };
 
     const renderLink = (

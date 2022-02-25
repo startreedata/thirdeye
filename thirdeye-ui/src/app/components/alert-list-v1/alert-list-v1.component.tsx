@@ -6,7 +6,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -28,7 +28,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     const [selectedAlert, setSelectedAlert] =
         useState<DataGridSelectionModelV1<UiAlert>>();
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const { t } = useTranslation();
 
@@ -54,7 +54,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     }, [props.alerts]);
 
     const handleAlertViewDetails = (id: number): void => {
-        history.push(getAlertsViewPath(id));
+        navigate(getAlertsViewPath(id));
     };
 
     const renderLink = (
@@ -99,7 +99,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
         }
         const selectedAlertId = selectedAlert.rowKeyValues[0] as number;
 
-        history.push(getAlertsUpdatePath(selectedAlertId));
+        navigate(getAlertsUpdatePath(selectedAlertId));
     };
 
     const alertGroupColumns = [

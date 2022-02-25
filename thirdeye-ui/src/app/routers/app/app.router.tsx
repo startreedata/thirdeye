@@ -1,11 +1,10 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
 } from "../../platform/components";
 import { AppRoute } from "../../utils/routes/routes.util";
-import { RootCauseAnalysisRouter } from "../root-cause-analysis/rca.router";
 
 const AlertsRouter = lazy(() =>
     import(
@@ -37,37 +36,46 @@ const GeneralUnauthenticatedRouter = lazy(() =>
     ).then((module) => ({ default: module.GeneralUnauthenticatedRouter }))
 );
 
+const RootCauseAnalysisRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "root-cause-analysis-router" */ "../root-cause-analysis/rca.router"
+    ).then((module) => ({ default: module.RootCauseAnalysisRouter }))
+);
+
 export const AppRouter: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();
 
     if (authDisabled || authenticated) {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
-                <Switch>
+                <Routes>
                     {/* Direct all alerts paths to alerts router */}
-                    <Route component={AlertsRouter} path={AppRoute.ALERTS} />
+                    <Route
+                        element={<AlertsRouter />}
+                        path={`${AppRoute.ALERTS}/*`}
+                    />
 
                     {/* Direct all anomalies paths to anomalies router */}
                     <Route
-                        component={AnomaliesRouter}
-                        path={AppRoute.ANOMALIES}
+                        element={<AnomaliesRouter />}
+                        path={`${AppRoute.ANOMALIES}/*`}
                     />
 
                     {/* Direct all configuration paths to configuration router */}
                     <Route
-                        component={ConfigurationRouter}
-                        path={AppRoute.CONFIGURATION}
+                        element={<ConfigurationRouter />}
+                        path={`${AppRoute.CONFIGURATION}/*`}
                     />
 
                     {/* Direct all rca paths root cause analysis router */}
                     <Route
-                        component={RootCauseAnalysisRouter}
+                        element={<RootCauseAnalysisRouter />}
                         path={AppRoute.ROOT_CAUSE_ANALYSIS}
                     />
 
                     {/* Direct all other paths to general authenticated router */}
-                    <Route component={GeneralAuthenticatedRouter} />
-                </Switch>
+                    <Route element={<GeneralAuthenticatedRouter />} path="/*" />
+                </Routes>
             </Suspense>
         );
     }

@@ -7,7 +7,7 @@ import {
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import {
@@ -20,11 +20,11 @@ import { SubscriptionGroupAlertsAccordianProps } from "./subscription-group-aler
 export const SubscriptionGroupAlertsAccordian: FunctionComponent<
     SubscriptionGroupAlertsAccordianProps
 > = (props: SubscriptionGroupAlertsAccordianProps) => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleAlertClick = (alert: Alert): void => {
-        history.push(getAlertsViewPath(alert.id));
+        navigate(getAlertsViewPath(alert.id));
     };
 
     return (

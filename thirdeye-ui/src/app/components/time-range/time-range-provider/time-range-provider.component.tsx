@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useTimeRangeStore } from "../../../stores/time-range/time-range.store";
 import {
     getTimeRangeDurationFromQueryString,
-    setTimeRangeDurationInQueryString,
+    useSetQueryParamsUtil,
 } from "../../../utils/params/params.util";
 import {
     TimeRange,
@@ -15,6 +15,7 @@ import {
 export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
     props: TimeRangeProviderProps
 ) => {
+    const setUrlQueryParamsUtils = useSetQueryParamsUtil();
     const [loading, setLoading] = useState(true);
     const [timeRangeDuration, setTimeRangeDuration, refreshTimeRange] =
         useTimeRangeStore((state) => [
@@ -35,8 +36,10 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
             return;
         }
 
-        // Time range changed, add time range durtion to query string
-        setTimeRangeDurationInQueryString(timeRangeDuration);
+        // Time range changed, add time range duration to query string
+        setUrlQueryParamsUtils.setTimeRangeDurationInQueryString(
+            timeRangeDuration
+        );
     }, [timeRangeDuration]);
 
     useEffect(() => {

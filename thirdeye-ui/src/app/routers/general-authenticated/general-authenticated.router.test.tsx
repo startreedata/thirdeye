@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { GeneralAuthenticatedRouter } from "./general-authenticated.router";
 
 jest.mock(
@@ -54,7 +54,7 @@ describe("General Authenticated Router", () => {
 
     it("should render page not found page at invalid base path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.BASE}/testPath`]}>
+            <MemoryRouter initialEntries={[`/testPath`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
@@ -66,7 +66,7 @@ describe("General Authenticated Router", () => {
 
     it("should render home page at exact home path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.HOME]}>
+            <MemoryRouter initialEntries={[`/${AppRouteRelative.HOME}`]}>
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );
@@ -78,7 +78,9 @@ describe("General Authenticated Router", () => {
 
     it("should render page not found page at invalid home path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.HOME}/testPath`]}>
+            <MemoryRouter
+                initialEntries={[`/${AppRouteRelative.HOME}/testPath`]}
+            >
                 <GeneralAuthenticatedRouter />
             </MemoryRouter>
         );

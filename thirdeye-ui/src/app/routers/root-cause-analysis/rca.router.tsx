@@ -1,7 +1,7 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRoute } from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const RootCauseAnalysisForAnomalyIndexPage = lazy(() =>
     import(
@@ -26,24 +26,24 @@ const PageNotFoundPage = lazy(() =>
 export const RootCauseAnalysisRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Root cause for an anomaly index path. */}
                 <Route
-                    exact
-                    component={RootCauseAnalysisForAnomalyIndexPage}
-                    path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX}
+                    element={<RootCauseAnalysisForAnomalyIndexPage />}
+                    path={
+                        AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX
+                    }
                 />
 
                 {/* Root cause for an anomaly path */}
                 <Route
-                    exact
-                    component={RootCauseAnalysisForAnomalyPage}
-                    path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
+                    element={<RootCauseAnalysisForAnomalyPage />}
+                    path={AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

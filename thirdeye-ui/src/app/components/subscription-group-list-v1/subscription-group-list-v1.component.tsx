@@ -1,7 +1,7 @@
 import { Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -21,7 +21,7 @@ export const SubscriptionGroupListV1: FunctionComponent<
     const { t } = useTranslation();
     const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] =
         useState<DataGridSelectionModelV1<UiSubscriptionGroup>>();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleSubscriptionGroupDelete = (): void => {
         if (!selectedSubscriptionGroup) {
@@ -59,9 +59,7 @@ export const SubscriptionGroupListV1: FunctionComponent<
         const selectedSubScriptionGroupId = selectedSubscriptionGroup
             .rowKeyValues[0] as number;
 
-        history.push(
-            getSubscriptionGroupsUpdatePath(selectedSubScriptionGroupId)
-        );
+        navigate(getSubscriptionGroupsUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -70,7 +68,7 @@ export const SubscriptionGroupListV1: FunctionComponent<
     );
 
     const handleSubscriptionGroupViewDetailsById = (id: number): void => {
-        history.push(getSubscriptionGroupsViewPath(id));
+        navigate(getSubscriptionGroupsViewPath(id));
     };
 
     const renderLink = (

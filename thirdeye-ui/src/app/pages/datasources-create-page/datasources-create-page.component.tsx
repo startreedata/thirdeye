@@ -1,7 +1,7 @@
 import { Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -15,7 +15,7 @@ import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 
 export const DatasourcesCreatePage: FunctionComponent = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -33,7 +33,7 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                     })
                 );
                 // Redirect to datasources detail path
-                history.push(getDatasourcesViewPath(datasource.id));
+                navigate(getDatasourcesViewPath(datasource.id));
             })
             .catch((): void => {
                 notify(

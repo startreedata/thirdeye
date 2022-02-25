@@ -1,8 +1,9 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
     AppRoute,
+    AppRouteRelative,
     getBasePath,
     getHomePath,
 } from "../../utils/routes/routes.util";
@@ -28,28 +29,33 @@ const PageNotFoundPage = lazy(() =>
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Base path */}
-                <Route exact path={AppRoute.BASE}>
-                    {/* Redirect to home path */}
-                    <Redirect to={getHomePath()} />
-                </Route>
+                {/* Redirect to home path */}
+                <Route
+                    element={<Navigate replace to={getHomePath()} />}
+                    path={AppRoute.BASE}
+                />
 
                 {/* Home path */}
-                <Route exact component={HomePage} path={AppRoute.HOME} />
+                <Route element={<HomePage />} path={AppRouteRelative.HOME} />
 
                 {/* Login path */}
-                <Route exact path={AppRoute.LOGIN}>
-                    {/* Already authenticated, redirect to base path */}
-                    <Redirect to={getBasePath()} />
-                </Route>
+                {/* Already authenticated, redirect to base path */}
+                <Route
+                    element={<Navigate replace to={getBasePath()} />}
+                    path={AppRouteRelative.LOGIN}
+                />
 
                 {/* Logout path */}
-                <Route exact component={LogoutPage} path={AppRoute.LOGOUT} />
+                <Route
+                    element={<LogoutPage />}
+                    path={AppRouteRelative.LOGOUT}
+                />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

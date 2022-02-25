@@ -2,7 +2,7 @@ import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -26,7 +26,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     const [dataset, setDataset] = useState<Dataset>();
     const [datasources, setDatasources] = useState<Datasource[]>([]);
     const params = useParams<DatasetsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -49,7 +49,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 );
 
                 // Redirect to datasets detail path
-                history.push(getDatasetsViewPath(dataset.id));
+                navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((): void => {
                 notify(
@@ -63,7 +63,7 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
 
     const fetchDataset = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {

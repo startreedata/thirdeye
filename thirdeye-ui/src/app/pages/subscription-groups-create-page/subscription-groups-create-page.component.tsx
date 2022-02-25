@@ -1,7 +1,7 @@
 import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import {
@@ -20,7 +20,7 @@ import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -45,9 +45,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                 );
 
                 // Redirect to subscription groups detail path
-                history.push(
-                    getSubscriptionGroupsViewPath(subscriptionGroup.id)
-                );
+                navigate(getSubscriptionGroupsViewPath(subscriptionGroup.id));
             }
         );
     };

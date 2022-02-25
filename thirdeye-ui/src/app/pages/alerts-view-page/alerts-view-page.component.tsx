@@ -2,7 +2,7 @@ import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
@@ -52,7 +52,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { id: alertId } = useParams<AlertsViewPageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -100,7 +100,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         let fetchedUiAlert = {} as UiAlert;
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
 
-        if (!isValidNumberId(alertId)) {
+        if (alertId && !isValidNumberId(alertId)) {
             // Invalid id
             notify(
                 NotificationTypeV1.Error,
@@ -175,7 +175,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             );
 
             // Redirect to alerts all path
-            history.push(getAlertsAllPath());
+            navigate(getAlertsAllPath());
         });
     };
 

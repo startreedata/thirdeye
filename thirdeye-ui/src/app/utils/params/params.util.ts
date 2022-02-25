@@ -1,14 +1,72 @@
 import { isInteger, toNumber } from "lodash";
+import { useSearchParams } from "react-router-dom";
 import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
 import {
     TimeRange,
     TimeRangeDuration,
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { historyV1 } from "../../platform/utils";
 import { createTimeRangeDuration } from "../time-range/time-range.util";
 
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
+
+interface UseSetQueryParamsUtil {
+    setQueryString: (key: string, value: string) => void;
+    setSearchInQueryString: (search: string) => void;
+    setSearchTextInQueryString: (searchText: string) => void;
+    setTimeRangeDurationInQueryString: (
+        timeRangeDuration: TimeRangeDuration
+    ) => void;
+}
+
+export function useSetQueryParamsUtil(): UseSetQueryParamsUtil {
+    const [urlSearchParams, setSearchParams] = useSearchParams();
+
+    const setQueryString = (key: string, value: string): void => {
+        if (!key) {
+            return;
+        }
+
+        // Get existing query string
+        urlSearchParams.set(key, value);
+
+        // Update URL
+        setSearchParams(urlSearchParams, { replace: true });
+    };
+
+    return {
+        setQueryString,
+        setSearchInQueryString: (search: string): void => {
+            setQueryString(SearchQueryStringKey.SEARCH.toLowerCase(), search);
+        },
+        setSearchTextInQueryString: (searchText: string): void => {
+            setQueryString(
+                SearchQueryStringKey.SEARCH_TEXT.toLowerCase(),
+                searchText
+            );
+        },
+        setTimeRangeDurationInQueryString: (
+            timeRangeDuration: TimeRangeDuration
+        ): void => {
+            if (!timeRangeDuration) {
+                return;
+            }
+
+            setQueryString(
+                TimeRangeQueryStringKey.TIME_RANGE.toLowerCase(),
+                timeRangeDuration.timeRange
+            );
+            setQueryString(
+                TimeRangeQueryStringKey.START_TIME.toLowerCase(),
+                timeRangeDuration.startTime.toString()
+            );
+            setQueryString(
+                TimeRangeQueryStringKey.END_TIME.toLowerCase(),
+                timeRangeDuration.endTime.toString()
+            );
+        },
+    };
+}
 
 export const getAccessTokenFromHashParams = (): string => {
     let accessToken = "";
@@ -20,41 +78,12 @@ export const getAccessTokenFromHashParams = (): string => {
     return accessToken;
 };
 
-export const setSearchInQueryString = (search: string): void => {
-    setQueryString(SearchQueryStringKey.SEARCH.toLowerCase(), search);
-};
-
 export const getSearchFromQueryString = (): string => {
     return getQueryString(SearchQueryStringKey.SEARCH.toLowerCase());
 };
 
-export const setSearchTextInQueryString = (searchText: string): void => {
-    setQueryString(SearchQueryStringKey.SEARCH_TEXT.toLowerCase(), searchText);
-};
-
 export const getSearchTextFromQueryString = (): string => {
     return getQueryString(SearchQueryStringKey.SEARCH_TEXT.toLowerCase());
-};
-
-export const setTimeRangeDurationInQueryString = (
-    timeRangeDuration: TimeRangeDuration
-): void => {
-    if (!timeRangeDuration) {
-        return;
-    }
-
-    setQueryString(
-        TimeRangeQueryStringKey.TIME_RANGE.toLowerCase(),
-        timeRangeDuration.timeRange
-    );
-    setQueryString(
-        TimeRangeQueryStringKey.START_TIME.toLowerCase(),
-        timeRangeDuration.startTime.toString()
-    );
-    setQueryString(
-        TimeRangeQueryStringKey.END_TIME.toLowerCase(),
-        timeRangeDuration.endTime.toString()
-    );
 };
 
 export const getTimeRangeDurationFromQueryString =
@@ -92,21 +121,6 @@ export const getTimeRangeDurationFromQueryString =
             endTime
         );
     };
-
-export const setQueryString = (key: string, value: string): void => {
-    if (!key) {
-        return;
-    }
-
-    // Get existing query string
-    const urlSearchParams = new URLSearchParams(location.search);
-    urlSearchParams.set(key, value);
-
-    // Update URL
-    historyV1.replace({
-        search: urlSearchParams.toString(),
-    });
-};
 
 export const getQueryString = (key: string): string => {
     let value = "";

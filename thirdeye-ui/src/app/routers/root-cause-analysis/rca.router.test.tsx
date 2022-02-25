@@ -6,9 +6,7 @@ import { RootCauseAnalysisRouter } from "./rca.router";
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useHistory: jest.fn().mockImplementation(() => ({
-        push: mockPush,
-    })),
+    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -69,4 +67,4 @@ describe("Root Cause Analysis Router", () => {
     });
 });
 
-const mockPush = jest.fn();
+const mockNavigate = jest.fn();

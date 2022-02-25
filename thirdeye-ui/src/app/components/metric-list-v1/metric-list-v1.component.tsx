@@ -1,7 +1,7 @@
 import { Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -22,7 +22,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     const { t } = useTranslation();
     const [selectedMetric, setSelectedMetric] =
         useState<DataGridSelectionModelV1<UiMetric>>();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleMetricDelete = (): void => {
         if (!selectedMetric) {
@@ -54,7 +54,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         const selectedSubScriptionGroupId = selectedMetric
             .rowKeyValues[0] as number;
 
-        history.push(getMetricsUpdatePath(selectedSubScriptionGroupId));
+        navigate(getMetricsUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -62,7 +62,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     );
 
     const handleMetricViewDetailsById = (id: number): void => {
-        history.push(getMetricsViewPath(id));
+        navigate(getMetricsViewPath(id));
     };
 
     const renderLink = (

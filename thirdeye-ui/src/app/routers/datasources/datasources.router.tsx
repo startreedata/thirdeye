@@ -1,10 +1,7 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { default as React, FunctionComponent, lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import {
-    AppRoute,
-    getDatasourcesAllPath,
-} from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const DatasourcesAllPage = lazy(() =>
     import(
@@ -39,44 +36,46 @@ const PageNotFoundPage = lazy(() =>
 export const DatasourcesRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Datasources path */}
-                <Route exact path={AppRoute.DATASOURCES}>
-                    {/* Redirect to datasources all path */}
-                    <Redirect to={getDatasourcesAllPath()} />
-                </Route>
+                {/* Redirect to datasources all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate
+                            replace
+                            to={AppRouteRelative.DATASOURCES_ALL}
+                        />
+                    }
+                />
 
                 {/* Datasources all path */}
                 <Route
-                    exact
-                    component={DatasourcesAllPage}
-                    path={AppRoute.DATASOURCES_ALL}
+                    element={<DatasourcesAllPage />}
+                    path={AppRouteRelative.DATASOURCES_ALL}
                 />
 
                 {/* Datasources view path */}
                 <Route
-                    exact
-                    component={DatasourcesViewPage}
-                    path={AppRoute.DATASOURCES_VIEW}
+                    element={<DatasourcesViewPage />}
+                    path={AppRouteRelative.DATASOURCES_VIEW}
                 />
 
                 {/* Datasources create path */}
                 <Route
-                    exact
-                    component={DatasourcesCreatePage}
-                    path={AppRoute.DATASOURCES_CREATE}
+                    element={<DatasourcesCreatePage />}
+                    path={AppRouteRelative.DATASOURCES_CREATE}
                 />
 
                 {/* Datasources update path */}
                 <Route
-                    exact
-                    component={DatasourcesUpdatePage}
-                    path={AppRoute.DATASOURCES_UPDATE}
+                    element={<DatasourcesUpdatePage />}
+                    path={AppRouteRelative.DATASOURCES_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

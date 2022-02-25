@@ -1,3 +1,3 @@
-export interface AlertsUpdatePageParams {
+export type AlertsUpdatePageParams = {
     id: string;
-}
+};

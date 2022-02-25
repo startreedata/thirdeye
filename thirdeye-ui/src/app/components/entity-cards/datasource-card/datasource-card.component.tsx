@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     getDatasourcesUpdatePath,
     getDatasourcesViewPath,
@@ -26,7 +26,7 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
 ) => {
     const [datasourceOptionsAnchorElement, setDatasourceOptionsAnchorElement] =
         useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleDatasourceOptionsClick = (
@@ -44,7 +44,7 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
             return;
         }
 
-        history.push(getDatasourcesViewPath(props.uiDatasource.id));
+        navigate(getDatasourcesViewPath(props.uiDatasource.id));
         handleDatasourceOptionsClose();
     };
 
@@ -53,7 +53,7 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
             return;
         }
 
-        history.push(getDatasourcesUpdatePath(props.uiDatasource.id));
+        navigate(getDatasourcesUpdatePath(props.uiDatasource.id));
         handleDatasourceOptionsClose();
     };
 

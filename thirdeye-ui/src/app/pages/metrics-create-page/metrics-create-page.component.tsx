@@ -1,7 +1,7 @@
 import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -20,7 +20,7 @@ import { getMetricsViewPath } from "../../utils/routes/routes.util";
 export const MetricsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasets, setDatasets] = useState<Dataset[]>([]);
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -42,7 +42,7 @@ export const MetricsCreatePage: FunctionComponent = () => {
             );
 
             // Redirect to metrics detail path
-            history.push(getMetricsViewPath(metric?.id || 0));
+            navigate(getMetricsViewPath(metric?.id || 0));
         });
     };
 

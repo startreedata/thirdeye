@@ -36,7 +36,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   private Integer timeDuration;
   private String timeFormat;
   private String timezone;
-  private String dataSource = "PinotThirdEyeDataSource";
+  private String dataSource;
   private Set<String> owners;
   private boolean active = true;
 

@@ -425,7 +425,7 @@ public class RootCauseMetricResource {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
         if (df.isEmpty()) {
           return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStart())
-              .addSeries(DataFrame.COL_VALUE, Double.NaN);
+              .addSeries(DataFrame.COL_VALUE, Double.NaN).setIndex(DataFrame.COL_TIME);
         }
         return df;
       }));

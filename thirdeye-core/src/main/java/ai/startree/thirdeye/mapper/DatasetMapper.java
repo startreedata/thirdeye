@@ -53,7 +53,6 @@ public interface DatasetMapper {
     final DatasetApi datasetApi = new DatasetApi()
         .setId(dto.getId())
         .setActive(dto.isActive())
-        .setAdditive(dto.isAdditive())
         .setDimensions(dto.getDimensions())
         .setName(dto.getDataset())
         .setExpectedDelay(optional(dto.getExpectedDelay()).map(TimeGranularity::toDuration)

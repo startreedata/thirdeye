@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collections;
@@ -35,8 +34,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String timeColumn;
   private TimeUnit timeUnit;
   private Integer timeDuration;
-  private String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
-  private String timezone = TimeSpec.DEFAULT_TIMEZONE;
+  private String timeFormat;
+  private String timezone;
   private String dataSource = "PinotThirdEyeDataSource";
   private Set<String> owners;
   private boolean active = true;

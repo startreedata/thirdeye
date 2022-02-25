@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
-import ai.startree.thirdeye.notification.EmailEntityBuilder;
+import ai.startree.thirdeye.notification.NotificationContentBuilder;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
@@ -67,11 +67,11 @@ public class InternalResource {
   private final DatabaseAdminResource databaseAdminResource;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationTaskRunner notificationTaskRunner;
-  private final EmailEntityBuilder emailEntityBuilder;
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final NotificationSchemeFactory notificationSchemeFactory;
+  private final NotificationContentBuilder notificationContentBuilder;
 
   @Inject
   public InternalResource(
@@ -79,20 +79,20 @@ public class InternalResource {
       final DatabaseAdminResource databaseAdminResource,
       final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationTaskRunner notificationTaskRunner,
-      final EmailEntityBuilder emailEntityBuilder,
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final NotificationSchemeFactory notificationSchemeFactory) {
+      final NotificationSchemeFactory notificationSchemeFactory,
+      final NotificationContentBuilder notificationContentBuilder) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
-    this.emailEntityBuilder = emailEntityBuilder;
     this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationSchemeFactory = notificationSchemeFactory;
+    this.notificationContentBuilder = notificationContentBuilder;
   }
 
   @Path("db-admin")
@@ -159,9 +159,9 @@ public class InternalResource {
     final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
         mergedAnomalyResultManager.findByDetectionConfigId(alertId));
 
-    return emailEntityBuilder.buildTemplateData(
-        new SubscriptionGroupDTO().setName("report-generation"),
-        new ArrayList<>(anomalies));
+    return notificationContentBuilder.format(
+        new ArrayList<MergedAnomalyResultDTO>(anomalies)
+    );
   }
 
   @GET

@@ -5,11 +5,12 @@
 
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.detection.anomaly.alert.util.AlertScreenshotHelper.takeGraphScreenShot;
 import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getDateString;
 import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getFeedbackValue;
 import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
@@ -23,11 +24,9 @@ import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
@@ -37,18 +36,13 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -59,12 +53,11 @@ import org.slf4j.LoggerFactory;
  * This email formatter lists the anomalies by their functions or metric.
  */
 @Singleton
-public class AnomalyEmailContentBuilder {
+public class NotificationContentBuilder {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AnomalyEmailContentBuilder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationContentBuilder.class);
   private static final boolean INCLUDE_SUMMARY = false;
 
-  private final MetricConfigManager metricConfigManager;
   private final AlertManager alertManager;
   private final UiConfiguration uiConfiguration;
   private final EventManager eventManager;
@@ -73,15 +66,12 @@ public class AnomalyEmailContentBuilder {
   private final DateTimeZone dateTimeZone;
   private final Period preEventCrawlOffset;
   private final Period postEventCrawlOffset;
-  private String imgPath = null;
 
   @Inject
-  public AnomalyEmailContentBuilder(final MetricConfigManager metricConfigManager,
-      final EventManager eventManager,
+  public NotificationContentBuilder(final EventManager eventManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
       final UiConfiguration uiConfiguration) {
-    this.metricConfigManager = metricConfigManager;
     this.eventManager = eventManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
@@ -92,36 +82,6 @@ public class AnomalyEmailContentBuilder {
     final Period defaultPeriod = Period.parse(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
     preEventCrawlOffset = defaultPeriod;
     postEventCrawlOffset = defaultPeriod;
-  }
-
-  public void cleanup() {
-    if (StringUtils.isNotBlank(imgPath)) {
-      try {
-        Files.deleteIfExists(new File(imgPath).toPath());
-      } catch (final IOException e) {
-        LOG.error("Exception in deleting screenshot {}", imgPath, e);
-      }
-    }
-  }
-
-  private Map<String, MetricConfigDTO> buildMetricsMap(
-      final Collection<AnomalyResult> anomalies) {
-    final Map<String, MetricConfigDTO> metricsMap = new TreeMap<>();
-    for (final AnomalyResult anomalyResult : anomalies) {
-      if (anomalyResult instanceof MergedAnomalyResultDTO) {
-        final MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
-
-        final String metricName = mergedAnomaly.getMetric();
-        if (metricName != null) {
-          final MetricConfigDTO metric = metricConfigManager
-              .findByMetricAndDataset(metricName, mergedAnomaly.getCollection());
-          if (metric != null) {
-            metricsMap.put(metric.getId().toString(), metric);
-          }
-        }
-      }
-    }
-    return metricsMap;
   }
 
   public NotificationReportApi buildNotificationReportApi(
@@ -241,15 +201,18 @@ public class AnomalyEmailContentBuilder {
         .collect(Collectors.toList());
   }
 
-  public Map<String, Object> format(final Collection<AnomalyResult> anomalies) {
+  public Map<String, Object> format(final Collection<? extends AnomalyResult> anomalies) {
     final Multimap<String, String> anomalyDimensions = ArrayListMultimap.create();
     final Multimap<String, AnomalyReportEntity> alertAnomalyReportsMap = ArrayListMultimap.create();
     final Multimap<String, AnomalyReportEntity> metricAnomalyReportsMap = ArrayListMultimap.create();
 
-    final List<AnomalyResult> sortedAnomalies = new ArrayList<>(anomalies);
-    sortedAnomalies.sort(Comparator.comparingDouble(AnomalyResult::getWeight));
+    requireNonNull(anomalies, "anomalies is null");
+    checkArgument(anomalies.size() > 0, "anomalies is empty");
 
-    for (final AnomalyResult anomalyResult : anomalies) {
+    final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalies);
+    sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
+
+    for (final AnomalyResult anomalyResult : sortedAnomalyResults) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
         LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
             anomalyResult);
@@ -295,20 +258,5 @@ public class AnomalyEmailContentBuilder {
     templateData.put("detectionToAnomalyDetailsMap", alertAnomalyReportsMap.asMap());
     templateData.put("metricToAnomalyDetailsMap", metricAnomalyReportsMap.asMap());
     return templateData;
-  }
-
-  private String buildScreenshot(final List<AnomalyReportEntity> anomalyDetails) {
-    if (anomalyDetails.size() == 1) {
-      final AnomalyReportEntity singleAnomaly = anomalyDetails.get(0);
-      try {
-        return takeGraphScreenShot(
-            singleAnomaly.getAnomalyId(),
-            uiConfiguration.getExternalUrl());
-      } catch (final Exception e) {
-        LOG.error("Exception while embedding screenshot for anomaly {}",
-            singleAnomaly.getAnomalyId(), e);
-      }
-    }
-    return null;
   }
 }

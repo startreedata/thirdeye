@@ -14,6 +14,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.metric.MetricType;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
@@ -22,9 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
-import org.apache.pinot.spi.data.DateTimeFormatSpec;
 import org.apache.pinot.spi.data.DimensionFieldSpec;
 import org.apache.pinot.spi.data.FieldSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
@@ -34,6 +33,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+// todo cyril the tests here are not deprecated - but putting them in pinot plugins require refactoring
 public class PinotDatasetOnboarderTest {
 
   public static final String DATA_SOURCE_NAME = PinotThirdEyeDataSource.class.getSimpleName();
@@ -77,19 +77,14 @@ public class PinotDatasetOnboarderTest {
   }
 
   @Test
-  public void testAddNewDataset() throws Exception {
+  public void testAddNewDataset() {
     Assert.assertEquals(datasetConfigDAO.findAll().size(), 1);
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(dataset);
     assertThat(datasetConfig.getDataset()).isEqualTo(dataset);
     assertThat(datasetConfig.getDimensions()).isEqualTo(schema.getDimensionNames());
     assertThat(datasetConfig.getTimeColumn()).isEqualTo(oldTimeColumnName);
-    DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(oldTimeColumnName);
-    DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
-    assertThat(datasetConfig.bucketTimeGranularity().getUnit()).isEqualTo(formatSpec.getColumnUnit());
-    assertThat(datasetConfig.bucketTimeGranularity().getSize()).isEqualTo(formatSpec.getColumnSize());
     assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
-    assertThat(datasetConfig.getTimezone()).isEqualTo("US/Pacific");
-    assertThat(datasetConfig.getExpectedDelay().getUnit()).isEqualTo(TimeUnit.HOURS);
+    assertThat(datasetConfig.getTimezone()).isEqualTo(TimeSpec.DEFAULT_TIMEZONE);
     assertThat(datasetConfig.isActive()).isTrue();
 
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
@@ -110,7 +105,7 @@ public class PinotDatasetOnboarderTest {
   }
 
   @Test(dependsOnMethods = {"testAddNewDataset"})
-  public void testRefreshDataset() throws Exception {
+  public void testRefreshDataset() {
     DatasetConfigDTO datasetConfig = datasetConfigDAO.findByDataset(dataset);
     DimensionFieldSpec dimensionFieldSpec = new DimensionFieldSpec("newDimension",
         FieldSpec.DataType.STRING, true);
@@ -174,17 +169,12 @@ public class PinotDatasetOnboarderTest {
         DATA_SOURCE_NAME);
     assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     datasetConfig = datasetConfigDAO.findByDataset(dataset);
-    assertThat(datasetConfig.bucketTimeGranularity().getUnit()).isEqualTo(TimeUnit.MINUTES);
-    assertThat(datasetConfig.bucketTimeGranularity().getSize()).isEqualTo(5);
-    assertThat(datasetConfig.getTimeUnit()).isEqualTo(TimeUnit.MILLISECONDS);
-    assertThat(datasetConfig.getTimeDuration().intValue()).isEqualTo(1);
     assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
-    assertThat(datasetConfig.getTimezone()).isEqualTo("US/Pacific");
-    assertThat(datasetConfig.getExpectedDelay().getUnit()).isEqualTo(TimeUnit.HOURS);
+    assertThat(datasetConfig.getTimezone()).isEqualTo(TimeSpec.DEFAULT_TIMEZONE);
   }
 
   @Test(dependsOnMethods = {"testRefreshDataset"})
-  public void testDeactivate() throws Exception {
+  public void testDeactivate() {
     assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     pinotDatasetOnboarder.deactivateDatasets(Collections.emptyList(), DATA_SOURCE_NAME);
     List<DatasetConfigDTO> datasets = datasetConfigDAO.findAll();

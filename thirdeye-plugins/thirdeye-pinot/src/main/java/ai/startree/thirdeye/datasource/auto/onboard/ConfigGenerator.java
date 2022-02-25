@@ -33,7 +33,6 @@ public class ConfigGenerator {
   public static final MetricAggFunction DEFAULT_AGG_FUNCTION = MetricAggFunction.SUM;
   public static final MetricAggFunction DEFAULT_TDIGEST_AGG_FUNCTION = MetricAggFunction.PCT90;
 
-  private static final String PDT_TIMEZONE = "US/Pacific";
   private static final String BYTES_STRING = "BYTES";
   private static final String NON_ADDITIVE = "non_additive";
   private static final String PINOT_PRE_AGGREGATED_KEYWORD = "*";
@@ -58,7 +57,7 @@ public class ConfigGenerator {
     datasetConfigDTO.setTimeUnit(columnUnit);
     datasetConfigDTO.setTimeFormat(timeFormatStr);
     datasetConfigDTO.setExpectedDelay(getExpectedDelayFromTimeunit(columnUnit));
-    datasetConfigDTO.setTimezone(PDT_TIMEZONE);
+    datasetConfigDTO.setTimezone(TimeSpec.DEFAULT_TIMEZONE);
     // set the data granularity of epoch timestamp dataset to minute-level
     if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
         .getTimeUnit()

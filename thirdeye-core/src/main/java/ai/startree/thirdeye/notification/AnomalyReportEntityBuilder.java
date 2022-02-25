@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.Constants.CompareMode;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -62,12 +63,12 @@ public class AnomalyReportEntityBuilder {
   }
 
   public static String getDateString(DateTime dateTime) {
-    return dateTime.toString(AnomalyEmailContentBuilder.DEFAULT_DATE_PATTERN);
+    return dateTime.toString(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
   }
 
   public static String getDateString(long millis, DateTimeZone dateTimeZone) {
     return (new DateTime(millis,
-        dateTimeZone)).toString(AnomalyEmailContentBuilder.DEFAULT_DATE_PATTERN);
+        dateTimeZone)).toString(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
   }
 
   public static double getLift(double current, double expected) {
@@ -130,7 +131,7 @@ public class AnomalyReportEntityBuilder {
    * Returns a human readable lift value to be displayed in the notification templates
    */
   public static String getFormattedLiftValue(MergedAnomalyResultDTO anomaly, double lift) {
-    String liftValue = String.format(AnomalyEmailContentBuilder.PERCENTAGE_FORMAT, lift * 100);
+    String liftValue = String.format(Constants.NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
 
     // Fetch the lift value for a SLA anomaly
     if (anomaly.getType().equals(AnomalyType.DATA_SLA)) {

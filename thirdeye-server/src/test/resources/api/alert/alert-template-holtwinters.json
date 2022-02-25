@@ -2,7 +2,7 @@
   {
     "name": "holtwinters",
     "description": "Holtwinters Alert Template",
-    "cron": "0 0/1 * 1/1 * ? * ",
+    "cron": "0 0 0 1/1 * ? * ",
     "nodes": [
       {
         "name": "root",

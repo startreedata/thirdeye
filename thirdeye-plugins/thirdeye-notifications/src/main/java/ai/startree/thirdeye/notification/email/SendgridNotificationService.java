@@ -23,6 +23,7 @@ import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import java.io.IOException;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +34,7 @@ public class SendgridNotificationService implements NotificationService {
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     try {
-      final EmailEntityApi emailEntity = new EmailContentBuilder().buildEmailEntityApi(
-          api.getSubscriptionGroup(),
-          DEFAULT_EMAIL_TEMPLATE,
-          api.getEmailTemplateData(),
-          api.getEmailRecipients());
+      final EmailEntityApi emailEntity = new EmailContentBuilder().buildEmailEntityApi(api);
 
       sendEmail(emailEntity);
     } catch (final Exception e) {
@@ -101,8 +98,8 @@ public class SendgridNotificationService implements NotificationService {
 
   @Override
   public Object toHtml(final NotificationPayloadApi api) {
-    return new EmailContentBuilder().buildHtml(
-        DEFAULT_EMAIL_TEMPLATE,
-        api.getEmailTemplateData());
+    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
+    final Map<String, Object> emailTemplateData = emailContentBuilder.constructTemplateData(api);
+    return emailContentBuilder.buildHtml(DEFAULT_EMAIL_TEMPLATE, emailTemplateData);
   }
 }

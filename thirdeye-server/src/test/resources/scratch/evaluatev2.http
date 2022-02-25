@@ -7,7 +7,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -91,7 +91,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -174,7 +174,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -293,7 +293,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -376,7 +376,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {

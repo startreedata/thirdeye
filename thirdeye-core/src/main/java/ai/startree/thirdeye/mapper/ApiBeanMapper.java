@@ -235,7 +235,11 @@ public abstract class ApiBeanMapper {
         .setImpactToGlobal(dto.getImpactToGlobal())
         .setSourceType(dto.getAnomalyResultSource())
         .setNotified(dto.isNotified())
-        .setMessage(dto.getMessage());
+        .setMessage(dto.getMessage())
+        .setMetric(optional(dto.getMetric())
+            .map(metric -> new MetricApi().setName(metric))
+            .orElse(null))
+        ;
     if (dto.getMetricUrn() != null) {
       anomalyApi
           .setMetric(toMetricApi(dto.getMetricUrn())

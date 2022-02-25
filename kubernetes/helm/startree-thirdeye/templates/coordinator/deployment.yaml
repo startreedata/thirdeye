@@ -106,7 +106,7 @@ spec:
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
             subPath: "holiday-loader-key.json"
             readOnly: true
-        {{- end }}
+          {{- end }}
         resources:
           {{- toYaml .Values.coordinator.resources | nindent 12 }}
       restartPolicy: Always
@@ -119,7 +119,7 @@ spec:
           secret:
             secretName: {{ include "thirdeye.coordinator.fullname" . }}-internal-tls
         - name: keystore
-        emptyDir: {}
+          emptyDir: {}
         {{- end }}
         {{- if .Values.config.holidayLoaderKey }}
         - name: holiday-loader-key

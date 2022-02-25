@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.AnomalyEmailContentBuilder.PERCENTAGE_FORMAT;
-import static ai.startree.thirdeye.notification.AnomalyEmailContentBuilder.RAW_VALUE_FORMAT;
+import static ai.startree.thirdeye.spi.Constants.NOTIFICATIONS_PERCENTAGE_FORMAT;
+import static ai.startree.thirdeye.spi.Constants.NOTIFICATIONS_RAW_VALUE_FORMAT;
 
 import ai.startree.thirdeye.spi.Constants.CompareMode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -84,7 +84,7 @@ public class AnomalyReportEntity {
     this.funcDescription = funcDescription;
     this.swi = "";
     if (swi != null) {
-      this.swi = String.format(PERCENTAGE_FORMAT, swi * 100);
+      this.swi = String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, swi * 100);
     }
     if (baselineVal.equals("-")) {
       this.lift = "";
@@ -106,23 +106,23 @@ public class AnomalyReportEntity {
     double lift = AnomalyReportEntityBuilder.getLift(current, seasonalValue);
     switch (compareMode) {
       case Wo4W:
-        this.wo4wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
-        this.wo4wLift = String.format(PERCENTAGE_FORMAT, lift);
+        this.wo4wValue = String.format(NOTIFICATIONS_RAW_VALUE_FORMAT, seasonalValue);
+        this.wo4wLift = String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, lift);
         this.positiveWo4WLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       case Wo3W:
-        this.wo3wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
-        this.wo3wLift = String.format(PERCENTAGE_FORMAT, lift * 100);
+        this.wo3wValue = String.format(NOTIFICATIONS_RAW_VALUE_FORMAT, seasonalValue);
+        this.wo3wLift = String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
         this.positiveWo3WLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       case Wo2W:
-        this.wo2wValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
-        this.wo2wLift = String.format(PERCENTAGE_FORMAT, lift * 100);
+        this.wo2wValue = String.format(NOTIFICATIONS_RAW_VALUE_FORMAT, seasonalValue);
+        this.wo2wLift = String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
         this.positiveWo2WLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       case WoW:
-        this.wowValue = String.format(RAW_VALUE_FORMAT, seasonalValue);
-        this.wowLift = String.format(PERCENTAGE_FORMAT, lift * 100);
+        this.wowValue = String.format(NOTIFICATIONS_RAW_VALUE_FORMAT, seasonalValue);
+        this.wowLift = String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
         this.positiveWoWLift = AnomalyReportEntityBuilder.getLiftDirection(lift);
         break;
       default:

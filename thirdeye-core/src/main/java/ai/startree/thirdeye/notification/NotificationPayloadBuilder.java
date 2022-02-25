@@ -10,9 +10,11 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
+import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -29,15 +31,18 @@ public class NotificationPayloadBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(NotificationPayloadBuilder.class);
   private static final String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
 
+  private final SmtpConfiguration smtpConfig;
   private final UiConfiguration uiConfiguration;
-  private final EmailEntityBuilder emailEntityBuilder;
+  private final NotificationContentBuilder notificationContentBuilder;
 
   @Inject
   public NotificationPayloadBuilder(
+      final SmtpConfiguration smtpConfig,
       final UiConfiguration uiConfiguration,
-      final EmailEntityBuilder emailEntityBuilder) {
+      final NotificationContentBuilder notificationContentBuilder) {
+    this.smtpConfig = smtpConfig;
     this.uiConfiguration = uiConfiguration;
-    this.emailEntityBuilder = emailEntityBuilder;
+    this.notificationContentBuilder = notificationContentBuilder;
   }
 
   public NotificationPayloadApi buildNotificationPayload(
@@ -46,21 +51,38 @@ public class NotificationPayloadBuilder {
     final List<MergedAnomalyResultDTO> anomalyResults = new ArrayList<>(anomalies);
     anomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final Map<String, Object> templateData = emailEntityBuilder.buildTemplateData(subscriptionGroup,
-        new ArrayList<>(anomalies));
+    final Map<String, Object> templateData = notificationContentBuilder.format(anomalies);
 
     final EmailSchemeDto emailScheme = subscriptionGroup.getNotificationSchemes().getEmailScheme();
     final EmailRecipientsApi recipients = emailScheme == null ? null : new EmailRecipientsApi(
         emailScheme.getTo(),
         emailScheme.getCc(),
         emailScheme.getBcc()
-    ).setFrom(subscriptionGroup.getFrom());
+    ).setFrom(getFromAddress(subscriptionGroup));
+
+    final NotificationReportApi report = notificationContentBuilder.buildNotificationReportApi(
+        subscriptionGroup,
+        anomalies);
+
+    report.setRelatedEvents(notificationContentBuilder.getRelatedEvents(anomalies));
 
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
+        .setReport(report)
         .setAnomalyReports(toAnomalyReports(anomalyResults))
         .setEmailTemplateData(templateData)
         .setEmailRecipients(recipients);
+  }
+
+  private String getFromAddress(final SubscriptionGroupDTO subscriptionGroup) {
+    if (Strings.isNullOrEmpty(subscriptionGroup.getFrom())) {
+      final String fromAddress = smtpConfig.getUser();
+      if (Strings.isNullOrEmpty(fromAddress)) {
+        throw new IllegalArgumentException("Invalid sender's email");
+      }
+    }
+
+    return subscriptionGroup.getFrom();
   }
 
   private List<AnomalyReportApi> toAnomalyReports(final List<MergedAnomalyResultDTO> anomalies) {

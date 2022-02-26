@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.notification.email;
 
-import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
+import static ai.startree.thirdeye.notification.email.EmailEntityBuilder.DEFAULT_EMAIL_TEMPLATE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
@@ -34,7 +34,7 @@ public class SendgridNotificationService implements NotificationService {
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     try {
-      final EmailEntityApi emailEntity = new EmailContentBuilder().buildEmailEntityApi(api);
+      final EmailEntity emailEntity = new EmailEntityBuilder().build(api);
 
       sendEmail(emailEntity);
     } catch (final Exception e) {
@@ -42,7 +42,7 @@ public class SendgridNotificationService implements NotificationService {
     }
   }
 
-  private void sendEmail(final EmailEntityApi emailEntity) throws IOException {
+  private void sendEmail(final EmailEntity emailEntity) throws IOException {
     final Mail mail = buildMail(emailEntity);
 
     final Request request = new Request();
@@ -58,7 +58,7 @@ public class SendgridNotificationService implements NotificationService {
     LOG.info(response.getHeaders().toString());
   }
 
-  private Mail buildMail(final EmailEntityApi emailEntity) {
+  private Mail buildMail(final EmailEntity emailEntity) {
     requireNonNull(emailEntity, "emailEntity is null");
 
     final Mail mail = new Mail();
@@ -98,8 +98,8 @@ public class SendgridNotificationService implements NotificationService {
 
   @Override
   public Object toHtml(final NotificationPayloadApi api) {
-    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
-    final Map<String, Object> emailTemplateData = emailContentBuilder.constructTemplateData(api);
-    return emailContentBuilder.buildHtml(DEFAULT_EMAIL_TEMPLATE, emailTemplateData);
+    final EmailEntityBuilder emailEntityBuilder = new EmailEntityBuilder();
+    final Map<String, Object> emailTemplateData = emailEntityBuilder.constructTemplateData(api);
+    return emailEntityBuilder.buildHtml(DEFAULT_EMAIL_TEMPLATE, emailTemplateData);
   }
 }

@@ -7,7 +7,7 @@ package ai.startree.thirdeye.notification.email;
 
 import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 
-public class EmailEntityApi {
+public class EmailEntity {
 
   private String from;
   private EmailRecipientsApi recipients;
@@ -19,7 +19,7 @@ public class EmailEntityApi {
     return from;
   }
 
-  public EmailEntityApi setFrom(final String from) {
+  public EmailEntity setFrom(final String from) {
     this.from = from;
     return this;
   }
@@ -28,7 +28,7 @@ public class EmailEntityApi {
     return recipients;
   }
 
-  public EmailEntityApi setRecipients(
+  public EmailEntity setRecipients(
       final EmailRecipientsApi recipients) {
     this.recipients = recipients;
     return this;
@@ -38,7 +38,7 @@ public class EmailEntityApi {
     return subject;
   }
 
-  public EmailEntityApi setSubject(final String subject) {
+  public EmailEntity setSubject(final String subject) {
     this.subject = subject;
     return this;
   }
@@ -47,17 +47,8 @@ public class EmailEntityApi {
     return htmlContent;
   }
 
-  public EmailEntityApi setHtmlContent(final String htmlContent) {
+  public EmailEntity setHtmlContent(final String htmlContent) {
     this.htmlContent = htmlContent;
-    return this;
-  }
-
-  public String getSnapshotPath() {
-    return snapshotPath;
-  }
-
-  public EmailEntityApi setSnapshotPath(final String snapshotPath) {
-    this.snapshotPath = snapshotPath;
     return this;
   }
 }

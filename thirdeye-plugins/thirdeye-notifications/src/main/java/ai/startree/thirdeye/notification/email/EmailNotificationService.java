@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.notification.email;
 
-import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
+import static ai.startree.thirdeye.notification.email.EmailEntityBuilder.DEFAULT_EMAIL_TEMPLATE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -61,9 +61,9 @@ public class EmailNotificationService implements NotificationService {
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
-    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
+    final EmailEntityBuilder emailEntityBuilder = new EmailEntityBuilder();
     try {
-      final EmailEntityApi emailEntity = emailContentBuilder.buildEmailEntityApi(api);
+      final EmailEntity emailEntity = emailEntityBuilder.build(api);
 
       final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
@@ -72,7 +72,7 @@ public class EmailNotificationService implements NotificationService {
     }
   }
 
-  private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
+  private HtmlEmail buildHtmlEmail(final EmailEntity emailEntity)
       throws EmailException {
     final HtmlEmail email = new HtmlEmail();
     final EmailRecipientsApi recipients = emailEntity.getRecipients();
@@ -120,9 +120,9 @@ public class EmailNotificationService implements NotificationService {
 
   @Override
   public Object toHtml(final NotificationPayloadApi api) {
-    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
-    final Map<String, Object> templateData = emailContentBuilder.constructTemplateData(api);
-    return emailContentBuilder.buildHtml(
+    final EmailEntityBuilder emailEntityBuilder = new EmailEntityBuilder();
+    final Map<String, Object> templateData = emailEntityBuilder.constructTemplateData(api);
+    return emailEntityBuilder.buildHtml(
         DEFAULT_EMAIL_TEMPLATE,
         templateData);
   }

@@ -17,7 +17,6 @@ import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
-import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -38,7 +37,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
-public class EmailContentBuilder {
+public class EmailEntityBuilder {
 
   public static final String DEFAULT_EMAIL_TEMPLATE = "metric-anomalies";
   private static final String BASE_PACKAGE_PATH = "/ai/startree/thirdeye/detection/detector";
@@ -94,29 +93,20 @@ public class EmailContentBuilder {
     }
   }
 
-  public EmailEntityApi buildEmailEntityApi(final NotificationPayloadApi api) {
-    final Map<String, Object> templateData = constructTemplateData(api);
-    return buildEmailEntityApi(api.getSubscriptionGroup(),
-        DEFAULT_EMAIL_TEMPLATE,
-        templateData,
-        api.getEmailRecipients());
-  }
-
-  private EmailEntityApi buildEmailEntityApi(final SubscriptionGroupApi subscriptionGroup,
-      final String templateKey,
-      final Map<String, Object> templateData,
-      final EmailRecipientsApi recipients) {
+  public EmailEntity build(final NotificationPayloadApi api) {
+    final EmailRecipientsApi recipients = api.getEmailRecipients();
     requireNonNull(recipients.getTo(), "to field in email scheme is null");
     checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
 
-    final String htmlText = buildHtml(templateKey, templateData);
+    final Map<String, Object> templateData = constructTemplateData(api);
+    final String htmlText = buildHtml(DEFAULT_EMAIL_TEMPLATE, templateData);
 
     final String subject = makeSubject(SubjectType.ALERT,
         templateData.get("metrics"),
         templateData.get("datasets"),
-        subscriptionGroup.getName());
+        api.getSubscriptionGroup().getName());
 
-    return new EmailEntityApi()
+    return new EmailEntity()
         .setSubject(subject)
         .setHtmlContent(htmlText)
         .setRecipients(recipients)

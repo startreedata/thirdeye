@@ -5,9 +5,9 @@
 
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getDateString;
-import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getFeedbackValue;
-import static ai.startree.thirdeye.notification.AnomalyReportEntityBuilder.getTimezoneString;
+import static ai.startree.thirdeye.notification.AnomalyReportHelper.getDateString;
+import static ai.startree.thirdeye.notification.AnomalyReportHelper.getFeedbackValue;
+import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
@@ -19,6 +19,7 @@ import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -107,22 +108,22 @@ public class NotificationContentBuilder {
     }
 
     final PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
-        mergedAnomalyResults, new DummyAlertFilter(),
+        mergedAnomalyResults,
+        new DummyAlertFilter(),
         mergedAnomalyResultManager);
 
-    final NotificationReportApi report = new NotificationReportApi();
-
-    report.setStartTime(getDateString(startTime));
-    report.setEndTime(getDateString(endTime));
-    report.setTimeZone(getTimezoneString(dateTimeZone));
-    report.setNotifiedCount(precisionRecallEvaluator.getTotalAlerts());
-    report.setFeedbackCount(precisionRecallEvaluator.getTotalResponses());
-    report.setTrueAlertCount(precisionRecallEvaluator.getTrueAnomalies());
-    report.setFalseAlertCount(precisionRecallEvaluator.getFalseAlarm());
-    report.setNewTrendCount(precisionRecallEvaluator.getTrueAnomalyNewTrend());
-    report.setAlertConfigName(notificationConfig.getName());
-    report.setIncludeSummary(INCLUDE_SUMMARY);
-    report.setReportGenerationTimeMillis(System.currentTimeMillis());
+    final NotificationReportApi report = new NotificationReportApi()
+        .setStartTime(getDateString(startTime))
+        .setEndTime(getDateString(endTime))
+        .setTimeZone(getTimezoneString(dateTimeZone))
+        .setNotifiedCount(precisionRecallEvaluator.getTotalAlerts())
+        .setFeedbackCount(precisionRecallEvaluator.getTotalResponses())
+        .setTrueAlertCount(precisionRecallEvaluator.getTrueAnomalies())
+        .setFalseAlertCount(precisionRecallEvaluator.getFalseAlarm())
+        .setNewTrendCount(precisionRecallEvaluator.getTrueAnomalyNewTrend())
+        .setAlertConfigName(notificationConfig.getName())
+        .setIncludeSummary(INCLUDE_SUMMARY)
+        .setReportGenerationTimeMillis(System.currentTimeMillis());
 
     if (precisionRecallEvaluator.getTotalResponses() > 0) {
       report.setPrecision(precisionRecallEvaluator.getPrecisionInResponse());
@@ -202,8 +203,8 @@ public class NotificationContentBuilder {
   }
 
   public Map<String, Object> format(final Collection<? extends AnomalyResult> anomalies) {
-    final Multimap<String, AnomalyReportEntity> alertAnomalyReportsMap = ArrayListMultimap.create();
-    final Multimap<String, AnomalyReportEntity> metricAnomalyReportsMap = ArrayListMultimap.create();
+    final Multimap<String, AnomalyReportDataApi> alertAnomalyReportsMap = ArrayListMultimap.create();
+    final Multimap<String, AnomalyReportDataApi> metricAnomalyReportsMap = ArrayListMultimap.create();
 
     requireNonNull(anomalies, "anomalies is null");
     checkArgument(anomalies.size() > 0, "anomalies is empty");
@@ -232,7 +233,7 @@ public class NotificationContentBuilder {
         alertDescription = alert.getDescription() == null ? "" : alert.getDescription();
       }
 
-      final AnomalyReportEntity anomalyReport = AnomalyReportEntityBuilder.buildAnomalyReportEntity(
+      final AnomalyReportDataApi anomalyReport = AnomalyReportHelper.buildAnomalyReportEntity(
           anomaly,
           feedbackVal,
           alertName,
@@ -244,9 +245,6 @@ public class NotificationContentBuilder {
       alertAnomalyReportsMap.put(alertName, anomalyReport);
       metricAnomalyReportsMap.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
     }
-
-    // Insert anomaly snapshot image
-//    this.imgPath = buildScreenshot(anomalyReports);
 
     final Map<String, Object> templateData = new HashMap<>();
     templateData.put("detectionToAnomalyDetailsMap", alertAnomalyReportsMap.asMap());

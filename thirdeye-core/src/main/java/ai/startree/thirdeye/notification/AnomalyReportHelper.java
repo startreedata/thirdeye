@@ -35,8 +35,8 @@ public class AnomalyReportHelper {
 
   public static AnomalyReportDataApi buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
       final String feedbackVal,
-      final String functionName,
-      final String funcDescription,
+      final String alertName,
+      final String alertDescription,
       final DateTimeZone dateTimeZone,
       final String uiPublicUrl) {
     final Properties props = new Properties();
@@ -55,8 +55,8 @@ public class AnomalyReportHelper {
         .setDimensions(getDimensionsList(anomaly.getDimensionMap()))
         .setDuration(getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime())) // duratio
         .setFeedback(feedbackVal)
-        .setFunction(functionName)
-        .setFuncDescription(funcDescription)
+        .setFunction(alertName)
+        .setFuncDescription(alertDescription)
         .setMetric(anomaly.getMetric())
         .setStartDateTime(getDateString(anomaly.getStartTime(), dateTimeZone))
         .setEndTime(getDateString(anomaly.getEndTime(), dateTimeZone))

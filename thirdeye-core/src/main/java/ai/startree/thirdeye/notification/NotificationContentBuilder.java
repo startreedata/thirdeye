@@ -8,7 +8,6 @@ package ai.startree.thirdeye.notification;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getDateString;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getFeedbackValue;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneString;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -19,6 +18,7 @@ import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
@@ -33,8 +33,6 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import ai.startree.thirdeye.spi.detection.events.EventType;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -58,6 +56,7 @@ public class NotificationContentBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationContentBuilder.class);
   private static final boolean INCLUDE_SUMMARY = false;
+  private static final String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
 
   private final AlertManager alertManager;
   private final UiConfiguration uiConfiguration;
@@ -202,16 +201,15 @@ public class NotificationContentBuilder {
         .collect(Collectors.toList());
   }
 
-  public Map<String, Object> format(final Collection<? extends AnomalyResult> anomalies) {
-    final Multimap<String, AnomalyReportDataApi> alertAnomalyReportsMap = ArrayListMultimap.create();
-    final Multimap<String, AnomalyReportDataApi> metricAnomalyReportsMap = ArrayListMultimap.create();
-
+  public List<AnomalyReportApi> buildAnomalyReports(
+      final Collection<? extends AnomalyResult> anomalies) {
     requireNonNull(anomalies, "anomalies is null");
     checkArgument(anomalies.size() > 0, "anomalies is empty");
 
     final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalies);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
+    final List<AnomalyReportApi> anomalyReportApis = new ArrayList<>();
     for (final AnomalyResult anomalyResult : sortedAnomalyResults) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
         LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
@@ -233,7 +231,7 @@ public class NotificationContentBuilder {
         alertDescription = alert.getDescription() == null ? "" : alert.getDescription();
       }
 
-      final AnomalyReportDataApi anomalyReport = AnomalyReportHelper.buildAnomalyReportEntity(
+      final AnomalyReportDataApi anomalyReportData = AnomalyReportHelper.buildAnomalyReportEntity(
           anomaly,
           feedbackVal,
           alertName,
@@ -241,14 +239,21 @@ public class NotificationContentBuilder {
           dateTimeZone,
           uiConfiguration.getExternalUrl());
 
-      // include notified alerts only in the email
-      alertAnomalyReportsMap.put(alertName, anomalyReport);
-      metricAnomalyReportsMap.put(optional(anomaly.getMetric()).orElse("UNKNOWN"), anomalyReport);
+      anomalyReportApis.add(new AnomalyReportApi()
+          .setAnomaly(ApiBeanMapper.toApi(anomaly))
+          .setData(anomalyReportData)
+          .setUrl(getDashboardUrl(anomaly.getId()))
+      );
     }
 
-    final Map<String, Object> templateData = new HashMap<>();
-    templateData.put("detectionToAnomalyDetailsMap", alertAnomalyReportsMap.asMap());
-    templateData.put("metricToAnomalyDetailsMap", metricAnomalyReportsMap.asMap());
-    return templateData;
+    return anomalyReportApis;
+  }
+
+  private String getDashboardUrl(final Long id) {
+    String extUrl = uiConfiguration.getExternalUrl();
+    if (!extUrl.matches(".*/")) {
+      extUrl += "/";
+    }
+    return String.format("%s%s%s", extUrl, ANOMALY_DASHBOARD_PREFIX, id);
   }
 }

@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Objects;
 import java.util.List;
-import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
 public class NotificationPayloadApi implements ThirdEyeApi {
@@ -20,10 +19,6 @@ public class NotificationPayloadApi implements ThirdEyeApi {
 
   // TODO spyne remove email specific parameters and generify
   private EmailRecipientsApi emailRecipients;
-
-  // TODO spyne remove email specific parameters. Introduce pojo and generify.
-  @Deprecated
-  private Map<String, Object> emailTemplateData;
 
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
@@ -50,17 +45,6 @@ public class NotificationPayloadApi implements ThirdEyeApi {
 
   public NotificationPayloadApi setEmailRecipients(final EmailRecipientsApi emailRecipients) {
     this.emailRecipients = emailRecipients;
-    return this;
-  }
-
-  @Deprecated
-  public Map<String, Object> getEmailTemplateData() {
-    return emailTemplateData;
-  }
-
-  public NotificationPayloadApi setEmailTemplateData(
-      final Map<String, Object> emailTemplateData) {
-    this.emailTemplateData = emailTemplateData;
     return this;
   }
 

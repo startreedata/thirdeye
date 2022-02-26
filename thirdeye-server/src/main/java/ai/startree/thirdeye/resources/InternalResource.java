@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.task.runner.NotificationTaskRunner;
@@ -38,10 +37,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -141,27 +136,6 @@ public class InternalResource {
         notificationDispatcher.buildEmailProperties());
     final String emailHtml = emailNotificationService.toHtml(payload).toString();
     return Response.ok(emailHtml).build();
-  }
-
-  @GET
-  @Path("email/entity")
-  @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response generateEmailEntity(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam("alertId") Long alertId
-  ) {
-    ensureExists(alertId, "Query parameter required: alertId !");
-    return Response.ok(buildTemplateData(alertId)).build();
-  }
-
-  private Map<String, Object> buildTemplateData(final Long alertId) {
-    final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
-        mergedAnomalyResultManager.findByDetectionConfigId(alertId));
-
-    return notificationContentBuilder.format(
-        new ArrayList<MergedAnomalyResultDTO>(anomalies)
-    );
   }
 
   @GET

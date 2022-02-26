@@ -202,7 +202,6 @@ public class NotificationContentBuilder {
   }
 
   public Map<String, Object> format(final Collection<? extends AnomalyResult> anomalies) {
-    final Multimap<String, String> anomalyDimensions = ArrayListMultimap.create();
     final Multimap<String, AnomalyReportEntity> alertAnomalyReportsMap = ArrayListMultimap.create();
     final Multimap<String, AnomalyReportEntity> metricAnomalyReportsMap = ArrayListMultimap.create();
 
@@ -240,11 +239,6 @@ public class NotificationContentBuilder {
           alertDescription,
           dateTimeZone,
           uiConfiguration.getExternalUrl());
-
-      // dimension filters / values
-      for (final Map.Entry<String, String> entry : anomaly.getDimensions().entrySet()) {
-        anomalyDimensions.put(entry.getKey(), entry.getValue());
-      }
 
       // include notified alerts only in the email
       alertAnomalyReportsMap.put(alertName, anomalyReport);

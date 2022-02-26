@@ -10,8 +10,10 @@ import ai.startree.thirdeye.datasource.mock.MockThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.datasource.sql.SqlThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
 
+@AutoService(Plugin.class)
 public class DefaultDataSourcesPlugin implements Plugin {
 
   @Override

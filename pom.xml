@@ -43,6 +43,7 @@
 
     <!--  Dependency Versions -->
     <assertj.version>3.17.2</assertj.version>
+    <auto-service.version>1.0.1</auto-service.version>
     <avro.version>1.7.7</avro.version>
     <calcite.version>1.28.0</calcite.version>
     <calendar-api.version>v3-rev300-1.23.0</calendar-api.version>
@@ -151,6 +152,11 @@
             <showWarnings>true</showWarnings>
             <release>${jdk.version}</release>
             <annotationProcessorPaths>
+              <path>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>${auto-service.version}</version>
+              </path>
               <path>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
@@ -420,6 +426,16 @@
         <groupId>org.mapstruct</groupId>
         <artifactId>mapstruct</artifactId>
         <version>${org.mapstruct.version}</version>
+      </dependency>
+
+      <!--
+      A configuration/metadata generator for java.util.ServiceLoader-style service providers
+      see: https://github.com/google/auto/tree/master/service
+      -->
+      <dependency>
+        <groupId>com.google.auto.service</groupId>
+        <artifactId>auto-service-annotations</artifactId>
+        <version>${auto-service.version}</version>
       </dependency>
 
       <!-- dropwizard -->

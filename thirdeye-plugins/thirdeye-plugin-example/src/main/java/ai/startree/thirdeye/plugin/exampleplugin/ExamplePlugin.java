@@ -7,7 +7,9 @@ package ai.startree.thirdeye.plugin.exampleplugin;
 
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.api.AlertApi;
+import com.google.auto.service.AutoService;
 
+@AutoService(Plugin.class)
 public class ExamplePlugin implements Plugin {
 
   public ExamplePlugin() {

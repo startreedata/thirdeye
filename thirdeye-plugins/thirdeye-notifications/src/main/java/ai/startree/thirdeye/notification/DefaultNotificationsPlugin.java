@@ -10,8 +10,10 @@ import ai.startree.thirdeye.notification.email.SendgridNotificationServiceFactor
 import ai.startree.thirdeye.notification.webhook.WebhookNotificationServiceFactory;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
+import com.google.auto.service.AutoService;
 import java.util.Arrays;
 
+@AutoService(Plugin.class)
 public class DefaultNotificationsPlugin implements Plugin {
 
   @Override

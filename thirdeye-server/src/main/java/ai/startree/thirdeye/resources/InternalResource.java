@@ -148,7 +148,7 @@ public class InternalResource {
   @POST
   @Path("trigger/webhook")
   public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    final ImmutableMap<String, String> properties = ImmutableMap.of(
+    final ImmutableMap<String, Object> properties = ImmutableMap.of(
         "url", "http://localhost:8080/internal/webhook"
     );
     notificationServiceRegistry

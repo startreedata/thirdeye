@@ -18,9 +18,9 @@ public class WebhookNotificationServiceFactory implements NotificationServiceFac
   }
 
   @Override
-  public NotificationService build(final Map<String, String> properties) {
+  public NotificationService build(final Map<String, Object> params) {
     final WebhookConfiguration configuration = new ObjectMapper()
-        .convertValue(properties, WebhookConfiguration.class);
+        .convertValue(params, WebhookConfiguration.class);
 
     return new WebhookNotificationService(configuration);
   }

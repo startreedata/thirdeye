@@ -24,10 +24,10 @@ public class NotificationServiceRegistry {
 
   public NotificationService get(
       final String name,
-      final Map<String, String> properties) {
+      final Map<String, Object> params) {
     requireNonNull(name, "name is null");
     final NotificationServiceFactory notificationServiceFactory = requireNonNull(factoryMap.get(name),
         "Unable to load NotificationServiceFactory: " + name);
-    return notificationServiceFactory.build(properties);
+    return notificationServiceFactory.build(params);
   }
 }

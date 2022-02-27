@@ -54,15 +54,15 @@ public class NotificationDispatcher {
     // Send out emails
     final EmailSchemeDto emailScheme = sg.getNotificationSchemes().getEmailScheme();
     if (emailScheme != null) {
-      final Map<String, String> properties = buildEmailProperties();
-      fireNotification("email", properties, payload);
+      final Map<String, Object> params = buildEmailProperties();
+      fireNotification("email", params, payload);
     }
 
     // fire webhook
     final WebhookSchemeDto webhookScheme = sg.getNotificationSchemes().getWebhookScheme();
     if (webhookScheme != null) {
-      final Map<String, String> properties = buildWebhookProperties(webhookScheme);
-      fireNotification("webhook", properties, payload);
+      final Map<String, Object> params = buildWebhookProperties(webhookScheme);
+      fireNotification("webhook", params, payload);
     }
   }
 
@@ -78,8 +78,8 @@ public class NotificationDispatcher {
         .orElse(null);
   }
 
-  public Map<String, String> buildEmailProperties() {
-    final Map<String, String> properties = new HashMap<>();
+  public Map<String, Object> buildEmailProperties() {
+    final Map<String, Object> properties = new HashMap<>();
     properties.put("host", smtpConfig.getHost());
     properties.put("port", String.valueOf(smtpConfig.getPort()));
     properties.put("user", smtpConfig.getUser());
@@ -88,8 +88,8 @@ public class NotificationDispatcher {
     return properties;
   }
 
-  private Map<String, String> buildWebhookProperties(final WebhookSchemeDto webhookScheme) {
-    final Map<String, String> properties = new HashMap<>();
+  private Map<String, Object> buildWebhookProperties(final WebhookSchemeDto webhookScheme) {
+    final Map<String, Object> properties = new HashMap<>();
     properties.put("url", webhookScheme.getUrl());
     if (webhookScheme.getHashKey() != null) {
       properties.put("hashKey", webhookScheme.getHashKey());
@@ -98,7 +98,7 @@ public class NotificationDispatcher {
   }
 
   private void fireNotification(final String name,
-      final Map<String, String> properties,
+      final Map<String, Object> properties,
       final NotificationPayloadApi entity) {
     final NotificationService service = notificationServiceRegistry.get(name, properties);
     service.notify(entity);

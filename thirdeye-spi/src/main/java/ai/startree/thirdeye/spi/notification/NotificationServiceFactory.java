@@ -11,5 +11,5 @@ public interface NotificationServiceFactory {
 
   String name();
 
-  NotificationService build(Map<String, String> properties);
+  NotificationService build(Map<String, Object> params);
 }

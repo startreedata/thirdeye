@@ -17,7 +17,7 @@ public class SendgridNotificationServiceFactory implements NotificationServiceFa
   }
 
   @Override
-  public NotificationService build(final Map<String, String> properties) {
+  public NotificationService build(final Map<String, Object> params) {
     return new SendgridNotificationService();
   }
 }

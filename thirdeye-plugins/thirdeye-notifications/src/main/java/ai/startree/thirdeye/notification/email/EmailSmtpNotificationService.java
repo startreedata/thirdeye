@@ -5,8 +5,10 @@
 
 package ai.startree.thirdeye.notification.email;
 
-import static ai.startree.thirdeye.notification.email.EmailEntityBuilder.DEFAULT_EMAIL_TEMPLATE;
+import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -60,27 +62,29 @@ public class EmailSmtpNotificationService implements NotificationService {
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
-    final EmailEntityBuilder emailEntityBuilder = new EmailEntityBuilder();
+    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
     try {
-      final EmailEntity emailEntity = emailEntityBuilder.build(api,
-          configuration.getEmailRecipients());
+      final EmailContent emailContent = emailContentBuilder.build(api
+      );
 
-      final HtmlEmail email = buildHtmlEmail(emailEntity);
+      final HtmlEmail email = buildHtmlEmail(emailContent);
       sendEmail(email);
     } catch (final Exception e) {
       throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "Email dispatch failed!");
     }
   }
 
-  private HtmlEmail buildHtmlEmail(final EmailEntity emailEntity)
+  private HtmlEmail buildHtmlEmail(final EmailContent emailContent)
       throws EmailException {
-    final HtmlEmail email = new HtmlEmail();
-    final EmailRecipientsConfiguration recipients = emailEntity.getRecipients();
+    final EmailRecipientsConfiguration recipients = configuration.getEmailRecipients();
+    requireNonNull(recipients.getTo(), "to field in email scheme is null");
+    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
 
-    email.setSubject(emailEntity.getSubject());
-    email.setFrom(emailEntity.getFrom());
+    final HtmlEmail email = new HtmlEmail();
+    email.setSubject(emailContent.getSubject());
+    email.setFrom(recipients.getFrom());
     email.setTo(toAddress(recipients.getTo()));
-    email.setContent(emailEntity.getHtmlContent(), "text/html; charset=utf-8");
+    email.setContent(emailContent.getHtmlBody(), "text/html; charset=utf-8");
 
     if (!CollectionUtils.isEmpty(recipients.getCc())) {
       email.setCc(toAddress(recipients.getCc()));
@@ -121,9 +125,9 @@ public class EmailSmtpNotificationService implements NotificationService {
 
   @Override
   public Object toHtml(final NotificationPayloadApi api) {
-    final EmailEntityBuilder emailEntityBuilder = new EmailEntityBuilder();
-    final Map<String, Object> templateData = emailEntityBuilder.constructTemplateData(api);
-    return emailEntityBuilder.buildHtml(
+    final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
+    final Map<String, Object> templateData = emailContentBuilder.constructTemplateData(api);
+    return emailContentBuilder.buildHtml(
         DEFAULT_EMAIL_TEMPLATE,
         templateData);
   }

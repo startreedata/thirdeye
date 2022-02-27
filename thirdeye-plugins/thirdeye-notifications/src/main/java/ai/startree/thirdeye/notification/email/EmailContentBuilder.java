@@ -6,8 +6,6 @@
 package ai.startree.thirdeye.notification.email;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.Constants.SubjectType;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -36,7 +34,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
-public class EmailEntityBuilder {
+public class EmailContentBuilder {
 
   public static final String DEFAULT_EMAIL_TEMPLATE = "metric-anomalies";
   private static final String BASE_PACKAGE_PATH = "/ai/startree/thirdeye/detection/detector";
@@ -92,11 +90,7 @@ public class EmailEntityBuilder {
     }
   }
 
-  public EmailEntity build(final NotificationPayloadApi api,
-      final EmailRecipientsConfiguration recipients) {
-    requireNonNull(recipients.getTo(), "to field in email scheme is null");
-    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
-
+  public EmailContent build(final NotificationPayloadApi api) {
     final Map<String, Object> templateData = constructTemplateData(api);
     final String htmlText = buildHtml(DEFAULT_EMAIL_TEMPLATE, templateData);
 
@@ -105,11 +99,9 @@ public class EmailEntityBuilder {
         templateData.get("datasets"),
         api.getSubscriptionGroup().getName());
 
-    return new EmailEntity()
+    return new EmailContent()
         .setSubject(subject)
-        .setHtmlContent(htmlText)
-        .setRecipients(recipients)
-        .setFrom(recipients.getFrom());
+        .setHtmlBody(htmlText);
   }
 
   public Map<String, Object> constructTemplateData(

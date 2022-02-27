@@ -6,6 +6,8 @@
 package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -81,17 +83,21 @@ public class NotificationDispatcher {
 
   private NotificationSpecDTO toSpec(final EmailSchemeDto emailScheme, final String from) {
     final Map<String, Object> smtpParams = buildSmtpParams();
+    final String fromAddress = requireNonNull(optional(from).orElse(smtpParams.get("user")
+            .toString()),
+        "from address is null");
 
-    final Map<String, Object> params = new HashMap<>();
-    params.put("smtp", smtpParams);
-    params.put("from", optional(from).orElse(smtpParams.get("user").toString()));
-    params.put("to", emailScheme.getTo());
-    params.put("cc", emailScheme.getCc());
-    params.put("bcc", emailScheme.getBcc());
+    checkArgument(!fromAddress.trim().isEmpty(), "from address is empty");
+
+    final Map<String, Object> emailRecipients = new HashMap<>();
+    emailRecipients.put("from", fromAddress);
+    emailRecipients.put("to", emailScheme.getTo());
+    emailRecipients.put("cc", emailScheme.getCc());
+    emailRecipients.put("bcc", emailScheme.getBcc());
 
     return new NotificationSpecDTO()
         .setType("email-smtp")
-        .setParams(params);
+        .setParams(Map.of("smtp", smtpParams, "emailRecipients", emailRecipients));
   }
 
   private NotificationSpecDTO toSpec(final WebhookSchemeDto webhookScheme) {

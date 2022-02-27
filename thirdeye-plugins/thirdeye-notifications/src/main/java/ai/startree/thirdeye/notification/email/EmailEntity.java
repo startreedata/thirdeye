@@ -5,15 +5,12 @@
 
 package ai.startree.thirdeye.notification.email;
 
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
-
 public class EmailEntity {
 
   private String from;
-  private EmailRecipientsApi recipients;
+  private EmailRecipientsConfiguration recipients;
   private String subject;
   private String htmlContent;
-  private String snapshotPath;
 
   public String getFrom() {
     return from;
@@ -24,12 +21,12 @@ public class EmailEntity {
     return this;
   }
 
-  public EmailRecipientsApi getRecipients() {
+  public EmailRecipientsConfiguration getRecipients() {
     return recipients;
   }
 
   public EmailEntity setRecipients(
-      final EmailRecipientsApi recipients) {
+      final EmailRecipientsConfiguration recipients) {
     this.recipients = recipients;
     return this;
   }

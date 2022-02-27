@@ -17,9 +17,6 @@ public class NotificationPayloadApi implements ThirdEyeApi {
   private List<AnomalyReportApi> anomalyReports;
   private NotificationReportApi report;
 
-  // TODO spyne remove email specific parameters and generify
-  private EmailRecipientsApi emailRecipients;
-
   public SubscriptionGroupApi getSubscriptionGroup() {
     return subscriptionGroup;
   }
@@ -36,15 +33,6 @@ public class NotificationPayloadApi implements ThirdEyeApi {
 
   public NotificationPayloadApi setAnomalyReports(final List<AnomalyReportApi> anomalyReports) {
     this.anomalyReports = anomalyReports;
-    return this;
-  }
-
-  public EmailRecipientsApi getEmailRecipients() {
-    return emailRecipients;
-  }
-
-  public NotificationPayloadApi setEmailRecipients(final EmailRecipientsApi emailRecipients) {
-    this.emailRecipients = emailRecipients;
     return this;
   }
 

@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.sendgrid.Content;
@@ -30,11 +29,17 @@ import org.slf4j.LoggerFactory;
 public class EmailSendgridNotificationService implements NotificationService {
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailSendgridNotificationService.class);
+  private final EmailSendgridConfiguration configuration;
+
+  public EmailSendgridNotificationService(final EmailSendgridConfiguration configuration) {
+    this.configuration = configuration;
+  }
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     try {
-      final EmailEntity emailEntity = new EmailEntityBuilder().build(api);
+      final EmailEntity emailEntity = new EmailEntityBuilder().build(api,
+          configuration.getEmailRecipients());
 
       sendEmail(emailEntity);
     } catch (final Exception e) {
@@ -69,7 +74,7 @@ public class EmailSendgridNotificationService implements NotificationService {
     return mail;
   }
 
-  private Personalization buildPersonalization(final EmailRecipientsApi recipients) {
+  private Personalization buildPersonalization(final EmailRecipientsConfiguration recipients) {
     requireNonNull(recipients, "email recipients obj is null");
     final Personalization personalization = new Personalization();
 

@@ -7,6 +7,7 @@ package ai.startree.thirdeye.notification.email;
 
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 public class EmailSendgridNotificationServiceFactory implements NotificationServiceFactory {
@@ -18,6 +19,9 @@ public class EmailSendgridNotificationServiceFactory implements NotificationServ
 
   @Override
   public NotificationService build(final Map<String, Object> params) {
-    return new EmailSendgridNotificationService();
+    final EmailSendgridConfiguration configuration = new ObjectMapper()
+        .convertValue(params, EmailSendgridConfiguration.class);
+
+    return new EmailSendgridNotificationService(configuration);
   }
 }

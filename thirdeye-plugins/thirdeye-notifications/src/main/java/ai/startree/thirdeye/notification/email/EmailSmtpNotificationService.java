@@ -9,7 +9,6 @@ import static ai.startree.thirdeye.notification.email.EmailEntityBuilder.DEFAULT
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.google.common.collect.Collections2;
@@ -63,7 +62,8 @@ public class EmailSmtpNotificationService implements NotificationService {
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     final EmailEntityBuilder emailEntityBuilder = new EmailEntityBuilder();
     try {
-      final EmailEntity emailEntity = emailEntityBuilder.build(api);
+      final EmailEntity emailEntity = emailEntityBuilder.build(api,
+          configuration.getEmailRecipients());
 
       final HtmlEmail email = buildHtmlEmail(emailEntity);
       sendEmail(email);
@@ -75,7 +75,7 @@ public class EmailSmtpNotificationService implements NotificationService {
   private HtmlEmail buildHtmlEmail(final EmailEntity emailEntity)
       throws EmailException {
     final HtmlEmail email = new HtmlEmail();
-    final EmailRecipientsApi recipients = emailEntity.getRecipients();
+    final EmailRecipientsConfiguration recipients = emailEntity.getRecipients();
 
     email.setSubject(emailEntity.getSubject());
     email.setFrom(emailEntity.getFrom());

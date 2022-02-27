@@ -13,7 +13,6 @@ import ai.startree.thirdeye.spi.Constants.SubjectType;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
@@ -93,8 +92,8 @@ public class EmailEntityBuilder {
     }
   }
 
-  public EmailEntity build(final NotificationPayloadApi api) {
-    final EmailRecipientsApi recipients = api.getEmailRecipients();
+  public EmailEntity build(final NotificationPayloadApi api,
+      final EmailRecipientsConfiguration recipients) {
     requireNonNull(recipients.getTo(), "to field in email scheme is null");
     checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
 

@@ -5,26 +5,15 @@
 
 package ai.startree.thirdeye.notification.email;
 
-public class EmailSmtpConfiguration {
+public class EmailSendgridConfiguration {
 
-  private SmtpConfiguration smtp;
   private EmailRecipientsConfiguration emailRecipients;
-
-  public SmtpConfiguration getSmtp() {
-    return smtp;
-  }
-
-  public EmailSmtpConfiguration setSmtp(
-      final SmtpConfiguration smtp) {
-    this.smtp = smtp;
-    return this;
-  }
 
   public EmailRecipientsConfiguration getEmailRecipients() {
     return emailRecipients;
   }
 
-  public EmailSmtpConfiguration setEmailRecipients(
+  public EmailSendgridConfiguration setEmailRecipients(
       final EmailRecipientsConfiguration emailRecipients) {
     this.emailRecipients = emailRecipients;
     return this;

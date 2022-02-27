@@ -14,8 +14,8 @@ import ai.startree.thirdeye.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.notification.email.EmailNotificationServiceFactory;
-import ai.startree.thirdeye.notification.email.SendgridNotificationServiceFactory;
+import ai.startree.thirdeye.notification.email.EmailSendgridNotificationServiceFactory;
+import ai.startree.thirdeye.notification.email.EmailSmtpNotificationServiceFactory;
 import ai.startree.thirdeye.notification.webhook.WebhookNotificationServiceFactory;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
@@ -75,8 +75,8 @@ public class ThirdEyeServerDebug {
   static void loadNotificationServiceFactories(final NotificationServiceRegistry instance) {
     Stream.of(
         new WebhookNotificationServiceFactory(),
-        new EmailNotificationServiceFactory(),
-        new SendgridNotificationServiceFactory()
+        new EmailSmtpNotificationServiceFactory(),
+        new EmailSendgridNotificationServiceFactory()
     ).forEach(instance::addNotificationServiceFactory);
   }
 }

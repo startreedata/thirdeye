@@ -9,7 +9,7 @@ import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import java.util.Map;
 
-public class SendgridNotificationServiceFactory implements NotificationServiceFactory {
+public class EmailSendgridNotificationServiceFactory implements NotificationServiceFactory {
 
   @Override
   public String name() {
@@ -18,6 +18,6 @@ public class SendgridNotificationServiceFactory implements NotificationServiceFa
 
   @Override
   public NotificationService build(final Map<String, Object> params) {
-    return new SendgridNotificationService();
+    return new EmailSendgridNotificationService();
   }
 }

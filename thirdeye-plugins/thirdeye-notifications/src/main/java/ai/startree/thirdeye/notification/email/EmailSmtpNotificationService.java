@@ -25,12 +25,12 @@ import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmailNotificationService implements NotificationService {
+public class EmailSmtpNotificationService implements NotificationService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EmailNotificationService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailSmtpNotificationService.class);
   private final SmtpConfiguration smtpConfiguration;
 
-  public EmailNotificationService(final SmtpConfiguration configuration) {
+  public EmailSmtpNotificationService(final SmtpConfiguration configuration) {
     smtpConfiguration = configuration;
   }
 
@@ -47,7 +47,7 @@ public class EmailNotificationService implements NotificationService {
       return Collections.emptySet();
     }
     return Collections2.filter(Collections2.transform(emailCollection,
-            EmailNotificationService::toInternetAddress),
+            EmailSmtpNotificationService::toInternetAddress),
         Objects::nonNull);
   }
 

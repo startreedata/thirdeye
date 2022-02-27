@@ -10,7 +10,7 @@ import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
-public class EmailNotificationServiceFactory implements NotificationServiceFactory {
+public class EmailSmtpNotificationServiceFactory implements NotificationServiceFactory {
 
   @Override
   public String name() {
@@ -22,6 +22,6 @@ public class EmailNotificationServiceFactory implements NotificationServiceFacto
     final SmtpConfiguration configuration = new ObjectMapper()
         .convertValue(params, SmtpConfiguration.class);
 
-    return new EmailNotificationService(configuration);
+    return new EmailSmtpNotificationService(configuration);
   }
 }

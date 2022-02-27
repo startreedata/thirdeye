@@ -27,9 +27,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SendgridNotificationService implements NotificationService {
+public class EmailSendgridNotificationService implements NotificationService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SendgridNotificationService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailSendgridNotificationService.class);
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {

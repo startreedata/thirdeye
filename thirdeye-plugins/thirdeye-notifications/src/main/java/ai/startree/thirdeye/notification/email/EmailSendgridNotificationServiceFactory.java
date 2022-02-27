@@ -13,7 +13,7 @@ public class EmailSendgridNotificationServiceFactory implements NotificationServ
 
   @Override
   public String name() {
-    return "sendgrid";
+    return "email-sendgrid";
   }
 
   @Override

@@ -35,6 +35,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.HashMap;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -124,8 +125,9 @@ public class InternalResource {
         sg,
         notificationDispatcher.getAnomalies(sg, result));
 
-    final NotificationService emailNotificationService = notificationServiceRegistry.get("email",
-        notificationDispatcher.buildSmtpParams());
+    final NotificationService emailNotificationService = notificationServiceRegistry.get(
+        "email-smtp",
+        new HashMap<>());
     final String emailHtml = emailNotificationService.toHtml(payload).toString();
     return Response.ok(emailHtml).build();
   }

@@ -14,7 +14,7 @@ public class EmailSmtpNotificationServiceFactory implements NotificationServiceF
 
   @Override
   public String name() {
-    return "email";
+    return "email-smtp";
   }
 
   @Override

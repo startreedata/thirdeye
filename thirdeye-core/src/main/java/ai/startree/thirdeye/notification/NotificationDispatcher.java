@@ -90,7 +90,7 @@ public class NotificationDispatcher {
     params.put("bcc", emailScheme.getBcc());
 
     return new NotificationSpecDTO()
-        .setType("email")
+        .setType("email-smtp")
         .setParams(params);
   }
 

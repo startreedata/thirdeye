@@ -14,5 +14,26 @@
         ]
       }
     }
+  },
+  {
+    "name": "sg-with-spec",
+    "cron": "*/1 * * * * ?",
+    "specs": [
+      {
+        "type": "email-smtp",
+        "params": {
+          "smtp": {
+            "host": "${SMTP_HOST}",
+            "port": "${SMTP_PORT}",
+            "user": "${SMTP_USER}",
+            "password": "${SMTP_PASSWORD}"
+          },
+          "from": "no-reply@startree.ai",
+          "to": [
+            "pyne.suvodeep@gmail.com"
+          ]
+        }
+      }
+    ]
   }
 ]

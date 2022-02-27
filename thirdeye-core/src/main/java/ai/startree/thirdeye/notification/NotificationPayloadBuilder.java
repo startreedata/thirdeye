@@ -21,25 +21,28 @@ public class NotificationPayloadBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationPayloadBuilder.class);
 
-  private final NotificationContentBuilder notificationContentBuilder;
+  private final NotificationReportBuilder notificationReportBuilder;
+  private final NotificationEventsBuilder notificationEventsBuilder;
 
   @Inject
-  public NotificationPayloadBuilder(final NotificationContentBuilder notificationContentBuilder) {
-    this.notificationContentBuilder = notificationContentBuilder;
+  public NotificationPayloadBuilder(final NotificationReportBuilder notificationReportBuilder,
+      final NotificationEventsBuilder notificationEventsBuilder) {
+    this.notificationReportBuilder = notificationReportBuilder;
+    this.notificationEventsBuilder = notificationEventsBuilder;
   }
 
   public NotificationPayloadApi buildNotificationPayload(
       final SubscriptionGroupDTO subscriptionGroup,
       final Set<MergedAnomalyResultDTO> anomalies) {
-    final NotificationReportApi report = notificationContentBuilder.buildNotificationReportApi(
+    final NotificationReportApi report = notificationReportBuilder.buildNotificationReportApi(
         subscriptionGroup,
         anomalies);
 
-    report.setRelatedEvents(notificationContentBuilder.getRelatedEvents(anomalies));
+    report.setRelatedEvents(notificationEventsBuilder.getRelatedEvents(anomalies));
 
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
         .setReport(report)
-        .setAnomalyReports(notificationContentBuilder.buildAnomalyReports(anomalies));
+        .setAnomalyReports(notificationReportBuilder.buildAnomalyReports(anomalies));
   }
 }

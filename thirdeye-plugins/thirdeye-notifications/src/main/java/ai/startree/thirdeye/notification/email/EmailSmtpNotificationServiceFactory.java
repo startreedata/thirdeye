@@ -19,8 +19,8 @@ public class EmailSmtpNotificationServiceFactory implements NotificationServiceF
 
   @Override
   public NotificationService build(final Map<String, Object> params) {
-    final SmtpConfiguration configuration = new ObjectMapper()
-        .convertValue(params, SmtpConfiguration.class);
+    final EmailSmtpConfiguration configuration = new ObjectMapper()
+        .convertValue(params, EmailSmtpConfiguration.class);
 
     return new EmailSmtpNotificationService(configuration);
   }

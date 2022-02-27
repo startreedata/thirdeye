@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 public class EmailSmtpNotificationService implements NotificationService {
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailSmtpNotificationService.class);
-  private final SmtpConfiguration smtpConfiguration;
+  private final EmailSmtpConfiguration configuration;
 
-  public EmailSmtpNotificationService(final SmtpConfiguration configuration) {
-    smtpConfiguration = configuration;
+  public EmailSmtpNotificationService(final EmailSmtpConfiguration configuration) {
+    this.configuration = configuration;
   }
 
   /**
@@ -97,6 +97,7 @@ public class EmailSmtpNotificationService implements NotificationService {
    * Sends email according to the provided config.
    */
   private void sendEmail(final HtmlEmail email) throws EmailException {
+    final SmtpConfiguration smtpConfiguration = configuration.getSmtp();
     email.setHostName(smtpConfiguration.getHost());
     email.setSmtpPort(smtpConfiguration.getPort());
     if (smtpConfiguration.getUser() != null && smtpConfiguration.getPassword() != null) {

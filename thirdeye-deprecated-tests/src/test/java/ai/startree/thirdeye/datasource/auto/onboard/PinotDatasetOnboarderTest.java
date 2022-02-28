@@ -33,7 +33,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-// todo cyril the tests here are not deprecated - but putting them in pinot plugins require refactoring
+// todo cyril the tests here are not deprecated - but putting them in pinot plugins requires refactoring
 public class PinotDatasetOnboarderTest {
 
   public static final String DATA_SOURCE_NAME = PinotThirdEyeDataSource.class.getSimpleName();
@@ -85,7 +85,7 @@ public class PinotDatasetOnboarderTest {
     assertThat(datasetConfig.getTimeColumn()).isEqualTo(oldTimeColumnName);
     assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
     assertThat(datasetConfig.getTimezone()).isEqualTo(TimeSpec.DEFAULT_TIMEZONE);
-    assertThat(datasetConfig.isActive()).isTrue();
+    assertThat(datasetConfig.getActive()).isTrue();
 
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
     List<String> schemaMetricNames = schema.getMetricNames();
@@ -124,7 +124,7 @@ public class PinotDatasetOnboarderTest {
     assertThat(newDatasetConfig1.getDataset()).isEqualTo(dataset);
     assertThat(Sets.newHashSet(newDatasetConfig1.getDimensions())).isEqualTo(Sets.newHashSet(schema.getDimensionNames()));
     assertThat(newDatasetConfig1.getProperties()).isEqualTo(pinotCustomConfigs);
-    assertThat(newDatasetConfig1.isActive()).isTrue();
+    assertThat(newDatasetConfig1.getActive()).isTrue();
 
     MetricFieldSpec metricFieldSpec = new MetricFieldSpec("newMetric", FieldSpec.DataType.LONG);
     schema.addField(metricFieldSpec);
@@ -179,6 +179,6 @@ public class PinotDatasetOnboarderTest {
     pinotDatasetOnboarder.deactivateDatasets(Collections.emptyList(), DATA_SOURCE_NAME);
     List<DatasetConfigDTO> datasets = datasetConfigDAO.findAll();
     assertThat(datasets.size()).isEqualTo(1);
-    assertThat(datasets.get(0).isActive()).isFalse();
+    assertThat(datasets.get(0).getActive()).isFalse();
   }
 }

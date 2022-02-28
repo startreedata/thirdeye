@@ -80,7 +80,7 @@ public class ConfigGenerator {
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
     datasetConfigDTO.setDataSource(dataSourceName);
     datasetConfigDTO.setProperties(customConfigs);
-    datasetConfigDTO.setActive(true);
+    datasetConfigDTO.setActive(Boolean.TRUE);
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
   }

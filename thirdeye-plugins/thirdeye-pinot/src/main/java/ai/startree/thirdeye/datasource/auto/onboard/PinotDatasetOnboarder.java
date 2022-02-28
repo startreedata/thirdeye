@@ -142,7 +142,7 @@ public class PinotDatasetOnboarder {
         .stream()
         .filter(dataset -> dataSourceName.equals(dataset.getDataSource()))
         .filter(dataset -> shouldDeactivateDataset(dataset, datasets))
-        .peek(dataset -> dataset.setActive(false))
+        .peek(dataset -> dataset.setActive(Boolean.FALSE))
         .forEach(datasetConfigManager::save);
   }
 
@@ -208,7 +208,7 @@ public class PinotDatasetOnboarder {
     checkTimeFieldChanges(datasetConfig, schema, timeColumnName);
     appendNewCustomConfigs(datasetConfig, customConfigs);
     ConfigGenerator.checkNonAdditive(datasetConfig);
-    datasetConfig.setActive(true);
+    datasetConfig.setActive(Boolean.TRUE);
     return datasetConfig;
   }
 

@@ -32,7 +32,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String timezone;
   private String dataSource;
   private Set<String> owners;
-  private boolean active = true;
+  private Boolean active;
 
   /**
    * Configuration for non-additive dataset
@@ -171,11 +171,11 @@ public class DatasetConfigDTO extends AbstractDTO {
     this.owners = owners;
   }
 
-  public boolean isActive() {
+  public Boolean getActive() {
     return active;
   }
 
-  public void setActive(boolean active) {
+  public void setActive(Boolean active) {
     this.active = active;
   }
 

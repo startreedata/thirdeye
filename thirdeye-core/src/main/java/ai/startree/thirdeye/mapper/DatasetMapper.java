@@ -32,6 +32,7 @@ public interface DatasetMapper {
         .ifPresent(dto::setDataSource);
     dto.setDataset(api.getName());
     dto.setDisplayName(api.getName());
+    dto.setActive(api.getActive());
     optional(api.getDimensions()).ifPresent(dto::setDimensions);
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
@@ -52,7 +53,7 @@ public interface DatasetMapper {
     }
     final DatasetApi datasetApi = new DatasetApi()
         .setId(dto.getId())
-        .setActive(dto.isActive())
+        .setActive(dto.getActive())
         .setDimensions(dto.getDimensions())
         .setName(dto.getDataset())
         .setExpectedDelay(optional(dto.getExpectedDelay()).map(TimeGranularity::toDuration)

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * searches Thirdeye's internal database for metrics contained in the same datasets as
  * any metric entities in the search context. All found metrics are scored equally.
  */
+@Deprecated
 public class MetricDatasetPipeline extends Pipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricDatasetPipeline.class);
@@ -132,14 +134,10 @@ public class MetricDatasetPipeline extends Pipeline {
     return out;
   }
 
-  static Collection<MetricConfigDTO> removeInactive(Iterable<MetricConfigDTO> dtos) {
-    Collection<MetricConfigDTO> out = new ArrayList<>();
-    for (MetricConfigDTO dto : dtos) {
-      if (dto.isActive()) {
-        out.add(dto);
-      }
-    }
-    return out;
+  static Collection<MetricConfigDTO> removeInactive(Collection<MetricConfigDTO> dtos) {
+    return dtos.stream()
+        .filter(dto -> Boolean.TRUE.equals(dto.getActive()))
+        .collect(Collectors.toList());
   }
 
   static boolean findExisting(MetricConfigDTO dto, Iterable<MetricEntity> existing) {

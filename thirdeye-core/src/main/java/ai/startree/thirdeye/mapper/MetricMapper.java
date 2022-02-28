@@ -38,8 +38,7 @@ public interface MetricMapper {
         .setAggregationColumn(api.getAggregationColumn())
         .setDatatype(api.getDatatype())
         .setDefaultAggFunction(api.getAggregationFunction())
-        // TODO suvodeep Revisit this: Assume false if active is not set.
-        .setActive(optional(api.getActive()).orElse(false))
+        .setActive(api.getActive())
         .setViews(api.getViews())
         .setWhere(api.getWhere())
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
@@ -53,7 +52,7 @@ public interface MetricMapper {
     }
     return new MetricApi()
         .setId(dto.getId())
-        .setActive(boolApi(dto.isActive()))
+        .setActive(dto.getActive())
         .setName(dto.getName())
         .setUpdated(dto.getUpdateTime())
         .setDataset(optional(dto.getDataset())
@@ -65,9 +64,5 @@ public interface MetricMapper {
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setViews(dto.getViews())
         ;
-  }
-
-  private static Boolean boolApi(final boolean value) {
-    return value ? true : null;
   }
 }

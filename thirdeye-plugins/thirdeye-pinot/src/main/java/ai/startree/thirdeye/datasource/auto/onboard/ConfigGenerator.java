@@ -80,6 +80,7 @@ public class ConfigGenerator {
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
     datasetConfigDTO.setDataSource(dataSourceName);
     datasetConfigDTO.setProperties(customConfigs);
+    datasetConfigDTO.setActive(true);
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
   }
@@ -122,6 +123,7 @@ public class ConfigGenerator {
     metricConfigDTO.setName(metric);
     metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(dataset, metric));
     metricConfigDTO.setDataset(dataset);
+    metricConfigDTO.setActive(Boolean.TRUE);
 
     String dataTypeStr = metricFieldSpec.getDataType().toString();
     if (BYTES_STRING.equals(dataTypeStr)) {

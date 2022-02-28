@@ -33,7 +33,7 @@ public class MetricConfigDTO extends AbstractDTO {
   private Double rollupThreshold;
   private boolean inverseMetric = false;
   private String cellSizeExpression;
-  private boolean active = true;
+  private Boolean active;
   private Map<String, String> extSourceLinkInfo;
   private Map<String, String> extSourceLinkTimeGranularity;
   private Map<String, String> metricProperties = null;
@@ -143,11 +143,11 @@ public class MetricConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public boolean isActive() {
+  public Boolean getActive() {
     return active;
   }
 
-  public MetricConfigDTO setActive(final boolean active) {
+  public MetricConfigDTO setActive(final Boolean active) {
     this.active = active;
     return this;
   }
@@ -224,7 +224,7 @@ public class MetricConfigDTO extends AbstractDTO {
         && Objects.equals(dimensionAsMetric, mc.isDimensionAsMetric())
         && Objects.equals(inverseMetric, mc.isInverseMetric())
         && Objects.equals(cellSizeExpression, mc.getCellSizeExpression())
-        && Objects.equals(active, mc.isActive())
+        && Objects.equals(active, mc.getActive())
         && Objects.equals(extSourceLinkInfo, mc.getExtSourceLinkInfo())
         && Objects.equals(metricProperties, mc.getMetricProperties())
         && Objects.equals(views, mc.getViews())

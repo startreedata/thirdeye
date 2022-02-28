@@ -326,7 +326,7 @@ public class PinotDatasetOnboarder {
           metricConfigManager.save(metricConfig);
         }
       } else {
-        if (!metricConfig.isActive()) {
+        if (!Boolean.TRUE.equals(metricConfig.getActive())) {
           LOG.info("Activating metric {} in {}", metricConfig.getName(), dataset);
           metricConfig.setActive(true);
           metricConfigManager.save(metricConfig);

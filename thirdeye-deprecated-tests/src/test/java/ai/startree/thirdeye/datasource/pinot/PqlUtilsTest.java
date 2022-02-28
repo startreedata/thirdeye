@@ -73,8 +73,10 @@ public class PqlUtilsTest {
 
   @Test(dataProvider = "betweenClauseArgs")
   public void getBetweenClause(DateTime start, DateTime end, TimeSpec timeSpec, String expected) {
-    String betweenClause = SqlUtils.getBetweenClause(start, end, timeSpec,
-        new DatasetConfigDTO());
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
+    datasetConfigDTO.setTimezone(TimeSpec.DEFAULT_TIMEZONE);
+    String betweenClause = SqlUtils.getBetweenClause(start, end, timeSpec, datasetConfigDTO);
     Assert.assertEquals(betweenClause, expected);
   }
 

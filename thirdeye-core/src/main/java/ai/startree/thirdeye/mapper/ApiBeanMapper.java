@@ -14,7 +14,6 @@ import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
-import ai.startree.thirdeye.spi.api.DataSourceMetaApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
@@ -28,7 +27,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -55,41 +53,11 @@ public abstract class ApiBeanMapper {
   }
 
   public static DataSourceApi toApi(final DataSourceDTO dto) {
-    return new DataSourceApi()
-        .setId(dto.getId())
-        .setName(dto.getName())
-        .setProperties(dto.getProperties())
-        .setType(dto.getType())
-        .setMetaList(optional(dto.getMetaList())
-            .map(l -> l.stream().map(ApiBeanMapper::toApi)
-                .collect(Collectors.toList()))
-            .orElse(null));
-  }
-
-  private static DataSourceMetaApi toApi(final DataSourceMetaBean metaBean) {
-    return new DataSourceMetaApi()
-        .setClassRef(metaBean.getClassRef())
-        .setProperties(metaBean.getProperties());
+    return DataSourceMapper.INSTANCE.toApi(dto);
   }
 
   public static DataSourceDTO toDataSourceDto(final DataSourceApi api) {
-    final DataSourceDTO dto = new DataSourceDTO();
-    dto
-        .setName(api.getName())
-        .setProperties(api.getProperties())
-        .setType(api.getType())
-        .setMetaList(optional(api.getMetaList())
-            .map(l -> l.stream().map(ApiBeanMapper::toDataSourceMetaBean)
-                .collect(Collectors.toList()))
-            .orElse(null));
-    dto.setId(api.getId());
-    return dto;
-  }
-
-  private static DataSourceMetaBean toDataSourceMetaBean(final DataSourceMetaApi api) {
-    return new DataSourceMetaBean()
-        .setClassRef(api.getClassRef())
-        .setProperties(api.getProperties());
+    return DataSourceMapper.INSTANCE.toBean(api);
   }
 
   public static DatasetApi toApi(final DatasetConfigDTO dto) {

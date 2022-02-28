@@ -18,10 +18,7 @@ import java.util.Set;
 public class MetricConfigDTO extends AbstractDTO {
 
   public static final String ALIAS_JOINER = "::";
-  public static final MetricAggFunction DEFAULT_AGG_FUNCTION = MetricAggFunction.SUM;
-  public static final MetricAggFunction DEFAULT_TDIGEST_AGG_FUNCTION = MetricAggFunction.PCT90;
   public static final String METRIC_PROPERTIES_SEPARATOR = ",";
-  public static double DEFAULT_THRESHOLD = 0.01;
 
   private String name;
   private String dataset;
@@ -30,11 +27,13 @@ public class MetricConfigDTO extends AbstractDTO {
   private MetricType datatype;
   private String derivedMetricExpression;
   private String aggregationColumn;
-  private MetricAggFunction defaultAggFunction = DEFAULT_AGG_FUNCTION;
-  private Double rollupThreshold = DEFAULT_THRESHOLD;
+  private MetricAggFunction defaultAggFunction;
+  @Deprecated
+  @JsonIgnore // not used anymore
+  private Double rollupThreshold;
   private boolean inverseMetric = false;
   private String cellSizeExpression;
-  private boolean active = true;
+  private Boolean active;
   private Map<String, String> extSourceLinkInfo;
   private Map<String, String> extSourceLinkTimeGranularity;
   private Map<String, String> metricProperties = null;
@@ -126,15 +125,6 @@ public class MetricConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public Double getRollupThreshold() {
-    return rollupThreshold;
-  }
-
-  public MetricConfigDTO setRollupThreshold(final Double rollupThreshold) {
-    this.rollupThreshold = rollupThreshold;
-    return this;
-  }
-
   public boolean isInverseMetric() {
     return inverseMetric;
   }
@@ -153,11 +143,11 @@ public class MetricConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public boolean isActive() {
+  public Boolean getActive() {
     return active;
   }
 
-  public MetricConfigDTO setActive(final boolean active) {
+  public MetricConfigDTO setActive(final Boolean active) {
     this.active = active;
     return this;
   }
@@ -232,10 +222,9 @@ public class MetricConfigDTO extends AbstractDTO {
         && Objects.equals(derivedMetricExpression, mc.getDerivedMetricExpression())
         && Objects.equals(defaultAggFunction, mc.getDefaultAggFunction())
         && Objects.equals(dimensionAsMetric, mc.isDimensionAsMetric())
-        && Objects.equals(rollupThreshold, mc.getRollupThreshold())
         && Objects.equals(inverseMetric, mc.isInverseMetric())
         && Objects.equals(cellSizeExpression, mc.getCellSizeExpression())
-        && Objects.equals(active, mc.isActive())
+        && Objects.equals(active, mc.getActive())
         && Objects.equals(extSourceLinkInfo, mc.getExtSourceLinkInfo())
         && Objects.equals(metricProperties, mc.getMetricProperties())
         && Objects.equals(views, mc.getViews())
@@ -245,10 +234,18 @@ public class MetricConfigDTO extends AbstractDTO {
   @Override
   public int hashCode() {
     return Objects
-        .hash(getId(), dataset, alias, derivedMetricExpression, defaultAggFunction,
-            rollupThreshold,
-            inverseMetric, cellSizeExpression, active, extSourceLinkInfo, metricProperties,
-            views, where);
+        .hash(getId(),
+            dataset,
+            alias,
+            derivedMetricExpression,
+            defaultAggFunction,
+            inverseMetric,
+            cellSizeExpression,
+            active,
+            extSourceLinkInfo,
+            metricProperties,
+            views,
+            where);
   }
 
   /**

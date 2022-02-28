@@ -314,6 +314,10 @@ public class RootCauseMetricResource {
         limit,
         rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
 
+    // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
+    fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
+    fillMissingKeysWithZeroes(anomalyBreakdown, baselineBreakdown);
+
     final HeatMapResultApi resultApi = new HeatMapResultApi()
         .setMetric(new MetricApi()
             .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
@@ -323,6 +327,27 @@ public class RootCauseMetricResource {
         .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
 
     return Response.ok(resultApi).build();
+  }
+
+  /**
+   * Inserts all keys that are present in fromBreakdown but absent in toBreakdown, with a value of
+   * 0.
+   */
+  private void fillMissingKeysWithZeroes(final Map<String, Map<String, Double>> fromBreakdown,
+      final Map<String, Map<String, Double>> toBreakdown) {
+    // all keys that are present in fromBreakdown but not in toBreakdown are inserted with a value of 0
+    for (String dimensionName : fromBreakdown.keySet()) {
+      if (!toBreakdown.containsKey(dimensionName)) {
+        toBreakdown.put(dimensionName, new HashMap<>());
+      }
+      Map<String, Double> fromCounts = fromBreakdown.get(dimensionName);
+      Map<String, Double> toCounts = toBreakdown.get(dimensionName);
+      for (String dimensionValue : fromCounts.keySet()) {
+        if (!toCounts.containsKey(dimensionValue)) {
+          toCounts.put(dimensionValue, 0.);
+        }
+      }
+    }
   }
 
   /**
@@ -425,7 +450,7 @@ public class RootCauseMetricResource {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
         if (df.isEmpty()) {
           return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStart())
-              .addSeries(DataFrame.COL_VALUE, Double.NaN);
+              .addSeries(DataFrame.COL_VALUE, Double.NaN).setIndex(DataFrame.COL_TIME);
         }
         return df;
       }));

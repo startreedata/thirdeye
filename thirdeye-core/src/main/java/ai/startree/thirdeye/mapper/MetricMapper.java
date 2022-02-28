@@ -20,12 +20,12 @@ public interface MetricMapper {
   MetricMapper INSTANCE = Mappers.getMapper(MetricMapper.class);
 
   default MetricConfigDTO toBean(MetricApi api) {
-    if ( api == null ) {
+    if (api == null) {
       return null;
     }
     final MetricConfigDTO dto = new MetricConfigDTO();
     String alias = null;
-    if (api.getName()!= null && api.getDataset() != null && api.getDataset().getName() != null) {
+    if (api.getName() != null && api.getDataset() != null && api.getDataset().getName() != null) {
       alias = SpiUtils.constructMetricAlias(api.getDataset().getName(), api.getName());
     }
     dto.setId(api.getId());
@@ -35,12 +35,10 @@ public interface MetricMapper {
         .setDataset(optional(api.getDataset())
             .map(DatasetApi::getName)
             .orElse(null))
-        .setRollupThreshold(api.getRollupThreshold())
         .setAggregationColumn(api.getAggregationColumn())
         .setDatatype(api.getDatatype())
         .setDefaultAggFunction(api.getAggregationFunction())
-        // TODO suvodeep Revisit this: Assume false if active is not set.
-        .setActive(optional(api.getActive()).orElse(false))
+        .setActive(api.getActive())
         .setViews(api.getViews())
         .setWhere(api.getWhere())
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
@@ -49,28 +47,22 @@ public interface MetricMapper {
   }
 
   default MetricApi toApi(MetricConfigDTO dto) {
-    if ( dto == null ) {
+    if (dto == null) {
       return null;
     }
     return new MetricApi()
         .setId(dto.getId())
-        .setActive(boolApi(dto.isActive()))
+        .setActive(dto.getActive())
         .setName(dto.getName())
         .setUpdated(dto.getUpdateTime())
-        .setDataset(new DatasetApi()
-            .setName(dto.getDataset())
-        )
+        .setDataset(optional(dto.getDataset())
+            .map(datasetName -> new DatasetApi().setName(datasetName)).orElse(null))
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
         .setWhere(dto.getWhere())
         .setAggregationColumn(dto.getAggregationColumn())
         .setDatatype(dto.getDatatype())
         .setAggregationFunction(dto.getDefaultAggFunction())
-        .setRollupThreshold(dto.getRollupThreshold())
         .setViews(dto.getViews())
         ;
-  }
-
-  private static Boolean boolApi(final boolean value) {
-    return value ? true : null;
   }
 }

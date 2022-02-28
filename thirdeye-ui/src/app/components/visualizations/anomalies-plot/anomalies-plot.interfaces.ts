@@ -5,5 +5,4 @@ export interface AnomaliesPlotProps {
     anomalies: Anomaly[];
     xScale: ScaleTime<number, number>;
     yScale: ScaleLinear<number, number>;
-    onAnomalyBarClick?: (anomaly: Anomaly) => void;
 }

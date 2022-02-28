@@ -32,4 +32,6 @@ export interface MouseHoverMarkerProps {
     onMouseMove: (event: MouseEvent<SVGRectElement>) => void;
     onMouseLeave: (event: MouseEvent<SVGRectElement>) => void;
     onZoomChange?: (zoom: VisxZoomProps) => void;
+    onMouseClick?: (event: MouseEvent<SVGRectElement>) => void;
+    cursor?: string;
 }

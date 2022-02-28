@@ -365,6 +365,42 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
         [props.parentWidth, filteredAlertEvaluationTimeSeriesPoints]
     );
 
+    const handleTimeSeriesMouseClick = (
+        event: MouseEvent<SVGRectElement>
+    ): void => {
+        const point = localPoint(event) as Point; // Event coordinates to SVG coordinates
+
+        if (!point) {
+            hideTooltip();
+
+            return;
+        }
+
+        // Determine time series time scale value from SVG coordinate, accounting for SVG
+        // padding
+        const xValue = timeSeriesXScale.invert(point.x - PADDING_LEFT_SVG);
+        if (!xValue) {
+            hideTooltip();
+
+            return;
+        }
+
+        const alertEvaluationAnomalies = getAnomaliesAtTime(
+            filteredAlertEvaluationAnomalies,
+            xValue.getTime()
+        );
+
+        // If we found anomaly fire click on that
+        if (
+            alertEvaluationAnomalies &&
+            alertEvaluationAnomalies[0] &&
+            alertEvaluationAnomalies[0].id
+        ) {
+            props.onAnomalyBarClick &&
+                props.onAnomalyBarClick(alertEvaluationAnomalies[0]);
+        }
+    };
+
     const handleTimeSeriesMouseLeave = (): void => {
         hideTooltip();
     };
@@ -472,26 +508,6 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
                 <svg className={alertEvaluationTimeSeriesClasses.svg}>
                     {/* Time series */}
                     <Group left={PADDING_LEFT_SVG} top={PADDING_TOP_SVG}>
-                        {/* X axis */}
-                        <TimeAxisBottom
-                            parentWidth={props.parentWidth}
-                            scale={timeSeriesXScale}
-                            top={timeSeriesYMax}
-                        />
-
-                        {/* Y axis */}
-                        <LinearAxisLeft scale={timeSeriesYScale} />
-
-                        {/* Mouse hover marker  */}
-                        <MouseHoverMarker
-                            x={tooltipData && tooltipData.timestamp}
-                            xScale={timeSeriesXScale}
-                            y={tooltipData && tooltipData.current}
-                            yScale={timeSeriesYScale}
-                            onMouseLeave={handleTimeSeriesMouseLeave}
-                            onMouseMove={handleTimeSeriesMouseMove}
-                        />
-
                         {/* Time series plot */}
                         <AlertEvaluationTimeSeriesPlot
                             alertEvaluationAnomalies={
@@ -506,7 +522,32 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
                             upperAndLowerBound={upperAndLowerBoundPlotVisible}
                             xScale={timeSeriesXScale}
                             yScale={timeSeriesYScale}
-                            onAnomalyBarClick={props.onAnomalyBarClick}
+                        />
+
+                        {/* X axis */}
+                        <TimeAxisBottom
+                            parentWidth={props.parentWidth}
+                            scale={timeSeriesXScale}
+                            top={timeSeriesYMax}
+                        />
+
+                        {/* Y axis */}
+                        <LinearAxisLeft scale={timeSeriesYScale} />
+
+                        {/* Mouse hover marker  */}
+                        <MouseHoverMarker
+                            cursor={
+                                isEmpty(tooltipData?.anomalies)
+                                    ? "default"
+                                    : "pointer"
+                            }
+                            x={tooltipData && tooltipData.timestamp}
+                            xScale={timeSeriesXScale}
+                            y={tooltipData && tooltipData.current}
+                            yScale={timeSeriesYScale}
+                            onMouseClick={handleTimeSeriesMouseClick}
+                            onMouseLeave={handleTimeSeriesMouseLeave}
+                            onMouseMove={handleTimeSeriesMouseMove}
                         />
                     </Group>
 

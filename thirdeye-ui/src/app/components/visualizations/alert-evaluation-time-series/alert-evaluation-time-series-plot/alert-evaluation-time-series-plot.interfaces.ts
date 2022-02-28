@@ -11,5 +11,4 @@ export interface AlertEvaluationTimeSeriesPlotProps {
     alertEvaluationAnomalies?: Anomaly[];
     xScale: ScaleTime<number, number>;
     yScale: ScaleLinear<number, number>;
-    onAnomalyBarClick?: (anomaly: Anomaly) => void;
 }

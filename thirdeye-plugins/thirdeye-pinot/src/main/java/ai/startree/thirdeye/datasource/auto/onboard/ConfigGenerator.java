@@ -85,7 +85,7 @@ public class ConfigGenerator {
     return datasetConfigDTO;
   }
 
-  @Deprecated // prefer using delay at the alert level + function here is not incorrect
+  @Deprecated // prefer using delay at the alert level + function here is not correct
   private static TimeGranularity getExpectedDelayFromTimeunit(TimeUnit timeUnit) {
     TimeGranularity expectedDelay = null;
     switch (timeUnit) {

@@ -42,10 +42,16 @@
         ]
       }
     ],
-    "rca": {
-      "datasource": "${dataSource}",
-      "dataset": "${dataset}",
-      "metric": "${metric}"
+    "metadata": {
+      "datasource": {
+        "name": "${dataSource}"
+      },
+      "dataset": {
+        "name": "${dataset}"
+      },
+      "metric": {
+        "name": "${metric}"
+      }
     }
   },
   "templateProperties": {

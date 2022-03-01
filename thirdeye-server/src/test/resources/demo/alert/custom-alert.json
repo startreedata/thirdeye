@@ -3,10 +3,16 @@
   "description": "This is an alert you can customize.",
   "cron": "0 0 0 1/1 * ? *",
   "template": {
-    "rca": {
-      "datasource": "${dataSource}",
-      "dataset": "${dataset}",
-      "metric": "views"
+    "metadata": {
+      "datasource": {
+        "name": "${dataSource}"
+      },
+      "dataset": {
+        "name": "${dataset}"
+      },
+      "metric": {
+        "name": "views"
+      }
     },
     "nodes": [
       {

@@ -38,6 +38,16 @@ jest.mock("../../rest/alerts/alerts.rest", () => ({
         .mockImplementation(() => Promise.resolve(MOCK_ALERT_PAYLOAD)),
 }));
 
+jest.mock("../../rest/anomalies/anomalies.rest", () => ({
+    ...(jest.requireActual("../../rest/anomalies/anomalies.rest") as Record<
+        string,
+        unknown
+    >),
+    getAnomaliesByAlertIdAndTime: jest
+        .fn()
+        .mockImplementation(() => mockedGetAnomaliesResponse),
+}));
+
 jest.mock("../../rest/subscription-groups/subscription-groups.rest", () => ({
     ...(jest.requireActual(
         "../../rest/subscription-groups/subscription-groups.rest"
@@ -76,6 +86,9 @@ describe("Alerts View Page", () => {
         mockedGetEvaluateResponse = Promise.reject({
             response: { data: { message: "Error message" } },
         });
+        mockedGetAnomaliesResponse = Promise.reject({
+            response: { data: { message: "Error message" } },
+        });
         render(
             <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
                 <Routes>
@@ -91,7 +104,7 @@ describe("Alerts View Page", () => {
 
         expect(jsonEditorComponent).toBeInTheDocument();
 
-        // Should display 0 since evaluate call failed
+        // Should display 0 since anomalies call failed
         const anomaliesCountContainer = await screen.findByText("0");
 
         expect(anomaliesCountContainer).toBeInTheDocument();
@@ -274,3 +287,7 @@ const MOCK_EVALUATE_PAYLOAD = {
 
 const mockNotify = jest.fn();
 let mockedGetEvaluateResponse = Promise.resolve(MOCK_EVALUATE_PAYLOAD);
+let mockedGetAnomaliesResponse = Promise.resolve(
+    MOCK_EVALUATE_PAYLOAD.detectionEvaluations.output_AnomalyDetectorResult_0
+        .anomalies
+);

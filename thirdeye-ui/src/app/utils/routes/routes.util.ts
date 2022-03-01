@@ -265,6 +265,13 @@ export const getRootCauseAnalysisForAnomalyPath = (id: number): string => {
     return createPathWithRecognizedQueryString(path);
 };
 
+export const getRootCauseAnalysisForAnomalyIndexPath = (id: number): string => {
+    let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
 export const getLoginPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.LOGIN);
 };

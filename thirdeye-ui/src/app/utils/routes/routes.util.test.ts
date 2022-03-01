@@ -26,7 +26,9 @@ import {
 } from "./routes.util";
 
 jest.mock("../params/params.util", () => ({
-    getRecognizedQueryString: jest.fn().mockReturnValue("testQueryString"),
+    getRecognizedQuery: jest.fn().mockReturnValue({
+        toString: jest.fn().mockReturnValue("testQueryString"),
+    }),
 }));
 
 describe("Routes Util", () => {

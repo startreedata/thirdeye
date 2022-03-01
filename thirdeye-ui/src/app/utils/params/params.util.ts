@@ -9,6 +9,8 @@ import {
 import { createTimeRangeDuration } from "../time-range/time-range.util";
 
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
+export const SEARCH_TERM_QUERY_PARAM_KEY =
+    SearchQueryStringKey.SEARCH.toLowerCase();
 
 interface UseSetQueryParamsUtil {
     setQueryString: (key: string, value: string) => void;
@@ -134,7 +136,7 @@ export const getQueryString = (key: string): string => {
 
 // Returns current query string from URL with only the recognized app query string key-value pairs
 // that are allowed to be carried forward when navigating
-export const getRecognizedQueryString = (): string => {
+export const getRecognizedQuery = (): URLSearchParams => {
     const currentURLSearchParams = new URLSearchParams(location.search);
     const recognizedURLSearchParams = new URLSearchParams();
     for (const allowedAppQueryStringKey of allowedAppQueryStringKeys) {
@@ -150,7 +152,7 @@ export const getRecognizedQueryString = (): string => {
         }
     }
 
-    return recognizedURLSearchParams.toString();
+    return recognizedURLSearchParams;
 };
 
 export const isValidNumberId = (param: string): boolean => {

@@ -125,6 +125,7 @@ public class MetricMappingPipelineTest {
     MetricConfigDTO dto = new MetricConfigDTO();
     dto.setId(id);
     dto.setDataset(dataset);
+    dto.setActive(Boolean.TRUE);
     return dto;
   }
 
@@ -132,6 +133,7 @@ public class MetricMappingPipelineTest {
     DatasetConfigDTO dto = new DatasetConfigDTO();
     dto.setDataset(dataset);
     dto.setDimensions(dimensions);
+    dto.setActive(Boolean.TRUE);
     return dto;
   }
 

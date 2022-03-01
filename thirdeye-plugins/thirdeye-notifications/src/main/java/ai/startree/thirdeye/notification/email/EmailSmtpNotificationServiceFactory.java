@@ -3,25 +3,25 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.notification.webhook;
+package ai.startree.thirdeye.notification.email;
 
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
-public class WebhookNotificationServiceFactory implements NotificationServiceFactory {
+public class EmailSmtpNotificationServiceFactory implements NotificationServiceFactory {
 
   @Override
   public String name() {
-    return "webhook";
+    return "email-smtp";
   }
 
   @Override
   public NotificationService build(final Map<String, Object> params) {
-    final WebhookConfiguration configuration = new ObjectMapper()
-        .convertValue(params, WebhookConfiguration.class);
+    final EmailSmtpConfiguration configuration = new ObjectMapper()
+        .convertValue(params, EmailSmtpConfiguration.class);
 
-    return new WebhookNotificationService(configuration);
+    return new EmailSmtpNotificationService(configuration);
   }
 }

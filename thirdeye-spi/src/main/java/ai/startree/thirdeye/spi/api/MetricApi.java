@@ -8,6 +8,7 @@ package ai.startree.thirdeye.spi.api;
 import ai.startree.thirdeye.spi.datalayer.dto.LogicalView;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
@@ -28,6 +29,8 @@ public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
   private String aggregationColumn;
   private MetricType datatype;
   private MetricAggFunction aggregationFunction;
+  @Deprecated
+  @JsonIgnore
   private Double rollupThreshold;
   private List<LogicalView> views;
   private String where;
@@ -130,15 +133,6 @@ public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
 
   public MetricApi setAggregationFunction(final MetricAggFunction aggregationFunction) {
     this.aggregationFunction = aggregationFunction;
-    return this;
-  }
-
-  public Double getRollupThreshold() {
-    return rollupThreshold;
-  }
-
-  public MetricApi setRollupThreshold(final Double rollupThreshold) {
-    this.rollupThreshold = rollupThreshold;
     return this;
   }
 

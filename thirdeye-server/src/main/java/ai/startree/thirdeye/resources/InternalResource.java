@@ -12,16 +12,13 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
-import ai.startree.thirdeye.notification.NotificationContentBuilder;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.task.runner.NotificationTaskRunner;
@@ -38,10 +35,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.HashMap;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -63,7 +57,6 @@ public class InternalResource {
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final DatabaseAdminResource databaseAdminResource;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationTaskRunner notificationTaskRunner;
@@ -71,20 +64,16 @@ public class InternalResource {
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final NotificationSchemeFactory notificationSchemeFactory;
-  private final NotificationContentBuilder notificationContentBuilder;
 
   @Inject
   public InternalResource(
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
       final DatabaseAdminResource databaseAdminResource,
       final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationTaskRunner notificationTaskRunner,
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final NotificationSchemeFactory notificationSchemeFactory,
-      final NotificationContentBuilder notificationContentBuilder) {
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+      final NotificationSchemeFactory notificationSchemeFactory) {
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
@@ -92,7 +81,6 @@ public class InternalResource {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationSchemeFactory = notificationSchemeFactory;
-    this.notificationContentBuilder = notificationContentBuilder;
   }
 
   @Path("db-admin")
@@ -137,31 +125,11 @@ public class InternalResource {
         sg,
         notificationDispatcher.getAnomalies(sg, result));
 
-    final NotificationService emailNotificationService = notificationServiceRegistry.get("email",
-        notificationDispatcher.buildEmailProperties());
+    final NotificationService emailNotificationService = notificationServiceRegistry.get(
+        "email-smtp",
+        new HashMap<>());
     final String emailHtml = emailNotificationService.toHtml(payload).toString();
     return Response.ok(emailHtml).build();
-  }
-
-  @GET
-  @Path("email/entity")
-  @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response generateEmailEntity(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam("alertId") Long alertId
-  ) {
-    ensureExists(alertId, "Query parameter required: alertId !");
-    return Response.ok(buildTemplateData(alertId)).build();
-  }
-
-  private Map<String, Object> buildTemplateData(final Long alertId) {
-    final Set<MergedAnomalyResultDTO> anomalies = new HashSet<>(
-        mergedAnomalyResultManager.findByDetectionConfigId(alertId));
-
-    return notificationContentBuilder.format(
-        new ArrayList<MergedAnomalyResultDTO>(anomalies)
-    );
   }
 
   @GET
@@ -174,7 +142,7 @@ public class InternalResource {
   @POST
   @Path("trigger/webhook")
   public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    final ImmutableMap<String, String> properties = ImmutableMap.of(
+    final ImmutableMap<String, Object> properties = ImmutableMap.of(
         "url", "http://localhost:8080/internal/webhook"
     );
     notificationServiceRegistry

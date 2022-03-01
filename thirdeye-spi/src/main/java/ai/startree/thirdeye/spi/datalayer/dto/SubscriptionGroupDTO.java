@@ -10,33 +10,30 @@ import com.google.common.base.Objects;
 import java.util.List;
 import java.util.Map;
 
-/**
- * ConfigBean holds namespaced key-value configuration values.  Values are serialized into the
- * database using the default object mapper.  ConfigBean serves as a light-weight
- * alternative to existing configuration mechanisms to
- * (a) allow at-runtime changes to configuration traditionally stored in config files, and
- * (b) alleviate the need for introducing new bean classes
- * to handle simple configuration tasks.
- */
 public class SubscriptionGroupDTO extends AbstractDTO {
 
-  boolean active;
-  String name;
-  String from;
-  String cronExpression;
-  String yaml;
-  String type;
+  private boolean active;
+  private String name;
+  private String from;
+  private String cronExpression;
+  private String yaml;
+  private String type;
 
-  NotificationSchemesDto notificationSchemes;
-  Map<String, Object> alertSuppressors;
-  SubjectType subjectType = SubjectType.ALERT;
+  /**
+   * Intended to replace notificationSchemes.
+   * Contains configs for all notification specs within the subscription group
+   */
+  private List<NotificationSpecDTO> specs;
 
-  Map<Long, Long> vectorClocks;
+  @Deprecated
+  private NotificationSchemesDto notificationSchemes;
 
-  Map<String, Object> properties;
-
-  Map<String, String> refLinks;
-  List<String> owners;
+  private Map<String, Object> alertSuppressors;
+  private SubjectType subjectType = SubjectType.ALERT;
+  private Map<Long, Long> vectorClocks;
+  private Map<String, Object> properties;
+  private Map<String, String> refLinks;
+  private List<String> owners;
 
   public boolean isActive() {
     return active;
@@ -148,6 +145,15 @@ public class SubscriptionGroupDTO extends AbstractDTO {
 
   public SubscriptionGroupDTO setOwners(final List<String> owners) {
     this.owners = owners;
+    return this;
+  }
+
+  public List<NotificationSpecDTO> getSpecs() {
+    return specs;
+  }
+
+  public SubscriptionGroupDTO setSpecs(final List<NotificationSpecDTO> specs) {
+    this.specs = specs;
     return this;
   }
 

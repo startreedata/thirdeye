@@ -25,6 +25,9 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   private Date updated;
   private UserApi owner;
 
+  private List<NotificationSpecApi> specs;
+
+  @Deprecated
   private NotificationSchemesApi notificationSchemes;
   private TimeWindowSuppressorApi alertSuppressors;
 
@@ -107,6 +110,16 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
 
   public SubscriptionGroupApi setOwner(final UserApi owner) {
     this.owner = owner;
+    return this;
+  }
+
+  public List<NotificationSpecApi> getSpecs() {
+    return specs;
+  }
+
+  public SubscriptionGroupApi setSpecs(
+      final List<NotificationSpecApi> specs) {
+    this.specs = specs;
     return this;
   }
 

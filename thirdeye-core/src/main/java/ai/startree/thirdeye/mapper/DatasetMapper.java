@@ -23,7 +23,7 @@ public interface DatasetMapper {
   DatasetMapper INSTANCE = Mappers.getMapper(DatasetMapper.class);
 
   default DatasetConfigDTO toBean(DatasetApi api) {
-    if ( api == null ) {
+    if (api == null) {
       return null;
     }
     final DatasetConfigDTO dto = new DatasetConfigDTO();
@@ -32,10 +32,10 @@ public interface DatasetMapper {
         .ifPresent(dto::setDataSource);
     dto.setDataset(api.getName());
     dto.setDisplayName(api.getName());
+    dto.setActive(api.getActive());
     optional(api.getDimensions()).ifPresent(dto::setDimensions);
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
-
       updateTimeGranularityOnDataset(dto, timeColumn);
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
@@ -45,29 +45,30 @@ public interface DatasetMapper {
         .ifPresent(dto::setExpectedDelay);
 
     return dto;
-
   }
 
   default DatasetApi toApi(DatasetConfigDTO dto) {
-    if ( dto == null ) {
+    if (dto == null) {
       return null;
     }
-    return new DatasetApi()
+    final DatasetApi datasetApi = new DatasetApi()
         .setId(dto.getId())
-        .setActive(dto.isActive())
-        .setAdditive(dto.isAdditive())
+        .setActive(dto.getActive())
         .setDimensions(dto.getDimensions())
         .setName(dto.getDataset())
-        .setTimeColumn(new TimeColumnApi()
-            .setName(dto.getTimeColumn())
+        .setExpectedDelay(optional(dto.getExpectedDelay()).map(TimeGranularity::toDuration)
+            .orElse(null))
+        .setDataSource(optional(dto.getDataSource())
+            .map(datasourceName -> new DataSourceApi().setName(datasourceName))
+            .orElse(null));
+    optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
+        new TimeColumnApi()
+            .setName(timeColumn)
             .setInterval(optional(dto.bucketTimeGranularity()).map(TimeGranularity::toDuration).orElse(null))
             .setFormat(dto.getTimeFormat())
-            .setTimezone(dto.getTimezone())
-        )
-        .setExpectedDelay(dto.getExpectedDelay().toDuration())
-        .setDataSource(new DataSourceApi()
-            .setName(dto.getDataSource()))
-        ;
+            .setTimezone(dto.getTimezone())));
+
+    return datasetApi;
   }
 
   private static void updateTimeGranularityOnDataset(final DatasetConfigDTO dto,

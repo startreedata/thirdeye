@@ -5,9 +5,12 @@
 
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.spi.Constants.NOTIFICATIONS_PERCENTAGE_FORMAT;
+
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.Constants.CompareMode;
+import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
@@ -28,38 +31,40 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.Weeks;
 
-public class AnomalyReportEntityBuilder {
+public class AnomalyReportHelper {
 
-  public static AnomalyReportEntity buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
+  public static AnomalyReportDataApi buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
       final String feedbackVal,
-      final String functionName,
-      final String funcDescription,
+      final String alertName,
+      final String alertDescription,
       final DateTimeZone dateTimeZone,
       final String uiPublicUrl) {
     final Properties props = new Properties();
     props.putAll(anomaly.getProperties());
     final double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
-    return new AnomalyReportEntity(String.valueOf(anomaly.getId()),
-        getAnomalyURL(anomaly, uiPublicUrl),
-        getPredictedValue(anomaly),
-        getCurrentValue(anomaly),
-        getFormattedLiftValue(anomaly, lift),
-        getLiftDirection(lift),
-        0d,
-        getDimensionsList(anomaly.getDimensionMap()),
-        getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime()), // duration
-        feedbackVal,
-        functionName,
-        funcDescription,
-        anomaly.getMetric(),
-        getDateString(anomaly.getStartTime(), dateTimeZone),
-        getDateString(anomaly.getEndTime(), dateTimeZone),
-        getTimezoneString(dateTimeZone),
-        getIssueType(anomaly),
-        anomaly.getType().getLabel(),
-        SpiUtils.encodeCompactedProperties(props),
-        anomaly.getMetricUrn()
-    );
+    final String baselineVal = getPredictedValue(anomaly);
+
+    return new AnomalyReportDataApi()
+        .setAnomalyId(String.valueOf(anomaly.getId()))
+        .setAnomalyURL(getAnomalyURL(anomaly, uiPublicUrl))
+        .setBaselineVal(baselineVal)
+        .setCurrentVal(getCurrentValue(anomaly))
+        .setLift(baselineVal.equals("-") ? "" : getFormattedLiftValue(anomaly, lift))
+        .setPositiveLift(getLiftDirection(lift))
+        .setSwi(String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, 0d))
+        .setDimensions(getDimensionsList(anomaly.getDimensionMap()))
+        .setDuration(getTimeDiffInHours(anomaly.getStartTime(), anomaly.getEndTime())) // duratio
+        .setFeedback(feedbackVal)
+        .setFunction(alertName)
+        .setFuncDescription(alertDescription)
+        .setMetric(anomaly.getMetric())
+        .setStartDateTime(getDateString(anomaly.getStartTime(), dateTimeZone))
+        .setEndTime(getDateString(anomaly.getEndTime(), dateTimeZone))
+        .setTimezone(getTimezoneString(dateTimeZone))
+        .setIssueType(getIssueType(anomaly))
+        .setAnomalyType(anomaly.getType().getLabel())
+        .setProperties(SpiUtils.encodeCompactedProperties(props))
+        .setMetricUrn(anomaly.getMetricUrn());
   }
 
   public static String getDateString(DateTime dateTime) {

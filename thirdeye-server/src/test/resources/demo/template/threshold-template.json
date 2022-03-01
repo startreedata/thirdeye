@@ -43,9 +43,15 @@
       ]
     }
   ],
-  "rca": {
-    "datasource": "${dataSource}",
-    "dataset": "${dataset}",
-    "metric": "${metricColumn}"
+  "metadata": {
+    "datasource": {
+      "name": "${dataSource}"
+    },
+    "dataset": {
+      "name": "${dataset}"
+    },
+    "metric": {
+      "name": "${metricColumn}"
+    }
   }
 }

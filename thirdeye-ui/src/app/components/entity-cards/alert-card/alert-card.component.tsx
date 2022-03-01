@@ -5,7 +5,7 @@ import {
     CardHeader,
     Grid,
     IconButton,
-    Link,
+    Link as MaterialLink,
     Menu,
     MenuItem,
 } from "@material-ui/core";
@@ -14,11 +14,12 @@ import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     getAlertsUpdatePath,
     getAlertsViewPath,
+    getAnomaliesAllPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -164,12 +165,12 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         <>
                             {/* Alert name */}
                             {props.showViewDetails && (
-                                <Link onClick={handleAlertViewDetails}>
+                                <MaterialLink onClick={handleAlertViewDetails}>
                                     <TextHighlighter
                                         searchWords={props.searchWords}
                                         text={props.uiAlert.name}
                                     />
-                                </Link>
+                                </MaterialLink>
                             )}
 
                             {/* Summary */}
@@ -184,13 +185,29 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             <CardContent>
                 {props.uiAlert && (
                     <Grid container>
-                        {/* Created by */}
+                        {/* Number of anomalies */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<string>
                                 name={`${t("label.anomalies")} in ${t(
                                     "label.time-range"
                                 )}`}
                                 searchWords={props.searchWords}
+                                valueRenderer={(value) => {
+                                    if (value) {
+                                        const filteredAnomaliesUrl =
+                                            getAnomaliesAllPath(
+                                                props.uiAlert?.name
+                                            );
+
+                                        return (
+                                            <Link to={filteredAnomaliesUrl}>
+                                                {value}
+                                            </Link>
+                                        );
+                                    }
+
+                                    return value;
+                                }}
                                 values={[`${anomalies ? anomalies.length : 0}`]}
                             />
                         </Grid>

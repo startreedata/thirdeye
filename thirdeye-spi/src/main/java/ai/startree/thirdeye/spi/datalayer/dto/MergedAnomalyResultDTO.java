@@ -157,8 +157,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   /**
    * DimensionMap class is deprecated.
-   *
-   * Please use MetricEntity.fromURN(anomaly.getMetricUrn()).getFilters()
+   * TODO spyne remove this.
    */
   @Deprecated
   public DimensionMap getDimensions() {

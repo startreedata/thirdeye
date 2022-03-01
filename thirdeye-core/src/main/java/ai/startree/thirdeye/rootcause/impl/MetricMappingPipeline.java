@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * <br/><b>NOTE:</b> traverses a maximum of one hop for related metrics and related datasets.
  * Performs 2nd degree search for metric > dataset > related dataset > related metric
  */
+@Deprecated
 public class MetricMappingPipeline extends Pipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetricMappingPipeline.class);
@@ -63,7 +64,8 @@ public class MetricMappingPipeline extends Pipeline {
    * Used by {@link RCAFrameworkLoader}
    */
   @SuppressWarnings("unused")
-  public MetricMappingPipeline() {}
+  public MetricMappingPipeline() {
+  }
 
   /**
    * Constructor for dependency injection
@@ -235,7 +237,7 @@ public class MetricMappingPipeline extends Pipeline {
   private List<MetricConfigDTO> pruneMetrics(List<MetricConfigDTO> metrics) {
     List<MetricConfigDTO> output = new ArrayList<>();
     for (MetricConfigDTO metric : metrics) {
-      if (!metric.isActive()) {
+      if (!Boolean.TRUE.equals(metric.getActive())) {
         continue;
       }
 

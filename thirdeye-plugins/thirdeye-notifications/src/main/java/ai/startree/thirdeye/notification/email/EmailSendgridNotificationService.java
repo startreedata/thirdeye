@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.sendgrid.Content;
@@ -27,23 +26,28 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SendgridNotificationService implements NotificationService {
+public class EmailSendgridNotificationService implements NotificationService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SendgridNotificationService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailSendgridNotificationService.class);
+  private final EmailRecipientsConfiguration emailRecipients;
+
+  public EmailSendgridNotificationService(final EmailSendgridConfiguration configuration) {
+    emailRecipients = configuration.getEmailRecipients();
+  }
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     try {
-      final EmailEntityApi emailEntity = new EmailContentBuilder().buildEmailEntityApi(api);
+      final EmailContent emailContent = new EmailContentBuilder().build(api);
 
-      sendEmail(emailEntity);
+      sendEmail(emailContent);
     } catch (final Exception e) {
       throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "sendgrid dispatch failed!");
     }
   }
 
-  private void sendEmail(final EmailEntityApi emailEntity) throws IOException {
-    final Mail mail = buildMail(emailEntity);
+  private void sendEmail(final EmailContent emailContent) throws IOException {
+    final Mail mail = buildMail(emailContent);
 
     final Request request = new Request();
     request.setMethod(Method.POST);
@@ -58,18 +62,20 @@ public class SendgridNotificationService implements NotificationService {
     LOG.info(response.getHeaders().toString());
   }
 
-  private Mail buildMail(final EmailEntityApi emailEntity) {
-    requireNonNull(emailEntity, "emailEntity is null");
+  private Mail buildMail(final EmailContent emailContent) {
+    requireNonNull(emailRecipients.getTo(), "to field in email scheme is null");
+    checkArgument(emailRecipients.getTo().size() > 0, "'to' field in email scheme is empty");
+    requireNonNull(emailContent, "emailEntity is null");
 
     final Mail mail = new Mail();
-    mail.setFrom(new Email(emailEntity.getFrom()));
-    mail.setSubject(emailEntity.getSubject());
-    mail.addPersonalization(buildPersonalization(emailEntity.getRecipients()));
-    mail.addContent(new Content("text/html", emailEntity.getHtmlContent()));
+    mail.setFrom(new Email(emailRecipients.getFrom()));
+    mail.setSubject(emailContent.getSubject());
+    mail.addPersonalization(buildPersonalization(emailRecipients));
+    mail.addContent(new Content("text/html", emailContent.getHtmlBody()));
     return mail;
   }
 
-  private Personalization buildPersonalization(final EmailRecipientsApi recipients) {
+  private Personalization buildPersonalization(final EmailRecipientsConfiguration recipients) {
     requireNonNull(recipients, "email recipients obj is null");
     final Personalization personalization = new Personalization();
 

@@ -38,6 +38,7 @@ public class DatalayerTestUtils {
     metricConfigDTO.setDataset(collection);
     metricConfigDTO.setDatatype(MetricType.LONG);
     metricConfigDTO.setName(metric);
+    metricConfigDTO.setActive(Boolean.TRUE);
     metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(collection, metric));
     return metricConfigDTO;
   }

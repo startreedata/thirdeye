@@ -140,18 +140,10 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     LOG.info("Aggregating '{}'", slice);
 
-    List<String> cols = new ArrayList<>();
-    for (String dimName : dimensions) {
-      cols.add(dimName + ":STRING");
-    }
-    cols.add(DataFrame.COL_VALUE + ":DOUBLE");
-
-    DataFrame dfEmpty = DataFrame.builder(cols).build().setIndex(dimensions);
-
     final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
         .get(dataset.getDataset());
     if (slice.getStart() > maxTime) {
-      return dfEmpty;
+      return emptyDataframe(dimensions);
     }
 
     RequestContainer rc = DataFrameUtils
@@ -165,6 +157,18 @@ public class DefaultAggregationLoader implements AggregationLoader {
     return aggregate
         .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(aggregate.size(), slice.getStart()))
         .setIndex(DataFrame.COL_TIME);
+  }
+
+  private DataFrame emptyDataframe(final List<String> dimensions) {
+    List<String> cols = new ArrayList<>();
+    cols.add(DataFrame.COL_TIME + ":LONG");
+    dimensions.forEach(dimName -> cols.add(dimName + ":STRING"));
+    cols.add(DataFrame.COL_VALUE + ":DOUBLE");
+
+    List<String> indexes = new ArrayList<>();
+    indexes.add(DataFrame.COL_TIME);
+    indexes.addAll(dimensions);
+    return DataFrame.builder(cols).build().setIndex(indexes);
   }
 
   /**

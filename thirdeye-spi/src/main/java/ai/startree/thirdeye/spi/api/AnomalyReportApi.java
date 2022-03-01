@@ -9,6 +9,8 @@ public class AnomalyReportApi implements ThirdEyeApi {
   private AnomalyApi anomaly;
   private String url;
 
+  private AnomalyReportDataApi data;
+
   public AnomalyApi getAnomaly() {
     return anomaly;
   }
@@ -24,6 +26,15 @@ public class AnomalyReportApi implements ThirdEyeApi {
 
   public AnomalyReportApi setUrl(final String url) {
     this.url = url;
+    return this;
+  }
+
+  public AnomalyReportDataApi getData() {
+    return data;
+  }
+
+  public AnomalyReportApi setData(final AnomalyReportDataApi data) {
+    this.data = data;
     return this;
   }
 }

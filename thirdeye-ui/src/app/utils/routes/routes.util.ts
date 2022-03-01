@@ -1,4 +1,7 @@
-import { getRecognizedQueryString } from "../params/params.util";
+import {
+    getRecognizedQuery,
+    SEARCH_TERM_QUERY_PARAM_KEY,
+} from "../params/params.util";
 
 const PLACEHOLDER_ROUTE_ID = ":id";
 
@@ -119,8 +122,14 @@ export const getAnomaliesPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ANOMALIES);
 };
 
-export const getAnomaliesAllPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.ANOMALIES_ALL);
+export const getAnomaliesAllPath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.ANOMALIES_ALL}?${urlQuery.toString()}`;
 };
 
 export const getAnomaliesViewPath = (id: number): string => {
@@ -274,5 +283,5 @@ export const getLogoutPath = (): string => {
 // Creates path with only the recognized app query string key-value pairs from URL that are allowed
 // to be carried forward when navigating
 export const createPathWithRecognizedQueryString = (path: string): string => {
-    return `${path}?${getRecognizedQueryString()}`;
+    return `${path}?${getRecognizedQuery().toString()}`;
 };

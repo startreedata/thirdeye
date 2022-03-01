@@ -14,11 +14,11 @@ import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
-import ai.startree.thirdeye.spi.api.DataSourceMetaApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
+import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
@@ -27,12 +27,12 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
+import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -53,41 +53,11 @@ public abstract class ApiBeanMapper {
   }
 
   public static DataSourceApi toApi(final DataSourceDTO dto) {
-    return new DataSourceApi()
-        .setId(dto.getId())
-        .setName(dto.getName())
-        .setProperties(dto.getProperties())
-        .setType(dto.getType())
-        .setMetaList(optional(dto.getMetaList())
-            .map(l -> l.stream().map(ApiBeanMapper::toApi)
-                .collect(Collectors.toList()))
-            .orElse(null));
-  }
-
-  private static DataSourceMetaApi toApi(final DataSourceMetaBean metaBean) {
-    return new DataSourceMetaApi()
-        .setClassRef(metaBean.getClassRef())
-        .setProperties(metaBean.getProperties());
+    return DataSourceMapper.INSTANCE.toApi(dto);
   }
 
   public static DataSourceDTO toDataSourceDto(final DataSourceApi api) {
-    final DataSourceDTO dto = new DataSourceDTO();
-    dto
-        .setName(api.getName())
-        .setProperties(api.getProperties())
-        .setType(api.getType())
-        .setMetaList(optional(api.getMetaList())
-            .map(l -> l.stream().map(ApiBeanMapper::toDataSourceMetaBean)
-                .collect(Collectors.toList()))
-            .orElse(null));
-    dto.setId(api.getId());
-    return dto;
-  }
-
-  private static DataSourceMetaBean toDataSourceMetaBean(final DataSourceMetaApi api) {
-    return new DataSourceMetaBean()
-        .setClassRef(api.getClassRef())
-        .setProperties(api.getProperties());
+    return DataSourceMapper.INSTANCE.toBean(api);
   }
 
   public static DatasetApi toApi(final DatasetConfigDTO dto) {
@@ -155,11 +125,19 @@ public abstract class ApiBeanMapper {
             .collect(Collectors.toList()))
         .orElse(null);
 
+    final List<NotificationSpecApi> specs = optional(dto.getSpecs())
+        .map(l -> l.stream()
+            .map(ApiBeanMapper::toApi)
+            .collect(Collectors.toList())
+        )
+        .orElse(null);
+
     return new SubscriptionGroupApi()
         .setId(dto.getId())
         .setName(dto.getName())
         .setCron(dto.getCronExpression())
         .setAlerts(alertApis)
+        .setSpecs(specs)
         .setNotificationSchemes(toApi(dto.getNotificationSchemes()));
   }
 
@@ -183,9 +161,16 @@ public abstract class ApiBeanMapper {
     dto.getProperties().put("detectionConfigIds", alertIds);
     dto.setCronExpression(api.getCron());
 
-    if (api.getNotificationSchemes() != null) {
-      dto.setNotificationSchemes(toNotificationSchemeDto(api.getNotificationSchemes()));
-    }
+    optional(api.getSpecs())
+        .map(l -> l.stream()
+            .map(ApiBeanMapper::toNotificationSpecDto)
+            .collect(Collectors.toList())
+        )
+        .ifPresent(dto::setSpecs);
+
+    optional(api.getNotificationSchemes())
+        .map(ApiBeanMapper::toNotificationSchemeDto)
+        .ifPresent(dto::setNotificationSchemes);
 
     dto.setVectorClocks(toVectorClocks(alertIds));
     dto.setAlertSuppressors(toAlertSuppressors(api.getAlertSuppressors()));
@@ -199,6 +184,14 @@ public abstract class ApiBeanMapper {
       vectorClocks.put(detectionConfigId, currentTimestamp);
     }
     return vectorClocks;
+  }
+
+  private static NotificationSpecDTO toNotificationSpecDto(final NotificationSpecApi api) {
+    return NotificationSpecMapper.INSTANCE.toBean(api);
+  }
+
+  private static NotificationSpecApi toApi(final NotificationSpecDTO dto) {
+    return NotificationSpecMapper.INSTANCE.toApi(dto);
   }
 
   public static NotificationSchemesDto toNotificationSchemeDto(
@@ -238,8 +231,7 @@ public abstract class ApiBeanMapper {
         .setMessage(dto.getMessage())
         .setMetric(optional(dto.getMetric())
             .map(metric -> new MetricApi().setName(metric))
-            .orElse(null))
-        ;
+            .orElse(null));
     if (dto.getMetricUrn() != null) {
       anomalyApi
           .setMetric(toMetricApi(dto.getMetricUrn())

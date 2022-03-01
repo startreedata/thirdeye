@@ -7,9 +7,10 @@ package ai.startree.thirdeye.notification.email;
 
 import static ai.startree.thirdeye.notification.email.EmailContentBuilder.DEFAULT_EMAIL_TEMPLATE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOTIFICATION_DISPATCH;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.google.common.collect.Collections2;
@@ -25,13 +26,13 @@ import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmailNotificationService implements NotificationService {
+public class EmailSmtpNotificationService implements NotificationService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EmailNotificationService.class);
-  private final SmtpConfiguration smtpConfiguration;
+  private static final Logger LOG = LoggerFactory.getLogger(EmailSmtpNotificationService.class);
+  private final EmailSmtpConfiguration configuration;
 
-  public EmailNotificationService(final SmtpConfiguration configuration) {
-    smtpConfiguration = configuration;
+  public EmailSmtpNotificationService(final EmailSmtpConfiguration configuration) {
+    this.configuration = configuration;
   }
 
   /**
@@ -47,7 +48,7 @@ public class EmailNotificationService implements NotificationService {
       return Collections.emptySet();
     }
     return Collections2.filter(Collections2.transform(emailCollection,
-            EmailNotificationService::toInternetAddress),
+            EmailSmtpNotificationService::toInternetAddress),
         Objects::nonNull);
   }
 
@@ -63,24 +64,27 @@ public class EmailNotificationService implements NotificationService {
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
     final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
     try {
-      final EmailEntityApi emailEntity = emailContentBuilder.buildEmailEntityApi(api);
+      final EmailContent emailContent = emailContentBuilder.build(api
+      );
 
-      final HtmlEmail email = buildHtmlEmail(emailEntity);
+      final HtmlEmail email = buildHtmlEmail(emailContent);
       sendEmail(email);
     } catch (final Exception e) {
       throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "Email dispatch failed!");
     }
   }
 
-  private HtmlEmail buildHtmlEmail(final EmailEntityApi emailEntity)
+  private HtmlEmail buildHtmlEmail(final EmailContent emailContent)
       throws EmailException {
-    final HtmlEmail email = new HtmlEmail();
-    final EmailRecipientsApi recipients = emailEntity.getRecipients();
+    final EmailRecipientsConfiguration recipients = configuration.getEmailRecipients();
+    requireNonNull(recipients.getTo(), "to field in email scheme is null");
+    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
 
-    email.setSubject(emailEntity.getSubject());
-    email.setFrom(emailEntity.getFrom());
+    final HtmlEmail email = new HtmlEmail();
+    email.setSubject(emailContent.getSubject());
+    email.setFrom(recipients.getFrom());
     email.setTo(toAddress(recipients.getTo()));
-    email.setContent(emailEntity.getHtmlContent(), "text/html; charset=utf-8");
+    email.setContent(emailContent.getHtmlBody(), "text/html; charset=utf-8");
 
     if (!CollectionUtils.isEmpty(recipients.getCc())) {
       email.setCc(toAddress(recipients.getCc()));
@@ -97,6 +101,7 @@ public class EmailNotificationService implements NotificationService {
    * Sends email according to the provided config.
    */
   private void sendEmail(final HtmlEmail email) throws EmailException {
+    final SmtpConfiguration smtpConfiguration = configuration.getSmtp();
     email.setHostName(smtpConfiguration.getHost());
     email.setSmtpPort(smtpConfiguration.getPort());
     if (smtpConfiguration.getUser() != null && smtpConfiguration.getPassword() != null) {

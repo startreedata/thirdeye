@@ -65,10 +65,16 @@
           ]
         }
       ],
-      "rca": {
-        "datasource": "${dataSource}",
-        "dataset": "${dataset}",
-        "metric": "purchases"
+      "metadata": {
+        "datasource": {
+          "name": "${dataSource}"
+        },
+        "dataset": {
+          "name": "${dataset}"
+        },
+        "metric": {
+          "name": "purchases"
+        }
       }
     },
     "templateProperties": {

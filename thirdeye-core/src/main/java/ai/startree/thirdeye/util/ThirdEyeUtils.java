@@ -24,20 +24,12 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
 import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.util.SpiUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,45 +43,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  /**
-   * Returns or modifies a filter that can be for querying the results corresponding to the given
-   * dimension map.
-   *
-   * For example, if a dimension map = {country=IN,page_name=front_page}, then the two entries will
-   * be added or
-   * over-written to the given filter.
-   *
-   * Note that if the given filter contains an entry: country=["IN", "US", "TW",...], then this
-   * entry is replaced by
-   * country=IN.
-   *
-   * @param dimensionMap the dimension map to add to the filter
-   * @param filterToDecorate if it is null, a new filter will be created; otherwise, it is
-   *     modified.
-   * @return a filter that is modified according to the given dimension map.
-   */
-  public static Multimap<String, String> getFilterSetFromDimensionMap(DimensionMap dimensionMap,
-      Multimap<String, String> filterToDecorate) {
-    if (filterToDecorate == null) {
-      filterToDecorate = HashMultimap.create();
-    }
-
-    for (Map.Entry<String, String> entry : dimensionMap.entrySet()) {
-      String dimensionName = entry.getKey();
-      String dimensionValue = entry.getValue();
-      // If dimension value is "OTHER", then we need to get all data and calculate "OTHER" part.
-      // In order to reproduce the data for "OTHER", the filter should remain as is.
-      if (!dimensionValue.equalsIgnoreCase("OTHER")) {
-        // Only add the specific dimension value to the filter because other dimension values will not be used
-        filterToDecorate.removeAll(dimensionName);
-        filterToDecorate.put(dimensionName, dimensionValue);
-      }
-    }
-
-    return filterToDecorate;
-  }
 
   /**
    * Returns the time spec of the buckets (data points) in the specified dataset config. For
@@ -139,15 +92,6 @@ public abstract class ThirdEyeUtils {
       derivedMetricExpression = metricConfig.getName();
     }
     return derivedMetricExpression;
-  }
-
-  public static Map<String, Double> getMetricThresholdsMap(List<MetricFunction> metricFunctions) {
-    Map<String, Double> metricThresholds = new HashMap<>();
-    for (MetricFunction metricFunction : metricFunctions) {
-      metricThresholds.put(metricFunction.getMetricName(),
-          metricFunction.getMetricConfig().getRollupThreshold());
-    }
-    return metricThresholds;
   }
 
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset,
@@ -342,39 +286,6 @@ public abstract class ThirdEyeUtils {
     }
   }
 
-  public static long getCachingPeriodLookback(TimeGranularity granularity) {
-    long period;
-    switch (granularity.getUnit()) {
-      case DAYS:
-        // 90 days data for daily detection
-        period = CoreConstants.CACHING_PERIOD_LOOKBACK_DAILY;
-        break;
-      case HOURS:
-        // 60 days data for hourly detection
-        period = CoreConstants.CACHING_PERIOD_LOOKBACK_HOURLY;
-        break;
-      case MINUTES:
-        // disable minute level cache warmup by default.
-        period = CoreConstants.CACHING_PERIOD_LOOKBACK_MINUTELY;
-        break;
-      default:
-        period = CoreConstants.DEFAULT_CACHING_PERIOD_LOOKBACK;
-    }
-    return period;
-  }
-
-  /**
-   * Check if the anomaly is detected by multiple components
-   *
-   * @param anomaly the anomaly
-   * @return if the anomaly is detected by multiple components
-   */
-  public static boolean isDetectedByMultipleComponents(MergedAnomalyResultDTO anomaly) {
-    String componentName = anomaly.getProperties().getOrDefault(
-        GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME, "");
-    return componentName.contains(CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER);
-  }
-
   /**
    * Combine two components with comma separated.
    * For example, will combine "component1" and "component2" into "component1, component2".
@@ -459,32 +370,5 @@ public abstract class ThirdEyeUtils {
       }
     }
     return mergedTimeSeriesSnapshot;
-  }
-
-  public static Multimap<String, String> convertToMultiMap(String json) {
-    ArrayListMultimap<String, String> multimap = ArrayListMultimap.create();
-    if (json == null) {
-      return multimap;
-    }
-    try {
-      TypeReference<Map<String, ArrayList<String>>> valueTypeRef =
-          new TypeReference<Map<String, ArrayList<String>>>() {
-          };
-      Map<String, ArrayList<String>> map;
-
-      map = OBJECT_MAPPER.readValue(json, valueTypeRef);
-      for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
-        ArrayList<String> valueList = entry.getValue();
-        ArrayList<String> trimmedList = new ArrayList<>();
-        for (String value : valueList) {
-          trimmedList.add(value.trim());
-        }
-        multimap.putAll(entry.getKey(), trimmedList);
-      }
-      return multimap;
-    } catch (IOException e) {
-      LOG.error("Error parsing json:{} message:{}", json, e.getMessage());
-    }
-    return multimap;
   }
 }

@@ -5,25 +5,26 @@
 
 package ai.startree.thirdeye.notification.email;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.Constants.SubjectType;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
-import ai.startree.thirdeye.spi.api.EmailRecipientsApi;
+import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
-import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,33 +90,18 @@ public class EmailContentBuilder {
     }
   }
 
-  public EmailEntityApi buildEmailEntityApi(final NotificationPayloadApi api) {
+  public EmailContent build(final NotificationPayloadApi api) {
     final Map<String, Object> templateData = constructTemplateData(api);
-    return buildEmailEntityApi(api.getSubscriptionGroup(),
-        DEFAULT_EMAIL_TEMPLATE,
-        templateData,
-        api.getEmailRecipients());
-  }
-
-  private EmailEntityApi buildEmailEntityApi(final SubscriptionGroupApi subscriptionGroup,
-      final String templateKey,
-      final Map<String, Object> templateData,
-      final EmailRecipientsApi recipients) {
-    requireNonNull(recipients.getTo(), "to field in email scheme is null");
-    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
-
-    final String htmlText = buildHtml(templateKey, templateData);
+    final String htmlText = buildHtml(DEFAULT_EMAIL_TEMPLATE, templateData);
 
     final String subject = makeSubject(SubjectType.ALERT,
         templateData.get("metrics"),
         templateData.get("datasets"),
-        subscriptionGroup.getName());
+        api.getSubscriptionGroup().getName());
 
-    return new EmailEntityApi()
+    return new EmailContent()
         .setSubject(subject)
-        .setHtmlContent(htmlText)
-        .setRecipients(recipients)
-        .setFrom(recipients.getFrom());
+        .setHtmlBody(htmlText);
   }
 
   public Map<String, Object> constructTemplateData(
@@ -183,15 +169,36 @@ public class EmailContentBuilder {
     // TODO spyne this is used only if "cid" is present. used in screenshots. can handle later
     templateData.put("anomalyDetails", new HashMap<>());
 
-    // TODO spyne remove links to emailTemplateData
     templateData.put("detectionToAnomalyDetailsMap",
-        api.getEmailTemplateData().get("detectionToAnomalyDetailsMap"));
+        buildDetectionToAnomalyDetailsMap(api.getAnomalyReports()));
     templateData.put("metricToAnomalyDetailsMap",
-        api.getEmailTemplateData().get("metricToAnomalyDetailsMap"));
+        buildMetricToAnomalyDetailsMap(api.getAnomalyReports()));
 
     // TODO spyne used to add nav to alerts. fix
     templateData.put("functionToId", new HashMap<>());
 
     return templateData;
+  }
+
+  private Map<String, Collection<AnomalyReportDataApi>> buildDetectionToAnomalyDetailsMap(
+      final List<AnomalyReportApi> anomalyReports) {
+    final Multimap<String, AnomalyReportDataApi> map = ArrayListMultimap.create();
+    for (AnomalyReportApi anomalyReportApi : anomalyReports) {
+      final AnomalyReportDataApi data = anomalyReportApi.getData();
+      map.put(data.getFunction(), data);
+    }
+    return map.asMap();
+  }
+
+  private Map<String, Collection<AnomalyReportDataApi>> buildMetricToAnomalyDetailsMap(
+      final List<AnomalyReportApi> anomalyReports) {
+    final Multimap<String, AnomalyReportDataApi> map = ArrayListMultimap.create();
+    for (AnomalyReportApi anomalyReportApi : anomalyReports) {
+      final String metricName = optional(anomalyReportApi.getAnomaly().getMetric())
+          .map(MetricApi::getName)
+          .orElse("UNKNOWN");
+      map.put(metricName, anomalyReportApi.getData());
+    }
+    return map.asMap();
   }
 }

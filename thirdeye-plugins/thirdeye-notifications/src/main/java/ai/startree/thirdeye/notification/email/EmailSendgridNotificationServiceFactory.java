@@ -10,18 +10,18 @@ import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
-public class EmailNotificationServiceFactory implements NotificationServiceFactory {
+public class EmailSendgridNotificationServiceFactory implements NotificationServiceFactory {
 
   @Override
   public String name() {
-    return "email";
+    return "email-sendgrid";
   }
 
   @Override
-  public NotificationService build(final Map<String, String> properties) {
-    final SmtpConfiguration configuration = new ObjectMapper()
-        .convertValue(properties, SmtpConfiguration.class);
+  public NotificationService build(final Map<String, Object> params) {
+    final EmailSendgridConfiguration configuration = new ObjectMapper()
+        .convertValue(params, EmailSendgridConfiguration.class);
 
-    return new EmailNotificationService(configuration);
+    return new EmailSendgridNotificationService(configuration);
   }
 }

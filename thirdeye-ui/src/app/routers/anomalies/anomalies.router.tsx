@@ -1,5 +1,6 @@
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
@@ -56,9 +57,9 @@ export const AnomaliesRouter: FunctionComponent = () => {
                         element={
                             <RedirectValidation
                                 queryParams={[
-                                    "timeRange",
-                                    "startTime",
-                                    "endTime",
+                                    TimeRangeQueryStringKey.TIME_RANGE,
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
                                 ]}
                                 to=".."
                             >

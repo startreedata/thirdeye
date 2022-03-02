@@ -1,7 +1,10 @@
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { TimeRange } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import {
+    TimeRange,
+    TimeRangeQueryStringKey,
+} from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -27,13 +30,13 @@ export const AnomaliesViewIndexPage: FunctionComponent = () => {
     useEffect(() => {
         if (anomaly) {
             const timeRangeQuery = new URLSearchParams([
-                ["timeRange", TimeRange.CUSTOM],
+                [TimeRangeQueryStringKey.TIME_RANGE, TimeRange.CUSTOM],
                 [
-                    "startTime",
+                    TimeRangeQueryStringKey.START_TIME,
                     (anomaly.startTime - WEEK_IN_MILLISECONDS * 2).toString(),
                 ],
                 [
-                    "endTime",
+                    TimeRangeQueryStringKey.END_TIME,
                     (anomaly.endTime + WEEK_IN_MILLISECONDS * 2).toString(),
                 ],
             ]);

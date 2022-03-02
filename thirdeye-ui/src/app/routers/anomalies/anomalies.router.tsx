@@ -1,8 +1,9 @@
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
+import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const AnomaliesAllPage = lazy(() =>
@@ -38,13 +39,27 @@ export const AnomaliesRouter: FunctionComponent = () => {
                 <Route
                     index
                     element={
-                        <Navigate replace to={AppRouteRelative.ANOMALIES_ALL} />
+                        <RedirectWithDefaultParams
+                            replace
+                            to={AppRouteRelative.ANOMALIES_ALL}
+                        />
                     }
                 />
 
                 {/* Anomalies all path */}
                 <Route
-                    element={<AnomaliesAllPage />}
+                    element={
+                        <RedirectValidation
+                            queryParams={[
+                                TimeRangeQueryStringKey.TIME_RANGE,
+                                TimeRangeQueryStringKey.START_TIME,
+                                TimeRangeQueryStringKey.END_TIME,
+                            ]}
+                            to=".."
+                        >
+                            <AnomaliesAllPage />
+                        </RedirectValidation>
+                    }
                     path={AppRouteRelative.ANOMALIES_ALL}
                 />
 

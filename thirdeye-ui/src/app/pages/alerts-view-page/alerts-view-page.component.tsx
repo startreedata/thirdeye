@@ -104,8 +104,8 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
         getAnomalyByAlertIdAndTime(
             uiAlert.alert.id,
-            timeRangeDuration.startTime,
-            timeRangeDuration.endTime
+            Number(start),
+            Number(end)
         );
         getEvaluation(
             createAlertEvaluation(uiAlert.alert, Number(start), Number(end))

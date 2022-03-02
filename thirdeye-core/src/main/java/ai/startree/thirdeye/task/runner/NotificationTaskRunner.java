@@ -11,6 +11,8 @@ import ai.startree.thirdeye.detection.alert.AlertUtils;
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
+import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
+import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -26,6 +28,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +50,7 @@ public class NotificationTaskRunner implements TaskRunner {
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
   private final NotificationDispatcher notificationDispatcher;
+  private final NotificationPayloadBuilder notificationPayloadBuilder;
 
   @Inject
   public NotificationTaskRunner(
@@ -53,7 +58,8 @@ public class NotificationTaskRunner implements TaskRunner {
       final SubscriptionGroupManager subscriptionGroupManager,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final MetricRegistry metricRegistry,
-      final NotificationDispatcher notificationDispatcher) {
+      final NotificationDispatcher notificationDispatcher,
+      final NotificationPayloadBuilder notificationPayloadBuilder) {
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
@@ -61,6 +67,7 @@ public class NotificationTaskRunner implements TaskRunner {
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
     this.notificationDispatcher = notificationDispatcher;
+    this.notificationPayloadBuilder = notificationPayloadBuilder;
   }
 
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
@@ -102,24 +109,42 @@ public class NotificationTaskRunner implements TaskRunner {
     return Collections.emptyList();
   }
 
-  private void executeInternal(final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
+  private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) throws Exception {
     final DetectionAlertFilterResult result = requireNonNull(notificationSchemeFactory
-        .getDetectionAlertFilterResult(subscriptionGroupDTO), "DetectionAlertFilterResult is null");
+        .getDetectionAlertFilterResult(subscriptionGroup), "DetectionAlertFilterResult is null");
 
     if (result.getAllAnomalies().size() == 0) {
       LOG.debug("Zero anomalies found, skipping notification for subscription group: {}",
-          subscriptionGroupDTO.getId());
+          subscriptionGroup.getId());
       return;
     }
 
     /* Dispatch notifications */
-    notificationDispatcher.dispatch(subscriptionGroupDTO, result);
+    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroup, result);
+    final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
+        subscriptionGroup,
+        anomalies);
+
+    /* fire notifications */
+    notificationDispatcher.dispatch(subscriptionGroup, payload);
 
     /* Record watermarks and update entities */
     for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
       anomaly.setNotified(true);
       mergedAnomalyResultManager.update(anomaly);
     }
-    updateSubscriptionWatermarks(subscriptionGroupDTO, result.getAllAnomalies());
+    updateSubscriptionWatermarks(subscriptionGroup, result.getAllAnomalies());
+  }
+
+  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
+      final DetectionAlertFilterResult results) {
+    return results
+        .getResult()
+        .entrySet()
+        .stream()
+        .filter(result -> subscriptionGroup.equals(result.getKey().getSubscriptionConfig()))
+        .findFirst()
+        .map(Entry::getValue)
+        .orElse(null);
   }
 }

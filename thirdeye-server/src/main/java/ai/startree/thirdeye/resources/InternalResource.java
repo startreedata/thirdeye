@@ -123,7 +123,7 @@ public class InternalResource {
     }
     final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
         sg,
-        notificationDispatcher.getAnomalies(sg, result));
+        notificationTaskRunner.getAnomalies(sg, result));
 
     final NotificationService emailNotificationService = notificationServiceRegistry.get(
         "email-smtp",

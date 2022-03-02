@@ -86,11 +86,11 @@ export const AppRoute = {
 } as const;
 
 export const getBasePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.BASE);
+    return AppRoute.BASE;
 };
 
 export const getHomePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.HOME);
+    return AppRoute.HOME;
 };
 
 export const getAlertsPath = (): string => {
@@ -156,129 +156,125 @@ export const getSubscriptionGroupsPath = (): string => {
 };
 
 export const getSubscriptionGroupsAllPath = (): string => {
-    return createPathWithRecognizedQueryString(
-        AppRoute.SUBSCRIPTION_GROUPS_ALL
-    );
+    return AppRoute.SUBSCRIPTION_GROUPS_ALL;
 };
 
 export const getSubscriptionGroupsViewPath = (id: number): string => {
     let path: string = AppRoute.SUBSCRIPTION_GROUPS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getSubscriptionGroupsCreatePath = (): string => {
-    return createPathWithRecognizedQueryString(
-        AppRoute.SUBSCRIPTION_GROUPS_CREATE
-    );
+    return AppRoute.SUBSCRIPTION_GROUPS_CREATE;
 };
 
 export const getSubscriptionGroupsUpdatePath = (id: number): string => {
     let path: string = AppRoute.SUBSCRIPTION_GROUPS_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getDatasetsPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ALL);
+    return AppRoute.DATASETS_ALL;
 };
 
 export const getDatasetsAllPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ALL);
+    return AppRoute.DATASETS_ALL;
 };
 
 export const getDatasetsViewPath = (id: number): string => {
     let path: string = AppRoute.DATASETS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getDatasetsOnboardPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASETS_ONBOARD);
+    return AppRoute.DATASETS_ONBOARD;
 };
 
 export const getDatasetsUpdatePath = (id: number): string => {
     let path: string = AppRoute.DATASETS_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getDatasourcesPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES);
+    return AppRoute.DATASOURCES;
 };
 
 export const getDatasourcesAllPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES_ALL);
+    return AppRoute.DATASOURCES_ALL;
 };
 
 export const getDatasourcesViewPath = (id: number): string => {
     let path: string = AppRoute.DATASOURCES_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getDatasourcesCreatePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.DATASOURCES_CREATE);
+    return AppRoute.DATASOURCES_CREATE;
 };
 
 export const getDatasourcesUpdatePath = (id: number): string => {
     let path: string = AppRoute.DATASOURCES_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getMetricsPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.METRICS);
+    return AppRoute.METRICS;
 };
 
 export const getMetricsAllPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.METRICS_ALL);
+    return AppRoute.METRICS_ALL;
 };
 
 export const getMetricsViewPath = (id: number): string => {
     let path: string = AppRoute.METRICS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getMetricsCreatePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.METRICS_CREATE);
+    return AppRoute.METRICS_CREATE;
 };
 
 export const getMetricsUpdatePath = (id: number): string => {
     let path: string = AppRoute.METRICS_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getRootCauseAnalysisForAnomalyPath = (id: number): string => {
     let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getRootCauseAnalysisForAnomalyIndexPath = (id: number): string => {
     let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getLoginPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.LOGIN);
+    return AppRoute.LOGIN;
 };
 
 export const getLogoutPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.LOGOUT);
+    return AppRoute.LOGOUT;
 };
 
 // Creates path with only the recognized app query string key-value pairs from URL that are allowed

@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTimeRange } from "../../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { RedirectWithDefaultParamsProps } from "./redirect-with-default-params.interfaces";
 
 /**
@@ -15,9 +16,15 @@ export const RedirectWithDefaultParams: FunctionComponent<
     const navigate = useNavigate();
     const { timeRangeDuration } = useTimeRange();
     const timeRangeQuery = new URLSearchParams([
-        ["timeRange", timeRangeDuration.timeRange],
-        ["startTime", timeRangeDuration.startTime.toString()],
-        ["endTime", timeRangeDuration.endTime.toString()],
+        [TimeRangeQueryStringKey.TIME_RANGE, timeRangeDuration.timeRange],
+        [
+            TimeRangeQueryStringKey.START_TIME,
+            timeRangeDuration.startTime.toString(),
+        ],
+        [
+            TimeRangeQueryStringKey.END_TIME,
+            timeRangeDuration.endTime.toString(),
+        ],
     ]);
 
     useEffect(() => {

@@ -76,6 +76,7 @@ export const AlertEvaluationTimeSeries: FunctionComponent<
                     hideBrush={props.hideBrush}
                     parentHeight={parent.height}
                     parentWidth={parent.width}
+                    onAnomalyBarClick={props.onAnomalyBarClick}
                 />
             )}
         </ParentSize>
@@ -364,6 +365,42 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
         [props.parentWidth, filteredAlertEvaluationTimeSeriesPoints]
     );
 
+    const handleTimeSeriesMouseClick = (
+        event: MouseEvent<SVGRectElement>
+    ): void => {
+        const point = localPoint(event) as Point; // Event coordinates to SVG coordinates
+
+        if (!point) {
+            hideTooltip();
+
+            return;
+        }
+
+        // Determine time series time scale value from SVG coordinate, accounting for SVG
+        // padding
+        const xValue = timeSeriesXScale.invert(point.x - PADDING_LEFT_SVG);
+        if (!xValue) {
+            hideTooltip();
+
+            return;
+        }
+
+        const alertEvaluationAnomalies = getAnomaliesAtTime(
+            filteredAlertEvaluationAnomalies,
+            xValue.getTime()
+        );
+
+        // If we found anomaly fire click on that
+        if (
+            alertEvaluationAnomalies &&
+            alertEvaluationAnomalies[0] &&
+            alertEvaluationAnomalies[0].id
+        ) {
+            props.onAnomalyBarClick &&
+                props.onAnomalyBarClick(alertEvaluationAnomalies[0]);
+        }
+    };
+
     const handleTimeSeriesMouseLeave = (): void => {
         hideTooltip();
     };
@@ -499,10 +536,16 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
 
                         {/* Mouse hover marker  */}
                         <MouseHoverMarker
+                            cursor={
+                                isEmpty(tooltipData?.anomalies)
+                                    ? "default"
+                                    : "pointer"
+                            }
                             x={tooltipData && tooltipData.timestamp}
                             xScale={timeSeriesXScale}
                             y={tooltipData && tooltipData.current}
                             yScale={timeSeriesYScale}
+                            onMouseClick={handleTimeSeriesMouseClick}
                             onMouseLeave={handleTimeSeriesMouseLeave}
                             onMouseMove={handleTimeSeriesMouseMove}
                         />

@@ -79,12 +79,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         handleAlertOptionsClose();
     };
 
-    let anomalies: Anomaly[] = [];
-    if (props.alertEvaluation) {
-        anomalies =
-            props.alertEvaluation.detectionEvaluations
-                .output_AnomalyDetectorResult_0.anomalies;
-    }
+    const anomalies: Anomaly[] = props.anomalies || [];
 
     return (
         <Card variant="outlined">
@@ -193,7 +188,9 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         {/* Number of anomalies */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<string>
-                                name={t("label.anomalies")}
+                                name={`${t("label.anomalies")} in ${t(
+                                    "label.time-range"
+                                )}`}
                                 searchWords={props.searchWords}
                                 valueRenderer={(value) => {
                                     if (value) {

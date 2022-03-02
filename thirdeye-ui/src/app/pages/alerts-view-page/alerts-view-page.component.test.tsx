@@ -52,11 +52,15 @@ jest.mock("../../rest/subscription-groups/subscription-groups.rest", () => ({
 describe("Alerts View Page", () => {
     it("should render expected components after successful API calls", async () => {
         render(
-            <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
+            <MemoryRouter
+                initialEntries={[
+                    `${getAlertsViewPath(458076)}?&startTime=123&endTime=456`,
+                ]}
+            >
                 <Routes>
                     <Route
                         element={<AlertsViewPage />}
-                        path={AppRoute.ALERTS_VIEW}
+                        path={AppRoute.ALERTS_ALERT}
                     />
                 </Routes>
             </MemoryRouter>
@@ -77,11 +81,15 @@ describe("Alerts View Page", () => {
             response: { data: { message: "Error message" } },
         });
         render(
-            <MemoryRouter initialEntries={[getAlertsViewPath(458076)]}>
+            <MemoryRouter
+                initialEntries={[
+                    `${getAlertsViewPath(458076)}?&startTime=123&endTime=456`,
+                ]}
+            >
                 <Routes>
                     <Route
                         element={<AlertsViewPage />}
-                        path={AppRoute.ALERTS_VIEW}
+                        path={AppRoute.ALERTS_ALERT}
                     />
                 </Routes>
             </MemoryRouter>

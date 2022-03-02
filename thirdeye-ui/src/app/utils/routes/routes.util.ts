@@ -11,9 +11,10 @@ export const AppRouteRelative = {
     LOGOUT: "logout",
     ALERTS: "alerts",
     ALERTS_ALL: "all",
-    ALERTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_ALERT: `${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_VIEW: `view`,
     ALERTS_CREATE: "create",
-    ALERTS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_UPDATE: `update`,
     ANOMALIES: "anomalies",
     ANOMALIES_ALL: "all",
     ANOMALIES_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
@@ -51,9 +52,9 @@ export const AppRoute = {
     LOGOUT: "/logout",
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
-    ALERTS_VIEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_VIEW}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
-    ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_UPDATE}`,
+    ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
+    ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
     ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_VIEW}`,
@@ -101,7 +102,7 @@ export const getAlertsAllPath = (): string => {
 };
 
 export const getAlertsViewPath = (id: number): string => {
-    let path: string = AppRoute.ALERTS_VIEW;
+    let path: string = AppRoute.ALERTS_ALERT;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

@@ -49,9 +49,7 @@ describe("Routes Util", () => {
     });
 
     it("getAlertsViewPath should return appropriate path with appropriate query string for id", () => {
-        expect(getAlertsViewPath(1)).toEqual(
-            "/alerts/view/id/1?testQueryString"
-        );
+        expect(getAlertsViewPath(1)).toEqual("/alerts/1?testQueryString");
     });
 
     it("getAlertsCreatePath should return appropriate path with appropriate query string", () => {
@@ -60,7 +58,7 @@ describe("Routes Util", () => {
 
     it("getAlertsUpdatePath should return appropriate path with appropriate query string for id", () => {
         expect(getAlertsUpdatePath(1)).toEqual(
-            "/alerts/update/id/1?testQueryString"
+            "/alerts/1/update?testQueryString"
         );
     });
 

@@ -42,10 +42,7 @@ export function useSetQueryParamsUtil(): UseSetQueryParamsUtil {
             setQueryString(SearchQueryStringKey.SEARCH.toLowerCase(), search);
         },
         setSearchTextInQueryString: (searchText: string): void => {
-            setQueryString(
-                SearchQueryStringKey.SEARCH_TEXT.toLowerCase(),
-                searchText
-            );
+            setQueryString(SearchQueryStringKey.SEARCH_TEXT, searchText);
         },
         setTimeRangeDurationInQueryString: (
             timeRangeDuration: TimeRangeDuration
@@ -54,18 +51,19 @@ export function useSetQueryParamsUtil(): UseSetQueryParamsUtil {
                 return;
             }
 
-            setQueryString(
-                TimeRangeQueryStringKey.TIME_RANGE.toLowerCase(),
+            urlSearchParams.set(
+                TimeRangeQueryStringKey.TIME_RANGE,
                 timeRangeDuration.timeRange
             );
-            setQueryString(
-                TimeRangeQueryStringKey.START_TIME.toLowerCase(),
+            urlSearchParams.set(
+                TimeRangeQueryStringKey.START_TIME,
                 timeRangeDuration.startTime.toString()
             );
-            setQueryString(
-                TimeRangeQueryStringKey.END_TIME.toLowerCase(),
+            urlSearchParams.set(
+                TimeRangeQueryStringKey.END_TIME,
                 timeRangeDuration.endTime.toString()
             );
+            setSearchParams(urlSearchParams);
         },
     };
 }
@@ -81,27 +79,25 @@ export const getAccessTokenFromHashParams = (): string => {
 };
 
 export const getSearchFromQueryString = (): string => {
-    return getQueryString(SearchQueryStringKey.SEARCH.toLowerCase());
+    return getQueryString(SearchQueryStringKey.SEARCH);
 };
 
 export const getSearchTextFromQueryString = (): string => {
-    return getQueryString(SearchQueryStringKey.SEARCH_TEXT.toLowerCase());
+    return getQueryString(SearchQueryStringKey.SEARCH_TEXT);
 };
 
 export const getTimeRangeDurationFromQueryString =
     (): TimeRangeDuration | null => {
         const timeRangeString = getQueryString(
-            TimeRangeQueryStringKey.TIME_RANGE.toLowerCase()
+            TimeRangeQueryStringKey.TIME_RANGE
         );
 
         const startTimeString = getQueryString(
-            TimeRangeQueryStringKey.START_TIME.toLowerCase()
+            TimeRangeQueryStringKey.START_TIME
         );
         const startTime = toNumber(startTimeString);
 
-        const endTimeString = getQueryString(
-            TimeRangeQueryStringKey.END_TIME.toLowerCase()
-        );
+        const endTimeString = getQueryString(TimeRangeQueryStringKey.END_TIME);
         const endTime = toNumber(endTimeString);
 
         // Validate time range duration
@@ -140,14 +136,10 @@ export const getRecognizedQuery = (): URLSearchParams => {
     const currentURLSearchParams = new URLSearchParams(location.search);
     const recognizedURLSearchParams = new URLSearchParams();
     for (const allowedAppQueryStringKey of allowedAppQueryStringKeys) {
-        if (
-            currentURLSearchParams.has(allowedAppQueryStringKey.toLowerCase())
-        ) {
+        if (currentURLSearchParams.has(allowedAppQueryStringKey)) {
             recognizedURLSearchParams.set(
-                allowedAppQueryStringKey.toLowerCase(),
-                currentURLSearchParams.get(
-                    allowedAppQueryStringKey.toLowerCase()
-                ) as string
+                allowedAppQueryStringKey,
+                currentURLSearchParams.get(allowedAppQueryStringKey) as string
             );
         }
     }

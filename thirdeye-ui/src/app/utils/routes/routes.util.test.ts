@@ -34,11 +34,11 @@ jest.mock("../params/params.util", () => ({
 
 describe("Routes Util", () => {
     it("getBasePath should return appropriate path with appropriate query string", () => {
-        expect(getBasePath()).toEqual("/?testQueryString");
+        expect(getBasePath()).toEqual("/");
     });
 
     it("getHomePath should return appropriate path with appropriate query string", () => {
-        expect(getHomePath()).toEqual("/home?testQueryString");
+        expect(getHomePath()).toEqual("/home");
     });
 
     it("getAlertsPath should return appropriate path with appropriate query string", () => {
@@ -97,64 +97,60 @@ describe("Routes Util", () => {
 
     it("getSubscriptionGroupsAllPath should return appropriate path with appropriate query string", () => {
         expect(getSubscriptionGroupsAllPath()).toEqual(
-            "/configuration/subscription-groups/all?testQueryString"
+            "/configuration/subscription-groups/all"
         );
     });
 
     it("getSubscriptionGroupsViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getSubscriptionGroupsViewPath(1)).toEqual(
-            "/configuration/subscription-groups/view/id/1?testQueryString"
+            "/configuration/subscription-groups/view/id/1"
         );
     });
 
     it("getSubscriptionGroupsCreatePath should return appropriate path with appropriate query string", () => {
         expect(getSubscriptionGroupsCreatePath()).toEqual(
-            "/configuration/subscription-groups/create?testQueryString"
+            "/configuration/subscription-groups/create"
         );
     });
 
     it("getSubscriptionGroupsUpdatePath should return appropriate path with appropriate query string for id", () => {
         expect(getSubscriptionGroupsUpdatePath(1)).toEqual(
-            "/configuration/subscription-groups/update/id/1?testQueryString"
+            "/configuration/subscription-groups/update/id/1"
         );
     });
 
     it("getMetricsPath should return appropriate path with appropriate query string", () => {
-        expect(getMetricsPath()).toEqual(
-            "/configuration/metrics?testQueryString"
-        );
+        expect(getMetricsPath()).toEqual("/configuration/metrics");
     });
 
     it("getMetricsAllPath should return appropriate path with appropriate query string", () => {
-        expect(getMetricsAllPath()).toEqual(
-            "/configuration/metrics/all?testQueryString"
-        );
+        expect(getMetricsAllPath()).toEqual("/configuration/metrics/all");
     });
 
     it("getMetricsViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getMetricsViewPath(1)).toEqual(
-            "/configuration/metrics/view/id/1?testQueryString"
+            "/configuration/metrics/view/id/1"
         );
     });
 
     it("getRootCauseAnalysisForAnomalyPath should return appropriate path with appropriate query string for anomaly id", () => {
         expect(getRootCauseAnalysisForAnomalyPath(1)).toEqual(
-            "/root-cause-analysis/anomaly/1?testQueryString"
+            "/root-cause-analysis/anomaly/1"
         );
     });
 
     it("getRootCauseAnalysisForAnomalyIndexPath should return appropriate path with appropriate query string for anomaly id", () => {
         expect(getRootCauseAnalysisForAnomalyIndexPath(1)).toEqual(
-            "/root-cause-analysis/anomaly/1/index?testQueryString"
+            "/root-cause-analysis/anomaly/1/index"
         );
     });
 
     it("getLoginPath should return appropriate path with appropriate query string", () => {
-        expect(getLoginPath()).toEqual("/login?testQueryString");
+        expect(getLoginPath()).toEqual("/login");
     });
 
     it("getLogoutPath should return appropriate path with appropriate query string", () => {
-        expect(getLogoutPath()).toEqual("/logout?testQueryString");
+        expect(getLogoutPath()).toEqual("/logout");
     });
 
     it("createPathWithTimeRangeQueryString should return path with appropriate query string", () => {

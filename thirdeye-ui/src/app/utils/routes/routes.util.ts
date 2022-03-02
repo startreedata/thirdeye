@@ -17,8 +17,8 @@ export const AppRouteRelative = {
     ALERTS_UPDATE: `update`,
     ANOMALIES: "anomalies",
     ANOMALIES_ALL: "all",
-    ANOMALIES_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
-    ANOMALIES_VIEW_INDEX: `view/id/${PLACEHOLDER_ROUTE_ID}/index`,
+    ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
+    ANOMALIES_ANOMALY_VIEW: `view`,
     CONFIGURATION: "configuration",
     SUBSCRIPTION_GROUPS: "subscription-groups",
     SUBSCRIPTION_GROUPS_ALL: "all",
@@ -57,8 +57,8 @@ export const AppRoute = {
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
-    ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_VIEW}`,
-    ANOMALIES_VIEW_INDEX: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_VIEW_INDEX}`,
+    ANOMALIES_ANOMALY: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}`,
+    ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`,
     CONFIGURATION: `/${AppRouteRelative.CONFIGURATION}`,
     SUBSCRIPTION_GROUPS: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}`,
     SUBSCRIPTION_GROUPS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}`,
@@ -133,18 +133,18 @@ export const getAnomaliesAllPath = (searchTerm?: string): string => {
     return `${AppRoute.ANOMALIES_ALL}?${urlQuery.toString()}`;
 };
 
-export const getAnomaliesViewPath = (id: number): string => {
+export const getAnomaliesAnomalyPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_ANOMALY;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getAnomaliesAnomalyViewPath = (id: number): string => {
     let path: string = AppRoute.ANOMALIES_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
-};
-
-export const getAnomaliesViewIndexPath = (id: number): string => {
-    let path: string = AppRoute.ANOMALIES_VIEW_INDEX;
-    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
-
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getConfigurationPath = (): string => {

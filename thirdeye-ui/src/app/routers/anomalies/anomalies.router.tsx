@@ -1,6 +1,7 @@
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const AnomaliesAllPage = lazy(() =>
@@ -46,17 +47,30 @@ export const AnomaliesRouter: FunctionComponent = () => {
                     path={AppRouteRelative.ANOMALIES_ALL}
                 />
 
-                {/* Anomalies view index path to change time range*/}
-                <Route
-                    element={<AnomaliesViewIndexPage />}
-                    path={AppRouteRelative.ANOMALIES_VIEW_INDEX}
-                />
+                <Route path={`${AppRouteRelative.ALERTS_ALERT}/*`}>
+                    {/* Anomalies view index path to default the time range params */}
+                    <Route index element={<AnomaliesViewIndexPage />} />
 
-                {/* Anomalies view path */}
-                <Route
-                    element={<AnomaliesViewPage />}
-                    path={AppRouteRelative.ANOMALIES_VIEW}
-                />
+                    {/* Anomalies view path */}
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    "timeRange",
+                                    "startTime",
+                                    "endTime",
+                                ]}
+                                to=".."
+                            >
+                                <AnomaliesViewPage />
+                            </RedirectValidation>
+                        }
+                        path={AppRouteRelative.ANOMALIES_ANOMALY_VIEW}
+                    />
+
+                    {/* No match found, render page not found */}
+                    <Route element={<PageNotFoundPage />} path="*" />
+                </Route>
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

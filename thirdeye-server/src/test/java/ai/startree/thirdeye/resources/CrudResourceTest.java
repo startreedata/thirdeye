@@ -17,8 +17,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -174,7 +172,7 @@ class DummyApi implements ThirdEyeCrudApi<DummyApi> {
 
 class DummyResource extends CrudResource<DummyApi, DummyDto> {
 
-  DummyMapper mapper = Mappers.getMapper(DummyMapper.class);
+  DummyMapper mapper = new DummyMapper();
 
   public DummyResource(
     final DummyManager dtoManager,
@@ -205,10 +203,25 @@ class DummyManager extends AbstractManagerImpl<DummyDto> {
   }
 }
 
-@Mapper
-interface DummyMapper {
+class DummyMapper {
 
-  DummyDto toDto(DummyApi api);
+  DummyDto toDto(DummyApi api) {
+    return (DummyDto) new DummyDto()
+      .setData(api.getData())
+      .setId(api.getId())
+      .setCreatedBy(api.getCreatedBy())
+      .setCreateTime(api.getCreateTime())
+      .setUpdatedBy(api.getUpdatedBy())
+      .setUpdateTime(api.getUpdateTime());
+  }
 
-  DummyApi toApi(DummyDto dto);
+  DummyApi toApi(DummyDto dto) {
+    return new DummyApi()
+      .setData(dto.getData())
+      .setId(dto.getId())
+      .setCreatedBy(dto.getCreatedBy())
+      .setCreateTime(dto.getCreateTime())
+      .setUpdatedBy(dto.getUpdatedBy())
+      .setUpdateTime(dto.getUpdateTime());
+  }
 }

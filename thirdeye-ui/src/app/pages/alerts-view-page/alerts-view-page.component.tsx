@@ -38,7 +38,7 @@ import {
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
     getAlertsAllPath,
-    getAnomaliesViewIndexPath,
+    getAnomaliesAnomalyPath,
 } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
@@ -197,7 +197,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     };
 
     const onAnomalyBarClick = (anomaly: Anomaly): void => {
-        navigate(getAnomaliesViewIndexPath(anomaly.id));
+        navigate(getAnomaliesAnomalyPath(anomaly.id));
     };
 
     return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (

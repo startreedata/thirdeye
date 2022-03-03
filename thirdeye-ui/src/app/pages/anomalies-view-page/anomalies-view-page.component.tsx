@@ -2,14 +2,14 @@ import { Box, Card, CardContent, Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     NotificationTypeV1,
@@ -42,19 +42,19 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const { timeRangeDuration } = useTimeRange();
+    const [searchParams] = useSearchParams();
     const { showDialog } = useDialog();
-    const params = useParams<AnomaliesViewPageParams>();
+    const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly
-        params.id &&
-            isValidNumberId(params.id) &&
-            getAnomaly(toNumber(params.id));
-    }, [timeRangeDuration]);
+        anomalyId &&
+            isValidNumberId(anomalyId) &&
+            getAnomaly(toNumber(anomalyId));
+    }, [anomalyId]);
 
     useEffect(() => {
         !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
@@ -76,9 +76,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }, [evaluation, anomaly]);
 
     useEffect(() => {
-        // Fetched alert changed, fetch alert evaluation
+        // Fetched alert or time range changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [anomaly]);
+    }, [anomaly, searchParams]);
 
     useEffect(() => {
         if (getEvaluationRequestStatus === ActionStatus.Error) {
@@ -91,13 +91,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         }
     }, [getEvaluationRequestStatus]);
 
-    if (params.id && !isValidNumberId(params.id)) {
+    if (anomalyId && !isValidNumberId(anomalyId)) {
         // Invalid id
         notify(
             NotificationTypeV1.Error,
             t("message.invalid-id", {
                 entity: t("label.anomaly"),
-                id: params.id,
+                id: anomalyId,
             })
         );
 
@@ -105,17 +105,16 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }
 
     const fetchAlertEvaluation = (): void => {
-        if (!anomaly || !anomaly.alert) {
+        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+        if (!anomaly || !anomaly.alert || !start || !end) {
             setAlertEvaluation(null);
 
             return;
         }
         getEvaluation(
-            createAlertEvaluation(
-                anomaly.alert.id,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
+            createAlertEvaluation(anomaly.alert.id, Number(start), Number(end))
         );
     };
 
@@ -180,7 +179,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     <AnomalyBreakdownComparisonHeatmap
                         anomaly={anomaly}
-                        anomalyId={toNumber(params.id)}
+                        anomalyId={toNumber(anomalyId)}
                     />
                 </Grid>
             </PageContentsGridV1>

@@ -6,7 +6,7 @@ import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
@@ -26,7 +26,6 @@ import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -34,16 +33,16 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch anomalies
         fetchAnomaliesByTime();
-    }, [timeRangeDuration]);
+    }, [searchParams]);
 
     const fetchAnomaliesByTime = (): void => {
         setUiAnomalies(null);
 
+        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
         let fetchedUiAnomalies: UiAnomaly[] = [];
-        getAnomaliesByTime(
-            timeRangeDuration.startTime,
-            timeRangeDuration.endTime
-        )
+        getAnomaliesByTime(Number(start), Number(end))
             .then((anomalies) => {
                 fetchedUiAnomalies = getUiAnomalies(anomalies);
             })

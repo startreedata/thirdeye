@@ -67,7 +67,7 @@ public class OnboardingTaskRunner implements TaskRunner {
       return Collections.emptyList();
     }
 
-    alert.setLastTimestamp(result.getLastTimestamp());
+    alert.setLastTimestamp(info.getEnd());
     alertManager.update(alert);
 
     for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {

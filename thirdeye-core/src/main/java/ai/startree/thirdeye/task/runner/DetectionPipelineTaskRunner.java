@@ -109,7 +109,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private void postExecution(final DetectionPipelineTaskInfo taskInfo,
       final AlertDTO alert, final DetectionPipelineResult result) {
-    alert.setLastTimestamp(result.getLastTimestamp());
+    alert.setLastTimestamp(taskInfo.getEnd());
+    alertManager.update(alert);
     anomalyMerger.mergeAndSave(taskInfo, alert, result.getAnomalies());
 
     for (final EvaluationDTO evaluationDTO : result.getEvaluations()) {

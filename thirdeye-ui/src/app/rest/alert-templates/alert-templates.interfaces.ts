@@ -1,22 +1,12 @@
 import { ActionHook } from "../actions.interfaces";
-import { Alert, AlertEvaluation } from "../dto/alert.interfaces";
+import { AlertTemplate } from "../dto/alert-template.interfaces";
 
-export interface UseGetEvaluationParams {
-    alert: {
-        id: number;
-    };
-    start: number;
-    end: number;
+export interface GetAlertTemplate extends ActionHook {
+    alertTemplate: AlertTemplate | null;
+    getAlertTemplate: (id: number) => Promise<AlertTemplate | undefined>;
 }
 
-export interface GetEvaluation extends ActionHook {
-    evaluation: AlertEvaluation | null;
-    getEvaluation: (
-        evaluationParams: UseGetEvaluationParams
-    ) => Promise<AlertEvaluation | undefined>;
-}
-
-export interface GetAlert extends ActionHook {
-    alert: Alert | null;
-    getAlert: (id: number) => Promise<Alert | undefined>;
+export interface GetAlertTemplates extends ActionHook {
+    alertTemplates: AlertTemplate[] | null;
+    getAlertTemplates: () => Promise<AlertTemplate[] | undefined>;
 }

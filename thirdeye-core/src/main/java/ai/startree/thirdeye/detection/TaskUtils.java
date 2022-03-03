@@ -99,7 +99,7 @@ public class TaskUtils {
     }
 
     return buildTaskInfoFromDetectionConfig(alert,
-        System.currentTimeMillis(),
+        jobExecutionContext.getScheduledFireTime().getTime(),
         thirdEyeCacheRegistry,
         datasetConfigManager,
         metricConfigManager);

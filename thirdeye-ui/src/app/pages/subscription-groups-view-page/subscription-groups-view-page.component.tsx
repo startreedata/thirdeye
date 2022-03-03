@@ -9,7 +9,6 @@ import { SubscriptionGroupCard } from "../../components/entity-cards/subscriptio
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -37,7 +36,6 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const navigate = useNavigate();
@@ -47,7 +45,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch subscription group
         fetchSubscriptionGroup();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchSubscriptionGroup = (): void => {
         setUiSubscriptionGroup(null);

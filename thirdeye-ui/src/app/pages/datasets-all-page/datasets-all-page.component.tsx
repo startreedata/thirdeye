@@ -4,7 +4,6 @@ import { ConfigurationPageHeader } from "../../components/configuration-page-hea
 import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -21,7 +20,6 @@ import { getUiDatasets } from "../../utils/datasets/datasets.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
     const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -29,7 +27,7 @@ export const DatasetsAllPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch datasets
         fetchAllDatasets();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllDatasets = (): void => {
         setUiDatasets(null);

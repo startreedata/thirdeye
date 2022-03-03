@@ -5,10 +5,13 @@
 
 package ai.startree.thirdeye.rca;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -23,6 +26,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,6 +38,7 @@ public class RootCauseAnalysisInfoFetcher {
   private final DatasetConfigManager datasetDAO;
   private final MetricConfigManager metricDAO;
   private final AlertTemplateRenderer alertTemplateRenderer;
+  private final AlertTemplateManager alertTemplateDAO;
 
   @Inject
   public RootCauseAnalysisInfoFetcher(
@@ -41,13 +46,15 @@ public class RootCauseAnalysisInfoFetcher {
       final AlertManager alertDAO,
       final DatasetConfigManager datasetDAO,
       final MetricConfigManager metricDAO,
-      final AlertTemplateRenderer alertTemplateRenderer
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final AlertTemplateManager alertTemplateDAO
   ) {
     this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;
     this.datasetDAO = datasetDAO;
     this.metricDAO = metricDAO;
     this.alertTemplateRenderer = alertTemplateRenderer;
+    this.alertTemplateDAO = alertTemplateDAO;
   }
 
   /**
@@ -66,8 +73,11 @@ public class RootCauseAnalysisInfoFetcher {
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
 
-    if (alertDTO.getTemplate().getRca() != null) {
-      migrateRcaInfoToAlertMetadata(alertDTO);
+    // todo cyril remove migration logic around May 2022
+    if (alertDTO.getTemplate().getId() != null || alertDTO.getTemplate().getName() != null) {
+      tryMigrateTemplateFromRcaToMetadata(alertDTO.getTemplate());
+    } else {
+      tryMigrateAlertFromRcaToMetadata(alertDTO);
     }
 
     // render properties - startTime/endTime not important
@@ -99,20 +109,55 @@ public class RootCauseAnalysisInfoFetcher {
     return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO);
   }
 
-  private void migrateRcaInfoToAlertMetadata(final AlertDTO alertDTO) {
-    RcaMetadataDTO rcaMetadataDTO = alertDTO.getTemplate().getRca();
+  private void tryMigrateTemplateFromRcaToMetadata(final AlertTemplateDTO alertTemplateInsideAlertDto) {
+    // get template
+    final AlertTemplateDTO templateDTO;
+    final Long id = alertTemplateInsideAlertDto.getId();
+    final String name = alertTemplateInsideAlertDto.getName();
+    if (id != null) {
+      templateDTO = alertTemplateDAO.findById(id);
+    } else if (name != null) {
+      final List<AlertTemplateDTO> byName = alertTemplateDAO.findByName(name);
+      ensure(byName.size() == 1, ERR_OBJECT_DOES_NOT_EXIST, "template not found: " + name);
+      templateDTO = byName.get(0);
+    }
+    else {
+      // cannot happen in context
+      throw new RuntimeException();
+    }
+    // migrate template
+    if (templateDTO.getRca() != null) {
+      replaceRcaByMetadata(templateDTO);
+      int migrationSuccess = alertTemplateDAO.update(templateDTO);
+      if (migrationSuccess != 1) {
+        throw new RuntimeException("Error when migrating rca info to AlertMetadata for template");
+      }
+    }
+  }
+
+  private void tryMigrateAlertFromRcaToMetadata(final AlertDTO alertDTO) {
+    // get template
+    final AlertTemplateDTO templateDTO = alertDTO.getTemplate();
+    // migrate alert
+    if (templateDTO.getRca() != null) {
+      replaceRcaByMetadata(templateDTO);
+      int migrationSuccess = alertDAO.update(alertDTO);
+      if (migrationSuccess != 1) {
+        throw new RuntimeException("Error when migrating rca info to AlertMetadata for alert");
+      }
+    }
+  }
+
+  private void replaceRcaByMetadata(final AlertTemplateDTO templateDTO) {
+    RcaMetadataDTO rcaMetadataDTO = templateDTO.getRca();
     DatasetConfigDTO metadataDatasetDTO = new DatasetConfigDTO();
     metadataDatasetDTO.setDataset(rcaMetadataDTO.getDataset());
-    AlertMetadataDTO alertMetadataDTO = Optional.ofNullable(alertDTO.getTemplate().getMetadata()).orElse(new AlertMetadataDTO());
-    alertDTO.getTemplate().setMetadata(alertMetadataDTO
+    AlertMetadataDTO alertMetadataDTO = Optional.ofNullable(templateDTO.getMetadata()).orElse(new AlertMetadataDTO());
+    templateDTO.setMetadata(alertMetadataDTO
         .setDataset(metadataDatasetDTO)
         .setDatasource(new DataSourceDTO().setName(rcaMetadataDTO.getDatasource()))
         .setMetric(new MetricConfigDTO().setName(rcaMetadataDTO.getMetric()))
     );
-    alertDTO.getTemplate().setRca(null);
-    int migrationSuccess = alertDAO.update(alertDTO);
-    if (migrationSuccess != 1) {
-      throw new RuntimeException("Error when migrating rca info to AlertMetadata");
-    }
+    templateDTO.setRca(null);
   }
 }

@@ -64,6 +64,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AlertEvaluator alertEvaluator;
 
+  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+    .put("id", "baseId")
+    .build();
+
   @Inject
   public AlertResource(
       final AlertManager alertManager,
@@ -71,7 +75,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
       final AlertEvaluator alertEvaluator) {
-    super(alertManager, ImmutableMap.of());
+    super(alertManager, API_TO_BEAN_MAP);
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertApiBeanMapper = alertApiBeanMapper;

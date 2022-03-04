@@ -43,7 +43,9 @@ export const AlertsRouter: FunctionComponent = () => {
                 {/* Redirect to alerts all path */}
                 <Route
                     index
-                    element={<Navigate to={AppRouteRelative.ALERTS_ALL} />}
+                    element={
+                        <Navigate replace to={AppRouteRelative.ALERTS_ALL} />
+                    }
                 />
 
                 {/* Alerts all path */}

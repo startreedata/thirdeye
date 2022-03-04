@@ -7,7 +7,6 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -26,7 +25,6 @@ import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 
 export const DatasetsViewPage: FunctionComponent = () => {
     const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<DatasetsViewPageParams>();
     const navigate = useNavigate();
@@ -36,7 +34,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch dataset
         fetchDataset();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchDataset = (): void => {
         setUiDataset(null);

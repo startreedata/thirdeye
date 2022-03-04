@@ -7,7 +7,6 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     JSONEditorV1,
     NotificationTypeV1,
@@ -28,7 +27,6 @@ import { DatasourcesViewPageParams } from "./datasources-view-page.interfaces";
 
 export const DatasourcesViewPage: FunctionComponent = () => {
     const [uiDatasource, setUiDatasource] = useState<UiDatasource | null>(null);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<DatasourcesViewPageParams>();
     const navigate = useNavigate();
@@ -38,7 +36,7 @@ export const DatasourcesViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch datasource
         fetchDatasource();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchDatasource = (): void => {
         setUiDatasource(null);

@@ -4,7 +4,6 @@ import { ConfigurationPageHeader } from "../../components/configuration-page-hea
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -25,7 +24,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
         UiSubscriptionGroup[] | null
     >(null);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -33,7 +31,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch subscription groups
         fetchAllSubscriptionGroups();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllSubscriptionGroups = (): void => {
         setUiSubscriptionGroups(null);

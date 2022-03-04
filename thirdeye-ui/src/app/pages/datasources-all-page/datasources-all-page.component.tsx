@@ -4,7 +4,6 @@ import { ConfigurationPageHeader } from "../../components/configuration-page-hea
 import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -23,7 +22,6 @@ export const DatasourcesAllPage: FunctionComponent = () => {
     const [uiDatasources, setUiDatasources] = useState<UiDatasource[] | null>(
         null
     );
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -31,7 +29,7 @@ export const DatasourcesAllPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch datasources
         fetchAllDatasources();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllDatasources = (): void => {
         setUiDatasources(null);

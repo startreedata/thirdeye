@@ -53,7 +53,7 @@ public class OnboardingTaskRunner implements TaskRunner {
       throws Exception {
     final OnboardingTaskInfo info = (OnboardingTaskInfo) taskInfo;
     final long alertId = info.getConfigId();
-    LOG.info("Running yaml detection onboarding task for id {}", alertId);
+    LOG.info("Running detection onboarding task for id {}", alertId);
 
     // replay the detection pipeline
     final AlertDTO alert = requireNonNull(alertManager.findById(alertId),

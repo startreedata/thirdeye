@@ -9,10 +9,8 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -24,37 +22,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 @Singleton
 public class NotificationDispatcher {
 
-  private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final NotificationServiceRegistry notificationServiceRegistry;
 
   private final SmtpConfiguration smtpConfig;
 
   @Inject
   public NotificationDispatcher(
-      final NotificationPayloadBuilder notificationPayloadBuilder,
       final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationConfiguration notificationConfiguration) {
-    this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.smtpConfig = notificationConfiguration.getSmtpConfiguration();
   }
 
-  public void dispatch(
-      final SubscriptionGroupDTO subscriptionGroup,
-      final DetectionAlertFilterResult result) {
-    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroup, result);
-
-    final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
-        subscriptionGroup,
-        anomalies);
-
-    /* fire notifications */
+  public void dispatch(final SubscriptionGroupDTO subscriptionGroup,
+      final NotificationPayloadApi payload) {
     optional(subscriptionGroup.getSpecs())
         .orElseGet(() -> specFromLegacySubscriptionGroup(subscriptionGroup))
         .stream()
@@ -104,18 +89,6 @@ public class NotificationDispatcher {
     return new NotificationSpecDTO()
         .setType("webhook")
         .setParams(buildWebhookProperties(webhookScheme));
-  }
-
-  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
-      final DetectionAlertFilterResult results) {
-    return results
-        .getResult()
-        .entrySet()
-        .stream()
-        .filter(result -> subscriptionGroup.equals(result.getKey().getSubscriptionConfig()))
-        .findFirst()
-        .map(Entry::getValue)
-        .orElse(null);
   }
 
   public Map<String, Object> buildSmtpParams() {

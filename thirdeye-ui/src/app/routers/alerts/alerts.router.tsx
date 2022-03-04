@@ -1,6 +1,8 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
+import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const AlertsAllPage = lazy(() =>
@@ -50,23 +52,49 @@ export const AlertsRouter: FunctionComponent = () => {
                     path={AppRouteRelative.ALERTS_ALL}
                 />
 
-                {/* Alerts view path */}
-                <Route
-                    element={<AlertsViewPage />}
-                    path={AppRouteRelative.ALERTS_VIEW}
-                />
-
                 {/* Alerts create path */}
                 <Route
                     element={<AlertsCreatePage />}
                     path={AppRouteRelative.ALERTS_CREATE}
                 />
 
-                {/* Alerts update path */}
+                {/* Alert paths */}
                 <Route
-                    element={<AlertsUpdatePage />}
-                    path={AppRouteRelative.ALERTS_UPDATE}
-                />
+                    element={<Outlet />}
+                    path={`${AppRouteRelative.ALERTS_ALERT}/*`}
+                >
+                    <Route
+                        index
+                        element={
+                            <RedirectWithDefaultParams
+                                to={AppRouteRelative.ALERTS_VIEW}
+                            />
+                        }
+                    />
+
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    "timeRange",
+                                    "startTime",
+                                    "endTime",
+                                ]}
+                                to=".."
+                            >
+                                <AlertsViewPage />
+                            </RedirectValidation>
+                        }
+                        path={AppRouteRelative.ALERTS_VIEW}
+                    />
+                    <Route
+                        element={<AlertsUpdatePage />}
+                        path={AppRouteRelative.ALERTS_UPDATE}
+                    />
+
+                    {/* No match found, render page not found */}
+                    <Route element={<PageNotFoundPage />} path="*" />
+                </Route>
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

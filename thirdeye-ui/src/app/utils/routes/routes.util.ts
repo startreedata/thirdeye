@@ -11,13 +11,14 @@ export const AppRouteRelative = {
     LOGOUT: "logout",
     ALERTS: "alerts",
     ALERTS_ALL: "all",
-    ALERTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_ALERT: `${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_VIEW: `view`,
     ALERTS_CREATE: "create",
-    ALERTS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_UPDATE: `update`,
     ANOMALIES: "anomalies",
     ANOMALIES_ALL: "all",
-    ANOMALIES_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
-    ANOMALIES_VIEW_INDEX: `view/id/${PLACEHOLDER_ROUTE_ID}/index`,
+    ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
+    ANOMALIES_ANOMALY_VIEW: `view`,
     CONFIGURATION: "configuration",
     SUBSCRIPTION_GROUPS: "subscription-groups",
     SUBSCRIPTION_GROUPS_ALL: "all",
@@ -51,13 +52,13 @@ export const AppRoute = {
     LOGOUT: "/logout",
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
-    ALERTS_VIEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_VIEW}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
-    ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_UPDATE}`,
+    ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
+    ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
-    ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_VIEW}`,
-    ANOMALIES_VIEW_INDEX: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_VIEW_INDEX}`,
+    ANOMALIES_ANOMALY: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}`,
+    ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`,
     CONFIGURATION: `/${AppRouteRelative.CONFIGURATION}`,
     SUBSCRIPTION_GROUPS: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}`,
     SUBSCRIPTION_GROUPS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}`,
@@ -101,7 +102,7 @@ export const getAlertsAllPath = (): string => {
 };
 
 export const getAlertsViewPath = (id: number): string => {
-    let path: string = AppRoute.ALERTS_VIEW;
+    let path: string = AppRoute.ALERTS_ALERT;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);
@@ -132,18 +133,18 @@ export const getAnomaliesAllPath = (searchTerm?: string): string => {
     return `${AppRoute.ANOMALIES_ALL}?${urlQuery.toString()}`;
 };
 
-export const getAnomaliesViewPath = (id: number): string => {
+export const getAnomaliesAnomalyPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_ANOMALY;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getAnomaliesAnomalyViewPath = (id: number): string => {
     let path: string = AppRoute.ANOMALIES_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
-};
-
-export const getAnomaliesViewIndexPath = (id: number): string => {
-    let path: string = AppRoute.ANOMALIES_VIEW_INDEX;
-    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
-
-    return createPathWithRecognizedQueryString(path);
+    return path;
 };
 
 export const getConfigurationPath = (): string => {

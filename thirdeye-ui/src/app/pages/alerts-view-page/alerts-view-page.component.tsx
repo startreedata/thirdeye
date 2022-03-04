@@ -2,13 +2,13 @@ import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     AppLoadingIndicatorV1,
@@ -38,7 +38,7 @@ import {
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
     getAlertsAllPath,
-    getAnomaliesViewIndexPath,
+    getAnomaliesAnomalyPath,
 } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
@@ -56,7 +56,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     >([]);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const { timeRangeDuration } = useTimeRange();
+    const [searchParams] = useSearchParams();
     const { showDialog } = useDialog();
     const { id: alertId } = useParams<AlertsViewPageParams>();
     const navigate = useNavigate();
@@ -80,7 +80,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [uiAlert]);
+    }, [uiAlert, searchParams]);
 
     useEffect(() => {
         if (evaluationRequestStatus === ActionStatus.Error) {
@@ -94,22 +94,21 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [evaluationRequestStatus]);
 
     const fetchAlertEvaluation = (): void => {
-        if (!uiAlert || !uiAlert.alert) {
+        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+        if (!uiAlert || !uiAlert.alert || !start || !end) {
             setAlertEvaluation(null);
 
             return;
         }
         getAnomalyByAlertIdAndTime(
             uiAlert.alert.id,
-            timeRangeDuration.startTime,
-            timeRangeDuration.endTime
+            Number(start),
+            Number(end)
         );
         getEvaluation(
-            createAlertEvaluation(
-                uiAlert.alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
+            createAlertEvaluation(uiAlert.alert, Number(start), Number(end))
         );
     };
 
@@ -198,7 +197,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     };
 
     const onAnomalyBarClick = (anomaly: Anomaly): void => {
-        navigate(getAnomaliesViewIndexPath(anomaly.id));
+        navigate(getAnomaliesAnomalyPath(anomaly.id));
     };
 
     return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (

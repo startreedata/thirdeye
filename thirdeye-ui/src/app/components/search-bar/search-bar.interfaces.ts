@@ -8,6 +8,6 @@ export interface SearchBarProps {
 }
 
 export enum SearchQueryStringKey {
-    SEARCH = "SEARCH",
-    SEARCH_TEXT = "SEARCH_TEXT",
+    SEARCH = "search",
+    SEARCH_TEXT = "searchText",
 }

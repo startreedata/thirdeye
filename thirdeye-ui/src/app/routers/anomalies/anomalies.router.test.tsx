@@ -5,11 +5,6 @@ import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-ind
 import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { AnomaliesRouter } from "./anomalies.router";
 
-jest.mock("react-router-dom", () => ({
-    ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
-}));
-
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
         t: (key: string) => key,
@@ -77,9 +72,9 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render page not found page at invalid anomalies path", async () => {
+    it("should render page not found page at invalid anomalies path (no path after an id of an anomaly)", async () => {
         render(
-            <MemoryRouter initialEntries={[`/testPath`]}>
+            <MemoryRouter initialEntries={[`/1234/testPath`]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
@@ -120,7 +115,9 @@ describe("Anomalies Router", () => {
     it("should render anomalies view page at exact anomalies view path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`/${AppRouteRelative.ANOMALIES_VIEW}`]}
+                initialEntries={[
+                    `/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}?startTime=1&endTime=2&timeRange=CUSTOM`,
+                ]}
             >
                 <AnomaliesRouter />
             </MemoryRouter>
@@ -134,7 +131,9 @@ describe("Anomalies Router", () => {
     it("should render page not found page at invalid anomalies view path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[`${AppRoute.ANOMALIES_VIEW}/testPath`]}
+                initialEntries={[
+                    `/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}/testPath`,
+                ]}
             >
                 <AnomaliesRouter />
             </MemoryRouter>
@@ -145,9 +144,9 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render page not found page at any other path", async () => {
+    it("should render page not found for path after all", async () => {
         render(
-            <MemoryRouter initialEntries={["/testPath"]}>
+            <MemoryRouter initialEntries={["/all/testPath"]}>
                 <AnomaliesRouter />
             </MemoryRouter>
         );
@@ -157,5 +156,3 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockNavigate = jest.fn();

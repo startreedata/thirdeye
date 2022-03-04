@@ -81,7 +81,7 @@ describe("Params Util", () => {
         setQueryParamsUtils.setSearchTextInQueryString("testSearchTextValue");
 
         expect(mockSetQueryParamFunc).toHaveBeenLastCalledWith(
-            new URLSearchParams("search_text=testSearchTextValue"),
+            new URLSearchParams("searchText=testSearchTextValue"),
             { replace: true }
         );
     });
@@ -93,7 +93,7 @@ describe("Params Util", () => {
     });
 
     it("getSearchTextFromQueryString should return appropriate search text from query string", () => {
-        location.search = "search_text=testSearchTextValue";
+        location.search = "searchText=testSearchTextValue";
 
         expect(getSearchTextFromQueryString()).toEqual("testSearchTextValue");
     });
@@ -114,8 +114,7 @@ describe("Params Util", () => {
         );
 
         expect(mockSetQueryParamFunc).toHaveBeenLastCalledWith(
-            new URLSearchParams("time_range=CUSTOM&start_time=1&end_time=2"),
-            { replace: true }
+            new URLSearchParams("timeRange=CUSTOM&startTime=1&endTime=2")
         );
     });
 
@@ -162,7 +161,7 @@ describe("Params Util", () => {
     });
 
     it("getTimeRangeDurationFromQueryString should return appropriate time range duration from query string", () => {
-        location.search = "time_range=CUSTOM&start_time=1&end_time=2";
+        location.search = "timeRange=CUSTOM&startTime=1&endTime=2";
 
         expect(getTimeRangeDurationFromQueryString()).toEqual(
             mockTimeRangeDuration
@@ -223,10 +222,10 @@ describe("Params Util", () => {
 
     it("getRecognizedQueryString should return appropriate query string", () => {
         location.search =
-            "time_range=CUSTOM&start_time=1&end_time=2&search=testSearchValue&testKey=testValue";
+            "timeRange=CUSTOM&startTime=1&endTime=2&search=testSearchValue&testKey=testValue";
 
         expect(getRecognizedQuery().toString()).toEqual(
-            "time_range=CUSTOM&start_time=1&end_time=2"
+            "timeRange=CUSTOM&startTime=1&endTime=2"
         );
     });
 

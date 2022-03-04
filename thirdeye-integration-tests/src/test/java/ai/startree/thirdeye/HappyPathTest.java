@@ -88,7 +88,6 @@ public class HappyPathTest {
     }
   }
 
-  // make containers singleton to share between instances https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/
   private PinotContainer pinotContainer;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
@@ -173,10 +172,11 @@ public class HappyPathTest {
 
   @AfterClass
   public void afterClass() {
-    log.info("Pinot container port: {}", pinotContainer.getPinotBrokerUrl());
-    log.info("Thirdeye port: {}", SUPPORT.getLocalPort());
+    log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
+    log.info("Stopping Pinot container at  port: {}", pinotContainer.getPinotBrokerUrl());
     pinotContainer.stop();
+    log.info("Stopping mysqlDb at port: {}", persistenceDbContainer.getJdbcUrl());
     persistenceDbContainer.stop();
   }
 

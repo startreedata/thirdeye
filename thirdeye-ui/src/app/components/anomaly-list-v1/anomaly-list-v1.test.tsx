@@ -83,7 +83,7 @@ jest.mock("../../platform/components/data-grid-v1", () => ({
 }));
 
 jest.mock("../../utils/routes/routes.util", () => ({
-    getAnomaliesViewIndexPath: jest.fn().mockImplementation((value) => value),
+    getAnomaliesAnomalyPath: jest.fn().mockImplementation((value) => value),
     getAlertsViewPath: jest.fn().mockImplementation((value) => value),
 }));
 

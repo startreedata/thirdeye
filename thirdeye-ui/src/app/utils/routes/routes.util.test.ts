@@ -6,9 +6,9 @@ import {
     getAlertsUpdatePath,
     getAlertsViewPath,
     getAnomaliesAllPath,
+    getAnomaliesAnomalyPath,
+    getAnomaliesAnomalyViewPath,
     getAnomaliesPath,
-    getAnomaliesViewIndexPath,
-    getAnomaliesViewPath,
     getBasePath,
     getConfigurationPath,
     getHomePath,
@@ -71,16 +71,12 @@ describe("Routes Util", () => {
         expect(getAnomaliesAllPath()).toEqual("/anomalies/all?testQueryString");
     });
 
-    it("getAnomaliesViewPath should return appropriate path with appropriate query string for id", () => {
-        expect(getAnomaliesViewPath(1)).toEqual(
-            "/anomalies/view/id/1?testQueryString"
-        );
+    it("getAnomaliesAnomalyPath should return appropriate path with appropriate query string for id", () => {
+        expect(getAnomaliesAnomalyPath(1)).toEqual("/anomalies/1");
     });
 
-    it("getAnomaliesViewIndexPath should return appropriate path with appropriate query string for id", () => {
-        expect(getAnomaliesViewIndexPath(1)).toEqual(
-            "/anomalies/view/id/1/index?testQueryString"
-        );
+    it("getAnomaliesAnomalyViewPath should return appropriate path with appropriate query string for id", () => {
+        expect(getAnomaliesAnomalyViewPath(1)).toEqual("/anomalies/1/view");
     });
 
     it("getConfigurationPath should return appropriate path with appropriate query string", () => {

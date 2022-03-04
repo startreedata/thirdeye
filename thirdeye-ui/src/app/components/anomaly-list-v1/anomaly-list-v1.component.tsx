@@ -9,7 +9,7 @@ import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
-    getAnomaliesViewIndexPath,
+    getAnomaliesAnomalyPath,
 } from "../../utils/routes/routes.util";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
@@ -24,7 +24,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         cellValue: Record<string, unknown>,
         data: UiAnomaly
     ): ReactNode => {
-        return linkRendererV1(cellValue, getAnomaliesViewIndexPath(data.id));
+        return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
     };
 
     const alertNameRenderer = (

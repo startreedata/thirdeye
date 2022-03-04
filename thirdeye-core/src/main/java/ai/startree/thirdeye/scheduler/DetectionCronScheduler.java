@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -151,7 +152,8 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
     Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-        CronScheduleBuilder.cronSchedule(((AlertDTO) config).getCron())).build();
+        CronScheduleBuilder.cronSchedule(((AlertDTO) config).getCron())
+            .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE))).build();
     this.scheduler.scheduleJob(job, trigger);
     LOG.info(String.format("scheduled detection pipeline job %s", job.getKey().getName()));
   }

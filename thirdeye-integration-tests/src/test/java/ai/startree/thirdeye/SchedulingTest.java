@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.database.ThirdEyeMySQLContainer;
+import ai.startree.thirdeye.database.ThirdEyeH2DatabaseServer;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.utils.TimeProvider;
@@ -23,6 +23,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -63,6 +63,8 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private static final long MARCH_21_2020 = 1584748800_000L;
   private static final long MARCH_22_2020 = MARCH_21_2020 + ONE_DAY_MILLIS;
 
+  private ThirdEyeH2DatabaseServer db;
+
   static {
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
@@ -75,16 +77,15 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private JdbcDatabaseContainer<?> persistenceDbContainer;
 
   private long alertId;
 
 
   @BeforeClass
-  public void beforeClass() {
-    persistenceDbContainer = new ThirdEyeMySQLContainer(MYSQL_DOCKER_IMAGE)
-        .withCreateContainerCmdModifier(cmd -> cmd.withName("mysql-scheduling"));
-    persistenceDbContainer.start();
+  public void beforeClass() throws SQLException {
+    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
+    db.start();
+    db.truncateAllTables();;
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
@@ -92,19 +93,17 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
         resourceFilePath("scheduling/config/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url",
-            persistenceDbContainer.getJdbcUrl()
-                + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED"),
-        config("database.user", persistenceDbContainer.getUsername()),
-        config("database.password", persistenceDbContainer.getPassword()),
-        config("database.driver", persistenceDbContainer.getDriverClassName())
+        config("database.url", db.getDbConfig().getUrl()),
+        config("database.user", db.getDbConfig().getUser()),
+        config("database.password", db.getDbConfig().getPassword()),
+        config("database.driver", db.getDbConfig().getDriver())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
     jerseyClientConfiguration.setTimeout(io.dropwizard.util.Duration.minutes(1)); // for timeout issues
     client = new JerseyClientBuilder(SUPPORT.getEnvironment())
         .using(jerseyClientConfiguration)
-        .build("test client");
+        .build("test-client-scheduling");
   }
 
   private void setupPluginsDirAbsolutePath() {
@@ -132,8 +131,8 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     CLOCK.useSystemTime();
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    log.info("Stopping mysqlDb at port: {}", persistenceDbContainer.getJdbcUrl());
-    persistenceDbContainer.stop();
+    log.info("Stopping H2 Db at port: {}", db.getDbConfig().getUrl());
+    db.stop();
   }
 
   @Test()

@@ -11,8 +11,12 @@ import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
+import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class NotificationDispatcher {
@@ -34,11 +38,21 @@ public class NotificationDispatcher {
         .orElseGet(() -> notificationSchemesMigrator.getSpecsFromNotificationSchemes(
             subscriptionGroup))
         .stream()
+        .map(this::substituteEnvironmentVariables)
         .map(this::getNotificationService)
         .forEach(service -> service.notify(payload));
   }
 
   private NotificationService getNotificationService(final NotificationSpecDTO spec) {
     return notificationServiceRegistry.get(spec.getType(), spec.getParams());
+  }
+
+  private NotificationSpecDTO substituteEnvironmentVariables(final NotificationSpecDTO spec) {
+    final Map<String, Object> values = new HashMap<>(System.getenv());
+    try {
+      return StringTemplateUtils.applyContext(spec, values);
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException("Error while replacing env variables in notification spec. spec: " + spec);
+    }
   }
 }

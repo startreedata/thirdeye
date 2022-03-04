@@ -12,9 +12,6 @@ public class NotificationConfiguration {
   @JsonProperty("smtp")
   private SmtpConfiguration smtpConfiguration;
 
-  @JsonProperty("sendgrid")
-  private SendgridConfiguration sendgridConfiguration;
-
   public SmtpConfiguration getSmtpConfiguration() {
     return smtpConfiguration;
   }
@@ -22,16 +19,6 @@ public class NotificationConfiguration {
   public NotificationConfiguration setSmtpConfiguration(
       final SmtpConfiguration smtpConfiguration) {
     this.smtpConfiguration = smtpConfiguration;
-    return this;
-  }
-
-  public SendgridConfiguration getSendgridConfiguration() {
-    return sendgridConfiguration;
-  }
-
-  public NotificationConfiguration setSendgridConfiguration(
-      final SendgridConfiguration sendgridConfiguration) {
-    this.sendgridConfiguration = sendgridConfiguration;
     return this;
   }
 }

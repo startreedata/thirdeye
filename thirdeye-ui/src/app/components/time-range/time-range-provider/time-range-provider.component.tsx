@@ -2,10 +2,7 @@ import { isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTimeRangeStore } from "../../../stores/time-range/time-range.store";
-import {
-    getTimeRangeDurationFromQueryString,
-    useSetQueryParamsUtil,
-} from "../../../utils/params/params.util";
+import { getTimeRangeDurationFromQueryString } from "../../../utils/params/params.util";
 import {
     TimeRange,
     TimeRangeProviderProps,
@@ -15,7 +12,6 @@ import {
 export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
     props: TimeRangeProviderProps
 ) => {
-    const setUrlQueryParamsUtils = useSetQueryParamsUtil();
     const [loading, setLoading] = useState(true);
     const [timeRangeDuration, setTimeRangeDuration, refreshTimeRange] =
         useTimeRangeStore((state) => [
@@ -30,17 +26,6 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
         initTimeRange();
         setLoading(false);
     }, []);
-
-    useEffect(() => {
-        if (loading) {
-            return;
-        }
-
-        // Time range changed, add time range duration to query string
-        setUrlQueryParamsUtils.setTimeRangeDurationInQueryString(
-            timeRangeDuration
-        );
-    }, [timeRangeDuration]);
 
     useEffect(() => {
         if (loading) {

@@ -42,6 +42,12 @@ import org.testng.annotations.Test;
 
 /**
  * Scheduler tests. Time is mocked with the TimeProvider.
+ * - create datasource, dataset
+ * - fix time
+ * - create alert. check lastTimestamp
+ * - wait for onboarding task to run. Check lastTimestamp
+ * - advance time to next cron run.
+ * - wait for detection task to run. Check lastTimestamp
  *
  * Note: if run within IntelliJ, run with the following JVM option:
  * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar
@@ -53,7 +59,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);
   private static final String RESOURCES_PATH = "/scheduling";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/scheduling/config";
-  private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final AlertApi ALERT_API;

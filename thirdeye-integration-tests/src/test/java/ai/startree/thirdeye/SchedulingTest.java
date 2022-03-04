@@ -266,7 +266,6 @@ public class SchedulingTest {
 
     // wait for the new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
-      System.out.println("Sleeping for detection to be done");
       Thread.sleep(8000);
       anomalies = getAnomalies();
     }

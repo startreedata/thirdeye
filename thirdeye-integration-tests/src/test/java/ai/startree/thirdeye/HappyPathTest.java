@@ -25,11 +25,8 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +36,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.testcontainer.AddTable;
-import org.apache.pinot.testcontainer.ImportData;
-import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -62,19 +56,13 @@ import org.testng.annotations.Test;
  * - get a single anomaly
  * - get the anomaly breakdown (heatmap)
  */
-public class HappyPathTest {
+public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
   private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
-  private static final String INGESTION_JOB_SPEC_FILENAME = "batch-job-spec.yml";
-  private static final String SCHEMA_FILENAME = "schema.json";
-  private static final String TABLE_CONFIG_FILENAME = "table-config.json";
-  private static final String DATA_FILENAME = "data.csv";
-  private static final String DATA_SOURCE_NAME = "PinotContainer";
-  private static final String DATASET_NAME = "pageviews";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final AlertApi ALERT_API;
 
@@ -88,7 +76,6 @@ public class HappyPathTest {
     }
   }
 
-  private PinotContainer pinotContainer;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
   private JdbcDatabaseContainer<?> persistenceDbContainer;
@@ -97,30 +84,6 @@ public class HappyPathTest {
   private long anomalyId;
   private long alertId;
 
-  private PinotContainer startPinot() {
-    URL datasetsBaseResource = getClass().getClassLoader().getResource("datasets");
-    com.google.common.base.Preconditions.checkNotNull(datasetsBaseResource);
-
-    final String datasetsBasePath = datasetsBaseResource.getFile();
-    File[] directories = new File(datasetsBasePath).listFiles(File::isDirectory);
-    List<AddTable> addTableList = new ArrayList<>();
-    List<ImportData> importDataList = new ArrayList<>();
-    for (File dir : directories) {
-      String tableName = dir.getName();
-      File schemaFile = Paths.get(datasetsBasePath, tableName, SCHEMA_FILENAME).toFile();
-      File tableConfigFile = Paths.get(datasetsBasePath, tableName, TABLE_CONFIG_FILENAME).toFile();
-      addTableList.add(new AddTable(schemaFile, tableConfigFile));
-
-      File batchJobSpecFile = Paths.get(datasetsBasePath, tableName, INGESTION_JOB_SPEC_FILENAME)
-          .toFile();
-      File dataFile = Paths.get(datasetsBasePath, tableName, DATA_FILENAME).toFile();
-      importDataList.add(new ImportData(batchJobSpecFile, dataFile));
-    }
-    pinotContainer = new PinotContainer(addTableList, importDataList);
-    pinotContainer.start();
-
-    return pinotContainer;
-  }
 
   @BeforeClass
   public void beforeClass() throws Exception {
@@ -130,8 +93,6 @@ public class HappyPathTest {
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
-    pinotContainer = startPinot();
-    pinotContainer.addTables();
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("happypath/config/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
@@ -173,8 +134,6 @@ public class HappyPathTest {
   public void afterClass() {
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    log.info("Stopping Pinot container at  port: {}", pinotContainer.getPinotBrokerUrl());
-    pinotContainer.stop();
     log.info("Stopping mysqlDb at port: {}", persistenceDbContainer.getJdbcUrl());
     persistenceDbContainer.stop();
   }
@@ -188,7 +147,7 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testPing")
   public void testCreatePinotDataSource() {
     DataSourceApi dataSourceApi = new DataSourceApi()
-        .setName(DATA_SOURCE_NAME)
+        .setName(PINOT_DATA_SOURCE_NAME)
         .setType("pinot")
         .setProperties(Map.of(
             "zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(),
@@ -207,8 +166,8 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testCreatePinotDataSource")
   public void testCreateDataset() {
     MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
-    formData.add("dataSourceName", DATA_SOURCE_NAME);
-    formData.add("datasetName", DATASET_NAME);
+    formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
+    formData.add("datasetName", PINOT_DATASET_NAME);
 
     Response response = request("api/data-sources/onboard-dataset/")
         .post(Entity.form(formData));

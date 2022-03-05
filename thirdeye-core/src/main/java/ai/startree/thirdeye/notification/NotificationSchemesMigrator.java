@@ -29,6 +29,7 @@ import java.util.Map;
 @Singleton
 public class NotificationSchemesMigrator {
 
+  private static final boolean USE_SENDGRID = false;
   private final SmtpConfiguration smtpConfig;
 
   @Inject
@@ -36,7 +37,7 @@ public class NotificationSchemesMigrator {
     this.smtpConfig = notificationConfiguration.getSmtpConfiguration();
   }
 
-  List<NotificationSpecDTO> getSpecsFromNotificationSchemes(final SubscriptionGroupDTO sg) {
+  public List<NotificationSpecDTO> getSpecsFromNotificationSchemes(final SubscriptionGroupDTO sg) {
     final NotificationSchemesDto legacySchemes = sg.getNotificationSchemes();
     final List<NotificationSpecDTO> specs = new ArrayList<>();
 
@@ -52,9 +53,7 @@ public class NotificationSchemesMigrator {
   }
 
   private NotificationSpecDTO toSpec(final WebhookSchemeDto webhookScheme) {
-    return new NotificationSpecDTO()
-        .setType("webhook")
-        .setParams(buildWebhookProperties(webhookScheme));
+    return spec("webhook", buildWebhookProperties(webhookScheme));
   }
 
   private Map<String, Object> buildWebhookProperties(final WebhookSchemeDto webhookScheme) {
@@ -80,9 +79,20 @@ public class NotificationSchemesMigrator {
     emailRecipients.put("cc", emailScheme.getCc());
     emailRecipients.put("bcc", emailScheme.getBcc());
 
+    if (USE_SENDGRID) {
+      return spec("email-sendgrid", Map.of(
+          "apiKey", "${SENDGRID_API_KEY}",
+          "emailRecipients", emailRecipients));
+    }
+    return spec("email-smtp", Map.of(
+        "smtp", smtpParams,
+        "emailRecipients", emailRecipients));
+  }
+
+  private NotificationSpecDTO spec(final String type, final Map<String, Object> smtpParams) {
     return new NotificationSpecDTO()
-        .setType("email-smtp")
-        .setParams(Map.of("smtp", smtpParams, "emailRecipients", emailRecipients));
+        .setType(type)
+        .setParams(smtpParams);
   }
 
   public Map<String, Object> buildSmtpParams() {

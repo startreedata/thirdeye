@@ -33,7 +33,7 @@ public class EmailSendgridNotificationService implements NotificationService {
 
   public EmailSendgridNotificationService(final EmailSendgridConfiguration configuration) {
     requireNonNull(configuration.getApiKey(), "api key cannot be null");
-    checkArgument(configuration.getApiKey().isBlank(), "api key cannot be blank");
+    checkArgument(!configuration.getApiKey().isBlank(), "api key cannot be blank");
 
     this.configuration = configuration;
   }

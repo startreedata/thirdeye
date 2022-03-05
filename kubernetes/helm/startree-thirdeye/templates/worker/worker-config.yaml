@@ -78,6 +78,7 @@ data:
       enabled: {{ .Values.prometheus.enabled }}
 
     notifications:
+      useSendgridEmail: true
       smtp:
         host: ${SMTP_HOST}
         port: ${SMTP_PORT}

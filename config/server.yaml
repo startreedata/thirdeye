@@ -104,6 +104,7 @@ ui:
   externalUrl: "http://localhost:8081"
 
 notifications:
+  useSendgridEmail: true
   smtp:
     host: localhost
     port: 25

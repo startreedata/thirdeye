@@ -29,12 +29,11 @@ import java.util.Map;
 @Singleton
 public class NotificationSchemesMigrator {
 
-  private static final boolean USE_SENDGRID = false;
-  private final SmtpConfiguration smtpConfig;
+  private final NotificationConfiguration notificationConfiguration;
 
   @Inject
   public NotificationSchemesMigrator(final NotificationConfiguration notificationConfiguration) {
-    this.smtpConfig = notificationConfiguration.getSmtpConfiguration();
+    this.notificationConfiguration = notificationConfiguration;
   }
 
   public List<NotificationSpecDTO> getSpecsFromNotificationSchemes(final SubscriptionGroupDTO sg) {
@@ -79,7 +78,7 @@ public class NotificationSchemesMigrator {
     emailRecipients.put("cc", emailScheme.getCc());
     emailRecipients.put("bcc", emailScheme.getBcc());
 
-    if (USE_SENDGRID) {
+    if (notificationConfiguration.isUseSendgridEmail()) {
       return spec("email-sendgrid", Map.of(
           "apiKey", "${SENDGRID_API_KEY}",
           "emailRecipients", emailRecipients));
@@ -96,6 +95,8 @@ public class NotificationSchemesMigrator {
   }
 
   public Map<String, Object> buildSmtpParams() {
+    final SmtpConfiguration smtpConfig = notificationConfiguration.getSmtpConfiguration();
+
     final Map<String, Object> properties = new HashMap<>();
     properties.put("host", smtpConfig.getHost());
     properties.put("port", String.valueOf(smtpConfig.getPort()));

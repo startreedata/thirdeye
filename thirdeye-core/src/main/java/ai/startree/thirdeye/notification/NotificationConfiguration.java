@@ -9,8 +9,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NotificationConfiguration {
 
+  private boolean useSendgridEmail = false;
+
   @JsonProperty("smtp")
   private SmtpConfiguration smtpConfiguration;
+
+  public boolean isUseSendgridEmail() {
+    return useSendgridEmail;
+  }
+
+  public NotificationConfiguration setUseSendgridEmail(final boolean useSendgridEmail) {
+    this.useSendgridEmail = useSendgridEmail;
+    return this;
+  }
 
   public SmtpConfiguration getSmtpConfiguration() {
     return smtpConfiguration;

@@ -19,7 +19,6 @@ import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionAlertTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.quartz.JobExecutionContext;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertJob.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
@@ -77,18 +75,12 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
       return;
     }
 
-    String taskInfoJson = null;
     try {
-      taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
-    } catch (JsonProcessingException e) {
-      LOG.error("Exception when converting AlertTaskInfo {} to jsonString", taskInfo, e);
+      TaskUtils.createTask(taskDAO, detectionAlertConfigId, taskInfo, TaskType.NOTIFICATION);
+    } catch (JsonProcessingException e ) {
+      LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
     }
 
-    TaskDTO taskDTO = TaskUtils
-        .buildTask(detectionAlertConfigId, taskInfoJson, TaskType.NOTIFICATION);
-    long taskId = taskDAO.save(taskDTO);
-    LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskId,
-        taskDTO);
   }
 
   /**

@@ -56,7 +56,6 @@ public class ConfigGenerator {
     datasetConfigDTO.setTimeDuration(columnSize);
     datasetConfigDTO.setTimeUnit(columnUnit);
     datasetConfigDTO.setTimeFormat(timeFormatStr);
-    datasetConfigDTO.setExpectedDelay(getExpectedDelayFromTimeunit(columnUnit));
     datasetConfigDTO.setTimezone(TimeSpec.DEFAULT_TIMEZONE);
     // set the data granularity of epoch timestamp dataset to minute-level
     if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
@@ -83,24 +82,6 @@ public class ConfigGenerator {
     datasetConfigDTO.setActive(Boolean.TRUE);
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
-  }
-
-  @Deprecated // prefer using delay at the alert level + function here is not correct
-  private static TimeGranularity getExpectedDelayFromTimeunit(TimeUnit timeUnit) {
-    TimeGranularity expectedDelay = null;
-    switch (timeUnit) {
-      case HOURS:
-      case MILLISECONDS:
-      case MINUTES:
-      case SECONDS:
-        expectedDelay = DEFAULT_HOURLY_EXPECTED_DELAY;
-        break;
-      case DAYS:
-      default:
-        expectedDelay = DEFAULT_DAILY_EXPECTED_DELAY;
-        break;
-    }
-    return expectedDelay;
   }
 
   /**

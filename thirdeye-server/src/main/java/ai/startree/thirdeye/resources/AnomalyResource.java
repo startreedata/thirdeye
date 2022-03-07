@@ -35,10 +35,9 @@ import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -118,19 +117,10 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
     return anomalyApi;
   }
 
-  private AnomalyApi toApi(final MergedAnomalyResultDTO dto,
-    final HashMap<Long, AlertDTO> requestCache) {
-    final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
-    optional(anomalyApi.getAlert())
-      .filter(alertApi -> alertApi.getId() != null)
-      .ifPresent(alertApi -> alertApi.setName(requestCache.get(alertApi.getId()).getName()));
-    return anomalyApi;
-  }
-
   private boolean checkFilters(final AlertDTO alert, final MultivaluedMap<String, String> params) {
     try {
       return checkDataset(alert, params) &&
-        checkMetric(alert, params);
+          checkMetric(alert, params);
     } finally {
       // remove the query params as they are dealt with
       // they are not part of Anomaly API_TO_BEAN_MAP
@@ -143,8 +133,8 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
     String query = params.getFirst(DATASET);
     if (query != null) {
       return queryToList(query).contains(renderProperty(
-        alert.getTemplate().getMetadata().getDataset().getName(),
-        alert.getTemplateProperties()).toString());
+          alert.getTemplate().getMetadata().getDataset().getName(),
+          alert.getTemplateProperties()).toString());
     }
     return true;
   }
@@ -153,57 +143,68 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
     String query = params.getFirst(METRIC);
     if (query != null) {
       return queryToList(query).contains(renderProperty(
-        alert.getTemplate().getMetadata().getMetric().getName(),
-        alert.getTemplateProperties()).toString());
+          alert.getTemplate().getMetadata().getMetric().getName(),
+          alert.getTemplateProperties()).toString());
     }
     return true;
   }
 
+  // extract propertyName from ${propertyName} and return its value from properties
   private Object renderProperty(final String name, final Map<String, Object> properties) {
-    return properties.get(name.substring(2,name.length()-1));
+    return properties.get(name.substring(2, name.length() - 1));
   }
 
-  private List<String> queryToList(final String query) {
+  private List queryToList(final String query) {
     return Arrays.asList(query.substring(query.indexOf("]") + 1).split(","));
   }
 
-  private String listToQuery(final List<String> params, final String operator) {
+  private String listToQuery(final List params, final String operator) {
     return String.format("%s%s", operator, Joiner.on(',').join(params));
   }
 
-  private HashMap<Long, AlertDTO> prepareRequestCache(
-    final MultivaluedMap<String, String> queryParameters) {
-    final HashMap<Long, AlertDTO> requestCache = new HashMap<>();
+  private RequestCache prepareRequestCache(
+      final MultivaluedMap<String, String> queryParameters) {
+    final List<AlertDTO> alerts;
+    final RequestCache cache = createRequestCache();
+
+    // get request specific alerts
     if (queryParameters.containsKey(ALERT_ID)) {
-      alertManager.filter(new DaoFilterBuilder(AlertResource.API_TO_BEAN_MAP)
-          .buildFilter(new MultivaluedHashMap<>(Map.of("id", queryParameters.getFirst(ALERT_ID)))))
-        .forEach(alert -> requestCache.put(alert.getId(), alert));
+      final MultivaluedMap<String, String> alertParams = new MultivaluedHashMap<>();
+      queryParameters.get(ALERT_ID).forEach(param -> alertParams.add("id", param));
+      alerts = alertManager.filter(new DaoFilterBuilder(AlertResource.API_TO_BEAN_MAP)
+          .buildFilter(alertParams));
     } else {
-      alertManager.findAll().forEach(alert -> requestCache.put(alert.getId(), alert));
+      alerts = alertManager.findAll();
     }
-    return requestCache;
+
+    // filter and load alerts into cache
+    alerts.forEach(alert -> {
+      if (checkFilters(alert, queryParameters)) {
+        cache.getAlerts().put(alert.getId(), alert);
+      }
+    });
+    return cache;
   }
 
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll(
-    @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-    @Context UriInfo uriInfo) {
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Context UriInfo uriInfo) {
     final MultivaluedMap<String, String> finalQueryParameters = new MultivaluedHashMap<>(uriInfo.getQueryParameters());
-    final HashMap<Long, AlertDTO> requestCache = prepareRequestCache(finalQueryParameters);
+    final RequestCache requestCache = prepareRequestCache(finalQueryParameters);
 
     // fetch all the ids of alerts which satisfy the filters
-    final List<String> alertQuery = requestCache.values().stream()
-      .filter(alertDTO -> checkFilters(alertDTO, finalQueryParameters))
-      .map(alertDTO -> alertDTO.getId().toString())
-      .collect(Collectors.toList());
+    final Set<Long> alertQuery = requestCache.getAlerts().asMap().keySet();
 
     if (alertQuery.isEmpty()) {
       return respondOk(Collections.emptyList());
     } else {
-      finalQueryParameters.putSingle(ALERT_ID, listToQuery(alertQuery, "[in]"));
-      final List<MergedAnomalyResultDTO> results = dtoManager.filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(finalQueryParameters));
+      finalQueryParameters.putSingle(ALERT_ID,
+          listToQuery(Arrays.asList(alertQuery.toArray()), "[in]"));
+      final List<MergedAnomalyResultDTO> results = dtoManager.filter(new DaoFilterBuilder(
+          apiToBeanMap).buildFilter(finalQueryParameters));
       return respondOk(results.stream().map(anomalyDto -> toApi(anomalyDto, requestCache)));
     }
   }

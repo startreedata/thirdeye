@@ -12,7 +12,7 @@ public interface AnomalyFeedback {
    *
    * @param feedbackType feedback type
    */
-  void setFeedbackType(AnomalyFeedbackType feedbackType);
+  AnomalyFeedback setFeedbackType(AnomalyFeedbackType feedbackType);
 
   /**
    * Get feedback type (e.g., anomaly, anomaly no action, etc.)
@@ -26,7 +26,7 @@ public interface AnomalyFeedback {
    *
    * @param comment comment for this feedback.
    */
-  void setComment(String comment);
+  AnomalyFeedback setComment(String comment);
 
   /**
    * Get comment of this feedback.

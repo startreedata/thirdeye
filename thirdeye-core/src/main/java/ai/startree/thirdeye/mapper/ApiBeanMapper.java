@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
@@ -258,6 +259,12 @@ public abstract class ApiBeanMapper {
     return new AnomalyFeedbackApi()
         .setComment(feedbackDto.getComment())
         .setType(feedbackDto.getFeedbackType());
+  }
+
+  public static AnomalyFeedbackDTO toAnomalyFeedbackDTO(AnomalyFeedbackApi api) {
+    return new AnomalyFeedbackDTO()
+        .setFeedbackType(api.getType())
+        .setComment(api.getComment());
   }
 
   public static AlertTemplateDTO toAlertTemplateDto(final AlertTemplateApi api) {

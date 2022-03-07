@@ -250,27 +250,26 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   public void updateAnomalyFeedback(MergedAnomalyResultDTO entity) {
-    MergedAnomalyResultDTO bean = entity;
     AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null) {
       if (feedbackDTO.getId() == null) {
-        AnomalyFeedbackDTO feedbackBean = feedbackDTO;
-        Long feedbackId = genericPojoDao.put(feedbackBean);
+        Long feedbackId = genericPojoDao.put(feedbackDTO);
         feedbackDTO.setId(feedbackId);
       } else {
-        AnomalyFeedbackDTO feedbackBean = genericPojoDao
+        AnomalyFeedbackDTO existingFeedback = genericPojoDao
             .get(feedbackDTO.getId(), AnomalyFeedbackDTO.class);
-        feedbackBean.setFeedbackType(feedbackDTO.getFeedbackType());
-        feedbackBean.setComment(feedbackDTO.getComment());
-        genericPojoDao.update(feedbackBean);
+        existingFeedback
+            .setFeedbackType(feedbackDTO.getFeedbackType())
+            .setComment(feedbackDTO.getComment());
+        genericPojoDao.update(existingFeedback);
       }
-      bean.setAnomalyFeedbackId(feedbackDTO.getId());
+      entity.setAnomalyFeedbackId(feedbackDTO.getId());
     }
     for (MergedAnomalyResultDTO child : entity.getChildren()) {
       child.setFeedback(feedbackDTO);
       this.updateAnomalyFeedback(child);
     }
-    genericPojoDao.update(bean);
+    genericPojoDao.update(entity);
   }
 
   /**

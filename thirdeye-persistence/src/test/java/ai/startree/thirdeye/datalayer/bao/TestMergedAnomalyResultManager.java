@@ -51,9 +51,9 @@ public class TestMergedAnomalyResultManager {
   public void testFeedback() {
     MergedAnomalyResultDTO anomalyMergedResult = mergedAnomalyResultDAO
         .findById(mergedResult.getId());
-    AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO();
-    feedback.setComment("this is a good find");
-    feedback.setFeedbackType(AnomalyFeedbackType.ANOMALY);
+    AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
+        .setComment("this is a good find")
+        .setFeedbackType(AnomalyFeedbackType.ANOMALY);
     anomalyMergedResult.setFeedback(feedback);
     // now we need to make explicit call to anomaly update in order to update the feedback
     mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyMergedResult);

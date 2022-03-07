@@ -5,6 +5,11 @@ import {
     getAlertsPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
+    getAlertTemplatesAllPath,
+    getAlertTemplatesCreatePath,
+    getAlertTemplatesPath,
+    getAlertTemplatesUpdatePath,
+    getAlertTemplatesViewPath,
     getAnomaliesAllPath,
     getAnomaliesAnomalyPath,
     getAnomaliesAnomalyViewPath,
@@ -152,6 +157,36 @@ describe("Routes Util", () => {
     it("createPathWithTimeRangeQueryString should return path with appropriate query string", () => {
         expect(createPathWithRecognizedQueryString("/testPath")).toEqual(
             "/testPath?testQueryString"
+        );
+    });
+
+    it("getAlertTemplatesPath should return appropriate path", () => {
+        expect(getAlertTemplatesPath()).toEqual(
+            "/configuration/alert-templates"
+        );
+    });
+
+    it("getAlertTemplatesAllPath should return appropriate path", () => {
+        expect(getAlertTemplatesAllPath()).toEqual(
+            "/configuration/alert-templates/all"
+        );
+    });
+
+    it("getAlertTemplatesCreatePath should return appropriate path", () => {
+        expect(getAlertTemplatesCreatePath()).toEqual(
+            "/configuration/alert-templates/create"
+        );
+    });
+
+    it("getAlertTemplatesViewPath should return appropriate path for id", () => {
+        expect(getAlertTemplatesViewPath(1)).toEqual(
+            "/configuration/alert-templates/1/view"
+        );
+    });
+
+    it("getAlertTemplatesUpdatePath should return appropriate path with appropriate for id", () => {
+        expect(getAlertTemplatesUpdatePath(1)).toEqual(
+            "/configuration/alert-templates/1/update"
         );
     });
 });

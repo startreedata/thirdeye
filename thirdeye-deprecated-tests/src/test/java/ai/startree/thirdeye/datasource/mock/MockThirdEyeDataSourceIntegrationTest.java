@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.RequestContainer;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -51,26 +50,6 @@ public class MockThirdEyeDataSourceIntegrationTest {
   private DatasetConfigManager datasetConfigDAO;
   private MetricConfigManager metricConfigDAO;
   private DataSourceCache dataSourceCache;
-
-  /**
-   * Constructs and wraps a request for a metric with derived expressions. Resolves all
-   * required dependencies from the Thirdeye database.
-   * <br/><b>NOTE:</b> this method injects dependencies from the DAO registry.
-   *
-   * @param slice metric data slice
-   * @param reference unique identifier for request
-   * @return RequestContainer
-   * @see DataFrameUtils#makeTimeSeriesRequest(MetricSlice slice, String, MetricConfigManager,
-   *     DatasetConfigManager)
-   */
-  private TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
-      String reference) throws Exception {
-    return DataFrameUtils.makeTimeSeriesRequest(slice,
-        reference,
-        metricConfigDAO,
-        datasetConfigDAO,
-        cacheRegistry);
-  }
 
   /**
    * Constructs and wraps a request for a metric with derived expressions. Resolves all
@@ -221,22 +200,6 @@ public class MockThirdEyeDataSourceIntegrationTest {
     for (int i = 0; i < df.size(); i++) {
       Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, i) >= 0);
     }
-  }
-
-  @Test(enabled = false)
-  public void testTimeSeries() throws Exception {
-    MetricSlice slice = MetricSlice
-        .from(this.metricPageViewsId, this.timestamp - 7200000, this.timestamp);
-    TimeSeriesRequestContainer requestContainer = makeTimeSeriesRequest(slice, "ref");
-    ThirdEyeResponse response = dataSourceCache.getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        cacheRegistry);
-
-    Assert.assertEquals(df.size(), 2);
-    Assert.assertTrue(df.getLong(DataFrame.COL_TIME, 0) > 0);
-    Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 0) > 0);
-    Assert.assertTrue(df.getLong(DataFrame.COL_TIME, 1) > 0);
-    Assert.assertTrue(df.getDouble(DataFrame.COL_VALUE, 1) > 0);
   }
 
   @Test(enabled = false)

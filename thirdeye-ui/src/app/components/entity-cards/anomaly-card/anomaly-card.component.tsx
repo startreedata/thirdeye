@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
     getAlertsViewPath,
-    getAnomaliesViewPath,
+    getAnomaliesAnomalyPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -48,7 +48,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        navigate(getAnomaliesViewPath(props.uiAnomaly.id));
+        navigate(getAnomaliesAnomalyPath(props.uiAnomaly.id));
         handleAnomalyOptionsClose();
     };
 

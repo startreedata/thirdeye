@@ -15,6 +15,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
+import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -91,20 +92,22 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     return updated;
   }
 
-  private DtoT createGateKeeper(final ThirdEyePrincipal principal, final DtoT dto){
+  private DtoT createGateKeeper(final ThirdEyePrincipal principal, final DtoT dto) {
     final Timestamp currentTime = new Timestamp(new Date().getTime());
     dto.setCreatedBy(principal.getName())
-      .setCreateTime(currentTime)
-      .setUpdatedBy(principal.getName())
-      .setUpdateTime(currentTime);
+        .setCreateTime(currentTime)
+        .setUpdatedBy(principal.getName())
+        .setUpdateTime(currentTime);
     return dto;
   }
 
-  private DtoT updateGateKeeper(final ThirdEyePrincipal principal, final DtoT existing, final DtoT updated){
+  private DtoT updateGateKeeper(final ThirdEyePrincipal principal,
+      final DtoT existing,
+      final DtoT updated) {
     updated.setCreatedBy(existing.getCreatedBy())
-      .setCreateTime(existing.getCreateTime())
-      .setUpdatedBy(principal.getName())
-      .setUpdateTime(new Timestamp(new Date().getTime()));
+        .setCreateTime(existing.getCreateTime())
+        .setUpdatedBy(principal.getName())
+        .setUpdateTime(new Timestamp(new Date().getTime()));
     return updated;
   }
 
@@ -131,7 +134,32 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     throw new UnsupportedOperationException("Not implemented");
   }
 
-  protected abstract ApiT toApi(final DtoT dto);
+  /**
+   * Initialize Request Cache
+   * @return cache container
+   */
+  protected RequestCache createRequestCache() {
+    return new RequestCache();
+  }
+
+  /**
+   * @param dto dto
+   * @param cache optional cache parameter
+   * @return convert to api object
+   */
+  protected ApiT toApi(final DtoT dto, final RequestCache cache) {
+    return toApi(dto);
+  }
+
+  /**
+   * No cache implementation
+   *
+   * @param dto dto
+   * @return convert to api object
+   */
+  protected ApiT toApi(final DtoT dto) {
+    throw new UnsupportedOperationException("Either of the 2 toApi variants must be implemented!");
+  }
 
   protected DtoT get(final Long id) {
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
@@ -153,7 +181,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
         ? dtoManager.filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(queryParameters))
         : dtoManager.findAll();
 
-    return respondOk(results.stream().map(this::toApi));
+    final RequestCache cache = createRequestCache();
+    return respondOk(results.stream().map(dto -> toApi(dto, cache)));
   }
 
   @POST
@@ -164,13 +193,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       List<ApiT> list) {
     ensureExists(list, "Invalid request");
 
+    final RequestCache cache = createRequestCache();
     return respondOk(list.stream()
         .peek(api1 -> validate(api1, null))
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
-        .map(this::toApi)
+        .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList())
     );
   }
@@ -181,10 +211,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response editMultiple(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
+    final RequestCache cache = createRequestCache();
     return respondOk(list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
-        .map(this::toApi)
+        .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList()));
   }
 
@@ -195,7 +226,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
-    return respondOk(toApi(get(id)));
+    final RequestCache cache = createRequestCache();
+    return respondOk(toApi(get(id), cache));
   }
 
   @DELETE
@@ -210,7 +242,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       deleteDto(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
 
-      return respondOk(toApi(dto));
+      final RequestCache cache = createRequestCache();
+      return respondOk(toApi(dto, cache));
     }
 
     return respondOk(statusResponse(ERR_OBJECT_DOES_NOT_EXIST, id));

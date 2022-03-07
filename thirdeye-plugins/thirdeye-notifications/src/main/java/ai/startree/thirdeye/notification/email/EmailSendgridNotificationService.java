@@ -29,10 +29,13 @@ import org.slf4j.LoggerFactory;
 public class EmailSendgridNotificationService implements NotificationService {
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailSendgridNotificationService.class);
-  private final EmailRecipientsConfiguration emailRecipients;
+  private final EmailSendgridConfiguration configuration;
 
   public EmailSendgridNotificationService(final EmailSendgridConfiguration configuration) {
-    emailRecipients = configuration.getEmailRecipients();
+    requireNonNull(configuration.getApiKey(), "api key cannot be null");
+    checkArgument(!configuration.getApiKey().isBlank(), "api key cannot be blank");
+
+    this.configuration = configuration;
   }
 
   @Override
@@ -54,7 +57,7 @@ public class EmailSendgridNotificationService implements NotificationService {
     request.setEndpoint("mail/send");
     request.setBody(mail.build());
 
-    final SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+    final SendGrid sg = new SendGrid(configuration.getApiKey());
     final Response response = sg.api(request);
 
     LOG.info(String.format("Sendgrid status: %d", response.getStatusCode()));
@@ -63,6 +66,7 @@ public class EmailSendgridNotificationService implements NotificationService {
   }
 
   private Mail buildMail(final EmailContent emailContent) {
+    final EmailRecipientsConfiguration emailRecipients = configuration.getEmailRecipients();
     requireNonNull(emailRecipients.getTo(), "to field in email scheme is null");
     checkArgument(emailRecipients.getTo().size() > 0, "'to' field in email scheme is empty");
     requireNonNull(emailContent, "emailEntity is null");

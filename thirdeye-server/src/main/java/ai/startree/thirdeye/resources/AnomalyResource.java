@@ -5,15 +5,16 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.RequestCache.buildCache;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
+import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -89,6 +90,12 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   }
 
   @Override
+  protected RequestCache createRequestCache() {
+    return super.createRequestCache()
+        .setAlerts(buildCache(alertManager::findById));
+  }
+
+  @Override
   protected MergedAnomalyResultDTO createDto(final ThirdEyePrincipal principal,
       final AnomalyApi api) {
     throw badRequest(ERR_OPERATION_UNSUPPORTED);
@@ -101,11 +108,13 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   }
 
   @Override
-  protected AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
+  protected AnomalyApi toApi(final MergedAnomalyResultDTO dto, RequestCache cache) {
     final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
     optional(anomalyApi.getAlert())
         .filter(alertApi -> alertApi.getId() != null)
-        .ifPresent(this::populateNameIfPossible);
+        .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
+            .getUnchecked(alertApi.getId())
+            .getName()));
     return anomalyApi;
   }
 
@@ -116,11 +125,6 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .filter(alertApi -> alertApi.getId() != null)
       .ifPresent(alertApi -> alertApi.setName(requestCache.get(alertApi.getId()).getName()));
     return anomalyApi;
-  }
-
-  private void populateNameIfPossible(final AlertApi alertApi) {
-    optional(alertManager.findById(alertApi.getId()))
-        .ifPresent(alert -> alertApi.setName(alert.getName()));
   }
 
   private boolean checkFilters(final AlertDTO alert, final MultivaluedMap<String, String> params) {

@@ -17,8 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.util.GroovyTemplateUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -28,8 +27,6 @@ import java.util.Map;
 
 @Singleton
 public class AlertTemplateRenderer {
-
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final AlertManager alertManager;
   private final AlertTemplateManager alertTemplateManager;
@@ -139,9 +136,6 @@ public class AlertTemplateRenderer {
               .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
     }
 
-    final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
-    return GroovyTemplateUtils.applyContextToTemplate(jsonString,
-        properties,
-        AlertTemplateDTO.class);
+    return StringTemplateUtils.applyContext(template, properties);
   }
 }

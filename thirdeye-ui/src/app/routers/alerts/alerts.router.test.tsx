@@ -5,11 +5,6 @@ import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-ind
 import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsRouter } from "./alerts.router";
 
-jest.mock("react-router-dom", () => ({
-    ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
-}));
-
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
         t: (key: string) => key,
@@ -62,6 +57,17 @@ jest.mock(
     })
 );
 
+jest.mock(
+    "../../components/time-range/time-range-provider/time-range-provider.component",
+    () => ({
+        useTimeRange: jest.fn().mockImplementation(() => {
+            return {
+                timeRangeDuration: mockTimeRangeDuration,
+            };
+        }),
+    })
+);
+
 describe("Alerts Router", () => {
     it("should have rendered loading indicator while loading", () => {
         render(
@@ -87,23 +93,6 @@ describe("Alerts Router", () => {
 
         await expect(
             screen.findByText("testAlertsAllPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page at invalid alerts path", async () => {
-        render(
-            <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
-                <Routes>
-                    <Route
-                        element={<AlertsRouter />}
-                        path={`${AppRouteRelative.ALERTS}/*`}
-                    />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
         ).resolves.toBeInTheDocument();
     });
 
@@ -143,7 +132,7 @@ describe("Alerts Router", () => {
 
     it("should render alerts view page at exact alerts view path", async () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.ALERTS_VIEW]}>
+            <MemoryRouter initialEntries={[`/alerts/1234`]}>
                 <Routes>
                     <Route
                         element={<AlertsRouter />}
@@ -153,14 +142,16 @@ describe("Alerts Router", () => {
             </MemoryRouter>
         );
 
-        await expect(
-            screen.findByText("testAlertsViewPage")
-        ).resolves.toBeInTheDocument();
+        expect(
+            await screen.findByText("testAlertsViewPage")
+        ).toBeInTheDocument();
     });
 
     it("should render page not found page at invalid alerts view path", async () => {
         render(
-            <MemoryRouter initialEntries={[`${AppRoute.ALERTS_VIEW}/testPath`]}>
+            <MemoryRouter
+                initialEntries={[`${AppRoute.ALERTS_ALERT}/testPath`]}
+            >
                 <Routes>
                     <Route
                         element={<AlertsRouter />}
@@ -246,23 +237,10 @@ describe("Alerts Router", () => {
             screen.findByText("testPageNotFoundPage")
         ).resolves.toBeInTheDocument();
     });
-
-    it("should render page not found page at any other path", async () => {
-        render(
-            <MemoryRouter initialEntries={[`${AppRoute.ALERTS}/testPath`]}>
-                <Routes>
-                    <Route
-                        element={<AlertsRouter />}
-                        path={`${AppRouteRelative.ALERTS}/*`}
-                    />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
-        ).resolves.toBeInTheDocument();
-    });
 });
 
-const mockNavigate = jest.fn();
+const mockTimeRangeDuration = {
+    timeRange: "CUSTOM",
+    startTime: 1,
+    endTime: 2,
+};

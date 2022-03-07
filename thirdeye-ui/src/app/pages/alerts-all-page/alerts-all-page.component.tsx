@@ -4,7 +4,6 @@ import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.compon
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -27,7 +26,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -35,7 +33,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch alerts
         fetchAllAlerts();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllAlerts = (): void => {
         setUiAlerts(null);

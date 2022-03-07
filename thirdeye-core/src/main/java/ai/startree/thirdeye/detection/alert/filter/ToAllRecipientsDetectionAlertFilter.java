@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.detection.annotation.AlertFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * The detection alert filter that sends the anomaly email to all recipients
@@ -54,18 +53,6 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
 
     // Fetch all the anomalies to be notified to the recipients
     final Set<MergedAnomalyResultDTO> anomalies = filter(makeVectorClocks(alertIds));
-
-    // Handle legacy recipients yaml syntax
-    if (SubscriptionUtils.isEmptyEmailRecipients(config) && CollectionUtils
-        .isNotEmpty(recipients.get(PROP_TO))) {
-      // recipients are configured using the older syntax
-      config.setNotificationSchemes(generateNotificationSchemeProps(
-          config,
-          recipients.get(PROP_TO),
-          recipients.get(PROP_CC),
-          recipients.get(PROP_BCC)));
-    }
-
     return result.addMapping(new DetectionAlertFilterNotification(config), anomalies);
   }
 }

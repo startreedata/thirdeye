@@ -81,6 +81,13 @@ spec:
               secretKeyRef:
                 name: {{ .Values.smtp.secretKeyRef.name }}
                 key: password
+          {{- if .Values.sendgrid }}
+          - name: SENDGRID_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: sendgrid-api-key
+                key: key
+          {{- end }}
           {{- if .Values.worker.tls.enabled }}
           - name: JAVA_OPTS
             value: >

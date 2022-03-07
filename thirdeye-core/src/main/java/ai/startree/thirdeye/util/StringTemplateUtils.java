@@ -11,14 +11,14 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class GroovyTemplateUtils {
+public class StringTemplateUtils {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final SimpleTemplateEngine GROOVY_TEMPLATE_ENGINE = new SimpleTemplateEngine();
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -48,15 +48,11 @@ public class GroovyTemplateUtils {
     return defaultContextMap;
   }
 
-  public static String renderTemplate(final String template)
+  @SuppressWarnings("unchecked")
+  public static <T> T applyContext(final T template,
+      final Map<String, Object> valuesMap)
       throws IOException, ClassNotFoundException {
-    return renderTemplate(template, Collections.emptyMap());
-  }
-
-  public static <T> T applyContextToTemplate(final String template,
-      final Map<String, Object> context,
-      final Class<T> clazz)
-      throws IOException, ClassNotFoundException {
-    return new ObjectMapper().readValue(renderTemplate(template, context), clazz);
+    final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
+    return (T) OBJECT_MAPPER.readValue(renderTemplate(jsonString, valuesMap), template.getClass());
   }
 }

@@ -9,11 +9,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NotificationConfiguration {
 
+  private boolean useSendgridEmail = false;
+
   @JsonProperty("smtp")
   private SmtpConfiguration smtpConfiguration;
 
-  @JsonProperty("sendgrid")
-  private SendgridConfiguration sendgridConfiguration;
+  public boolean isUseSendgridEmail() {
+    return useSendgridEmail;
+  }
+
+  public NotificationConfiguration setUseSendgridEmail(final boolean useSendgridEmail) {
+    this.useSendgridEmail = useSendgridEmail;
+    return this;
+  }
 
   public SmtpConfiguration getSmtpConfiguration() {
     return smtpConfiguration;
@@ -22,16 +30,6 @@ public class NotificationConfiguration {
   public NotificationConfiguration setSmtpConfiguration(
       final SmtpConfiguration smtpConfiguration) {
     this.smtpConfiguration = smtpConfiguration;
-    return this;
-  }
-
-  public SendgridConfiguration getSendgridConfiguration() {
-    return sendgridConfiguration;
-  }
-
-  public NotificationConfiguration setSendgridConfiguration(
-      final SendgridConfiguration sendgridConfiguration) {
-    this.sendgridConfiguration = sendgridConfiguration;
     return this;
   }
 }

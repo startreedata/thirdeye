@@ -4,7 +4,6 @@ import { ConfigurationPageHeader } from "../../components/configuration-page-hea
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricListV1 } from "../../components/metric-list-v1/metric-list-v1.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -18,7 +17,6 @@ import { getUiMetrics } from "../../utils/metrics/metrics.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
     const [uiMetrics, setUiMetrics] = useState<UiMetric[] | null>(null);
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -26,7 +24,7 @@ export const MetricsAllPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch metrics
         fetchAllMetrics();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllMetrics = (): void => {
         setUiMetrics(null);

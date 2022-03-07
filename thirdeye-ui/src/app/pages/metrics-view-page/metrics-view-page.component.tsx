@@ -7,7 +7,6 @@ import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provi
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -27,7 +26,6 @@ import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 export const MetricsViewPage: FunctionComponent = () => {
     const [uiMetric, setUiMetric] = useState<UiMetric | null>(null);
 
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<MetricsViewPageParams>();
     const navigate = useNavigate();
@@ -37,7 +35,7 @@ export const MetricsViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Time range refreshed, fetch metric
         fetchMetric();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchMetric = (): void => {
         setUiMetric(null);

@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
-import ai.startree.thirdeye.util.GroovyTemplateUtils;
+import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -33,9 +33,9 @@ public class AlertResourceTest {
     final Map<String, Object> alertEvaluationPlanApiContext = new ObjectMapper()
         .readValue(resource.openStream(), Map.class);
 
-    final AlertEvaluationApi api = GroovyTemplateUtils.applyContextToTemplate(
+    final AlertEvaluationApi api = new ObjectMapper().readValue(StringTemplateUtils.renderTemplate(
         jsonString,
-        alertEvaluationPlanApiContext, AlertEvaluationApi.class);
+        alertEvaluationPlanApiContext), AlertEvaluationApi.class);
 
     Assert.assertEquals(api.getAlert().getName(), "percentage-change-template");
     Assert.assertEquals(api.getAlert().getDescription(),

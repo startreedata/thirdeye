@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class NotificationSpecDTO {
 
@@ -28,5 +29,13 @@ public class NotificationSpecDTO {
   public NotificationSpecDTO setParams(final Map<String, Object> params) {
     this.params = params;
     return this;
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", NotificationSpecDTO.class.getSimpleName() + "[", "]")
+        .add("type='" + type + "'")
+        .add("params=" + params)
+        .toString();
   }
 }

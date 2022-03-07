@@ -26,7 +26,8 @@ public interface DatasetMapper {
     if (api == null) {
       return null;
     }
-    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    final DatasetConfigDTO dto = new DatasetConfigDTO()
+        .setCompletenessDelay(optional(api.getCompletenessDelay()).orElse(null));
     optional(api.getDataSource())
         .map(DataSourceApi::getName)
         .ifPresent(dto::setDataSource);
@@ -40,9 +41,6 @@ public interface DatasetMapper {
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });
-    optional(api.getExpectedDelay())
-        .map(TimeGranularity::fromDuration)
-        .ifPresent(dto::setExpectedDelay);
 
     return dto;
   }
@@ -56,11 +54,10 @@ public interface DatasetMapper {
         .setActive(dto.getActive())
         .setDimensions(dto.getDimensions())
         .setName(dto.getDataset())
-        .setExpectedDelay(optional(dto.getExpectedDelay()).map(TimeGranularity::toDuration)
-            .orElse(null))
         .setDataSource(optional(dto.getDataSource())
             .map(datasourceName -> new DataSourceApi().setName(datasourceName))
-            .orElse(null));
+            .orElse(null))
+        .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null));
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()
             .setName(timeColumn)

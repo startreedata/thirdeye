@@ -62,14 +62,6 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
     this.alertManager = alertManager;
   }
 
-  private static AnomalyFeedbackDTO toAnomalyFeedbackDTO(AnomalyFeedbackApi api) {
-    final AnomalyFeedbackDTO dto = new AnomalyFeedbackDTO();
-    dto.setComment(api.getComment());
-    dto.setFeedbackType(api.getType());
-
-    return dto;
-  }
-
   @Override
   protected MergedAnomalyResultDTO createDto(final ThirdEyePrincipal principal,
       final AnomalyApi api) {
@@ -105,7 +97,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       AnomalyFeedbackApi api) {
     final MergedAnomalyResultDTO dto = get(id);
 
-    final AnomalyFeedbackDTO feedbackDTO = toAnomalyFeedbackDTO(api);
+    final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     dto.setFeedback(feedbackDTO);
     mergedAnomalyResultManager.updateAnomalyFeedback(dto);
 

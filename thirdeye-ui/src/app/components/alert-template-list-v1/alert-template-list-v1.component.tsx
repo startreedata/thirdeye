@@ -64,9 +64,15 @@ export const AlertTemplateListV1: FunctionComponent<
         cellValue: Record<string, unknown>,
         data: AlertTemplate
     ): ReactElement => {
-        return (
-            <Link href={getAlertTemplatesViewPath(data.id)}>{cellValue}</Link>
-        );
+        if (cellValue) {
+            return (
+                <Link href={getAlertTemplatesViewPath(data.id)}>
+                    {cellValue}
+                </Link>
+            );
+        } else {
+            return <span />;
+        }
     };
 
     const isActionButtonDisable = !(

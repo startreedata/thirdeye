@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 
-import static ai.startree.thirdeye.detection.TaskUtils.createDetectionTask;
-
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.TaskUtils;
@@ -26,6 +24,7 @@ import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.task.TaskInfoFactory;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   // Fallback runs based on the last task run (successful or not).
   private final Map<Long, Long> detectionIdToLastTaskEndTimeMap;
 
-  private final TaskManager taskManager;
+  private final TaskManager taskDAO;
   private final AlertManager alertManager;
   private final DatasetConfigManager datasetConfigManager;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
@@ -68,7 +67,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   @Inject
   public DataAvailabilityTaskScheduler(
       final DataAvailabilitySchedulingConfiguration config,
-      final TaskManager taskManager,
+      final TaskManager taskDAO,
       final AlertManager alertManager,
       final DatasetConfigManager datasetConfigManager,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
@@ -80,7 +79,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
     this.detectionIdToLastTaskEndTimeMap = new HashMap<>();
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    this.taskManager = taskManager;
+    this.taskDAO = taskDAO;
     this.alertManager = alertManager;
     this.datasetConfigManager = datasetConfigManager;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
@@ -101,19 +100,19 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     for (AlertDTO detectionConfig : detection2DatasetMap.keySet()) {
       try {
         long detectionConfigId = detectionConfig.getId();
-        DetectionPipelineTaskInfo taskInfo = TaskUtils
-            .buildTaskInfoFromDetectionConfig(detectionConfig,
-                detectionEndTime,
-                thirdEyeCacheRegistry,
-                datasetConfigManager,
-                metricConfigManager);
+        DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(detectionConfig.getId(),
+            detectionConfig.getLastTimestamp(),
+            detectionEndTime);
         if (!runningDetection.containsKey(detectionConfigId)) {
           if (isAllDatasetUpdated(detectionConfig, detection2DatasetMap.get(detectionConfig),
               datasetConfigMap)) {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
-              //TODO: additional check is required if detection is based on aggregated value across multiple data points
-              createDetectionTask(taskInfo, taskManager);
+              try {
+                TaskUtils.createTask(taskDAO, taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+              } catch (JsonProcessingException e) {
+                LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
+              }
               detectionIdToLastTaskEndTimeMap.put(detectionConfig.getId(), taskInfo.getEnd());
               ThirdeyeMetricsUtil.eventScheduledTaskCounter.inc();
               taskCount++;
@@ -129,7 +128,11 @@ public class DataAvailabilityTaskScheduler implements Runnable {
           if (needFallback(detectionConfig)) {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
-            createDetectionTask(taskInfo, taskManager);
+            try {
+              TaskUtils.createTask(taskDAO, taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+            } catch (JsonProcessingException e) {
+              LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
+            }
 
             detectionIdToLastTaskEndTimeMap.put(detectionConfig.getId(), taskInfo.getEnd());
             ThirdeyeMetricsUtil.eventScheduledTaskFallbackCounter.inc();
@@ -170,9 +173,9 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         MetricEntity me = MetricEntity.fromURN(urn);
         if (!metricCache.containsKey(me.getId())) {
           datasets.addAll(ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
-              datasetConfigManager,
-              metricConfigManager,
-              thirdEyeCacheRegistry)
+                  datasetConfigManager,
+                  metricConfigManager,
+                  thirdEyeCacheRegistry)
               .stream().map(DatasetConfigDTO::getDataset).collect(Collectors.toList()));
           // cache the mapping in memory to avoid duplicate retrieval
           metricCache.put(me.getId(), datasets);
@@ -199,7 +202,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     List<TaskStatus> statusList = new ArrayList<>();
     statusList.add(TaskStatus.WAITING);
     statusList.add(TaskStatus.RUNNING);
-    List<TaskDTO> tasks = taskManager
+    List<TaskDTO> tasks = taskDAO
         .findByStatusesAndTypeWithinDays(statusList, TaskType.DETECTION,
             (int) TimeUnit.MILLISECONDS.toDays(CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
     Map<Long, TaskDTO> res = new HashMap<>(tasks.size());
@@ -211,7 +214,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
   private void loadLatestTaskCreateTime(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
-    List<TaskDTO> tasks = taskManager
+    List<TaskDTO> tasks = taskDAO
         .findByNameOrderByCreateTime(TaskType.DETECTION +
             "_" + detectionConfigId, 1, false);
     if (tasks.size() == 0) {

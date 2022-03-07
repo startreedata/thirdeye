@@ -16,9 +16,4 @@ public interface CoreConstants {
 
   // disable minute level cache warm up
   long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
-
-  // default onboarding replay period
-  // todo cyril this is not used - alert is replayed from epoch 0
-  // also this should depend on the granularity
-  long ONBOARDING_REPLAY_LOOKBACK = TimeUnit.DAYS.toMillis(60);
 }

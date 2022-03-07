@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Detection alert job that run by the cron scheduler.
- * This job put detection alert task into database which can be picked up by works later.
+ * This job put notification task into database which can be picked up by works later.
  */
 public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
@@ -53,19 +53,10 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(detectionAlertConfigId);
 
-    // check if a task for this detection alerter is already scheduled
-    String jobName = String
-        .format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
-    List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
-        Predicate.EQ("name", jobName),
-        Predicate.OR(
-            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
-            Predicate.EQ("status", TaskStatus.WAITING.toString())
-        ))
-    );
-    if (!scheduledTasks.isEmpty()) {
-      // if a task is pending and not time out yet, don't schedule more
-      LOG.trace("Skip scheduling subscription task {}. Already queued.", jobName);
+    // if a task is pending and not time out yet, don't schedule more
+    String jobName = String.format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
+    if (taskAlreadyRunning(taskDAO, jobName)) {
+      LOG.trace("Skip scheduling subscription task {}. Already queued", jobName);
       return;
     }
 
@@ -77,10 +68,22 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     try {
       TaskUtils.createTask(taskDAO, detectionAlertConfigId, taskInfo, TaskType.NOTIFICATION);
-    } catch (JsonProcessingException e ) {
+    } catch (JsonProcessingException e) {
       LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
     }
+  }
 
+  private boolean taskAlreadyRunning(final TaskManager taskDAO, final String jobName) {
+    // check if a notification task for the job is already scheduled and not timed-out
+    // todo cyril current implementation does not check the timeout
+    List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
+        Predicate.EQ("name", jobName),
+        Predicate.OR(
+            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+            Predicate.EQ("status", TaskStatus.WAITING.toString())
+        ))
+    );
+    return !scheduledTasks.isEmpty();
   }
 
   /**
@@ -113,7 +116,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
       long configId = e.getKey();
       long lastNotifiedTime = e.getValue();
       if (anomalyDAO.findByCreatedTimeInRangeAndDetectionConfigId(lastNotifiedTime,
-          System.currentTimeMillis(), configId)
+              System.currentTimeMillis(), configId)
           .stream().anyMatch(x -> !x.isChild())) {
         return true;
       }

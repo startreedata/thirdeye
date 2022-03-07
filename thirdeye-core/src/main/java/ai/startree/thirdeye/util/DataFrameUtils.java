@@ -263,57 +263,6 @@ public class DataFrameUtils {
    * required dependencies from the Thirdeye database.
    *
    * @param slice metric data slice
-   * @param reference unique identifier for request
-   * @param metricDAO metric config DAO
-   * @param datasetDAO dataset config DAO
-   * @return TimeSeriesRequestContainer
-   */
-  public static TimeSeriesRequestContainer makeTimeSeriesRequest(MetricSlice slice,
-      String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
-    MetricConfigDTO metric = metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
-
-    DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
-              metric.getId()));
-    }
-
-    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset(),
-        thirdEyeCacheRegistry);
-
-    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
-        .orElse(dataset.bucketTimeGranularity());
-
-    DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
-    Period period = granularity.toPeriod();
-
-    DateTime start = new DateTime(slice.getStart(), timezone)
-        .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.getEnd(),
-        timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
-
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
-        thirdEyeCacheRegistry
-    )
-        .setGroupByTimeGranularity(granularity)
-        .build(reference);
-
-    return new TimeSeriesRequestContainer(request, expressions, start, end, granularity.toPeriod());
-  }
-
-  /**
-   * Constructs and wraps a request for a metric with derived expressions. Resolves all
-   * required dependencies from the Thirdeye database.
-   *
-   * @param slice metric data slice
    * @param dimensions dimensions to group by
    * @param limit top k element limit ({@code -1} for default)
    * @param reference unique identifier for request

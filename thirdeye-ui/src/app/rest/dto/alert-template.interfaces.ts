@@ -1,25 +1,38 @@
-import { AlertNodeType } from "./alert.interfaces";
-
-export interface AlertTemplate {
-    id: number;
+export interface NewAlertTemplate {
     name: string;
     description: string;
-    cron: string;
-    nodes: AlertTemplateNode[];
+    cron?: string;
+    nodes?: AlertTemplateNode[];
 
-    rca: {
+    rca?: {
         datasource: string;
         dataset: string;
         metric: string;
     };
+
+    metadata?: {
+        datasource: {
+            name: string;
+        };
+        dataset: {
+            name: string;
+        };
+        metric: {
+            name: string;
+        };
+    };
+}
+
+export interface AlertTemplate extends NewAlertTemplate {
+    id: number;
 }
 
 export interface AlertTemplateNode {
     name: string;
-    type: AlertNodeType;
+    type: string;
     params: { [index: string]: unknown };
-    inputs: AlertTemplateNodeInput[];
-    outputs: AlertTemplateNodeOutput[];
+    inputs?: AlertTemplateNodeInput[];
+    outputs?: AlertTemplateNodeOutput[];
 }
 
 export interface AlertTemplateNodeInput {

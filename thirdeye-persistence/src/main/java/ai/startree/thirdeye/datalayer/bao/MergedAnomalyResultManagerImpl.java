@@ -260,8 +260,9 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       } else {
         AnomalyFeedbackDTO feedbackBean = genericPojoDao
             .get(feedbackDTO.getId(), AnomalyFeedbackDTO.class);
-        feedbackBean.setFeedbackType(feedbackDTO.getFeedbackType());
-        feedbackBean.setComment(feedbackDTO.getComment());
+        feedbackBean
+            .setFeedbackType(feedbackDTO.getFeedbackType())
+            .setComment(feedbackDTO.getComment());
         genericPojoDao.update(feedbackBean);
       }
       bean.setAnomalyFeedbackId(feedbackDTO.getId());

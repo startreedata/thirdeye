@@ -40,16 +40,18 @@ public class AnomalyFeedbackDTO extends AbstractDTO implements AnomalyFeedback, 
     return feedbackType;
   }
 
-  public void setFeedbackType(AnomalyFeedbackType feedbackType) {
+  public AnomalyFeedbackDTO setFeedbackType(AnomalyFeedbackType feedbackType) {
     this.feedbackType = feedbackType;
+    return this;
   }
 
   public String getComment() {
     return comment;
   }
 
-  public void setComment(String comment) {
+  public AnomalyFeedbackDTO setComment(String comment) {
     this.comment = comment;
+    return this;
   }
 
   @Override

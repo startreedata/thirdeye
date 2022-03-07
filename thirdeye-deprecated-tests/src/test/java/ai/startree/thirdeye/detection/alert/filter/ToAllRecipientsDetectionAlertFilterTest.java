@@ -267,10 +267,10 @@ public class ToAllRecipientsDetectionAlertFilterTest {
     this.alertConfig.setVectorClocks(Collections.singletonMap(detectionConfigId3, this.baseTime));
 
     // Create feedback objects
-    AnomalyFeedbackDTO feedbackAnomaly = new AnomalyFeedbackDTO();
-    feedbackAnomaly.setFeedbackType(AnomalyFeedbackType.ANOMALY);
-    AnomalyFeedbackDTO feedbackNoFeedback = new AnomalyFeedbackDTO();
-    feedbackNoFeedback.setFeedbackType(AnomalyFeedbackType.NO_FEEDBACK);
+    AnomalyFeedbackDTO feedbackAnomaly = new AnomalyFeedbackDTO()
+        .setFeedbackType(AnomalyFeedbackType.ANOMALY);
+    AnomalyFeedbackDTO feedbackNoFeedback = new AnomalyFeedbackDTO()
+        .setFeedbackType(AnomalyFeedbackType.NO_FEEDBACK);
 
     // Create anomalies with various feedback type
     MergedAnomalyResultDTO anomalyWithFeedback = makeAnomaly(detectionConfigId3, this.baseTime, 5,

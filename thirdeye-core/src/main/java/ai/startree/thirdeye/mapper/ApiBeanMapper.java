@@ -262,11 +262,9 @@ public abstract class ApiBeanMapper {
   }
 
   public static AnomalyFeedbackDTO toAnomalyFeedbackDTO(AnomalyFeedbackApi api) {
-    final AnomalyFeedbackDTO dto = new AnomalyFeedbackDTO();
-    dto.setComment(api.getComment());
-    dto.setFeedbackType(api.getType());
-
-    return dto;
+    return new AnomalyFeedbackDTO()
+        .setFeedbackType(api.getType())
+        .setComment(api.getComment());
   }
 
   public static AlertTemplateDTO toAlertTemplateDto(final AlertTemplateApi api) {

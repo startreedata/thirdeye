@@ -65,7 +65,9 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
         && anomalyWeight >= (expectedDropOrSpike - acceptableDeviation)) {
       LOG.info(
           "Anomaly falls within the specified thresholds (anomalyWeight = {}, expectedDropOrSpike = {},"
-              + " acceptableDeviation = {})", anomalyWeight, expectedDropOrSpike,
+              + " acceptableDeviation = {})",
+          anomalyWeight,
+          expectedDropOrSpike,
           acceptableDeviation);
       return true;
     }
@@ -124,8 +126,9 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
 
           // Suppressing is a way by which users admit that anomalies during this period
           // are expected. We also do not want the algorithm to readjust the baseline.
-          feedback.setFeedbackType(AnomalyFeedbackType.ANOMALY);
-          feedback.setComment("Suppressed anomaly. Auto-labeling as true anomaly.");
+          feedback
+              .setFeedbackType(AnomalyFeedbackType.ANOMALY)
+              .setComment("Suppressed anomaly. Auto-labeling as true anomaly.");
 
           anomaly.setFeedback(feedback);
           mergedAnomalyResultManager.updateAnomalyFeedback(anomaly);

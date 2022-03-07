@@ -30,8 +30,7 @@ kubectl create secret docker-registry startree \
 
 ## Installing ThirdEye
 
-This installs thirdeye in the default namespace. The `helmw` is a light helm wrapper that adds
-additional configuration to get ThirdEye up and running.
+This installs thirdeye in the default namespace.
 
 ```bash
 # fetch dependencies. example: mysql. See Chart.yaml
@@ -62,8 +61,7 @@ helm upgrade --install thirdeye -n "${namespace}" . \
   --set smtp.password=${SMTP_PASSWORD}
 ```
 
-All arguments passed to this script are forwarded to helm. So to install in namespace `te`, you can
-simply pass on the helm arguments directly.
+To install in namespace `te`, you can simply pass on the helm arguments directly.
 
 ```bash
 helm install thirdeye . --namespace te
@@ -80,7 +78,7 @@ helm uninstall thirdeye --namespace te
 
 ## Configuration
 
-> Warning: The initdb.sql used for setting up the db may be out of date. Please note that this chart is currently a work in progress.
+> Warning: The initdb.sql used for setting up the db is currently passed as a helm value to the charts.
 
 Please see `values.yaml` for configurable parameters. Specify parameters
 using `--set key=value[,key=value]` argument to `helm install`
@@ -94,10 +92,10 @@ helm install thirdeye . --name thirdeye -f values.yaml
 ## Holiday Events
 
 ThirdEye allows you to display events from external Google Calendars. To enable this feature, simply
-provide a JSON key. Check https://docs.simplecalendar.io/google-api-key/
+provide a **base64 encoded** JSON key. Check https://docs.simplecalendar.io/google-api-key/
 
 ```bash
-helm install thirdeye . --set-file config.holidayLoaderKey="/path/to/holiday-loader-key.json"
+helm install thirdeye . --set config.holidayLoaderKey="<base64 encoded key>"
 ```
 
 ## Email Configuration via SMTP

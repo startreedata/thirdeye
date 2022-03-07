@@ -13,6 +13,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -33,10 +34,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -52,6 +53,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Api(tags = "Anomaly", authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
@@ -59,6 +62,7 @@ import javax.ws.rs.core.UriInfo;
 @Produces(MediaType.APPLICATION_JSON)
 public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResultDTO> {
 
+  private static final Logger log = LoggerFactory.getLogger(AnomalyResource.class);
   private static final String ALERT_ID = "alertId";
   private static final String DATASET = "dataset";
   private static final String METRIC = "metric";
@@ -70,14 +74,17 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
+  private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
   public AnomalyResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final AlertManager alertManager) {
+      final AlertManager alertManager,
+      final AlertTemplateRenderer alertTemplateRenderer) {
     super(mergedAnomalyResultManager, API_TO_BEAN_MAP);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
+    this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
   private static AnomalyFeedbackDTO toAnomalyFeedbackDTO(AnomalyFeedbackApi api) {
@@ -132,9 +139,12 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   private boolean checkDataset(final AlertDTO alert, final MultivaluedMap<String, String> params) {
     String query = params.getFirst(DATASET);
     if (query != null) {
-      return queryToList(query).contains(renderProperty(
-          alert.getTemplate().getMetadata().getDataset().getName(),
-          alert.getTemplateProperties()).toString());
+      try {
+        return queryToList(query).contains(alert.getTemplate().getMetadata().getDataset().getName());
+      } catch (NullPointerException e) {
+        // when dataset is not set
+        return false;
+      }
     }
     return true;
   }
@@ -142,16 +152,14 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   private boolean checkMetric(final AlertDTO alert, final MultivaluedMap<String, String> params) {
     String query = params.getFirst(METRIC);
     if (query != null) {
-      return queryToList(query).contains(renderProperty(
-          alert.getTemplate().getMetadata().getMetric().getName(),
-          alert.getTemplateProperties()).toString());
+      try {
+        return queryToList(query).contains(alert.getTemplate().getMetadata().getMetric().getName());
+      } catch (NullPointerException e) {
+        // when metric is not set
+        return false;
+      }
     }
     return true;
-  }
-
-  // extract propertyName from ${propertyName} and return its value from properties
-  private Object renderProperty(final String name, final Map<String, Object> properties) {
-    return properties.get(name.substring(2, name.length() - 1));
   }
 
   private List queryToList(final String query) {
@@ -165,7 +173,6 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   private RequestCache prepareRequestCache(
       final MultivaluedMap<String, String> queryParameters) {
     final List<AlertDTO> alerts;
-    final RequestCache cache = createRequestCache();
 
     // get request specific alerts
     if (queryParameters.containsKey(ALERT_ID)) {
@@ -178,7 +185,13 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
     }
 
     // filter and load alerts into cache
+    final RequestCache cache = createRequestCache();
     alerts.forEach(alert -> {
+      try {
+        alert.setTemplate(alertTemplateRenderer.renderAlert(alert, 0, 0));
+      } catch (IOException | ClassNotFoundException e) {
+        log.warn(e.getMessage(), e);
+      }
       if (checkFilters(alert, queryParameters)) {
         cache.getAlerts().put(alert.getId(), alert);
       }

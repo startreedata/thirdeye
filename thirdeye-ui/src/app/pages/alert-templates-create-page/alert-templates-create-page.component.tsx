@@ -11,7 +11,11 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { createAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
-import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
+import {
+    AlertTemplate,
+    NewAlertTemplate,
+} from "../../rest/dto/alert-template.interfaces";
+import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 
 export const AlertTemplatesCreatePage: FunctionComponent = () => {
@@ -20,7 +24,7 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
 
     const onAlertTemplateWizardFinish = (
-        alertTemplate: AlertTemplate
+        alertTemplate: NewAlertTemplate
     ): void => {
         if (!alertTemplate) {
             return;
@@ -57,7 +61,8 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <AlertTemplateWizard
+                    <AlertTemplateWizard<NewAlertTemplate>
+                        alertTemplate={createDefaultAlertTemplate()}
                         onFinish={onAlertTemplateWizardFinish}
                     />
                 </Grid>

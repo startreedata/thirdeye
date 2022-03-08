@@ -1,10 +1,8 @@
-import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
-
-export interface AlertTemplateWizardProps {
-    alertTemplate?: AlertTemplate;
+export interface AlertTemplateWizardProps<NewOrExistingTemplate> {
+    alertTemplate: NewOrExistingTemplate;
     showCancel?: boolean;
     onCancel?: () => void;
-    onFinish?: (alertTemplate: AlertTemplate) => void;
+    onFinish?: (alertTemplate: NewOrExistingTemplate) => void;
 }
 
 export enum AlertTemplateWizardStep {

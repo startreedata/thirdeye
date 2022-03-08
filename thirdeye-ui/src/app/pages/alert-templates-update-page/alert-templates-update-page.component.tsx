@@ -43,7 +43,7 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
 
         modifiedAlertTemplate = assign(
             { ...modifiedAlertTemplate },
-            { id: modifiedAlertTemplate?.id }
+            { id: modifiedAlertTemplate.id }
         );
 
         updateAlertTemplate(modifiedAlertTemplate)
@@ -84,7 +84,7 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {alertTemplate && (
-                        <AlertTemplateWizard
+                        <AlertTemplateWizard<AlertTemplate>
                             alertTemplate={alertTemplate}
                             onFinish={onAlertWizardFinish}
                         />

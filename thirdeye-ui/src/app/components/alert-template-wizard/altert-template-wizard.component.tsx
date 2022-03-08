@@ -1,14 +1,13 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
-import React, { FunctionComponent, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
 } from "../../platform/components";
-import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
@@ -19,15 +18,14 @@ import {
 } from "./altert-template-wizard.interfaces";
 import { useAlertTemplateWizardStyles } from "./altert-template-wizard.styles";
 
-export const AlertTemplateWizard: FunctionComponent<
-    AlertTemplateWizardProps
-> = (props) => {
+function AlertTemplateWizard<NewOrExistingTemplate>(
+    props: AlertTemplateWizardProps<NewOrExistingTemplate>
+): JSX.Element {
     const alertTemplateWizardClasses = useAlertTemplateWizardStyles();
-    const [newAlertTemplate, setNewAlertTemplate] = useState<AlertTemplate>(
-        props.alertTemplate || createDefaultAlertTemplate()
-    );
+    const [newAlertTemplate, setNewAlertTemplate] =
+        useState<NewOrExistingTemplate>(props.alertTemplate);
     const [newAlertTemplateJSON, setNewAlertTemplateJSON] = useState(
-        JSON.stringify(props.alertTemplate || createDefaultAlertTemplate())
+        JSON.stringify(props.alertTemplate)
     );
     const [
         alertTemplateConfigurationError,
@@ -122,9 +120,9 @@ export const AlertTemplateWizard: FunctionComponent<
         const alertTemplate = props.alertTemplate
             ? ({
                   ...props.alertTemplate,
-              } as AlertTemplate)
+              } as NewOrExistingTemplate)
             : createDefaultAlertTemplate();
-        setNewAlertTemplate(alertTemplate);
+        setNewAlertTemplate(alertTemplate as NewOrExistingTemplate);
         setNewAlertTemplateJSON(JSON.stringify(alertTemplate));
     };
 
@@ -180,7 +178,7 @@ export const AlertTemplateWizard: FunctionComponent<
                         <>
                             {/* Datasource configuration editor */}
                             <Grid item sm={12}>
-                                <JSONEditorV1<AlertTemplate>
+                                <JSONEditorV1<NewOrExistingTemplate>
                                     error={alertTemplateConfigurationError}
                                     helperText={
                                         alertTemplateConfigurationHelperText
@@ -198,7 +196,7 @@ export const AlertTemplateWizard: FunctionComponent<
                         <>
                             {/* Datasource information */}
                             <Grid item sm={12}>
-                                <JSONEditorV1<AlertTemplate>
+                                <JSONEditorV1<NewOrExistingTemplate>
                                     readOnly
                                     value={newAlertTemplate}
                                 />
@@ -307,4 +305,6 @@ export const AlertTemplateWizard: FunctionComponent<
             </PageContentsCardV1>
         </>
     );
-};
+}
+
+export { AlertTemplateWizard };

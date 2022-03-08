@@ -10,6 +10,7 @@ import static ai.startree.thirdeye.util.TimeUtils.getBiggestDatetime;
 import static ai.startree.thirdeye.util.TimeUtils.getSmallestDatetime;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -21,6 +22,31 @@ public class TimeUtilsTest {
 
   private static final DateTimeFormatter DATE_PARSER = DateTimeFormat.forPattern(
       "yyyy-MM-dd HH:mm:ss.SSS z");
+
+  @Test
+  public void testFloorByPeriodIsIdempotent() {
+    // test that floorByPeriod · floorByPeriod = floorByPeriod
+    final DateTime input = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
+
+    final List<Period> periodList = List.of(
+        Period.years(1),
+        Period.years(2),
+        Period.months(1),
+        Period.months(2),
+        Period.days(1),
+        Period.days(2),
+        Period.minutes(1),
+        Period.minutes(2),
+        Period.seconds(1),
+        Period.seconds(2),
+        Period.millis(1),
+        Period.millis(2));
+
+    for (Period p : periodList) {
+      DateTime floored = floorByPeriod(input, p);
+      assertThat(floorByPeriod(floored, p)).isEqualTo(floored);
+    }
+  }
 
   @Test
   public void testFloorByPeriodRoundByYear() {

@@ -35,6 +35,12 @@ export const AppRouteRelative = {
     DATASOURCES_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
     DATASOURCES_CREATE: "create",
     DATASOURCES_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
+    ALERT_TEMPLATES: "alert-templates",
+    ALERT_TEMPLATES_ALL: "all",
+    ALERT_TEMPLATES_CREATE: "create",
+    ALERT_TEMPLATES_ALERT_TEMPLATE: `${PLACEHOLDER_ROUTE_ID}`,
+    ALERT_TEMPLATES_ALERT_TEMPLATE_VIEW: "view",
+    ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE: "update",
     METRICS: "metrics",
     METRICS_ALL: "all",
     METRICS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
@@ -75,6 +81,16 @@ export const AppRoute = {
     DATASOURCES_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.DATASOURCES}/${AppRouteRelative.DATASOURCES_VIEW}`,
     DATASOURCES_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.DATASOURCES}/${AppRouteRelative.DATASOURCES_CREATE}`,
     DATASOURCES_UPDATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.DATASOURCES}/${AppRouteRelative.DATASOURCES_UPDATE}`,
+    ALERT_TEMPLATES: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.ALERT_TEMPLATES}`,
+    ALERT_TEMPLATES_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.ALERT_TEMPLATES}/${AppRouteRelative.ALERT_TEMPLATES_ALL}`,
+    ALERT_TEMPLATES_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.ALERT_TEMPLATES}/${AppRouteRelative.ALERT_TEMPLATES_CREATE}`,
+    ALERT_TEMPLATES_ALERT_TEMPLATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.ALERT_TEMPLATES}/${AppRouteRelative.ALERT_TEMPLATES_ALERT_TEMPLATE}`,
+    ALERT_TEMPLATES_ALERT_TEMPLATE_VIEW:
+        `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.ALERT_TEMPLATES}/` +
+        `${AppRouteRelative.ALERT_TEMPLATES_ALERT_TEMPLATE}/${AppRouteRelative.ALERT_TEMPLATES_ALERT_TEMPLATE_VIEW}`,
+    ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE:
+        `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.ALERT_TEMPLATES}/` +
+        `${AppRouteRelative.ALERT_TEMPLATES_ALERT_TEMPLATE}/${AppRouteRelative.ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE}`,
     METRICS: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.METRICS}`,
     METRICS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.METRICS}/${AppRouteRelative.METRICS_ALL}`,
     METRICS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.METRICS}/${AppRouteRelative.METRICS_VIEW}`,
@@ -224,6 +240,32 @@ export const getDatasourcesCreatePath = (): string => {
 
 export const getDatasourcesUpdatePath = (id: number): string => {
     let path: string = AppRoute.DATASOURCES_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getAlertTemplatesPath = (): string => {
+    return AppRoute.ALERT_TEMPLATES;
+};
+
+export const getAlertTemplatesAllPath = (): string => {
+    return AppRoute.ALERT_TEMPLATES_ALL;
+};
+
+export const getAlertTemplatesViewPath = (id: number): string => {
+    let path: string = AppRoute.ALERT_TEMPLATES_ALERT_TEMPLATE_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getAlertTemplatesCreatePath = (): string => {
+    return AppRoute.ALERT_TEMPLATES_CREATE;
+};
+
+export const getAlertTemplatesUpdatePath = (id: number): string => {
+    let path: string = AppRoute.ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return path;

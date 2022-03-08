@@ -116,6 +116,8 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
+      // data delay and granularity is not applied, but it could be - with a toogle in evaluationContext to be optional
+
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
           request.getAlert(),

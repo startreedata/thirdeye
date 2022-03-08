@@ -5,9 +5,10 @@
 
 package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 
+import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
+
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -109,7 +110,9 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
               try {
-                TaskUtils.createTask(taskDAO, taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+                TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+                final long taskId = taskDAO.save(taskDTO);
+                LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
               } catch (JsonProcessingException e) {
                 LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
               }
@@ -129,7 +132,9 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
             try {
-              TaskUtils.createTask(taskDAO, taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+              TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+              final long taskId = taskDAO.save(taskDTO);
+              LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
             } catch (JsonProcessingException e) {
               LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
             }

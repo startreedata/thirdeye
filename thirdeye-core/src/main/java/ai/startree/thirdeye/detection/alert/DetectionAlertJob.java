@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.detection.alert;
 
+import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
+
 import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.scheduler.ThirdEyeAbstractJob;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -67,7 +69,9 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     }
 
     try {
-      TaskUtils.createTask(taskDAO, detectionAlertConfigId, taskInfo, TaskType.NOTIFICATION);
+      TaskDTO taskDTO = createTaskDto(detectionAlertConfigId, taskInfo, TaskType.NOTIFICATION);
+      final long taskId = taskDAO.save(taskDTO);
+      LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskId, taskDTO);
     } catch (JsonProcessingException e) {
       LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
     }

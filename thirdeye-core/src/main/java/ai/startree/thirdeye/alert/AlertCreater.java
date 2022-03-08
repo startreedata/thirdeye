@@ -5,17 +5,18 @@
 
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.OnboardingTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -104,7 +105,9 @@ public class AlertCreater {
     ;
 
     try {
-      TaskUtils.createTask(taskDAO, alertDTO.getId(), info, TaskType.ONBOARDING);
+      TaskDTO taskDTO = createTaskDto(alertDTO.getId(), info, TaskType.ONBOARDING);
+      final long taskId = taskDAO.save(taskDTO);
+      LOG.info("Created {} task {} with settings {}", TaskType.ONBOARDING, taskId, taskDTO);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
           OnboardingTaskInfo.class.getSimpleName(), info), e);

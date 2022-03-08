@@ -1,6 +1,8 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const RootCauseAnalysisForAnomalyIndexPage = lazy(() =>
@@ -27,19 +29,36 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
-                {/* Root cause for an anomaly index path. */}
                 <Route
-                    element={<RootCauseAnalysisForAnomalyIndexPage />}
-                    path={
-                        AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INDEX
-                    }
-                />
+                    path={`/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}/*`}
+                >
+                    {/* Root cause for an anomaly index path. */}
+                    <Route
+                        index
+                        element={<RootCauseAnalysisForAnomalyIndexPage />}
+                    />
 
-                {/* Root cause for an anomaly path */}
-                <Route
-                    element={<RootCauseAnalysisForAnomalyPage />}
-                    path={AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
-                />
+                    {/* Root cause for an anomaly path */}
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    TimeRangeQueryStringKey.TIME_RANGE,
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
+                                ]}
+                                to=".."
+                            >
+                                <RootCauseAnalysisForAnomalyPage />
+                            </RedirectValidation>
+                        }
+                        path={
+                            AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE
+                        }
+                    />
+
+                    <Route element={<PageNotFoundPage />} path="*" />
+                </Route>
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

@@ -2,12 +2,12 @@ import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     AppLoadingIndicatorV1,
@@ -42,11 +42,12 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const { timeRangeDuration } = useTimeRange();
     const { notify } = useNotificationProviderV1();
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
+
     const pageTitle = `${t("label.root-cause-analysis")}: ${t(
         "label.anomaly"
     )} #${anomalyId}`;
@@ -63,7 +64,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
 
     useEffect(() => {
         fetchAlertEvaluation();
-    }, [uiAnomaly]);
+    }, [uiAnomaly, searchParams]);
 
     useEffect(() => {
         if (getEvaluationRequestStatus === ActionStatus.Error) {
@@ -106,17 +107,16 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     }
 
     const fetchAlertEvaluation = (): void => {
-        if (!uiAnomaly || !uiAnomaly.alertId) {
+        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+        if (!uiAnomaly || !uiAnomaly.alertId || !start || !end) {
             setAlertEvaluation(null);
 
             return;
         }
         getEvaluation(
-            createAlertEvaluation(
-                uiAnomaly.alertId,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
+            createAlertEvaluation(uiAnomaly.alertId, Number(start), Number(end))
         );
     };
 

@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
-import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.text.DateFormat;
@@ -32,6 +31,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.mockito.invocation.InvocationOnMock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -47,12 +48,6 @@ public class AnomalyMergerTest {
   private Date endDate;
   private DataProvider dataProvider;
   private MergedAnomalyResultManager mergedAnomalyResultManager;
-
-  private static DetectionPipelineTaskInfo newTaskInfo(final Date startDate, final Date endDate) {
-    return new DetectionPipelineTaskInfo()
-        .setStart(startDate.getTime())
-        .setEnd(endDate.getTime());
-  }
 
   private static AlertDTO newAlert() {
     final AlertDTO alert = new AlertDTO();
@@ -140,9 +135,9 @@ public class AnomalyMergerTest {
 
   @Test
   public void testEmptyMergeAndSave() {
-    anomalyMerger.mergeAndSave(newTaskInfo(startDate, endDate),
+    anomalyMerger.mergeAndSave(
         newAlert(),
-        emptyList());
+        emptyList(), new Interval(startDate.getTime(), endDate.getTime(), DateTimeZone.UTC));
   }
 
   @Test
@@ -151,9 +146,9 @@ public class AnomalyMergerTest {
         .thenAnswer(i -> multimap(getAnomalySliceFromFirstArg(i), emptyList()));
 
     final MergedAnomalyResultDTO newAnomaly = newAnomaly(startDate, endDate);
-    anomalyMerger.mergeAndSave(newTaskInfo(startDate, endDate),
+    anomalyMerger.mergeAndSave(
         newAlert(),
-        singletonList(newAnomaly));
+        singletonList(newAnomaly), new Interval(startDate.getTime(), endDate.getTime(), DateTimeZone.UTC));
     verify(mergedAnomalyResultManager).save(newAnomaly);
   }
 
@@ -163,12 +158,12 @@ public class AnomalyMergerTest {
         .thenAnswer(i -> multimap(getAnomalySliceFromFirstArg(i),
             singletonList(existingAnomaly(startDate, endDate))));
 
-    anomalyMerger.mergeAndSave(newTaskInfo(startDate, endDate),
+    anomalyMerger.mergeAndSave(
         newAlert(),
         asList(
             newAnomaly(startDate, endDate),
             newAnomaly(startDate, plusMin(startDate, 10))
-        ));
+        ), new Interval(startDate.getTime(), endDate.getTime(), DateTimeZone.UTC));
     verify(mergedAnomalyResultManager, times(1)).save(any());
   }
 

@@ -21,8 +21,11 @@ import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -38,6 +41,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -139,12 +143,11 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   private boolean checkDataset(final AlertDTO alert, final MultivaluedMap<String, String> params) {
     String query = params.getFirst(DATASET);
     if (query != null) {
-      try {
-        return queryToList(query).contains(alert.getTemplate().getMetadata().getDataset().getName());
-      } catch (NullPointerException e) {
-        // when dataset is not set
-        return false;
-      }
+      return Optional.ofNullable(alert.getTemplate().getMetadata())
+              .map(AlertMetadataDTO::getDataset)
+              .map(DatasetConfigDTO::getName)
+              .map(name -> queryToList(query).contains(name))
+              .orElse(false);
     }
     return true;
   }
@@ -152,12 +155,11 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   private boolean checkMetric(final AlertDTO alert, final MultivaluedMap<String, String> params) {
     String query = params.getFirst(METRIC);
     if (query != null) {
-      try {
-        return queryToList(query).contains(alert.getTemplate().getMetadata().getMetric().getName());
-      } catch (NullPointerException e) {
-        // when metric is not set
-        return false;
-      }
+      return Optional.ofNullable(alert.getTemplate().getMetadata())
+              .map(AlertMetadataDTO::getMetric)
+              .map(MetricConfigDTO::getName)
+              .map(name -> queryToList(query).contains(name))
+              .orElse(false);
     }
     return true;
   }

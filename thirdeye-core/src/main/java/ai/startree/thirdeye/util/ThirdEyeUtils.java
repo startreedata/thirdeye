@@ -14,10 +14,8 @@ import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
-import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -32,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -127,32 +124,6 @@ public abstract class ThirdEyeUtils {
       return functions.stream().map(
           f -> datasetConfigManager.findByDataset(f.getDataset())).collect(Collectors.toList());
     }
-  }
-
-  /**
-   * Get the expected delay for the detection pipeline.
-   * This delay should be the longest of the expected delay of the underline datasets.
-   *
-   * @param config The detection config.
-   * @return The expected delay for this alert in milliseconds.
-   */
-  public static long getDetectionExpectedDelay(AlertDTO config,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
-      final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager) {
-    long maxExpectedDelay = 0;
-    Set<String> metricUrns = DetectionConfigFormatter
-        .extractMetricUrnsFromProperties(config.getProperties());
-    for (String urn : metricUrns) {
-      List<DatasetConfigDTO> datasets = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
-          datasetConfigManager,
-          metricConfigManager,
-          thirdEyeCacheRegistry);
-      for (DatasetConfigDTO dataset : datasets) {
-        maxExpectedDelay = Math.max(dataset.getExpectedDelay().toMillis(), maxExpectedDelay);
-      }
-    }
-    return maxExpectedDelay;
   }
 
   /**

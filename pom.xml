@@ -3,7 +3,9 @@
   ~ Copyright (c) 2022 StarTree Inc. All rights reserved.
   ~ Confidential and Proprietary Information of StarTree Inc.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.pinot.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
@@ -81,6 +83,7 @@
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
     <swagger.version>1.3.17-1</swagger.version>
     <testcontainers.version>1.15.3</testcontainers.version>
+    <aspectj.version>1.9.6</aspectj.version>
   </properties>
 
   <licenses>
@@ -116,6 +119,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -193,6 +200,26 @@
           </executions>
         </plugin>
         <plugin>
+          <!-- download weaver jar - required for surefire goals-->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.2.0</version>
+          <executions>
+            <execution>
+              <id>resolve</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>get</goal>
+              </goals>
+              <configuration>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>${aspectj.version}</version>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
@@ -200,6 +227,9 @@
             <!-- See https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/ -->
             <argLine>
               --illegal-access=permit
+            </argLine>
+            <argLine>
+              -javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
             </argLine>
             <threadCount>1</threadCount>
             <systemPropertyVariables>
@@ -496,6 +526,18 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
         <version>${testcontainers.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjrt</artifactId>
+        <version>${aspectj.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>${aspectj.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>

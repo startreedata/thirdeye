@@ -67,6 +67,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   private boolean realtime = false;
 
   @Deprecated // use completenessDelay
+  @JsonIgnore
   private TimeGranularity expectedDelay;
   // latest timestamp of the dataset updated by external events
   private long lastRefreshTime;

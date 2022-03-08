@@ -50,14 +50,15 @@ spec:
               ssl_certificate_key /home/thirdeye/tls/tls.key;
               ssl_password_file /home/thirdeye/tls-pass/pass;
               {{- end }}
+              set $backend_servers ${THIRDEYE_API_BASE_URL};
+              resolver kube-dns.kube-system.svc.cluster.local valid=30s;
               location ~/api(.*) {
                 if ($args != "") {
-                  proxy_pass ${THIRDEYE_API_BASE_URL}/api$1?$args;
+                  proxy_pass $backend_servers/api$1?$args;
                 }
                 if ($args = "") {
-                  proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
+                  proxy_pass $backend_servers/api$1;
                 }
-                resolver kube-dns.kube-system.svc.cluster.local valid=30s;
                 proxy_ssl_server_name on;
                 proxy_redirect off;
                 proxy_set_header Host $proxy_host;
@@ -65,9 +66,8 @@ spec:
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-Forwarded-Host $server_name;
               }
-              location /swagger {
-                proxy_pass ${THIRDEYE_API_BASE_URL}/swagger;
-                resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+              location ~/swagger(.*) {
+                proxy_pass $backend_servers/swagger$1;
                 proxy_ssl_server_name on;
                 proxy_redirect off;
                 proxy_set_header Host $proxy_host;

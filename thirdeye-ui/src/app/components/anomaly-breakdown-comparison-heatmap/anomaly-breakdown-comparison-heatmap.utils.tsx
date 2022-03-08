@@ -61,7 +61,9 @@ export function formatTreemapData(
 
             return {
                 id: k,
-                size: comparisonData.current,
+                // when current is 0, treemap won't render anything
+                // fix: https://cortexdata.atlassian.net/browse/TE-453
+                size: comparisonData.current || 1,
                 parent: parentId,
                 extraData: comparisonAndDisplayData,
             };

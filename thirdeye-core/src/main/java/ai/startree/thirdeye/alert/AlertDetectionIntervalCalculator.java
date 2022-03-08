@@ -42,12 +42,12 @@ public class AlertDetectionIntervalCalculator {
    *
    *
    * Notes:
-   * Assumes that the caller of this method is setting the lastTimestamp of the alert
-   * as the endTime of the correctedInterval once the alert pipeline has run successfully.
+   * Assumes that the caller of this method is setting the corrected endTime as the alert
+   * lastTimestamp once the alert pipeline has run successfully.
    */
   public Interval getCorrectedInterval(final AlertDTO alertDTO, final long taskStartMillis,
       final long taskEndMillis) throws IOException, ClassNotFoundException {
-    // render properties - startTime/endTime not important
+    // render properties - startTime/endTime not important - objective is to get metadata
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
         0L,
         0L);
@@ -60,7 +60,7 @@ public class AlertDetectionIntervalCalculator {
 
   @NotNull
   @VisibleForTesting
-  protected Interval getCorrectedInterval(final long alertId, final DateTime taskStart,
+  protected static Interval getCorrectedInterval(final long alertId, final DateTime taskStart,
       final DateTime taskEnd, final AlertTemplateDTO templateWithProperties) {
     DateTime correctedStart = taskStart;
     DateTime correctedEnd = taskEnd;
@@ -75,11 +75,11 @@ public class AlertDetectionIntervalCalculator {
         correctedStart = correctedStart.minus(delay);
         LOG.warn(
             "EndTime with delay correction {} is before startTime {}. This can happen if delay configuration is changed to a bigger value. "
-                + "Applying delay correction to startTime. Detection may rerun on a timeframe on which it already run with a different config",
+                + "Applied delay correction to startTime. Detection may rerun on a timeframe on which it already run with a different config",
             correctedEnd, correctedStart);
       }
       LOG.info(
-          "Applying delay correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
+          "Applied delay correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
           delay, alertId, taskStart, taskEnd, correctedStart, correctedEnd);
     }
 
@@ -91,7 +91,7 @@ public class AlertDetectionIntervalCalculator {
       correctedStart = TimeUtils.floorByPeriod(correctedStart, granularity);
       correctedEnd = TimeUtils.floorByPeriod(correctedEnd, granularity);
       LOG.info(
-          "Applying granularity correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
+          "Applied granularity correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
           granularity, alertId, taskStart, taskEnd, correctedStart, correctedEnd);
     }
 
@@ -99,7 +99,7 @@ public class AlertDetectionIntervalCalculator {
   }
 
   @Nullable
-  private Period getDelay(final AlertTemplateDTO templateWithProperties) {
+  private static Period getDelay(final AlertTemplateDTO templateWithProperties) {
     return Optional.ofNullable(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getDataset)
         .map(DatasetConfigDTO::getCompletenessDelay)
@@ -108,7 +108,7 @@ public class AlertDetectionIntervalCalculator {
   }
 
   @Nullable
-  private Period getGranularity(final AlertTemplateDTO templateWithProperties) {
+  private static Period getGranularity(final AlertTemplateDTO templateWithProperties) {
     return Optional.ofNullable(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getGranularity)
         .map(granularityString -> Period.parse(granularityString, ISOPeriodFormat.standard()))

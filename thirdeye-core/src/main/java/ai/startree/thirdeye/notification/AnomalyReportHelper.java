@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.notification.NotificationReportBuilder.ANOMALY_VIEW_PREFIX;
 import static ai.startree.thirdeye.spi.Constants.NOTIFICATIONS_PERCENTAGE_FORMAT;
 
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
@@ -46,7 +47,7 @@ public class AnomalyReportHelper {
 
     return new AnomalyReportDataApi()
         .setAnomalyId(String.valueOf(anomaly.getId()))
-        .setAnomalyURL(getAnomalyURL(anomaly, uiPublicUrl))
+        .setAnomalyURL(getAnomalyURL(uiPublicUrl))
         .setBaselineVal(baselineVal)
         .setCurrentVal(getCurrentValue(anomaly))
         .setLift(baselineVal.equals("-") ? "" : getFormattedLiftValue(anomaly, lift))
@@ -115,9 +116,8 @@ public class AnomalyReportHelper {
   /**
    * Get the url of given anomaly result
    */
-  public static String getAnomalyURL(MergedAnomalyResultDTO anomalyResultDTO,
-      String dashboardUrl) {
-    return dashboardUrl + "/anomalies/view/id/";
+  public static String getAnomalyURL(String dashboardUrl) {
+    return dashboardUrl + "/" + ANOMALY_VIEW_PREFIX;
   }
 
   /**

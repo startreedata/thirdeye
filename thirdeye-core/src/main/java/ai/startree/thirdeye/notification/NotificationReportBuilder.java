@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class NotificationReportBuilder {
 
+  public static final String ANOMALY_VIEW_PREFIX = "anomalies/";
   private static final Logger LOG = LoggerFactory.getLogger(NotificationReportBuilder.class);
   private static final boolean INCLUDE_SUMMARY = false;
-  private static final String ANOMALY_DASHBOARD_PREFIX = "anomalies/view/id/";
 
   private final AlertManager alertManager;
   private final UiConfiguration uiConfiguration;
@@ -170,6 +170,6 @@ public class NotificationReportBuilder {
     if (!extUrl.matches(".*/")) {
       extUrl += "/";
     }
-    return String.format("%s%s%s", extUrl, ANOMALY_DASHBOARD_PREFIX, id);
+    return String.format("%s%s%s", extUrl, ANOMALY_VIEW_PREFIX, id);
   }
 }

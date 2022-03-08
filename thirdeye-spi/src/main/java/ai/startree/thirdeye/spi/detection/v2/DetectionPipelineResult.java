@@ -14,6 +14,9 @@ public interface DetectionPipelineResult {
 
   List<DetectionResult> getDetectionResults();
 
+  /**
+   * If implemented, returns the last timestamp observed in the data. Can be different from the last processed timestamp.
+   */
   default long getLastTimestamp() {
     return -1;
   }

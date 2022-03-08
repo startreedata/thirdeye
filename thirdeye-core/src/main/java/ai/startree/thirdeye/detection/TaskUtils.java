@@ -5,25 +5,27 @@
 
 package ai.startree.thirdeye.detection;
 
-import static ai.startree.thirdeye.util.ThirdEyeUtils.getDetectionExpectedDelay;
-
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
+import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
+import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -97,7 +99,7 @@ public class TaskUtils {
     }
 
     return buildTaskInfoFromDetectionConfig(alert,
-        System.currentTimeMillis(),
+        jobExecutionContext.getScheduledFireTime().getTime(),
         thirdEyeCacheRegistry,
         datasetConfigManager,
         metricConfigManager);
@@ -146,5 +148,31 @@ public class TaskUtils {
     long id = taskManager.save(taskDTO);
     LOG.info("Created {} task {} with taskId {}", taskType, taskDTO, id);
     return id;
+  }
+
+  /**
+   * Get the expected delay for the detection pipeline.
+   * This delay should be the longest of the expected delay of the underline datasets.
+   *
+   * @param config The detection config.
+   * @return The expected delay for this alert in milliseconds.
+   */
+  public static long getDetectionExpectedDelay(AlertDTO config,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
+      final DatasetConfigManager datasetConfigManager,
+      final MetricConfigManager metricConfigManager) {
+    long maxExpectedDelay = 0;
+    Set<String> metricUrns = DetectionConfigFormatter
+        .extractMetricUrnsFromProperties(config.getProperties());
+    for (String urn : metricUrns) {
+      List<DatasetConfigDTO> datasets = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
+          datasetConfigManager,
+          metricConfigManager,
+          thirdEyeCacheRegistry);
+      for (DatasetConfigDTO dataset : datasets) {
+        maxExpectedDelay = Math.max(dataset.getExpectedDelay().toMillis(), maxExpectedDelay);
+      }
+    }
+    return maxExpectedDelay;
   }
 }

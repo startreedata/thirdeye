@@ -22,7 +22,7 @@ import {
     getMetricsAllPath,
     getMetricsPath,
     getMetricsViewPath,
-    getRootCauseAnalysisForAnomalyIndexPath,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
     getRootCauseAnalysisForAnomalyPath,
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsCreatePath,
@@ -140,9 +140,9 @@ describe("Routes Util", () => {
         );
     });
 
-    it("getRootCauseAnalysisForAnomalyIndexPath should return appropriate path with appropriate query string for anomaly id", () => {
-        expect(getRootCauseAnalysisForAnomalyIndexPath(1)).toEqual(
-            "/root-cause-analysis/anomaly/1/index"
+    it("getRootCauseAnalysisForAnomalyInvestigatePath should return appropriate path with for anomaly id", () => {
+        expect(getRootCauseAnalysisForAnomalyInvestigatePath(1)).toEqual(
+            "/root-cause-analysis/anomaly/1/investigate"
         );
     });
 

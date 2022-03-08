@@ -6,6 +6,7 @@ import {
     PageHeaderTextV1,
     PageHeaderV1,
 } from "../../platform/components";
+import { getTimeRangeDuration } from "../../utils/time-range/time-range.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import {
@@ -22,7 +23,6 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
         timeRangeDuration,
         recentCustomTimeRangeDurations,
         setTimeRangeDuration,
-        refreshTimeRange,
     } = useTimeRange();
     const theme = useTheme();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -48,6 +48,12 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
         setSearchParams(searchParams);
     };
 
+    const onHandleRefresh = (): void => {
+        onHandleTimeRangeChange(
+            getTimeRangeDuration(timeRangeDuration.timeRange)
+        );
+    };
+
     return (
         <PageHeaderV1>
             <PageHeaderTextV1>{props.title}</PageHeaderTextV1>
@@ -62,7 +68,7 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
                         }
                         timeRangeDuration={timeRangeDuration}
                         onChange={onHandleTimeRangeChange}
-                        onRefresh={refreshTimeRange}
+                        onRefresh={onHandleRefresh}
                     />
                 )}
 

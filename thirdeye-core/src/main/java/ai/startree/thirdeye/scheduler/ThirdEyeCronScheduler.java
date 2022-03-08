@@ -17,6 +17,8 @@ import org.quartz.SchedulerException;
  */
 public interface ThirdEyeCronScheduler extends Runnable {
 
+  String CRON_TIMEZONE = "UTC";
+
   void addToContext(String identifier, Object instance);
 
   // Initialize and prepare the scheduler

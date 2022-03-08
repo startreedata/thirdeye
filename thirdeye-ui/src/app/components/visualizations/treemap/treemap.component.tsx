@@ -187,9 +187,15 @@ function TreemapInternal<Data>({
                                     .descendants()
                                     .reverse()
                                     .map((node, i) => {
-                                        const nodeWidth = node.x1 - node.x0 - 1;
-                                        const nodeHeight =
-                                            node.y1 - node.y0 - 1;
+                                        const nodeWidth = Math.max(
+                                            node.x1 - node.x0 - 1,
+                                            0
+                                        );
+                                        const nodeHeight = Math.max(
+                                            node.y1 - node.y0 - 1,
+                                            0
+                                        );
+
                                         let colorValue = -1;
 
                                         if (!isOtherDimension(node.data.id)) {
@@ -207,18 +213,12 @@ function TreemapInternal<Data>({
                                                 fill={colorScale(
                                                     colorValue || 0
                                                 )}
-                                                height={Math.max(
-                                                    node.y1 - node.y0 - 1,
-                                                    0
-                                                )}
-                                                width={Math.max(
-                                                    node.x1 - node.x0 - 1,
-                                                    0
-                                                )}
+                                                height={nodeHeight}
+                                                width={nodeWidth}
                                             />
                                         );
 
-                                        return (
+                                        return !nodeHeight ? null : (
                                             <Group
                                                 className={
                                                     props.onDimensionClickHandler

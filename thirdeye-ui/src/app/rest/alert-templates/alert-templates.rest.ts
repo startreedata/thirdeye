@@ -1,5 +1,8 @@
 import axios from "axios";
-import { AlertTemplate } from "../dto/alert-template.interfaces";
+import {
+    AlertTemplate,
+    NewAlertTemplate,
+} from "../dto/alert-template.interfaces";
 
 const BASE_URL_ALERTS = "/api/alert-templates";
 
@@ -16,7 +19,7 @@ export const getAlertTemplates = async (): Promise<AlertTemplate[]> => {
 };
 
 export const createAlertTemplate = async (
-    alertTemplate: AlertTemplate
+    alertTemplate: AlertTemplate | NewAlertTemplate
 ): Promise<AlertTemplate> => {
     const response = await axios.post(BASE_URL_ALERTS, [alertTemplate]);
 

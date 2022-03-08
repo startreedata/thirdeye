@@ -80,8 +80,7 @@ public abstract class ApiBeanMapper {
             .map(ApiBeanMapper::toAlertTemplateApi)
             .orElse(null))
         .setTemplateProperties(dto.getTemplateProperties())
-        // keep lastTimestamp internal - TE-340
-        //.setLastTimestamp(new Date(dto.getLastTimestamp()))
+        .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
         ;

@@ -35,10 +35,9 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
   }
 
   /**
-   * Choose the max out of all the timestamps
+   * Find the max out of all observed timestamps.
    *
-   * @return the last processed timestamp
-   *     NOTE! This is different from the legacy implementation which guesses the lastTimestamp.
+   * @return the last timestamp observed in the data.
    */
   @Override
   public long getLastTimestamp() {

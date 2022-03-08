@@ -70,7 +70,7 @@ export const AppRouter: FunctionComponent = () => {
                     {/* Direct all rca paths root cause analysis router */}
                     <Route
                         element={<RootCauseAnalysisRouter />}
-                        path={AppRoute.ROOT_CAUSE_ANALYSIS}
+                        path={`${AppRoute.ROOT_CAUSE_ANALYSIS}/*`}
                     />
 
                     {/* Direct all other paths to general authenticated router */}

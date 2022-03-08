@@ -5,34 +5,51 @@
 
 package ai.startree.thirdeye.utils;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
+// thread safety has not been thoroughly tested
 public class TimeProvider {
+
   private final static TimeProvider instance = new TimeProvider();
 
   public static TimeProvider instance() {
     return instance;
   }
 
-  private long currentTimeMillis;
-  private boolean mockTime = false;
+  private final AtomicLong currentTimeMillis = new AtomicLong();
+  private final AtomicBoolean mockTime = new AtomicBoolean(false);
 
   public boolean isTimedMocked() {
-    return mockTime;
+    return mockTime.get();
   }
 
-  public void useMockTime(long currentTime) {
-    currentTimeMillis = currentTime;
-    mockTime = true;
+  /**
+   * Set mock time and enable time mocking
+   */
+  public synchronized void useMockTime(long currentTime) {
+    currentTimeMillis.set(currentTime);
+    mockTime.set(true);
   }
 
+  /**
+   * Disable time mocking
+   */
   public void useSystemTime() {
-    mockTime = false;
+    mockTime.set(false);
   }
 
+  /**
+   * Get mock time value
+   */
   public long currentTimeMillis() {
-    return currentTimeMillis;
+    return currentTimeMillis.get();
   }
 
-  public void tick(long tick) {
-    currentTimeMillis += tick;
+  /**
+   * Advance mock time and returns it
+   */
+  public synchronized long tick(long tick) {
+    return currentTimeMillis.addAndGet(tick);
   }
 }

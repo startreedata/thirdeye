@@ -163,7 +163,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
         .setProperties(Map.of(
             "zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(),
             "brokerUrl", pinotContainer.getPinotBrokerUrl().replace("http://", ""),
-            "clusterName", "QuickStartCluster", // really not sure here
+            "clusterName", "QuickStartCluster",
             "controllerConnectionScheme", "http",
             "controllerHost", "localhost",
             "controllerPort", pinotContainer.getControllerPort())

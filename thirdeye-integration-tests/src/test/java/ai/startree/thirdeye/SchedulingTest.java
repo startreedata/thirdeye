@@ -65,8 +65,15 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
   private static final TimeProvider CLOCK = TimeProvider.instance();
   private static final long ONE_DAY_MILLIS = 86400000L;
-  private static final long MARCH_21_2020 = 1584748800_000L;
-  private static final long MARCH_22_2020 = MARCH_21_2020 + ONE_DAY_MILLIS;
+  // alert can be created at any time in the day
+  private static final long MARCH_24_2020_15H33 = 1585063980_000L;
+  // = MARCH_24_2020_15H33 - delay P3D and floor granularity P1D (config in alert json)
+  private static final long MARCH_21_2020_00H00 = 1584748800_000L;
+
+  // cron is every day at 5 am
+  private static final long MARCH_25_2020_00H00 = 1585112400_000L;
+  // = MARCH_25_2020_00H00 - delay P3D and floor granularity P1D (config in alert json)
+  private static final long MARCH_22_2020_00H00 = 1584835200_000L;
 
   private ThirdEyeH2DatabaseServer db;
 
@@ -184,7 +191,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   @Test(dependsOnMethods = "setUpData")
   public void testCreateAlertLastTimestamp() {
     // fix clock : time is now controlled manually
-    CLOCK.useMockTime(MARCH_21_2020);
+    CLOCK.useMockTime(MARCH_24_2020_15H33);
 
     Response createResponse = request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
@@ -209,7 +216,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     // check that lastTimestamp is the endTime of the Onboarding task: March 21 1H
     long alertLastTimestamp = getAlertLastTimestamp();
-    assertThat(alertLastTimestamp).isEqualTo(MARCH_21_2020);
+    assertThat(alertLastTimestamp).isEqualTo(MARCH_21_2020_00H00);
   }
 
   @Test(dependsOnMethods = "testOnboardingLastTimestamp")
@@ -220,7 +227,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     // advance time to March 22, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
-    CLOCK.useMockTime(MARCH_22_2020);
+    CLOCK.useMockTime(MARCH_25_2020_00H00);
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
     // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
@@ -234,7 +241,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     // check that lastTimestamp after detection is the runTime of the cron
     long alertLastTimestamp = getAlertLastTimestamp();
-    assertThat(alertLastTimestamp).isEqualTo(MARCH_22_2020);
+    assertThat(alertLastTimestamp).isEqualTo(MARCH_22_2020_00H00);
   }
 
   private List<Map<String, Object>> getAnomalies() {

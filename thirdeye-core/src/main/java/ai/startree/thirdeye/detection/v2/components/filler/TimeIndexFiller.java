@@ -221,7 +221,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   private Series generateSeries(final DateTime firstValue, final DateTime lastValueIncluded,
       Period timePeriod) {
     Builder correctIndexSeries = LongSeries.builder();
-    DateTime indexValue = new DateTime(firstValue);
+    DateTime indexValue = new DateTime(firstValue, DateTimeZone.UTC);
     while (!indexValue.isAfter(lastValueIncluded)) {
       correctIndexSeries.addValues(indexValue.getMillis());
       indexValue = indexValue.plus(timePeriod);

@@ -7,14 +7,12 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.alert.AlertEvaluator.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.detection.v2.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detection.v2.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detection.v2.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
@@ -33,8 +31,7 @@ public class AlertEvaluatorTest {
 
   @Test
   public void testInjectFilters() {
-    AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null,
-        mock(AlertManager.class));
+    AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null);
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
         .setRca(new RcaMetadataDTO().setDataset(DATASET_NAME))
         .setNodes(List.of(

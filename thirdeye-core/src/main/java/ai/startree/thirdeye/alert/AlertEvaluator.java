@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -63,16 +62,13 @@ public class AlertEvaluator {
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ExecutorService executorService;
   private final PlanExecutor planExecutor;
-  private final AlertManager alertManager;
 
   @Inject
   public AlertEvaluator(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final PlanExecutor planExecutor,
-      final AlertManager alertManager) {
+      final PlanExecutor planExecutor) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.planExecutor = planExecutor;
-    this.alertManager = alertManager;
 
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }

@@ -62,12 +62,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     this.evaluationManager = evaluationManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.detectionPipelineRunner = detectionPipelineRunner;
+    this.anomalyMerger = anomalyMerger;
+    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
     detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
-    this.anomalyMerger = anomalyMerger;
-    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
   }
 
   @Override

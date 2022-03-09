@@ -199,12 +199,15 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> alerts = createResponse.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
 
+    // time advancing should not impact lastTimestamp
+    CLOCK.tick(5);
+
     // check that lastTimestamp just after creation is 0
     long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(0);
   }
 
-  @Test(dependsOnMethods = "testCreateAlertLastTimestamp")
+  @Test(dependsOnMethods = "testCreateAlertLastTimestamp", timeOut = 60000L)
   public void testOnboardingLastTimestamp() throws Exception {
     // wait for anomalies - proxy to know when the onboarding task has run
     List<Map<String, Object>> anomalies = List.of();
@@ -219,7 +222,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     assertThat(alertLastTimestamp).isEqualTo(MARCH_21_2020_00H00);
   }
 
-  @Test(dependsOnMethods = "testOnboardingLastTimestamp")
+  @Test(dependsOnMethods = "testOnboardingLastTimestamp", timeOut = 60000L)
   public void testAfterDetectionCronLastTimestamp() throws InterruptedException {
     // get current number of anomalies
     List<Map<String, Object>> anomalies = getAnomalies();

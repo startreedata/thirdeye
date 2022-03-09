@@ -7,6 +7,7 @@ import {
 } from "../../platform/components";
 import {
     getAlertsCreatePath,
+    getAlertTemplatesCreatePath,
     getDatasetsOnboardPath,
     getDatasourcesCreatePath,
     getMetricsCreatePath,
@@ -35,6 +36,10 @@ export const CreateMenuButton: FunctionComponent = () => {
 
     const handleCreateDatasource = (): void => {
         navigate(getDatasourcesCreatePath());
+    };
+
+    const handleCreateAlertTemplate = (): void => {
+        navigate(getAlertTemplatesCreatePath());
     };
 
     const shortcutCreateMenuItems = [
@@ -68,6 +73,12 @@ export const CreateMenuButton: FunctionComponent = () => {
                 entity: t("label.datasource"),
             }),
         },
+        {
+            id: "createAlertTemplate",
+            text: t("label.create-entity", {
+                entity: t("label.alert-template"),
+            }),
+        },
     ];
 
     const handleShortcutCreateOnclick = (
@@ -93,6 +104,10 @@ export const CreateMenuButton: FunctionComponent = () => {
                 break;
             case "createDatasource":
                 handleCreateDatasource();
+
+                break;
+            case "createAlertTemplate":
+                handleCreateAlertTemplate();
 
                 break;
             default:

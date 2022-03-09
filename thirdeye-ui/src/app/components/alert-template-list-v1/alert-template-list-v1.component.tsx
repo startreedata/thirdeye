@@ -23,7 +23,7 @@ import { AlertTemplateListV1Props } from "./alert-template-list-v1.interfaces";
 
 export const AlertTemplateListV1: FunctionComponent<
     AlertTemplateListV1Props
-> = (props) => {
+> = ({ alertTemplates, onDelete }) => {
     const [selectedAlertTemplate, setSelectedAlertTemplate] =
         useState<DataGridSelectionModelV1<AlertTemplate>>();
     const [alertTemplatesData, setAlertTemplatesData] = useState<
@@ -53,12 +53,12 @@ export const AlertTemplateListV1: FunctionComponent<
     };
 
     useEffect(() => {
-        if (!props.alertTemplates) {
+        if (!alertTemplates) {
             return;
         }
 
-        setAlertTemplatesData(generateDataWithChildren(props.alertTemplates));
-    }, [props.alertTemplates]);
+        setAlertTemplatesData(generateDataWithChildren(alertTemplates));
+    }, [alertTemplates]);
 
     const renderLink = (
         cellValue: Record<string, unknown>,
@@ -80,18 +80,17 @@ export const AlertTemplateListV1: FunctionComponent<
     );
 
     const handleAlertTemplateDelete = (): void => {
-        if (isActionButtonDisable) {
+        if (isActionButtonDisable || !selectedAlertTemplate) {
             return;
         }
-        const selectedAlertTemplate: AlertTemplate | undefined =
-            props.alertTemplates?.find(
+        const alertTemplateToDelete: AlertTemplate | undefined =
+            alertTemplates?.find(
                 (alertTemplate) =>
-                    alertTemplate.id === selectedAlertTemplate?.id
+                    alertTemplate.id ===
+                    (selectedAlertTemplate.rowKeyValues[0] as number)
             );
 
-        selectedAlertTemplate &&
-            props.onDelete &&
-            props.onDelete(selectedAlertTemplate);
+        alertTemplateToDelete && onDelete && onDelete(alertTemplateToDelete);
     };
 
     const handleAlertEdit = (): void => {

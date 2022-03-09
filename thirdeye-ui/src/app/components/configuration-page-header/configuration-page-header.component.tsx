@@ -8,6 +8,7 @@ import {
     PageHeaderV1,
 } from "../../platform/components";
 import {
+    getAlertTemplatesPath,
     getDatasetsPath,
     getDatasourcesPath,
     getMetricsPath,
@@ -41,6 +42,9 @@ export const ConfigurationPageHeader: FunctionComponent<
                 </PageHeaderTabV1>
                 <PageHeaderTabV1 href={getMetricsPath()}>
                     {t("label.metrics")}
+                </PageHeaderTabV1>
+                <PageHeaderTabV1 href={getAlertTemplatesPath()}>
+                    {t("label.alert-templates")}
                 </PageHeaderTabV1>
             </PageHeaderTabsV1>
         </PageHeaderV1>

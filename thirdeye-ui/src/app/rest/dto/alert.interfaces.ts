@@ -25,15 +25,6 @@ export interface EditableAlert {
     };
     templateProperties: {
         [index: string]: string;
-        min: string;
-        max: string;
-        timeColumnFormat: string;
-        timeColumn: string;
-        monitoringGranularity: string;
-        dataSource: string;
-        aggregateFunction: string;
-        dataset: string;
-        metric: string;
     };
     lastTimestamp?: number;
     active?: boolean;

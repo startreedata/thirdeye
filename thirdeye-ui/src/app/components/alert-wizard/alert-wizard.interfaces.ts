@@ -7,6 +7,7 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 
 export interface AlertWizardProps<NewOrExistingAlert> {
     alert: NewOrExistingAlert;
+    createNewMode?: boolean;
     showCancel?: boolean;
     getAllSubscriptionGroups: () => Promise<SubscriptionGroup[]>;
     getAllAlerts: () => Promise<Alert[]>;
@@ -20,6 +21,15 @@ export interface AlertWizardProps<NewOrExistingAlert> {
         subscriptionGroups: SubscriptionGroup[],
         omittedSubscriptionGroups?: SubscriptionGroup[]
     ) => void;
+}
+
+export interface AlertWizardConfigurationNewProps {
+    alertConfiguration: EditableAlert;
+    error: boolean;
+    selectedTemplateId: string;
+    helperText: string;
+    onChange: (value: string) => void;
+    onTemplateIdChange: (value: string) => void;
 }
 
 export enum AlertWizardStep {

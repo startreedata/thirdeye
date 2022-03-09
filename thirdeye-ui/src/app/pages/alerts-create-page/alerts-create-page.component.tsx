@@ -46,44 +46,51 @@ export const AlertsCreatePage: FunctionComponent = () => {
             return;
         }
 
-        createAlert(alert).then((alert: Alert): void => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.create-success", { entity: t("label.alert") })
-            );
+        createAlert(alert)
+            .then((alert: Alert): void => {
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.create-success", { entity: t("label.alert") })
+                );
 
-            if (isEmpty(subscriptionGroups)) {
-                // Redirect to alerts detail path
-                navigate(getAlertsViewPath(alert.id));
-
-                return;
-            }
-
-            // Update subscription groups with new alert
-            for (const subscriptionGroup of subscriptionGroups) {
-                if (subscriptionGroup.alerts) {
-                    // Add to existing list
-                    subscriptionGroup.alerts.push(alert);
-                } else {
-                    // Create and add to list
-                    subscriptionGroup.alerts = [alert];
-                }
-            }
-
-            updateSubscriptionGroups(subscriptionGroups)
-                .then((): void => {
-                    notify(
-                        NotificationTypeV1.Success,
-                        t("message.update-success", {
-                            entity: t("label.subscription-groups"),
-                        })
-                    );
-                })
-                .finally((): void => {
+                if (isEmpty(subscriptionGroups)) {
                     // Redirect to alerts detail path
                     navigate(getAlertsViewPath(alert.id));
-                });
-        });
+
+                    return;
+                }
+
+                // Update subscription groups with new alert
+                for (const subscriptionGroup of subscriptionGroups) {
+                    if (subscriptionGroup.alerts) {
+                        // Add to existing list
+                        subscriptionGroup.alerts.push(alert);
+                    } else {
+                        // Create and add to list
+                        subscriptionGroup.alerts = [alert];
+                    }
+                }
+
+                updateSubscriptionGroups(subscriptionGroups)
+                    .then((): void => {
+                        notify(
+                            NotificationTypeV1.Success,
+                            t("message.update-success", {
+                                entity: t("label.subscription-groups"),
+                            })
+                        );
+                    })
+                    .finally((): void => {
+                        // Redirect to alerts detail path
+                        navigate(getAlertsViewPath(alert.id));
+                    });
+            })
+            .catch(() => {
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.create-error", { entity: t("label.alert") })
+                );
+            });
     };
 
     const onSubscriptionGroupWizardFinish = async (
@@ -167,6 +174,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <AlertWizard<EditableAlert>
+                        createNewMode
                         alert={createDefaultAlert()}
                         getAlertEvaluation={fetchAlertEvaluation}
                         getAllAlerts={fetchAllAlerts}

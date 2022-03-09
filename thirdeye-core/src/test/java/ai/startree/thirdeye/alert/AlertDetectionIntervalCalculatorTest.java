@@ -69,7 +69,7 @@ public class AlertDetectionIntervalCalculatorTest {
         inputAlertTemplate);
 
     Interval expected = new Interval(
-        inputTaskStart,                                                 // unchanged
+        inputTaskStart,  // unchanged
         DATE_PARSER.parseDateTime("2021-11-23 13:02:12.333 UTC"));  // minus 1 day
 
     assertThat(output).isEqualTo(expected);
@@ -126,7 +126,7 @@ public class AlertDetectionIntervalCalculatorTest {
 
   @Test
   public void testGetCorrectedIntervalWithStartTimeGreaterThanEndTimeMinusDelay() {
-    // test that both start and enTime are changed there is a delay and end-delay < start
+    // test that both start and endTime are changed when end-delay < start
     // this can happen if delay is augmented
     DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");

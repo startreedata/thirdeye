@@ -83,7 +83,6 @@ public class AnomalyMerger {
       return;
     }
 
-    // cyril - alert may need template rendering for some use cases
     final List<MergedAnomalyResultDTO> existingAnomalies = retrieveRelevantAnomaliesFromDatabase(
         alert,
         anomalies,

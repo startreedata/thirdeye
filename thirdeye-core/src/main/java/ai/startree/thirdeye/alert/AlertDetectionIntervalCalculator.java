@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.alert;
 
+import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -35,6 +36,20 @@ public class AlertDetectionIntervalCalculator {
   @Inject
   public AlertDetectionIntervalCalculator(final AlertTemplateRenderer alertTemplateRenderer) {
     this.alertTemplateRenderer = alertTemplateRenderer;
+  }
+
+  public Interval getCorrectedInterval(final AlertApi alertApi, final long taskStartMillis,
+      final long taskEndMillis) throws IOException, ClassNotFoundException {
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
+        0L,
+        0L);
+    // alertApi does not have an idea if it's new alert tested in the create alert flow
+    long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
+
+    return getCorrectedInterval(alertId,
+        new DateTime(taskStartMillis, DateTimeZone.UTC),
+        new DateTime(taskEndMillis, DateTimeZone.UTC),
+        templateWithProperties);
   }
 
   /**
@@ -76,11 +91,17 @@ public class AlertDetectionIntervalCalculator {
         LOG.warn(
             "EndTime with delay correction {} is before startTime {}. This can happen if delay configuration is changed to a bigger value. "
                 + "Applied delay correction to startTime. Detection may rerun on a timeframe on which it already run with a different config",
-            correctedEnd, correctedStart);
+            correctedEnd,
+            correctedStart);
       }
       LOG.info(
           "Applied delay correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
-          delay, alertId, taskStart, taskEnd, correctedStart, correctedEnd);
+          delay,
+          alertId,
+          taskStart,
+          taskEnd,
+          correctedStart,
+          correctedEnd);
     }
 
     // apply granularity correction
@@ -92,7 +113,12 @@ public class AlertDetectionIntervalCalculator {
       correctedEnd = TimeUtils.floorByPeriod(correctedEnd, granularity);
       LOG.info(
           "Applied granularity correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
-          granularity, alertId, taskStart, taskEnd, correctedStart, correctedEnd);
+          granularity,
+          alertId,
+          taskStart,
+          taskEnd,
+          correctedStart,
+          correctedEnd);
     }
 
     return new Interval(correctedStart, correctedEnd);

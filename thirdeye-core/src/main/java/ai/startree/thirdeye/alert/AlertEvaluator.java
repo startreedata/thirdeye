@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,13 +63,16 @@ public class AlertEvaluator {
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ExecutorService executorService;
   private final PlanExecutor planExecutor;
+  private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
 
   @Inject
   public AlertEvaluator(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final PlanExecutor planExecutor) {
+      final PlanExecutor planExecutor,
+      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.planExecutor = planExecutor;
+    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
 
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -114,11 +118,16 @@ public class AlertEvaluator {
     try {
       // data delay and granularity is not applied, but it could be - with a toogle in evaluationContext to be optional
 
+      Interval detectionInterval = alertDetectionIntervalCalculator
+          .getCorrectedInterval(request.getAlert(),
+              request.getStart().getTime(),
+              request.getEnd().getTime());
+
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
           request.getAlert(),
-          request.getStart().getTime(),
-          request.getEnd().getTime());
+          detectionInterval.getStartMillis(),
+          detectionInterval.getEndMillis());
 
       // inject custom evaluation context
       injectEvaluationContext(templateWithProperties, request.getEvaluationContext());
@@ -133,8 +142,8 @@ public class AlertEvaluator {
       final Map<String, DetectionPipelineResult> result = executorService
           .submit(() -> planExecutor.runPipeline(
               templateWithProperties.getNodes(),
-              request.getStart().getTime(),
-              request.getEnd().getTime()
+              detectionInterval.getStartMillis(),
+              detectionInterval.getEndMillis()
           ))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
@@ -158,7 +167,6 @@ public class AlertEvaluator {
     if (filters != null) {
       injectFilters(templateWithProperties, filters);
     }
-
   }
 
   @VisibleForTesting

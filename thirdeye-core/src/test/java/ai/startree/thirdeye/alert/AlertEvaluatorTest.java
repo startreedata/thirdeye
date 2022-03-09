@@ -31,7 +31,7 @@ public class AlertEvaluatorTest {
 
   @Test
   public void testInjectFilters() {
-    AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null);
+    AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null, null);
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
         .setRca(new RcaMetadataDTO().setDataset(DATASET_NAME))
         .setNodes(List.of(

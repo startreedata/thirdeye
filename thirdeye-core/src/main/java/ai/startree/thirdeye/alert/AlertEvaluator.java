@@ -116,8 +116,6 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      // data delay and granularity is not applied, but it could be - with a toogle in evaluationContext to be optional
-
       Interval detectionInterval = alertDetectionIntervalCalculator
           .getCorrectedInterval(request.getAlert(),
               request.getStart().getTime(),

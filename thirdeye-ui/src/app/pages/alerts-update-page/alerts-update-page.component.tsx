@@ -19,7 +19,11 @@ import {
     getAllAlerts,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    EditableAlert,
+} from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
@@ -46,7 +50,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     }, []);
 
     const onAlertWizardFinish = (
-        newAlert: Alert,
+        newAlert: EditableAlert,
         subscriptionGroups: SubscriptionGroup[],
         omittedSubscriptionGroups: SubscriptionGroup[] = []
     ): void => {
@@ -56,7 +60,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
         newAlert = assign({ ...newAlert }, { id: alert?.id });
 
-        updateAlert(newAlert)
+        updateAlert(newAlert as Alert)
             .then((alert: Alert): void => {
                 notify(
                     NotificationTypeV1.Success,
@@ -243,16 +247,20 @@ export const AlertsUpdatePage: FunctionComponent = () => {
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <AlertWizard
-                        alert={alert}
-                        getAlertEvaluation={fetchAlertEvaluation}
-                        getAllAlerts={fetchAllAlerts}
-                        getAllSubscriptionGroups={fetchAllSubscriptionGroups}
-                        onFinish={onAlertWizardFinish}
-                        onSubscriptionGroupWizardFinish={
-                            onSubscriptionGroupWizardFinish
-                        }
-                    />
+                    {alert && (
+                        <AlertWizard<Alert>
+                            alert={alert}
+                            getAlertEvaluation={fetchAlertEvaluation}
+                            getAllAlerts={fetchAllAlerts}
+                            getAllSubscriptionGroups={
+                                fetchAllSubscriptionGroups
+                            }
+                            onFinish={onAlertWizardFinish}
+                            onSubscriptionGroupWizardFinish={
+                                onSubscriptionGroupWizardFinish
+                            }
+                        />
+                    )}
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

@@ -14,14 +14,21 @@ import {
 } from "../../platform/components";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { createAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    EditableAlert,
+} from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
     getAllSubscriptionGroups,
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
+import {
+    createAlertEvaluation,
+    createDefaultAlert,
+} from "../../utils/alerts/alerts.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
@@ -32,7 +39,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
 
     const onAlertWizardFinish = (
-        alert: Alert,
+        alert: EditableAlert,
         subscriptionGroups: SubscriptionGroup[]
     ): void => {
         if (!alert) {
@@ -132,7 +139,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     };
 
     const fetchAlertEvaluation = async (
-        alert: Alert
+        alert: EditableAlert
     ): Promise<AlertEvaluation> => {
         const fetchedAlertEvaluation = await getEvaluation(
             createAlertEvaluation(
@@ -159,7 +166,8 @@ export const AlertsCreatePage: FunctionComponent = () => {
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <AlertWizard
+                    <AlertWizard<EditableAlert>
+                        alert={createDefaultAlert()}
                         getAlertEvaluation={fetchAlertEvaluation}
                         getAllAlerts={fetchAllAlerts}
                         getAllSubscriptionGroups={fetchAllSubscriptionGroups}

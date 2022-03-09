@@ -5,12 +5,11 @@
 
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.CoreConstants;
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -21,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.OnboardingTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
@@ -31,20 +29,25 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertCreater {
 
+  // default onboarding replay period
+  // not used - with the current implementation alert is replayed from epoch 0
+  // to get this right, this should depend on the granularity
+  private static final long ONBOARDING_REPLAY_LOOKBACK = TimeUnit.DAYS.toMillis(60);
+
   protected static final Logger LOG = LoggerFactory.getLogger(AlertCreater.class);
 
   private final AlertManager alertManager;
   private final AlertApiBeanMapper alertApiBeanMapper;
-  private final TaskManager taskManager;
+  private final TaskManager taskDAO;
 
   @Inject
   public AlertCreater(
       final AlertManager alertManager,
       final AlertApiBeanMapper alertApiBeanMapper,
-      final TaskManager taskManager) {
+      final TaskManager taskDAO) {
     this.alertManager = alertManager;
     this.alertApiBeanMapper = alertApiBeanMapper;
-    this.taskManager = taskManager;
+    this.taskDAO = taskDAO;
   }
 
   public AlertDTO create(AlertApi api) {
@@ -66,7 +69,7 @@ public class AlertCreater {
     long start = dto.getLastTimestamp();
     // If no value is present, set the default lookback
     if (start < 0) {
-      start = end - CoreConstants.ONBOARDING_REPLAY_LOOKBACK;
+      start = end - ONBOARDING_REPLAY_LOOKBACK;
     }
 
     createOnboardingTask(dto, start, end);
@@ -101,18 +104,13 @@ public class AlertCreater {
         .setEnd(end)
     ;
 
-    final String taskInfoJson;
     try {
-      taskInfoJson = new ObjectMapper().writeValueAsString(info);
+      TaskDTO taskDTO = createTaskDto(alertDTO.getId(), info, TaskType.ONBOARDING);
+      final long taskId = taskDAO.save(taskDTO);
+      LOG.info("Created {} task {} with settings {}", TaskType.ONBOARDING, taskId, taskDTO);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
           OnboardingTaskInfo.class.getSimpleName(), info), e);
     }
-
-    final TaskDTO taskDTO = TaskUtils.buildTask(alertDTO.getId(), taskInfoJson,
-        TaskType.ONBOARDING);
-    final long taskId = taskManager.save(taskDTO);
-    LOG.info("Created {} task {} with taskId {}", TaskType.ONBOARDING,
-        taskDTO, taskId);
   }
 }

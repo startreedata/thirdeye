@@ -33,6 +33,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String dataSource;
   private Set<String> owners;
   private Boolean active;
+  /** Expected delay for data to be complete. In ISO 8601. Eg P1D*/
+  private String completenessDelay;
 
   /**
    * Configuration for non-additive dataset
@@ -64,10 +66,8 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   private boolean realtime = false;
 
-  // delay expected for a dataset for data to arrive
-  // prefer using delay at the alert level (in metadata)
-  // todo cyril remove once alert delay is implemented
-  @Deprecated
+  @Deprecated // use completenessDelay
+  @JsonIgnore
   private TimeGranularity expectedDelay;
   // latest timestamp of the dataset updated by external events
   private long lastRefreshTime;
@@ -227,12 +227,12 @@ public class DatasetConfigDTO extends AbstractDTO {
     this.realtime = realtime;
   }
 
-  @Deprecated
+  @Deprecated // use completenessDelay
   public TimeGranularity getExpectedDelay() {
     return expectedDelay;
   }
 
-  @Deprecated
+  @Deprecated // use completenessDelay
   public void setExpectedDelay(TimeGranularity expectedDelay) {
     this.expectedDelay = expectedDelay;
   }
@@ -269,6 +269,15 @@ public class DatasetConfigDTO extends AbstractDTO {
     this.lastRefreshEventTime = lastRefreshEventTime;
   }
 
+  public String getCompletenessDelay() {
+    return completenessDelay;
+  }
+
+  public DatasetConfigDTO setCompletenessDelay(final String completenessDelay) {
+    this.completenessDelay = completenessDelay;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -290,8 +299,7 @@ public class DatasetConfigDTO extends AbstractDTO {
         .equals(preAggregatedKeyword,
             that.preAggregatedKeyword) && Objects
         .equals(nonAdditiveBucketSize, that.nonAdditiveBucketSize)
-        && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit && Objects
-        .equals(expectedDelay, that.expectedDelay)
+        && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit
         && Objects.equals(properties, that.properties);
   }
 
@@ -302,7 +310,7 @@ public class DatasetConfigDTO extends AbstractDTO {
             timezone,
             dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
             preAggregatedKeyword,
-            nonAdditiveBucketSize, nonAdditiveBucketUnit, realtime, expectedDelay, properties);
+            nonAdditiveBucketSize, nonAdditiveBucketUnit, realtime, properties);
   }
 
   /**

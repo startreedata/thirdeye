@@ -23,7 +23,7 @@ import ai.startree.thirdeye.spi.detection.IndexFiller;
 import ai.startree.thirdeye.spi.detection.NullReplacer;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
-import com.google.common.annotations.VisibleForTesting;
+import ai.startree.thirdeye.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -79,7 +79,6 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     } else {
       timeColumn = properties.getOrDefault(TIME_COLUMN.toString(), DEFAULT_TIMESTAMP);
     }
-
 
     String granularitySpec = Optional.ofNullable(spec.getMonitoringGranularity())
         .orElseGet(() -> Optional.ofNullable(properties.get(GRANULARITY.toString()))
@@ -163,8 +162,10 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
   private DataFrame generateCorrectIndex() {
 
-    DateTime firstIndexValue = getFirstIndexValue(minTime, granularity);
-    DateTime lastIndexValue = getLastIndexValue(maxTime, granularity);
+    DateTime firstIndexValue = TimeUtils.getSmallestDatetime(
+        new DateTime(minTime, DateTimeZone.UTC), granularity);
+    DateTime lastIndexValue = TimeUtils.getBiggestDatetime(
+        new DateTime(maxTime, DateTimeZone.UTC), granularity);
     Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(timeColumn, correctIndexSeries);
@@ -220,81 +221,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   private Series generateSeries(final DateTime firstValue, final DateTime lastValueIncluded,
       Period timePeriod) {
     Builder correctIndexSeries = LongSeries.builder();
-    DateTime indexValue = new DateTime(firstValue);
+    DateTime indexValue = new DateTime(firstValue, DateTimeZone.UTC);
     while (!indexValue.isAfter(lastValueIncluded)) {
       correctIndexSeries.addValues(indexValue.getMillis());
       indexValue = indexValue.plus(timePeriod);
     }
     return correctIndexSeries.build();
-  }
-
-  /**
-   * Returns the first index of a timeseries grouped by period, with time index >=minTimeConstraint.
-   * eg: minTimeConstraint is >= Thursday 3 am - period is 1 DAY --> returns Friday.
-   * eg: inclusion: minTimeConstraint is >= Thursday 0 am - period is 1 DAY --> returns Thursday.
-   */
-  @VisibleForTesting
-  protected static DateTime getFirstIndexValue(long minTimeConstraint, Period timePeriod) {
-    DateTime dateTimeConstraint = new DateTime(minTimeConstraint, DateTimeZone.UTC);
-    DateTime dateTimeFloored = floorByPeriod(dateTimeConstraint, timePeriod.toPeriod());
-    if (dateTimeConstraint.equals(dateTimeFloored)) {
-      return dateTimeFloored;
-    }
-    // dateTimeConstraint bigger than floor --> add 1 period
-    return dateTimeFloored.plus(timePeriod);
-  }
-
-  /**
-   * Returns the last index of a timeseries grouped by period, with time index <maxTimeConstraint.
-   * eg: maxTimeConstraint is < Monday 4 am - period is 1 DAY --> returns Monday.
-   * eg: exclusion: maxTimeConstraint is < Monday 0 am - period is 1 DAY --> returns Sunday.
-   */
-  @VisibleForTesting
-  protected static DateTime getLastIndexValue(long maxTimeConstraint, Period timePeriod) {
-    DateTime dateTimeConstraint = new DateTime(maxTimeConstraint, DateTimeZone.UTC);
-    DateTime dateTimeFloored = floorByPeriod(dateTimeConstraint, timePeriod.toPeriod());
-
-    if (dateTimeConstraint.equals(dateTimeFloored)) {
-      // dateTimeConstraint equals floor --> should be excluded
-      return dateTimeFloored.minus(timePeriod);
-    }
-    return dateTimeFloored;
-  }
-
-  /**
-   * See https://stackoverflow.com/questions/8933158/how-do-i-round-a-datetime-to-the-nearest-period
-   * Floors correctly only if 1 Time unit is used in the Period.
-   */
-  @VisibleForTesting
-  protected static DateTime floorByPeriod(DateTime dt, Period period) {
-    if (period.getYears() != 0) {
-      return dt.yearOfEra().roundFloorCopy().minusYears(dt.getYearOfEra() % period.getYears());
-    } else if (period.getMonths() != 0) {
-      return dt.monthOfYear()
-          .roundFloorCopy()
-          .minusMonths((dt.getMonthOfYear() - 1) % period.getMonths());
-    } else if (period.getWeeks() != 0) {
-      return dt.weekOfWeekyear()
-          .roundFloorCopy()
-          .minusWeeks((dt.getWeekOfWeekyear() - 1) % period.getWeeks());
-    } else if (period.getDays() != 0) {
-      return dt.dayOfMonth()
-          .roundFloorCopy()
-          .minusDays((dt.getDayOfMonth() - 1) % period.getDays());
-    } else if (period.getHours() != 0) {
-      return dt.hourOfDay().roundFloorCopy().minusHours(dt.getHourOfDay() % period.getHours());
-    } else if (period.getMinutes() != 0) {
-      return dt.minuteOfHour()
-          .roundFloorCopy()
-          .minusMinutes(dt.getMinuteOfHour() % period.getMinutes());
-    } else if (period.getSeconds() != 0) {
-      return dt.secondOfMinute()
-          .roundFloorCopy()
-          .minusSeconds(dt.getSecondOfMinute() % period.getSeconds());
-    }
-    return dt.millisOfSecond()
-        .roundCeilingCopy()
-        .minusMillis(dt.getMillisOfSecond() % period.getMillis());
   }
 
   private static class NullReplacerRegistry {

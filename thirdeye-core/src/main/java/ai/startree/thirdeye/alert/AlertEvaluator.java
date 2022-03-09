@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -43,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,16 +63,16 @@ public class AlertEvaluator {
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ExecutorService executorService;
   private final PlanExecutor planExecutor;
-  private final AlertManager alertManager;
+  private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
 
   @Inject
   public AlertEvaluator(
       final AlertTemplateRenderer alertTemplateRenderer,
       final PlanExecutor planExecutor,
-      final AlertManager alertManager) {
+      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.planExecutor = planExecutor;
-    this.alertManager = alertManager;
+    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
 
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
@@ -116,11 +116,16 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
+      Interval detectionInterval = alertDetectionIntervalCalculator
+          .getCorrectedInterval(request.getAlert(),
+              request.getStart().getTime(),
+              request.getEnd().getTime());
+
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
           request.getAlert(),
-          request.getStart().getTime(),
-          request.getEnd().getTime());
+          detectionInterval.getStartMillis(),
+          detectionInterval.getEndMillis());
 
       // inject custom evaluation context
       injectEvaluationContext(templateWithProperties, request.getEvaluationContext());
@@ -135,8 +140,8 @@ public class AlertEvaluator {
       final Map<String, DetectionPipelineResult> result = executorService
           .submit(() -> planExecutor.runPipeline(
               templateWithProperties.getNodes(),
-              request.getStart().getTime(),
-              request.getEnd().getTime()
+              detectionInterval.getStartMillis(),
+              detectionInterval.getEndMillis()
           ))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
@@ -160,7 +165,6 @@ public class AlertEvaluator {
     if (filters != null) {
       injectFilters(templateWithProperties, filters);
     }
-
   }
 
   @VisibleForTesting

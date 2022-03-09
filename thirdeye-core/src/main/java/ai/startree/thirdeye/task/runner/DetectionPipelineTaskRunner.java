@@ -8,6 +8,7 @@ package ai.startree.thirdeye.task.runner;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
@@ -26,8 +27,10 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +48,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
   private final DetectionPipelineRunner detectionPipelineRunner;
   private final AnomalyMerger anomalyMerger;
+  private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
 
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
@@ -52,16 +56,18 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
       final MetricRegistry metricRegistry,
       final DetectionPipelineRunner detectionPipelineRunner,
-      final AnomalyMerger anomalyMerger) {
+      final AnomalyMerger anomalyMerger,
+      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator) {
     this.alertManager = alertManager;
     this.evaluationManager = evaluationManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.detectionPipelineRunner = detectionPipelineRunner;
+    this.anomalyMerger = anomalyMerger;
+    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
     detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
-    this.anomalyMerger = anomalyMerger;
   }
 
   @Override
@@ -70,34 +76,34 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     detectionTaskCounter.inc();
     try {
       final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
+      LOG.info("Start detection task for id {} between {} and {}",
+          info.getConfigId(),
+          new DateTime(info.getStart(), DateTimeZone.UTC),
+          new DateTime(info.getEnd(), DateTimeZone.UTC));
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
-      LOG.info("Start detection for config {} between {} and {}",
-          alert.getId(),
-          info.getStart(),
-          info.getEnd());
+      Interval detectionInterval = alertDetectionIntervalCalculator
+          .getCorrectedInterval(alert, info.getStart(), info.getEnd());
 
-      final DetectionPipelineResult result = detectionPipelineRunner.run(
-          alert,
-          info.getStart(),
-          info.getEnd());
+      final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
       if (result.getLastTimestamp() < 0) {
-        LOG.info("No detection ran for config {} between {} and {}",
+        // notice lastTimestamp is not updated
+        LOG.info("No data returned for detection run for id {} between {} and {}",
             alert.getId(),
-            info.getStart(),
-            info.getEnd());
+            detectionInterval.getStart(),
+            detectionInterval.getEnd());
         return Collections.emptyList();
       }
 
-      postExecution(info, alert, result);
+      postExecution(alert, result, detectionInterval);
 
       detectionTaskSuccessCounter.inc();
-      LOG.info("End detection for alert {} between {} and {}. Detected {} anomalies.",
+      LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
           alert.getId(),
-          new Date(info.getStart()),
-          new Date(info.getEnd()),
+          detectionInterval.getStart(),
+          detectionInterval.getEnd(),
           optional(result.getAnomalies()).map(List::size).orElse(0));
 
       return Collections.emptyList();
@@ -107,11 +113,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private void postExecution(final DetectionPipelineTaskInfo taskInfo,
-      final AlertDTO alert, final DetectionPipelineResult result) {
-    alert.setLastTimestamp(taskInfo.getEnd());
+  private void postExecution(final AlertDTO alert, final DetectionPipelineResult result,
+      final Interval detectionInterval) {
+    alert.setLastTimestamp(detectionInterval.getEndMillis());
     alertManager.update(alert);
-    anomalyMerger.mergeAndSave(taskInfo, alert, result.getAnomalies());
+    anomalyMerger.mergeAndSave(alert, result.getAnomalies(), detectionInterval);
 
     for (final EvaluationDTO evaluationDTO : result.getEvaluations()) {
       evaluationManager.save(evaluationDTO);

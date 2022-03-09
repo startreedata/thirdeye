@@ -13,7 +13,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
-import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -30,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +77,8 @@ public class AnomalyMerger {
     this.dataProvider = dataProvider;
   }
 
-  public void mergeAndSave(final DetectionPipelineTaskInfo taskInfo,
-      final AlertDTO alert,
-      final List<MergedAnomalyResultDTO> anomalies) {
+  public void mergeAndSave(final AlertDTO alert,
+      final List<MergedAnomalyResultDTO> anomalies, final Interval detectionInterval) {
     if (anomalies.isEmpty()) {
       return;
     }
@@ -87,8 +86,8 @@ public class AnomalyMerger {
     final List<MergedAnomalyResultDTO> existingAnomalies = retrieveRelevantAnomaliesFromDatabase(
         alert,
         anomalies,
-        taskInfo.getStart(),
-        taskInfo.getEnd());
+        detectionInterval.getStartMillis(),
+        detectionInterval.getEndMillis());
 
     final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = prepareSortedAnomalyList(
         anomalies,

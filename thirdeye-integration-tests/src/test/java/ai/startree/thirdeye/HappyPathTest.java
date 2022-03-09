@@ -211,7 +211,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test(dependsOnMethods = "testCreateAlert", timeOut = 50000L, groups = {"longTest"})
+  @Test(dependsOnMethods = "testCreateAlert", timeOut = 50000L)
   public void testGetAnomalies() throws InterruptedException {
     // test get anomalies
     // need to wait for the taskRunner to run the onboard task - can take some time

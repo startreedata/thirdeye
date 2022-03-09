@@ -15,8 +15,8 @@ import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.task.DetectionPipelineResultWrapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Date;
 import java.util.Map;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,27 +37,25 @@ public class DetectionPipelineRunner {
   }
 
   public DetectionPipelineResult run(final AlertDTO alert,
-      final long start,
-      final long end) throws Exception {
+      final Interval detectionInterval) throws Exception {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
-        alert.getId(), new Date(start), new Date(end)));
+        alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
-    return executePlan(alert, start, end);
+    return executePlan(alert, detectionInterval);
   }
 
   private DetectionPipelineResult executePlan(final AlertDTO alert,
-      final long start,
-      final long end) throws Exception {
+      final Interval detectionInterval) throws Exception {
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
         alert,
-        start,
-        end);
+        detectionInterval.getStartMillis(),
+        detectionInterval.getEndMillis());
 
     final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),
-        start,
-        end);
+        detectionInterval.getStartMillis(),
+        detectionInterval.getEndMillis());
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();

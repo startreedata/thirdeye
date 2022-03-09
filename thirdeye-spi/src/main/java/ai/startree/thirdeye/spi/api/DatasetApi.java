@@ -19,8 +19,11 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   private Boolean additive;
   private List<String> dimensions;
   private TimeColumnApi timeColumn;
+  @Deprecated // use completenessDelay 
   private Duration expectedDelay;
   private DataSourceApi dataSource;
+  /** Expected delay for data to be complete. In ISO 8601. Eg P1D.*/
+  private String completenessDelay;
 
   public Long getId() {
     return id;
@@ -76,10 +79,12 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return this;
   }
 
+  @Deprecated // use completenessDelay
   public Duration getExpectedDelay() {
     return expectedDelay;
   }
 
+  @Deprecated // use completenessDelay
   public DatasetApi setExpectedDelay(final Duration expectedDelay) {
     this.expectedDelay = expectedDelay;
     return this;
@@ -91,6 +96,15 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   public DatasetApi setDataSource(DataSourceApi dataSource) {
     this.dataSource = dataSource;
+    return this;
+  }
+
+  public String getCompletenessDelay() {
+    return completenessDelay;
+  }
+
+  public DatasetApi setCompletenessDelay(final String completenessDelay) {
+    this.completenessDelay = completenessDelay;
     return this;
   }
 }

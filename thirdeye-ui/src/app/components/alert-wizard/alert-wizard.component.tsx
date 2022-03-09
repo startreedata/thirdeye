@@ -28,6 +28,10 @@ import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscr
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import {
+    AlertWizardConfigurationNew,
+    DEFAULT_ALERT_TEMPLATE_ID,
+} from "./alert-wizard-configuration-new.component";
 import { AlertWizardProps, AlertWizardStep } from "./alert-wizard.interfaces";
 import { useAlertWizardStyles } from "./alert-wizard.styles";
 
@@ -58,6 +62,12 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
         AlertWizardStep.DETECTION_CONFIGURATION
     );
+    // This is used to keep track of the last selected template id if the user
+    // changed the default template for situations when user's go back to step 1
+    const [
+        alertConfigurationNewAlertTemplateId,
+        setAlertConfigurationNewAlertTemplateId,
+    ] = useState(DEFAULT_ALERT_TEMPLATE_ID);
     const [wizard, setWizard] = useState("");
     const { timeRangeDuration } = useTimeRange();
     const { t } = useTranslation();
@@ -325,16 +335,41 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                 <>
                                     {/* Detection configuration editor */}
                                     <Grid item sm={12}>
-                                        <JSONEditorV1<EditableAlert>
-                                            error={detectionConfigurationError}
-                                            helperText={
-                                                detectionConfigurationHelperText
-                                            }
-                                            value={newAlert}
-                                            onChange={
-                                                onDetectionConfigurationChange
-                                            }
-                                        />
+                                        {!props.createNewMode && (
+                                            <JSONEditorV1<EditableAlert>
+                                                error={
+                                                    detectionConfigurationError
+                                                }
+                                                helperText={
+                                                    detectionConfigurationHelperText
+                                                }
+                                                value={newAlert}
+                                                onChange={
+                                                    onDetectionConfigurationChange
+                                                }
+                                            />
+                                        )}
+
+                                        {props.createNewMode && (
+                                            <AlertWizardConfigurationNew
+                                                alertConfiguration={newAlert}
+                                                error={
+                                                    detectionConfigurationError
+                                                }
+                                                helperText={
+                                                    detectionConfigurationHelperText
+                                                }
+                                                selectedTemplateId={
+                                                    alertConfigurationNewAlertTemplateId
+                                                }
+                                                onChange={
+                                                    onDetectionConfigurationChange
+                                                }
+                                                onTemplateIdChange={
+                                                    setAlertConfigurationNewAlertTemplateId
+                                                }
+                                            />
+                                        )}
                                     </Grid>
 
                                     {/* Alert evaluation */}
@@ -484,14 +519,16 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                             {currentWizardStep ===
                                                 AlertWizardStep.DETECTION_CONFIGURATION && (
                                                 <Grid item>
-                                                    <Button
-                                                        color="primary"
-                                                        size="large"
-                                                        variant="outlined"
-                                                        onClick={onReset}
-                                                    >
-                                                        Reset
-                                                    </Button>
+                                                    {!props.createNewMode && (
+                                                        <Button
+                                                            color="primary"
+                                                            size="large"
+                                                            variant="outlined"
+                                                            onClick={onReset}
+                                                        >
+                                                            Reset
+                                                        </Button>
+                                                    )}
                                                 </Grid>
                                             )}
 

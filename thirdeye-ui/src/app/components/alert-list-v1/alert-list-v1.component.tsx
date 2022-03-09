@@ -19,7 +19,6 @@ import {
     getAlertsViewPath,
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
-import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (
@@ -33,14 +32,8 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     const { t } = useTranslation();
 
     const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
-        return data?.map((alert, index) => ({
+        return data?.map((alert) => ({
             ...alert,
-            children: [
-                {
-                    id: index,
-                    expandPanelContents: <AlertCardV1 uiAlert={alert} />,
-                },
-            ],
         }));
     };
 

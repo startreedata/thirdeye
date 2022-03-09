@@ -1,4 +1,4 @@
-import { Alert, AlertNode } from "./alert.interfaces";
+import { Alert } from "./alert.interfaces";
 import { Metric } from "./metric.interfaces";
 import { User } from "./user.interfaces";
 
@@ -16,7 +16,6 @@ export interface Anomaly {
     notified: boolean;
     message: string;
     alert: Alert;
-    alertNode: AlertNode;
     metric: Metric;
     children: Anomaly[];
     type: AnomalyType;

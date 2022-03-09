@@ -1,18 +1,22 @@
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    EditableAlert,
+} from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
-export interface AlertWizardProps {
-    alert?: Alert;
+export interface AlertWizardProps<NewOrExistingAlert> {
+    alert: NewOrExistingAlert;
     showCancel?: boolean;
     getAllSubscriptionGroups: () => Promise<SubscriptionGroup[]>;
     getAllAlerts: () => Promise<Alert[]>;
-    getAlertEvaluation: (alert: Alert) => Promise<AlertEvaluation>;
+    getAlertEvaluation: (alert: NewOrExistingAlert) => Promise<AlertEvaluation>;
     onCancel?: () => void;
     onSubscriptionGroupWizardFinish: (
         sub: SubscriptionGroup
     ) => Promise<SubscriptionGroup>;
     onFinish?: (
-        alert: Alert,
+        alert: EditableAlert,
         subscriptionGroups: SubscriptionGroup[],
         omittedSubscriptionGroups?: SubscriptionGroup[]
     ) => void;

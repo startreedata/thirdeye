@@ -2,9 +2,10 @@ import i18n from "i18next";
 import { cloneDeep, isEmpty, omit } from "lodash";
 import {
     Alert,
+    AlertAnomalyDetectorNode,
     AlertEvaluation,
-    AlertNode,
     AlertNodeType,
+    EditableAlert,
 } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
@@ -14,27 +15,78 @@ import {
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
-export const createDefaultAlert = (): Alert => {
+export const createDefaultAlert = (): EditableAlert => {
     return {
-        name: "new-alert",
-        description: "This is the detection used by online service",
-        nodes: {
-            "detection-1": {
-                type: AlertNodeType.DETECTION,
-                subType: "PERCENTAGE_RULE",
-                metric: {
-                    name: "views",
-                    dataset: {
-                        name: "pageviews",
+        name: "simple-threshold-template",
+        description:
+            "Sample threshold alert. Runs every hour. Change the template properties to run on your data",
+        cron: "0 0 0 1/1 * ? *",
+        template: {
+            nodes: [
+                {
+                    name: "root",
+                    type: "AnomalyDetector",
+                    params: {
+                        type: "THRESHOLD",
+                        "component.timezone": "UTC",
+                        "component.monitoringGranularity":
+                            "${monitoringGranularity}",
+                        "component.timestamp": "ts",
+                        "component.metric": "met",
+                        "component.max": "${max}",
+                        "component.min": "${min}",
+                        "anomaly.metric": "${aggregateFunction}(${metric})",
                     },
+                    inputs: [
+                        {
+                            targetProperty: "current",
+                            sourcePlanNode: "currentDataFetcher",
+                            sourceProperty: "currentData",
+                        },
+                    ],
                 },
-                params: {
-                    offset: "wo1w",
-                    percentageChange: 0.2,
-                } as { [index: string]: unknown },
-            } as AlertNode,
-        } as { [index: string]: AlertNode },
-    } as Alert;
+                {
+                    name: "currentDataFetcher",
+                    type: "DataFetcher",
+                    params: {
+                        "component.dataSource": "${dataSource}",
+                        "component.query":
+                            "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}'," +
+                            " '${monitoringGranularity}') as ts, ${aggregateFunction}(${metric}) as met FROM " +
+                            "${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000",
+                    },
+                    outputs: [
+                        {
+                            outputKey: "pinot",
+                            outputName: "currentData",
+                        },
+                    ],
+                },
+            ],
+            metadata: {
+                datasource: {
+                    name: "${dataSource}",
+                },
+                dataset: {
+                    name: "${dataset}",
+                },
+                metric: {
+                    name: "${metric}",
+                },
+            },
+        },
+        templateProperties: {
+            dataSource: "pinotQuickStartAzure",
+            dataset: "pageviews",
+            aggregateFunction: "sum",
+            metric: "views",
+            monitoringGranularity: "P1D",
+            timeColumn: "date",
+            timeColumnFormat: "yyyyMMdd",
+            max: "850000",
+            min: "250000",
+        },
+    };
 };
 
 export const createEmptyUiAlert = (): UiAlert => {
@@ -48,7 +100,6 @@ export const createEmptyUiAlert = (): UiAlert => {
         userId: -1,
         createdBy: noDataMarker,
         detectionTypes: [],
-        filteredBy: [],
         datasetAndMetrics: [],
         subscriptionGroups: [],
         alert: null,
@@ -76,7 +127,7 @@ export const createEmptyUiAlertSubscriptionGroup =
     };
 
 export const createAlertEvaluation = (
-    alert: Alert,
+    alert: Alert | EditableAlert,
     startTime: number,
     endTime: number
 ): AlertEvaluation => {
@@ -88,7 +139,7 @@ export const createAlertEvaluation = (
 };
 
 export const getUiAlert = (
-    alert: Alert,
+    alert: EditableAlert,
     subscriptionGroups: SubscriptionGroup[]
 ): UiAlert => {
     if (!alert) {
@@ -99,7 +150,7 @@ export const getUiAlert = (
     const subscriptionGroupsToAlertIdsMap =
         mapSubscriptionGroupsToAlertIds(subscriptionGroups);
 
-    return getUiAlertInternal(alert, subscriptionGroupsToAlertIdsMap);
+    return getUiAlertInternal(alert as Alert, subscriptionGroupsToAlertIdsMap);
 };
 
 export const getUiAlerts = (
@@ -163,7 +214,9 @@ export const filterAlerts = (
     return filteredUiAlerts;
 };
 
-export const omitNonUpdatableData = (alert: Alert): Alert => {
+export const omitNonUpdatableData = (
+    alert: Alert | EditableAlert
+): EditableAlert => {
     const newAlert = omit(alert, "id");
 
     return newAlert as Alert;
@@ -194,43 +247,21 @@ const getUiAlertInternal = (
     }
 
     // Subscription groups
-    uiAlert.subscriptionGroups =
-        (subscriptionGroupsToAlertIdsMap &&
-            subscriptionGroupsToAlertIdsMap.get(alert.id)) ||
-        [];
-
-    // Detection, dataset and metric properties
-    if (isEmpty(alert.nodes)) {
-        return uiAlert;
+    if (subscriptionGroupsToAlertIdsMap) {
+        uiAlert.subscriptionGroups =
+            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
     }
 
-    for (const alertNode of Object.values(alert.nodes)) {
-        // Detection
-        if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
-            uiAlert.detectionTypes.push(alertNode.subType);
-        } else if (
-            alertNode.type === AlertNodeType.FILTER &&
-            alertNode.subType
-        ) {
-            uiAlert.filteredBy.push(alertNode.subType);
-        }
-
-        // Dataset and metric
-        if (!alertNode.metric) {
-            continue;
-        }
-
-        const uiAlertDatasetAndMetric = createEmptyUiAlertDatasetAndMetric();
-        if (alertNode.metric.dataset) {
-            uiAlertDatasetAndMetric.datasetId = alertNode.metric.dataset.id;
-            uiAlertDatasetAndMetric.datasetName =
-                alertNode.metric.dataset.name || noDataMarker;
-        }
-        uiAlertDatasetAndMetric.metricId = alertNode.metric.id;
-        uiAlertDatasetAndMetric.metricName =
-            alertNode.metric.name || noDataMarker;
-
-        uiAlert.datasetAndMetrics.push(uiAlertDatasetAndMetric);
+    if (alert.template && alert.template.nodes) {
+        alert.template.nodes.forEach((alertNode) => {
+            if (alertNode.type === AlertNodeType.ANOMALY_DETECTOR.toString()) {
+                if ((alertNode as AlertAnomalyDetectorNode).params) {
+                    uiAlert.detectionTypes.push(
+                        (alertNode as AlertAnomalyDetectorNode).params.type
+                    );
+                }
+            }
+        });
     }
 
     return uiAlert;

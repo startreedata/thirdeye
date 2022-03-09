@@ -1,7 +1,7 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
@@ -9,7 +9,11 @@ import {
     PageContentsCardV1,
     StepperV1,
 } from "../../platform/components";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    EditableAlert,
+} from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createDefaultAlert,
@@ -27,17 +31,13 @@ import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluatio
 import { AlertWizardProps, AlertWizardStep } from "./alert-wizard.interfaces";
 import { useAlertWizardStyles } from "./alert-wizard.styles";
 
-export const AlertWizard: FunctionComponent<AlertWizardProps> = (
-    props: AlertWizardProps
-) => {
+function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
+    props: AlertWizardProps<NewOrExistingAlert>
+): JSX.Element {
     const alertWizardClasses = useAlertWizardStyles();
     const [loading, setLoading] = useState(true);
-    const editableAlert = props.alert
-        ? omitNonUpdatableData(props.alert)
-        : undefined;
-    const [newAlert, setNewAlert] = useState<Alert>(
-        editableAlert || createDefaultAlert()
-    );
+    const editableAlert = omitNonUpdatableData(props.alert);
+    const [newAlert, setNewAlert] = useState<EditableAlert>(editableAlert);
     const [newAlertJSON, setNewAlertJSON] = useState(
         JSON.stringify(editableAlert || createDefaultAlert())
     );
@@ -52,7 +52,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
     const [initialSelectedSubs, setInitialSelectedSubs] = useState<
         SubscriptionGroup[]
     >([]);
-    const [selecteddSubs, setSelectedSubs] = useState<SubscriptionGroup[]>([]);
+    const [selectedSubs, setSelectedSubs] = useState<SubscriptionGroup[]>([]);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
@@ -71,31 +71,33 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
     }, [timeRangeDuration]);
 
     useEffect(() => {
-        if (currentWizardStep === AlertWizardStep.SUBSCRIPTION_GROUPS) {
-            props.getAllSubscriptionGroups &&
-                props
-                    .getAllSubscriptionGroups()
-                    .then((subs: SubscriptionGroup[]): void => {
-                        setSubs(subs);
-                    });
+        if (currentWizardStep !== AlertWizardStep.SUBSCRIPTION_GROUPS) {
+            return;
         }
+        props.getAllSubscriptionGroups &&
+            props
+                .getAllSubscriptionGroups()
+                .then((subs: SubscriptionGroup[]): void => {
+                    setSubs(subs);
+                });
     }, [currentWizardStep]);
 
     const refreshAlertEvaluation = (): void => {
         setAlertEvaluation({} as AlertEvaluation);
-        if (validateDetectionConfiguration()) {
-            setAlertEvaluation(null);
-            let fetchedAlertEvaluation = {} as AlertEvaluation;
-            props.getAlertEvaluation &&
-                props
-                    .getAlertEvaluation(JSON.parse(newAlertJSON))
-                    .then((alertEvaluation: AlertEvaluation): void => {
-                        fetchedAlertEvaluation = alertEvaluation;
-                    })
-                    .finally((): void => {
-                        setAlertEvaluation(fetchedAlertEvaluation);
-                    });
+        if (!validateDetectionConfiguration()) {
+            return;
         }
+        setAlertEvaluation(null);
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
+        props.getAlertEvaluation &&
+            props
+                .getAlertEvaluation(JSON.parse(newAlertJSON))
+                .then((alertEvaluation: AlertEvaluation): void => {
+                    fetchedAlertEvaluation = alertEvaluation;
+                })
+                .finally((): void => {
+                    setAlertEvaluation(fetchedAlertEvaluation);
+                });
     };
 
     const onDetectionConfigurationChange = (value: string): void => {
@@ -143,32 +145,32 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             // On last step
             if (props.alert) {
                 // Edit Alert
-                const selectedSubscritpionGroups = [];
+                const selectedSubscriptionGroups = [];
                 const omittedSubscriptionGroups = [];
 
                 // Find updated subscriptionGroups
                 const subscriptionGroupsToBeUpdated = xor(
                     initialSelectedSubs,
-                    selecteddSubs
+                    selectedSubs
                 );
 
                 // Check if subscriptionGroup added or removed
-                for (const subscritionGroup of subscriptionGroupsToBeUpdated) {
-                    if (initialSelectedSubs.includes(subscritionGroup)) {
-                        omittedSubscriptionGroups.push(subscritionGroup);
+                for (const subscriptionsGroup of subscriptionGroupsToBeUpdated) {
+                    if (initialSelectedSubs.includes(subscriptionsGroup)) {
+                        omittedSubscriptionGroups.push(subscriptionsGroup);
                     } else {
-                        selectedSubscritpionGroups.push(subscritionGroup);
+                        selectedSubscriptionGroups.push(subscriptionsGroup);
                     }
                 }
                 props.onFinish &&
                     props.onFinish(
                         newAlert,
-                        selectedSubscritpionGroups,
+                        selectedSubscriptionGroups,
                         omittedSubscriptionGroups
                     );
             } else {
                 // Create Alert
-                props.onFinish && props.onFinish(newAlert, selecteddSubs);
+                props.onFinish && props.onFinish(newAlert, selectedSubs);
             }
 
             return;
@@ -191,8 +193,8 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             return;
         }
 
-        const alertcard = getUiAlert(props.alert, subs);
-        if (isEmpty(alertcard.subscriptionGroups)) {
+        const alertCardData = getUiAlert(props.alert, subs);
+        if (isEmpty(alertCardData.subscriptionGroups)) {
             // No groups sub
             setLoading(false);
 
@@ -200,7 +202,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
         }
 
         const selsubs: SubscriptionGroup[] = [];
-        for (const sub of alertcard.subscriptionGroups) {
+        for (const sub of alertCardData.subscriptionGroups) {
             for (const group of subs) {
                 if (sub.id === group.id) {
                     // Duplicates?
@@ -252,7 +254,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
             });
     };
 
-    const onSubWizardC = (): void => {
+    const onSubWizardCancel = (): void => {
         setLoading(false);
         setWizard("");
     };
@@ -323,7 +325,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 <>
                                     {/* Detection configuration editor */}
                                     <Grid item sm={12}>
-                                        <JSONEditorV1<Alert>
+                                        <JSONEditorV1<EditableAlert>
                                             error={detectionConfigurationError}
                                             helperText={
                                                 detectionConfigurationHelperText
@@ -366,7 +368,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                                     s: SubscriptionGroup
                                                 ): string => s.name}
                                                 toLabel="Associated Subscription Groups"
-                                                toList={selecteddSubs}
+                                                toList={selectedSubs}
                                                 onChange={setSelectedSubs}
                                             />
                                         </Grid>
@@ -379,7 +381,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                 <>
                                     {/* Alert information */}
                                     <Grid item sm={12}>
-                                        <JSONEditorV1<Alert>
+                                        <JSONEditorV1<EditableAlert>
                                             readOnly
                                             value={newAlert}
                                         />
@@ -398,7 +400,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                         </Grid>
 
                                         {/* No subscription groups */}
-                                        {isEmpty(selecteddSubs) && (
+                                        {isEmpty(selectedSubs) && (
                                             <Grid item sm={10}>
                                                 <Typography variant="body2">
                                                     {t("label.no-data-marker")}
@@ -407,9 +409,9 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                         )}
 
                                         {/* All subscription groups */}
-                                        {selecteddSubs && (
+                                        {selectedSubs && (
                                             <Grid item sm={10}>
-                                                {selecteddSubs.map(
+                                                {selectedSubs.map(
                                                     (sub, index) => (
                                                         <Typography
                                                             key={index}
@@ -502,7 +504,7 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                                                         variant="outlined"
                                                         onClick={onCreateNew}
                                                     >
-                                                        Create New Susbscription
+                                                        Create New Subscription
                                                         Group
                                                     </Button>
                                                 </Grid>
@@ -555,11 +557,13 @@ export const AlertWizard: FunctionComponent<AlertWizardProps> = (
                 <SubscriptionGroupWizard
                     showCancel
                     alerts={alerts}
-                    onCancel={onSubWizardC}
+                    onCancel={onSubWizardCancel}
                     onChange={onSubscriptionGroupWizardStepChange}
                     onFinish={onSubWizardFinish}
                 />
             )}
         </>
     );
-};
+}
+
+export { AlertWizard };

@@ -8,7 +8,6 @@ export interface UiAlert {
     userId: number;
     createdBy: string;
     detectionTypes: string[];
-    filteredBy: string[];
     datasetAndMetrics: UiAlertDatasetAndMetric[];
     subscriptionGroups: UiAlertSubscriptionGroup[];
     alert: Alert | null;

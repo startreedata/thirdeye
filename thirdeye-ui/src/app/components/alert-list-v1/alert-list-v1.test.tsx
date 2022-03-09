@@ -1,10 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React, { ReactNode } from "react";
-import {
-    Alert,
-    AlertNode,
-    AlertNodeType,
-} from "../../rest/dto/alert.interfaces";
+import { Alert, AlertNodeType } from "../../rest/dto/alert.interfaces";
 import { AlertListV1 } from "./alert-list-v1.component";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
 
@@ -100,47 +96,63 @@ describe("AlertListV1", () => {
 const mockAlert = {
     id: 1,
     name: "testNameAlert1",
+    description: "hello world",
+    cron: "0 0 0 1/1 * ? *",
     active: true,
     owner: {
         id: 2,
         principal: "testPrincipalOwner2",
     },
-    nodes: {
-        alertNode1: {
-            type: AlertNodeType.DETECTION,
-            subType: "testSubTypeAlertNode1",
-            metric: {
-                id: 3,
-                name: "testNameMetric3",
-                dataset: {
-                    id: 4,
-                    name: "testNameDataset4",
+    template: {
+        nodes: [
+            {
+                name: "root",
+                type: AlertNodeType.ANOMALY_DETECTOR,
+                params: {
+                    type: "THRESHOLD",
+                    "component.timezone": "UTC",
+                    "component.monitoringGranularity":
+                        "${monitoringGranularity}",
+                    "component.timestamp": "ts",
+                    "component.metric": "met",
+                    "component.max": "${max}",
+                    "component.min": "${min}",
+                    "anomaly.metric": "${aggregateFunction}(${metric})",
                 },
+                inputs: [
+                    {
+                        targetProperty: "current",
+                        sourcePlanNode: "currentDataFetcher",
+                        sourceProperty: "currentData",
+                    },
+                ],
             },
-        } as AlertNode,
-        alertNode2: {
-            type: AlertNodeType.DETECTION,
-            subType: "testSubTypeAlertNode2",
-            metric: {
-                id: 5,
-                dataset: {
-                    id: 6,
+            {
+                type: AlertNodeType.DATA_FETCHER,
+                params: {
+                    "component.dataSource": "${dataSource}",
+                    "component.query": "query here",
                 },
+                outputs: [
+                    {
+                        outputKey: "pinot",
+                        outputName: "currentData",
+                    },
+                ],
             },
-        } as AlertNode,
-        alertNode3: {
-            type: AlertNodeType.FILTER,
-            subType: "testSubTypeAlertNode3",
-            metric: {
-                id: 7,
-                name: "testNameMetric7",
-            },
-        } as AlertNode,
-        alertNode4: {
-            type: "testTypeAlertNode4" as AlertNodeType,
-            subType: "testSubTypeAlertNode4",
-        } as AlertNode,
-    } as { [index: string]: AlertNode },
+        ],
+    },
+    templateProperties: {
+        dataSource: "pinotQuickStartAzure",
+        dataset: "pageviews",
+        aggregateFunction: "sum",
+        metric: "views",
+        monitoringGranularity: "P1D",
+        timeColumn: "date",
+        timeColumnFormat: "yyyyMMdd",
+        max: "850000",
+        min: "250000",
+    },
 } as Alert;
 
 const mockUiAlert = {
@@ -151,7 +163,6 @@ const mockUiAlert = {
     userId: 2,
     createdBy: "testPrincipalOwner2",
     detectionTypes: ["testSubTypeAlertNode1", "testSubTypeAlertNode2"],
-    filteredBy: ["testSubTypeAlertNode3"],
     datasetAndMetrics: [
         {
             datasetId: 4,

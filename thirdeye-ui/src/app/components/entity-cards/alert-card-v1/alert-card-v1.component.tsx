@@ -14,14 +14,14 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
     const { t } = useTranslation();
 
     const getAllSubscriptionGroupsName = (uiAlert: UiAlert): string => {
-        const subScriptionGroups: Array<string | number> = [];
+        const subScriptingGroups: Array<string | number> = [];
         forEach(uiAlert.subscriptionGroups, (Obj) => {
             if (Obj.name) {
-                subScriptionGroups.push(Obj.name);
+                subScriptingGroups.push(Obj.name);
             }
         });
 
-        return subScriptionGroups.join(", ");
+        return subScriptingGroups.join(", ");
     };
 
     const getAllDatasetAndMetrics = (uiAlert: UiAlert): string => {
@@ -37,10 +37,6 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
 
     const getDetectionTypes = (uiAlert: UiAlert): string => {
         return uiAlert.detectionTypes.join(", ");
-    };
-
-    const getFilteredBy = (uiAlert: UiAlert): string => {
-        return uiAlert.filteredBy.join(", ") || "-";
     };
 
     if (!props.uiAlert) {
@@ -98,19 +94,6 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
 
             {/* second column */}
             <Grid container item alignContent="flex-start" md={6} xs={12}>
-                {/* Filtered By */}
-                <Grid item xs={4}>
-                    <Typography className={classes.fontMedium} variant="body2">
-                        {t("label.filtered-by")}:
-                    </Typography>
-                </Grid>
-
-                <Grid item xs={8}>
-                    <Typography variant="body2">
-                        {getFilteredBy(props.uiAlert) || "-"}
-                    </Typography>
-                </Grid>
-
                 {/* Subscription Groups */}
                 <Grid item xs={4}>
                     <Typography className={classes.fontMedium} variant="body2">

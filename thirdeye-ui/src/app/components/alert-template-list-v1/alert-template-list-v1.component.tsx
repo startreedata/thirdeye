@@ -43,6 +43,7 @@ export const AlertTemplateListV1: FunctionComponent<
                     id: index,
                     expandPanelContents: (
                         <JSONEditorV1<AlertTemplate>
+                            disableValidation
                             readOnly
                             value={alertTemplate}
                         />

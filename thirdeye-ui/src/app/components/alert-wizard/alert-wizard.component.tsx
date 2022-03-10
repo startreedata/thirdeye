@@ -352,6 +352,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
 
                                         {props.createNewMode && (
                                             <AlertWizardConfigurationNew
+                                                hideTemplateSelector
                                                 alertConfiguration={newAlert}
                                                 error={
                                                     detectionConfigurationError

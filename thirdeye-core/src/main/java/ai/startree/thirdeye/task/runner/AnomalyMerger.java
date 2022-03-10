@@ -36,10 +36,10 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AnomalyMerger {
 
-  public static final String PROP_PATTERN_KEY = "pattern";
-  public static final String PROP_GROUP_KEY = "groupKey";
+  private static final String PROP_PATTERN_KEY = "pattern";
+  private static final String PROP_GROUP_KEY = "groupKey";
 
-  public static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
+  private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
     // earlier for start time
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
     if (res != 0) {

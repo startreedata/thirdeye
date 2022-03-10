@@ -31,20 +31,20 @@ export const ConfigurationPageHeader: FunctionComponent<
             </PageHeaderActionsV1>
 
             <PageHeaderTabsV1 selectedIndex={props.selectedIndex}>
-                <PageHeaderTabV1 href={getSubscriptionGroupsPath()}>
-                    {t("label.subscription-groups")}
+                <PageHeaderTabV1 href={getDatasourcesPath()}>
+                    {t("label.datasources")}
                 </PageHeaderTabV1>
                 <PageHeaderTabV1 href={getDatasetsPath()}>
                     {t("label.datasets")}
-                </PageHeaderTabV1>
-                <PageHeaderTabV1 href={getDatasourcesPath()}>
-                    {t("label.datasources")}
                 </PageHeaderTabV1>
                 <PageHeaderTabV1 href={getMetricsPath()}>
                     {t("label.metrics")}
                 </PageHeaderTabV1>
                 <PageHeaderTabV1 href={getAlertTemplatesPath()}>
                     {t("label.alert-templates")}
+                </PageHeaderTabV1>
+                <PageHeaderTabV1 href={getSubscriptionGroupsPath()}>
+                    {t("label.subscription-groups")}
                 </PageHeaderTabV1>
             </PageHeaderTabsV1>
         </PageHeaderV1>

@@ -95,7 +95,7 @@ export const DatasourcesAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={2} />
+            <ConfigurationPageHeader selectedIndex={0} />
             <PageContentsGridV1 fullHeight>
                 <DatasourceListV1
                     datasources={uiDatasources}

@@ -106,7 +106,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={0} />
+            <ConfigurationPageHeader selectedIndex={4} />
             <PageContentsGridV1 fullHeight>
                 <SubscriptionGroupListV1
                     subscriptionGroups={uiSubscriptionGroups}

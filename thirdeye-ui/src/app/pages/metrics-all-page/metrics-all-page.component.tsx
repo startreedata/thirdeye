@@ -72,7 +72,7 @@ export const MetricsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={3} />
+            <ConfigurationPageHeader selectedIndex={2} />
             <PageContentsGridV1 fullHeight>
                 <MetricListV1
                     metrics={uiMetrics}

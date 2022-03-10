@@ -76,7 +76,7 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={4} />
+            <ConfigurationPageHeader selectedIndex={3} />
 
             <PageContentsGridV1 fullHeight>
                 {/* Alert Template list */}

@@ -47,10 +47,7 @@ export const ConfigurationRouter: FunctionComponent = () => {
                 <Route
                     index
                     element={
-                        <Navigate
-                            replace
-                            to={AppRouteRelative.SUBSCRIPTION_GROUPS}
-                        />
+                        <Navigate replace to={AppRouteRelative.DATASOURCES} />
                     }
                 />
 

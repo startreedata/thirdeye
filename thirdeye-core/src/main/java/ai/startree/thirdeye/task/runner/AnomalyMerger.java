@@ -133,19 +133,19 @@ public class AnomalyMerger {
       final MergedAnomalyResultDTO parent = parents.get(key);
 
       if (shouldMerge(parent, anomaly, maxGap, maxDurationMillis)) {
+        mergeIntoParent(parent, anomaly);
         LOG.info("Merging anomaly between {} and {} into parent between {} and {} for key {}",
             new DateTime(anomaly.getStartTime(), DateTimeZone.UTC),
             new DateTime(anomaly.getEndTime(), DateTimeZone.UTC),
             new DateTime(parent.getStartTime(), DateTimeZone.UTC),
             new DateTime(parent.getEndTime(), DateTimeZone.UTC),
             key);
-        mergeIntoParent(parent, anomaly);
       } else {
-        LOG.info("Using anomaly between {} and {} as parent for key {}",
-            new DateTime(parent.getStartTime(), DateTimeZone.UTC),
-            new DateTime(parent.getEndTime(), DateTimeZone.UTC),
-            key);
         parents.put(key, anomaly);
+        LOG.info("Using anomaly between {} and {} as parent for key {}",
+            new DateTime(anomaly.getStartTime(), DateTimeZone.UTC),
+            new DateTime(anomaly.getEndTime(), DateTimeZone.UTC),
+            key);
       }
     }
     return parents.values();

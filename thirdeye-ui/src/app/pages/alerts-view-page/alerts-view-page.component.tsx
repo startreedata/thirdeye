@@ -249,6 +249,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                         />
                         <CardContent>
                             <JSONEditorV1
+                                disableValidation
                                 readOnly
                                 value={
                                     uiAlert.alert as unknown as Record<

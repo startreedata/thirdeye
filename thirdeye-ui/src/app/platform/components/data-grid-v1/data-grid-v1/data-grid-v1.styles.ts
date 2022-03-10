@@ -97,5 +97,6 @@ export const useDataGridV1Styles = makeStyles((theme) => ({
     },
     dataGridExpandPanel: {
         padding: theme.spacing(2),
+        width: "100%",
     },
 }));

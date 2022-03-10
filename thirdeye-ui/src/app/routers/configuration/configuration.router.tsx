@@ -43,7 +43,7 @@ export const ConfigurationRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
-                {/* Configuration path */}
+                {/* Datasources path */}
                 <Route
                     index
                     element={

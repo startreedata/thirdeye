@@ -154,7 +154,8 @@
         "root-cause-analysis": "Root Cause Analysis",
         "heatmap-data": "Heatmap Data",
         "chart-data": "Chart Data",
-        "alert-template-configuration": "Alert Template Configuration"
+        "alert-template-configuration": "Alert Template Configuration",
+        "anomaly-feedback": "Anomaly Feedback"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -174,6 +175,7 @@
         "onboard-error": "Error onboarding {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "validation-failed": "Validation failed",
+        "change-confirmation-to": "Are you sure you want to change to {{value}}?",
 
         "subscription-group-name-required": "Subscription Group name is required",
 

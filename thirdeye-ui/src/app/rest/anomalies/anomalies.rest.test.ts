@@ -1,11 +1,16 @@
 import axios from "axios";
 import {
+    AnomalyFeedback,
+    AnomalyFeedbackType,
+} from "../dto/anomaly.interfaces";
+import {
     deleteAnomaly,
     getAllAnomalies,
     getAnomaliesByAlertId,
     getAnomaliesByAlertIdAndTime,
     getAnomaliesByTime,
     getAnomaly,
+    updateAnomalyFeedback,
 } from "./anomalies.rest";
 
 jest.mock("axios");
@@ -120,6 +125,29 @@ describe("Anomalies REST", () => {
 
         await expect(deleteAnomaly(1)).rejects.toThrow("testError");
     });
+
+    it("updateAnomalyFeedback should invoke axios.post with appropriate input and return appropriate AnomalyFeedback", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: mockAnomalyFeedback,
+        });
+
+        await expect(
+            updateAnomalyFeedback(1, mockAnomalyFeedback)
+        ).resolves.toEqual(mockAnomalyFeedback);
+
+        expect(axios.post).toHaveBeenCalledWith(
+            "/api/anomalies/1/feedback",
+            mockAnomalyFeedback
+        );
+    });
+
+    it("updateAnomalyFeedback should throw encountered error", async () => {
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
+
+        await expect(
+            updateAnomalyFeedback(1, mockAnomalyFeedback)
+        ).rejects.toThrow("testError");
+    });
 });
 
 const mockAnomaly = {
@@ -127,3 +155,8 @@ const mockAnomaly = {
 };
 
 const mockError = new Error("testError");
+
+const mockAnomalyFeedback = {
+    type: AnomalyFeedbackType.ANOMALY,
+    comment: "hello world",
+} as AnomalyFeedback;

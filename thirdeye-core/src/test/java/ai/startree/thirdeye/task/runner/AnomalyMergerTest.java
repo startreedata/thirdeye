@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.task.runner;
 
+import static ai.startree.thirdeye.task.runner.AnomalyMerger.DEFAULT_MERGE_MAX_GAP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -27,8 +28,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -116,7 +115,7 @@ public class AnomalyMergerTest {
   public void testEmptyMergeAndSave() {
     anomalyMerger.mergeAndSave(
         newAlert(),
-        emptyList(), new Interval(startDate.getTime(), endDate.getTime(), DateTimeZone.UTC));
+        emptyList());
   }
 
   @Test
@@ -127,7 +126,7 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO newAnomaly = newAnomaly(startDate, endDate);
     anomalyMerger.mergeAndSave(
         newAlert(),
-        singletonList(newAnomaly), new Interval(startDate.getTime(), endDate.getTime(), DateTimeZone.UTC));
+        singletonList(newAnomaly));
     verify(mergedAnomalyResultManager).save(newAnomaly);
   }
 
@@ -141,7 +140,7 @@ public class AnomalyMergerTest {
         asList(
             newAnomaly(startDate, endDate),
             newAnomaly(startDate, plusMin(startDate, 10))
-        ), new Interval(startDate.getTime(), endDate.getTime(), DateTimeZone.UTC));
+        ));
     verify(mergedAnomalyResultManager, times(1)).save(any());
   }
 
@@ -156,7 +155,8 @@ public class AnomalyMergerTest {
         asList(new1, new2),
         asList(existing1, existing2));
 
-    final Collection<MergedAnomalyResultDTO> merged = anomalyMerger.merge(newAlert(), sorted);
+    final Collection<MergedAnomalyResultDTO> merged = anomalyMerger.merge(newAlert(), sorted,
+        DEFAULT_MERGE_MAX_GAP);
     assertThat(merged.size()).isEqualTo(1);
 
     final MergedAnomalyResultDTO mergedAnomaly = merged.iterator().next();

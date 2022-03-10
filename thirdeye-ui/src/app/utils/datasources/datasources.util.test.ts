@@ -86,24 +86,16 @@ describe("Datasources Util", () => {
 });
 
 const mockDefaultDatasource = {
-    name: "new-datasource",
-    type: "datasource",
+    name: "mypinot",
+    type: "pinot",
     properties: {
-        zooKeeperURL: "localhost:2123",
-        clusterName: "QuickStartCluster",
-        controllerConnectionScheme: "http",
-        controllerHost: "localhost",
+        zookeeperUrl: "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
+        clusterName: "pinot",
+        controllerConnectionScheme: "https",
+        controllerHost:
+            "pinot-pinot-controller-headless.managed.svc.cluster.local",
         controllerPort: 9000,
-        cacheLoaderClassName:
-            "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader",
     },
-    metaList: [
-        {
-            classRef:
-                "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource",
-            properties: {},
-        },
-    ],
 };
 
 const mockEmptyUiDatasource = {
@@ -118,7 +110,7 @@ const mockDatasource1 = {
     name: "testNameDatasource1",
     type: "testTypeDatasource1",
     properties: {
-        zooKeeperURL: "testURLDatasource1",
+        zookeeperUrl: "testURLDatasource1",
         clusterName: "testClusterDatasource1",
         controllerConnectionScheme: "http",
         controllerHost: "localhost",

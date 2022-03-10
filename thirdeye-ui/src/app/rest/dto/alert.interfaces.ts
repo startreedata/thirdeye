@@ -12,15 +12,7 @@ export interface EditableAlert {
             | AlertAnomalyDetectorNode
         >;
         metadata?: {
-            datasource: {
-                name: string;
-            };
-            dataset: {
-                name: string;
-            };
-            metric: {
-                name: string;
-            };
+            [index: string]: { [index: string]: string };
         };
     };
     templateProperties: {

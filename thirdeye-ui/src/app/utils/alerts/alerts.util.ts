@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { cloneDeep, isEmpty, omit } from "lodash";
+import { cloneDeep, isEmpty, omit, sortBy } from "lodash";
 import {
     Alert,
     AlertAnomalyDetectorNode,
@@ -102,6 +102,7 @@ export const createEmptyUiAlert = (): UiAlert => {
         detectionTypes: [],
         datasetAndMetrics: [],
         subscriptionGroups: [],
+        renderedMetadata: [],
         alert: null,
     };
 };
@@ -264,7 +265,53 @@ const getUiAlertInternal = (
         });
     }
 
+    if (alert.templateProperties && alert.template) {
+        renderMetadataFromAlert(alert, uiAlert);
+    }
+
     return uiAlert;
+};
+
+const renderMetadataFromAlert = (alert: Alert, uiAlert: UiAlert): void => {
+    if (!alert.template || !alert.template.metadata) {
+        return;
+    }
+
+    const metadataValueKeyExtractor = /\$\{(.*)\}/;
+
+    // This is done so we avoid a weird typescript error
+    // `alert.template.metadata` may be null even though its checked
+    const metadata = alert.template.metadata;
+
+    Object.keys(metadata).forEach((metadataKey) => {
+        const metadataObjectForKey = metadata[metadataKey];
+
+        if (metadataObjectForKey.name) {
+            const templatePropKeySearch = metadataObjectForKey.name.match(
+                metadataValueKeyExtractor
+            );
+
+            if (templatePropKeySearch && templatePropKeySearch.length > 1) {
+                const value =
+                    alert.templateProperties[templatePropKeySearch[1]];
+                if (value) {
+                    uiAlert.renderedMetadata.push({
+                        key: metadataKey,
+                        value: value,
+                    });
+                }
+            } else {
+                // If regex doesn't match then assume no value is being
+                // taken from template properties
+                uiAlert.renderedMetadata.push({
+                    key: metadataKey,
+                    value: metadataObjectForKey.name,
+                });
+            }
+        }
+    });
+
+    uiAlert.renderedMetadata = sortBy(uiAlert.renderedMetadata, "key");
 };
 
 const mapSubscriptionGroupsToAlertIds = (

@@ -33,6 +33,7 @@ describe("Alerts Util", () => {
         const result = createEmptyUiAlert();
 
         expect(result.name).not.toBeNull();
+        expect(result.renderedMetadata).not.toBeNull();
         expect(result.active).not.toBeNull();
         expect(result.activeText).not.toBeNull();
         expect(result.userId).not.toBeNull();
@@ -186,6 +187,7 @@ const mockEmptyUiAlert = {
     detectionTypes: [],
     datasetAndMetrics: [],
     subscriptionGroups: [],
+    renderedMetadata: [],
     alert: null,
 };
 
@@ -249,6 +251,17 @@ const mockAlert1 = {
                 ],
             },
         ],
+        metadata: {
+            metric: {
+                name: "orders",
+            },
+            datasource: {
+                name: "${dataSource}",
+            },
+            dataset: {
+                name: "${dataset}",
+            },
+        },
     },
     templateProperties: {
         dataSource: "pinotQuickStartAzure",
@@ -332,6 +345,20 @@ const mockUiAlert1 = {
             name: "label.no-data-marker",
         },
     ],
+    renderedMetadata: [
+        {
+            key: "dataset",
+            value: "pageviews",
+        },
+        {
+            key: "datasource",
+            value: "pinotQuickStartAzure",
+        },
+        {
+            key: "metric",
+            value: "orders",
+        },
+    ],
     alert: mockAlert1,
 };
 
@@ -350,6 +377,7 @@ const mockUiAlert2 = {
             name: "testNameSubscriptionGroup11",
         },
     ],
+    renderedMetadata: [],
     alert: mockAlert2,
 };
 
@@ -363,6 +391,7 @@ const mockUiAlert3 = {
     detectionTypes: [],
     datasetAndMetrics: [],
     subscriptionGroups: [],
+    renderedMetadata: [],
     alert: mockAlert3,
 };
 

@@ -11,8 +11,6 @@ import ai.startree.thirdeye.detection.algorithm.AnomalyKey;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.DataProvider;
-import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -20,7 +18,6 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,14 +64,11 @@ public class AnomalyMerger {
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final DataProvider dataProvider;
 
   @Inject
   public AnomalyMerger(
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final DataProvider dataProvider) {
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.dataProvider = dataProvider;
   }
 
   public void mergeAndSave(final AlertDTO alert,
@@ -248,15 +242,10 @@ public class AnomalyMerger {
         .orElse(end);
 
     final long maxGap = getMaxGap(alert);
-    final AnomalySlice effectiveSlice = new AnomalySlice()
-        .withDetectionId(alert.getId())
-        .withStart(minTime - maxGap - 1)
-        .withEnd(maxTime + maxGap + 1);
+    long mergeLowerBound = minTime - maxGap -1;
+    long mergeUpperBound = maxTime + maxGap + 1;
 
-    final Collection<MergedAnomalyResultDTO> existingAnomalies = dataProvider
-        .fetchAnomalies(Collections.singleton(effectiveSlice))
-        .get(effectiveSlice);
-    return new ArrayList<>(existingAnomalies);
+    return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(mergeLowerBound, mergeUpperBound, alert.getId());
   }
 
   public static MergedAnomalyResultDTO copyAnomalyInfo(MergedAnomalyResultDTO from,

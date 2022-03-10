@@ -10,6 +10,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,10 +19,6 @@ import static org.mockito.Mockito.when;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.DataProvider;
-import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,10 +27,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
-import org.mockito.invocation.InvocationOnMock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,7 +41,6 @@ public class AnomalyMergerTest {
   private AnomalyMerger anomalyMerger;
   private Date startDate;
   private Date endDate;
-  private DataProvider dataProvider;
   private MergedAnomalyResultManager mergedAnomalyResultManager;
 
   private static AlertDTO newAlert() {
@@ -68,19 +62,6 @@ public class AnomalyMergerTest {
     return anomaly;
   }
 
-  private static AnomalySlice getAnomalySliceFromFirstArg(final InvocationOnMock i) {
-    final Set<AnomalySlice> collection = (Set<AnomalySlice>) i.getArguments()[0];
-    assertThat(collection.size()).isEqualTo(1);
-    return collection.iterator().next();
-  }
-
-  private static Multimap<AnomalySlice, MergedAnomalyResultDTO> multimap(
-      final AnomalySlice key, final List<MergedAnomalyResultDTO> anomalies) {
-    final Multimap<AnomalySlice, MergedAnomalyResultDTO> mmap = ArrayListMultimap.create();
-    mmap.putAll(key, anomalies);
-    return mmap;
-  }
-
   private static Date plusMin(final Date startDate, final int minutes) {
     return plusDuration(startDate, Duration.ofMinutes(minutes));
   }
@@ -97,10 +78,8 @@ public class AnomalyMergerTest {
 
   @BeforeMethod
   public void setUp() throws ParseException {
-    dataProvider = mock(DataProvider.class);
     mergedAnomalyResultManager = mock(MergedAnomalyResultManager.class);
-    anomalyMerger = new AnomalyMerger(mergedAnomalyResultManager,
-        dataProvider);
+    anomalyMerger = new AnomalyMerger(mergedAnomalyResultManager);
 
     startDate = DATE_FORMAT.parse("2021-01-01 01:00:00");
     endDate = DATE_FORMAT.parse("2021-01-01 02:00:00");
@@ -142,8 +121,8 @@ public class AnomalyMergerTest {
 
   @Test
   public void testSingleAnomalyNoMergeAndSave() {
-    when(dataProvider.fetchAnomalies(any()))
-        .thenAnswer(i -> multimap(getAnomalySliceFromFirstArg(i), emptyList()));
+    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(), anyLong(), anyLong()))
+        .thenAnswer(i -> emptyList());
 
     final MergedAnomalyResultDTO newAnomaly = newAnomaly(startDate, endDate);
     anomalyMerger.mergeAndSave(
@@ -154,9 +133,8 @@ public class AnomalyMergerTest {
 
   @Test
   public void testSingleAnomalyWithMergeAndSave() {
-    when(dataProvider.fetchAnomalies(any()))
-        .thenAnswer(i -> multimap(getAnomalySliceFromFirstArg(i),
-            singletonList(existingAnomaly(startDate, endDate))));
+    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(), anyLong(), anyLong()))
+        .thenAnswer(i -> singletonList(existingAnomaly(startDate, endDate)));
 
     anomalyMerger.mergeAndSave(
         newAlert(),

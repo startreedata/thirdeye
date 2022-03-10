@@ -253,9 +253,7 @@ public class AnomalyMerger {
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
     to.setMetric(from.getMetric());
-    to.setMetricUrn(from.getMetricUrn());
     to.setCollection(from.getCollection());
-    to.setDimensions(from.getDimensions());
     to.setDetectionConfigId(from.getDetectionConfigId());
     to.setAnomalyResultSource(from.getAnomalyResultSource());
     to.setAvgBaselineVal(from.getAvgBaselineVal());

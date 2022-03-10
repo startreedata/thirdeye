@@ -43,14 +43,11 @@ export const ConfigurationRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
-                {/* Configuration path */}
+                {/* Datasources path */}
                 <Route
                     index
                     element={
-                        <Navigate
-                            replace
-                            to={AppRouteRelative.SUBSCRIPTION_GROUPS}
-                        />
+                        <Navigate replace to={AppRouteRelative.DATASOURCES} />
                     }
                 />
 

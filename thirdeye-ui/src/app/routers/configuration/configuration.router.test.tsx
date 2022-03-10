@@ -20,13 +20,17 @@ jest.mock("../../utils/routes/routes.util", () => ({
         string,
         unknown
     >),
-    getConfigurationPath: jest.fn().mockReturnValue("testConfigurationPath"),
+    getDatasourcesPath: jest.fn().mockReturnValue("testDatasourcePath"),
 }));
 
 jest.mock("../subscription-groups/subscription-groups.router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
         .mockReturnValue("testSubscriptionGroupsRouter"),
+}));
+
+jest.mock("../datasources/datasources.router", () => ({
+    DatasourcesRouter: jest.fn().mockReturnValue("testDatasourcesRouter"),
 }));
 
 jest.mock("../metrics/metrics.router", () => ({
@@ -53,9 +57,9 @@ describe("Configuration Router", () => {
             </MemoryRouter>
         );
 
-        await expect(
-            screen.findByText("testSubscriptionGroupsRouter")
-        ).resolves.toBeInTheDocument();
+        expect(
+            await screen.findByText("testDatasourcesRouter")
+        ).toBeInTheDocument();
     });
 
     it("should render page not found page at invalid configuration path", async () => {

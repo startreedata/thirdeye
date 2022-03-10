@@ -26,6 +26,7 @@ export interface AlertWizardProps<NewOrExistingAlert> {
 export interface AlertWizardConfigurationNewProps {
     alertConfiguration: EditableAlert;
     error: boolean;
+    hideTemplateSelector?: boolean;
     selectedTemplateId: string;
     helperText: string;
     onChange: (value: string) => void;

@@ -23,6 +23,7 @@ function AlertWizardConfigurationNew({
     alertConfiguration,
     selectedTemplateId,
     onTemplateIdChange,
+    hideTemplateSelector,
 }: AlertWizardConfigurationNewProps): JSX.Element {
     const [currentWorkingConfiguration, setCurrentWorkingConfiguration] =
         useState(alertConfiguration);
@@ -70,33 +71,35 @@ function AlertWizardConfigurationNew({
 
     return (
         <div>
-            <Box mb={3}>
-                <FormControl fullWidth>
-                    <InputLabel id="alert-templates-select-label">
-                        Choose an alert template to start from
-                    </InputLabel>
-                    <Select
-                        id="alert-templates-select"
-                        labelId="alert-templates-select-label"
-                        value={currentTemplate}
-                        onChange={handleChangeTemplateSelectionChange}
-                    >
-                        <MenuItem value={DEFAULT_ALERT_TEMPLATE_ID}>
-                            Default
-                        </MenuItem>
+            {!hideTemplateSelector && (
+                <Box mb={3}>
+                    <FormControl fullWidth>
+                        <InputLabel id="alert-templates-select-label">
+                            Choose an alert template to start from
+                        </InputLabel>
+                        <Select
+                            id="alert-templates-select"
+                            labelId="alert-templates-select-label"
+                            value={currentTemplate}
+                            onChange={handleChangeTemplateSelectionChange}
+                        >
+                            <MenuItem value={DEFAULT_ALERT_TEMPLATE_ID}>
+                                Default
+                            </MenuItem>
 
-                        {alertTemplates &&
-                            alertTemplates.map((alertTemplate) => (
-                                <MenuItem
-                                    key={alertTemplate.id}
-                                    value={alertTemplate.id}
-                                >
-                                    {alertTemplate.name}
-                                </MenuItem>
-                            ))}
-                    </Select>
-                </FormControl>
-            </Box>
+                            {alertTemplates &&
+                                alertTemplates.map((alertTemplate) => (
+                                    <MenuItem
+                                        key={alertTemplate.id}
+                                        value={alertTemplate.id}
+                                    >
+                                        {alertTemplate.name}
+                                    </MenuItem>
+                                ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+            )}
 
             <JSONEditorV1<EditableAlert>
                 error={error}

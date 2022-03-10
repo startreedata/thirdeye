@@ -11,7 +11,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificati
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,12 +31,6 @@ public class DetectionUtils {
         "componentKey is invalid; must be of type componentName:type");
   }
 
-  // get the spec class name for a component class
-  public static String getSpecClassName(final Class<BaseComponent> componentClass) {
-    final ParameterizedType genericSuperclass = (ParameterizedType) componentClass
-        .getGenericInterfaces()[0];
-    return (genericSuperclass.getActualTypeArguments()[0].getTypeName());
-  }
 
   public static void setEntityChildMapping(final MergedAnomalyResultDTO parent,
       final MergedAnomalyResultDTO child1) {

@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.task.runner;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import ai.startree.thirdeye.detection.algorithm.AnomalyKey;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -22,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
@@ -36,14 +35,14 @@ public class AnomalyMerger {
   private static final String PROP_PATTERN_KEY = "pattern";
   private static final String PROP_GROUP_KEY = "groupKey";
   private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
-    // earlier for start time
+    // smallest startTime is smaller
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
     if (res != 0) {
       return res;
     }
 
-    // later for end time
-    res = Long.compare(o2.getEndTime(), o1.getEndTime());
+    // biggest endTime is smaller
+    res = -1 * Long.compare(o1.getEndTime(), o2.getEndTime());
     if (res != 0) {
       return res;
     }
@@ -73,19 +72,19 @@ public class AnomalyMerger {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
-  public void mergeAndSave(final AlertDTO alert,
-      final List<MergedAnomalyResultDTO> anomalies) {
+  public void mergeAndSave(final AlertDTO alert, final List<MergedAnomalyResultDTO> anomalies) {
     if (anomalies.isEmpty()) {
       return;
     }
     final long maxGap = getMaxGap(alert);
-    final Long alertId = alert.getId();
+    final long alertId = Objects.requireNonNull(alert.getId(),
+        "Alert must be an existing alert for merging.");
+
     final List<MergedAnomalyResultDTO> existingAnomalies = retrieveRelevantAnomaliesFromDatabase(
         alertId,
         anomalies, maxGap);
 
-    final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = prepareSortedAnomalyList(
-        anomalies,
+    final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = mergedAndSort(anomalies,
         existingAnomalies);
 
     final long maxDurationMillis = getMaxDuration(alert);
@@ -94,15 +93,15 @@ public class AnomalyMerger {
         maxDurationMillis);
 
     for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
-      mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
-      if (mergedAnomalyResultDTO.getId() == null) {
+      Long id = mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
+      if (id == null) {
         LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
       }
     }
   }
 
   @VisibleForTesting
-  List<MergedAnomalyResultDTO> prepareSortedAnomalyList(
+  List<MergedAnomalyResultDTO> mergedAndSort(
       final List<MergedAnomalyResultDTO> anomalies,
       final List<MergedAnomalyResultDTO> existingAnomalies) {
     final List<MergedAnomalyResultDTO> generatedAndExistingAnomalies = new ArrayList<>();
@@ -156,7 +155,7 @@ public class AnomalyMerger {
     // fully merge into existing
     final Set<MergedAnomalyResultDTO> children = parent.getChildren();
 
-    // if this parent has no children, then add itself as a child
+    // if this parent has no children, then add a copy of itself as a child
     if (children.isEmpty()) {
       children.add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
     }
@@ -226,23 +225,24 @@ public class AnomalyMerger {
   }
 
   private List<MergedAnomalyResultDTO> retrieveRelevantAnomaliesFromDatabase(
-      final Long alertId,
+      final long alertId,
       final List<MergedAnomalyResultDTO> anomalies, final long maxGap) {
-    checkArgument(alertId != null, "must be an existing alert");
 
     final long minTime = anomalies.stream()
         .map(MergedAnomalyResultDTO::getStartTime)
         .mapToLong(e -> e)
         .min()
-        .orElseThrow(() -> new RuntimeException(
-            "When trying to merge. No startTime in the anomalies. This should not happen."));
+        .orElseThrow(() -> new RuntimeException(String.format(
+            "When trying to merge anomalies for alert id %s: No startTime in the anomalies.",
+            alertId)));
 
     final long maxTime = anomalies.stream()
         .map(MergedAnomalyResultDTO::getEndTime)
         .mapToLong(e -> e)
         .max()
-        .orElseThrow(() -> new RuntimeException(
-            "When trying to merge. No endTime in the anomalies. This should not happen."));
+        .orElseThrow(() -> new RuntimeException(String.format(
+            "When trying to merge anomalies for alert id %s: No endTime in the anomalies.",
+            alertId)));
 
     long mergeLowerBound = minTime - maxGap - 1;
     long mergeUpperBound = maxTime + maxGap + 1;

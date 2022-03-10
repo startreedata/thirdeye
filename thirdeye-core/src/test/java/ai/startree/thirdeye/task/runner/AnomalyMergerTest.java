@@ -87,7 +87,7 @@ public class AnomalyMergerTest {
 
   @Test
   public void testPrepareSortedAnomalyList() {
-    assertThat(anomalyMerger.prepareSortedAnomalyList(emptyList(), emptyList()))
+    assertThat(anomalyMerger.mergedAndSort(emptyList(), emptyList()))
         .isEqualTo(emptyList());
 
     final MergedAnomalyResultDTO new1 = newAnomaly(startDate, endDate);
@@ -95,18 +95,18 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO existing1 = existingAnomaly(startDate, endDate);
     final MergedAnomalyResultDTO existing2 = existingAnomaly(startDate, plusMin(startDate, 10));
 
-    assertThat(anomalyMerger.prepareSortedAnomalyList(emptyList(), singletonList(existing1)))
+    assertThat(anomalyMerger.mergedAndSort(emptyList(), singletonList(existing1)))
         .isEqualTo(singletonList(existing1));
 
-    assertThat(anomalyMerger.prepareSortedAnomalyList(singletonList(new1), emptyList()))
+    assertThat(anomalyMerger.mergedAndSort(singletonList(new1), emptyList()))
         .isEqualTo(singletonList(new1));
 
-    assertThat(anomalyMerger.prepareSortedAnomalyList(
+    assertThat(anomalyMerger.mergedAndSort(
         singletonList(new1),
         singletonList(existing1)))
         .isEqualTo(asList(existing1, new1));
 
-    assertThat(anomalyMerger.prepareSortedAnomalyList(
+    assertThat(anomalyMerger.mergedAndSort(
         asList(new1, new2),
         asList(existing1, existing2)))
         .isEqualTo(asList(existing1, new1, existing2, new2));
@@ -152,7 +152,7 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO existing1 = existingAnomaly(startDate, endDate);
     final MergedAnomalyResultDTO existing2 = existingAnomaly(startDate, plusMin(startDate, 10));
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.prepareSortedAnomalyList(
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.mergedAndSort(
         asList(new1, new2),
         asList(existing1, existing2));
 

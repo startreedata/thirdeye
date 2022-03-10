@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AnomalyMerger {
 
+  private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
   private static final String PROP_PATTERN_KEY = "pattern";
   private static final String PROP_GROUP_KEY = "groupKey";
-
   private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
     // earlier for start time
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
@@ -59,9 +59,11 @@ public class AnomalyMerger {
     // more children
     return -1 * Integer.compare(o1.getChildren().size(), o2.getChildren().size());
   };
-  protected static final long DEFAULT_MERGE_MAX_GAP = TimeUnit.HOURS.toMillis(2);
 
-  private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+  @VisibleForTesting
+  protected static final long DEFAULT_MERGE_MAX_GAP = TimeUnit.HOURS.toMillis(2);
+  @VisibleForTesting
+  protected static final long DEFAULT_ANOMALY_MAX_DURATION = TimeUnit.DAYS.toMillis(7);
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
@@ -77,16 +79,19 @@ public class AnomalyMerger {
       return;
     }
     final long maxGap = getMaxGap(alert);
+    final Long alertId = alert.getId();
     final List<MergedAnomalyResultDTO> existingAnomalies = retrieveRelevantAnomaliesFromDatabase(
-        alert.getId(),
+        alertId,
         anomalies, maxGap);
 
     final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = prepareSortedAnomalyList(
         anomalies,
         existingAnomalies);
 
-    final Collection<MergedAnomalyResultDTO> mergedAnomalies = merge(alert,
-        sortedRelevantAnomalies, maxGap);
+    final long maxDurationMillis = getMaxDuration(alert);
+    final Collection<MergedAnomalyResultDTO> mergedAnomalies = merge(sortedRelevantAnomalies,
+        maxGap,
+        maxDurationMillis);
 
     for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
       mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
@@ -110,15 +115,11 @@ public class AnomalyMerger {
   }
 
   /**
-   * The Wrapper code is legacy and will be subsequently deleted
-   *
-   * @param alert alert DTO
-   * @param anomalies list of generated anomalies
-   * @return merged list of anomalies
+   * Merge a list of anomalies given a max gap and a max duration.
    */
   @VisibleForTesting
-  Collection<MergedAnomalyResultDTO> merge(final AlertDTO alert,
-      final Collection<MergedAnomalyResultDTO> anomalies, final long maxGap) {
+  Collection<MergedAnomalyResultDTO> merge(final Collection<MergedAnomalyResultDTO> anomalies,
+      final long maxGap, final long maxDurationMillis) {
     final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
     for (final MergedAnomalyResultDTO anomaly : anomalies) {
       // skip child anomalies. merge their parents instead
@@ -130,7 +131,7 @@ public class AnomalyMerger {
       final AnomalyKey key = createAnomalyKey(anomaly);
       final MergedAnomalyResultDTO parent = parents.get(key);
 
-      if (shouldMerge(parent, anomaly, alert, maxGap)) {
+      if (shouldMerge(parent, anomaly, maxGap, maxDurationMillis)) {
         mergeIntoParent(parent, anomaly);
       } else {
         parents.put(key, anomaly);
@@ -187,17 +188,14 @@ public class AnomalyMerger {
    *
    * @param parent parent anomaly
    * @param child child anomaly
-   * @param alert alert. both parent and child anomalies should be from the same alert
    * @return whether they should be merged
    */
   private boolean shouldMerge(
       final MergedAnomalyResultDTO parent,
       final MergedAnomalyResultDTO child,
-      final AlertDTO alert,
-      final long maxGap
+      final long maxGap,
+      final long maxDurationMillis
   ) {
-    final long maxDurationMillis = MapUtils
-        .getLongValue(alert.getProperties(), "maxDuration", TimeUnit.DAYS.toMillis(7));
 
     return parent != null
         && child.getStartTime() - parent.getEndTime() <= maxGap
@@ -217,9 +215,14 @@ public class AnomalyMerger {
   }
 
   @VisibleForTesting
-  long getMaxGap(final AlertDTO alert) {
+  protected long getMaxGap(final AlertDTO alert) {
     return MapUtils
         .getLongValue(alert.getProperties(), "maxGap", DEFAULT_MERGE_MAX_GAP);
+  }
+
+  private long getMaxDuration(final AlertDTO alert) {
+    return MapUtils
+        .getLongValue(alert.getProperties(), "maxDuration", DEFAULT_ANOMALY_MAX_DURATION);
   }
 
   private List<MergedAnomalyResultDTO> retrieveRelevantAnomaliesFromDatabase(
@@ -231,18 +234,22 @@ public class AnomalyMerger {
         .map(MergedAnomalyResultDTO::getStartTime)
         .mapToLong(e -> e)
         .min()
-        .orElseThrow(() -> new RuntimeException("When trying to merge. No startTime in the anomalies. This should not happen."));
+        .orElseThrow(() -> new RuntimeException(
+            "When trying to merge. No startTime in the anomalies. This should not happen."));
 
     final long maxTime = anomalies.stream()
         .map(MergedAnomalyResultDTO::getEndTime)
         .mapToLong(e -> e)
         .max()
-        .orElseThrow(() -> new RuntimeException("When trying to merge. No endTime in the anomalies. This should not happen."));
+        .orElseThrow(() -> new RuntimeException(
+            "When trying to merge. No endTime in the anomalies. This should not happen."));
 
-    long mergeLowerBound = minTime - maxGap -1;
+    long mergeLowerBound = minTime - maxGap - 1;
     long mergeUpperBound = maxTime + maxGap + 1;
 
-    return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(mergeLowerBound, mergeUpperBound, alertId);
+    return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(mergeLowerBound,
+        mergeUpperBound,
+        alertId);
   }
 
   public static MergedAnomalyResultDTO copyAnomalyInfo(MergedAnomalyResultDTO from,

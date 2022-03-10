@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.task.runner;
 
+import static ai.startree.thirdeye.task.runner.AnomalyMerger.DEFAULT_ANOMALY_MAX_DURATION;
 import static ai.startree.thirdeye.task.runner.AnomalyMerger.DEFAULT_MERGE_MAX_GAP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -155,8 +156,8 @@ public class AnomalyMergerTest {
         asList(new1, new2),
         asList(existing1, existing2));
 
-    final Collection<MergedAnomalyResultDTO> merged = anomalyMerger.merge(newAlert(), sorted,
-        DEFAULT_MERGE_MAX_GAP);
+    final Collection<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION);
     assertThat(merged.size()).isEqualTo(1);
 
     final MergedAnomalyResultDTO mergedAnomaly = merged.iterator().next();

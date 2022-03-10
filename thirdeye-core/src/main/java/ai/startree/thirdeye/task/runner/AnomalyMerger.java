@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +86,7 @@ public class AnomalyMerger {
         alertId,
         anomalies, maxGap);
 
-    final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = mergedAndSort(anomalies,
+    final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = combineAndSort(anomalies,
         existingAnomalies);
 
     final long maxDurationMillis = getMaxDuration(alert);
@@ -101,7 +103,7 @@ public class AnomalyMerger {
   }
 
   @VisibleForTesting
-  List<MergedAnomalyResultDTO> mergedAndSort(
+  List<MergedAnomalyResultDTO> combineAndSort(
       final List<MergedAnomalyResultDTO> anomalies,
       final List<MergedAnomalyResultDTO> existingAnomalies) {
     final List<MergedAnomalyResultDTO> generatedAndExistingAnomalies = new ArrayList<>();
@@ -131,8 +133,18 @@ public class AnomalyMerger {
       final MergedAnomalyResultDTO parent = parents.get(key);
 
       if (shouldMerge(parent, anomaly, maxGap, maxDurationMillis)) {
+        LOG.info("Merging anomaly between {} and {} into parent between {} and {} for key {}",
+            new DateTime(anomaly.getStartTime(), DateTimeZone.UTC),
+            new DateTime(anomaly.getEndTime(), DateTimeZone.UTC),
+            new DateTime(parent.getStartTime(), DateTimeZone.UTC),
+            new DateTime(parent.getEndTime(), DateTimeZone.UTC),
+            key);
         mergeIntoParent(parent, anomaly);
       } else {
+        LOG.info("Using anomaly between {} and {} as parent for key {}",
+            new DateTime(parent.getStartTime(), DateTimeZone.UTC),
+            new DateTime(parent.getEndTime(), DateTimeZone.UTC),
+            key);
         parents.put(key, anomaly);
       }
     }

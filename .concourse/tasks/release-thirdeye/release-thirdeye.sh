@@ -21,8 +21,11 @@ Host github.com
  IdentityFile ~/.ssh/github_key
 EOF
 
-# check github connection
-ssh -T git@github.com || exit 1
+if (ssh -T git@github.com 2>&1 | grep -q 'successfully'); then
+  echo "SSH connection to github successful."
+else
+  echo "Could not connect to github with ssh" || exit 1
+fi
 
 pushd src && \
   rm -rf ~/.m2 && \

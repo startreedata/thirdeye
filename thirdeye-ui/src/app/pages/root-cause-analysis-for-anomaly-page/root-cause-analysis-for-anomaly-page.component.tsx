@@ -81,14 +81,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         if (evaluation && anomaly) {
             const anomaliesDetector =
                 evaluation.detectionEvaluations.output_AnomalyDetectorResult_0;
-            anomaliesDetector.anomalies = anomaliesDetector.anomalies.filter(
-                (anomalyData) => {
-                    return (
-                        anomalyData.startTime === anomaly.startTime &&
-                        anomalyData.endTime === anomaly.endTime
-                    );
-                }
-            );
+            anomaliesDetector.anomalies = [anomaly];
             setAlertEvaluation(evaluation);
         }
     }, [evaluation]);

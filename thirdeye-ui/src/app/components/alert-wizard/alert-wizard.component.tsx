@@ -337,6 +337,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     <Grid item sm={12}>
                                         {!props.createNewMode && (
                                             <JSONEditorV1<EditableAlert>
+                                                hideValidationSuccessIcon
                                                 error={
                                                     detectionConfigurationError
                                                 }
@@ -418,6 +419,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     {/* Alert information */}
                                     <Grid item sm={12}>
                                         <JSONEditorV1<EditableAlert>
+                                            hideValidationSuccessIcon
                                             readOnly
                                             value={newAlert}
                                         />

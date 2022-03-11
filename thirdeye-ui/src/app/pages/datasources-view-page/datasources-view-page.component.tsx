@@ -119,6 +119,7 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 {/* Datasource JSON viewer */}
                 <Grid item sm={12}>
                     <JSONEditorV1<Datasource>
+                        hideValidationSuccessIcon
                         readOnly
                         value={uiDatasource?.datasource as Datasource}
                     />

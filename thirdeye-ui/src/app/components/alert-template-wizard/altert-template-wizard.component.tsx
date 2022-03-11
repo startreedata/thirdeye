@@ -179,6 +179,7 @@ function AlertTemplateWizard<NewOrExistingTemplate>(
                             {/* Datasource configuration editor */}
                             <Grid item sm={12}>
                                 <JSONEditorV1<NewOrExistingTemplate>
+                                    hideValidationSuccessIcon
                                     error={alertTemplateConfigurationError}
                                     helperText={
                                         alertTemplateConfigurationHelperText
@@ -197,6 +198,7 @@ function AlertTemplateWizard<NewOrExistingTemplate>(
                             {/* Datasource information */}
                             <Grid item sm={12}>
                                 <JSONEditorV1<NewOrExistingTemplate>
+                                    hideValidationSuccessIcon
                                     readOnly
                                     value={newAlertTemplate}
                                 />

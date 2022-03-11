@@ -174,6 +174,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                             {/* Datasource configuration editor */}
                             <Grid item sm={12}>
                                 <JSONEditorV1<Datasource>
+                                    hideValidationSuccessIcon
                                     error={datasourceConfigurationError}
                                     helperText={
                                         datasourceConfigurationHelperText
@@ -192,6 +193,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                             {/* Datasource information */}
                             <Grid item sm={12}>
                                 <JSONEditorV1<Datasource>
+                                    hideValidationSuccessIcon
                                     readOnly
                                     value={newDatasource}
                                 />

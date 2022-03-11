@@ -5,6 +5,7 @@ export interface JSONEditorV1Props<T = string> {
     helperText?: string;
     error?: boolean;
     readOnly?: boolean;
+    hideValidationSuccessIcon?: boolean;
     disableAutoFormat?: boolean;
     allowEmpty?: boolean;
     disableValidation?: boolean;

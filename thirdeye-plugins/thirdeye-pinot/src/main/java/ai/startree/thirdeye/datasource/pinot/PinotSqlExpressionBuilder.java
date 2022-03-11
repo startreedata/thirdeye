@@ -45,13 +45,15 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   private String periodToPinotFormat(final Period period) {
     if (period.getYears() > 0) {
-      return String.format("%s:YEARS", period.getYears());
+      throw new RuntimeException(String.format("Pinot datasource cannot round to yearly granularity: %s", period));
     } else if (period.getMonths() > 0) {
-      return String.format("%s:MONTHS", period.getMonths());
+      throw new RuntimeException(String.format("Pinot datasource cannot round to monthly granularity: %s", period));
     } else if (period.getWeeks() > 0) {
-      return String.format("%s:WEEKS", period.getWeeks());
+      throw new RuntimeException(String.format("Pinot datasource cannot round to weekly granularity: %s", period));
     } else if (period.getDays() > 0) {
       return String.format("%s:DAYS", period.getDays());
+    } else if (period.getHours() > 0) {
+      return String.format("%s:HOURS", period.getHours());
     } else if (period.getMinutes() > 0) {
       return String.format("%s:MINUTES", period.getMinutes());
     } else if (period.getSeconds() > 0) {

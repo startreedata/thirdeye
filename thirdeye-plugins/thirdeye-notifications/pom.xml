@@ -8,7 +8,7 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.34.0</version>
+    <version>1.35.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

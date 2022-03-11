@@ -264,6 +264,8 @@
           <version>3.0.0-M1</version>
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
+            <!-- default concourse git check frequency is 60 seconds. Ensures first release commit is triggering concourse-->
+            <waitBeforeTagging>65</waitBeforeTagging>
             <developmentVersion>
               ${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT
             </developmentVersion>

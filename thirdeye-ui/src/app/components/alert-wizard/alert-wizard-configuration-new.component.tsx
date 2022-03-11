@@ -102,6 +102,7 @@ function AlertWizardConfigurationNew({
             )}
 
             <JSONEditorV1<EditableAlert>
+                hideValidationSuccessIcon
                 error={error}
                 helperText={helperText}
                 value={currentWorkingConfiguration}

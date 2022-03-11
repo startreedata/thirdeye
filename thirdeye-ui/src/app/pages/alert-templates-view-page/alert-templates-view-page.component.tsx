@@ -189,6 +189,7 @@ export const AlertTemplatesViewPage: FunctionComponent = () => {
                         <CardContent>
                             {alertTemplate && (
                                 <JSONEditorV1<AlertTemplate>
+                                    hideValidationSuccessIcon
                                     readOnly
                                     value={alertTemplate}
                                 />

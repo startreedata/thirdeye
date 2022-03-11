@@ -35,6 +35,7 @@ export function JSONEditorV1<T = string>({
     disableAutoFormat,
     allowEmpty,
     disableValidation,
+    hideValidationSuccessIcon,
     validationDelay = DELAY_VALIDATION_DEFAULT,
     className,
     onChange,
@@ -213,19 +214,22 @@ export function JSONEditorV1<T = string>({
             )}
 
             {/* Valid icon */}
-            {showValidationIcon() && !error && valid && (
-                <div
-                    className={classNames(
-                        jsonEditorV1Classes.validationIcon,
-                        "json-editor-v1-valid-icon"
-                    )}
-                >
-                    <CheckCircleIcon
-                        fontSize="medium"
-                        htmlColor={theme.palette.success.main}
-                    />
-                </div>
-            )}
+            {showValidationIcon() &&
+                !error &&
+                valid &&
+                !hideValidationSuccessIcon && (
+                    <div
+                        className={classNames(
+                            jsonEditorV1Classes.validationIcon,
+                            "json-editor-v1-valid-icon"
+                        )}
+                    >
+                        <CheckCircleIcon
+                            fontSize="medium"
+                            htmlColor={theme.palette.success.main}
+                        />
+                    </div>
+                )}
 
             {/* Invalid icon */}
             {showValidationIcon() && (error || !valid) && (

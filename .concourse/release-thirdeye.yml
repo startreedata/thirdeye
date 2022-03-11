@@ -32,7 +32,7 @@ jobs:
     params:
       channel: ((slack-channel))
       text: |
-        Thirdeye release creation successfull.
+        Thirdeye release creation successful.
         ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
   on_failure:
     put: slack

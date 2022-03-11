@@ -39,5 +39,5 @@ jobs:
     params:
       channel: ((slack-channel))
       text: |
-        <!channel> Failed to create a release for Thirdeye.
+        <!channel> Failed to create a ThirdEye release.
         ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

@@ -3,6 +3,7 @@ import {
     TimeRangeDuration,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
+    deserializeKeyValuePair,
     getAccessTokenFromHashParams,
     getQueryString,
     getRecognizedQuery,
@@ -10,6 +11,7 @@ import {
     getSearchTextFromQueryString,
     getTimeRangeDurationFromQueryString,
     isValidNumberId,
+    serializeKeyValuePair,
     useSetQueryParamsUtil,
 } from "./params.util";
 
@@ -255,6 +257,50 @@ describe("Params Util", () => {
 
     it("isValidNumberId should return false for decimal number string", () => {
         expect(isValidNumberId("1.1")).toBeFalsy();
+    });
+
+    it("serializeKeyValuePair should return sorted serialized string", () => {
+        expect(
+            serializeKeyValuePair([
+                {
+                    key: "z",
+                    value: "3",
+                },
+                {
+                    key: "a",
+                    value: "1",
+                },
+                {
+                    key: "c",
+                    value: "2=4",
+                },
+            ])
+        ).toEqual("a=1,c=2=4,z=3");
+    });
+
+    it("serializeKeyValuePair should return empty string when empty array is passed", () => {
+        expect(serializeKeyValuePair([])).toEqual("");
+    });
+
+    it("deserializeKeyValuePair should return correct values for `=` in values", () => {
+        expect(deserializeKeyValuePair("a=1,c=2=4,z=3")).toEqual([
+            {
+                key: "a",
+                value: "1",
+            },
+            {
+                key: "c",
+                value: "2=4",
+            },
+            {
+                key: "z",
+                value: "3",
+            },
+        ]);
+    });
+
+    it("deserializeKeyValuePair should return empty array for empty string", () => {
+        expect(deserializeKeyValuePair("")).toEqual([]);
     });
 });
 

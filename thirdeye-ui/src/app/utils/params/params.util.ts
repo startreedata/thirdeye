@@ -1,5 +1,6 @@
-import { isInteger, toNumber } from "lodash";
+import { isInteger, sortBy, toNumber } from "lodash";
 import { useSearchParams } from "react-router-dom";
+import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
 import {
     TimeRange,
@@ -7,6 +8,8 @@ import {
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { createTimeRangeDuration } from "../time-range/time-range.util";
+
+const SINGLE_SEARCH_PARAM_SEPARATOR = ",";
 
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
 export const SEARCH_TERM_QUERY_PARAM_KEY =
@@ -155,6 +158,65 @@ export const isValidNumberId = (param: string): boolean => {
     const numberId = toNumber(param);
 
     return isInteger(numberId) && numberId >= 0;
+};
+
+/**
+ * Serialize and array of objects such as:
+ * [{
+ *     key: "city",
+ *     value: "sunnyvale"
+ * },{
+ *     key: "country",
+ *     value: "usa"
+ * }]
+ *
+ * to `city=sunnyvalye,country=usa`
+ *
+ * @param {array} keysValues - array of objects with "key" and "value" properties
+ */
+export const serializeKeyValuePair = (
+    keysValues: AnomalyFilterOption[]
+): string => {
+    const sorted = sortBy(keysValues, "key");
+
+    return sorted
+        .map((keyValuePair) => `${keyValuePair.key}=${keyValuePair.value}`)
+        .join(SINGLE_SEARCH_PARAM_SEPARATOR);
+};
+
+/**
+ * Deserialize a string like `city=sunnyvale,country=usa` to
+ *
+ * [{
+ *     key: "city",
+ *     value: "sunnyvale"
+ * },{
+ *     key: "country",
+ *     value: "usa"
+ * }]
+ *
+ * @param {string} serializedString - key values pairs seperated by commas
+ */
+export const deserializeKeyValuePair = (
+    serializedString: string
+): AnomalyFilterOption[] => {
+    if (!serializedString) {
+        return [];
+    }
+
+    const splitted = serializedString.split(SINGLE_SEARCH_PARAM_SEPARATOR);
+    const parsed: AnomalyFilterOption[] = [];
+
+    splitted.forEach((item) => {
+        // account for key=value=value1
+        const [key, ...values] = item.split("=");
+        parsed.push({
+            key,
+            value: values.join("="),
+        });
+    });
+
+    return parsed;
 };
 
 // List of app query string keys that are allowed to be carried forward when navigating

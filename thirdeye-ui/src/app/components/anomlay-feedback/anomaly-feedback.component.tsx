@@ -2,9 +2,8 @@ import {
     Card,
     CardContent,
     FormControl,
-    InputLabel,
     MenuItem,
-    Select,
+    TextField,
 } from "@material-ui/core";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -91,13 +90,10 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         <Card className={className} variant="outlined">
             <CardContent>
                 <FormControl fullWidth>
-                    <InputLabel id="anomaly-feedback-select-outlined-label">
-                        Is this an anomaly?
-                    </InputLabel>
-                    <Select
+                    <TextField
+                        select
                         id="anomaly-feedback-select"
                         label="Is this an anomaly?"
-                        labelId="anomaly-feedback-select-outlined-label"
                         value={currentlySelected}
                         onChange={handleChange}
                     >
@@ -108,7 +104,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                                 </MenuItem>
                             )
                         )}
-                    </Select>
+                    </TextField>
                 </FormControl>
             </CardContent>
         </Card>

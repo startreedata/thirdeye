@@ -1,6 +1,5 @@
 import { Alert } from "./alert.interfaces";
 import { Metric } from "./metric.interfaces";
-import { User } from "./user.interfaces";
 
 export interface Anomaly {
     id: number;
@@ -21,12 +20,10 @@ export interface Anomaly {
     type: AnomalyType;
     severity: AnomalySeverity;
     child: boolean;
-    feedback: AnomalyFeedback;
+    feedback?: AnomalyFeedback;
 }
 
 export interface AnomalyFeedback {
-    id: number;
-    owner: User;
     type: AnomalyFeedbackType;
     comment: string;
 }

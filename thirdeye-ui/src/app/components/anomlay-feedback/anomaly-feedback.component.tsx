@@ -95,6 +95,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         id="anomaly-feedback-select"
                         label="Is this an anomaly?"
                         value={currentlySelected}
+                        variant="standard"
                         onChange={handleChange}
                     >
                         {Object.keys(OPTION_TO_DESCRIPTIONS).map(

@@ -1,10 +1,4 @@
-import {
-    Card,
-    CardContent,
-    FormControl,
-    MenuItem,
-    TextField,
-} from "@material-ui/core";
+import { Card, CardContent, MenuItem, TextField } from "@material-ui/core";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -89,24 +83,28 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     return (
         <Card className={className} variant="outlined">
             <CardContent>
-                <FormControl fullWidth>
-                    <TextField
-                        select
-                        id="anomaly-feedback-select"
-                        label="Is this an anomaly?"
-                        value={currentlySelected}
-                        variant="standard"
-                        onChange={handleChange}
-                    >
-                        {Object.keys(OPTION_TO_DESCRIPTIONS).map(
-                            (optionKey: string) => (
-                                <MenuItem key={optionKey} value={optionKey}>
-                                    {OPTION_TO_DESCRIPTIONS[optionKey]}
-                                </MenuItem>
-                            )
-                        )}
-                    </TextField>
-                </FormControl>
+                <TextField
+                    fullWidth
+                    select
+                    InputLabelProps={{
+                        style: {
+                            backgroundColor: "white",
+                            paddingRight: "5px",
+                        },
+                    }}
+                    id="anomaly-feedback-select"
+                    label="Is this an anomaly?"
+                    value={currentlySelected}
+                    onChange={handleChange}
+                >
+                    {Object.keys(OPTION_TO_DESCRIPTIONS).map(
+                        (optionKey: string) => (
+                            <MenuItem key={optionKey} value={optionKey}>
+                                {OPTION_TO_DESCRIPTIONS[optionKey]}
+                            </MenuItem>
+                        )
+                    )}
+                </TextField>
             </CardContent>
         </Card>
     );

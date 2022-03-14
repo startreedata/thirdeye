@@ -1,9 +1,10 @@
-import { Box, Card, CardContent, Grid } from "@material-ui/core";
+import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
@@ -23,6 +24,7 @@ import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
@@ -30,6 +32,7 @@ import {
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
+import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
     const {
@@ -47,6 +50,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const style = useAnomaliesViewPageStyles();
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly
@@ -143,11 +147,36 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             />
             <PageContentsGridV1>
                 {/* Anomaly */}
-                <Grid item xs={12}>
-                    <AnomalyCard
-                        uiAnomaly={uiAnomaly}
-                        onDelete={handleAnomalyDelete}
-                    />
+                <Grid
+                    container
+                    item
+                    alignItems="stretch"
+                    justifyContent="space-between"
+                    xs={12}
+                >
+                    <Grid item lg={9} md={8} sm={12} xs={12}>
+                        <Paper className={style.fullHeight} elevation={0}>
+                            <AnomalyCard
+                                uiAnomaly={uiAnomaly}
+                                onDelete={handleAnomalyDelete}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item lg={3} md={4} sm={12} xs={12}>
+                        <Paper className={style.fullHeight} elevation={0}>
+                            {anomaly && (
+                                <AnomalyFeedback
+                                    anomalyFeedback={
+                                        anomaly.feedback || {
+                                            ...DEFAULT_FEEDBACK,
+                                        }
+                                    }
+                                    anomalyId={anomaly.id}
+                                    className={style.fullHeight}
+                                />
+                            )}
+                        </Paper>
+                    </Grid>
                 </Grid>
 
                 {/* Alert evaluation time series */}

@@ -11,7 +11,7 @@ import { AnomalySummaryCardProps } from "./anomaly-summary-card.interfaces";
 import { useAnomalySummaryCardStyles } from "./anomaly-summary-card.styles";
 
 export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
-    props: AnomalySummaryCardProps
+    props
 ) => {
     const { alert, getAlert, status } = useGetAlert();
     const anomalySummaryCardStyles = useAnomalySummaryCardStyles();
@@ -26,7 +26,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
     }, [uiAnomaly]);
 
     return (
-        <Card variant="outlined">
+        <Card className={props.className} variant="outlined">
             <CardContent>
                 {uiAnomaly && (
                     <Grid container spacing={4}>

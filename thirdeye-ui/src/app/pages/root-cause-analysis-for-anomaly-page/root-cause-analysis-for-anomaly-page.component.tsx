@@ -4,6 +4,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -21,12 +22,14 @@ import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "./root-cause-analysis-for-anomaly-page.interfaces";
+import { useRootCauseAnalysisForAnomalyPageStyles } from "./root-cause-analysis-for-anomaly-page.style";
 
 export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const {
@@ -47,6 +50,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
+    const style = useRootCauseAnalysisForAnomalyPageStyles();
 
     const pageTitle = `${t("label.root-cause-analysis")}: ${t(
         "label.anomaly"
@@ -119,26 +123,60 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             <PageContentsGridV1>
                 {/* Anomaly Summary */}
                 <Grid item xs={12}>
-                    <Paper elevation={0}>
-                        {getAnomalyRequestStatus === ActionStatus.Working && (
+                    {getAnomalyRequestStatus === ActionStatus.Working && (
+                        <Paper elevation={0}>
                             <Card variant="outlined">
                                 <CardContent>
                                     <AppLoadingIndicatorV1 />
                                 </CardContent>
                             </Card>
+                        </Paper>
+                    )}
+                    {getAnomalyRequestStatus !== ActionStatus.Working &&
+                        getAnomalyRequestStatus !== ActionStatus.Error && (
+                            <Grid
+                                container
+                                alignItems="stretch"
+                                justifyContent="space-between"
+                            >
+                                <Grid item lg={9} md={8} sm={12} xs={12}>
+                                    <Paper
+                                        className={style.fullHeight}
+                                        elevation={0}
+                                    >
+                                        <AnomalySummaryCard
+                                            className={style.fullHeight}
+                                            uiAnomaly={uiAnomaly}
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item lg={3} md={4} sm={12} xs={12}>
+                                    <Paper
+                                        className={style.fullHeight}
+                                        elevation={0}
+                                    >
+                                        {anomaly && (
+                                            <AnomalyFeedback
+                                                anomalyFeedback={
+                                                    anomaly.feedback || {
+                                                        ...DEFAULT_FEEDBACK,
+                                                    }
+                                                }
+                                                anomalyId={anomaly.id}
+                                                className={style.fullHeight}
+                                            />
+                                        )}
+                                    </Paper>
+                                </Grid>
+                            </Grid>
                         )}
-                        {getAnomalyRequestStatus !== ActionStatus.Working &&
-                            getAnomalyRequestStatus !== ActionStatus.Error && (
-                                <AnomalySummaryCard uiAnomaly={uiAnomaly} />
-                            )}
-                        {getAnomalyRequestStatus === ActionStatus.Error && (
-                            <Card variant="outlined">
-                                <CardContent>
-                                    <NoDataIndicator />
-                                </CardContent>
-                            </Card>
-                        )}
-                    </Paper>
+                    {getAnomalyRequestStatus === ActionStatus.Error && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <NoDataIndicator />
+                            </CardContent>
+                        </Card>
+                    )}
                 </Grid>
 
                 {/* Trending */}

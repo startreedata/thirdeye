@@ -7,9 +7,20 @@ package ai.startree.thirdeye.util;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
+import org.joda.time.format.ISOPeriodFormat;
 
 public class TimeUtils {
+
+
+  public static Period isoPeriod(String period) {
+    return Period.parse(period, ISOPeriodFormat.standard());
+  }
+
+  public static DateTime utcDatetime(long timeMillis) {
+    return new DateTime(timeMillis, DateTimeZone.UTC);
+  }
 
   /**
    * See https://stackoverflow.com/questions/8933158/how-do-i-round-a-datetime-to-the-nearest-period

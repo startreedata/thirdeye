@@ -1,10 +1,14 @@
 import { useHTTPAction } from "../create-rest-action";
 import { Anomaly } from "../dto/anomaly.interfaces";
 import {
-    getAnomaliesByAlertIdAndTime,
+    getAnomalies as getAnomaliesRest,
     getAnomaly as getAnomalyRest,
 } from "./anomalies.rest";
-import { GetAnomaly, GetAnomalyByAlertIdAndTime } from "./anomaly.interfaces";
+import {
+    GetAnomalies,
+    GetAnomaliesProps,
+    GetAnomaly,
+} from "./anomaly.interfaces";
 
 export const useGetAnomaly = (): GetAnomaly => {
     const { data, makeRequest, status, errorMessage } =
@@ -17,22 +21,19 @@ export const useGetAnomaly = (): GetAnomaly => {
     return { anomaly: data, getAnomaly, status, errorMessage };
 };
 
-export const useGetAnomalyByAlertIdAndTime = (): GetAnomalyByAlertIdAndTime => {
-    const { data, makeRequest, status, errorMessage } = useHTTPAction<
-        Anomaly[]
-    >(getAnomaliesByAlertIdAndTime);
+export const useGetAnomalies = (): GetAnomalies => {
+    const { data, makeRequest, status, errorMessage } =
+        useHTTPAction<Anomaly[]>(getAnomaliesRest);
 
-    const getAnomalyByAlertIdAndTime = (
-        alertId: number,
-        startTime: number,
-        endTime: number
+    const getAnomalies = (
+        getAnomalyParams: GetAnomaliesProps = {}
     ): Promise<Anomaly[] | undefined> => {
-        return makeRequest(alertId, startTime, endTime);
+        return makeRequest(getAnomalyParams);
     };
 
     return {
         anomalies: data,
-        getAnomalyByAlertIdAndTime,
+        getAnomalies,
         status,
         errorMessage,
     };

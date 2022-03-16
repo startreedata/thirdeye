@@ -43,7 +43,7 @@ jest.mock("../../rest/anomalies/anomalies.rest", () => ({
         string,
         unknown
     >),
-    getAnomaliesByAlertIdAndTime: jest
+    getAnomalies: jest
         .fn()
         .mockImplementation(() => mockedGetAnomaliesResponse),
 }));

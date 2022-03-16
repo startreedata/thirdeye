@@ -14,7 +14,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
-import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
 import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,7 +103,6 @@ public class TestMergedAnomalyResultManager {
       MergedAnomalyResultDTO expected = anomalies.get(i);
       Assert.assertNotNull(actual.getId());
       Assert.assertEquals(actual.getDetectionConfigId(), expected.getDetectionConfigId());
-      Assert.assertEquals(actual.getDimensions(), expected.getDimensions());
     }
     // Clean up
     for (int i = 0; i < anomalies.size(); i++) {
@@ -131,7 +129,6 @@ public class TestMergedAnomalyResultManager {
       MergedAnomalyResultDTO expected = anomalies.get(i);
       Assert.assertNotNull(actual.getId());
       Assert.assertEquals(actual.getDetectionConfigId(), expected.getDetectionConfigId());
-      Assert.assertEquals(actual.getDimensions(), expected.getDimensions());
     }
     // Clean up
     for (int i = 0; i < anomalies.size(); i++) {
@@ -304,23 +301,11 @@ public class TestMergedAnomalyResultManager {
     anomaly1.setDetectionConfigId(detectionConfigId);
     anomaly1.setStartTime(new DateTime(2019, 1, 1, 0, 0).getMillis());
     anomaly1.setEndTime(new DateTime(2019, 1, 1, 12, 0).getMillis());
-    DimensionMap dimension1 = new DimensionMap();
-    dimension1.put("what", "a");
-    dimension1.put("where", "b");
-    dimension1.put("when", "c");
-    dimension1.put("how", "d");
-    anomaly1.setDimensions(dimension1);
     MergedAnomalyResultDTO anomaly2 = new MergedAnomalyResultDTO();
     anomaly2.setMetric("metric");
     anomaly2.setDetectionConfigId(detectionConfigId);
     anomaly2.setStartTime(new DateTime(2019, 1, 2, 10, 0).getMillis());
     anomaly2.setEndTime(new DateTime(2019, 1, 2, 20, 0).getMillis());
-    DimensionMap dimension2 = new DimensionMap();
-    dimension2.put("what", "e");
-    dimension2.put("where", "f");
-    dimension2.put("when", "g");
-    dimension2.put("how", "h");
-    anomaly2.setDimensions(dimension2);
 
     return Arrays.asList(anomaly1, anomaly2);
   }

@@ -103,13 +103,11 @@ public class DetectionHealthTest {
     anomaly.setDetectionConfigId(this.configId);
     anomaly.setStartTime(110);
     anomaly.setEndTime(120);
-    anomaly.setMetricUrn("thirdeye:metric:1:country%3Dus");
     this.anomalyDAO.save(anomaly);
     MergedAnomalyResultDTO anomaly2 = new MergedAnomalyResultDTO();
     anomaly2.setDetectionConfigId(this.configId);
     anomaly2.setStartTime(115);
     anomaly2.setEndTime(125);
-    anomaly2.setMetricUrn("thirdeye:metric:1:country%3Dcn");
     this.anomalyDAO.save(anomaly2);
     DetectionHealth health = new DetectionHealth.Builder(configId, startTime, endTime)
         .addAnomalyCoverageStatus(this.anomalyDAO).build();

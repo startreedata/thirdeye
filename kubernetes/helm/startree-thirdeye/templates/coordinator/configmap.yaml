@@ -139,6 +139,9 @@ data:
       holidayEvents:
         enabled: {{ not .Values.config.holidayLoaderKey | ternary "false" "true" }}
         calendars:
+        {{- if .Values.config.calendars }}
+          {{- toYaml .Values.config.calendars | nindent 10 }}
+        {{- else }}
           - en.australian#holiday@group.v.calendar.google.com
           - en.austrian#holiday@group.v.calendar.google.com
           - en.brazilian#holiday@group.v.calendar.google.com
@@ -176,6 +179,7 @@ data:
           - en.uk#holiday@group.v.calendar.google.com
           - en.usa#holiday@group.v.calendar.google.com
           - en.vietnamese#holiday@group.v.calendar.google.com
+        {{- end }}
         holidayLoadRange: 2592000000
         runFrequency: 1  # in Days
 

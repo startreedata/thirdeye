@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -17,6 +18,7 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasources } from "../../utils/datasources/datasources.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 
 export const DatasourcesAllPage: FunctionComponent = () => {
     const [uiDatasources, setUiDatasources] = useState<UiDatasource[] | null>(
@@ -39,8 +41,13 @@ export const DatasourcesAllPage: FunctionComponent = () => {
             .then((datasources) => {
                 fetchedUiDatasources = getUiDatasources(datasources);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    errMessage || t("message.fetch-error")
+                );
             })
             .finally(() => {
                 setUiDatasources(fetchedUiDatasources);
@@ -69,14 +76,17 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 // Remove deleted datasource from fetched datasources
                 removeUiDatasource(datasource);
             })
-            .catch(() =>
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.delete-error", {
-                        entity: t("label.datasource"),
-                    })
-                )
-            );
+                    errMessage ||
+                        t("message.delete-error", {
+                            entity: t("label.datasource"),
+                        })
+                );
+            });
     };
 
     const removeUiDatasource = (datasource: Datasource): void => {

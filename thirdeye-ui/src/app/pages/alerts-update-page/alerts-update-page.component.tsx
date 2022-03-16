@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { assign, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +33,7 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
@@ -110,12 +112,15 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                             })
                         );
                     })
-                    .catch((): void => {
+                    .catch((error: AxiosError): void => {
+                        const errMessage = getErrorMessage(error);
+
                         notify(
                             NotificationTypeV1.Error,
-                            t("message.update-error", {
-                                entity: t("label.subscription-groups"),
-                            })
+                            errMessage ||
+                                t("message.update-error", {
+                                    entity: t("label.subscription-groups"),
+                                })
                         );
                     })
                     .finally((): void => {
@@ -123,10 +128,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                         navigate(getAlertsViewPath(alert.id));
                     });
             })
-            .catch((): void => {
+            .catch((error: AxiosError): void => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.update-error", { entity: t("label.alert") })
+                    errMessage ||
+                        t("message.update-error", { entity: t("label.alert") })
                 );
             });
     };
@@ -153,11 +161,14 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
+            const errMessage = getErrorMessage(error as AxiosError);
+
             notify(
                 NotificationTypeV1.Error,
-                t("message.create-error", {
-                    entity: t("label.subscription-group"),
-                })
+                errMessage ||
+                    t("message.create-error", {
+                        entity: t("label.subscription-group"),
+                    })
             );
         }
 
@@ -171,7 +182,12 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            const errMessage = getErrorMessage(error as AxiosError);
+
+            notify(
+                NotificationTypeV1.Error,
+                errMessage || t("message.fetch-error")
+            );
         }
 
         return fetchedSubscriptionGroups;
@@ -182,7 +198,12 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            const errMessage = getErrorMessage(error as AxiosError);
+
+            notify(
+                NotificationTypeV1.Error,
+                errMessage || t("message.fetch-error")
+            );
         }
 
         return fetchedAlerts;
@@ -225,8 +246,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
             .then((alert) => {
                 setAlert(alert);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    errMessage || t("message.fetch-error")
+                );
             })
             .finally((): void => {
                 setLoading(false);

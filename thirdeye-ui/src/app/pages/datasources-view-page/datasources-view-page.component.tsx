@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,7 @@ import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getDatasourcesAllPath } from "../../utils/routes/routes.util";
 import { DatasourcesViewPageParams } from "./datasources-view-page.interfaces";
 
@@ -61,8 +63,13 @@ export const DatasourcesViewPage: FunctionComponent = () => {
             .then((datasource) => {
                 fetchedUiDatasource = getUiDatasource(datasource);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    errMessage || t("message.fetch-error")
+                );
             })
             .finally(() => {
                 setUiDatasource(fetchedUiDatasource);
@@ -91,14 +98,17 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 // Redirect to datasources all path
                 navigate(getDatasourcesAllPath());
             })
-            .catch(() =>
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.delete-error", {
-                        entity: t("label.datasource"),
-                    })
-                )
-            );
+                    errMessage ||
+                        t("message.delete-error", {
+                            entity: t("label.datasource"),
+                        })
+                );
+            });
     };
 
     return (

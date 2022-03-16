@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,7 @@ import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import {
     getDatasetsAllPath,
     getDatasetsUpdatePath,
@@ -59,9 +61,14 @@ export const DatasetsViewPage: FunctionComponent = () => {
             .then((dataset) => {
                 fetchedUiDataset = getUiDataset(dataset);
             })
-            .catch(() =>
-                notify(NotificationTypeV1.Error, t("message.fetch-error"))
-            )
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    errMessage || t("message.fetch-error")
+                );
+            })
             .finally(() => setUiDataset(fetchedUiDataset));
     };
 
@@ -85,12 +92,17 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 // Redirect to datasets all path
                 navigate(getDatasetsAllPath());
             })
-            .catch(() =>
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.delete-error", { entity: t("label.dataset") })
-                )
-            );
+                    errMessage ||
+                        t("message.delete-error", {
+                            entity: t("label.dataset"),
+                        })
+                );
+            });
     };
 
     const handleDatasetEdit = (id: number): void => {

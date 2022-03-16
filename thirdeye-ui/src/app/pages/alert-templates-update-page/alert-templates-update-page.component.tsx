@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { assign } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplate } from "../../rest/alert-templates/alert-templates.actions";
 import { updateAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 import { AlertTemplatesUpdatePageParams } from "./alert-templates-update-page.interfaces";
 
@@ -59,12 +61,15 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
 
                 return;
             })
-            .catch((): void => {
+            .catch((error: AxiosError): void => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.alert-template"),
-                    })
+                    errMessage ||
+                        t("message.update-error", {
+                            entity: t("label.alert-template"),
+                        })
                 );
             });
     };

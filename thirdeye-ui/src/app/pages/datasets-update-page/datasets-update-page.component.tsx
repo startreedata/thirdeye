@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,6 +19,7 @@ import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
 import { DatasetsUpdatePageParams } from "./datasets-update-page.interfaces";
 
@@ -51,12 +53,15 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 // Redirect to datasets detail path
                 navigate(getDatasetsViewPath(dataset.id));
             })
-            .catch((): void => {
+            .catch((error: AxiosError): void => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.dataset"),
-                    })
+                    errMessage ||
+                        t("message.update-error", {
+                            entity: t("label.dataset"),
+                        })
                 );
             });
     };

@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,6 +30,7 @@ import {
     createAlertEvaluation,
     createDefaultAlert,
 } from "../../utils/alerts/alerts.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
@@ -85,10 +87,13 @@ export const AlertsCreatePage: FunctionComponent = () => {
                         navigate(getAlertsViewPath(alert.id));
                     });
             })
-            .catch(() => {
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.create-error", { entity: t("label.alert") })
+                    errMessage ||
+                        t("message.create-error", { entity: t("label.alert") })
                 );
             });
     };
@@ -115,7 +120,15 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
-            // Empty
+            const errMessage = getErrorMessage(error as AxiosError);
+
+            notify(
+                NotificationTypeV1.Error,
+                errMessage ||
+                    t("message.create-error", {
+                        entity: t("label.subscription-group"),
+                    })
+            );
         }
 
         return newSubscriptionGroup;
@@ -128,7 +141,12 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            // Empty
+            const errMessage = getErrorMessage(error as AxiosError);
+
+            notify(
+                NotificationTypeV1.Error,
+                errMessage || t("message.fetch-error")
+            );
         }
 
         return fetchedSubscriptionGroups;
@@ -139,7 +157,12 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            // Empty
+            const errMessage = getErrorMessage(error as AxiosError);
+
+            notify(
+                NotificationTypeV1.Error,
+                errMessage || t("message.fetch-error")
+            );
         }
 
         return fetchedAlerts;

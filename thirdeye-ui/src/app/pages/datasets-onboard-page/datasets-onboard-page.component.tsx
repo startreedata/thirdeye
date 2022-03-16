@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,7 @@ import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
 
 export const DatasetsOnboardPage: FunctionComponent = () => {
@@ -45,12 +47,15 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 // Redirect to datasets detail path
                 navigate(getDatasetsViewPath(dataset.id));
             })
-            .catch((): void => {
+            .catch((error: AxiosError): void => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.onboard-error", {
-                        entity: t("label.dataset"),
-                    })
+                    errMessage ||
+                        t("message.onboard-error", {
+                            entity: t("label.dataset"),
+                        })
                 );
             });
     };
@@ -60,8 +65,13 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
             .then((datasources: Datasource[]): void => {
                 setDatasources(datasources);
             })
-            .catch((): void => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError): void => {
+                const errMessage = getErrorMessage(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    errMessage || t("message.fetch-error")
+                );
             })
             .finally((): void => {
                 setLoading(false);

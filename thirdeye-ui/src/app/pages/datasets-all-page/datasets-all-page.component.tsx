@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -17,6 +18,7 @@ import {
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
     const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
@@ -37,9 +39,14 @@ export const DatasetsAllPage: FunctionComponent = () => {
             .then((datasets) => {
                 fetchedUiDatasets = getUiDatasets(datasets);
             })
-            .catch(() =>
-                notify(NotificationTypeV1.Error, t("message.fetch-error"))
-            )
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    errMessage || t("message.fetch-error")
+                );
+            })
             .finally(() => setUiDatasets(fetchedUiDatasets));
     };
 
@@ -63,12 +70,17 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 // Remove deleted dataset from fetched datasets
                 removeUiDataset(dataset);
             })
-            .catch(() =>
+            .catch((error: AxiosError) => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.delete-error", { entity: t("label.dataset") })
-                )
-            );
+                    errMessage ||
+                        t("message.delete-error", {
+                            entity: t("label.dataset"),
+                        })
+                );
+            });
     };
 
     const removeUiDataset = (dataset: Dataset): void => {

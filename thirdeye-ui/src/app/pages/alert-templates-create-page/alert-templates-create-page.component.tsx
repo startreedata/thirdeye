@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ import {
     NewAlertTemplate,
 } from "../../rest/dto/alert-template.interfaces";
 import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
+import { getErrorMessage } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 
 export const AlertTemplatesCreatePage: FunctionComponent = () => {
@@ -42,12 +44,15 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
                 alertTemplate.id &&
                     navigate(getAlertTemplatesViewPath(alertTemplate.id));
             })
-            .catch((): void => {
+            .catch((error: AxiosError): void => {
+                const errMessage = getErrorMessage(error);
+
                 notify(
                     NotificationTypeV1.Error,
-                    t("message.create-error", {
-                        entity: t("label.alert-template"),
-                    })
+                    errMessage ||
+                        t("message.create-error", {
+                            entity: t("label.alert-template"),
+                        })
                 );
             });
     };

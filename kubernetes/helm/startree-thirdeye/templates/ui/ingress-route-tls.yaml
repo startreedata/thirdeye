@@ -7,7 +7,7 @@ spec:
   entryPoints:
   - websecure
   routes:
-  - match: HostSNI(`{{ .Release.Name }}.{{ .Release.Namespace }}.{{ required "domain is required." .Values.domain }}`)
+  - match: HostSNI(`thirdeye.{{ required "domain is required." .Values.domain }}`)
     services:
     - name: {{ include "thirdeye.ui.headless" . }}
       namespace: {{ .Release.Namespace }}

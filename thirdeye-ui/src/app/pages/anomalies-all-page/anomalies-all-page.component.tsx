@@ -16,7 +16,7 @@ import {
 } from "../../platform/components";
 import {
     deleteAnomaly,
-    getAnomaliesByTime,
+    getAnomalies,
 } from "../../rest/anomalies/anomalies.rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
@@ -42,7 +42,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
 
         let fetchedUiAnomalies: UiAnomaly[] = [];
-        getAnomaliesByTime(Number(start), Number(end))
+        getAnomalies({ startTime: Number(start), endTime: Number(end) })
             .then((anomalies) => {
                 fetchedUiAnomalies = getUiAnomalies(anomalies);
             })

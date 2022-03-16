@@ -25,7 +25,7 @@ import {
     getAlert,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
-import { useGetAnomalyByAlertIdAndTime } from "../../rest/anomalies/anomaly.actions";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -48,8 +48,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         getEvaluation,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
-    const { anomalies, getAnomalyByAlertIdAndTime } =
-        useGetAnomalyByAlertIdAndTime();
+    const { anomalies, getAnomalies } = useGetAnomalies();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -102,11 +101,11 @@ export const AlertsViewPage: FunctionComponent = () => {
 
             return;
         }
-        getAnomalyByAlertIdAndTime(
-            uiAlert.alert.id,
-            Number(start),
-            Number(end)
-        );
+        getAnomalies({
+            alertId: uiAlert.alert.id,
+            startTime: Number(start),
+            endTime: Number(end),
+        });
         getEvaluation(
             createAlertEvaluation(uiAlert.alert, Number(start), Number(end))
         );

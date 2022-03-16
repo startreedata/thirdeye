@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Anomaly, AnomalyFeedback } from "../dto/anomaly.interfaces";
+import { GetAnomaliesProps } from "./anomaly.interfaces";
 
 const BASE_URL_ANOMALIES = "/api/anomalies";
 
@@ -9,40 +10,27 @@ export const getAnomaly = async (id: number): Promise<Anomaly> => {
     return response.data;
 };
 
-export const getAllAnomalies = async (): Promise<Anomaly[]> => {
-    const response = await axios.get(`${BASE_URL_ANOMALIES}?isChild=false`);
+export const getAnomalies = async ({
+    alertId,
+    startTime,
+    endTime,
+}: GetAnomaliesProps = {}): Promise<Anomaly[]> => {
+    const queryParams = new URLSearchParams([["isChild", "false"]]);
 
-    return response.data;
-};
+    if (alertId) {
+        queryParams.set("alert.id", alertId.toString());
+    }
 
-export const getAnomaliesByAlertId = async (
-    alertId: number
-): Promise<Anomaly[]> => {
+    if (startTime) {
+        queryParams.set("startTime", `[gte]${startTime}`);
+    }
+
+    if (endTime) {
+        queryParams.set("endTime", `[lte]${endTime}`);
+    }
+
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?isChild=false&alert.id=${alertId}`
-    );
-
-    return response.data;
-};
-
-export const getAnomaliesByTime = async (
-    startTime: number,
-    endTime: number
-): Promise<Anomaly[]> => {
-    const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?isChild=false&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
-    );
-
-    return response.data;
-};
-
-export const getAnomaliesByAlertIdAndTime = async (
-    alertId: number,
-    startTime: number,
-    endTime: number
-): Promise<Anomaly[]> => {
-    const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?isChild=false&alert.id=${alertId}&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
+        `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
     );
 
     return response.data;

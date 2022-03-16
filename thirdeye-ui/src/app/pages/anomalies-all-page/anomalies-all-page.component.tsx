@@ -1,4 +1,5 @@
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -14,10 +15,9 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import {
-    deleteAnomaly,
-    getAnomalies,
-} from "../../rest/anomalies/anomalies.rest";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
@@ -26,6 +26,8 @@ import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
+    const { getAnomalies, status: getAnomaliesRequestStatus } =
+        useGetAnomalies();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -44,7 +46,9 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         let fetchedUiAnomalies: UiAnomaly[] = [];
         getAnomalies({ startTime: Number(start), endTime: Number(end) })
             .then((anomalies) => {
-                fetchedUiAnomalies = getUiAnomalies(anomalies);
+                if (anomalies && anomalies.length) {
+                    fetchedUiAnomalies = getUiAnomalies(anomalies);
+                }
             })
             .finally(() => setUiAnomalies(fetchedUiAnomalies));
     };
@@ -101,19 +105,36 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>
-                    <PageContentsCardV1 disablePadding fullHeight>
-                        {/* Anomaly list */}
-                        <AnomalyListV1
-                            anomalies={uiAnomalies}
-                            searchFilterValue={searchParams.get(
-                                SEARCH_TERM_QUERY_PARAM_KEY
-                            )}
-                            onDelete={handleAnomalyDelete}
-                            onSearchFilterValueChange={
-                                onSearchFilterValueChange
-                            }
-                        />
-                    </PageContentsCardV1>
+                    {getAnomaliesRequestStatus === ActionStatus.Done &&
+                        uiAnomalies &&
+                        uiAnomalies.length === 0 && (
+                            <PageContentsCardV1 disablePadding>
+                                <Box alignContent="center">
+                                    <Alert severity="info">
+                                        <AlertTitle>Info</AlertTitle>
+                                        No anomalies for the date range. Please
+                                        try a different date range.
+                                    </Alert>
+                                </Box>{" "}
+                            </PageContentsCardV1>
+                        )}
+                    {/* Anomaly list */}
+                    {getAnomaliesRequestStatus === ActionStatus.Done &&
+                        uiAnomalies &&
+                        uiAnomalies.length > 0 && (
+                            <PageContentsCardV1 disablePadding fullHeight>
+                                <AnomalyListV1
+                                    anomalies={uiAnomalies}
+                                    searchFilterValue={searchParams.get(
+                                        SEARCH_TERM_QUERY_PARAM_KEY
+                                    )}
+                                    onDelete={handleAnomalyDelete}
+                                    onSearchFilterValueChange={
+                                        onSearchFilterValueChange
+                                    }
+                                />{" "}
+                            </PageContentsCardV1>
+                        )}
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

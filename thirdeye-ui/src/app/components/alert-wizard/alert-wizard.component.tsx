@@ -1,4 +1,12 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    Tooltip,
+    Typography,
+} from "@material-ui/core";
+import InfoIcon from "@material-ui/icons/Info";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { useEffect, useState } from "react";
@@ -322,6 +330,27 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                         `label.${kebabCase(
                                             AlertWizardStep[currentWizardStep]
                                         )}`
+                                    )}
+                                    {currentWizardStep ===
+                                        AlertWizardStep.DETECTION_CONFIGURATION && (
+                                        <a
+                                            href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                            rel="noreferrer"
+                                            target="_blank"
+                                        >
+                                            <IconButton color="secondary">
+                                                <Tooltip
+                                                    placement="top"
+                                                    title={
+                                                        t(
+                                                            "label.view-configuration-docs"
+                                                        ) as string
+                                                    }
+                                                >
+                                                    <InfoIcon />
+                                                </Tooltip>
+                                            </IconButton>
+                                        </a>
                                     )}
                                 </Typography>
                             </Grid>

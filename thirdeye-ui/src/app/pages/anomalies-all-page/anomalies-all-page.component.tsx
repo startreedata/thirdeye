@@ -1,5 +1,4 @@
-import { Box, Grid } from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
+import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -36,6 +35,21 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         // Time range refreshed, fetch anomalies
         fetchAnomaliesByTime();
     }, [searchParams]);
+
+    useEffect(() => {
+        if (
+            getAnomaliesRequestStatus === ActionStatus.Done &&
+            uiAnomalies &&
+            uiAnomalies.length === 0
+        ) {
+            notify(
+                NotificationTypeV1.Info,
+                t("message.no-data-for-entity-for-date-range", {
+                    entity: t("label.anomalies"),
+                })
+            );
+        }
+    }, [getAnomaliesRequestStatus, uiAnomalies]);
 
     const fetchAnomaliesByTime = (): void => {
         setUiAnomalies(null);
@@ -105,36 +119,19 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>
-                    {getAnomaliesRequestStatus === ActionStatus.Done &&
-                        uiAnomalies &&
-                        uiAnomalies.length === 0 && (
-                            <PageContentsCardV1 disablePadding>
-                                <Box alignContent="center">
-                                    <Alert severity="info">
-                                        <AlertTitle>Info</AlertTitle>
-                                        No anomalies for the date range. Please
-                                        try a different date range.
-                                    </Alert>
-                                </Box>{" "}
-                            </PageContentsCardV1>
-                        )}
                     {/* Anomaly list */}
-                    {getAnomaliesRequestStatus === ActionStatus.Done &&
-                        uiAnomalies &&
-                        uiAnomalies.length > 0 && (
-                            <PageContentsCardV1 disablePadding fullHeight>
-                                <AnomalyListV1
-                                    anomalies={uiAnomalies}
-                                    searchFilterValue={searchParams.get(
-                                        SEARCH_TERM_QUERY_PARAM_KEY
-                                    )}
-                                    onDelete={handleAnomalyDelete}
-                                    onSearchFilterValueChange={
-                                        onSearchFilterValueChange
-                                    }
-                                />{" "}
-                            </PageContentsCardV1>
-                        )}
+                    <PageContentsCardV1 disablePadding fullHeight>
+                        <AnomalyListV1
+                            anomalies={uiAnomalies}
+                            searchFilterValue={searchParams.get(
+                                SEARCH_TERM_QUERY_PARAM_KEY
+                            )}
+                            onDelete={handleAnomalyDelete}
+                            onSearchFilterValueChange={
+                                onSearchFilterValueChange
+                            }
+                        />{" "}
+                    </PageContentsCardV1>
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

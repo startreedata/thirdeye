@@ -2,10 +2,10 @@ import {
     Box,
     Card,
     CardContent,
-    CardHeader,
     Chip,
     Divider,
     Grid,
+    MenuItem,
     TextField,
     Typography,
 } from "@material-ui/core";
@@ -47,7 +47,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     AnomalyBreakdownComparisonHeatmapProps
 > = ({
     anomalyId,
-    comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
     anomaly,
     shouldTruncateText = true,
 }: AnomalyBreakdownComparisonHeatmapProps) => {
@@ -67,6 +66,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
         AnomalyFilterOption[]
     >([]);
+    const [comparisonOffset, setComparisonWeekOffset] =
+        useState<AnomalyBreakdownAPIOffsetValues>(
+            AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO
+        );
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
@@ -222,13 +225,56 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         return node.size;
     };
 
+    const baselineOptions: {
+        key: AnomalyBreakdownAPIOffsetValues;
+        description: string;
+    }[] = [];
+    Object.values(AnomalyBreakdownAPIOffsetValues).forEach(
+        (offsetKey: AnomalyBreakdownAPIOffsetValues) => {
+            if (offsetKey !== AnomalyBreakdownAPIOffsetValues.CURRENT) {
+                baselineOptions.push({
+                    key: offsetKey,
+                    description: OFFSET_TO_HUMAN_READABLE[offsetKey],
+                });
+            }
+        }
+    );
+
+    const onHandleComparisonOffsetSelection = (
+        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+    ): void => {
+        setComparisonWeekOffset(
+            e.target.value as AnomalyBreakdownAPIOffsetValues
+        );
+    };
+
     return (
         <Card variant="outlined">
-            <CardHeader
-                title="Heatmap of Change in Contribution"
-                titleTypographyProps={{ variant: "h5" }}
-            />
-
+            <CardContent>
+                <Grid container justifyContent="space-between">
+                    <Grid item sm={6} xs={12}>
+                        <Typography gutterBottom component="h2" variant="h5">
+                            Heatmap of Change in Contribution
+                        </Typography>
+                    </Grid>
+                    <Grid item sm={6} xs={12}>
+                        <TextField
+                            fullWidth
+                            select
+                            label="Baseline Week Offset"
+                            size="small"
+                            value={comparisonOffset}
+                            onChange={onHandleComparisonOffsetSelection}
+                        >
+                            {baselineOptions.map((option) => (
+                                <MenuItem key={option.key} value={option.key}>
+                                    {option.description}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                </Grid>
+            </CardContent>
             <CardContent>
                 {breakdownComparisonData &&
                     breakdownComparisonData.length > 0 &&

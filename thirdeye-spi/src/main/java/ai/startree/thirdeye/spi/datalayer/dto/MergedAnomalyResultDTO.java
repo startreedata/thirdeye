@@ -11,7 +11,6 @@ import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.MoreObjects;
@@ -36,6 +35,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private Long anomalyFeedbackId;
   private String collection;
   private String metric;
+  @JsonIgnore
+  @Deprecated
   private DimensionMap dimensions = new DimensionMap();
   private long startTime;
   private long endTime;
@@ -52,6 +53,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private boolean notified;
   private String message;
   @Deprecated
+  @JsonIgnore
   private String metricUrn;
   private Long detectionConfigId;
   private Set<Long> childIds; // ids of the anomalies this anomaly merged from
@@ -298,8 +300,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   @Override
   public int hashCode() {
     return Objects
-        .hash(getId(), startTime, endTime, collection, metric, dimensions, score, impactToGlobal,
-            avgBaselineVal, avgCurrentVal, anomalyResultSource, metricUrn, detectionConfigId,
+        .hash(getId(), startTime, endTime, collection, metric, score, impactToGlobal,
+            avgBaselineVal, avgCurrentVal, anomalyResultSource, detectionConfigId,
             childIds, isChild);
   }
 
@@ -312,13 +314,12 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return Objects.equals(getId(), m.getId()) && Objects.equals(startTime, m.getStartTime())
         && Objects
         .equals(endTime, m.getEndTime()) && Objects.equals(collection, m.getCollection()) && Objects
-        .equals(metric, m.getMetric()) && Objects.equals(dimensions, m.getDimensions()) && Objects
-        .equals(score, m.getScore()) && Objects.equals(avgBaselineVal, m.getAvgBaselineVal())
+        .equals(metric, m.getMetric())  && Objects.equals(score, m.getScore())
+        && Objects.equals(avgBaselineVal, m.getAvgBaselineVal())
         && Objects
         .equals(avgCurrentVal, m.getAvgCurrentVal()) && Objects
         .equals(impactToGlobal, m.getImpactToGlobal()) &&
-        Objects.equals(anomalyResultSource, m.getAnomalyResultSource()) && Objects
-        .equals(metricUrn, m.getMetricUrn()) &&
+        Objects.equals(anomalyResultSource, m.getAnomalyResultSource()) &&
         Objects.equals(detectionConfigId, m.getDetectionConfigId()) && Objects
         .equals(childIds, m.getChildIds()) &&
         Objects.equals(isChild, m.isChild());
@@ -326,12 +327,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   @Override
   public int compareTo(MergedAnomalyResultDTO o) {
-    // compare by dimension, -startTime, functionId, id
-    int diff = ObjectUtils.compare(getDimensions(), o.getDimensions());
-    if (diff != 0) {
-      return diff;
-    }
-    diff = -ObjectUtils.compare(startTime, o.getStartTime()); // inverted to sort by
+    // compare by -startTime, id
+    int diff = -ObjectUtils.compare(startTime, o.getStartTime()); // inverted to sort by
     // decreasing time
     if (diff != 0) {
       return diff;
@@ -350,13 +347,10 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     setProperties(anomalyResult.getProperties());
   }
 
+  @Deprecated
   public Multimap<String, String> getDimensionMap() {
-    Multimap<String, String> dimMap = ArrayListMultimap.create();
-    if (this.getMetricUrn() != null) {
-      dimMap = MetricEntity.fromURN(this.getMetricUrn()).getFilters();
-    }
 
-    return dimMap;
+    return ArrayListMultimap.create();
   }
 
   @Override

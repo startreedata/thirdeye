@@ -26,8 +26,6 @@ import org.testng.annotations.Test;
 
 public class MockGrouperTest {
 
-  private static final String METRIC_URN = "thirdeye:metric:123";
-
   private DataProvider testDataProvider;
   private Baseline baseline;
 
@@ -86,8 +84,6 @@ public class MockGrouperTest {
 
   private static MergedAnomalyResultDTO makeAnomaly(long start, long end,
       Map<String, String> dimensions) {
-    MergedAnomalyResultDTO anomaly = DetectionTestUtils.makeAnomaly(125L, start, end, dimensions);
-    anomaly.setMetricUrn(METRIC_URN);
-    return anomaly;
+    return DetectionTestUtils.makeAnomaly(125L, start, end, dimensions);
   }
 }

@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -70,10 +71,13 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   // = MARCH_24_2020_15H33 - delay P3D and floor granularity P1D (config in alert json)
   private static final long MARCH_21_2020_00H00 = 1584748800_000L;
 
-  // cron is every day at 5 am
-  private static final long MARCH_25_2020_00H00 = 1585112400_000L;
-  // = MARCH_25_2020_00H00 - delay P3D and floor granularity P1D (config in alert json)
+  private static final long MARCH_25_2020_05H00 = 1585112400_000L;
+  // = MARCH_25_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
   private static final long MARCH_22_2020_00H00 = 1584835200_000L;
+
+  private static final long MARCH_26_2020_05H00 = 1585198800_000L;
+  // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
+  private static final long MARCH_23_2020_00H00 = 1584921600_000L;
 
   private ThirdEyeH2DatabaseServer db;
 
@@ -92,12 +96,12 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
   private long alertId;
 
-
   @BeforeClass
   public void beforeClass() throws SQLException {
     db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
     db.start();
-    db.truncateAllTables();;
+    db.truncateAllTables();
+    ;
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
@@ -179,7 +183,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
         .post(Entity.json(List.of(dataSourceApi)));
     assertThat(response.getStatus()).isEqualTo(200);
 
-  // create dataset
+    // create dataset
     MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
     formData.add("datasetName", PINOT_DATASET_NAME);
@@ -228,9 +232,9 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> anomalies = getAnomalies();
     int numAnomaliesBeforeDetectionRun = anomalies.size();
 
-    // advance time to March 22, 2020, 00:00:00 UTC
+    // advance detection time to March 22, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
-    CLOCK.useMockTime(MARCH_25_2020_00H00);
+    CLOCK.useMockTime(MARCH_25_2020_05H00);
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
     // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
@@ -245,6 +249,42 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     // check that lastTimestamp after detection is the runTime of the cron
     long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(MARCH_22_2020_00H00);
+  }
+
+  @Test(dependsOnMethods = "testAfterDetectionCronLastTimestamp", timeOut = 60000L)
+  public void testSecondAnomalyIsMerged() throws InterruptedException {
+    List<Map<String, Object>> anomalies = getAnomalies();
+    int numAnomaliesBeforeDetectionRun = anomalies.size();
+
+    // advance detection time to March 23, 2020, 00:00:00 UTC
+    // this should trigger the cron - and a new anomaly is expected on [March 22 - March 23]
+    CLOCK.useMockTime(MARCH_26_2020_05H00);
+    // not exact time should not impact lastTimestamp
+    CLOCK.tick(5);
+    // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
+    Thread.sleep(1000);
+
+    // wait for a new anomaly to be created - proxy to know when the detection has run
+    while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
+      Thread.sleep(8000);
+      anomalies = getAnomalies();
+    }
+
+    // check that lastTimestamp after detection is the runTime of the cron
+    long alertLastTimestamp = getAlertLastTimestamp();
+    assertThat(alertLastTimestamp).isEqualTo(MARCH_23_2020_00H00);
+
+    // find anomalies starting on MARCH 21 - there should be 2
+    List<Map<String, Object>> march21Anomalies = anomalies.stream()
+        .filter(a -> (long) a.get("startTime") == MARCH_21_2020_00H00)
+        .collect(Collectors.toList());
+    assertThat(march21Anomalies.size()).isEqualTo(2);
+    // check that one anomaly finishes on MARCH 22: the child anomaly
+    assertThat(march21Anomalies.stream()
+        .anyMatch(a -> (long) a.get("endTime") == MARCH_22_2020_00H00)).isTrue();
+    // check that one anomaly finishes on MARCH 23: the parent anomaly
+    assertThat(march21Anomalies.stream()
+        .anyMatch(a -> (long) a.get("endTime") == MARCH_23_2020_00H00)).isTrue();
   }
 
   private List<Map<String, Object>> getAnomalies() {

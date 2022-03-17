@@ -17,6 +17,7 @@ params:
   MVN_REPOSITORY_USERNAME: ((artifactory-username))
   MVN_REPOSITORY_PASSWORD: ((artifactory-password))
   GITHUB_PRIVATE_KEY: ((ssh-private-key))
+  GIT_BRANCH: ((git-branch))
 
 run:
   path: src/.concourse/tasks/release-thirdeye/release-thirdeye.sh

@@ -27,6 +27,10 @@ else
   echo "Could not connect to github with ssh" || exit 1
 fi
 
+# setup git itself
+git config --global user.email "thirdeye-ci@startree.ai"
+git config --global user.name "ThirdEye CI"
+
 pushd src && \
   rm -rf ~/.m2 && \
   ln -fs $(pwd)/m2 ~/.m2

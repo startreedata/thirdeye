@@ -38,7 +38,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                         <Grid
                             container
                             alignItems="center"
-                            justify="center"
+                            justifyContent="center"
                             spacing={0}
                         >
                             <Grid item>
@@ -208,7 +208,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                 <Grid
                                     container
                                     alignItems="center"
-                                    justify="center"
+                                    justifyContent="center"
                                     spacing={0}
                                 >
                                     <Grid item>
@@ -299,7 +299,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                     <Grid
                                         container
                                         alignItems="center"
-                                        justify="flex-end"
+                                        justifyContent="flex-end"
                                         spacing={0}
                                     >
                                         <Grid item>

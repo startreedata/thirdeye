@@ -313,6 +313,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
       // We need at least 2 periods of data
+      // fixme cyril period is in number of observations - prefer ISO 8601 or auto period
       if (trainingDF.size() < 2 * period) {
         continue;
       }
@@ -320,6 +321,15 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       resultTimeArray[k] = forecastDF.getLong(COL_TIME, k);
 
       final double[] y = trainingDF.getDoubles(COL_VALUE).values();
+      if (Arrays.stream(y).allMatch(value -> value == 0)) {
+        // training data is only 0 - just predict 0 - fixme cyril only a quickfix - rewrite the whole algo
+        baselineArray[k] = 0;
+        errorArray[k] = 0;
+        upperBoundArray[k] = 0;
+        lowerBoundArray[k] = 0;
+        continue;
+      }
+
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);

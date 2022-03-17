@@ -68,6 +68,17 @@ spec:
         - "server"
         {{- if .Values.scheduler.tls.enabled }}
         env:
+          {{- range $secret := .Values.secrets }}
+          {{- range $pair := $secret.data }}
+          {{- if and $pair.env $pair.value }}
+          - name: {{ $pair.env }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret.name }}
+                key: {{ $pair.key }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           - name: JAVA_OPTS
             value: >
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore

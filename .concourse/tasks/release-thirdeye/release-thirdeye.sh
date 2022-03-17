@@ -51,4 +51,4 @@ cat > ~/.m2/settings.xml <<EOF
 </settings>
 EOF
 
-./mvnw -B -DskipTests -Darguments=-DskipTests release:clean initialize release:prepare -DdryRun=true
+./mvnw -B -DskipTests -Darguments=-DskipTests release:clean initialize release:prepare

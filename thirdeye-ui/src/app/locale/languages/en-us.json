@@ -155,7 +155,8 @@
         "heatmap-data": "Heatmap Data",
         "chart-data": "Chart Data",
         "alert-template-configuration": "Alert Template Configuration",
-        "anomaly-feedback": "Anomaly Feedback"
+        "anomaly-feedback": "Anomaly Feedback",
+        "baseline-week-offset": "Baseline Week Offset"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

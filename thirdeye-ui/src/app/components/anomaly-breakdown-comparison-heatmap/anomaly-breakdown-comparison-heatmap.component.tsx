@@ -261,7 +261,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                         <TextField
                             fullWidth
                             select
-                            label="Baseline Week Offset"
+                            label={t("label.baseline-week-offset")}
                             size="small"
                             value={comparisonOffset}
                             onChange={onHandleComparisonOffsetSelection}

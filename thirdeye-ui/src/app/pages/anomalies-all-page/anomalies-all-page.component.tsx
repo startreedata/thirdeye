@@ -130,7 +130,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                             onSearchFilterValueChange={
                                 onSearchFilterValueChange
                             }
-                        />{" "}
+                        />
                     </PageContentsCardV1>
                 </Grid>
             </PageContentsGridV1>

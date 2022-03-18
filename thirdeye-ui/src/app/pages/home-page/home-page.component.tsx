@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import DescriptionIcon from "@material-ui/icons/Description";
 import ErrorIcon from "@material-ui/icons/Error";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
@@ -56,6 +57,22 @@ export const HomePage: FunctionComponent = () => {
                         </TileButtonIconV1>
                         <TileButtonTextV1>
                             {t("label.configuration")}
+                        </TileButtonTextV1>
+                    </TileButtonV1>
+                </Grid>
+
+                {/* Documentation */}
+                <Grid item>
+                    <TileButtonV1
+                        externalLink
+                        href="https://dev.startree.ai/docs/thirdeye/"
+                        target="_blank"
+                    >
+                        <TileButtonIconV1>
+                            <DescriptionIcon color="primary" />
+                        </TileButtonIconV1>
+                        <TileButtonTextV1>
+                            {t("label.documentation")}
                         </TileButtonTextV1>
                     </TileButtonV1>
                 </Grid>

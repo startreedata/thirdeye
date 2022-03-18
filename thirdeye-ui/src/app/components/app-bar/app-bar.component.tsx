@@ -1,4 +1,4 @@
-import { ExitToApp, Home, LockOpen } from "@material-ui/icons";
+import { Description, ExitToApp, Home, LockOpen } from "@material-ui/icons";
 import ErrorIcon from "@material-ui/icons/Error";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
@@ -82,6 +82,20 @@ export const AppBar: FunctionComponent = () => {
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>
                         {t("label.configuration")}
+                    </NavBarLinkTextV1>
+                </NavBarLinkV1>
+
+                {/* Documentation */}
+                <NavBarLinkV1
+                    externalLink
+                    href="https://dev.startree.ai/docs/thirdeye/"
+                    target="_blank"
+                >
+                    <NavBarLinkIconV1>
+                        <Description />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>
+                        {t("label.documentation")}
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
             </NavBarPrimaryContainerV1>

@@ -19,6 +19,7 @@
         "datasource": "Datasource",
         "datasources": "Datasources",
         "description": "Description",
+        "documentation": "Documentation",
         "login": "Login",
         "logout": "Logout",
         "document-title": "{{page}} - {{app}}",

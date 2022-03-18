@@ -3,7 +3,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.spi.api.UIConfigurationApi;
+import ai.startree.thirdeye.spi.api.UiConfigurationApi;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
@@ -17,12 +17,12 @@ import javax.ws.rs.core.Response;
 @Api(tags = "UI Configuration")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
-public class UIResource {
+public class UiResource {
 
     private UiConfiguration configuration;
 
     @Inject
-    public UIResource(final UiConfiguration uiConfiguration) {
+    public UiResource(final UiConfiguration uiConfiguration) {
         this.configuration = uiConfiguration;
     }
 
@@ -31,6 +31,6 @@ public class UIResource {
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     public Response get() {
-        return respondOk(new UIConfigurationApi().setClientId(configuration.getClientId()));
+        return respondOk(new UiConfigurationApi().setClientId(configuration.getClientId()));
     }
 }

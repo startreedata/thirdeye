@@ -23,7 +23,7 @@ public class ApiResource {
   private final RcaResource rcaResource;
   private final EventResource eventResource;
   private final TaskResource taskResource;
-  private final UIResource uiResource;
+  private final UiResource uiResource;
 
   @Inject
   public ApiResource(final AuthResource authResource,
@@ -39,7 +39,7 @@ public class ApiResource {
       final RcaResource rcaResource,
       final EventResource eventResource,
       final TaskResource taskResource,
-      final UIResource uiResource) {
+      final UiResource uiResource) {
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
     this.dataSourceResource = dataSourceResource;
@@ -122,7 +122,7 @@ public class ApiResource {
   }
 
   @Path("ui")
-  public UIResource getUIResource() {
+  public UiResource getUIResource() {
     return uiResource;
   }
 }

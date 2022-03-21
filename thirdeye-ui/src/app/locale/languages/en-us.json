@@ -155,7 +155,8 @@
         "heatmap-data": "Heatmap Data",
         "chart-data": "Chart Data",
         "alert-template-configuration": "Alert Template Configuration",
-        "anomaly-feedback": "Anomaly Feedback"
+        "anomaly-feedback": "Anomaly Feedback",
+        "baseline-week-offset": "Baseline Week Offset"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -195,6 +196,7 @@
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
         "authentication-disabled": "Authentication has been disabled.",
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
-        "error-while-fetching": "An issue was experienced while retrieving {{entity}}"
+        "error-while-fetching": "An issue was experienced while retrieving {{entity}}",
+        "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range."
     }
 }

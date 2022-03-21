@@ -295,7 +295,7 @@ export const SubscriptionGroupWizard: FunctionComponent<
                     alignItems="stretch"
                     className={subscriptionGroupWizardClasses.controlsContainer}
                     direction="column"
-                    justify="flex-end"
+                    justifyContent="flex-end"
                 >
                     {/* Separator */}
                     <Grid item>
@@ -309,7 +309,7 @@ export const SubscriptionGroupWizard: FunctionComponent<
                     </Grid>
 
                     <Grid item>
-                        <Grid container justify="space-between">
+                        <Grid container justifyContent="space-between">
                             {/* Cancel button */}
                             <Grid item>
                                 {props.showCancel && (

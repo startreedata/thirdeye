@@ -67,20 +67,21 @@ spec:
         args:
         - "server"
         env:
+          {{- range $secret := .Values.secrets }}
+          {{- range $pair := $secret.data }}
+          {{- if and $pair.env $pair.value }}
+          - name: {{ $pair.env }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret.name }}
+                key: {{ $pair.key }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           - name: SMTP_HOST
             value: {{ .Values.smtp.host | quote }}
           - name: SMTP_PORT
             value: {{ .Values.smtp.port  | quote }}
-          - name: SMTP_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.smtp.secretKeyRef.name }}
-                key: username
-          - name: SMTP_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.smtp.secretKeyRef.name }}
-                key: password
           {{- if .Values.sendgrid }}
           - name: SENDGRID_API_KEY
             valueFrom:

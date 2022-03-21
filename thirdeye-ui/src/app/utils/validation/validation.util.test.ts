@@ -6,7 +6,7 @@ jest.mock("i18next", () => ({
 
 describe("Validation Util", () => {
     it("validateEmail should return appropriate validation result for invalid email", () => {
-        expect(validateEmail((null as unknown) as string)).toEqual({
+        expect(validateEmail(null as unknown as string)).toEqual({
             valid: false,
             message: "message.email-required",
         });
@@ -30,7 +30,7 @@ describe("Validation Util", () => {
     });
 
     it("validateJSON should return appropriate validation result for invalid JSON", () => {
-        expect(validateJSON((null as unknown) as string)).toEqual({
+        expect(validateJSON(null as unknown as string)).toEqual({
             valid: false,
             message: "message.json-input-required",
         });

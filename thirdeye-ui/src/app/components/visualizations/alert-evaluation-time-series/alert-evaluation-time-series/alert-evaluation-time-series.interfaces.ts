@@ -4,6 +4,7 @@ import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 export interface AlertEvaluationTimeSeriesProps {
     alertEvaluation: AlertEvaluation | null;
     hideBrush?: boolean;
+    onAnomalyBarClick?: (anomaly: Anomaly) => void;
 }
 
 export interface AlertEvaluationTimeSeriesInternalProps {
@@ -11,6 +12,7 @@ export interface AlertEvaluationTimeSeriesInternalProps {
     parentWidth: number;
     alertEvaluation: AlertEvaluation | null;
     hideBrush?: boolean;
+    onAnomalyBarClick?: (anomaly: Anomaly) => void;
 }
 
 export interface AlertEvaluationTimeSeriesState {

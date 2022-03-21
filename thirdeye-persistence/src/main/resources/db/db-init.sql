@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
 -- ------------------------------------------
--- MySQL 5.7 Setup
+-- MySQL 8.0 Setup
 -- ------------------------------------------
 
 -- Create DB

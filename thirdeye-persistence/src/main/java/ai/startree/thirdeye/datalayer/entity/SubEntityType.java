@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2022 StarTree Inc. All rights reserved.
+ * Confidential and Proprietary Information of StarTree Inc.
+ */
+
+package ai.startree.thirdeye.datalayer.entity;
+
+public enum SubEntityType {
+  ALERT,
+  ALERT_TEMPLATE,
+  ANOMALY_FEEDBACK,
+  ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION,
+  APPLICATION,
+  DATASET,
+  DATA_SOURCE,
+  DETECTION_STATUS,
+  ENTITY_TO_ENTITY_MAPPING,
+  EVALUATION,
+  EVENT,
+  JOB,
+  ANOMALY,
+  METRIC,
+  ONBOARD_DATASET_METRIC,
+  ONLINE_DETECTION_DATA,
+  OVERRIDE_CONFIG,
+  ROOT_CAUSE_SESSION,
+  ROOT_CAUSE_TEMPLATE,
+  SUBSCRIPTION_GROUP,
+  SESSION,
+  TASK,
+}

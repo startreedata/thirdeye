@@ -12,7 +12,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = (
     const { t } = useTranslation();
 
     return (
-        <Grid container justify="flex-end">
+        <Grid container item justify="flex-end">
             {/* Name */}
             <Grid item sm={3}>
                 <Typography variant="subtitle1">
@@ -21,7 +21,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.metric && props.metric.name) ||
                         t("label.no-data-marker")}
                 </Typography>
@@ -35,7 +35,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     <>
                         {/* Active */}
                         {props.metric.active && (
@@ -64,7 +64,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.metric && props.metric.dataset?.name) ||
                         t("label.no-data-marker")}
                 </Typography>
@@ -78,7 +78,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.metric && props.metric.aggregationFunction) ||
                         t("label.no-data-marker")}
                 </Typography>
@@ -92,7 +92,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body1">
+                <Typography variant="body2">
                     {(props.metric && props.metric.rollupThreshold) ||
                         t("label.no-data-marker")}
                 </Typography>

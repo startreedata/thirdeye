@@ -1,4 +1,9 @@
-import { IconButton, InputAdornment, TextField } from "@material-ui/core";
+import {
+    IconButton,
+    InputAdornment,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SearchIcon from "@material-ui/icons/Search";
 import { debounce, isNil } from "lodash";
@@ -13,8 +18,7 @@ import React, {
 import {
     getSearchFromQueryString,
     getSearchTextFromQueryString,
-    setSearchInQueryString,
-    setSearchTextInQueryString,
+    useSetQueryParamsUtil,
 } from "../../utils/params/params.util";
 import { SearchBarProps } from "./search-bar.interfaces";
 
@@ -26,6 +30,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 ) => {
     const [searchText, setSearchText] = useState(props.searchText || "");
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const setUrlQueryParamsUtils = useSetQueryParamsUtil();
 
     useEffect(() => {
         // Pick up search from query string if search text not provided
@@ -85,8 +90,8 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
 
         // Set search in query string
         if (props.setSearchQueryString) {
-            setSearchInQueryString(props.searchLabel);
-            setSearchTextInQueryString(
+            setUrlQueryParamsUtils.setSearchInQueryString(props.searchLabel);
+            setUrlQueryParamsUtils.setSearchTextInQueryString(
                 searchWords.join(DELIMITER_SEARCH_WORDS)
             );
         }
@@ -104,20 +109,22 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
                 startAdornment: (
                     // Search icon
                     <InputAdornment position="start">
-                        <SearchIcon />
+                        <SearchIcon fontSize="small" />
                     </InputAdornment>
                 ),
                 endAdornment: (
                     <>
                         {/* Search status label */}
                         <InputAdornment position="end">
-                            {props.searchStatusLabel}
+                            <Typography variant="body2">
+                                {props.searchStatusLabel}
+                            </Typography>
                         </InputAdornment>
 
                         {/* Clear button */}
                         <InputAdornment position="end">
                             <IconButton onClick={handleClearClick}>
-                                <CloseIcon />
+                                <CloseIcon fontSize="small" />
                             </IconButton>
                         </InputAdornment>
                     </>
@@ -125,7 +132,7 @@ export const SearchBar: FunctionComponent<SearchBarProps> = (
             }}
             autoFocus={props.autoFocus}
             inputRef={searchInputRef}
-            label={props.searchLabel}
+            placeholder={props.searchLabel}
             value={searchText}
             variant="outlined"
             onChange={handleInputChange}

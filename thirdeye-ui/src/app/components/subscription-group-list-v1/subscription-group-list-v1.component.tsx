@@ -1,13 +1,13 @@
 import { Button, Grid, Link } from "@material-ui/core";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router";
+} from "../../platform/components";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     getSubscriptionGroupsUpdatePath,
@@ -15,15 +15,13 @@ import {
 } from "../../utils/routes/routes.util";
 import { SubscriptionGroupListV1Props } from "./subscription-group-list-v1.interfaces";
 
-export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1Props> = (
-    props: SubscriptionGroupListV1Props
-) => {
+export const SubscriptionGroupListV1: FunctionComponent<
+    SubscriptionGroupListV1Props
+> = (props: SubscriptionGroupListV1Props) => {
     const { t } = useTranslation();
-    const [
-        selectedSubscriptionGroup,
-        setSelectedSubscriptionGroup,
-    ] = useState<DataGridSelectionModelV1>();
-    const history = useHistory();
+    const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] =
+        useState<DataGridSelectionModelV1<UiSubscriptionGroup>>();
+    const navigate = useNavigate();
 
     const handleSubscriptionGroupDelete = (): void => {
         if (!selectedSubscriptionGroup) {
@@ -61,9 +59,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         const selectedSubScriptionGroupId = selectedSubscriptionGroup
             .rowKeyValues[0] as number;
 
-        history.push(
-            getSubscriptionGroupsUpdatePath(selectedSubScriptionGroupId)
-        );
+        navigate(getSubscriptionGroupsUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -72,20 +68,16 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
     );
 
     const handleSubscriptionGroupViewDetailsById = (id: number): void => {
-        history.push(getSubscriptionGroupsViewPath(id));
+        navigate(getSubscriptionGroupsViewPath(id));
     };
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiSubscriptionGroup
     ): ReactElement => {
         return (
             <Link
-                onClick={() =>
-                    handleSubscriptionGroupViewDetailsById(
-                        ((data as unknown) as UiSubscriptionGroup).id
-                    )
-                }
+                onClick={() => handleSubscriptionGroupViewDetailsById(data.id)}
             >
                 {cellValue}
             </Link>
@@ -130,15 +122,10 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiSubscriptionGroup>
                     hideBorder
                     columns={subscriptionGroupColumns}
-                    data={
-                        (props.subscriptionGroups as unknown) as Record<
-                            string,
-                            unknown
-                        >[]
-                    }
+                    data={props.subscriptionGroups as UiSubscriptionGroup[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

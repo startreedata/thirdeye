@@ -1,13 +1,13 @@
 import { Button, Grid, Link } from "@material-ui/core";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+} from "../../platform/components";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import {
     getDatasourcesUpdatePath,
@@ -19,20 +19,18 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedDatasource,
-        setSelectedDatasource,
-    ] = useState<DataGridSelectionModelV1>();
-    const history = useHistory();
+    const [selectedDatasource, setSelectedDatasource] =
+        useState<DataGridSelectionModelV1<UiDatasource>>();
+    const navigate = useNavigate();
 
     const handleDatasourceDelete = (): void => {
         if (!selectedDatasource) {
             return;
         }
 
-        const selectedSubScriptionGroupId = selectedDatasource
+        const selectedSubScriptingGroupId = selectedDatasource
             .rowKeyValues[0] as number;
-        const uiDatasource = getUiDatasource(selectedSubScriptionGroupId);
+        const uiDatasource = getUiDatasource(selectedSubScriptingGroupId);
         if (!uiDatasource) {
             return;
         }
@@ -57,7 +55,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         const selectedSubScriptionGroupId = selectedDatasource
             .rowKeyValues[0] as number;
 
-        history.push(getDatasourcesUpdatePath(selectedSubScriptionGroupId));
+        navigate(getDatasourcesUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -65,21 +63,15 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     );
 
     const handleDatasourceViewDetailsById = (id: number): void => {
-        history.push(getDatasourcesViewPath(id));
+        navigate(getDatasourcesViewPath(id));
     };
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiDatasource
     ): ReactElement => {
         return (
-            <Link
-                onClick={() =>
-                    handleDatasourceViewDetailsById(
-                        ((data as unknown) as UiDatasource).id
-                    )
-                }
-            >
+            <Link onClick={() => handleDatasourceViewDetailsById(data.id)}>
                 {cellValue}
             </Link>
         );
@@ -108,15 +100,10 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiDatasource>
                     hideBorder
                     columns={datasourceColumns}
-                    data={
-                        (props.datasources as unknown) as Record<
-                            string,
-                            unknown
-                        >[]
-                    }
+                    data={props.datasources as UiDatasource[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

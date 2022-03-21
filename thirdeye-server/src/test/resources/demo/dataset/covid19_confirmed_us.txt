@@ -1,0 +1,1 @@
+dataSourceName=pinotQuickStartAzure&datasetName=covid19_confirmed_us

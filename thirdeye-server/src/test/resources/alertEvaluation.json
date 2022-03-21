@@ -44,7 +44,7 @@
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher",
+            "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher",
             "component.pinot.dataSource": "${dataSourceName}",
             "component.pinot.query": "SELECT \"date\" as ${timestamp}, count(*) as ${metricName} FROM ${table} WHERE \"date\" >= ${baseline_start} AND \"date\" < ${baseline_end} GROUP BY \"date\" LIMIT 100",
             "component.pinot.tableName": "${table}",
@@ -63,7 +63,7 @@
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher",
+            "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.PinotDataFetcher",
             "component.pinot.dataSource": "${dataSourceName}",
             "component.pinot.query": "SELECT \"date\" as ${timestamp}, count(*) as ${metricName} FROM ${table} WHERE \"date\" >= ${current_start} AND \"date\" < ${current_end} GROUP BY \"date\" LIMIT 100",
             "component.pinot.tableName": "${table}",

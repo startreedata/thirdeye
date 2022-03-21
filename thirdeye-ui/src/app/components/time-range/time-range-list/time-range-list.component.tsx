@@ -1,8 +1,8 @@
 import { List, ListItem, ListItemText, ListSubheader } from "@material-ui/core";
-import { TooltipV1 } from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { TooltipV1 } from "../../../platform/components";
 import {
     formatTimeRange,
     formatTimeRangeDuration,

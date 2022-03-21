@@ -1,8 +1,13 @@
 #!/bin/bash
+#
+# Copyright (c) 2022 StarTree Inc. All rights reserved.
+# Confidential and Proprietary Information of StarTree Inc.
+#
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then
-    PINOT_VERSION=0.7.1
+    PINOT_VERSION=0.9.3
 fi
 if [ -z "${CONTROLLER_HOST}" ]; then
     CONTROLLER_HOST=localhost
@@ -11,7 +16,7 @@ if [ -z "${CONTROLLER_PORT}" ]; then
     CONTROLLER_PORT=9000
 fi
 if [ -z "${PINOT_DIST_ROOT}" ]; then
-    PINOT_DIST_ROOT="${TE_REPO}/tmp/pinot-bin/apache-pinot-incubating-${PINOT_VERSION}-bin"
+    PINOT_DIST_ROOT="${TE_REPO}/tmp/pinot-bin/apache-pinot-${PINOT_VERSION}-bin"
 fi
 cd "${TE_REPO}" || (echo "failed to load" && exit 1)
 

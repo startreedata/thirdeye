@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TimeRangeSelectorControlsProps } from "./time-range-selector-controls.interfaces";
 
-export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorControlsProps> = (
-    props: TimeRangeSelectorControlsProps
-) => {
+export const TimeRangeSelectorControls: FunctionComponent<
+    TimeRangeSelectorControlsProps
+> = (props: TimeRangeSelectorControlsProps) => {
     const { t } = useTranslation();
 
     return (

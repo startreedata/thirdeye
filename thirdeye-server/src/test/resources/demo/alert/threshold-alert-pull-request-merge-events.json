@@ -1,0 +1,19 @@
+{
+  "name": "threshold-alert-pull-request-merge-events",
+  "description": "Threshold alert on pull request merge events",
+  "template": {
+    "name": "threshold-template"
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartAzure",
+    "dataset": "pullRequestMergedEvents",
+    "metric": "sum(numCommits)",
+    "metricColumn": "numCommits",
+    "monitoringGranularity": "2:HOURS",
+    "timeColumn": "mergedTimeMillis",
+    "timeColumnFormat": "1:MILLISECONDS:EPOCH",
+    "max": "15000",
+    "min": "1000"
+  },
+  "cron": "0 0 0/2 1/1 * ? *"
+}

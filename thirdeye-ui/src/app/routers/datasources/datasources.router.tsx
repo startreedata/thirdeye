@@ -1,19 +1,7 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
-import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import {
-    AppRoute,
-    getDatasourcesAllPath,
-    getDatasourcesPath,
-} from "../../utils/routes/routes.util";
+import { default as React, FunctionComponent, lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const DatasourcesAllPage = lazy(() =>
     import(
@@ -46,65 +34,48 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const DatasourcesRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        setRouterBreadcrumbs([
-            {
-                text: t("label.datasources"),
-                onClick: () => history.push(getDatasourcesPath()),
-            },
-        ]);
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Datasources path */}
-                <Route exact path={AppRoute.DATASOURCES}>
-                    {/* Redirect to datasources all path */}
-                    <Redirect to={getDatasourcesAllPath()} />
-                </Route>
+                {/* Redirect to datasources all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate
+                            replace
+                            to={AppRouteRelative.DATASOURCES_ALL}
+                        />
+                    }
+                />
 
                 {/* Datasources all path */}
                 <Route
-                    exact
-                    component={DatasourcesAllPage}
-                    path={AppRoute.DATASOURCES_ALL}
+                    element={<DatasourcesAllPage />}
+                    path={AppRouteRelative.DATASOURCES_ALL}
                 />
 
                 {/* Datasources view path */}
                 <Route
-                    exact
-                    component={DatasourcesViewPage}
-                    path={AppRoute.DATASOURCES_VIEW}
+                    element={<DatasourcesViewPage />}
+                    path={AppRouteRelative.DATASOURCES_VIEW}
                 />
 
                 {/* Datasources create path */}
                 <Route
-                    exact
-                    component={DatasourcesCreatePage}
-                    path={AppRoute.DATASOURCES_CREATE}
+                    element={<DatasourcesCreatePage />}
+                    path={AppRouteRelative.DATASOURCES_CREATE}
                 />
 
                 {/* Datasources update path */}
                 <Route
-                    exact
-                    component={DatasourcesUpdatePage}
-                    path={AppRoute.DATASOURCES_UPDATE}
+                    element={<DatasourcesUpdatePage />}
+                    path={AppRouteRelative.DATASOURCES_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

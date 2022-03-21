@@ -1,9 +1,5 @@
 import { cloneDeep } from "lodash";
-import {
-    Alert,
-    AlertNode,
-    AlertNodeType,
-} from "../../rest/dto/alert.interfaces";
+import { Alert, AlertNodeType } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
@@ -24,11 +20,27 @@ jest.mock("i18next", () => ({
 
 describe("Alerts Util", () => {
     it("createDefaultAlert should create appropriate alert", () => {
-        expect(createDefaultAlert()).toEqual(mockDefaultAlert);
+        const result = createDefaultAlert();
+
+        expect(result.name).not.toBeNull();
+        expect(result.description).not.toBeNull();
+        expect(result.cron).not.toBeNull();
+        expect(result.template).not.toBeNull();
+        expect(result.templateProperties).not.toBeNull();
     });
 
     it("createEmptyUiAlert should create appropriate UI alert", () => {
-        expect(createEmptyUiAlert()).toEqual(mockEmptyUiAlert);
+        const result = createEmptyUiAlert();
+
+        expect(result.name).not.toBeNull();
+        expect(result.renderedMetadata).not.toBeNull();
+        expect(result.active).not.toBeNull();
+        expect(result.activeText).not.toBeNull();
+        expect(result.userId).not.toBeNull();
+        expect(result.createdBy).not.toBeNull();
+        expect(result.detectionTypes).not.toBeNull();
+        expect(result.datasetAndMetrics).not.toBeNull();
+        expect(result.subscriptionGroups).not.toBeNull();
     });
 
     it("createEmptyUiAlertDatasetAndMetric should create appropriate UI alert dataset and metric", () => {
@@ -63,7 +75,7 @@ describe("Alerts Util", () => {
 
     it("getUiAlert should return empty UI alert for invalid alert", () => {
         expect(
-            getUiAlert((null as unknown) as Alert, mockSubscriptionGroups)
+            getUiAlert(null as unknown as Alert, mockSubscriptionGroups)
         ).toEqual(mockEmptyUiAlert);
     });
 
@@ -72,7 +84,7 @@ describe("Alerts Util", () => {
         expectedUiAlert.subscriptionGroups = [];
 
         expect(
-            getUiAlert(mockAlert1, (null as unknown) as SubscriptionGroup[])
+            getUiAlert(mockAlert1, null as unknown as SubscriptionGroup[])
         ).toEqual(expectedUiAlert);
     });
 
@@ -91,7 +103,7 @@ describe("Alerts Util", () => {
 
     it("getUiAlerts should return empty array for invalid alerts", () => {
         expect(
-            getUiAlerts((null as unknown) as Alert[], mockSubscriptionGroups)
+            getUiAlerts(null as unknown as Alert[], mockSubscriptionGroups)
         ).toEqual([]);
     });
 
@@ -108,7 +120,7 @@ describe("Alerts Util", () => {
         expectedUiAlert3.subscriptionGroups = [];
 
         expect(
-            getUiAlerts(mockAlerts, (null as unknown) as SubscriptionGroup[])
+            getUiAlerts(mockAlerts, null as unknown as SubscriptionGroup[])
         ).toEqual([expectedUiAlert1, expectedUiAlert2, expectedUiAlert3]);
     });
 
@@ -135,7 +147,7 @@ describe("Alerts Util", () => {
 
     it("filterAlerts should return empty array for invalid UI alerts", () => {
         expect(
-            filterAlerts((null as unknown) as UiAlert[], mockSearchWords)
+            filterAlerts(null as unknown as UiAlert[], mockSearchWords)
         ).toEqual([]);
     });
 
@@ -144,9 +156,9 @@ describe("Alerts Util", () => {
     });
 
     it("filterAlerts should return appropriate UI alerts for UI alerts and invalid search words", () => {
-        expect(
-            filterAlerts(mockUiAlerts, (null as unknown) as string[])
-        ).toEqual(mockUiAlerts);
+        expect(filterAlerts(mockUiAlerts, null as unknown as string[])).toEqual(
+            mockUiAlerts
+        );
     });
 
     it("filterAlerts should return appropriate UI alerts for UI alerts and empty search words", () => {
@@ -165,27 +177,6 @@ describe("Alerts Util", () => {
     });
 });
 
-const mockDefaultAlert = {
-    name: "new-alert",
-    description: "This is the detection used by online service",
-    nodes: {
-        "detection-1": {
-            type: AlertNodeType.DETECTION,
-            subType: "PERCENTAGE_RULE",
-            metric: {
-                name: "views",
-                dataset: {
-                    name: "pageviews",
-                },
-            },
-            params: {
-                offset: "wo1w",
-                percentageChange: 0.2,
-            },
-        },
-    },
-};
-
 const mockEmptyUiAlert = {
     id: -1,
     name: "label.no-data-marker",
@@ -194,9 +185,9 @@ const mockEmptyUiAlert = {
     userId: -1,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
-    filteredBy: [],
     datasetAndMetrics: [],
     subscriptionGroups: [],
+    renderedMetadata: [],
     alert: null,
 };
 
@@ -215,47 +206,74 @@ const mockEmptyUiAlertSubscriptionGroup = {
 const mockAlert1 = {
     id: 1,
     name: "testNameAlert1",
+    description: "hello world",
+    cron: "0 0 0 1/1 * ? *",
     active: true,
     owner: {
         id: 2,
         principal: "testPrincipalOwner2",
     },
-    nodes: {
-        alertNode1: {
-            type: AlertNodeType.DETECTION,
-            subType: "testSubTypeAlertNode1",
-            metric: {
-                id: 3,
-                name: "testNameMetric3",
-                dataset: {
-                    id: 4,
-                    name: "testNameDataset4",
+    template: {
+        nodes: [
+            {
+                name: "root",
+                type: AlertNodeType.ANOMALY_DETECTOR,
+                params: {
+                    type: "THRESHOLD",
+                    "component.timezone": "UTC",
+                    "component.monitoringGranularity":
+                        "${monitoringGranularity}",
+                    "component.timestamp": "ts",
+                    "component.metric": "met",
+                    "component.max": "${max}",
+                    "component.min": "${min}",
+                    "anomaly.metric": "${aggregateFunction}(${metric})",
                 },
+                inputs: [
+                    {
+                        targetProperty: "current",
+                        sourcePlanNode: "currentDataFetcher",
+                        sourceProperty: "currentData",
+                    },
+                ],
             },
-        } as AlertNode,
-        alertNode2: {
-            type: AlertNodeType.DETECTION,
-            subType: "testSubTypeAlertNode2",
-            metric: {
-                id: 5,
-                dataset: {
-                    id: 6,
+            {
+                type: AlertNodeType.DATA_FETCHER,
+                params: {
+                    "component.dataSource": "${dataSource}",
+                    "component.query": "query here",
                 },
+                outputs: [
+                    {
+                        outputKey: "pinot",
+                        outputName: "currentData",
+                    },
+                ],
             },
-        } as AlertNode,
-        alertNode3: {
-            type: AlertNodeType.FILTER,
-            subType: "testSubTypeAlertNode3",
+        ],
+        metadata: {
             metric: {
-                id: 7,
-                name: "testNameMetric7",
+                name: "orders",
             },
-        } as AlertNode,
-        alertNode4: {
-            type: "testTypeAlertNode4" as AlertNodeType,
-            subType: "testSubTypeAlertNode4",
-        } as AlertNode,
-    } as { [index: string]: AlertNode },
+            datasource: {
+                name: "${dataSource}",
+            },
+            dataset: {
+                name: "${dataset}",
+            },
+        },
+    },
+    templateProperties: {
+        dataSource: "pinotQuickStartAzure",
+        dataset: "pageviews",
+        aggregateFunction: "sum",
+        metric: "views",
+        monitoringGranularity: "P1D",
+        timeColumn: "date",
+        timeColumnFormat: "yyyyMMdd",
+        max: "850000",
+        min: "250000",
+    },
 } as Alert;
 
 const mockAlert2 = {
@@ -315,28 +333,8 @@ const mockUiAlert1 = {
     activeText: "label.active",
     userId: 2,
     createdBy: "testPrincipalOwner2",
-    detectionTypes: ["testSubTypeAlertNode1", "testSubTypeAlertNode2"],
-    filteredBy: ["testSubTypeAlertNode3"],
-    datasetAndMetrics: [
-        {
-            datasetId: 4,
-            datasetName: "testNameDataset4",
-            metricId: 3,
-            metricName: "testNameMetric3",
-        },
-        {
-            datasetId: 6,
-            datasetName: "label.no-data-marker",
-            metricId: 5,
-            metricName: "label.no-data-marker",
-        },
-        {
-            datasetId: -1,
-            datasetName: "label.no-data-marker",
-            metricId: 7,
-            metricName: "testNameMetric7",
-        },
-    ],
+    detectionTypes: ["THRESHOLD"],
+    datasetAndMetrics: [],
     subscriptionGroups: [
         {
             id: 11,
@@ -345,6 +343,20 @@ const mockUiAlert1 = {
         {
             id: 12,
             name: "label.no-data-marker",
+        },
+    ],
+    renderedMetadata: [
+        {
+            key: "dataset",
+            value: "pageviews",
+        },
+        {
+            key: "datasource",
+            value: "pinotQuickStartAzure",
+        },
+        {
+            key: "metric",
+            value: "orders",
         },
     ],
     alert: mockAlert1,
@@ -358,7 +370,6 @@ const mockUiAlert2 = {
     userId: 9,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
-    filteredBy: [],
     datasetAndMetrics: [],
     subscriptionGroups: [
         {
@@ -366,6 +377,7 @@ const mockUiAlert2 = {
             name: "testNameSubscriptionGroup11",
         },
     ],
+    renderedMetadata: [],
     alert: mockAlert2,
 };
 
@@ -377,9 +389,9 @@ const mockUiAlert3 = {
     userId: -1,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
-    filteredBy: [],
     datasetAndMetrics: [],
     subscriptionGroups: [],
+    renderedMetadata: [],
     alert: mockAlert3,
 };
 

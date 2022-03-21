@@ -1,48 +1,35 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { useNavigate, useParams } from "react-router-dom";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
 import { getMetric, updateMetric } from "../../rest/metrics/metrics.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { MetricsUpdatePageParams } from "./metrics-update-page.interfaces";
 
 export const MetricsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [metric, setMetric] = useState<Metric>();
     const [datasets, setDatasets] = useState<Dataset[]>([]);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { enqueueSnackbar } = useSnackbar();
-    const params = useParams<MetricsUpdatePageParams>();
-    const history = useHistory();
-    const { t } = useTranslation();
 
-    useEffect(() => {
-        // Fetched metric changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: metric ? metric.name : "",
-                onClick: (): void => {
-                    if (metric) {
-                        history.push(getMetricsViewPath(metric.id));
-                    }
-                },
-            },
-        ]);
-    }, [metric]);
+    const params = useParams<MetricsUpdatePageParams>();
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         fetchMetric();
@@ -54,28 +41,29 @@ export const MetricsUpdatePage: FunctionComponent = () => {
         }
 
         updateMetric(newMetric).then((newMetric: LogicalMetric): void => {
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Success,
                 t("message.update-success", {
                     entity: t("label.metric"),
-                }),
-                getSuccessSnackbarOption()
+                })
             );
 
             // Redirect to metric detail path
-            history.push(getMetricsViewPath(newMetric.id || 0));
+            navigate(getMetricsViewPath(newMetric.id || 0));
         });
     };
 
     const fetchMetric = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
+        if (params.id && !isValidNumberId(params.id)) {
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.metric"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
+
             setLoading(false);
 
             return;
@@ -88,10 +76,7 @@ export const MetricsUpdatePage: FunctionComponent = () => {
                     metricResponse.status === "rejected" ||
                     datasetsResponse.status === "rejected"
                 ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
+                    notify(NotificationTypeV1.Error, t("message.fetch-error"));
                 }
 
                 // Attempt to gather data
@@ -112,17 +97,25 @@ export const MetricsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            {metric && (
-                <MetricsWizard
-                    datasets={datasets}
-                    metric={metric}
-                    onFinish={onMetricWizardFinish}
-                />
-            )}
-
-            {/* No data available message */}
-            {!metric && <NoDataIndicator />}
-        </PageContents>
+        <PageV1>
+            <PageHeader
+                title={t("label.update-entity", {
+                    entity: t("label.metric"),
+                })}
+            />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {metric && (
+                        <MetricsWizard
+                            datasets={datasets}
+                            metric={metric}
+                            onFinish={onMetricWizardFinish}
+                        />
+                    )}
+                    {/* No data available message */}
+                    {!metric && <NoDataIndicator />}
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

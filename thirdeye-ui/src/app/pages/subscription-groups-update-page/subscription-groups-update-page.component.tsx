@@ -1,13 +1,18 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { useNavigate, useParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -17,40 +22,17 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [
-        subscriptionGroup,
-        setSubscriptionGroup,
-    ] = useState<SubscriptionGroup>();
+    const [subscriptionGroup, setSubscriptionGroup] =
+        useState<SubscriptionGroup>();
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        // Fetched subscription group changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: subscriptionGroup ? subscriptionGroup.name : "",
-                onClick: (): void => {
-                    if (subscriptionGroup) {
-                        history.push(
-                            getSubscriptionGroupsViewPath(subscriptionGroup.id)
-                        );
-                    }
-                },
-            },
-        ]);
-    }, [subscriptionGroup]);
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         fetchSubscriptionGroup();
@@ -65,30 +47,28 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
 
         updateSubscriptionGroup(subscriptionGroup).then(
             (subscriptionGroup: SubscriptionGroup): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.update-success", {
                         entity: t("label.subscription-group"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Redirect to subscription groups detail path
-                history.push(
-                    getSubscriptionGroupsViewPath(subscriptionGroup.id)
-                );
+                navigate(getSubscriptionGroupsViewPath(subscriptionGroup.id));
             }
         );
     };
 
     const fetchSubscriptionGroup = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
+        if (params.id && !isValidNumberId(params.id)) {
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.subscription-group"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
             setLoading(false);
 
@@ -118,17 +98,26 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            {subscriptionGroup && (
-                <SubscriptionGroupWizard
-                    alerts={alerts}
-                    subscriptionGroup={subscriptionGroup}
-                    onFinish={onSubscriptionGroupWizardFinish}
-                />
-            )}
+        <PageV1>
+            <PageHeader
+                title={t("label.update-entity", {
+                    entity: t("label.subscription-group"),
+                })}
+            />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {subscriptionGroup && (
+                        <SubscriptionGroupWizard
+                            alerts={alerts}
+                            subscriptionGroup={subscriptionGroup}
+                            onFinish={onSubscriptionGroupWizardFinish}
+                        />
+                    )}
 
-            {/* No data available message */}
-            {!subscriptionGroup && <NoDataIndicator />}
-        </PageContents>
+                    {/* No data available message */}
+                    {!subscriptionGroup && <NoDataIndicator />}
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

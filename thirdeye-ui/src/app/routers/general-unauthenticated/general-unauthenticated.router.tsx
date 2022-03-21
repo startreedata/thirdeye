@@ -1,14 +1,7 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { AppRoute, getLoginPath } from "../../utils/routes/routes.util";
+import React, { FunctionComponent, lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { AppRoute } from "../../utils/routes/routes.util";
 
 const LoginPage = lazy(() =>
     import(
@@ -17,27 +10,18 @@ const LoginPage = lazy(() =>
 );
 
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-
-    useEffect(() => {
-        setRouterBreadcrumbs([]);
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Login path */}
-                <Route exact component={LoginPage} path={AppRoute.LOGIN} />
+                <Route element={<LoginPage />} path={AppRoute.LOGIN} />
 
                 {/* No match found, redirect to login path */}
-                <Redirect to={getLoginPath()} />
-            </Switch>
+                <Route
+                    element={<Navigate replace to={AppRoute.LOGIN} />}
+                    path="*"
+                />
+            </Routes>
         </Suspense>
     );
 };

@@ -1,3 +1,3 @@
-export interface MetricsViewPageParams {
+export type MetricsViewPageParams = {
     id: string;
-}
+};

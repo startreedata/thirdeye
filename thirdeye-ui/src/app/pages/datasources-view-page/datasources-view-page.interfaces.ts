@@ -1,3 +1,3 @@
-export interface DatasourcesViewPageParams {
+export type DatasourcesViewPageParams = {
     id: string;
-}
+};

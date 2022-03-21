@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Copyright (c) 2022 StarTree Inc. All rights reserved.
+# Confidential and Proprietary Information of StarTree Inc.
+#
+
 cat > ~/.npmrc <<EOF
 ; this will be our temp .npmrc credentials for Artifactory
 //repo.startreedata.io/artifactory/api/npm/startree-ui/:_auth=$(echo -n ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}|base64 -w 0 -)

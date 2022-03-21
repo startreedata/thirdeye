@@ -50,7 +50,7 @@ public class OAuthIntegrationTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "OAuthIntegrationTest");
+    db = new ThirdEyeH2DatabaseServer("localhost", 7123, "OAuthIntegrationTest");
     db.start();
     db.truncateAllTables();
 

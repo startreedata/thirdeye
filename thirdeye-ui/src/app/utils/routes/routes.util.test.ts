@@ -5,9 +5,15 @@ import {
     getAlertsPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
+    getAlertTemplatesAllPath,
+    getAlertTemplatesCreatePath,
+    getAlertTemplatesPath,
+    getAlertTemplatesUpdatePath,
+    getAlertTemplatesViewPath,
     getAnomaliesAllPath,
+    getAnomaliesAnomalyPath,
+    getAnomaliesAnomalyViewPath,
     getAnomaliesPath,
-    getAnomaliesViewPath,
     getBasePath,
     getConfigurationPath,
     getHomePath,
@@ -16,6 +22,8 @@ import {
     getMetricsAllPath,
     getMetricsPath,
     getMetricsViewPath,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
+    getRootCauseAnalysisForAnomalyPath,
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsCreatePath,
     getSubscriptionGroupsPath,
@@ -24,16 +32,18 @@ import {
 } from "./routes.util";
 
 jest.mock("../params/params.util", () => ({
-    getRecognizedQueryString: jest.fn().mockReturnValue("testQueryString"),
+    getRecognizedQuery: jest.fn().mockReturnValue({
+        toString: jest.fn().mockReturnValue("testQueryString"),
+    }),
 }));
 
 describe("Routes Util", () => {
     it("getBasePath should return appropriate path with appropriate query string", () => {
-        expect(getBasePath()).toEqual("/?testQueryString");
+        expect(getBasePath()).toEqual("/");
     });
 
     it("getHomePath should return appropriate path with appropriate query string", () => {
-        expect(getHomePath()).toEqual("/home?testQueryString");
+        expect(getHomePath()).toEqual("/home");
     });
 
     it("getAlertsPath should return appropriate path with appropriate query string", () => {
@@ -45,9 +55,7 @@ describe("Routes Util", () => {
     });
 
     it("getAlertsViewPath should return appropriate path with appropriate query string for id", () => {
-        expect(getAlertsViewPath(1)).toEqual(
-            "/alerts/view/id/1?testQueryString"
-        );
+        expect(getAlertsViewPath(1)).toEqual("/alerts/1?testQueryString");
     });
 
     it("getAlertsCreatePath should return appropriate path with appropriate query string", () => {
@@ -56,7 +64,7 @@ describe("Routes Util", () => {
 
     it("getAlertsUpdatePath should return appropriate path with appropriate query string for id", () => {
         expect(getAlertsUpdatePath(1)).toEqual(
-            "/alerts/update/id/1?testQueryString"
+            "/alerts/1/update?testQueryString"
         );
     });
 
@@ -68,10 +76,12 @@ describe("Routes Util", () => {
         expect(getAnomaliesAllPath()).toEqual("/anomalies/all?testQueryString");
     });
 
-    it("getAnomaliesViewPath should return appropriate path with appropriate query string for id", () => {
-        expect(getAnomaliesViewPath(1)).toEqual(
-            "/anomalies/view/id/1?testQueryString"
-        );
+    it("getAnomaliesAnomalyPath should return appropriate path with appropriate query string for id", () => {
+        expect(getAnomaliesAnomalyPath(1)).toEqual("/anomalies/1");
+    });
+
+    it("getAnomaliesAnomalyViewPath should return appropriate path with appropriate query string for id", () => {
+        expect(getAnomaliesAnomalyViewPath(1)).toEqual("/anomalies/1/view");
     });
 
     it("getConfigurationPath should return appropriate path with appropriate query string", () => {
@@ -88,57 +98,95 @@ describe("Routes Util", () => {
 
     it("getSubscriptionGroupsAllPath should return appropriate path with appropriate query string", () => {
         expect(getSubscriptionGroupsAllPath()).toEqual(
-            "/configuration/subscription-groups/all?testQueryString"
+            "/configuration/subscription-groups/all"
         );
     });
 
     it("getSubscriptionGroupsViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getSubscriptionGroupsViewPath(1)).toEqual(
-            "/configuration/subscription-groups/view/id/1?testQueryString"
+            "/configuration/subscription-groups/view/id/1"
         );
     });
 
     it("getSubscriptionGroupsCreatePath should return appropriate path with appropriate query string", () => {
         expect(getSubscriptionGroupsCreatePath()).toEqual(
-            "/configuration/subscription-groups/create?testQueryString"
+            "/configuration/subscription-groups/create"
         );
     });
 
     it("getSubscriptionGroupsUpdatePath should return appropriate path with appropriate query string for id", () => {
         expect(getSubscriptionGroupsUpdatePath(1)).toEqual(
-            "/configuration/subscription-groups/update/id/1?testQueryString"
+            "/configuration/subscription-groups/update/id/1"
         );
     });
 
     it("getMetricsPath should return appropriate path with appropriate query string", () => {
-        expect(getMetricsPath()).toEqual(
-            "/configuration/metrics?testQueryString"
-        );
+        expect(getMetricsPath()).toEqual("/configuration/metrics");
     });
 
     it("getMetricsAllPath should return appropriate path with appropriate query string", () => {
-        expect(getMetricsAllPath()).toEqual(
-            "/configuration/metrics/all?testQueryString"
-        );
+        expect(getMetricsAllPath()).toEqual("/configuration/metrics/all");
     });
 
     it("getMetricsViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getMetricsViewPath(1)).toEqual(
-            "/configuration/metrics/view/id/1?testQueryString"
+            "/configuration/metrics/view/id/1"
+        );
+    });
+
+    it("getRootCauseAnalysisForAnomalyPath should return appropriate path with appropriate query string for anomaly id", () => {
+        expect(getRootCauseAnalysisForAnomalyPath(1)).toEqual(
+            "/root-cause-analysis/anomaly/1"
+        );
+    });
+
+    it("getRootCauseAnalysisForAnomalyInvestigatePath should return appropriate path with for anomaly id", () => {
+        expect(getRootCauseAnalysisForAnomalyInvestigatePath(1)).toEqual(
+            "/root-cause-analysis/anomaly/1/investigate"
         );
     });
 
     it("getLoginPath should return appropriate path with appropriate query string", () => {
-        expect(getLoginPath()).toEqual("/login?testQueryString");
+        expect(getLoginPath()).toEqual("/login");
     });
 
     it("getLogoutPath should return appropriate path with appropriate query string", () => {
-        expect(getLogoutPath()).toEqual("/logout?testQueryString");
+        expect(getLogoutPath()).toEqual("/logout");
     });
 
     it("createPathWithTimeRangeQueryString should return path with appropriate query string", () => {
         expect(createPathWithRecognizedQueryString("/testPath")).toEqual(
             "/testPath?testQueryString"
+        );
+    });
+
+    it("getAlertTemplatesPath should return appropriate path", () => {
+        expect(getAlertTemplatesPath()).toEqual(
+            "/configuration/alert-templates"
+        );
+    });
+
+    it("getAlertTemplatesAllPath should return appropriate path", () => {
+        expect(getAlertTemplatesAllPath()).toEqual(
+            "/configuration/alert-templates/all"
+        );
+    });
+
+    it("getAlertTemplatesCreatePath should return appropriate path", () => {
+        expect(getAlertTemplatesCreatePath()).toEqual(
+            "/configuration/alert-templates/create"
+        );
+    });
+
+    it("getAlertTemplatesViewPath should return appropriate path for id", () => {
+        expect(getAlertTemplatesViewPath(1)).toEqual(
+            "/configuration/alert-templates/1/view"
+        );
+    });
+
+    it("getAlertTemplatesUpdatePath should return appropriate path with appropriate for id", () => {
+        expect(getAlertTemplatesUpdatePath(1)).toEqual(
+            "/configuration/alert-templates/1/update"
         );
     });
 });

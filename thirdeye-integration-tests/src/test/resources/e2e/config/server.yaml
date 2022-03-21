@@ -22,7 +22,7 @@ server:
 logging:
   level: INFO
   loggers:
-    org.apache.pinot.thirdeye: DEBUG
+    ai.startree.thirdeye: DEBUG
     org.apache.zookeeper: WARN
 
 auth:
@@ -33,14 +33,14 @@ auth:
 
 database:
   # Assuming a local MySQL server running on the default port 3306
-  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true
+  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
   user: uthirdeye
   password: pass
-  driver: com.mysql.jdbc.Driver
+  driver: com.mysql.cj.jdbc.Driver
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
   enabled: true
 
   # package to scan for jersey resources
-  resourcePackage: org.apache.pinot.thirdeye.resources
+  resourcePackage: ai.startree.thirdeye.resources

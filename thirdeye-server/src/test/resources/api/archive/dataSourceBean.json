@@ -6,18 +6,18 @@
   "updateTime": 1622149115274,
   "updatedBy": "no-auth-user",
   "name": "PinotThirdEyeDataSource1",
-  "classRef": "org.apache.pinot.thirdeye.datasource.pinot.PinotThirdEyeDataSource",
+  "classRef": "ai.startree.thirdeye.datasource.pinot.PinotThirdEyeDataSource",
   "properties": {
     "controllerConnectionScheme": "http",
     "zookeeperUrl": "localhost:2123",
     "clusterName": "QuickStartCluster",
     "controllerHost": "localhost",
     "controllerPort": 9000,
-    "cacheLoaderClassName": "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader"
+    "cacheLoaderClassName": "ai.startree.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader"
   },
   "metaList": [
     {
-      "classRef": "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource",
+      "classRef": "ai.startree.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource",
       "properties": {}
     }
   ]

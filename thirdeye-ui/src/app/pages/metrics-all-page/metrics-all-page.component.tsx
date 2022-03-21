@@ -1,35 +1,30 @@
-import { PageContentsGridV1, PageV1 } from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricListV1 } from "../../components/metric-list-v1/metric-list-v1.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
 import { getUiMetrics } from "../../utils/metrics/metrics.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
     const [uiMetrics, setUiMetrics] = useState<UiMetric[] | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         // Time range refreshed, fetch metrics
         fetchAllMetrics();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllMetrics = (): void => {
         setUiMetrics(null);
@@ -53,9 +48,9 @@ export const MetricsAllPage: FunctionComponent = () => {
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
         deleteMetric(uiMetric.id).then((metric) => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.metric") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.metric") })
             );
 
             // Remove deleted metric from fetched metrics
@@ -77,7 +72,7 @@ export const MetricsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={3} />
+            <ConfigurationPageHeader selectedIndex={2} />
             <PageContentsGridV1 fullHeight>
                 <MetricListV1
                     metrics={uiMetrics}

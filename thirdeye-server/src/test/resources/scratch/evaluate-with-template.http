@@ -116,7 +116,7 @@ Content-Type: application/json
             "component.detector.metric": "met",
             "component.detector.dimensions": [],
             "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "1_DAYS",
+            "component.detector.monitoringGranularity": "P1D",
             "component.detector.type": "THRESHOLD",
             "component.detector.max": "850000",
             "component.detector.min": "300000",
@@ -136,7 +136,7 @@ Content-Type: application/json
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
             "component.pinot.dataSource": "pinotQuickStartLocal",
             "component.pinot.query": "SELECT DATETIMECONVERT(\"date\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '1:DAYS') as ts, sum(views) as met FROM pageviews WHERE ts >= ${startTime} AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000",
             "component.pinot.tableName": "pageviews"

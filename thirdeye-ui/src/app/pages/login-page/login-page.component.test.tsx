@@ -1,76 +1,113 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { AuthExceptionCodeV1 } from "../../platform/components/auth-provider-v1/auth-provider-v1.interfaces";
 import { LoginPage } from "./login-page.component";
 
-jest.mock("../../components/auth-provider/auth-provider.component", () => ({
-    useAuth: jest.fn().mockImplementation(() => ({
+jest.mock("../../platform/components/app-loading-indicator-v1", () => ({
+    AppLoadingIndicatorV1: jest
+        .fn()
+        .mockReturnValue("testAppLoadingIndicatorV1"),
+}));
+
+jest.mock("../../platform/components/auth-provider-v1", () => ({
+    useAuthProviderV1: jest.fn().mockImplementation(() => ({
+        authExceptionCode: mockAuthExceptionCode,
         login: mockLogin,
     })),
 }));
 
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setPageBreadcrumbs: mockSetPageBreadcrumbs,
-        })),
-    })
-);
-
-jest.mock("react-i18next", () => ({
-    useTranslation: jest.fn().mockReturnValue({
-        t: (key: string) => key,
-    }),
+jest.mock("../../platform/components/notification-provider-v1", () => ({
+    useNotificationProviderV1: jest
+        .fn()
+        .mockImplementation(() => ({ notify: mockNotify })),
+    NotificationTypeV1: {
+        Error: "error",
+    },
 }));
 
-jest.mock("../../components/page-contents/page-contents.component", () => ({
-    PageContents: jest.fn().mockImplementation((props) => props.children),
+jest.mock("../../platform/components/page-v1", () => ({
+    PageV1: jest.fn().mockImplementation((props) => props.children),
+    PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
+    PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),
+}));
+
+jest.mock("react-i18next", () => ({
+    useTranslation: jest.fn().mockImplementation(() => ({
+        t: mockT,
+    })),
 }));
 
 describe("Login Page", () => {
-    it("should set appropriate page breadcrumbs", async () => {
+    it("should invoke login when no blocking auth exception", () => {
+        mockAuthExceptionCode = AuthExceptionCodeV1.UnauthorizedAccess;
         act(() => {
             render(<LoginPage />);
         });
-
-        expect(mockSetPageBreadcrumbs).toHaveBeenCalledWith([]);
-    });
-
-    it("should set appropriate page title", async () => {
-        act(() => {
-            render(<LoginPage />);
-        });
-
-        expect(PageContents).toHaveBeenCalledWith(
-            {
-                hideHeader: true,
-                title: "label.login",
-                children: expect.any(Object),
-            },
-            {}
-        );
-    });
-
-    it("should render login button", async () => {
-        act(() => {
-            render(<LoginPage />);
-        });
-
-        expect(screen.getByText("label.login")).toBeInTheDocument();
-    });
-
-    it("should login on login button click", async () => {
-        act(() => {
-            render(<LoginPage />);
-        });
-
-        fireEvent.click(screen.getByText("label.login"));
 
         expect(mockLogin).toHaveBeenCalled();
     });
+
+    it("should not invoke login when blocking auth exception", () => {
+        mockAuthExceptionCode = AuthExceptionCodeV1.InfoCallFailure;
+        act(() => {
+            render(<LoginPage />);
+        });
+
+        expect(mockLogin).not.toHaveBeenCalled();
+    });
+
+    it("should notify blocking auth exception", () => {
+        mockAuthExceptionCode = AuthExceptionCodeV1.InfoCallFailure;
+        act(() => {
+            render(<LoginPage />);
+        });
+
+        expect(mockNotify).toHaveBeenCalledWith(
+            "error",
+            "message.authentication-error",
+            true
+        );
+        expect(mockT).toHaveBeenCalledWith("message.authentication-error", {
+            exceptionCode: AuthExceptionCodeV1.InfoCallFailure,
+        });
+    });
+
+    it("should not notify non-blocking auth exception", () => {
+        mockAuthExceptionCode = AuthExceptionCodeV1.UnauthorizedAccess;
+        act(() => {
+            render(<LoginPage />);
+        });
+
+        expect(mockNotify).not.toHaveBeenCalledWith();
+    });
+
+    it("should render loading indicator when no blocking auth exception", () => {
+        mockAuthExceptionCode = AuthExceptionCodeV1.UnauthorizedAccess;
+        act(() => {
+            render(<LoginPage />);
+        });
+
+        expect(
+            screen.getByText("testAppLoadingIndicatorV1")
+        ).toBeInTheDocument();
+    });
+
+    it("should render appropriately when blocking auth exception", () => {
+        mockAuthExceptionCode = AuthExceptionCodeV1.InfoCallFailure;
+        act(() => {
+            render(<LoginPage />);
+        });
+
+        expect(
+            screen.getByText("label.authentication-error")
+        ).toBeInTheDocument();
+    });
 });
 
-const mockSetPageBreadcrumbs = jest.fn();
+let mockAuthExceptionCode = "";
 
 const mockLogin = jest.fn();
+
+const mockNotify = jest.fn().mockReturnValue("ok");
+
+const mockT = jest.fn().mockImplementation((key) => key);

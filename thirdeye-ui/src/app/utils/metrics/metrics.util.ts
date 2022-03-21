@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { isEmpty } from "lodash";
+import { formatNumberV1 } from "../../platform/utils";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import {
     LogicalMetric,
@@ -8,7 +9,6 @@ import {
     MetricAggFunction,
 } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
-import { formatNumber } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createEmptyUiMetric = (): UiMetric => {
@@ -24,7 +24,7 @@ export const createEmptyUiMetric = (): UiMetric => {
         aggregationColumn: noDataMarker,
         aggregationFunction: noDataMarker as MetricAggFunction,
         views: [],
-        viewCount: formatNumber(0),
+        viewCount: formatNumberV1(0),
     };
 };
 
@@ -84,7 +84,7 @@ export const getUiMetric = (metric: Metric): UiMetric => {
 
         uiMetric.views.push(metricLocicalView);
     }
-    uiMetric.viewCount = formatNumber(uiMetric.views.length);
+    uiMetric.viewCount = formatNumberV1(uiMetric.views.length);
 
     return uiMetric;
 };

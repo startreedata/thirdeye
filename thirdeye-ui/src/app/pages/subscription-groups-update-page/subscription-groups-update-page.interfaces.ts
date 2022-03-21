@@ -1,3 +1,3 @@
-export interface SubscriptionGroupsUpdatePageParams {
+export type SubscriptionGroupsUpdatePageParams = {
     id: string;
-}
+};

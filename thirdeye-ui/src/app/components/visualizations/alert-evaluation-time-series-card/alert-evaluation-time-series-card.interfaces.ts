@@ -1,7 +1,7 @@
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AlertEvaluationTimeSeriesCardProps {
-    maximized?: boolean;
     alertEvaluationTimeSeriesHeight: number;
     alertEvaluationTimeSeriesMaximizedHeight?: number;
     title?: string;
@@ -11,4 +11,5 @@ export interface AlertEvaluationTimeSeriesCardProps {
     helperText?: string;
     hideRefreshButton?: boolean;
     onRefresh?: () => void;
+    onAnomalyBarClick?: (anomaly: Anomaly) => void;
 }

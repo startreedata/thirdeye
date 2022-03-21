@@ -8,6 +8,6 @@ export const useEditableListStyles = makeStyles({
         padding: 0,
     },
     addButton: {
-        height: Dimension.HEIGHT_INPUT_DEFAULT,
+        height: Dimension.HEIGHT_INPUT_SMALL_DEFAULT,
     },
 });

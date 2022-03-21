@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,6 +19,7 @@ import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
 import { getMetric, updateMetric } from "../../rest/metrics/metrics.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";
 import { MetricsUpdatePageParams } from "./metrics-update-page.interfaces";
 
@@ -76,7 +78,21 @@ export const MetricsUpdatePage: FunctionComponent = () => {
                     metricResponse.status === "rejected" ||
                     datasetsResponse.status === "rejected"
                 ) {
-                    notify(NotificationTypeV1.Error, t("message.fetch-error"));
+                    const axiosError =
+                        datasetsResponse.status === "rejected"
+                            ? datasetsResponse.reason
+                            : metricResponse.status === "rejected"
+                            ? metricResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 }
 
                 // Attempt to gather data

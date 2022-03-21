@@ -94,7 +94,21 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                     datasetResponse.status === "rejected" ||
                     datasourcesResponse.status === "rejected"
                 ) {
-                    notify(NotificationTypeV1.Error, t("message.fetch-error"));
+                    const axiosError =
+                        datasourcesResponse.status === "rejected"
+                            ? datasourcesResponse.reason
+                            : datasetResponse.status === "rejected"
+                            ? datasetResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 }
 
                 // Attempt to gather data

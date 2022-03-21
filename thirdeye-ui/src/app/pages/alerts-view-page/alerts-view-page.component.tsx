@@ -1,5 +1,6 @@
 import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -36,6 +37,7 @@ import {
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAlertsAllPath,
     getAnomaliesAnomalyPath,
@@ -137,6 +139,28 @@ export const AlertsViewPage: FunctionComponent = () => {
             getAllSubscriptionGroups(),
         ])
             .then(([alertResponse, subscriptionGroupsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === "rejected" ||
+                    alertResponse.status === "rejected"
+                ) {
+                    const axiosError =
+                        alertResponse.status === "rejected"
+                            ? alertResponse.reason
+                            : subscriptionGroupsResponse.status === "rejected"
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =

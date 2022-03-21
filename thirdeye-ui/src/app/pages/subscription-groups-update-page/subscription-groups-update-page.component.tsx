@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -21,6 +22,7 @@ import {
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
@@ -80,6 +82,28 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             getAllAlerts(),
         ])
             .then(([subscriptionGroupResponse, alertsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupResponse.status === "rejected" ||
+                    alertsResponse.status === "rejected"
+                ) {
+                    const axiosError =
+                        alertsResponse.status === "rejected"
+                            ? alertsResponse.reason
+                            : subscriptionGroupResponse.status === "rejected"
+                            ? subscriptionGroupResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
                 if (subscriptionGroupResponse.status === "fulfilled") {
                     setSubscriptionGroup(subscriptionGroupResponse.value);

@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
@@ -20,6 +22,7 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getUiAlert, getUiAlerts } from "../../utils/alerts/alerts.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
@@ -42,6 +45,28 @@ export const AlertsAllPage: FunctionComponent = () => {
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
         Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
             .then(([alertsResponse, subscriptionGroupsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === "rejected" ||
+                    alertsResponse.status === "rejected"
+                ) {
+                    const axiosError =
+                        alertsResponse.status === "rejected"
+                            ? alertsResponse.reason
+                            : subscriptionGroupsResponse.status === "rejected"
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
                 if (subscriptionGroupsResponse.status === "fulfilled") {
                     fetchedSubscriptionGroups =

@@ -340,6 +340,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       // We need at least 2 periods of data
       // fixme cyril period is in number of observations - prefer ISO 8601 or auto period
       if (trainingDF.size() < 2 * period) {
+        // fixme cyril adding warn only to not change the behavior but I think this should throw an exception - it will fail later
+        LOG.warn("Not enough historical data available for Holt-Winters algorithm. Alert configuration may be incorrect.");
         continue;
       }
 

@@ -9,7 +9,7 @@ export const DatasetRenderer: FunctionComponent<DatasetRendererProps> = (
     const { t } = useTranslation();
 
     return (
-        <Grid container item justify="flex-end">
+        <Grid container item justifyContent="flex-end">
             {/* Name */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">

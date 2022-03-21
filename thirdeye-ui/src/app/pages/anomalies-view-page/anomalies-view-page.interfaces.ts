@@ -7,4 +7,5 @@ export enum AnomalyBreakdownAPIOffsetValues {
     ONE_WEEK_AGO = "P1W",
     TWO_WEEKS_AGO = "P2W",
     THREE_WEEKS_AGO = "P3W",
+    FOUR_WEEKS_AGO = "P4W",
 }

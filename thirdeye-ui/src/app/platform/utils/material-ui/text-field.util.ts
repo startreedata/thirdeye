@@ -6,4 +6,10 @@ import { TextFieldProps } from "@material-ui/core";
 export const textFieldPropsV1: Partial<TextFieldProps> = {
     size: "small",
     variant: "outlined",
+    InputLabelProps: {
+        style: {
+            backgroundColor: "white",
+            paddingRight: "5px",
+        },
+    },
 };

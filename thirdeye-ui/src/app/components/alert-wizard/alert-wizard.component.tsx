@@ -454,7 +454,11 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                         />
                                     </Grid>
 
-                                    <Grid container item justify="flex-end">
+                                    <Grid
+                                        container
+                                        item
+                                        justifyContent="flex-end"
+                                    >
                                         {/* Subscription groups */}
                                         <Grid item sm={2}>
                                             <Typography variant="subtitle1">
@@ -509,7 +513,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                             container
                             alignItems="stretch"
                             className={alertWizardClasses.controlsContainer}
-                            justify="flex-end"
+                            justifyContent="flex-end"
                         >
                             {detectionConfigurationError && (
                                 <Grid item sm={12}>
@@ -531,7 +535,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                             </Grid>
 
                             <Grid item sm={12}>
-                                <Grid container justify="space-between">
+                                <Grid container justifyContent="space-between">
                                     {/* Cancel button */}
                                     <Grid item>
                                         <Grid container>

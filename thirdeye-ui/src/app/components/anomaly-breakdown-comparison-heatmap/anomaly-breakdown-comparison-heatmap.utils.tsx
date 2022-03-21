@@ -15,12 +15,14 @@ export const OFFSET_TO_MILLISECONDS = {
     [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: WEEK_IN_MILLISECONDS,
     [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2 * WEEK_IN_MILLISECONDS,
     [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3 * WEEK_IN_MILLISECONDS,
+    [AnomalyBreakdownAPIOffsetValues.FOUR_WEEKS_AGO]: 4 * WEEK_IN_MILLISECONDS,
 };
 export const OFFSET_TO_HUMAN_READABLE = {
     [AnomalyBreakdownAPIOffsetValues.CURRENT]: "",
     [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: "One Week Ago",
     [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: "Two Weeks Ago",
     [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: "Three Weeks Ago",
+    [AnomalyBreakdownAPIOffsetValues.FOUR_WEEKS_AGO]: "Four Weeks Ago",
 };
 
 export function summarizeDimensionValueData(

@@ -86,12 +86,6 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                 <TextField
                     fullWidth
                     select
-                    InputLabelProps={{
-                        style: {
-                            backgroundColor: "white",
-                            paddingRight: "5px",
-                        },
-                    }}
                     id="anomaly-feedback-select"
                     label="Is this an anomaly?"
                     value={currentlySelected}

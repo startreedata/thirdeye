@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye;
 
-import static ai.startree.thirdeye.database.AuthTestUtils.getJWKS;
-import static ai.startree.thirdeye.database.AuthTestUtils.getToken;
+import static ai.startree.thirdeye.utils.AuthTestUtils.getJWKS;
+import static ai.startree.thirdeye.utils.AuthTestUtils.getToken;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;

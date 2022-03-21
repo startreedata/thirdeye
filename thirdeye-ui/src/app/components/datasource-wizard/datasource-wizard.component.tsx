@@ -6,12 +6,12 @@ import {
     Tooltip,
     Typography,
 } from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    InfoIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
@@ -186,7 +186,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                                 ) as string
                                             }
                                         >
-                                            <InfoIcon />
+                                            <InfoIconV1 />
                                         </Tooltip>
                                     </IconButton>
                                 </a>

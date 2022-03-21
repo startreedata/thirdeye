@@ -6,13 +6,13 @@ import {
     Tooltip,
     Typography,
 } from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
+    InfoIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
@@ -347,7 +347,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                                         ) as string
                                                     }
                                                 >
-                                                    <InfoIcon />
+                                                    <InfoIconV1 />
                                                 </Tooltip>
                                             </IconButton>
                                         </a>

@@ -84,7 +84,8 @@ export const AppBar: FunctionComponent = () => {
                         {t("label.configuration")}
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
-
+            </NavBarPrimaryContainerV1>
+            <NavBarSecondaryContainerV1>
                 {/* Documentation */}
                 <NavBarLinkV1
                     externalLink
@@ -98,8 +99,7 @@ export const AppBar: FunctionComponent = () => {
                         {t("label.documentation")}
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
-            </NavBarPrimaryContainerV1>
-            <NavBarSecondaryContainerV1>
+
                 {/* Login */}
                 {!authenticated && !authDisabled && (
                     <NavBarLinkV1

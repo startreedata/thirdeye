@@ -60,7 +60,7 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<
     return (
         <Legend scale={legendScale}>
             {(labels) => (
-                <Grid container justify="space-between" spacing={0}>
+                <Grid container justifyContent="space-between" spacing={0}>
                     {labels &&
                         labels.map((label, index) => (
                             <Grid item key={index}>

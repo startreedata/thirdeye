@@ -67,7 +67,7 @@ export const DimensionHeatmapTooltip: FunctionComponent<
                     <Grid
                         container
                         alignItems="center"
-                        justify="center"
+                        justifyContent="center"
                         spacing={0}
                     >
                         <Grid

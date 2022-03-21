@@ -212,7 +212,7 @@ function AlertTemplateWizard<NewOrExistingTemplate>(
                     container
                     alignItems="stretch"
                     className={alertTemplateWizardClasses.controlsContainer}
-                    justify="flex-end"
+                    justifyContent="flex-end"
                 >
                     {alertTemplateConfigurationError && (
                         <Grid item sm={12}>
@@ -234,7 +234,7 @@ function AlertTemplateWizard<NewOrExistingTemplate>(
                     </Grid>
 
                     <Grid item sm={12}>
-                        <Grid container justify="space-between">
+                        <Grid container justifyContent="space-between">
                             {/* Cancel button */}
                             <Grid item>
                                 <Grid container>

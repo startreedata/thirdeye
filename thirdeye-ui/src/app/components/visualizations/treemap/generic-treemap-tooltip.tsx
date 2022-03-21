@@ -23,7 +23,7 @@ function GenericTreemapTooltip<Data>(props: TreemapData<Data>): JSX.Element {
                 <Grid
                     container
                     alignItems="center"
-                    justify="center"
+                    justifyContent="center"
                     spacing={0}
                 >
                     <Grid item>

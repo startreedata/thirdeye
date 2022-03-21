@@ -33,19 +33,19 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
             numTicks = props.numTicks;
         } else if (
             props.parentWidth &&
-            props.parentWidth < theme.breakpoints.width("sm")
+            props.parentWidth < theme.breakpoints.values.sm
         ) {
             // Parent container width roughly equal to screen width xs
             numTicks = NUM_TICKS_XS;
         } else if (
             props.parentWidth &&
-            props.parentWidth < theme.breakpoints.width("md")
+            props.parentWidth < theme.breakpoints.values.md
         ) {
             // Parent container width roughly equal to screen width sm
             numTicks = NUM_TICKS_SM;
         } else if (
             props.parentWidth &&
-            props.parentWidth < theme.breakpoints.width("lg")
+            props.parentWidth < theme.breakpoints.values.lg
         ) {
             // Parent container width roughly equal to screen width md
             numTicks = NUM_TICKS_MD;

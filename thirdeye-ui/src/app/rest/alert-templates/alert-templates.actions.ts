@@ -10,7 +10,7 @@ import {
 } from "./alert-templates.rest";
 
 export const useGetAlertTemplate = (): GetAlertTemplate => {
-    const { data, makeRequest, status, errorMessage } =
+    const { data, makeRequest, status, errorMessages } =
         useHTTPAction<AlertTemplate>(getAlertTemplateREST);
 
     const getAlertTemplate = (
@@ -19,11 +19,11 @@ export const useGetAlertTemplate = (): GetAlertTemplate => {
         return makeRequest(alertTemplateId);
     };
 
-    return { alertTemplate: data, getAlertTemplate, status, errorMessage };
+    return { alertTemplate: data, getAlertTemplate, status, errorMessages };
 };
 
 export const useGetAlertTemplates = (): GetAlertTemplates => {
-    const { data, makeRequest, status, errorMessage } = useHTTPAction<
+    const { data, makeRequest, status, errorMessages } = useHTTPAction<
         AlertTemplate[]
     >(getAlertTemplatesREST);
 
@@ -31,5 +31,5 @@ export const useGetAlertTemplates = (): GetAlertTemplates => {
         return makeRequest();
     };
 
-    return { alertTemplates: data, getAlertTemplates, status, errorMessage };
+    return { alertTemplates: data, getAlertTemplates, status, errorMessages };
 };

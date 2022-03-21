@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -18,7 +19,7 @@ import {
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
     const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
@@ -40,12 +41,13 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 fetchedUiDatasets = getUiDatasets(datasets);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage || t("message.fetch-error")
-                );
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => setUiDatasets(fetchedUiDatasets));
     };
@@ -71,15 +73,18 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 removeUiDataset(dataset);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.delete-error", {
-                            entity: t("label.dataset"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

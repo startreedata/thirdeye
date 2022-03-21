@@ -25,7 +25,7 @@ import {
 } from "../../utils/alerts/alerts.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
@@ -96,12 +96,16 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                     setSubs(subs);
                 })
                 .catch((error: AxiosError) => {
-                    const errMessage = getErrorMessage(error);
+                    const errMessages = getErrorMessages(error);
 
-                    notify(
-                        NotificationTypeV1.Error,
-                        errMessage || t("message.fetch-error")
-                    );
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 });
     }, [currentWizardStep]);
 

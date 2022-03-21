@@ -1,13 +1,14 @@
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 
-export const getErrorMessage = (error: AxiosError): string => {
+export const getErrorMessages = (error: AxiosError): string[] => {
     const errMsgs: string[] = [];
 
     if (
         error &&
         error.response &&
         error.response.data &&
+        error.response.data.list &&
         error.response.data.list.length
     ) {
         error.response.data.list.map((err: { code: string; msg: string }) => {
@@ -18,6 +19,5 @@ export const getErrorMessage = (error: AxiosError): string => {
         });
     }
 
-    // Remove this `0` index value if we need all the errors
-    return errMsgs[0];
+    return errMsgs;
 };

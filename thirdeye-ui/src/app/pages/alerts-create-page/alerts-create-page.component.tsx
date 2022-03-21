@@ -30,7 +30,7 @@ import {
     createAlertEvaluation,
     createDefaultAlert,
 } from "../../utils/alerts/alerts.util";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
@@ -88,13 +88,18 @@ export const AlertsCreatePage: FunctionComponent = () => {
                     });
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.create-error", { entity: t("label.alert") })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.create-error", {
+                              entity: t("label.alert"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -120,15 +125,18 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
-            const errMessage = getErrorMessage(error as AxiosError);
+            const errMessages = getErrorMessages(error as AxiosError);
 
-            notify(
-                NotificationTypeV1.Error,
-                errMessage ||
-                    t("message.create-error", {
-                        entity: t("label.subscription-group"),
-                    })
-            );
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.create-error", {
+                          entity: t("label.subscription-group"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return newSubscriptionGroup;
@@ -141,12 +149,13 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            const errMessage = getErrorMessage(error as AxiosError);
+            const errMessages = getErrorMessages(error as AxiosError);
 
-            notify(
-                NotificationTypeV1.Error,
-                errMessage || t("message.fetch-error")
-            );
+            isEmpty(errMessages)
+                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedSubscriptionGroups;
@@ -157,12 +166,13 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            const errMessage = getErrorMessage(error as AxiosError);
+            const errMessages = getErrorMessages(error as AxiosError);
 
-            notify(
-                NotificationTypeV1.Error,
-                errMessage || t("message.fetch-error")
-            );
+            isEmpty(errMessages)
+                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedAlerts;

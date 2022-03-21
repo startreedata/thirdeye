@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +17,7 @@ import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
 
 export const DatasetsOnboardPage: FunctionComponent = () => {
@@ -48,15 +49,18 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.onboard-error", {
-                            entity: t("label.dataset"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.onboard-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -66,12 +70,13 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 setDatasources(datasources);
             })
             .catch((error: AxiosError): void => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage || t("message.fetch-error")
-                );
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally((): void => {
                 setLoading(false);

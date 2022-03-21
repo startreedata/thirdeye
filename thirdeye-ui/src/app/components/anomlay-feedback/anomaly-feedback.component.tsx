@@ -1,5 +1,6 @@
 import { Card, CardContent, MenuItem, TextField } from "@material-ui/core";
 import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -8,7 +9,7 @@ import {
 } from "../../platform/components";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { useDialog } from "../dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyFeedbackProps } from "./anomaly-feedback.interfaces";
@@ -73,15 +74,19 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                 setCurrentlySelected(feedbackType);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.update-error", {
-                            entity: t("label.anomaly-feedback"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+
+                          t("message.update-error", {
+                              entity: t("label.anomaly-feedback"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

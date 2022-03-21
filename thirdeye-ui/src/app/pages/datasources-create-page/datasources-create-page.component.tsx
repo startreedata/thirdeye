@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +14,7 @@ import {
 } from "../../platform/components";
 import { createDatasource } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 
 export const DatasourcesCreatePage: FunctionComponent = () => {
@@ -38,15 +39,18 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                 navigate(getDatasourcesViewPath(datasource.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.create-error", {
-                            entity: t("label.datasource"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.create-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

@@ -1,6 +1,6 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,7 +18,7 @@ import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getDatasetsAllPath,
     getDatasetsUpdatePath,
@@ -62,12 +62,13 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 fetchedUiDataset = getUiDataset(dataset);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage || t("message.fetch-error")
-                );
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => setUiDataset(fetchedUiDataset));
     };
@@ -93,15 +94,18 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 navigate(getDatasetsAllPath());
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.delete-error", {
-                            entity: t("label.dataset"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

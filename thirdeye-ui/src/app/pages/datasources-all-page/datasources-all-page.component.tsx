@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -18,7 +19,7 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasources } from "../../utils/datasources/datasources.util";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const DatasourcesAllPage: FunctionComponent = () => {
     const [uiDatasources, setUiDatasources] = useState<UiDatasource[] | null>(
@@ -42,12 +43,13 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 fetchedUiDatasources = getUiDatasources(datasources);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage || t("message.fetch-error")
-                );
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => {
                 setUiDatasources(fetchedUiDatasources);
@@ -77,15 +79,18 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 removeUiDatasource(datasource);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.delete-error", {
-                            entity: t("label.datasource"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

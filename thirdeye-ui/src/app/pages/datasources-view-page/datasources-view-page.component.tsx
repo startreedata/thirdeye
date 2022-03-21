@@ -1,6 +1,6 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -23,7 +23,7 @@ import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getErrorMessage } from "../../utils/rest/rest.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesAllPath } from "../../utils/routes/routes.util";
 import { DatasourcesViewPageParams } from "./datasources-view-page.interfaces";
 
@@ -64,12 +64,13 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 fetchedUiDatasource = getUiDatasource(datasource);
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage || t("message.fetch-error")
-                );
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => {
                 setUiDatasource(fetchedUiDatasource);
@@ -99,15 +100,18 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 navigate(getDatasourcesAllPath());
             })
             .catch((error: AxiosError) => {
-                const errMessage = getErrorMessage(error);
+                const errMessages = getErrorMessages(error);
 
-                notify(
-                    NotificationTypeV1.Error,
-                    errMessage ||
-                        t("message.delete-error", {
-                            entity: t("label.datasource"),
-                        })
-                );
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

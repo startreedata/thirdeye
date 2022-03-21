@@ -26,7 +26,7 @@ logging:
     org.apache.zookeeper: WARN
 
 auth:
-  enabled: true
+  enabled: false
   oauth:
     exactMatch:
       iss: http://identity.example.com

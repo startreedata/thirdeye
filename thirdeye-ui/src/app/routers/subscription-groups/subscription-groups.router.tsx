@@ -1,9 +1,19 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import {
-    AppRouteRelative,
+    AppRoute,
+    getConfigurationPath,
     getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
 
 const SubscriptionGroupsAllPage = lazy(() =>
@@ -37,45 +47,69 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const SubscriptionGroupsRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.configuration"),
+                onClick: () => history.push(getConfigurationPath()),
+            },
+            {
+                text: t("label.subscription-groups"),
+                onClick: () => history.push(getSubscriptionGroupsPath()),
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <AppLoadingIndicatorV1 />;
+    }
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Routes>
+            <Switch>
                 {/* Subscription groups path */}
-                {/* Redirect to subscription groups all path */}
-                <Route
-                    index
-                    element={
-                        <Navigate replace to={getSubscriptionGroupsAllPath()} />
-                    }
-                />
+                <Route exact path={AppRoute.SUBSCRIPTION_GROUPS}>
+                    {/* Redirect to subscription groups all path */}
+                    <Redirect to={getSubscriptionGroupsAllPath()} />
+                </Route>
 
                 {/* Subscription groups all path */}
                 <Route
-                    element={<SubscriptionGroupsAllPage />}
-                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}
+                    exact
+                    component={SubscriptionGroupsAllPage}
+                    path={AppRoute.SUBSCRIPTION_GROUPS_ALL}
                 />
 
                 {/* Subscription groups view path */}
                 <Route
-                    element={<SubscriptionGroupsViewPage />}
-                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_VIEW}
+                    exact
+                    component={SubscriptionGroupsViewPage}
+                    path={AppRoute.SUBSCRIPTION_GROUPS_VIEW}
                 />
 
                 {/* Subscription groups create path */}
                 <Route
-                    element={<SubscriptionGroupsCreatePage />}
-                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}
+                    exact
+                    component={SubscriptionGroupsCreatePage}
+                    path={AppRoute.SUBSCRIPTION_GROUPS_CREATE}
                 />
 
                 {/* Subscription groups update path */}
                 <Route
-                    element={<SubscriptionGroupsUpdatePage />}
-                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}
+                    exact
+                    component={SubscriptionGroupsUpdatePage}
+                    path={AppRoute.SUBSCRIPTION_GROUPS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={<PageNotFoundPage />} path="*" />
-            </Routes>
+                <Route component={PageNotFoundPage} />
+            </Switch>
         </Suspense>
     );
 };

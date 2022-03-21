@@ -1,13 +1,13 @@
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
     DropdownButtonTypeV1,
     DropdownButtonV1,
-} from "../../platform/components";
+    PageHeaderActionsV1,
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router";
 import {
     getAlertsCreatePath,
-    getAlertTemplatesCreatePath,
     getDatasetsOnboardPath,
     getDatasourcesCreatePath,
     getMetricsCreatePath,
@@ -16,30 +16,26 @@ import {
 
 export const CreateMenuButton: FunctionComponent = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+    const history = useHistory();
 
     const handleCreateAlert = (): void => {
-        navigate(getAlertsCreatePath());
+        history.push(getAlertsCreatePath());
     };
 
     const handleCreateSubscriptionGroup = (): void => {
-        navigate(getSubscriptionGroupsCreatePath());
+        history.push(getSubscriptionGroupsCreatePath());
     };
 
     const handleCreateMetric = (): void => {
-        navigate(getMetricsCreatePath());
+        history.push(getMetricsCreatePath());
     };
 
     const handleOnBoardDataset = (): void => {
-        navigate(getDatasetsOnboardPath());
+        history.push(getDatasetsOnboardPath());
     };
 
     const handleCreateDatasource = (): void => {
-        navigate(getDatasourcesCreatePath());
-    };
-
-    const handleCreateAlertTemplate = (): void => {
-        navigate(getAlertTemplatesCreatePath());
+        history.push(getDatasourcesCreatePath());
     };
 
     const shortcutCreateMenuItems = [
@@ -73,12 +69,6 @@ export const CreateMenuButton: FunctionComponent = () => {
                 entity: t("label.datasource"),
             }),
         },
-        {
-            id: "createAlertTemplate",
-            text: t("label.create-entity", {
-                entity: t("label.alert-template"),
-            }),
-        },
     ];
 
     const handleShortcutCreateOnclick = (
@@ -106,23 +96,21 @@ export const CreateMenuButton: FunctionComponent = () => {
                 handleCreateDatasource();
 
                 break;
-            case "createAlertTemplate":
-                handleCreateAlertTemplate();
-
-                break;
             default:
                 break;
         }
     };
 
     return (
-        <DropdownButtonV1
-            color="primary"
-            dropdownMenuItems={shortcutCreateMenuItems}
-            type={DropdownButtonTypeV1.Regular}
-            onClick={handleShortcutCreateOnclick}
-        >
-            {t("label.create")}
-        </DropdownButtonV1>
+        <PageHeaderActionsV1>
+            <DropdownButtonV1
+                color="primary"
+                dropdownMenuItems={shortcutCreateMenuItems}
+                type={DropdownButtonTypeV1.Regular}
+                onClick={handleShortcutCreateOnclick}
+            >
+                {t("label.create")}
+            </DropdownButtonV1>
+        </PageHeaderActionsV1>
     );
 };

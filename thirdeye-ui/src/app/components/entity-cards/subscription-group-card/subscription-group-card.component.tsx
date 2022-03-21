@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import {
     getAlertsViewPath,
@@ -24,14 +24,14 @@ import { TextHighlighter } from "../../text-highlighter/text-highlighter.compone
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { SubscriptionGroupCardProps } from "./subscription-group-card.interfaces";
 
-export const SubscriptionGroupCard: FunctionComponent<
-    SubscriptionGroupCardProps
-> = (props: SubscriptionGroupCardProps) => {
+export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps> = (
+    props: SubscriptionGroupCardProps
+) => {
     const [
         subscriptionGroupOptionsAnchorElement,
         setSubscriptionGroupOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const navigate = useNavigate();
+    const history = useHistory();
     const { t } = useTranslation();
 
     const handleSubscriptionGroupOptionsClick = (
@@ -49,7 +49,9 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        navigate(getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id));
+        history.push(
+            getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id)
+        );
         handleSubscriptionGroupOptionsClose();
     };
 
@@ -58,7 +60,9 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        navigate(getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id));
+        history.push(
+            getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id)
+        );
         handleSubscriptionGroupOptionsClose();
     };
 
@@ -78,7 +82,7 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        navigate(getAlertsViewPath(uiSubscriptionGroupAlert.id));
+        history.push(getAlertsViewPath(uiSubscriptionGroupAlert.id));
     };
 
     return (
@@ -89,7 +93,6 @@ export const SubscriptionGroupCard: FunctionComponent<
                         <>
                             {/* Subscription group options button */}
                             <IconButton
-                                color="secondary"
                                 onClick={handleSubscriptionGroupOptionsClick}
                             >
                                 <MoreVertIcon />

@@ -1,6 +1,5 @@
 import axios from "axios";
-import { Anomaly, AnomalyFeedback } from "../dto/anomaly.interfaces";
-import { GetAnomaliesProps } from "./anomaly.interfaces";
+import { Anomaly } from "../dto/anomaly.interfaces";
 
 const BASE_URL_ANOMALIES = "/api/anomalies";
 
@@ -10,27 +9,40 @@ export const getAnomaly = async (id: number): Promise<Anomaly> => {
     return response.data;
 };
 
-export const getAnomalies = async ({
-    alertId,
-    startTime,
-    endTime,
-}: GetAnomaliesProps = {}): Promise<Anomaly[]> => {
-    const queryParams = new URLSearchParams([["isChild", "false"]]);
+export const getAllAnomalies = async (): Promise<Anomaly[]> => {
+    const response = await axios.get(`${BASE_URL_ANOMALIES}?isChild=false`);
 
-    if (alertId) {
-        queryParams.set("alert.id", alertId.toString());
-    }
+    return response.data;
+};
 
-    if (startTime) {
-        queryParams.set("startTime", `[gte]${startTime}`);
-    }
-
-    if (endTime) {
-        queryParams.set("endTime", `[lte]${endTime}`);
-    }
-
+export const getAnomaliesByAlertId = async (
+    alertId: number
+): Promise<Anomaly[]> => {
     const response = await axios.get(
-        `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
+        `${BASE_URL_ANOMALIES}?isChild=false&alert.id=${alertId}`
+    );
+
+    return response.data;
+};
+
+export const getAnomaliesByTime = async (
+    startTime: number,
+    endTime: number
+): Promise<Anomaly[]> => {
+    const response = await axios.get(
+        `${BASE_URL_ANOMALIES}?isChild=false&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
+    );
+
+    return response.data;
+};
+
+export const getAnomaliesByAlertIdAndTime = async (
+    alertId: number,
+    startTime: number,
+    endTime: number
+): Promise<Anomaly[]> => {
+    const response = await axios.get(
+        `${BASE_URL_ANOMALIES}?isChild=false&alert.id=${alertId}&startTime=[gte]${startTime}&endTime=[lte]${endTime}`
     );
 
     return response.data;
@@ -38,18 +50,6 @@ export const getAnomalies = async ({
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {
     const response = await axios.delete(`${BASE_URL_ANOMALIES}/${id}`);
-
-    return response.data;
-};
-
-export const updateAnomalyFeedback = async (
-    anomalyId: number,
-    feedback: AnomalyFeedback
-): Promise<AnomalyFeedback> => {
-    const response = await axios.post(
-        `${BASE_URL_ANOMALIES}/${anomalyId}/feedback`,
-        feedback
-    );
 
     return response.data;
 };

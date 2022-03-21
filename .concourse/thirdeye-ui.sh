@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#
-# Copyright (c) 2022 StarTree Inc. All rights reserved.
-# Confidential and Proprietary Information of StarTree Inc.
-#
-
 if [ -z "$CONCOURSE_TEAM" ]; then
   echo "CONCOURSE_TEAM is undefined. Using \`startree-ui\`"
   export CONCOURSE_TEAM="startree-ui"

@@ -1,10 +1,19 @@
-import { default as React, FunctionComponent, lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
-import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
-import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import {
+    AppRoute,
+    getAnomaliesAllPath,
+    getAnomaliesPath,
+} from "../../utils/routes/routes.util";
 
 const AnomaliesAllPage = lazy(() =>
     import(
@@ -18,12 +27,6 @@ const AnomaliesViewPage = lazy(() =>
     ).then((module) => ({ default: module.AnomaliesViewPage }))
 );
 
-const AnomaliesViewIndexPage = lazy(() =>
-    import(
-        /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-page.component"
-    ).then((module) => ({ default: module.AnomaliesViewIndexPage }))
-);
-
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -31,66 +34,51 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const AnomaliesRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.anomalies"),
+                onClick: () => history.push(getAnomaliesPath()),
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <AppLoadingIndicatorV1 />;
+    }
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Routes>
+            <Switch>
                 {/* Anomalies path */}
-                {/* Redirect to anomalies all path */}
-                <Route
-                    index
-                    element={
-                        <RedirectWithDefaultParams
-                            replace
-                            to={AppRouteRelative.ANOMALIES_ALL}
-                        />
-                    }
-                />
+                <Route exact path={AppRoute.ANOMALIES}>
+                    {/* Redirect to anomalies all path */}
+                    <Redirect to={getAnomaliesAllPath()} />
+                </Route>
 
                 {/* Anomalies all path */}
                 <Route
-                    element={
-                        <RedirectValidation
-                            queryParams={[
-                                TimeRangeQueryStringKey.TIME_RANGE,
-                                TimeRangeQueryStringKey.START_TIME,
-                                TimeRangeQueryStringKey.END_TIME,
-                            ]}
-                            to=".."
-                        >
-                            <AnomaliesAllPage />
-                        </RedirectValidation>
-                    }
-                    path={AppRouteRelative.ANOMALIES_ALL}
+                    exact
+                    component={AnomaliesAllPage}
+                    path={AppRoute.ANOMALIES_ALL}
                 />
 
-                <Route path={`${AppRouteRelative.ALERTS_ALERT}/*`}>
-                    {/* Anomalies view index path to default the time range params */}
-                    <Route index element={<AnomaliesViewIndexPage />} />
-
-                    {/* Anomalies view path */}
-                    <Route
-                        element={
-                            <RedirectValidation
-                                queryParams={[
-                                    TimeRangeQueryStringKey.TIME_RANGE,
-                                    TimeRangeQueryStringKey.START_TIME,
-                                    TimeRangeQueryStringKey.END_TIME,
-                                ]}
-                                to=".."
-                            >
-                                <AnomaliesViewPage />
-                            </RedirectValidation>
-                        }
-                        path={AppRouteRelative.ANOMALIES_ANOMALY_VIEW}
-                    />
-
-                    {/* No match found, render page not found */}
-                    <Route element={<PageNotFoundPage />} path="*" />
-                </Route>
+                {/* Anomalies view path */}
+                <Route
+                    exact
+                    component={AnomaliesViewPage}
+                    path={AppRoute.ANOMALIES_VIEW}
+                />
 
                 {/* No match found, render page not found */}
-                <Route element={<PageNotFoundPage />} path="*" />
-            </Routes>
+                <Route component={PageNotFoundPage} />
+            </Switch>
         </Suspense>
     );
 };

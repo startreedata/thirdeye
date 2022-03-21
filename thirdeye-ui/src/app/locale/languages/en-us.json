@@ -4,8 +4,6 @@
         "home": "Home",
         "alert": "Alert",
         "alerts": "Alerts",
-        "alert-template": "Alert Template",
-        "alert-templates": "Alert Templates",
         "alert-name": "Alert Name",
         "anomaly": "Anomaly",
         "anomalies": "Anomalies",
@@ -18,7 +16,6 @@
         "datasets": "Datasets",
         "datasource": "Datasource",
         "datasources": "Datasources",
-        "description": "Description",
         "login": "Login",
         "logout": "Logout",
         "document-title": "{{page}} - {{app}}",
@@ -116,7 +113,6 @@
         "predicted": "Predicted",
         "deviation": "Deviation",
         "baseline": "Baseline",
-        "change": "Change",
         "upper-bound": "Upper bound",
         "lower-bound": "Lower bound",
         "upper-and-lower-bound": "Upper and Lower bound",
@@ -144,18 +140,7 @@
         "datasource-configuration": "Datasource Configuration",
         "type": "Type",
         "minimize": "Minimize",
-        "maximize": "Maximize",
-
-        "authentication-error": "Authentication Error",
-
-        "contribution": "Contribution",
-        "value": "Value",
-        "alert-performance": "Alert Performance",
-        "root-cause-analysis": "Root Cause Analysis",
-        "heatmap-data": "Heatmap Data",
-        "chart-data": "Chart Data",
-        "alert-template-configuration": "Alert Template Configuration",
-        "anomaly-feedback": "Anomaly Feedback"
+        "maximize": "Maximize"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -165,9 +150,7 @@
         "no-search-results": "No search results available",
         "invalid-id": "Invalid {{entity}} id {{id}}",
         "create-success": "{{entity}} created successfully",
-        "create-error": "Error creating {{entity}}",
         "update-success": "{{entity}} updated successfully",
-        "update-error": "Error updating {{entity}}",
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
         "delete-error": "Error deleting {{entity}}",
@@ -175,7 +158,6 @@
         "onboard-error": "Error onboarding {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "validation-failed": "Validation failed",
-        "change-confirmation-to": "Are you sure you want to change to {{value}}?",
 
         "subscription-group-name-required": "Subscription Group name is required",
 
@@ -190,11 +172,6 @@
         "invalid-json": "Invalid JSON",
 
         "dataset-name-required": "Dataset name is required",
-        "dataset-datasource-required": "Datasource is required",
-
-        "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
-        "authentication-disabled": "Authentication has been disabled.",
-        "anomaly-filter-search": "Add a dimension filter (Type to Search)",
-        "error-while-fetching": "An issue was experienced while retrieving {{entity}}"
+        "dataset-datasource-required": "Datasource is required"
     }
 }

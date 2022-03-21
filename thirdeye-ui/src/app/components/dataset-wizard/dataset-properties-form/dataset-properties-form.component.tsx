@@ -1,13 +1,12 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
-    Box,
     FormControl,
     FormHelperText,
     Grid,
+    InputLabel,
     MenuItem,
     Select,
     TextField,
-    Typography,
 } from "@material-ui/core";
 import _ from "lodash";
 import React, { FunctionComponent } from "react";
@@ -18,9 +17,9 @@ import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { createEmptyDataset } from "../../../utils/datasets/datasets.util";
 import { DatasetPropertiesFormProps } from "./dataset-properties-form.interfaces";
 
-export const DatasetPropertiesForm: FunctionComponent<
-    DatasetPropertiesFormProps
-> = (props: DatasetPropertiesFormProps) => {
+export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps> = (
+    props: DatasetPropertiesFormProps
+) => {
     const { t } = useTranslation();
     const defaultValues = props.dataset || createEmptyDataset();
     const { register, handleSubmit, errors, control } = useForm<Dataset>({
@@ -51,79 +50,68 @@ export const DatasetPropertiesForm: FunctionComponent<
             id={props.id}
             onSubmit={handleSubmit(onSubmitDatasetPropertiesForm)}
         >
-            <Grid container alignItems="center">
+            <Grid container>
                 {/* Name label */}
-                <Grid item lg={2} md={3} sm={5} xs={12}>
-                    <Typography variant="subtitle2">
-                        {t("label.name")}
-                    </Typography>
-                </Grid>
-
-                {/* Name input */}
-                <Grid item lg={4} md={5} sm={6} xs={12}>
-                    <TextField
-                        fullWidth
-                        required
-                        error={Boolean(errors && errors.name)}
-                        helperText={
-                            errors && errors.name && errors.name.message
-                        }
-                        inputRef={register}
-                        name="name"
-                        type="string"
-                        variant="outlined"
-                    />
-                </Grid>
-
-                <Box width="100%" />
-
-                {/* Datasource label */}
-                <Grid item lg={2} md={3} sm={5} xs={12}>
-                    <Typography variant="subtitle2">
-                        {t("label.datasource")}
-                    </Typography>
-                </Grid>
-
-                {/* Datasource input */}
-                <Grid item lg={4} md={5} sm={6} xs={12}>
-                    <FormControl
-                        fullWidth
-                        error={Boolean(errors.dataSource?.name?.message)}
-                        size="small"
-                        variant="outlined"
-                    >
-                        <Controller
-                            control={control}
-                            name="dataSource"
-                            render={({ onChange, value }) => (
-                                <Select
-                                    fullWidth
-                                    value={value.name}
-                                    variant="outlined"
-                                    onChange={(e) =>
-                                        onChange({ name: e.target.value })
-                                    }
-                                >
-                                    {!_.isEmpty(props.datasources) &&
-                                        props.datasources.map(
-                                            (datasource, index) => (
-                                                <MenuItem
-                                                    key={index}
-                                                    value={datasource.name}
-                                                >
-                                                    {datasource.name}
-                                                </MenuItem>
-                                            )
-                                        )}
-                                </Select>
-                            )}
+                <Grid container item sm={6}>
+                    <Grid item sm={8}>
+                        {/* Name */}
+                        <TextField
+                            fullWidth
+                            required
+                            error={Boolean(errors && errors.name)}
+                            helperText={
+                                errors && errors.name && errors.name.message
+                            }
+                            inputRef={register}
+                            label={t("label.name")}
+                            name="name"
+                            type="string"
+                            variant="outlined"
                         />
-                        {errors.dataSource?.name && (
-                            <FormHelperText error>
-                                {errors.dataSource.name.message}
-                            </FormHelperText>
-                        )}
-                    </FormControl>
+                    </Grid>
+                </Grid>
+                <Grid container item sm={6}>
+                    <Grid item sm={8}>
+                        {/* Datasource */}
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel id="datasets-datasource">
+                                {t(`label.datasource`)}
+                            </InputLabel>
+                            <Controller
+                                control={control}
+                                name="dataSource"
+                                render={({ onChange, value }) => (
+                                    <Select
+                                        fullWidth
+                                        label={t("label.datasource")}
+                                        labelId="datasets-datasource"
+                                        value={value.name}
+                                        variant="outlined"
+                                        onChange={(e) =>
+                                            onChange({ name: e.target.value })
+                                        }
+                                    >
+                                        {!_.isEmpty(props.datasources) &&
+                                            props.datasources.map(
+                                                (datasource, index) => (
+                                                    <MenuItem
+                                                        key={index}
+                                                        value={datasource.name}
+                                                    >
+                                                        {datasource.name}
+                                                    </MenuItem>
+                                                )
+                                            )}
+                                    </Select>
+                                )}
+                            />
+                            {errors.dataSource?.name && (
+                                <FormHelperText error>
+                                    {errors.dataSource.name.message}
+                                </FormHelperText>
+                            )}
+                        </FormControl>
+                    </Grid>
                 </Grid>
             </Grid>
         </form>

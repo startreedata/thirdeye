@@ -1,1 +1,0 @@
-export const WEEK_IN_MILLISECONDS = 604800000;

@@ -1,13 +1,13 @@
 import { Grid } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
 import {
     PageContentsGridV1,
     PageHeaderTextV1,
     PageHeaderV1,
     PageNotFoundIndicatorV1,
     PageV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 
 export const PageNotFoundPage: FunctionComponent = () => {
     const { t } = useTranslation();

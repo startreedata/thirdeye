@@ -1,9 +1,15 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { Redirect, Route, Switch } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import {
     AppRoute,
-    AppRouteRelative,
     getBasePath,
     getHomePath,
 } from "../../utils/routes/routes.util";
@@ -27,35 +33,42 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <AppLoadingIndicatorV1 />;
+    }
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Routes>
+            <Switch>
                 {/* Base path */}
-                {/* Redirect to home path */}
-                <Route
-                    element={<Navigate replace to={getHomePath()} />}
-                    path={AppRoute.BASE}
-                />
+                <Route exact path={AppRoute.BASE}>
+                    {/* Redirect to home path */}
+                    <Redirect to={getHomePath()} />
+                </Route>
 
                 {/* Home path */}
-                <Route element={<HomePage />} path={AppRouteRelative.HOME} />
+                <Route exact component={HomePage} path={AppRoute.HOME} />
 
                 {/* Login path */}
-                {/* Already authenticated, redirect to base path */}
-                <Route
-                    element={<Navigate replace to={getBasePath()} />}
-                    path={AppRouteRelative.LOGIN}
-                />
+                <Route exact path={AppRoute.LOGIN}>
+                    {/* Already authenticated, redirect to base path */}
+                    <Redirect to={getBasePath()} />
+                </Route>
 
                 {/* Logout path */}
-                <Route
-                    element={<LogoutPage />}
-                    path={AppRouteRelative.LOGOUT}
-                />
+                <Route exact component={LogoutPage} path={AppRoute.LOGOUT} />
 
                 {/* No match found, render page not found */}
-                <Route element={<PageNotFoundPage />} path="*" />
-            </Routes>
+                <Route component={PageNotFoundPage} />
+            </Switch>
         </Suspense>
     );
 };

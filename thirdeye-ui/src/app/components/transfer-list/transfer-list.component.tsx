@@ -12,12 +12,12 @@ import {
 } from "@material-ui/core";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import CloseIcon from "@material-ui/icons/Close";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import { produce } from "immer";
 import { isEmpty } from "lodash";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { getSearchStatusLabel } from "../../utils/search/search.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
@@ -254,7 +254,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     {props.link && (
                                                                         <Link
                                                                             component="button"
-                                                                            variant="body2"
                                                                             onClick={() =>
                                                                                 props.onClick &&
                                                                                 props.onClick(
@@ -276,7 +275,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                             }
                                                             primaryTypographyProps={{
                                                                 variant:
-                                                                    "body2",
+                                                                    "body1",
                                                             }}
                                                         />
 
@@ -289,7 +288,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     )
                                                                 }
                                                             >
-                                                                <ArrowForwardIcon fontSize="small" />
+                                                                <ArrowForwardIcon />
                                                             </IconButton>
                                                         </ListItemSecondaryAction>
                                                     </ListItem>
@@ -376,7 +375,6 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     {props.link && (
                                                                         <Link
                                                                             component="button"
-                                                                            variant="body2"
                                                                             onClick={() =>
                                                                                 props.onClick &&
                                                                                 props.onClick(
@@ -398,7 +396,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                             }
                                                             primaryTypographyProps={{
                                                                 variant:
-                                                                    "body2",
+                                                                    "body1",
                                                             }}
                                                         />
 
@@ -411,7 +409,7 @@ export function TransferList<T>(props: TransferListProps<T>): ReactElement {
                                                                     )
                                                                 }
                                                             >
-                                                                <CloseIcon fontSize="small" />
+                                                                <CloseIcon />
                                                             </IconButton>
                                                         </ListItemSecondaryAction>
                                                     </ListItem>

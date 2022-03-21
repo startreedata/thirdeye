@@ -1,12 +1,24 @@
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
+import { MemoryRouter } from "react-router-dom";
+import { AppRoute } from "../../utils/routes/routes.util";
 import { ConfigurationRouter } from "./configuration.router";
+
+jest.mock(
+    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    () => ({
+        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
+            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
+        })),
+    })
+);
 
 jest.mock("react-router-dom", () => ({
     ...(jest.requireActual("react-router-dom") as Record<string, unknown>),
-    useNavigate: jest.fn().mockImplementation(() => mockNavigate),
+    useHistory: jest.fn().mockImplementation(() => ({
+        push: mockPush,
+    })),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -20,17 +32,24 @@ jest.mock("../../utils/routes/routes.util", () => ({
         string,
         unknown
     >),
-    getDatasourcesPath: jest.fn().mockReturnValue("testDatasourcePath"),
+    getConfigurationPath: jest.fn().mockReturnValue("testConfigurationPath"),
 }));
+
+jest.mock("@startree-ui/platform-ui", () => ({
+    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
+}));
+
+jest.mock(
+    "../../pages/configuration-page/configuration-page.component",
+    () => ({
+        ConfigurationPage: jest.fn().mockReturnValue("testConfigurationPage"),
+    })
+);
 
 jest.mock("../subscription-groups/subscription-groups.router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
         .mockReturnValue("testSubscriptionGroupsRouter"),
-}));
-
-jest.mock("../datasources/datasources.router", () => ({
-    DatasourcesRouter: jest.fn().mockReturnValue("testDatasourcesRouter"),
 }));
 
 jest.mock("../metrics/metrics.router", () => ({
@@ -45,21 +64,49 @@ jest.mock(
 );
 
 describe("Configuration Router", () => {
-    it("should render configuration page at exact configuration path", async () => {
+    it("should have rendered loading indicator while loading", () => {
         render(
-            <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
-                <Routes>
-                    <Route
-                        element={<ConfigurationRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/*`}
-                    />
-                </Routes>
+            <MemoryRouter>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
-        expect(
-            await screen.findByText("testDatasourcesRouter")
-        ).toBeInTheDocument();
+        expect(AppLoadingIndicatorV1).toHaveBeenCalled();
+    });
+
+    it("should set appropriate router breadcrumbs", () => {
+        render(
+            <MemoryRouter>
+                <ConfigurationRouter />
+            </MemoryRouter>
+        );
+
+        expect(mockSetRouterBreadcrumbs).toHaveBeenCalled();
+
+        // Get router breadcrumbs
+        const breadcrumbs = mockSetRouterBreadcrumbs.mock.calls[0][0];
+        // Also invoke the click handlers
+        breadcrumbs &&
+            breadcrumbs[0] &&
+            breadcrumbs[0].onClick &&
+            breadcrumbs[0].onClick();
+
+        expect(breadcrumbs).toHaveLength(1);
+        expect(breadcrumbs[0].text).toEqual("label.configuration");
+        expect(breadcrumbs[0].onClick).toBeDefined();
+        expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
+    });
+
+    it("should render configuration page at exact configuration path", async () => {
+        render(
+            <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
+                <ConfigurationRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testConfigurationPage")
+        ).resolves.toBeInTheDocument();
     });
 
     it("should render page not found page at invalid configuration path", async () => {
@@ -67,12 +114,7 @@ describe("Configuration Router", () => {
             <MemoryRouter
                 initialEntries={[`${AppRoute.CONFIGURATION}/testPath`]}
             >
-                <Routes>
-                    <Route
-                        element={<ConfigurationRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/*`}
-                    />
-                </Routes>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -84,12 +126,7 @@ describe("Configuration Router", () => {
     it("should direct exact subscription groups path to subscription groups router", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.SUBSCRIPTION_GROUPS]}>
-                <Routes>
-                    <Route
-                        element={<ConfigurationRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/*`}
-                    />
-                </Routes>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -103,12 +140,7 @@ describe("Configuration Router", () => {
             <MemoryRouter
                 initialEntries={[`${AppRoute.SUBSCRIPTION_GROUPS}/testPath`]}
             >
-                <Routes>
-                    <Route
-                        element={<ConfigurationRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/*`}
-                    />
-                </Routes>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -120,12 +152,7 @@ describe("Configuration Router", () => {
     it("should direct exact metrics path to metrics router", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.METRICS]}>
-                <Routes>
-                    <Route
-                        element={<ConfigurationRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/*`}
-                    />
-                </Routes>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -137,12 +164,7 @@ describe("Configuration Router", () => {
     it("should direct metrics path to metrics router", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.METRICS}/testPath`]}>
-                <Routes>
-                    <Route
-                        element={<ConfigurationRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/*`}
-                    />
-                </Routes>
+                <ConfigurationRouter />
             </MemoryRouter>
         );
 
@@ -150,6 +172,32 @@ describe("Configuration Router", () => {
             screen.findByText("testMetricsRouter")
         ).resolves.toBeInTheDocument();
     });
+
+    it("should render page not found page at any other path", async () => {
+        render(
+            <MemoryRouter initialEntries={["/testPath"]}>
+                <ConfigurationRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
+    });
+
+    it("should render page not found page by default", async () => {
+        render(
+            <MemoryRouter>
+                <ConfigurationRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testPageNotFoundPage")
+        ).resolves.toBeInTheDocument();
+    });
 });
 
-const mockNavigate = jest.fn();
+const mockSetRouterBreadcrumbs = jest.fn();
+
+const mockPush = jest.fn();

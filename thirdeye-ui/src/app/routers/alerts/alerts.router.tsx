@@ -1,9 +1,19 @@
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
-import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import {
+    AppRoute,
+    getAlertsAllPath,
+    getAlertsPath,
+} from "../../utils/routes/routes.util";
 
 const AlertsAllPage = lazy(() =>
     import(
@@ -36,71 +46,65 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const AlertsRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.alerts"),
+                onClick: () => history.push(getAlertsPath()),
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <AppLoadingIndicatorV1 />;
+    }
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Routes>
+            <Switch>
                 {/* Alerts path */}
-                {/* Redirect to alerts all path */}
-                <Route
-                    index
-                    element={
-                        <Navigate replace to={AppRouteRelative.ALERTS_ALL} />
-                    }
-                />
+                <Route exact path={AppRoute.ALERTS}>
+                    {/* Redirect to alerts all path */}
+                    <Redirect to={getAlertsAllPath()} />
+                </Route>
 
                 {/* Alerts all path */}
                 <Route
-                    element={<AlertsAllPage />}
-                    path={AppRouteRelative.ALERTS_ALL}
+                    exact
+                    component={AlertsAllPage}
+                    path={AppRoute.ALERTS_ALL}
+                />
+
+                {/* Alerts view path */}
+                <Route
+                    exact
+                    component={AlertsViewPage}
+                    path={AppRoute.ALERTS_VIEW}
                 />
 
                 {/* Alerts create path */}
                 <Route
-                    element={<AlertsCreatePage />}
-                    path={AppRouteRelative.ALERTS_CREATE}
+                    exact
+                    component={AlertsCreatePage}
+                    path={AppRoute.ALERTS_CREATE}
                 />
 
-                {/* Alert paths */}
+                {/* Alerts update path */}
                 <Route
-                    element={<Outlet />}
-                    path={`${AppRouteRelative.ALERTS_ALERT}/*`}
-                >
-                    <Route
-                        index
-                        element={
-                            <RedirectWithDefaultParams
-                                to={AppRouteRelative.ALERTS_VIEW}
-                            />
-                        }
-                    />
-
-                    <Route
-                        element={
-                            <RedirectValidation
-                                queryParams={[
-                                    "timeRange",
-                                    "startTime",
-                                    "endTime",
-                                ]}
-                                to=".."
-                            >
-                                <AlertsViewPage />
-                            </RedirectValidation>
-                        }
-                        path={AppRouteRelative.ALERTS_VIEW}
-                    />
-                    <Route
-                        element={<AlertsUpdatePage />}
-                        path={AppRouteRelative.ALERTS_UPDATE}
-                    />
-
-                    {/* No match found, render page not found */}
-                    <Route element={<PageNotFoundPage />} path="*" />
-                </Route>
+                    exact
+                    component={AlertsUpdatePage}
+                    path={AppRoute.ALERTS_UPDATE}
+                />
 
                 {/* No match found, render page not found */}
-                <Route element={<PageNotFoundPage />} path="*" />
-            </Routes>
+                <Route component={PageNotFoundPage} />
+            </Switch>
         </Suspense>
     );
 };

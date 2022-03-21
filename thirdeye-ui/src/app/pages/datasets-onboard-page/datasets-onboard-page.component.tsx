@@ -1,30 +1,31 @@
-import { Grid } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar/snackbar.util";
 
 export const DatasetsOnboardPage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasources, setDatasources] = useState<Datasource[]>([]);
-    const navigate = useNavigate();
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { enqueueSnackbar } = useSnackbar();
+    const history = useHistory();
     const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
+        setPageBreadcrumbs([]);
         fetchAllDatasources();
     }, []);
 
@@ -35,22 +36,22 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
 
         onBoardDataset(dataset.name, dataset.dataSource.name)
             .then((dataset: Dataset): void => {
-                notify(
-                    NotificationTypeV1.Success,
+                enqueueSnackbar(
                     t("message.onboard-success", {
                         entity: t("label.dataset"),
-                    })
+                    }),
+                    getSuccessSnackbarOption()
                 );
 
                 // Redirect to datasets detail path
-                navigate(getDatasetsViewPath(dataset.id));
+                history.push(getDatasetsViewPath(dataset.id));
             })
             .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
+                enqueueSnackbar(
                     t("message.onboard-error", {
                         entity: t("label.dataset"),
-                    })
+                    }),
+                    getErrorSnackbarOption()
                 );
             });
     };
@@ -61,7 +62,10 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 setDatasources(datasources);
             })
             .catch((): void => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                );
             })
             .finally((): void => {
                 setLoading(false);
@@ -73,20 +77,11 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
     }
 
     return (
-        <PageV1>
-            <PageHeader
-                title={t("label.onboard-entity", {
-                    entity: t("label.dataset"),
-                })}
+        <PageContents centered hideTimeRange title={t("label.onboard")}>
+            <DatasetWizard
+                datasources={datasources}
+                onFinish={onDatasetWizardFinish}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <DatasetWizard
-                        datasources={datasources}
-                        onFinish={onDatasetWizardFinish}
-                    />
-                </Grid>
-            </PageContentsGridV1>
-        </PageV1>
+        </PageContents>
     );
 };

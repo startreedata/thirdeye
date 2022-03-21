@@ -1,37 +1,43 @@
 import {
-    Button,
     Card,
     CardContent,
     CardHeader,
+    Divider,
     Grid,
     IconButton,
-    Link as MaterialLink,
+    Link,
     Menu,
     MenuItem,
+    Typography,
 } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { useHistory } from "react-router-dom";
+import {
+    UiAlertDatasetAndMetric,
+    UiAlertSubscriptionGroup,
+} from "../../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsUpdatePath,
     getAlertsViewPath,
-    getAnomaliesAllPath,
+    getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { AlertCardProps } from "./alert-card.interfaces";
+import { useAlertCardStyles } from "./alert-card.styles";
 
 export const AlertCard: FunctionComponent<AlertCardProps> = (
     props: AlertCardProps
 ) => {
-    const [alertOptionsAnchorElement, setAlertOptionsAnchorElement] =
-        useState<HTMLElement | null>();
-    const navigate = useNavigate();
+    const alertCardClasses = useAlertCardStyles();
+    const [
+        alertOptionsAnchorElement,
+        setAlertOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
+    const history = useHistory();
     const { t } = useTranslation();
 
     const handleAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
@@ -47,7 +53,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        navigate(getAlertsViewPath(props.uiAlert.id));
+        history.push(getAlertsViewPath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
@@ -66,7 +72,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        navigate(getAlertsUpdatePath(props.uiAlert.id));
+        history.push(getAlertsUpdatePath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
@@ -79,42 +85,64 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
         handleAlertOptionsClose();
     };
 
-    const anomalies: Anomaly[] = props.anomalies || [];
+    const handleSubscriptionGroupViewDetails = (
+        subscriptionGroup: UiAlertSubscriptionGroup
+    ): void => {
+        if (!subscriptionGroup) {
+            return;
+        }
+
+        history.push(getSubscriptionGroupsViewPath(subscriptionGroup.id));
+    };
+
+    const getAlertDataSetAndMetric = (
+        uiAlertDatasetAndMetric: UiAlertDatasetAndMetric
+    ): string => {
+        if (!uiAlertDatasetAndMetric) {
+            return "";
+        }
+
+        return `${uiAlertDatasetAndMetric.datasetName}${t(
+            "label.pair-separator"
+        )}${uiAlertDatasetAndMetric.metricName}`;
+    };
+
+    const getUiAlertSubscriptionGroupName = (
+        uiAlertSubscriptionGroup: UiAlertSubscriptionGroup
+    ): string => {
+        if (!uiAlertSubscriptionGroup) {
+            return "";
+        }
+
+        return uiAlertSubscriptionGroup.name;
+    };
 
     return (
         <Card variant="outlined">
             {props.uiAlert && (
                 <CardHeader
                     action={
-                        <Grid container alignItems="center" spacing={2}>
+                        <Grid container alignItems="center" spacing={0}>
                             {/* Active/inactive */}
                             <Grid item>
-                                <Button
-                                    disableRipple
-                                    startIcon={
-                                        props.uiAlert.active ? (
-                                            <CheckIcon color="primary" />
-                                        ) : (
-                                            <CloseIcon color="error" />
-                                        )
+                                <Typography
+                                    className={
+                                        props.uiAlert.active
+                                            ? alertCardClasses.active
+                                            : alertCardClasses.inactive
                                     }
+                                    variant="h6"
                                 >
-                                    {t(
-                                        `label.${
-                                            props.uiAlert.active
-                                                ? "active"
-                                                : "inactive"
-                                        }`
-                                    )}
-                                </Button>
+                                    <TextHighlighter
+                                        searchWords={props.searchWords}
+                                        text={props.uiAlert.activeText}
+                                    />
+                                </Typography>
                             </Grid>
 
                             <Grid item>
                                 {/* Alert options button */}
-                                <IconButton
-                                    color="secondary"
-                                    onClick={handleAlertOptionsClick}
-                                >
+                                <IconButton onClick={handleAlertOptionsClick}>
                                     <MoreVertIcon />
                                 </IconButton>
 
@@ -133,7 +161,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                         </MenuItem>
                                     )}
 
-                                    {/* Activate/deactivate alert */}
+                                    {/* Activate/deactivete alert */}
                                     <MenuItem onClick={handleAlertStateToggle}>
                                         {props.uiAlert.active
                                             ? t("label.deactivate-entity", {
@@ -165,17 +193,16 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                         <>
                             {/* Alert name */}
                             {props.showViewDetails && (
-                                <MaterialLink onClick={handleAlertViewDetails}>
+                                <Link onClick={handleAlertViewDetails}>
                                     <TextHighlighter
                                         searchWords={props.searchWords}
                                         text={props.uiAlert.name}
                                     />
-                                </MaterialLink>
+                                </Link>
                             )}
 
                             {/* Summary */}
-                            {!props.showViewDetails &&
-                                t("label.alert-performance")}
+                            {!props.showViewDetails && t("label.summary")}
                         </>
                     }
                     titleTypographyProps={{ variant: "h6" }}
@@ -185,30 +212,63 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             <CardContent>
                 {props.uiAlert && (
                     <Grid container>
-                        {/* Number of anomalies */}
+                        {/* Created by */}
                         <Grid item md={3} sm={6} xs={12}>
                             <NameValueDisplayCard<string>
-                                name={`${t("label.anomalies")} in ${t(
-                                    "label.time-range"
-                                )}`}
+                                name={t("label.created-by")}
                                 searchWords={props.searchWords}
-                                valueRenderer={(value) => {
-                                    if (value) {
-                                        const filteredAnomaliesUrl =
-                                            getAnomaliesAllPath(
-                                                props.uiAlert?.name
-                                            );
+                                values={[props.uiAlert.createdBy]}
+                            />
+                        </Grid>
 
-                                        return (
-                                            <Link to={filteredAnomaliesUrl}>
-                                                {value}
-                                            </Link>
-                                        );
-                                    }
+                        {/* Separator */}
+                        <Grid item xs={12}>
+                            <Divider variant="fullWidth" />
+                        </Grid>
 
-                                    return value;
-                                }}
-                                values={[`${anomalies ? anomalies.length : 0}`]}
+                        {/* Detection type */}
+                        <Grid item md={3} sm={6} xs={12}>
+                            <NameValueDisplayCard<string>
+                                showCount
+                                name={t("label.detection-type")}
+                                searchWords={props.searchWords}
+                                values={props.uiAlert.detectionTypes}
+                            />
+                        </Grid>
+
+                        {/* Dataset/Metric */}
+                        <Grid item md={3} sm={6} xs={12}>
+                            <NameValueDisplayCard<UiAlertDatasetAndMetric>
+                                showCount
+                                name={`${t("label.dataset")}${t(
+                                    "label.pair-separator"
+                                )}${t("label.metric")}`}
+                                searchWords={props.searchWords}
+                                valueRenderer={getAlertDataSetAndMetric}
+                                values={props.uiAlert.datasetAndMetrics}
+                            />
+                        </Grid>
+
+                        {/* Filtered by */}
+                        <Grid item md={3} sm={6} xs={12}>
+                            <NameValueDisplayCard<string>
+                                showCount
+                                name={t("label.filtered-by")}
+                                searchWords={props.searchWords}
+                                values={props.uiAlert.filteredBy}
+                            />
+                        </Grid>
+
+                        {/* Subscription groups */}
+                        <Grid item md={3} sm={6} xs={12}>
+                            <NameValueDisplayCard<UiAlertSubscriptionGroup>
+                                link
+                                showCount
+                                name={t("label.subscription-groups")}
+                                searchWords={props.searchWords}
+                                valueRenderer={getUiAlertSubscriptionGroupName}
+                                values={props.uiAlert.subscriptionGroups}
+                                onClick={handleSubscriptionGroupViewDetails}
                             />
                         </Grid>
                     </Grid>

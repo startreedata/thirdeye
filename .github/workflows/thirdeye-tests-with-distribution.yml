@@ -22,16 +22,5 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Setup artifactory
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-        server-id: startree-releases
-        server-username: ARTIFACTORY_USERNAME_REF
-        server-password: ARTIFACTORY_TOKEN_REF
     - name: Build with Maven
-      run: ./mvnw -B clean verify -pl '!thirdeye-ui'
-      env:
-        ARTIFACTORY_USERNAME_REF: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
-        ARTIFACTORY_TOKEN_REF: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}
+      run: mvn -B clean verify -pl '!thirdeye-ui'

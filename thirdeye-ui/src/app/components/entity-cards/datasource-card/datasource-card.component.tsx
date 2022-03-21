@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
     getDatasourcesUpdatePath,
     getDatasourcesViewPath,
@@ -24,9 +24,11 @@ import { DatasourceCardProps } from "./datasource-card.interfaces";
 export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
     props: DatasourceCardProps
 ) => {
-    const [datasourceOptionsAnchorElement, setDatasourceOptionsAnchorElement] =
-        useState<HTMLElement | null>();
-    const navigate = useNavigate();
+    const [
+        datasourceOptionsAnchorElement,
+        setDatasourceOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
+    const history = useHistory();
     const { t } = useTranslation();
 
     const handleDatasourceOptionsClick = (
@@ -44,7 +46,7 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
             return;
         }
 
-        navigate(getDatasourcesViewPath(props.uiDatasource.id));
+        history.push(getDatasourcesViewPath(props.uiDatasource.id));
         handleDatasourceOptionsClose();
     };
 
@@ -53,7 +55,7 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
             return;
         }
 
-        navigate(getDatasourcesUpdatePath(props.uiDatasource.id));
+        history.push(getDatasourcesUpdatePath(props.uiDatasource.id));
         handleDatasourceOptionsClose();
     };
 
@@ -75,7 +77,6 @@ export const DatasourceCard: FunctionComponent<DatasourceCardProps> = (
                             <Grid item>
                                 {/* Datasource options button */}
                                 <IconButton
-                                    color="secondary"
                                     onClick={handleDatasourceOptionsClick}
                                 >
                                     <MoreVertIcon />

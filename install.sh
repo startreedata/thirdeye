@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#
-# Copyright (c) 2022 StarTree Inc. All rights reserved.
-# Confidential and Proprietary Information of StarTree Inc.
-#
-
 # [Optional] Uncomment below lines to build with latest Pinot changes
 # cd ..
 # mvn install -DskipTests -pl pinot-common,pinot-core,pinot-spi,pinot-java-client -am -Pbuild-shaded-jar || exit 1

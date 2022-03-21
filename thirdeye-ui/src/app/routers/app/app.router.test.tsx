@@ -4,12 +4,8 @@ import { MemoryRouter } from "react-router-dom";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { AppRouter } from "./app.router";
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
-        string,
-        unknown
-    >),
-    useAuthProviderV1: jest.fn().mockImplementation(() => ({
+jest.mock("../../components/auth-provider/auth-provider.component", () => ({
+    useAuth: jest.fn().mockImplementation(() => ({
         authDisabled: mockAuthDisabled,
         authenticated: mockAuthenticated,
     })),

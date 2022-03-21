@@ -5,7 +5,7 @@ import {
     TimeRange,
     TimeRangeDuration,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { formatDateAndTimeV1 } from "../../platform/utils";
+import { formatDateAndTime } from "../date-time/date-time.util";
 
 export const createTimeRangeDuration = (
     timeRange: TimeRange,
@@ -192,7 +192,7 @@ export const formatTimeRangeDuration = (
     }
 
     return i18n.t("label.start-time-end-time", {
-        startTime: formatDateAndTimeV1(timeRangeDuration.startTime),
-        endTime: formatDateAndTimeV1(timeRangeDuration.endTime),
+        startTime: formatDateAndTime(timeRangeDuration.startTime),
+        endTime: formatDateAndTime(timeRangeDuration.endTime),
     });
 };

@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
- */
-
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS anomaly_feedback_index;

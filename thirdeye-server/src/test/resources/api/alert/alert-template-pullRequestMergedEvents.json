@@ -12,7 +12,7 @@
           "component.detector.metric": "met",
           "component.detector.dimensions": [],
           "component.detector.timezone": "US/Pacific",
-          "component.detector.monitoringGranularity": "PT2H",
+          "component.detector.monitoringGranularity": "2_HOURS",
           "component.detector.type": "THRESHOLD",
           "component.detector.max": "${max}",
           "component.detector.min": "${min}",

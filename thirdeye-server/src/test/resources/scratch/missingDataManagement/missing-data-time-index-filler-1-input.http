@@ -24,9 +24,10 @@ Content-Type: application/json
           "params": {
             "type": "HOLT_WINTERS",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "P1D",
+            "component.monitoringGranularity": "1_DAYS",
             "component.timestamp": "ts",
             "component.metric": "met",
+            "component.dimensions": [],
             "component.pattern": "${pattern}",
             "component.sensitivity": "${sensitivity}",
             "anomaly.metric": "${metric}"
@@ -44,7 +45,7 @@ Content-Type: application/json
           "name": "missingDataManager",
           "type": "TimeIndexFiller",
           "params": {
-            "component.monitoringGranularity": "P1D",
+            "component.monitoringGranularity": "1_DAYS",
             "component.timestamp": "ts"
           },
           "inputs": [

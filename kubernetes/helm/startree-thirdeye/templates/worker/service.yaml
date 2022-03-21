@@ -14,16 +14,7 @@ spec:
   type: {{ .Values.worker.serviceType }}
   ports:
     # [pod_name].[service_name].[namespace].svc.cluster.local
-    - name: http
-      protocol: TCP
-      port: {{ .Values.worker.port }}
-      targetPort: {{ .Values.worker.port }}
-    {{- if .Values.worker.tls.enabled }}
-    - name: https
-      protocol: TCP
-      port: 443
-      targetPort: 443
-    {{- end }}
+    - port: {{ .Values.worker.port }}
   selector:
     app: {{ include "thirdeye.name" . }}
     release: {{ .Release.Name }}

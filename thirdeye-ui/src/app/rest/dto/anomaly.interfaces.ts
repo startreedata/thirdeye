@@ -1,5 +1,6 @@
-import { Alert } from "./alert.interfaces";
+import { Alert, AlertNode } from "./alert.interfaces";
 import { Metric } from "./metric.interfaces";
+import { User } from "./user.interfaces";
 
 export interface Anomaly {
     id: number;
@@ -15,15 +16,18 @@ export interface Anomaly {
     notified: boolean;
     message: string;
     alert: Alert;
+    alertNode: AlertNode;
     metric: Metric;
     children: Anomaly[];
     type: AnomalyType;
     severity: AnomalySeverity;
     child: boolean;
-    feedback?: AnomalyFeedback;
+    feedback: AnomalyFeedback;
 }
 
 export interface AnomalyFeedback {
+    id: number;
+    owner: User;
     type: AnomalyFeedbackType;
     comment: string;
 }
@@ -44,6 +48,7 @@ export enum AnomalySeverity {
 
 export enum AnomalyResultSource {
     DEFAULT_ANOMALY_DETECTION = "DEFAULT_ANOMALY_DETECTION",
+    DATA_QUALITY_DETECTION = "DATA_QUALITY_DETECTION",
     ANOMALY_REPLAY = "ANOMALY_REPLAY",
     USER_LABELED_ANOMALY = "USER_LABELED_ANOMALY",
 }

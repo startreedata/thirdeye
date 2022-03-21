@@ -3,54 +3,55 @@
 ######################################################
 
 server:
-  type: default
+  type: simple
   applicationContextPath: /
   adminContextPath: /admin
 
-  applicationConnectors:
-    - type: http
-      port: 8080
-      idleTimeout: 620s
-    - type: https
-      port: 443
-      keyStorePath: config/tls-key.keystore
-      keyStorePassword: password
+  connector:
+    type: http
+    port: 8080
+    idleTimeout: 620s
+#   SSL connector is disabled since APP Engine only allows exposing a single port.
+#   A sample keystore and password is added so that this can be tested locally.
+#   However, the settings currently don't work on GAE
+#    - type: https
+#      port: 8443
+#      keyStorePath: conf/keystore.jks
+#      keyStorePassword: password
 
 logging:
   level: INFO
   loggers:
-    ai.startree.thirdeye: DEBUG
+    org.apache.pinot.thirdeye: DEBUG
     org.apache.zookeeper: WARN
 
 auth:
   enabled: false
-#  oauth:
-#    serverUrl: <dex server url>
-#    required:
-#      - sub
-#      - exp
-#    exactMatch:
-#      sub: <subject name>
-#    cache:
-#      size: 64
-#      ttl: 60000
+#  infoURL: http://startree.ai/api/info
+  oauth:
+    keysUrl: file://<path to project dir>/config/jwks.json
+    required:
+      - sub
+      - exp
+    exactMatch:
+      iss: http://identity.startree.ai
+    cache:
+      size: 64
+      ttl: 60000
 
 database:
   # Assuming a local MySQL server running on the default port 3306
-  # use sslMode=REQUIRED or more in prod
-  url: jdbc:mysql://127.0.0.1:3306/thirdeye_test?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
+  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&useSSL=false
   user: uthirdeye
   password: pass
-  driver: com.mysql.cj.jdbc.Driver
+  driver: com.mysql.jdbc.Driver
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
   enabled: true
-  schemes:
-    - http
-    - https
+
   # package to scan for jersey resources
-  resourcePackage: ai.startree.thirdeye.resources
+  resourcePackage: org.apache.pinot.thirdeye.resources
 
 # Start the Task Driver. This module runs the detection and notification tasks
 taskDriver:
@@ -104,7 +105,6 @@ ui:
   externalUrl: "http://localhost:8081"
 
 notifications:
-  useSendgridEmail: true
   smtp:
     host: localhost
     port: 25
@@ -186,27 +186,27 @@ rca:
     identity:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.NullPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.NullPipeline
 
     metricRelated:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricMappingPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.MetricMappingPipeline
 
     metricAnalysis:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.MetricAnalysisPipeline
 
     metricBreakdown:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricBreakdownPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.MetricBreakdownPipeline
 
     metricComponentAnalysis:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
         properties:
           excludeDimensions: [ "environment", "continent" ]
           parallelism: 5
@@ -215,7 +215,7 @@ rca:
     eventExperiment:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
         properties:
           strategy: COMPOUND
           k: 500
@@ -224,11 +224,11 @@ rca:
     eventHoliday:
       - outputName: METRIC_RELATED
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.MetricAnalysisPipeline
 
       - outputName: OUTPUT
         inputNames: [ INPUT, METRIC_RELATED ]
-        className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
         properties:
           strategy: COMPOUND
           k: 500
@@ -237,7 +237,7 @@ rca:
     eventCustom:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
         properties:
           strategy: COMPOUND
           k: 500
@@ -246,9 +246,9 @@ rca:
     eventAnomaly:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.AnomalyEventsPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventsPipeline
         properties:
-          strategyClass: ai.startree.thirdeye.rootcause.impl.AnomalyEventsPipeline$TimeRangeScoreStrategy
+          strategyClass: org.apache.pinot.thirdeye.rootcause.impl.AnomalyEventsPipeline$TimeRangeScoreStrategy
           strategyProperties:
             type: HYPERBOLA
           k: 500
@@ -256,12 +256,12 @@ rca:
     eventIssue:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.EmptyPipeline
 
     eventChange:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
         properties:
           strategy: COMPOUND
           k: 500
@@ -270,7 +270,7 @@ rca:
     eventDeployment:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
         properties:
           strategy: COMPOUND
           k: 500
@@ -279,7 +279,7 @@ rca:
     eventAC:
       - outputName: OUTPUT
         inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
+        className: org.apache.pinot.thirdeye.rootcause.impl.EmptyPipeline
 
 cache:
   useInMemoryCache: true
@@ -294,7 +294,7 @@ cache:
     cacheDataStoreName: 'couchbase'
     cacheDataSources:
       couchbase:
-        className: ai.startree.thirdeye.detection.cache.CouchbaseCacheDAO
+        className: org.apache.pinot.thirdeye.detection.cache.CouchbaseCacheDAO
         config:
           useCertificateBasedAuthentication: false
           # at least 1 host needed

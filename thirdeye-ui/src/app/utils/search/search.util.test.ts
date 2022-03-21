@@ -9,6 +9,10 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
+jest.mock("../number/number.util", () => ({
+    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
+}));
+
 describe("Search Util", () => {
     it("deepSearchStringProperty should return null for invalid object", () => {
         expect(deepSearchStringProperty(null, mockMatchFn)).toBeNull();
@@ -91,14 +95,14 @@ describe("Search Util", () => {
     });
 
     it("getSearchStatusLabel should return appropriate search status label for invalid count and total", () => {
-        expect(getSearchStatusLabel(null as unknown as number, 1)).toEqual(
+        expect(getSearchStatusLabel((null as unknown) as number, 1)).toEqual(
             "label.search-count"
         );
         expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
             count: "0",
             total: "1",
         });
-        expect(getSearchStatusLabel(1, null as unknown as number)).toEqual(
+        expect(getSearchStatusLabel(1, (null as unknown) as number)).toEqual(
             "label.search-count"
         );
         expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
@@ -107,8 +111,8 @@ describe("Search Util", () => {
         });
         expect(
             getSearchStatusLabel(
-                null as unknown as number,
-                null as unknown as number
+                (null as unknown) as number,
+                (null as unknown) as number
             )
         ).toEqual("label.search-count");
         expect(i18n.t).toHaveBeenCalledWith("label.search-count", {
@@ -126,7 +130,7 @@ describe("Search Util", () => {
     });
 
     it("getSelectedStatusLabel should return appropriate selected status label for invalid count", () => {
-        expect(getSelectedStatusLabel(null as unknown as number)).toEqual(
+        expect(getSelectedStatusLabel((null as unknown) as number)).toEqual(
             "label.selected-count"
         );
         expect(i18n.t).toHaveBeenCalledWith("label.selected-count", {

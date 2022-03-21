@@ -175,7 +175,7 @@ export function NameValueDisplayCard<T>(
                                                 </>
                                             }
                                             primaryTypographyProps={{
-                                                variant: "body2",
+                                                variant: "body1",
                                                 noWrap: !props.wrap,
                                                 className: props.valueClassName,
                                             }}
@@ -197,7 +197,7 @@ export function NameValueDisplayCard<T>(
                                         }
                                         primary={t("label.no-data-marker")}
                                         primaryTypographyProps={{
-                                            variant: "body2",
+                                            variant: "body1",
                                             noWrap: !props.wrap,
                                             className: props.valueClassName,
                                         }}

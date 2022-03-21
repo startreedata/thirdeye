@@ -5,20 +5,26 @@ import {
 import {
     getAccessTokenFromHashParams,
     getQueryString,
-    getRecognizedQuery,
+    getRecognizedQueryString,
     getSearchFromQueryString,
     getSearchTextFromQueryString,
     getTimeRangeDurationFromQueryString,
     isValidNumberId,
-    useSetQueryParamsUtil,
+    setQueryString,
+    setSearchInQueryString,
+    setSearchTextInQueryString,
+    setTimeRangeDurationInQueryString,
 } from "./params.util";
 
 const systemLocation = location;
 
-jest.mock("react-router-dom", () => ({
-    useSearchParams: jest.fn().mockImplementation(() => {
-        return [urlParams, mockSetQueryParamFunc];
-    }),
+jest.mock("../history/history.util", () => ({
+    appHistory: {
+        replace: jest.fn().mockImplementation((locationObject) => {
+            location.hash = locationObject.hash;
+            location.search = locationObject.search;
+        }),
+    },
 }));
 
 describe("Params Util", () => {
@@ -30,11 +36,6 @@ describe("Params Util", () => {
                 search: "",
             },
         });
-    });
-
-    beforeEach(() => {
-        urlParams = new URLSearchParams();
-        mockSetQueryParamFunc.mockReset();
     });
 
     afterAll(() => {
@@ -55,13 +56,10 @@ describe("Params Util", () => {
     });
 
     it("setSearchInQueryString should set appropriate search in query string", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setSearchInQueryString("testSearchValue");
+        location.search = "";
+        setSearchInQueryString("testSearchValue");
 
-        expect(mockSetQueryParamFunc).toHaveBeenLastCalledWith(
-            new URLSearchParams("search=testSearchValue"),
-            { replace: true }
-        );
+        expect(location.search).toEqual("search=testSearchValue");
     });
 
     it("getSearchFromQueryString should return empty string when search is not found in query string", () => {
@@ -77,13 +75,10 @@ describe("Params Util", () => {
     });
 
     it("setSearchTextInQueryString should set appropriate search text in query string", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setSearchTextInQueryString("testSearchTextValue");
+        location.search = "";
+        setSearchTextInQueryString("testSearchTextValue");
 
-        expect(mockSetQueryParamFunc).toHaveBeenLastCalledWith(
-            new URLSearchParams("searchText=testSearchTextValue"),
-            { replace: true }
-        );
+        expect(location.search).toEqual("search_text=testSearchTextValue");
     });
 
     it("getSearchTextFromQueryString should return empty string when search text is not found in query string", () => {
@@ -93,28 +88,26 @@ describe("Params Util", () => {
     });
 
     it("getSearchTextFromQueryString should return appropriate search text from query string", () => {
-        location.search = "searchText=testSearchTextValue";
+        location.search = "search_text=testSearchTextValue";
 
         expect(getSearchTextFromQueryString()).toEqual("testSearchTextValue");
     });
 
     it("setTimeRangeDurationInQueryString should not set invalid time range duration in query string", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setTimeRangeDurationInQueryString(
-            null as unknown as TimeRangeDuration
+        location.search = "";
+        setTimeRangeDurationInQueryString(
+            (null as unknown) as TimeRangeDuration
         );
 
-        expect(mockSetQueryParamFunc).not.toHaveBeenCalled();
+        expect(location.search).toEqual("");
     });
 
     it("setTimeRangeDurationInQueryString should set appropriate time range duration in query string", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setTimeRangeDurationInQueryString(
-            mockTimeRangeDuration
-        );
+        location.search = "";
+        setTimeRangeDurationInQueryString(mockTimeRangeDuration);
 
-        expect(mockSetQueryParamFunc).toHaveBeenLastCalledWith(
-            new URLSearchParams("timeRange=CUSTOM&startTime=1&endTime=2")
+        expect(location.search).toEqual(
+            "time_range=CUSTOM&start_time=1&end_time=2"
         );
     });
 
@@ -161,7 +154,7 @@ describe("Params Util", () => {
     });
 
     it("getTimeRangeDurationFromQueryString should return appropriate time range duration from query string", () => {
-        location.search = "timeRange=CUSTOM&startTime=1&endTime=2";
+        location.search = "time_range=CUSTOM&start_time=1&end_time=2";
 
         expect(getTimeRangeDurationFromQueryString()).toEqual(
             mockTimeRangeDuration
@@ -169,42 +162,32 @@ describe("Params Util", () => {
     });
 
     it("setQueryString should not set query string for invalid key", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setQueryString(
-            null as unknown as string,
-            "testValue"
-        );
+        location.search = "";
+        setQueryString((null as unknown) as string, "testValue");
 
-        expect(mockSetQueryParamFunc).not.toHaveBeenCalled();
+        expect(location.search).toEqual("");
     });
 
     it("setQueryString should not set query string for empty key", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setQueryString("", "testValue");
+        location.search = "";
+        setQueryString("", "testValue");
 
-        expect(mockSetQueryParamFunc).not.toHaveBeenCalled();
+        expect(location.search).toEqual("");
     });
 
     it("setQueryString should set appropriate query string for key", () => {
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setQueryString("testKey", "testValue");
+        location.search = "";
+        setQueryString("testKey", "testValue");
 
-        expect(mockSetQueryParamFunc).toHaveBeenCalledWith(
-            new URLSearchParams("testKey=testValue"),
-            { replace: true }
-        );
+        expect(location.search).toEqual("testKey=testValue");
     });
 
     it("setQueryString should set appropriate query string for existing key", () => {
-        urlParams = new URLSearchParams(
-            "testKey1=testValue1&testKey2=testValue2"
-        );
-        const setQueryParamsUtils = useSetQueryParamsUtil();
-        setQueryParamsUtils.setQueryString("testKey1", "testValue3");
+        location.search = "testKey1=testValue1&testKey2=testValue2";
+        setQueryString("testKey1", "testValue3");
 
-        expect(mockSetQueryParamFunc).toHaveBeenCalledWith(
-            new URLSearchParams("testKey1=testValue3&testKey2=testValue2"),
-            { replace: true }
+        expect(location.search).toEqual(
+            "testKey1=testValue3&testKey2=testValue2"
         );
     });
 
@@ -222,15 +205,15 @@ describe("Params Util", () => {
 
     it("getRecognizedQueryString should return appropriate query string", () => {
         location.search =
-            "timeRange=CUSTOM&startTime=1&endTime=2&search=testSearchValue&testKey=testValue";
+            "time_range=CUSTOM&start_time=1&end_time=2&search=testSearchValue&testKey=testValue";
 
-        expect(getRecognizedQuery().toString()).toEqual(
-            "timeRange=CUSTOM&startTime=1&endTime=2"
+        expect(getRecognizedQueryString()).toEqual(
+            "time_range=CUSTOM&start_time=1&end_time=2"
         );
     });
 
     it("isValidNumberId should return false for invalid string", () => {
-        expect(isValidNumberId(null as unknown as string)).toBeFalsy();
+        expect(isValidNumberId((null as unknown) as string)).toBeFalsy();
     });
 
     it("isValidNumberId should return false for empty string", () => {
@@ -263,6 +246,3 @@ const mockTimeRangeDuration = {
     startTime: 1,
     endTime: 2,
 };
-
-const mockSetQueryParamFunc = jest.fn();
-let urlParams: URLSearchParams;

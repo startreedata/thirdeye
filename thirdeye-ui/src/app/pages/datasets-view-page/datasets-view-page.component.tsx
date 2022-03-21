@@ -1,18 +1,14 @@
-import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
+import { PageContents } from "../../components/page-contents/page-contents.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
@@ -21,33 +17,43 @@ import {
     getDatasetsAllPath,
     getDatasetsUpdatePath,
 } from "../../utils/routes/routes.util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar/snackbar.util";
 import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 
 export const DatasetsViewPage: FunctionComponent = () => {
     const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<DatasetsViewPageParams>();
-    const navigate = useNavigate();
+    const history = useHistory();
     const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
+
+    useEffect(() => {
+        setPageBreadcrumbs([]);
+    }, []);
 
     useEffect(() => {
         // Time range refreshed, fetch dataset
         fetchDataset();
-    }, []);
+    }, [timeRangeDuration]);
 
     const fetchDataset = (): void => {
         setUiDataset(null);
         let fetchedUiDataset = {} as UiDataset;
 
-        if (params.id && !isValidNumberId(params.id)) {
+        if (!isValidNumberId(params.id)) {
             // Invalid id
-            notify(
-                NotificationTypeV1.Error,
+            enqueueSnackbar(
                 t("message.invalid-id", {
                     entity: t("label.dataset"),
                     id: params.id,
-                })
+                }),
+                getErrorSnackbarOption()
             );
 
             setUiDataset(fetchedUiDataset);
@@ -60,7 +66,10 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 fetchedUiDataset = getUiDataset(dataset);
             })
             .catch(() =>
-                notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                enqueueSnackbar(
+                    t("message.fetch-error"),
+                    getErrorSnackbarOption()
+                )
             )
             .finally(() => setUiDataset(fetchedUiDataset));
     };
@@ -77,42 +86,38 @@ export const DatasetsViewPage: FunctionComponent = () => {
     const handleDatasetDeleteOk = (uiDataset: UiDataset): void => {
         deleteDataset(uiDataset.id)
             .then(() => {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.delete-success", { entity: t("label.dataset") })
+                enqueueSnackbar(
+                    t("message.delete-success", { entity: t("label.dataset") }),
+                    getSuccessSnackbarOption()
                 );
 
                 // Redirect to datasets all path
-                navigate(getDatasetsAllPath());
+                history.push(getDatasetsAllPath());
             })
             .catch(() =>
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.delete-error", { entity: t("label.dataset") })
+                enqueueSnackbar(
+                    t("message.delete-error", { entity: t("label.dataset") }),
+                    getErrorSnackbarOption()
                 )
             );
     };
 
     const handleDatasetEdit = (id: number): void => {
-        navigate(getDatasetsUpdatePath(id));
+        history.push(getDatasetsUpdatePath(id));
     };
 
     return (
-        <PageV1>
-            <PageHeader
-                showCreateButton
-                title={uiDataset ? uiDataset.name : ""}
+        <PageContents
+            centered
+            hideTimeRange
+            title={uiDataset ? uiDataset.name : ""}
+        >
+            {/* Dataset */}
+            <DatasetCard
+                uiDataset={uiDataset}
+                onDelete={handleDatasetDelete}
+                onEdit={handleDatasetEdit}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {/* Dataset */}
-                    <DatasetCard
-                        uiDataset={uiDataset}
-                        onDelete={handleDatasetDelete}
-                        onEdit={handleDatasetEdit}
-                    />
-                </Grid>
-            </PageContentsGridV1>
-        </PageV1>
+        </PageContents>
     );
 };

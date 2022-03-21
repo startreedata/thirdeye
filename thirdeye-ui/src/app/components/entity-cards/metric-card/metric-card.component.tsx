@@ -1,5 +1,4 @@
 import {
-    Button,
     Card,
     CardContent,
     CardHeader,
@@ -11,13 +10,11 @@ import {
     MenuItem,
     Typography,
 } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { getMetricsViewPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -29,9 +26,11 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
     props: MetricCardProps
 ) => {
     const metricCardClasses = useMetricCardStyles();
-    const [metricOptionsAnchorElement, setMetricOptionsAnchorElement] =
-        useState<HTMLElement | null>();
-    const navigate = useNavigate();
+    const [
+        metricOptionsAnchorElement,
+        setMetricOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
+    const history = useHistory();
     const { t } = useTranslation();
 
     const handleMetricOptionsClick = (event: MouseEvent<HTMLElement>): void => {
@@ -47,7 +46,7 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             return;
         }
 
-        navigate(getMetricsViewPath(props.metric.id));
+        history.push(getMetricsViewPath(props.metric.id));
         handleMetricOptionsClose();
     };
 
@@ -74,35 +73,27 @@ export const MetricCard: FunctionComponent<MetricCardProps> = (
             {props.metric && (
                 <CardHeader
                     action={
-                        <Grid container alignItems="center" spacing={2}>
+                        <Grid container alignItems="center" spacing={0}>
                             {/* Active/inactive */}
                             <Grid item>
-                                <Button
-                                    disableRipple
-                                    startIcon={
-                                        props.metric.active ? (
-                                            <CheckIcon color="primary" />
-                                        ) : (
-                                            <CloseIcon color="error" />
-                                        )
+                                <Typography
+                                    className={
+                                        props.metric.active
+                                            ? metricCardClasses.active
+                                            : metricCardClasses.inactive
                                     }
+                                    variant="h6"
                                 >
-                                    {t(
-                                        `label.${
-                                            props.metric.active
-                                                ? "active"
-                                                : "inactive"
-                                        }`
-                                    )}
-                                </Button>
+                                    <TextHighlighter
+                                        searchWords={props.searchWords}
+                                        text={props.metric.activeText}
+                                    />
+                                </Typography>
                             </Grid>
 
                             <Grid item>
                                 {/* Metric options button */}
-                                <IconButton
-                                    color="secondary"
-                                    onClick={handleMetricOptionsClick}
-                                >
+                                <IconButton onClick={handleMetricOptionsClick}>
                                     <MoreVertIcon />
                                 </IconButton>
 

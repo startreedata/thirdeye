@@ -1,13 +1,11 @@
 import i18n from "i18next";
-import { cloneDeep, isEmpty, omit, sortBy } from "lodash";
+import { cloneDeep, isEmpty, omit } from "lodash";
 import {
     Alert,
-    AlertAnomalyDetectorNode,
     AlertEvaluation,
+    AlertNode,
     AlertNodeType,
-    EditableAlert,
 } from "../../rest/dto/alert.interfaces";
-import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     UiAlert,
@@ -16,78 +14,27 @@ import {
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
-export const createDefaultAlert = (): EditableAlert => {
+export const createDefaultAlert = (): Alert => {
     return {
-        name: "simple-threshold-template",
-        description:
-            "Sample threshold alert. Runs every hour. Change the template properties to run on your data",
-        cron: "0 0 0 1/1 * ? *",
-        template: {
-            nodes: [
-                {
-                    name: "root",
-                    type: "AnomalyDetector",
-                    params: {
-                        type: "THRESHOLD",
-                        "component.timezone": "UTC",
-                        "component.monitoringGranularity":
-                            "${monitoringGranularity}",
-                        "component.timestamp": "ts",
-                        "component.metric": "met",
-                        "component.max": "${max}",
-                        "component.min": "${min}",
-                        "anomaly.metric": "${aggregateFunction}(${metric})",
-                    },
-                    inputs: [
-                        {
-                            targetProperty: "current",
-                            sourcePlanNode: "currentDataFetcher",
-                            sourceProperty: "currentData",
-                        },
-                    ],
-                },
-                {
-                    name: "currentDataFetcher",
-                    type: "DataFetcher",
-                    params: {
-                        "component.dataSource": "${dataSource}",
-                        "component.query":
-                            "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}'," +
-                            " '${monitoringGranularity}') as ts, ${aggregateFunction}(${metric}) as met FROM " +
-                            "${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000",
-                    },
-                    outputs: [
-                        {
-                            outputKey: "pinot",
-                            outputName: "currentData",
-                        },
-                    ],
-                },
-            ],
-            metadata: {
-                datasource: {
-                    name: "${dataSource}",
-                },
-                dataset: {
-                    name: "${dataset}",
-                },
+        name: "new-alert",
+        description: "This is the detection used by online service",
+        nodes: {
+            "detection-1": {
+                type: AlertNodeType.DETECTION,
+                subType: "PERCENTAGE_RULE",
                 metric: {
-                    name: "${metric}",
+                    name: "views",
+                    dataset: {
+                        name: "pageviews",
+                    },
                 },
-            },
-        },
-        templateProperties: {
-            dataSource: "pinotQuickStartAzure",
-            dataset: "pageviews",
-            aggregateFunction: "sum",
-            metric: "views",
-            monitoringGranularity: "P1D",
-            timeColumn: "date",
-            timeColumnFormat: "yyyyMMdd",
-            max: "850000",
-            min: "250000",
-        },
-    };
+                params: {
+                    offset: "wo1w",
+                    percentageChange: 0.2,
+                } as { [index: string]: unknown },
+            } as AlertNode,
+        } as { [index: string]: AlertNode },
+    } as Alert;
 };
 
 export const createEmptyUiAlert = (): UiAlert => {
@@ -101,35 +48,33 @@ export const createEmptyUiAlert = (): UiAlert => {
         userId: -1,
         createdBy: noDataMarker,
         detectionTypes: [],
+        filteredBy: [],
         datasetAndMetrics: [],
         subscriptionGroups: [],
-        renderedMetadata: [],
         alert: null,
     };
 };
 
-export const createEmptyUiAlertDatasetAndMetric =
-    (): UiAlertDatasetAndMetric => {
-        const noDataMarker = i18n.t("label.no-data-marker");
+export const createEmptyUiAlertDatasetAndMetric = (): UiAlertDatasetAndMetric => {
+    const noDataMarker = i18n.t("label.no-data-marker");
 
-        return {
-            datasetId: -1,
-            datasetName: noDataMarker,
-            metricId: -1,
-            metricName: noDataMarker,
-        };
+    return {
+        datasetId: -1,
+        datasetName: noDataMarker,
+        metricId: -1,
+        metricName: noDataMarker,
     };
+};
 
-export const createEmptyUiAlertSubscriptionGroup =
-    (): UiAlertSubscriptionGroup => {
-        return {
-            id: -1,
-            name: i18n.t("label.no-data-marker"),
-        };
+export const createEmptyUiAlertSubscriptionGroup = (): UiAlertSubscriptionGroup => {
+    return {
+        id: -1,
+        name: i18n.t("label.no-data-marker"),
     };
+};
 
 export const createAlertEvaluation = (
-    alert: Alert | EditableAlert,
+    alert: Alert,
     startTime: number,
     endTime: number
 ): AlertEvaluation => {
@@ -141,7 +86,7 @@ export const createAlertEvaluation = (
 };
 
 export const getUiAlert = (
-    alert: EditableAlert,
+    alert: Alert,
     subscriptionGroups: SubscriptionGroup[]
 ): UiAlert => {
     if (!alert) {
@@ -149,10 +94,11 @@ export const getUiAlert = (
     }
 
     // Map subscription groups to alert ids
-    const subscriptionGroupsToAlertIdsMap =
-        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
+    const subscriptionGroupsToAlertIdsMap = mapSubscriptionGroupsToAlertIds(
+        subscriptionGroups
+    );
 
-    return getUiAlertInternal(alert as Alert, subscriptionGroupsToAlertIdsMap);
+    return getUiAlertInternal(alert, subscriptionGroupsToAlertIdsMap);
 };
 
 export const getUiAlerts = (
@@ -164,8 +110,9 @@ export const getUiAlerts = (
     }
 
     // Map subscription groups to alert ids
-    const subscriptionGroupsToAlertIdsMap =
-        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
+    const subscriptionGroupsToAlertIdsMap = mapSubscriptionGroupsToAlertIds(
+        subscriptionGroups
+    );
 
     const uiAlerts = [];
     for (const alert of alerts) {
@@ -216,9 +163,7 @@ export const filterAlerts = (
     return filteredUiAlerts;
 };
 
-export const omitNonUpdatableData = (
-    alert: Alert | EditableAlert
-): EditableAlert => {
+export const omitNonUpdatableData = (alert: Alert): Alert => {
     const newAlert = omit(alert, "id");
 
     return newAlert as Alert;
@@ -249,70 +194,46 @@ const getUiAlertInternal = (
     }
 
     // Subscription groups
-    if (subscriptionGroupsToAlertIdsMap) {
-        uiAlert.subscriptionGroups =
-            subscriptionGroupsToAlertIdsMap.get(alert.id) || [];
+    uiAlert.subscriptionGroups =
+        (subscriptionGroupsToAlertIdsMap &&
+            subscriptionGroupsToAlertIdsMap.get(alert.id)) ||
+        [];
+
+    // Detection, dataset and metric properties
+    if (isEmpty(alert.nodes)) {
+        return uiAlert;
     }
 
-    if (alert.template && alert.template.nodes) {
-        alert.template.nodes.forEach((alertNode) => {
-            if (alertNode.type === AlertNodeType.ANOMALY_DETECTOR.toString()) {
-                if ((alertNode as AlertAnomalyDetectorNode).params) {
-                    uiAlert.detectionTypes.push(
-                        (alertNode as AlertAnomalyDetectorNode).params.type
-                    );
-                }
-            }
-        });
-    }
+    for (const alertNode of Object.values(alert.nodes)) {
+        // Detection
+        if (alertNode.type === AlertNodeType.DETECTION && alertNode.subType) {
+            uiAlert.detectionTypes.push(alertNode.subType);
+        } else if (
+            alertNode.type === AlertNodeType.FILTER &&
+            alertNode.subType
+        ) {
+            uiAlert.filteredBy.push(alertNode.subType);
+        }
 
-    if (alert.templateProperties && alert.template) {
-        renderMetadataFromAlert(alert, uiAlert);
+        // Dataset and metric
+        if (!alertNode.metric) {
+            continue;
+        }
+
+        const uiAlertDatasetAndMetric = createEmptyUiAlertDatasetAndMetric();
+        if (alertNode.metric.dataset) {
+            uiAlertDatasetAndMetric.datasetId = alertNode.metric.dataset.id;
+            uiAlertDatasetAndMetric.datasetName =
+                alertNode.metric.dataset.name || noDataMarker;
+        }
+        uiAlertDatasetAndMetric.metricId = alertNode.metric.id;
+        uiAlertDatasetAndMetric.metricName =
+            alertNode.metric.name || noDataMarker;
+
+        uiAlert.datasetAndMetrics.push(uiAlertDatasetAndMetric);
     }
 
     return uiAlert;
-};
-
-const renderMetadataFromAlert = (alert: Alert, uiAlert: UiAlert): void => {
-    if (!alert.template || !alert.template.metadata) {
-        return;
-    }
-
-    const metadataValueKeyExtractor = /\$\{(.*)\}/;
-
-    // This is done so we avoid a weird typescript error
-    // `alert.template.metadata` may be null even though its checked
-    const metadata = alert.template.metadata;
-
-    Object.keys(metadata).forEach((metadataKey) => {
-        const metadataObjectForKey = metadata[metadataKey];
-
-        if (metadataObjectForKey.name) {
-            const templatePropKeySearch = metadataObjectForKey.name.match(
-                metadataValueKeyExtractor
-            );
-
-            if (templatePropKeySearch && templatePropKeySearch.length > 1) {
-                const value =
-                    alert.templateProperties[templatePropKeySearch[1]];
-                if (value) {
-                    uiAlert.renderedMetadata.push({
-                        key: metadataKey,
-                        value: value,
-                    });
-                }
-            } else {
-                // If regex doesn't match then assume no value is being
-                // taken from template properties
-                uiAlert.renderedMetadata.push({
-                    key: metadataKey,
-                    value: metadataObjectForKey.name,
-                });
-            }
-        }
-    });
-
-    uiAlert.renderedMetadata = sortBy(uiAlert.renderedMetadata, "key");
 };
 
 const mapSubscriptionGroupsToAlertIds = (
@@ -351,9 +272,4 @@ const mapSubscriptionGroupsToAlertIds = (
     }
 
     return subscriptionGroupsToAlertIdsMap;
-};
-
-export const DEFAULT_FEEDBACK = {
-    type: AnomalyFeedbackType.NO_FEEDBACK,
-    comment: "",
 };

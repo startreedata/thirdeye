@@ -1,3 +1,3 @@
-export type SubscriptionGroupsViewPageParams = {
+export interface SubscriptionGroupsViewPageParams {
     id: string;
-};
+}

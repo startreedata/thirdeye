@@ -76,8 +76,9 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
         ) {
             // String contains both date and time which need to be rendered in two parts one below
             // the other
-            const dateParts =
-                tickRendererProps.formattedValue.split(SEPARATOR_DATE_TIME);
+            const dateParts = tickRendererProps.formattedValue.split(
+                SEPARATOR_DATE_TIME
+            );
             dateString = dateParts && dateParts[0] && dateParts[0];
             timeString = dateParts && dateParts[1] && dateParts[1];
         }

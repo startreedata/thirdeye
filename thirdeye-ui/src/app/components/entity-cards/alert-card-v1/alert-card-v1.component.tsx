@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@material-ui/core";
-import { capitalize, forEach } from "lodash";
+import { forEach } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { UiAlert } from "../../../rest/dto/ui-alert.interfaces";
@@ -14,18 +14,33 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
     const { t } = useTranslation();
 
     const getAllSubscriptionGroupsName = (uiAlert: UiAlert): string => {
-        const subScriptingGroups: Array<string | number> = [];
+        const subScriptionGroups: Array<string | number> = [];
         forEach(uiAlert.subscriptionGroups, (Obj) => {
             if (Obj.name) {
-                subScriptingGroups.push(Obj.name);
+                subScriptionGroups.push(Obj.name);
             }
         });
 
-        return subScriptingGroups.join(", ");
+        return subScriptionGroups.join(", ");
+    };
+
+    const getAllDatasetAndMetrics = (uiAlert: UiAlert): string => {
+        const datasetMetrics: Array<string | number> = [];
+        forEach(uiAlert.datasetAndMetrics, (Obj) => {
+            if (Obj.datasetName && Obj.metricName) {
+                datasetMetrics.push(`${Obj.datasetName}/${Obj.metricName}`);
+            }
+        });
+
+        return datasetMetrics.join(", ");
     };
 
     const getDetectionTypes = (uiAlert: UiAlert): string => {
         return uiAlert.detectionTypes.join(", ");
+    };
+
+    const getFilteredBy = (uiAlert: UiAlert): string => {
+        return uiAlert.filteredBy.join(", ") || "-";
     };
 
     if (!props.uiAlert) {
@@ -34,83 +49,81 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
 
     return (
         <Grid container>
-            {/* Created By */}
-            {props.showCreatedBy && (
-                <Grid item xs={6}>
-                    <Grid item>
-                        <Typography
-                            className={classes.fontMedium}
-                            variant="body2"
-                        >
-                            {t("label.created-by")}:
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="body2">
-                            {props.uiAlert.createdBy || "-"}
-                        </Typography>
-                    </Grid>
+            {/* First Column */}
+            <Grid container item alignContent="flex-start" md={6} xs={12}>
+                {/* Created By */}
+                {props.showCreatedBy && (
+                    <>
+                        <Grid item xs={4}>
+                            <Typography
+                                className={classes.fontMedium}
+                                variant="body2"
+                            >
+                                {t("label.created-by")}:
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <Typography variant="body2">
+                                {props.uiAlert.createdBy || "-"}
+                            </Typography>
+                        </Grid>
+                    </>
+                )}
+
+                {/* Detection Type */}
+                <Grid item xs={4}>
+                    <Typography className={classes.fontMedium} variant="body2">
+                        {t("label.detection-type")}:
+                    </Typography>
                 </Grid>
-            )}
 
-            {/* Detection Type */}
-            {props.uiAlert.detectionTypes.length > 0 && (
-                <Grid item xs={6}>
-                    <Grid item>
-                        <Typography
-                            className={classes.fontMedium}
-                            variant="body2"
-                        >
-                            {t("label.detection-type")}:
-                        </Typography>
-                    </Grid>
-
-                    <Grid item>
-                        <Typography variant="body2">
-                            {getDetectionTypes(props.uiAlert) || "-"}
-                        </Typography>
-                    </Grid>
+                <Grid item xs={8}>
+                    <Typography variant="body2">
+                        {getDetectionTypes(props.uiAlert) || "-"}
+                    </Typography>
                 </Grid>
-            )}
 
-            {/* Subscription Groups */}
-            <Grid item xs={6}>
-                <Grid item>
+                {/* Dataset/Metric */}
+                <Grid item xs={4}>
+                    <Typography className={classes.fontMedium} variant="body2">
+                        {t("label.dataset-metric")}:
+                    </Typography>
+                </Grid>
+                <Grid item xs={8}>
+                    <Typography variant="body2">
+                        {getAllDatasetAndMetrics(props.uiAlert) || "-"}
+                    </Typography>
+                </Grid>
+            </Grid>
+
+            {/* second column */}
+            <Grid container item alignContent="flex-start" md={6} xs={12}>
+                {/* Filtered By */}
+                <Grid item xs={4}>
+                    <Typography className={classes.fontMedium} variant="body2">
+                        {t("label.filtered-by")}:
+                    </Typography>
+                </Grid>
+
+                <Grid item xs={8}>
+                    <Typography variant="body2">
+                        {getFilteredBy(props.uiAlert) || "-"}
+                    </Typography>
+                </Grid>
+
+                {/* Subscription Groups */}
+                <Grid item xs={4}>
                     <Typography className={classes.fontMedium} variant="body2">
                         {t("label.subscription-groups")}:
                     </Typography>
                 </Grid>
 
-                <Grid item>
+                <Grid item xs={8}>
                     <Typography variant="body2">
-                        {props.uiAlert.subscriptionGroups.length > 0 &&
-                            getAllSubscriptionGroupsName(props.uiAlert)}
-                        {props.uiAlert.subscriptionGroups.length === 0 && (
-                            <span>None</span>
-                        )}
+                        {getAllSubscriptionGroupsName(props.uiAlert) || "-"}
                     </Typography>
                 </Grid>
             </Grid>
-
-            {props.uiAlert.renderedMetadata.length > 0 &&
-                props.uiAlert.renderedMetadata.map((metadata) => (
-                    <Grid item key={metadata.key} xs={6}>
-                        <Grid item>
-                            <Typography
-                                className={classes.fontMedium}
-                                variant="body2"
-                            >
-                                {capitalize(metadata.key)}:
-                            </Typography>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography variant="body2">
-                                {metadata.value}
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                ))}
         </Grid>
     );
 };

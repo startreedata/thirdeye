@@ -1,36 +1,21 @@
-import {
-    Alert,
-    AlertEvaluation,
-    EditableAlert,
-} from "../../rest/dto/alert.interfaces";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
-export interface AlertWizardProps<NewOrExistingAlert> {
-    alert: NewOrExistingAlert;
-    createNewMode?: boolean;
+export interface AlertWizardProps {
+    alert?: Alert;
     showCancel?: boolean;
     getAllSubscriptionGroups: () => Promise<SubscriptionGroup[]>;
     getAllAlerts: () => Promise<Alert[]>;
-    getAlertEvaluation: (alert: NewOrExistingAlert) => Promise<AlertEvaluation>;
+    getAlertEvaluation: (alert: Alert) => Promise<AlertEvaluation>;
     onCancel?: () => void;
     onSubscriptionGroupWizardFinish: (
         sub: SubscriptionGroup
     ) => Promise<SubscriptionGroup>;
     onFinish?: (
-        alert: EditableAlert,
+        alert: Alert,
         subscriptionGroups: SubscriptionGroup[],
         omittedSubscriptionGroups?: SubscriptionGroup[]
     ) => void;
-}
-
-export interface AlertWizardConfigurationNewProps {
-    alertConfiguration: EditableAlert;
-    error: boolean;
-    hideTemplateSelector?: boolean;
-    selectedTemplateId: string;
-    helperText: string;
-    onChange: (value: string) => void;
-    onTemplateIdChange: (value: string) => void;
 }
 
 export enum AlertWizardStep {

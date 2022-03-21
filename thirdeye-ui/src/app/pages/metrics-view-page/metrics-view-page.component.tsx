@@ -1,18 +1,14 @@
-import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
+import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
+import { PageContents } from "../../components/page-contents/page-contents.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
 import { getUiMetric } from "../../utils/metrics/metrics.util";
@@ -21,34 +17,43 @@ import {
     getMetricsAllPath,
     getMetricsUpdatePath,
 } from "../../utils/routes/routes.util";
+import {
+    getErrorSnackbarOption,
+    getSuccessSnackbarOption,
+} from "../../utils/snackbar/snackbar.util";
 import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 
 export const MetricsViewPage: FunctionComponent = () => {
     const [uiMetric, setUiMetric] = useState<UiMetric | null>(null);
-
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
+    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<MetricsViewPageParams>();
-    const navigate = useNavigate();
+    const history = useHistory();
     const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
+
+    useEffect(() => {
+        setPageBreadcrumbs([]);
+    }, []);
 
     useEffect(() => {
         // Time range refreshed, fetch metric
         fetchMetric();
-    }, []);
+    }, [timeRangeDuration]);
 
     const fetchMetric = (): void => {
         setUiMetric(null);
         let fetchedUiMetric = {} as UiMetric;
 
-        if (params.id && !isValidNumberId(params.id)) {
+        if (!isValidNumberId(params.id)) {
             // Invalid id
-            notify(
-                NotificationTypeV1.Error,
+            enqueueSnackbar(
                 t("message.invalid-id", {
                     entity: t("label.metric"),
                     id: params.id,
-                })
+                }),
+                getErrorSnackbarOption()
             );
 
             setUiMetric(fetchedUiMetric);
@@ -74,36 +79,32 @@ export const MetricsViewPage: FunctionComponent = () => {
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
         deleteMetric(uiMetric.id).then(() => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.delete-success", { entity: t("label.metric") })
+            enqueueSnackbar(
+                t("message.delete-success", { entity: t("label.metric") }),
+                getSuccessSnackbarOption()
             );
 
             // Redirect to metrics all path
-            navigate(getMetricsAllPath());
+            history.push(getMetricsAllPath());
         });
     };
 
     const handleMetricEdit = (id: number): void => {
-        navigate(getMetricsUpdatePath(id));
+        history.push(getMetricsUpdatePath(id));
     };
 
     return (
-        <PageV1>
-            <PageHeader
-                showCreateButton
-                title={uiMetric ? uiMetric.name : ""}
+        <PageContents
+            centered
+            hideTimeRange
+            title={uiMetric ? uiMetric.name : ""}
+        >
+            {/* Metric */}
+            <MetricCard
+                metric={uiMetric}
+                onDelete={handleMetricDelete}
+                onEdit={handleMetricEdit}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {/* Metric */}
-                    <MetricCard
-                        metric={uiMetric}
-                        onDelete={handleMetricDelete}
-                        onEdit={handleMetricEdit}
-                    />
-                </Grid>
-            </PageContentsGridV1>
-        </PageV1>
+        </PageContents>
     );
 };

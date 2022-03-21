@@ -1,7 +1,20 @@
-import { default as React, FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import {
+    AppRoute,
+    getConfigurationPath,
+    getDatasetsAllPath,
+    getDatasetsPath,
+} from "../../utils/routes/routes.util";
 
 const DatasetsAllPage = lazy(() =>
     import(
@@ -34,45 +47,69 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const DatasetsRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.configuration"),
+                onClick: () => history.push(getConfigurationPath()),
+            },
+            {
+                text: t("label.datasets"),
+                onClick: () => history.push(getDatasetsPath()),
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <AppLoadingIndicatorV1 />;
+    }
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Routes>
+            <Switch>
                 {/* Datasets path */}
-                {/* Redirect to datasets all path */}
-                <Route
-                    index
-                    element={
-                        <Navigate replace to={AppRouteRelative.DATASETS_ALL} />
-                    }
-                />
+                <Route exact path={AppRoute.DATASETS}>
+                    {/* Redirect to datasets all path */}
+                    <Redirect to={getDatasetsAllPath()} />
+                </Route>
 
                 {/* Datasets all path */}
                 <Route
-                    element={<DatasetsAllPage />}
-                    path={AppRouteRelative.DATASETS_ALL}
+                    exact
+                    component={DatasetsAllPage}
+                    path={AppRoute.DATASETS_ALL}
                 />
 
                 {/* Datasets view path */}
                 <Route
-                    element={<DatasetsViewPage />}
-                    path={AppRouteRelative.DATASETS_VIEW}
+                    exact
+                    component={DatasetsViewPage}
+                    path={AppRoute.DATASETS_VIEW}
                 />
 
                 {/* Datasets onboard path */}
                 <Route
-                    element={<DatasetsOnboardPage />}
-                    path={AppRouteRelative.DATASETS_ONBOARD}
+                    exact
+                    component={DatasetsOnboardPage}
+                    path={AppRoute.DATASETS_ONBOARD}
                 />
 
                 {/* Datasets update path */}
                 <Route
-                    element={<DatasetsUpdatePage />}
-                    path={AppRouteRelative.DATASETS_UPDATE}
+                    exact
+                    component={DatasetsUpdatePage}
+                    path={AppRoute.DATASETS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route element={<PageNotFoundPage />} path="*" />
-            </Routes>
+                <Route component={PageNotFoundPage} />
+            </Switch>
         </Suspense>
     );
 };

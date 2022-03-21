@@ -39,7 +39,7 @@ describe("Time Range Store", () => {
 
         act(() => {
             result.current.setTimeRangeDuration(
-                null as unknown as TimeRangeDuration
+                (null as unknown) as TimeRangeDuration
             );
         });
 

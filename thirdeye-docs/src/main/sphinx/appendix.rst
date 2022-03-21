@@ -147,6 +147,8 @@ with duration filters and percentage filters.
 | period            | seasonality period, default 7 for daily, hourly and minutely data. For monthly data, set it to 12.   | 7                                                                                            | Any positive interger  |
 |                   | For non-seasonal data, set it to 1.                                                                  |                                                                                              |                        |
 +-------------------+------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+------------------------+
+| smoothing         | For smoothing of hourly and minutely data to reduce noise                                            | true                                                                                         | true or false          |
++-------------------+------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+------------------------+
 
 .. _rule-absolutechange:
 

@@ -13,10 +13,10 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
     getAlertsViewPath,
-    getAnomaliesAnomalyPath,
+    getAnomaliesViewPath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -28,9 +28,11 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     props: AnomalyCardProps
 ) => {
     const anomalyCardClasses = useAnomalyCardStyles();
-    const [anomalyOptionsAnchorElement, setAnomalyOptionsAnchorElement] =
-        useState<HTMLElement | null>();
-    const navigate = useNavigate();
+    const [
+        anomalyOptionsAnchorElement,
+        setAnomalyOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
+    const history = useHistory();
     const { t } = useTranslation();
 
     const handleAnomalyOptionsClick = (
@@ -48,7 +50,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        navigate(getAnomaliesAnomalyPath(props.uiAnomaly.id));
+        history.push(getAnomaliesViewPath(props.uiAnomaly.id));
         handleAnomalyOptionsClose();
     };
 
@@ -70,7 +72,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             return;
         }
 
-        navigate(getAlertsViewPath(props.uiAnomaly.alertId));
+        history.push(getAlertsViewPath(props.uiAnomaly.alertId));
     };
 
     return (
@@ -80,10 +82,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                     action={
                         <>
                             {/* Anomaly options button */}
-                            <IconButton
-                                color="secondary"
-                                onClick={handleAnomalyOptionsClick}
-                            >
+                            <IconButton onClick={handleAnomalyOptionsClick}>
                                 <MoreVertIcon />
                             </IconButton>
 

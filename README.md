@@ -49,11 +49,11 @@ Detailed documentation can be found at [ThirdEye documentation](https://thirdeye
 
 ### Prerequisite
 ThirdEye requires Java 8.
-We recommend using MySQL 8.0 with ThirdEye.
+We recommend using MySQL 5.7 with ThirdEye.
 ThirdEye UI requires internal npm packages. Make sure you can access them. See [thirdeye-ui prerequisites](./thirdeye-ui/README.md#configure-node-package-manager-npm-for-use-with-artifactory)
 
 ### Database setup
-If you have MySQL 8.0 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
+If you have MySQL 5.7 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
 create the database and tables.
 
 Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql-docker-start.sh`
@@ -127,7 +127,7 @@ docker run \
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
 ### Running ThirdEye Coordinator in debug mode
-After setting up IntelliJ, navigate to `ai.startree.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
+After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.
 
 In the debug configuration settings, set the following values:

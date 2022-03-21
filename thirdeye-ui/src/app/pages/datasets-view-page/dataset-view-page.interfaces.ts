@@ -1,3 +1,3 @@
-export type DatasetsViewPageParams = {
+export interface DatasetsViewPageParams {
     id: string;
-};
+}

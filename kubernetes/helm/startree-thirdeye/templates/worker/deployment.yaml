@@ -24,48 +24,24 @@ spec:
         release: {{ .Release.Name }}
         component: {{ .Values.worker.name }}
       annotations:
-        prometheus.io/port: "8081"
-        prometheus.io/scrape: {{ .Values.prometheus.enabled | quote }}
-        {{- toYaml .Values.worker.podAnnotations | nindent 8 }}
+        prometheus.io/port: {{ .Values.worker.port | quote }}
+        prometheus.io/path: "/admin/prometheus"
+{{ toYaml .Values.worker.podAnnotations | indent 8 }}
     spec:
       {{- if .Values.image.pullSecretsName }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecretsName | quote}}
       {{- end }}
-      nodeSelector: 
-        {{- toYaml .Values.worker.nodeSelector | nindent 8 }}
+      nodeSelector:
+{{ toYaml .Values.worker.nodeSelector | indent 8 }}
       affinity:
-        {{- toYaml .Values.worker.affinity | nindent 8 }}
+{{ toYaml .Values.worker.affinity | indent 8 }}
       tolerations:
-        {{- toYaml .Values.worker.tolerations | nindent 8 }}
-      {{- if .Values.worker.tls.enabled }}
-      initContainers:
-      - name: init-keystore
-        image: eclipse-temurin:17-jdk
-        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-        command:
-        - /bin/sh
-        - -c
-        - >
-          echo "importing internal tls key" &&
-          openssl pkcs12 -export -name internalTls -in /opt/thirdeye/server/tls-internal/tls.crt -inkey /opt/thirdeye/server/tls-internal/tls.key -out /opt/thirdeye/server/keystore-internal.p12 -password pass:changeit &&
-          keytool -noprompt  -importkeystore -alias internalTls -srckeystore /opt/thirdeye/server/keystore-internal.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore &&
-          echo "importing ca cert" &&
-          keytool -noprompt  -import -alias startreePlatformCa -srcstorepass changeit -deststorepass changeit -keystore /opt/java/openjdk/lib/security/cacerts -file /opt/thirdeye/server/tls-internal/ca.crt &&
-          cp /opt/java/openjdk/lib/security/cacerts /opt/thirdeye/server/keystore/truststore
-        volumeMounts:
-        - name: tls-internal
-          mountPath: /opt/thirdeye/server/tls-internal
-          readOnly: true
-        - name: keystore
-          mountPath: /opt/thirdeye/server/keystore
-      {{- end }}
+{{ toYaml .Values.worker.tolerations | indent 8 }}
       containers:
       - name: worker
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        args:
-        - "server"
         env:
           - name: SMTP_HOST
             value: {{ .Values.smtp.host | quote }}
@@ -81,21 +57,9 @@ spec:
               secretKeyRef:
                 name: {{ .Values.smtp.secretKeyRef.name }}
                 key: password
-          {{- if .Values.sendgrid }}
-          - name: SENDGRID_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: sendgrid-api-key
-                key: key
-          {{- end }}
-          {{- if .Values.worker.tls.enabled }}
-          - name: JAVA_OPTS
-            value: >
-              -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
-              -Djavax.net.ssl.keyStorePassword=changeit
-              -Djavax.net.ssl.trustStore=/opt/thirdeye/server/keystore/truststore
-              -Djavax.net.ssl.trustStorePassword=changeit
-          {{- end }}
+        args: [
+            "server"
+        ]
         ports:
           - containerPort: {{ .Values.worker.port }}
             protocol: TCP
@@ -104,23 +68,11 @@ spec:
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
             subPath: "server.yaml"
             readOnly: true
-          {{- if .Values.worker.tls.enabled }}
-          - name: keystore
-            mountPath: /opt/thirdeye/server/keystore
-            readOnly: true
-          {{- end }}
         resources:
-          {{- toYaml .Values.worker.resources | nindent 12 }}
+{{ toYaml .Values.worker.resources | indent 12 }}
       restartPolicy: Always
       volumes:
         - name: thirdeye-config
           configMap:
             name: thirdeye-worker
-        {{- if .Values.worker.tls.enabled }}
-        - name: tls-internal
-          secret:
-            secretName: {{ include "thirdeye.worker.fullname" . }}-internal-tls
-        - name: keystore
-          emptyDir: {}
-        {{- end }}
 {{ end }}

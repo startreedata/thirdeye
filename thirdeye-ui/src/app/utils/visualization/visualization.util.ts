@@ -3,15 +3,15 @@ import { ScaleTime } from "d3-scale";
 import { isEmpty, isNil } from "lodash";
 import { Interval } from "luxon";
 import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
-import {
-    formatDateV1,
-    formatLargeNumberV1,
-    formatMonthOfYearV1,
-    formatTimeV1,
-    formatYearV1,
-} from "../../platform/utils";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import {
+    formatDate,
+    formatMonthOfYear,
+    formatTime,
+    formatYear,
+} from "../date-time/date-time.util";
+import { formatLargeNumber } from "../number/number.util";
 
 export const SEPARATOR_DATE_TIME = "@";
 export const NUM_TICKS = 8;
@@ -36,7 +36,7 @@ export const formatLargeNumberForVisualization = (
         return "";
     }
 
-    return formatLargeNumberV1(targetNum);
+    return formatLargeNumber(targetNum);
 };
 
 // Returns formatted string representation of date based on scale domain interval
@@ -72,24 +72,22 @@ export const formatDateTimeForTimeAxis = (
 
     if (duration.as("years") > 2) {
         // YYYY
-        return formatYearV1(targetDate);
+        return formatYear(targetDate);
     }
 
     if (duration.as("months") > 2) {
         // MMM YYYY
-        return formatMonthOfYearV1(targetDate);
+        return formatMonthOfYear(targetDate);
     }
 
     if (duration.as("days") > 2) {
         // MMM DD, YYYY
-        return formatDateV1(targetDate);
+        return formatDate(targetDate);
     }
 
     // MMM DD, YYYY SEPARATOR_DATE_TIME HH:MM AM/PM
     return (
-        formatDateV1(targetDate) +
-        SEPARATOR_DATE_TIME +
-        formatTimeV1(targetDate)
+        formatDate(targetDate) + SEPARATOR_DATE_TIME + formatTime(targetDate)
     );
 };
 

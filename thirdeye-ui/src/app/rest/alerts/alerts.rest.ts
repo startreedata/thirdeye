@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Alert, AlertEvaluation, EditableAlert } from "../dto/alert.interfaces";
+import { Alert, AlertEvaluation } from "../dto/alert.interfaces";
 
 const BASE_URL_ALERTS = "/api/alerts";
 
@@ -15,7 +15,7 @@ export const getAllAlerts = async (): Promise<Alert[]> => {
     return response.data;
 };
 
-export const createAlert = async (alert: EditableAlert): Promise<Alert> => {
+export const createAlert = async (alert: Alert): Promise<Alert> => {
     const response = await axios.post(BASE_URL_ALERTS, [alert]);
 
     return response.data[0];

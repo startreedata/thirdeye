@@ -1,3 +1,3 @@
-export type MetricsUpdatePageParams = {
+export interface MetricsUpdatePageParams {
     id: string;
-};
+}

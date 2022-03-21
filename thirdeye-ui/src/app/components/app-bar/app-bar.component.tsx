@@ -1,10 +1,4 @@
 import { ExitToApp, Home, LockOpen } from "@material-ui/icons";
-import ErrorIcon from "@material-ui/icons/Error";
-import SettingsIcon from "@material-ui/icons/Settings";
-import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
 import {
     NavBarLinkIconV1,
     NavBarLinkTextV1,
@@ -12,8 +6,13 @@ import {
     NavBarPrimaryContainerV1,
     NavBarSecondaryContainerV1,
     NavBarV1,
-    useAuthProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+import { ReactComponent as AlertIcon } from "../../../assets/images/alert.svg";
+import { ReactComponent as AnomalyIcon } from "../../../assets/images/anomaly.svg";
+import { ReactComponent as ConfigurationIcon } from "../../../assets/images/configuration.svg";
 import {
     AppRoute,
     getAlertsPath,
@@ -23,9 +22,10 @@ import {
     getLoginPath,
     getLogoutPath,
 } from "../../utils/routes/routes.util";
+import { useAuth } from "../auth-provider/auth-provider.component";
 
 export const AppBar: FunctionComponent = () => {
-    const { authDisabled, authenticated } = useAuthProviderV1();
+    const { authDisabled, authenticated } = useAuth();
     const location = useLocation();
     const { t } = useTranslation();
 
@@ -56,7 +56,7 @@ export const AppBar: FunctionComponent = () => {
                     selected={isRouteCurrent(AppRoute.ALERTS)}
                 >
                     <NavBarLinkIconV1>
-                        <WifiTetheringIcon />
+                        <AlertIcon />
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>{t("label.alerts")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
@@ -67,7 +67,7 @@ export const AppBar: FunctionComponent = () => {
                     selected={isRouteCurrent(AppRoute.ANOMALIES)}
                 >
                     <NavBarLinkIconV1>
-                        <ErrorIcon />
+                        <AnomalyIcon />
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>{t("label.anomalies")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
@@ -78,7 +78,7 @@ export const AppBar: FunctionComponent = () => {
                     selected={isRouteCurrent(AppRoute.CONFIGURATION)}
                 >
                     <NavBarLinkIconV1>
-                        <SettingsIcon />
+                        <ConfigurationIcon />
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>
                         {t("label.configuration")}

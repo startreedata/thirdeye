@@ -2,7 +2,7 @@
   {
     "name": "threshold-alert-pull-request-merge-events",
     "description": "Threshold alert on pull request merge events",
-    "cron": "0 0 0/2 * * ? *",
+    "cron": "0 0/1 * 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -13,7 +13,7 @@
             "component.detector.metric": "met",
             "component.detector.dimensions": [],
             "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "PT2H",
+            "component.detector.monitoringGranularity": "2_HOURS",
             "component.detector.type": "THRESHOLD",
             "component.detector.max": "${max}",
             "component.detector.min": "${min}",

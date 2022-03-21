@@ -1,8 +1,15 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Grid,
+    Step,
+    StepLabel,
+    Stepper,
+    Typography,
+} from "@material-ui/core";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
@@ -32,18 +39,22 @@ import { useSubscriptionGroupWizardStyles } from "./subscription-group-wizard.st
 const FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES =
     "FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES";
 
-export const SubscriptionGroupWizard: FunctionComponent<
-    SubscriptionGroupWizardProps
-> = (props: SubscriptionGroupWizardProps) => {
+export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardProps> = (
+    props: SubscriptionGroupWizardProps
+) => {
     const subscriptionGroupWizardClasses = useSubscriptionGroupWizardStyles();
-    const [newSubscriptionGroup, setNewSubscriptionGroup] =
-        useState<SubscriptionGroup>(
-            props.subscriptionGroup || createEmptySubscriptionGroup()
-        );
-    const [currentWizardStep, setCurrentWizardStep] =
-        useState<SubscriptionGroupWizardStep>(
-            SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
-        );
+    const [
+        newSubscriptionGroup,
+        setNewSubscriptionGroup,
+    ] = useState<SubscriptionGroup>(
+        props.subscriptionGroup || createEmptySubscriptionGroup()
+    );
+    const [
+        currentWizardStep,
+        setCurrentWizardStep,
+    ] = useState<SubscriptionGroupWizardStep>(
+        SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
+    );
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -78,28 +89,32 @@ export const SubscriptionGroupWizard: FunctionComponent<
         uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
     ): void => {
         // Update subscription group with subscribed alerts
-        setNewSubscriptionGroup((newSubscriptionGroup): SubscriptionGroup => {
-            newSubscriptionGroup.alerts = uiSubscriptionGroupAlerts as Alert[];
+        setNewSubscriptionGroup(
+            (newSubscriptionGroup): SubscriptionGroup => {
+                newSubscriptionGroup.alerts = uiSubscriptionGroupAlerts as Alert[];
 
-            return newSubscriptionGroup;
-        });
+                return newSubscriptionGroup;
+            }
+        );
     };
 
     const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
         // Update subscription group with subscribed emails
-        setNewSubscriptionGroup((newSubscriptionGroup): SubscriptionGroup => {
-            if (newSubscriptionGroup.notificationSchemes.email) {
-                // Add to existing email settings
-                newSubscriptionGroup.notificationSchemes.email.to = emails;
-            } else {
-                // Create and add to email settings
-                newSubscriptionGroup.notificationSchemes.email = {
-                    to: emails,
-                } as EmailScheme;
-            }
+        setNewSubscriptionGroup(
+            (newSubscriptionGroup): SubscriptionGroup => {
+                if (newSubscriptionGroup.notificationSchemes.email) {
+                    // Add to existing email settings
+                    newSubscriptionGroup.notificationSchemes.email.to = emails;
+                } else {
+                    // Create and add to email settings
+                    newSubscriptionGroup.notificationSchemes.email = {
+                        to: emails,
+                    } as EmailScheme;
+                }
 
-            return newSubscriptionGroup;
-        });
+                return newSubscriptionGroup;
+            }
+        );
     };
 
     const onCancel = (): void => {
@@ -145,244 +160,231 @@ export const SubscriptionGroupWizard: FunctionComponent<
         );
     };
 
-    const stepLabelFn = (step: string): string => {
-        return t(`label.${kebabCase(SubscriptionGroupWizardStep[+step])}`);
-    };
-
     return (
         <>
-            {/* Stepper */}
             <Grid container>
+                {/* Stepper */}
                 <Grid item sm={12}>
-                    <StepperV1
-                        activeStep={currentWizardStep.toString()}
-                        stepLabelFn={stepLabelFn}
-                        steps={Object.values(
-                            SubscriptionGroupWizardStep
-                        ).reduce((steps, subscriptionGroupWizardStep) => {
-                            if (
-                                typeof subscriptionGroupWizardStep === "number"
-                            ) {
-                                steps.push(
-                                    subscriptionGroupWizardStep.toString()
-                                );
-                            }
-
-                            return steps;
-                        }, [] as string[])}
-                    />
+                    <Stepper alternativeLabel activeStep={currentWizardStep}>
+                        {Object.values(SubscriptionGroupWizardStep)
+                            .filter(
+                                (subscriptionGroupWizardStep) =>
+                                    typeof subscriptionGroupWizardStep ===
+                                    "string"
+                            )
+                            .map((subscriptionGroupWizardStep, index) => (
+                                <Step key={index}>
+                                    <StepLabel>
+                                        {t(
+                                            `label.${kebabCase(
+                                                subscriptionGroupWizardStep as string
+                                            )}`
+                                        )}
+                                    </StepLabel>
+                                </Step>
+                            ))}
+                    </Stepper>
                 </Grid>
-            </Grid>
 
-            <PageContentsCardV1>
-                <Grid container>
-                    {/* Step label */}
-                    <Grid item sm={12}>
-                        <Typography variant="h5">
-                            {t(
-                                `label.${kebabCase(
-                                    SubscriptionGroupWizardStep[
-                                        currentWizardStep
-                                    ]
-                                )}`
-                            )}
-                        </Typography>
-                    </Grid>
-
-                    {/* Spacer */}
-                    <Grid item sm={12} />
-
-                    {/* Subscription group properties */}
-                    {currentWizardStep ===
-                        SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
-                        <>
-                            {/* Subscription group properties form */}
-                            <Grid item sm={12}>
-                                <SubscriptionGroupPropertiesForm
-                                    id={FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES}
-                                    subscriptionGroup={newSubscriptionGroup}
-                                    onSubmit={
-                                        onSubmitSubscriptionGroupPropertiesForm
-                                    }
-                                />
-                            </Grid>
-
-                            {/* Spacer */}
-                            <Grid item sm={12} />
-
-                            {/* Subscribe alerts */}
-                            <Grid item sm={12}>
-                                <Typography variant="h5">
-                                    {t("label.subscribe-alerts")}
-                                </Typography>
-                            </Grid>
-
-                            <Grid item sm={12}>
-                                <TransferList<UiSubscriptionGroupAlert>
-                                    fromLabel={t("label.all-entity", {
-                                        entity: t("label.alerts"),
-                                    })}
-                                    fromList={getUiSubscriptionGroupAlerts(
-                                        props.alerts
-                                    )}
-                                    listItemKeyFn={
-                                        getUiSubscriptionGroupAlertId
-                                    }
-                                    listItemTextFn={
-                                        getUiSubscriptionGroupAlertName
-                                    }
-                                    toLabel={t("label.subscribed-alerts")}
-                                    toList={
-                                        getUiSubscriptionGroup(
-                                            newSubscriptionGroup,
-                                            props.alerts
-                                        ).alerts
-                                    }
-                                    onChange={onUiSubscriptionGroupAlertsChange}
-                                />
-                            </Grid>
-
-                            {/* Spacer */}
-                            <Grid item sm={12} />
-
-                            {/* Subscribe emails */}
-                            <Grid item sm={12}>
-                                <Typography variant="h5">
-                                    {t("label.subscribe-emails")}
-                                </Typography>
-                            </Grid>
-
-                            <Grid item sm={12}>
-                                <EditableList
-                                    addButtonLabel={t("label.add")}
-                                    inputLabel={t("label.add-entity", {
-                                        entity: t("label.email"),
-                                    })}
-                                    list={
-                                        (newSubscriptionGroup &&
-                                            newSubscriptionGroup
-                                                .notificationSchemes.email &&
-                                            newSubscriptionGroup
-                                                .notificationSchemes.email
-                                                .to) ||
-                                        []
-                                    }
-                                    validateFn={validateEmail}
-                                    onChange={onSubscriptionGroupEmailsChange}
-                                />
-                            </Grid>
-                        </>
-                    )}
-
-                    {/* Review and submit */}
-                    {currentWizardStep ===
-                        SubscriptionGroupWizardStep.REVIEW_AND_SUBMIT && (
-                        <>
-                            {/* Subscription group information */}
-                            <SubscriptionGroupRenderer
-                                subscriptionGroup={newSubscriptionGroup}
-                            />
-                        </>
-                    )}
+                {/* Step label */}
+                <Grid item sm={12}>
+                    <Typography variant="h5">
+                        {t(
+                            `label.${kebabCase(
+                                SubscriptionGroupWizardStep[currentWizardStep]
+                            )}`
+                        )}
+                    </Typography>
                 </Grid>
 
                 {/* Spacer */}
-                <Box padding={2} />
+                <Grid item sm={12} />
 
-                {/* Controls */}
-                <Grid
-                    container
-                    alignItems="stretch"
-                    className={subscriptionGroupWizardClasses.controlsContainer}
-                    direction="column"
-                    justify="flex-end"
-                >
-                    {/* Separator */}
-                    <Grid item>
-                        <Box
-                            border={Dimension.WIDTH_BORDER_DEFAULT}
-                            borderBottom={0}
-                            borderColor={Palette.COLOR_BORDER_DEFAULT}
-                            borderLeft={0}
-                            borderRight={0}
+                {/* Subscription group properties */}
+                {currentWizardStep ===
+                    SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
+                    <>
+                        {/* Subscription group properties form */}
+                        <Grid item sm={12}>
+                            <SubscriptionGroupPropertiesForm
+                                id={FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES}
+                                subscriptionGroup={newSubscriptionGroup}
+                                onSubmit={
+                                    onSubmitSubscriptionGroupPropertiesForm
+                                }
+                            />
+                        </Grid>
+
+                        {/* Spacer */}
+                        <Grid item sm={12} />
+
+                        {/* Subscribe alerts */}
+                        <Grid item sm={12}>
+                            <Typography variant="h5">
+                                {t("label.subscribe-alerts")}
+                            </Typography>
+                        </Grid>
+
+                        <Grid item sm={12}>
+                            <TransferList<UiSubscriptionGroupAlert>
+                                fromLabel={t("label.all-entity", {
+                                    entity: t("label.alerts"),
+                                })}
+                                fromList={getUiSubscriptionGroupAlerts(
+                                    props.alerts
+                                )}
+                                listItemKeyFn={getUiSubscriptionGroupAlertId}
+                                listItemTextFn={getUiSubscriptionGroupAlertName}
+                                toLabel={t("label.subscribed-alerts")}
+                                toList={
+                                    getUiSubscriptionGroup(
+                                        newSubscriptionGroup,
+                                        props.alerts
+                                    ).alerts
+                                }
+                                onChange={onUiSubscriptionGroupAlertsChange}
+                            />
+                        </Grid>
+
+                        {/* Spacer */}
+                        <Grid item sm={12} />
+
+                        {/* Subscribe emails */}
+                        <Grid item sm={12}>
+                            <Typography variant="h5">
+                                {t("label.subscribe-emails")}
+                            </Typography>
+                        </Grid>
+
+                        <Grid item sm={12}>
+                            <EditableList
+                                addButtonLabel={t("label.add")}
+                                inputLabel={t("label.add-entity", {
+                                    entity: t("label.email"),
+                                })}
+                                list={
+                                    (newSubscriptionGroup &&
+                                        newSubscriptionGroup.notificationSchemes
+                                            .email &&
+                                        newSubscriptionGroup.notificationSchemes
+                                            .email.to) ||
+                                    []
+                                }
+                                validateFn={validateEmail}
+                                onChange={onSubscriptionGroupEmailsChange}
+                            />
+                        </Grid>
+                    </>
+                )}
+
+                {/* Review and submit */}
+                {currentWizardStep ===
+                    SubscriptionGroupWizardStep.REVIEW_AND_SUBMIT && (
+                    <>
+                        {/* Subscription group information */}
+                        <SubscriptionGroupRenderer
+                            subscriptionGroup={newSubscriptionGroup}
                         />
-                    </Grid>
+                    </>
+                )}
+            </Grid>
 
-                    <Grid item>
-                        <Grid container justify="space-between">
-                            {/* Cancel button */}
-                            <Grid item>
-                                {props.showCancel && (
+            {/* Spacer */}
+            <Box padding={2} />
+
+            {/* Controls */}
+            <Grid
+                container
+                alignItems="stretch"
+                className={subscriptionGroupWizardClasses.controlsContainer}
+                direction="column"
+                justify="flex-end"
+            >
+                {/* Separator */}
+                <Grid item>
+                    <Box
+                        border={Dimension.WIDTH_BORDER_DEFAULT}
+                        borderBottom={0}
+                        borderColor={Palette.COLOR_BORDER_DEFAULT}
+                        borderLeft={0}
+                        borderRight={0}
+                    />
+                </Grid>
+
+                <Grid item>
+                    <Grid container justify="space-between">
+                        {/* Cancel button */}
+                        <Grid item>
+                            {props.showCancel && (
+                                <Button
+                                    color="primary"
+                                    size="large"
+                                    variant="outlined"
+                                    onClick={onCancel}
+                                >
+                                    {t("label.cancel")}
+                                </Button>
+                            )}
+                        </Grid>
+
+                        <Grid item>
+                            <Grid container>
+                                {/* Back button */}
+                                <Grid item>
                                     <Button
                                         color="primary"
+                                        disabled={
+                                            currentWizardStep ===
+                                            SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
+                                        }
                                         size="large"
                                         variant="outlined"
-                                        onClick={onCancel}
+                                        onClick={onBack}
                                     >
-                                        {t("label.cancel")}
+                                        {t("label.back")}
                                     </Button>
-                                )}
-                            </Grid>
+                                </Grid>
 
-                            <Grid item>
-                                <Grid container>
-                                    {/* Back button */}
-                                    <Grid item>
+                                {/* Next button */}
+                                <Grid item>
+                                    {/* Submit button for subscription group properties form in
+                                    first step */}
+                                    {currentWizardStep ===
+                                        SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
                                         <Button
                                             color="primary"
-                                            disabled={
-                                                currentWizardStep ===
-                                                SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
+                                            form={
+                                                FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES
                                             }
                                             size="large"
-                                            variant="outlined"
-                                            onClick={onBack}
+                                            type="submit"
+                                            variant="contained"
                                         >
-                                            {t("label.back")}
+                                            {t("label.next")}
                                         </Button>
-                                    </Grid>
+                                    )}
 
-                                    {/* Next button */}
-                                    <Grid item>
-                                        {/* Submit button for subscription group properties form in
-                                    first step */}
-                                        {currentWizardStep ===
-                                            SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
-                                            <Button
-                                                color="primary"
-                                                form={
-                                                    FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES
-                                                }
-                                                size="large"
-                                                type="submit"
-                                                variant="contained"
-                                            >
-                                                {t("label.next")}
-                                            </Button>
-                                        )}
-
-                                        {/* Next button for all other steps */}
-                                        {currentWizardStep !==
-                                            SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
-                                            <Button
-                                                color="primary"
-                                                size="large"
-                                                variant="contained"
-                                                onClick={onNext}
-                                            >
-                                                {currentWizardStep ===
-                                                SubscriptionGroupWizardStep.REVIEW_AND_SUBMIT
-                                                    ? t("label.finish")
-                                                    : t("label.next")}
-                                            </Button>
-                                        )}
-                                    </Grid>
+                                    {/* Next button for all other steps */}
+                                    {currentWizardStep !==
+                                        SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES && (
+                                        <Button
+                                            color="primary"
+                                            size="large"
+                                            variant="contained"
+                                            onClick={onNext}
+                                        >
+                                            {currentWizardStep ===
+                                            SubscriptionGroupWizardStep.REVIEW_AND_SUBMIT
+                                                ? t("label.finish")
+                                                : t("label.next")}
+                                        </Button>
+                                    )}
                                 </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-            </PageContentsCardV1>
+            </Grid>
         </>
     );
 };

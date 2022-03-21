@@ -1,6 +1,3 @@
-#  Copyright (c) 2022 StarTree Inc. All rights reserved.
-#  Confidential and Proprietary Information of StarTree Inc.
-
 # Build an order management event database
 # place at the root of the file
 import os

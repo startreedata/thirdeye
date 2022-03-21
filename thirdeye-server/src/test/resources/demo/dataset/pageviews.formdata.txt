@@ -1,1 +1,0 @@
-dataSourceName=pinotQuickStartAzure&datasetName=pageviews

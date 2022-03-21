@@ -19,10 +19,8 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../../platform/utils/date-time/date-time.util", () => ({
-    formatDateAndTimeV1: jest
-        .fn()
-        .mockImplementation((date) => date.toString()),
+jest.mock("../date-time/date-time.util", () => ({
+    formatDateAndTime: jest.fn().mockImplementation((date) => date.toString()),
 }));
 
 describe("Time Range Util", () => {
@@ -60,7 +58,7 @@ describe("Time Range Util", () => {
     });
 
     it("getTimeRangeDuration should return default TimeRange.TODAY time range duration for invalid time range", () => {
-        expect(getTimeRangeDuration(null as unknown as TimeRange)).toEqual({
+        expect(getTimeRangeDuration((null as unknown) as TimeRange)).toEqual({
             timeRange: TimeRange.TODAY,
             startTime: 1577865600000,
             endTime: 1577865600000,
@@ -188,7 +186,7 @@ describe("Time Range Util", () => {
     });
 
     it("formatTimeRange should return empty string for invalid time range", () => {
-        expect(formatTimeRange(null as unknown as TimeRange)).toEqual("");
+        expect(formatTimeRange((null as unknown) as TimeRange)).toEqual("");
     });
 
     it("formatTimeRange should return appropriate string for time range", () => {
@@ -199,7 +197,7 @@ describe("Time Range Util", () => {
 
     it("formatTimeRangeDuration should return empty string for invalid time range duration", () => {
         expect(
-            formatTimeRangeDuration(null as unknown as TimeRangeDuration)
+            formatTimeRangeDuration((null as unknown) as TimeRangeDuration)
         ).toEqual("");
     });
 

@@ -1,7 +1,7 @@
 import flatten from "flat";
 import i18n from "i18next";
 import { isEmpty, isNil } from "lodash";
-import { formatNumberV1 } from "../../platform/utils";
+import { formatNumber } from "../number/number.util";
 
 // Traverses all the properties of object, including those nested, in arrays and maps until it finds
 // a string property for which match function returns true
@@ -27,13 +27,13 @@ export const deepSearchStringProperty = <T>(
 
 export const getSearchStatusLabel = (count: number, total: number): string => {
     return i18n.t("label.search-count", {
-        count: formatNumberV1(!isNil(count) ? count : 0) as never,
-        total: formatNumberV1(!isNil(total) ? total : 0) as never,
+        count: formatNumber(!isNil(count) ? count : 0) as never,
+        total: formatNumber(!isNil(total) ? total : 0) as never,
     });
 };
 
 export const getSelectedStatusLabel = (count: number): string => {
     return i18n.t("label.selected-count", {
-        count: formatNumberV1(!isNil(count) ? count : 0) as never,
+        count: formatNumber(!isNil(count) ? count : 0) as never,
     });
 };

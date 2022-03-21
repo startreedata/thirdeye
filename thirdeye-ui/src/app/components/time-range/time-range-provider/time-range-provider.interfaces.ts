@@ -36,7 +36,7 @@ export enum TimeRange {
 }
 
 export enum TimeRangeQueryStringKey {
-    TIME_RANGE = "timeRange",
-    START_TIME = "startTime",
-    END_TIME = "endTime",
+    TIME_RANGE = "TIME_RANGE",
+    START_TIME = "START_TIME",
+    END_TIME = "END_TIME",
 }

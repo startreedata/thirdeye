@@ -1,7 +1,15 @@
-import { default as React, FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import React, {
+    FunctionComponent,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { AppRoute, getConfigurationPath } from "../../utils/routes/routes.util";
 
 const SubscriptionGroupsRouter = lazy(() =>
     import(
@@ -27,12 +35,6 @@ const MetricsRouter = lazy(() =>
     ).then((module) => ({ default: module.MetricsRouter }))
 );
 
-const AlertTemplatesRouter = lazy(() =>
-    import(
-        /* webpackChunkName: "metrics-router" */ "../alert-templates/alert-templates.router"
-    ).then((module) => ({ default: module.AlertTemplatesRouter }))
-);
-
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -40,50 +42,54 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const ConfigurationRouter: FunctionComponent = () => {
+    const [loading, setLoading] = useState(true);
+    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
+    const history = useHistory();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        setRouterBreadcrumbs([
+            {
+                text: t("label.configuration"),
+                onClick: () => history.push(getConfigurationPath()),
+            },
+        ]);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <AppLoadingIndicatorV1 />;
+    }
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Routes>
-                {/* Datasources path */}
-                <Route
-                    index
-                    element={
-                        <Navigate replace to={AppRouteRelative.DATASOURCES} />
-                    }
-                />
+            <Switch>
+                {/* Configuration path */}
+                <Route exact path={AppRoute.CONFIGURATION}>
+                    <Redirect to={AppRoute.SUBSCRIPTION_GROUPS} />
+                </Route>
 
                 {/* Direct all subscription groups paths to subscription groups router */}
                 <Route
-                    element={<SubscriptionGroupsRouter />}
-                    path={`${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                    component={SubscriptionGroupsRouter}
+                    path={AppRoute.SUBSCRIPTION_GROUPS}
                 />
 
                 {/* Direct all datasets paths to datasets router */}
-                <Route
-                    element={<DatasetsRouter />}
-                    path={`${AppRouteRelative.DATASETS}/*`}
-                />
+                <Route component={DatasetsRouter} path={AppRoute.DATASETS} />
 
                 {/* Direct all datasource paths to datasources router */}
                 <Route
-                    element={<DatasourcesRouter />}
-                    path={`${AppRouteRelative.DATASOURCES}/*`}
+                    component={DatasourcesRouter}
+                    path={AppRoute.DATASOURCES}
                 />
 
                 {/* Direct all metrics paths to metrics router */}
-                <Route
-                    element={<MetricsRouter />}
-                    path={`${AppRouteRelative.METRICS}/*`}
-                />
-
-                {/* Alert templates path */}
-                <Route
-                    element={<AlertTemplatesRouter />}
-                    path={`${AppRouteRelative.ALERT_TEMPLATES}/*`}
-                />
+                <Route component={MetricsRouter} path={AppRoute.METRICS} />
 
                 {/* No match found, render page not found */}
-                <Route element={<PageNotFoundPage />} path="*" />
-            </Routes>
+                <Route component={PageNotFoundPage} />
+            </Switch>
         </Suspense>
     );
 };

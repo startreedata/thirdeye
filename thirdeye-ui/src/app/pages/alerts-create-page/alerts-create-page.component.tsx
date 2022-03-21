@@ -1,103 +1,91 @@
-import { Grid } from "@material-ui/core";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent } from "react";
+import { useSnackbar } from "notistack";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
+import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { PageContents } from "../../components/page-contents/page-contents.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
-import { createAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
-import {
-    Alert,
-    AlertEvaluation,
-    EditableAlert,
-} from "../../rest/dto/alert.interfaces";
+    createAlert,
+    getAlertEvaluation,
+    getAllAlerts,
+} from "../../rest/alerts/alerts.rest";
+import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
     getAllSubscriptionGroups,
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import {
-    createAlertEvaluation,
-    createDefaultAlert,
-} from "../../utils/alerts/alerts.util";
+import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
-    const { getEvaluation } = useGetEvaluation();
+    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
-    const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
+    const history = useHistory();
     const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
+
+    useEffect(() => {
+        setPageBreadcrumbs([]);
+    }, []);
 
     const onAlertWizardFinish = (
-        alert: EditableAlert,
+        alert: Alert,
         subscriptionGroups: SubscriptionGroup[]
     ): void => {
         if (!alert) {
             return;
         }
 
-        createAlert(alert)
-            .then((alert: Alert): void => {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.create-success", { entity: t("label.alert") })
-                );
+        createAlert(alert).then((alert: Alert): void => {
+            enqueueSnackbar(
+                t("message.create-success", { entity: t("label.alert") }),
+                getSuccessSnackbarOption()
+            );
 
-                if (isEmpty(subscriptionGroups)) {
+            if (isEmpty(subscriptionGroups)) {
+                // Redirect to alerts detail path
+                history.push(getAlertsViewPath(alert.id));
+
+                return;
+            }
+
+            // Update subscription groups with new alert
+            for (const subscriptionGroup of subscriptionGroups) {
+                if (subscriptionGroup.alerts) {
+                    // Add to existing list
+                    subscriptionGroup.alerts.push(alert);
+                } else {
+                    // Create and add to list
+                    subscriptionGroup.alerts = [alert];
+                }
+            }
+
+            updateSubscriptionGroups(subscriptionGroups)
+                .then((): void => {
+                    enqueueSnackbar(
+                        t("message.update-success", {
+                            entity: t("label.subscription-groups"),
+                        }),
+                        getSuccessSnackbarOption()
+                    );
+                })
+                .finally((): void => {
                     // Redirect to alerts detail path
-                    navigate(getAlertsViewPath(alert.id));
-
-                    return;
-                }
-
-                // Update subscription groups with new alert
-                for (const subscriptionGroup of subscriptionGroups) {
-                    if (subscriptionGroup.alerts) {
-                        // Add to existing list
-                        subscriptionGroup.alerts.push(alert);
-                    } else {
-                        // Create and add to list
-                        subscriptionGroup.alerts = [alert];
-                    }
-                }
-
-                updateSubscriptionGroups(subscriptionGroups)
-                    .then((): void => {
-                        notify(
-                            NotificationTypeV1.Success,
-                            t("message.update-success", {
-                                entity: t("label.subscription-groups"),
-                            })
-                        );
-                    })
-                    .finally((): void => {
-                        // Redirect to alerts detail path
-                        navigate(getAlertsViewPath(alert.id));
-                    });
-            })
-            .catch(() => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.create-error", { entity: t("label.alert") })
-                );
-            });
+                    history.push(getAlertsViewPath(alert.id));
+                });
+        });
     };
 
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let newSubscriptionGroup: SubscriptionGroup =
-            null as unknown as SubscriptionGroup;
+        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
 
         if (!subscriptionGroup) {
             return newSubscriptionGroup;
@@ -107,12 +95,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
             newSubscriptionGroup = await createSubscriptionGroup(
                 subscriptionGroup
             );
-
-            notify(
-                NotificationTypeV1.Success,
+            enqueueSnackbar(
                 t("message.create-success", {
                     entity: t("label.subscription-group"),
-                })
+                }),
+                getSuccessSnackbarOption()
             );
         } catch (error) {
             // Empty
@@ -146,46 +133,35 @@ export const AlertsCreatePage: FunctionComponent = () => {
     };
 
     const fetchAlertEvaluation = async (
-        alert: EditableAlert
+        alert: Alert
     ): Promise<AlertEvaluation> => {
-        const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(
-                alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
-        );
-
-        if (fetchedAlertEvaluation === undefined) {
-            return {} as AlertEvaluation;
+        let fetchedAlertEvaluation = {} as AlertEvaluation;
+        try {
+            fetchedAlertEvaluation = await getAlertEvaluation(
+                createAlertEvaluation(
+                    alert,
+                    timeRangeDuration.startTime,
+                    timeRangeDuration.endTime
+                )
+            );
+        } catch (error) {
+            // Empty
         }
 
         return fetchedAlertEvaluation;
     };
 
     return (
-        <PageV1>
-            <PageHeader
-                showTimeRange
-                title={t("label.create-entity", {
-                    entity: t("label.alert"),
-                })}
+        <PageContents centered title={t("label.create")}>
+            <AlertWizard
+                getAlertEvaluation={fetchAlertEvaluation}
+                getAllAlerts={fetchAllAlerts}
+                getAllSubscriptionGroups={fetchAllSubscriptionGroups}
+                onFinish={onAlertWizardFinish}
+                onSubscriptionGroupWizardFinish={
+                    onSubscriptionGroupWizardFinish
+                }
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <AlertWizard<EditableAlert>
-                        createNewMode
-                        alert={createDefaultAlert()}
-                        getAlertEvaluation={fetchAlertEvaluation}
-                        getAllAlerts={fetchAllAlerts}
-                        getAllSubscriptionGroups={fetchAllSubscriptionGroups}
-                        onFinish={onAlertWizardFinish}
-                        onSubscriptionGroupWizardFinish={
-                            onSubscriptionGroupWizardFinish
-                        }
-                    />
-                </Grid>
-            </PageContentsGridV1>
-        </PageV1>
+        </PageContents>
     );
 };

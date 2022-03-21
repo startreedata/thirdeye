@@ -1,3 +1,3 @@
-export type DatasourcesUpdatePageParams = {
+export interface DatasourcesUpdatePageParams {
     id: string;
-};
+}

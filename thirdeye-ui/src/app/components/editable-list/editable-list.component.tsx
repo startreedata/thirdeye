@@ -10,10 +10,10 @@ import {
     ListItemSecondaryAction,
     ListItemText,
     TextField,
-    Typography,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import SubdirectoryArrowLeftIcon from "@material-ui/icons/SubdirectoryArrowLeft";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import React, {
     FunctionComponent,
@@ -23,7 +23,6 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useCommonStyles } from "../../utils/material-ui/common.styles";
 import { EditableListProps } from "./editable-list.interfaces";
 import { useEditableListStyles } from "./editable-list.styles";
@@ -95,16 +94,9 @@ export const EditableList: FunctionComponent<EditableListProps> = (
     };
 
     return (
-        <Grid container alignItems="center">
-            {/* Input label */}
-            <Grid item xs={1}>
-                <Typography variant="subtitle2">
-                    {props.inputLabel || t("label.add")}
-                </Typography>
-            </Grid>
-
+        <Grid container>
             {/* Input */}
-            <Grid item xs={9}>
+            <Grid item sm={10} xs={9}>
                 <TextField
                     fullWidth
                     InputProps={{
@@ -112,7 +104,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                             // Add button
                             <InputAdornment position="end">
                                 <IconButton onClick={handleListItemAdd}>
-                                    <SubdirectoryArrowLeftIcon fontSize="small" />
+                                    <SubdirectoryArrowLeftIcon />
                                 </IconButton>
                             </InputAdornment>
                         ),
@@ -121,13 +113,14 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                     error={Boolean(helperText)}
                     helperText={helperText}
                     inputRef={inputRef}
+                    label={props.inputLabel || t("label.add")}
                     variant="outlined"
                     onKeyDown={handleInputKeyDown}
                 />
             </Grid>
 
             {/* Add button */}
-            <Grid item xs={2}>
+            <Grid item sm={2} xs={3}>
                 <Button
                     fullWidth
                     className={editableListClasses.addButton}
@@ -157,7 +150,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                             <ListItemText
                                                 primary={listItem}
                                                 primaryTypographyProps={{
-                                                    variant: "body2",
+                                                    variant: "body1",
                                                 }}
                                             />
 
@@ -168,7 +161,7 @@ export const EditableList: FunctionComponent<EditableListProps> = (
                                                         index
                                                     )}
                                                 >
-                                                    <CloseIcon fontSize="small" />
+                                                    <CloseIcon />
                                                 </IconButton>
                                             </ListItemSecondaryAction>
                                         </ListItem>

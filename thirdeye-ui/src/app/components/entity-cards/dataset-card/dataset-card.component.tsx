@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
     getDatasetsUpdatePath,
     getDatasetsViewPath,
@@ -24,9 +24,11 @@ import { DatasetCardProps } from "./dataset-card.interfaces";
 export const DatasetCard: FunctionComponent<DatasetCardProps> = (
     props: DatasetCardProps
 ) => {
-    const [datasetOptionsAnchorElement, setDatasetOptionsAnchorElement] =
-        useState<HTMLElement | null>();
-    const navigate = useNavigate();
+    const [
+        datasetOptionsAnchorElement,
+        setDatasetOptionsAnchorElement,
+    ] = useState<HTMLElement | null>();
+    const history = useHistory();
     const { t } = useTranslation();
 
     const handleDatasetOptionsClick = (
@@ -44,7 +46,7 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
             return;
         }
 
-        navigate(getDatasetsViewPath(props.uiDataset.id));
+        history.push(getDatasetsViewPath(props.uiDataset.id));
         handleDatasetOptionsClose();
     };
 
@@ -53,7 +55,7 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
             return;
         }
 
-        navigate(getDatasetsUpdatePath(props.uiDataset.id));
+        history.push(getDatasetsUpdatePath(props.uiDataset.id));
         handleDatasetOptionsClose();
     };
 
@@ -74,10 +76,7 @@ export const DatasetCard: FunctionComponent<DatasetCardProps> = (
                         <Grid container alignItems="center" spacing={0}>
                             <Grid item>
                                 {/* Dataset options button */}
-                                <IconButton
-                                    color="secondary"
-                                    onClick={handleDatasetOptionsClick}
-                                >
+                                <IconButton onClick={handleDatasetOptionsClick}>
                                     <MoreVertIcon />
                                 </IconButton>
 

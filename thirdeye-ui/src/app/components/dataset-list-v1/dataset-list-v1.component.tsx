@@ -1,13 +1,13 @@
 import { Button, Grid, Link } from "@material-ui/core";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import {
     getDatasetsUpdatePath,
@@ -19,18 +19,20 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     props: DatasetListV1Props
 ) => {
     const { t } = useTranslation();
-    const [selectedDataset, setSelectedDataset] =
-        useState<DataGridSelectionModelV1<UiDataset>>();
-    const navigate = useNavigate();
+    const [
+        selectedDataset,
+        setSelectedDataset,
+    ] = useState<DataGridSelectionModelV1>();
+    const history = useHistory();
 
     const handleDatasetDelete = (): void => {
         if (!selectedDataset) {
             return;
         }
 
-        const selectedSubScriptingGroupId = selectedDataset
+        const selectedSubScriptionGroupId = selectedDataset
             .rowKeyValues[0] as number;
-        const uiDataset = getUiDataset(selectedSubScriptingGroupId);
+        const uiDataset = getUiDataset(selectedSubScriptionGroupId);
         if (!uiDataset) {
             return;
         }
@@ -53,7 +55,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         const selectedSubScriptionGroupId = selectedDataset
             .rowKeyValues[0] as number;
 
-        navigate(getDatasetsUpdatePath(selectedSubScriptionGroupId));
+        history.push(getDatasetsUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -61,15 +63,21 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     );
 
     const handleDatasetViewDetailsById = (id: number): void => {
-        navigate(getDatasetsViewPath(id));
+        history.push(getDatasetsViewPath(id));
     };
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: UiDataset
+        data: Record<string, unknown>
     ): ReactElement => {
         return (
-            <Link onClick={() => handleDatasetViewDetailsById(data.id)}>
+            <Link
+                onClick={() =>
+                    handleDatasetViewDetailsById(
+                        ((data as unknown) as UiDataset).id
+                    )
+                }
+            >
                 {cellValue}
             </Link>
         );
@@ -98,10 +106,12 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<UiDataset>
+                <DataGridV1
                     hideBorder
                     columns={datasetColumns}
-                    data={props.datasets as UiDataset[]}
+                    data={
+                        (props.datasets as unknown) as Record<string, unknown>[]
+                    }
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

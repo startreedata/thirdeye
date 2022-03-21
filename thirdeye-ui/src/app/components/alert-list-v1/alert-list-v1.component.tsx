@@ -1,4 +1,12 @@
-import { Button, Grid, Link } from "@material-ui/core";
+import { Button, Grid, Link, Paper, useTheme } from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+} from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -6,31 +14,34 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "../../platform/components";
+import { useHistory } from "react-router-dom";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import {
-    getAlertsUpdatePath,
-    getAlertsViewPath,
-} from "../../utils/routes/routes.util";
-import { ActiveIndicator } from "../active-indicator/active-indicator.component";
+import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
+import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeSelectorV1 } from "../time-range/time-range-selector/time-range-selector-v1/time-range-selector-v1.component";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
+import { useAlertListV1Styles } from "./alert-list-v1.styles";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     props: AlertListV1Props
 ) => {
-    const [selectedAlert, setSelectedAlert] =
-        useState<DataGridSelectionModelV1<UiAlert>>();
+    const [
+        selectedAlert,
+        setSelectedAlert,
+    ] = useState<DataGridSelectionModelV1>();
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
-    const navigate = useNavigate();
+    const history = useHistory();
+
+    const {
+        timeRangeDuration,
+        recentCustomTimeRangeDurations,
+        setTimeRangeDuration,
+    } = useTimeRange();
 
     const { t } = useTranslation();
+    const theme = useTheme();
+    const { timeRangeContainer } = useAlertListV1Styles();
 
     const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
         return data?.map((alert, index) => ({
@@ -54,15 +65,19 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     }, [props.alerts]);
 
     const handleAlertViewDetails = (id: number): void => {
-        navigate(getAlertsViewPath(id));
+        history.push(getAlertsViewPath(id));
     };
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: UiAlert
+        data: Record<string, unknown>
     ): ReactElement => {
         return (
-            <Link onClick={() => handleAlertViewDetails(data.id)}>
+            <Link
+                onClick={() =>
+                    handleAlertViewDetails(((data as unknown) as UiAlert).id)
+                }
+            >
                 {cellValue}
             </Link>
         );
@@ -70,11 +85,29 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
 
     const renderAlertStatus = (
         _: Record<string, unknown>,
-        data: UiAlert
+        data: Record<string, unknown>
     ): ReactElement => {
-        const active = data.active;
+        const active = ((data as unknown) as UiAlert).active;
 
-        return <ActiveIndicator active={active} />;
+        return (
+            <>
+                {/* Active */}
+                {active && (
+                    <CheckIcon
+                        fontSize="small"
+                        htmlColor={theme.palette.success.main}
+                    />
+                )}
+
+                {/* Inactive */}
+                {!active && (
+                    <CloseIcon
+                        fontSize="small"
+                        htmlColor={theme.palette.error.main}
+                    />
+                )}
+            </>
+        );
     };
 
     const isActionButtonDisable = !(
@@ -91,15 +124,6 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
                 props.onDelete &&
                 props.onDelete(selectedUiAlert);
         }
-    };
-
-    const handleAlertEdit = (): void => {
-        if (!selectedAlert) {
-            return;
-        }
-        const selectedAlertId = selectedAlert.rowKeyValues[0] as number;
-
-        navigate(getAlertsUpdatePath(selectedAlertId));
     };
 
     const alertGroupColumns = [
@@ -131,11 +155,22 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
 
     return (
         <Grid item xs={12}>
+            <Paper className={timeRangeContainer} elevation={0}>
+                <PageContentsCardV1>
+                    <TimeRangeSelectorV1
+                        recentCustomTimeRangeDurations={
+                            recentCustomTimeRangeDurations
+                        }
+                        timeRangeDuration={timeRangeDuration}
+                        onChange={setTimeRangeDuration}
+                    />
+                </PageContentsCardV1>
+            </Paper>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<UiAlert>
+                <DataGridV1
                     hideBorder
                     columns={alertGroupColumns}
-                    data={alertsData as UiAlert[]}
+                    data={(alertsData as unknown) as Record<string, unknown>[]}
                     expandColumnKey="name"
                     rowKey="id"
                     scroll={DataGridScrollV1.Body}
@@ -143,28 +178,14 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
                         entity: t("label.alerts"),
                     })}
                     toolbarComponent={
-                        <Grid container alignItems="center" spacing={2}>
-                            {/* Edit */}
-                            <Grid item>
-                                <Button
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertEdit}
-                                >
-                                    {t("label.edit")}
-                                </Button>
-                            </Grid>
-
-                            {/* Delete */}
-                            <Grid>
-                                <Button
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
-                            </Grid>
+                        <Grid>
+                            <Button
+                                disabled={isActionButtonDisable}
+                                variant="contained"
+                                onClick={handleAlertDelete}
+                            >
+                                {t("label.delete")}
+                            </Button>
                         </Grid>
                     }
                     onSelectionChange={setSelectedAlert}

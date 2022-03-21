@@ -11,7 +11,7 @@
           "params": {
             "component.detector.type": "ABSOLUTE_CHANGE",
             "component.detector.timezone": "US/Pacific",
-            "component.detector.monitoringGranularity": "P1D",
+            "component.detector.monitoringGranularity": "1_DAYS",
             "component.detector.absoluteChange": "100000",
             "component.detector.offset": "wo1w",
             "component.detector.pattern": "down",
@@ -39,7 +39,7 @@
           "name": "baselineDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
             "component.pinot.dataSource": "pinot1",
             "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200202 AND \"date\" <= 20200723 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
             "component.pinot.tableName": "pageviews",
@@ -58,7 +58,7 @@
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
-            "component.pinot.className": "ai.startree.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
+            "component.pinot.className": "org.apache.pinot.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher",
             "component.pinot.dataSource": "pinot1",
             "component.pinot.query": "SELECT \"date\" as ts, sum(views) as met FROM pageviews WHERE \"date\" >= 20200209 AND \"date\" <= 20200730 GROUP BY \"date\" ORDER BY \"date\" LIMIT 1000",
             "component.pinot.tableName": "pageviews",

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+base_dir=$(dirname "$0")
+cd "${base_dir}" || exit 1
+
+# fetch dependencies. example: mysql. See Chart.yaml
+# to skip update, use this: export THIRDEYE_HELM_DEPENDENCY_NO_UPDATE="true"
+if [ -z "$THIRDEYE_HELM_DEPENDENCY_NO_UPDATE" ]; then
+  helm dependency update
+fi
+
+# Note:
+# - initdb files must end with .sql
+# - When injecting yaml config via terminal, the period ('.') must be escaped and quoted
+helm "$@" --set-file mysql.initializationFiles."initdb\.sql"="./config/initdb.sql"

@@ -92,7 +92,14 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                     isEmpty(errMessages)
                         ? notify(
                               NotificationTypeV1.Error,
-                              t("message.fetch-error")
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertsResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.alerts"
+                                          : "label.subscription-group"
+                                  ),
+                              })
                           )
                         : errMessages.map((err) =>
                               notify(NotificationTypeV1.Error, err)

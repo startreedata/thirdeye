@@ -58,11 +58,19 @@ export const AlertsAllPage: FunctionComponent = () => {
                               PROMISES.REJECTED
                             ? subscriptionGroupsResponse.reason
                             : ({} as AxiosError);
+
                     const errMessages = getErrorMessages(axiosError);
                     isEmpty(errMessages)
                         ? notify(
                               NotificationTypeV1.Error,
-                              t("message.fetch-error")
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertsResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.alerts"
+                                          : "label.subscription-groups"
+                                  ),
+                              })
                           )
                         : errMessages.map((err) =>
                               notify(NotificationTypeV1.Error, err)

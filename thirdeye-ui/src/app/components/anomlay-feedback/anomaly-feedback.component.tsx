@@ -1,4 +1,6 @@
 import { Card, CardContent, MenuItem, TextField } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -7,6 +9,7 @@ import {
 } from "../../platform/components";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { useDialog } from "../dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyFeedbackProps } from "./anomaly-feedback.interfaces";
@@ -70,13 +73,20 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                 );
                 setCurrentlySelected(feedbackType);
             })
-            .catch(() => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.anomaly-feedback"),
-                    })
-                );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+
+                          t("message.update-error", {
+                              entity: t("label.anomaly-feedback"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -86,12 +96,6 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                 <TextField
                     fullWidth
                     select
-                    InputLabelProps={{
-                        style: {
-                            backgroundColor: "white",
-                            paddingRight: "5px",
-                        },
-                    }}
                     id="anomaly-feedback-select"
                     label="Is this an anomaly?"
                     value={currentlySelected}

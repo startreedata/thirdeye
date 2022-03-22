@@ -45,19 +45,6 @@ public class AlertFilterUtils {
     return makeEmailNotifications(config, recipients, PROP_CC_VALUE, PROP_BCC_VALUE);
   }
 
-  // TODO enable this test when jira notification is supported
-//  static DetectionAlertFilterNotification makeJiraNotifications(SubscriptionGroupDTO config,
-//      String assignee) {
-//    Map<String, Object> alertProps = new HashMap<>();
-//    Map<String, Object> jiraParams = new HashMap<>();
-//    jiraParams.put(PROP_ASSIGNEE, assignee);
-//    alertProps.put(PROP_JIRA_SCHEME, jiraParams);
-//
-//    SubscriptionGroupDTO subsConfig = SubscriptionUtils
-//        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
-//    return new DetectionAlertFilterNotification(subsConfig);
-//  }
-
   static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config,
       List<String> toRecipients, List<String> ccRecipients, List<String> bccRecipients) {
     NotificationSchemesDto notificationSchemes = new NotificationSchemesDto();

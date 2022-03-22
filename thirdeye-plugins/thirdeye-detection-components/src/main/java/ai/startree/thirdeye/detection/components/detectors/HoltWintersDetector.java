@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.detection.BaselineProvider;
 import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,6 +59,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
   private static final Logger LOG = LoggerFactory.getLogger(HoltWintersDetector.class);
   private static final String COL_ERROR = "error";
+  @VisibleForTesting
+  protected boolean FAST_SKIP_ZEROES = true;
 
   private int period;
   private double alpha;
@@ -108,8 +111,17 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     for (int i = 0; i < seasons; i++) {
       for (int j = 0; j < period; j++) {
-        averagedObservations[(i * period) + j] = y[(i * period) + j]
-            / seasonalMean[i];
+        // zero case
+        if (seasonalMean[i] == 0 && y[(i * period) + j] == 0) {
+          // no seasonality
+          averagedObservations[(i * period) + j] = 1;
+        }
+        // case seasonalMean = 0 and y[(i * period) + j] != 0 cannot happen if all values are positive
+        // very unlikely to happen if at least one value is not null
+        // fixme cyril add logging if this happens (or reimplement HW) - for the moment returns a nan
+        else {
+          averagedObservations[(i * period) + j] = y[(i * period) + j] / seasonalMean[i];
+        }
       }
     }
 
@@ -131,6 +143,14 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
    * @return the error bound
    */
   private static double calculateErrorBound(final List<Double> givenNumbers, final double zscore) {
+    // no data: cannot compute mean and variance
+    if (givenNumbers.size() == 0) {
+      return 0;
+    }
+    // one point: cannot compute variance - apply rule of thumb
+    if (givenNumbers.size() == 1) {
+      return Math.abs(givenNumbers.get(0)) / 2;
+    }
     // calculate the mean value (= average)
     double sum = 0.0;
     for (final double num : givenNumbers) {
@@ -262,7 +282,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       sNew = alpha * (y[i] / seasonal[i]) + (1 - alpha) * (s + t);
       tNew = beta * (sNew - s) + (1 - beta) * t;
       if (i + period <= y.length) {
-        seasonal[i + period] = gamma * (y[i] / (sNew * seasonal[i])) + (1 - gamma) * seasonal[i];
+        // history of zero case
+        if (sNew == 0) {
+          seasonal[i + period] = 1;
+        } else {
+          seasonal[i + period] = gamma * (y[i] / (sNew * seasonal[i])) + (1 - gamma) * seasonal[i];
+        }
       }
       s = sNew;
       t = tNew;
@@ -274,7 +299,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     final List<Double> diff = new ArrayList<>();
     double sse = 0;
     for (int i = 0; i < y.length; i++) {
-      if (forecast[i] != 0) {
+      if (forecast[i] != 0 || (forecast[i] == 0 && y[i] != 0)) {
         sse += Math.pow(y[i] - forecast[i], 2);
         diff.add(forecast[i] - y[i]);
       }
@@ -313,13 +338,26 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
       // We need at least 2 periods of data
+      // fixme cyril period is in number of observations - prefer ISO 8601 or auto period
       if (trainingDF.size() < 2 * period) {
+        // fixme cyril adding warn only to not change the behavior but I think this should throw an exception - it will fail later
+        LOG.warn("Not enough historical data available for Holt-Winters algorithm. Alert configuration may be incorrect.");
         continue;
       }
 
       resultTimeArray[k] = forecastDF.getLong(COL_TIME, k);
 
       final double[] y = trainingDF.getDoubles(COL_VALUE).values();
+      // fixme cyril only a quickfix - rewrite the whole algo
+      if (FAST_SKIP_ZEROES && Arrays.stream(y).allMatch(value -> value == 0)) {
+        // training data is only 0 - just predict 0 -
+        baselineArray[k] = 0;
+        errorArray[k] = 0;
+        upperBoundArray[k] = 0;
+        lowerBoundArray[k] = 0;
+        continue;
+      }
+
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
@@ -390,6 +428,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     try {
       final PointValuePair optimal = optimizer
           .optimize(objectiveFunction, goal, bounds, initGuess, maxIter, maxEval);
+      LOG.debug("Performed {} iterations to optimize Holt-Winters", optimizer.getIterations());
       params = new HoltWintersParams(optimal.getPoint()[0], optimal.getPoint()[1],
           optimal.getPoint()[2]);
     } catch (final Exception e) {

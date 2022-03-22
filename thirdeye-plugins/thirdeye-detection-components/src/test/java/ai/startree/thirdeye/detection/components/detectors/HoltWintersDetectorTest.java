@@ -40,8 +40,11 @@ public class HoltWintersDetectorTest {
   private static final long JANUARY_3_2021 = 1609632000000L;
   private static final long JANUARY_4_2021 = 1609718400000L;
   private static final long JANUARY_5_2021 = 1609804800000L;
+  private static final long JANUARY_6_2021 = 1609891200000L;
+  private static final long JANUARY_7_2021 = 1609977600000L;
+  private static final long JANUARY_8_2021 = 1610064000000L;
 
-  private static final DataFrame historicalData = new DataFrame()
+  private static final DataFrame HISTORICAL_DATA = new DataFrame()
       .addSeries(DataFrame.COL_TIME,
           DECEMBER_22_2020,
           DECEMBER_23_2020,
@@ -79,7 +82,7 @@ public class HoltWintersDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 120, 80, 100, 120, 80)
-        .append(historicalData)
+        .append(HISTORICAL_DATA)
         .sortedBy(DataFrame.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
@@ -133,6 +136,67 @@ public class HoltWintersDetectorTest {
   }
 
   @Test
+  public void testZeroesInHistoricalData() throws DetectorException {
+    final DataFrame historicalDataWithZeroes = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            DECEMBER_22_2020,
+            DECEMBER_23_2020,
+            DECEMBER_24_2020,
+            DECEMBER_25_2020,
+            DECEMBER_26_2020,
+            DECEMBER_27_2020,
+            DECEMBER_28_2020,
+            DECEMBER_29_2020,
+            DECEMBER_30_2020,
+            DECEMBER_31_2020)
+        // mean 100, std 16.329932
+        .addSeries(DataFrame.COL_VALUE,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(DataFrame.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021,
+            JANUARY_6_2021,
+            JANUARY_7_2021,
+            JANUARY_8_2021)
+        .addSeries(DataFrame.COL_VALUE, 0, 0, 100, 120, 80, 100, 120, 80)
+        .append(historicalDataWithZeroes)
+        .sortedBy(DataFrame.COL_TIME);
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+
+    HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
+    spec.setMonitoringGranularity("P1D");
+    spec.setLookback(10);
+    spec.setPeriod(3);
+    spec.setSensitivity(0); // corresponds to zscore of 1
+    HoltWintersDetector detector = new HoltWintersDetector();
+    detector.init(spec);
+
+    DataFrame outputSkippingZeroes = detector.runDetection(interval, timeSeriesMap).getDataFrame();
+    detector.FAST_SKIP_ZEROES = false;
+    DataFrame outputComputingWhenZeroes = detector.runDetection(interval, timeSeriesMap).getDataFrame();
+
+    // ensure fast zeroes skipping does not change the behaviour
+    assertThat(outputSkippingZeroes).isEqualTo(outputComputingWhenZeroes);
+    // check rule of thumb error when only one element to compute variance
+    assertThat(outputSkippingZeroes.get("error").getDoubles().get(13)).isEqualTo(50);
+  }
+
+  @Test
   public void testDetectionRunsOnIntervalOnly() throws DetectorException {
     // test anomaly analysis is only conducted on the interval
     // notice the interval is smaller than the dataframe data
@@ -146,7 +210,7 @@ public class HoltWintersDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 120, 80, 100, 120, 80)
-        .append(historicalData)
+        .append(HISTORICAL_DATA)
         .sortedBy(DataFrame.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
@@ -181,7 +245,7 @@ public class HoltWintersDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
-        .append(historicalData)
+        .append(HISTORICAL_DATA)
         .sortedBy(DataFrame.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
@@ -221,7 +285,7 @@ public class HoltWintersDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
-        .append(historicalData)
+        .append(HISTORICAL_DATA)
         .sortedBy(DataFrame.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
@@ -262,7 +326,7 @@ public class HoltWintersDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
-        .append(historicalData)
+        .append(HISTORICAL_DATA)
         .sortedBy(DataFrame.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 

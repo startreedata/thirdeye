@@ -27,9 +27,22 @@ else
   echo "Could not connect to github with ssh" || exit 1
 fi
 
+# setup git itself
+git config --global user.email "thirdeye-ci@startree.ai"
+git config --global user.name "ThirdEye CI"
+
 pushd src && \
   rm -rf ~/.m2 && \
   ln -fs $(pwd)/m2 ~/.m2
+
+# concourse checkouts a particular commit in detached mode - maven requires to be on a precise branch - get back on branch
+git_ref=$(git rev-parse HEAD)
+git checkout "$GIT_BRANCH"
+master_last_commit=$(git rev-parse HEAD)
+if [ $git_ref != $master_last_commit ]; then
+  echo "Concourse commit ref $git_ref and runtime master ref $master_last_commit are not the same. This should not happen. Aborting release."
+  exit 1
+fi
 
 cat > ~/.m2/settings.xml <<EOF
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
@@ -51,4 +64,4 @@ cat > ~/.m2/settings.xml <<EOF
 </settings>
 EOF
 
-./mvnw -B -DskipTests -Darguments=-DskipTests release:clean initialize release:prepare -DdryRun=true
+./mvnw -B -DskipTests -Darguments=-DskipTests release:clean initialize release:prepare

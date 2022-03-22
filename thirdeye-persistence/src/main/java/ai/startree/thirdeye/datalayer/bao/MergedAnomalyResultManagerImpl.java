@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.datalayer.bao;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -58,15 +61,16 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     super(MergedAnomalyResultDTO.class, genericPojoDao);
   }
 
+  @Override
   public Long save(MergedAnomalyResultDTO mergedAnomalyResultDTO) {
     if (mergedAnomalyResultDTO.getId() != null) {
-      //TODO: throw exception and force the caller to call update instead
       update(mergedAnomalyResultDTO);
       return mergedAnomalyResultDTO.getId();
     }
     return saveAnomaly(mergedAnomalyResultDTO, new HashSet<>());
   }
 
+  @Override
   public int update(MergedAnomalyResultDTO mergedAnomalyResultDTO) {
     if (mergedAnomalyResultDTO.getId() == null) {
       Long id = save(mergedAnomalyResultDTO);
@@ -103,16 +107,10 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
 
   private int updateAnomaly(MergedAnomalyResultDTO mergedAnomalyResultDTO,
       Set<MergedAnomalyResultDTO> visitedAnomalies) {
-    visitedAnomalies.add(mergedAnomalyResultDTO);
+    checkArgument(mergedAnomalyResultDTO.getId() != null,
+        "Anomaly id is null. Anomaly id should not be null for an update");
 
-    if (mergedAnomalyResultDTO.getId() == null) {
-      Long id = saveAnomaly(mergedAnomalyResultDTO, visitedAnomalies);
-      if (id > 0) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
+    visitedAnomalies.add(mergedAnomalyResultDTO);
 
     MergedAnomalyResultDTO mergeAnomalyBean = convertMergeAnomalyDTO2Bean(mergedAnomalyResultDTO);
     Set<Long> childAnomalyIds = saveChildAnomalies(mergedAnomalyResultDTO, visitedAnomalies);
@@ -339,17 +337,16 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
 
   @Override
   public MergedAnomalyResultDTO convertMergeAnomalyDTO2Bean(MergedAnomalyResultDTO entity) {
-    MergedAnomalyResultDTO bean = (MergedAnomalyResultDTO) entity;
-    AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
-    if (feedbackDTO != null && feedbackDTO.getId() != null) {
-      bean.setAnomalyFeedbackId(feedbackDTO.getId());
-    }
+    Optional.ofNullable(entity.getFeedback())
+        .map(feedback -> (AnomalyFeedbackDTO) feedback)
+        .map(AnomalyFeedbackDTO::getId)
+        .ifPresent(entity::setAnomalyFeedbackId);
 
-    if (entity.getAnomalyFunction() != null) {
-      bean.setFunctionId(entity.getAnomalyFunction().getId());
-    }
+    Optional.ofNullable(entity.getAnomalyFunction())
+        .map(AnomalyFunctionDTO::getId)
+        .ifPresent(entity::setFunctionId);
 
-    return bean;
+    return entity;
   }
 
   @Override

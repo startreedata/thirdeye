@@ -119,12 +119,6 @@ public class DetectionTestUtils {
     return anomaly;
   }
 
-  public static MergedAnomalyResultDTO makeAnomalyWithProps(long start, long end,
-      Map<String, String> props) {
-    return DetectionTestUtils.makeAnomaly(PROP_ID_VALUE, null, start, end, null, null,
-        Collections.emptyMap(), props, AnomalySeverity.DEFAULT);
-  }
-
   public static MergedAnomalyResultDTO makeAnomaly(long start, long end, AnomalySeverity severity) {
     return DetectionTestUtils.makeAnomaly(PROP_ID_VALUE, null, start, end, null, null,
         Collections.emptyMap(), Collections.emptyMap(), severity);

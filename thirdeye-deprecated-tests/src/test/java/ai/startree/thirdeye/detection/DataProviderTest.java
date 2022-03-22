@@ -77,8 +77,7 @@ public class DataProviderTest {
   private List<Long> datasetIds;
   private List<Long> detectionIds;
 
-  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end,
-      Iterable<String> filterStrings) {
+  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setDetectionConfigId(configId);
     anomaly.setStartTime(start);
@@ -87,12 +86,6 @@ public class DataProviderTest {
     anomaly.setChildIds(new HashSet<>());
     anomaly.setType(AnomalyType.DEVIATION);
 
-    StringBuilder filterUrn = new StringBuilder();
-    for (String fs : filterStrings) {
-      filterUrn.append(":").append(fs);
-    }
-
-    anomaly.setMetricUrn("thirdeye:metric:1234" + filterUrn.toString());
     return anomaly;
   }
 
@@ -207,24 +200,19 @@ public class DataProviderTest {
     // anomalies
     this.anomalyIds = new ArrayList<>();
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L,
-            Arrays.asList("a=1", "c=3", "b=2"))));
+        makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L, Arrays.asList("a=1", "c=4"))));
+        makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L,
-            Collections.emptyList())));
+        makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=3", "c=3"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
 
     // metrics
     this.metricIds = new ArrayList<>();
@@ -438,8 +426,7 @@ public class DataProviderTest {
 
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L,
-            Collections.emptyList())));
+        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L)));
   }
 
   @Test(enabled = false)
@@ -451,15 +438,12 @@ public class DataProviderTest {
 
     Assert.assertEquals(anomalies.size(), 2);
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(0), detectionIds.get(0), 4000000L, 8000000L,
-            Arrays.asList("a=1", "c=3", "b=2"))));
+        makeAnomaly(this.anomalyIds.get(0), detectionIds.get(0), 4000000L, 8000000L)));
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L)));
 
     Assert.assertFalse(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L,
-            Collections.emptyList())));
+        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L)));
   }
 
   @Test(enabled = false)
@@ -470,16 +454,12 @@ public class DataProviderTest {
         .fetchAnomalies(Collections.singleton(slice)).get(slice);
     Assert.assertEquals(anomalies.size(), 2);
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(4), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(4), detectionIds.get(1), 14400000L, 18000000L)));
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(6), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
+        makeAnomaly(this.anomalyIds.get(6), detectionIds.get(1), 14400000L, 18000000L)));
     Assert.assertFalse(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L)));
     Assert.assertFalse(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=3", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L)));
   }
 }

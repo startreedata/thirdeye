@@ -14,10 +14,9 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import {
-    deleteAnomaly,
-    getAnomaliesByTime,
-} from "../../rest/anomalies/anomalies.rest";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
@@ -26,6 +25,8 @@ import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
+    const { getAnomalies, status: getAnomaliesRequestStatus } =
+        useGetAnomalies();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -35,6 +36,21 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         fetchAnomaliesByTime();
     }, [searchParams]);
 
+    useEffect(() => {
+        if (
+            getAnomaliesRequestStatus === ActionStatus.Done &&
+            uiAnomalies &&
+            uiAnomalies.length === 0
+        ) {
+            notify(
+                NotificationTypeV1.Info,
+                t("message.no-data-for-entity-for-date-range", {
+                    entity: t("label.anomalies"),
+                })
+            );
+        }
+    }, [getAnomaliesRequestStatus, uiAnomalies]);
+
     const fetchAnomaliesByTime = (): void => {
         setUiAnomalies(null);
 
@@ -42,9 +58,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
 
         let fetchedUiAnomalies: UiAnomaly[] = [];
-        getAnomaliesByTime(Number(start), Number(end))
+        getAnomalies({ startTime: Number(start), endTime: Number(end) })
             .then((anomalies) => {
-                fetchedUiAnomalies = getUiAnomalies(anomalies);
+                if (anomalies && anomalies.length) {
+                    fetchedUiAnomalies = getUiAnomalies(anomalies);
+                }
             })
             .finally(() => setUiAnomalies(fetchedUiAnomalies));
     };
@@ -101,8 +119,8 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>
+                    {/* Anomaly list */}
                     <PageContentsCardV1 disablePadding fullHeight>
-                        {/* Anomaly list */}
                         <AnomalyListV1
                             anomalies={uiAnomalies}
                             searchFilterValue={searchParams.get(

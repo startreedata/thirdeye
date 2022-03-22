@@ -18,6 +18,7 @@ import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
 import { getMetric, updateMetric } from "../../rest/metrics/metrics.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";
@@ -75,13 +76,13 @@ export const MetricsUpdatePage: FunctionComponent = () => {
             .then(([metricResponse, datasetsResponse]): void => {
                 // Determine if any of the calls failed
                 if (
-                    metricResponse.status === "rejected" ||
-                    datasetsResponse.status === "rejected"
+                    metricResponse.status === PROMISES.REJECTED ||
+                    datasetsResponse.status === PROMISES.REJECTED
                 ) {
                     const axiosError =
-                        datasetsResponse.status === "rejected"
+                        datasetsResponse.status === PROMISES.REJECTED
                             ? datasetsResponse.reason
-                            : metricResponse.status === "rejected"
+                            : metricResponse.status === PROMISES.REJECTED
                             ? metricResponse.reason
                             : ({} as AxiosError);
                     const errMessages = getErrorMessages(axiosError);
@@ -96,10 +97,10 @@ export const MetricsUpdatePage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                if (metricResponse.status === "fulfilled") {
+                if (metricResponse.status === PROMISES.FULFILLED) {
                     setMetric(metricResponse.value);
                 }
-                if (datasetsResponse.status === "fulfilled") {
+                if (datasetsResponse.status === PROMISES.FULFILLED) {
                     setDatasets(datasetsResponse.value);
                 }
             })

@@ -21,6 +21,7 @@ import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
@@ -84,13 +85,14 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             .then(([subscriptionGroupResponse, alertsResponse]): void => {
                 // Determine if any of the calls failed
                 if (
-                    subscriptionGroupResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
+                    subscriptionGroupResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
                 ) {
                     const axiosError =
-                        alertsResponse.status === "rejected"
+                        alertsResponse.status === PROMISES.REJECTED
                             ? alertsResponse.reason
-                            : subscriptionGroupResponse.status === "rejected"
+                            : subscriptionGroupResponse.status ===
+                              PROMISES.REJECTED
                             ? subscriptionGroupResponse.reason
                             : ({} as AxiosError);
                     const errMessages = getErrorMessages(axiosError);
@@ -105,10 +107,10 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                if (subscriptionGroupResponse.status === "fulfilled") {
+                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
                     setSubscriptionGroup(subscriptionGroupResponse.value);
                 }
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     setAlerts(alertsResponse.value);
                 }
             })

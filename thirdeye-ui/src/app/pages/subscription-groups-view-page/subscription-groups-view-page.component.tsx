@@ -28,6 +28,7 @@ import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsAllPath } from "../../utils/routes/routes.util";
@@ -77,13 +78,14 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
             .then(([subscriptionGroupResponse, alertsResponse]) => {
                 // Determine if any of the calls failed
                 if (
-                    subscriptionGroupResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
+                    subscriptionGroupResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
                 ) {
                     const axiosError =
-                        alertsResponse.status === "rejected"
+                        alertsResponse.status === PROMISES.REJECTED
                             ? alertsResponse.reason
-                            : subscriptionGroupResponse.status === "rejected"
+                            : subscriptionGroupResponse.status ===
+                              PROMISES.REJECTED
                             ? subscriptionGroupResponse.reason
                             : ({} as AxiosError);
                     const errMessages = getErrorMessages(axiosError);
@@ -98,10 +100,10 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     fetchedAlerts = alertsResponse.value;
                 }
-                if (subscriptionGroupResponse.status === "fulfilled") {
+                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
                     fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
                         subscriptionGroupResponse.value,
                         fetchedAlerts

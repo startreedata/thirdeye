@@ -18,6 +18,7 @@ import { getDataset, updateDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
@@ -91,13 +92,13 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
             .then(([datasetResponse, datasourcesResponse]): void => {
                 // Determine if any of the calls failed
                 if (
-                    datasetResponse.status === "rejected" ||
-                    datasourcesResponse.status === "rejected"
+                    datasetResponse.status === PROMISES.REJECTED ||
+                    datasourcesResponse.status === PROMISES.REJECTED
                 ) {
                     const axiosError =
-                        datasourcesResponse.status === "rejected"
+                        datasourcesResponse.status === PROMISES.REJECTED
                             ? datasourcesResponse.reason
-                            : datasetResponse.status === "rejected"
+                            : datasetResponse.status === PROMISES.REJECTED
                             ? datasetResponse.reason
                             : ({} as AxiosError);
                     const errMessages = getErrorMessages(axiosError);
@@ -112,10 +113,10 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                if (datasetResponse.status === "fulfilled") {
+                if (datasetResponse.status === PROMISES.FULFILLED) {
                     setDataset(datasetResponse.value);
                 }
-                if (datasourcesResponse.status === "fulfilled") {
+                if (datasourcesResponse.status === PROMISES.FULFILLED) {
                     setDatasources(datasourcesResponse.value);
                 }
             })

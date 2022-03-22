@@ -20,6 +20,7 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
@@ -45,13 +46,14 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             .then(([subscriptionGroupsResponse, alertsResponse]) => {
                 // Determine if any of the calls failed
                 if (
-                    subscriptionGroupsResponse.status === "rejected" ||
-                    alertsResponse.status === "rejected"
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
                 ) {
                     const axiosError =
-                        alertsResponse.status === "rejected"
+                        alertsResponse.status === PROMISES.REJECTED
                             ? alertsResponse.reason
-                            : subscriptionGroupsResponse.status === "rejected"
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
                             ? subscriptionGroupsResponse.reason
                             : ({} as AxiosError);
                     const errMessages = getErrorMessages(axiosError);
@@ -66,10 +68,10 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     fetchedAlerts = alertsResponse.value;
                 }
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedUiSubscriptionGroups = getUiSubscriptionGroups(
                         subscriptionGroupsResponse.value,
                         fetchedAlerts

@@ -36,6 +36,7 @@ import {
     createAlertEvaluation,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -141,13 +142,14 @@ export const AlertsViewPage: FunctionComponent = () => {
             .then(([alertResponse, subscriptionGroupsResponse]) => {
                 // Determine if any of the calls failed
                 if (
-                    subscriptionGroupsResponse.status === "rejected" ||
-                    alertResponse.status === "rejected"
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertResponse.status === PROMISES.REJECTED
                 ) {
                     const axiosError =
-                        alertResponse.status === "rejected"
+                        alertResponse.status === PROMISES.REJECTED
                             ? alertResponse.reason
-                            : subscriptionGroupsResponse.status === "rejected"
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
                             ? subscriptionGroupsResponse.reason
                             : ({} as AxiosError);
                     const errMessages = getErrorMessages(axiosError);
@@ -162,11 +164,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                 }
 
                 // Attempt to gather data
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
                 }
-                if (alertResponse.status === "fulfilled") {
+                if (alertResponse.status === PROMISES.FULFILLED) {
                     fetchedUiAlert = getUiAlert(
                         alertResponse.value,
                         fetchedSubscriptionGroups

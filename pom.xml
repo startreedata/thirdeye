@@ -5,7 +5,7 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.pinot.thirdeye</groupId>
+  <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
   <version>1.37.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -334,47 +334,47 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-spi</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-persistence</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-datasources</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-pinot</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-detection-components</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-server</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-dashboard</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-notifications</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -765,7 +765,7 @@
 
       <!-- test dependencies -->
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-persistence</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
@@ -847,7 +847,7 @@
 
       <!-- Test containers -->
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>pinot-test-container</artifactId>
         <version>${project.version}</version>
       </dependency>

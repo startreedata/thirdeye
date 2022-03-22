@@ -258,20 +258,35 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                         </Typography>
                     </Grid>
                     <Grid item sm={6} xs={12}>
-                        <TextField
-                            fullWidth
-                            select
-                            label={t("label.baseline-week-offset")}
-                            size="small"
-                            value={comparisonOffset}
-                            onChange={onHandleComparisonOffsetSelection}
-                        >
-                            {baselineOptions.map((option) => (
-                                <MenuItem key={option.key} value={option.key}>
-                                    {option.description}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                        <Grid container spacing={0}>
+                            <Grid item sm={6} xs={12}>
+                                <Box p="10.5px 0">
+                                    <label>
+                                        <strong>
+                                            {t("label.baseline-week-offset")}:
+                                        </strong>
+                                    </label>
+                                </Box>
+                            </Grid>
+                            <Grid item sm={6} xs={12}>
+                                <TextField
+                                    fullWidth
+                                    select
+                                    size="small"
+                                    value={comparisonOffset}
+                                    onChange={onHandleComparisonOffsetSelection}
+                                >
+                                    {baselineOptions.map((option) => (
+                                        <MenuItem
+                                            key={option.key}
+                                            value={option.key}
+                                        >
+                                            {option.description}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             </CardContent>

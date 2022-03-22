@@ -1,4 +1,4 @@
-import { Card, CardContent, MenuItem, TextField } from "@material-ui/core";
+import { Box, Card, CardContent, MenuItem, TextField } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
@@ -93,11 +93,15 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     return (
         <Card className={className} variant="outlined">
             <CardContent>
+                <Box marginBottom="4px">
+                    <label>
+                        <strong>Is this an anomaly?</strong>
+                    </label>
+                </Box>
                 <TextField
                     fullWidth
                     select
                     id="anomaly-feedback-select"
-                    label="Is this an anomaly?"
                     value={currentlySelected}
                     onChange={handleChange}
                 >

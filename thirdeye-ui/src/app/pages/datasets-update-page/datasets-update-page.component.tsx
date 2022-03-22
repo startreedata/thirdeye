@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,7 +18,9 @@ import { getDataset, updateDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
 import { DatasetsUpdatePageParams } from "./datasets-update-page.interfaces";
 
@@ -51,13 +54,19 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 // Redirect to datasets detail path
                 navigate(getDatasetsViewPath(dataset.id));
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.dataset"),
-                    })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -83,17 +92,31 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
             .then(([datasetResponse, datasourcesResponse]): void => {
                 // Determine if any of the calls failed
                 if (
-                    datasetResponse.status === "rejected" ||
-                    datasourcesResponse.status === "rejected"
+                    datasetResponse.status === PROMISES.REJECTED ||
+                    datasourcesResponse.status === PROMISES.REJECTED
                 ) {
-                    notify(NotificationTypeV1.Error, t("message.fetch-error"));
+                    const axiosError =
+                        datasourcesResponse.status === PROMISES.REJECTED
+                            ? datasourcesResponse.reason
+                            : datasetResponse.status === PROMISES.REJECTED
+                            ? datasetResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 }
 
                 // Attempt to gather data
-                if (datasetResponse.status === "fulfilled") {
+                if (datasetResponse.status === PROMISES.FULFILLED) {
                     setDataset(datasetResponse.value);
                 }
-                if (datasourcesResponse.status === "fulfilled") {
+                if (datasourcesResponse.status === PROMISES.FULFILLED) {
                     setDatasources(datasourcesResponse.value);
                 }
             })

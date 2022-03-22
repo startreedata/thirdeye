@@ -1,5 +1,6 @@
 import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -35,7 +36,9 @@ import {
     createAlertEvaluation,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAlertsAllPath,
     getAnomaliesAnomalyPath,
@@ -137,12 +140,35 @@ export const AlertsViewPage: FunctionComponent = () => {
             getAllSubscriptionGroups(),
         ])
             .then(([alertResponse, subscriptionGroupsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertResponse.status === PROMISES.REJECTED
+                            ? alertResponse.reason
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
                 }
-                if (alertResponse.status === "fulfilled") {
+                if (alertResponse.status === PROMISES.FULFILLED) {
                     fetchedUiAlert = getUiAlert(
                         alertResponse.value,
                         fetchedSubscriptionGroups

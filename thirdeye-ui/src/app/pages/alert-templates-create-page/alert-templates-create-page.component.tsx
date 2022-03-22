@@ -1,4 +1,6 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +18,7 @@ import {
     NewAlertTemplate,
 } from "../../rest/dto/alert-template.interfaces";
 import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 
 export const AlertTemplatesCreatePage: FunctionComponent = () => {
@@ -42,13 +45,20 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
                 alertTemplate.id &&
                     navigate(getAlertTemplatesViewPath(alertTemplate.id));
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.create-error", {
-                        entity: t("label.alert-template"),
-                    })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+
+                          t("message.create-error", {
+                              entity: t("label.alert-template"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

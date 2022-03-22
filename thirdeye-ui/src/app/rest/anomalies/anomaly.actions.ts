@@ -11,18 +11,18 @@ import {
 } from "./anomaly.interfaces";
 
 export const useGetAnomaly = (): GetAnomaly => {
-    const { data, makeRequest, status, errorMessage } =
+    const { data, makeRequest, status, errorMessages } =
         useHTTPAction<Anomaly>(getAnomalyRest);
 
     const getAnomaly = (id: number): Promise<Anomaly | undefined> => {
         return makeRequest(id);
     };
 
-    return { anomaly: data, getAnomaly, status, errorMessage };
+    return { anomaly: data, getAnomaly, status, errorMessages };
 };
 
 export const useGetAnomalies = (): GetAnomalies => {
-    const { data, makeRequest, status, errorMessage } =
+    const { data, makeRequest, status, errorMessages } =
         useHTTPAction<Anomaly[]>(getAnomaliesRest);
 
     const getAnomalies = (
@@ -35,6 +35,6 @@ export const useGetAnomalies = (): GetAnomalies => {
         anomalies: data,
         getAnomalies,
         status,
-        errorMessage,
+        errorMessages,
     };
 };

@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { assign, toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { assign, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -19,6 +20,7 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { omitNonUpdatableData } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 import { DatasourcesUpdatePageParams } from "./datasources-update-page.interfaces";
 
@@ -58,13 +60,19 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
                 // Redirect to datasources detail path
                 navigate(getDatasourcesViewPath(datasourceResponse.id));
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.datasource"),
-                    })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -87,8 +95,14 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
             .then((datasource) => {
                 setDatasource(datasource);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally((): void => {
                 setLoading(false);

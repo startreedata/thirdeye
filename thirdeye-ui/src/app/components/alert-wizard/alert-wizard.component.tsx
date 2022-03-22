@@ -1,13 +1,16 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
+import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
     JSONEditorV1,
+    NotificationTypeV1,
     PageContentsCardV1,
     StepperV1,
+    useNotificationProviderV1,
 } from "../../platform/components";
 import {
     Alert,
@@ -22,6 +25,7 @@ import {
 } from "../../utils/alerts/alerts.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
@@ -62,6 +66,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
     const [currentWizardStep, setCurrentWizardStep] = useState<AlertWizardStep>(
         AlertWizardStep.DETECTION_CONFIGURATION
     );
+    const { notify } = useNotificationProviderV1();
     // This is used to keep track of the last selected template id if the user
     // changed the default template for situations when user's go back to step 1
     const [
@@ -89,6 +94,18 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                 .getAllSubscriptionGroups()
                 .then((subs: SubscriptionGroup[]): void => {
                     setSubs(subs);
+                })
+                .catch((error: AxiosError) => {
+                    const errMessages = getErrorMessages(error);
+
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 });
     }, [currentWizardStep]);
 

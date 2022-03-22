@@ -17,7 +17,7 @@ describe("Alert Templates Actions", () => {
             expect(result.current.alertTemplate).toBeNull();
             expect(result.current.getAlertTemplate).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Initial);
-            expect(result.current.errorMessage).toEqual("");
+            expect(result.current.errorMessages).toEqual([]);
         });
 
         it("should update data appropriately when making a successful REST call", async () => {
@@ -38,14 +38,14 @@ describe("Alert Templates Actions", () => {
                 expect(result.current.alertTemplate).toBeNull();
                 expect(result.current.getAlertTemplate).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Working);
-                expect(result.current.errorMessage).toEqual("");
+                expect(result.current.errorMessages).toEqual([]);
 
                 return promise.then(() => {
                     // When REST call is completed
                     expect(result.current.alertTemplate).toEqual({ id: 123 });
                     expect(result.current.getAlertTemplate).toBeDefined();
                     expect(result.current.status).toEqual(ActionStatus.Done);
-                    expect(result.current.errorMessage).toEqual("");
+                    expect(result.current.errorMessages).toEqual([]);
                 });
             });
         });
@@ -58,7 +58,7 @@ describe("Alert Templates Actions", () => {
             expect(result.current.alertTemplates).toBeNull();
             expect(result.current.getAlertTemplates).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Initial);
-            expect(result.current.errorMessage).toEqual("");
+            expect(result.current.errorMessages).toEqual([]);
         });
 
         it("should update data appropriately when making a successful REST call", async () => {
@@ -81,14 +81,14 @@ describe("Alert Templates Actions", () => {
                 expect(result.current.alertTemplates).toBeNull();
                 expect(result.current.getAlertTemplates).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Working);
-                expect(result.current.errorMessage).toEqual("");
+                expect(result.current.errorMessages).toEqual([]);
 
                 return promise.then(() => {
                     // When REST call is completed
                     expect(result.current.alertTemplates).toEqual({ id: 123 });
                     expect(result.current.getAlertTemplates).toBeDefined();
                     expect(result.current.status).toEqual(ActionStatus.Done);
-                    expect(result.current.errorMessage).toEqual("");
+                    expect(result.current.errorMessages).toEqual([]);
                 });
             });
         });

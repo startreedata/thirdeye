@@ -6,7 +6,7 @@ import { useHTTPAction } from "./create-rest-action";
 const mockError = {
     response: {
         data: {
-            message: "testError",
+            list: [{ code: "TEST_ERROR", msg: "testError" }],
         },
     },
 };
@@ -18,7 +18,7 @@ describe("Create Rest Action (useHTTPAction)", () => {
         expect(result.current.data).toBeNull();
         expect(result.current.makeRequest).toBeDefined();
         expect(result.current.status).toEqual(ActionStatus.Initial);
-        expect(result.current.errorMessage).toEqual("");
+        expect(result.current.errorMessages).toEqual([]);
     });
 
     it("should invoke passed fetch function when calling makeRequest", async () => {
@@ -62,14 +62,14 @@ describe("Create Rest Action (useHTTPAction)", () => {
             expect(result.current.data).toBeNull();
             expect(result.current.makeRequest).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Working);
-            expect(result.current.errorMessage).toEqual("");
+            expect(result.current.errorMessages).toEqual([]);
 
             return promise.then(() => {
                 // When REST call is completed
                 expect(result.current.data).toEqual(mockResponse);
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Done);
-                expect(result.current.errorMessage).toEqual("");
+                expect(result.current.errorMessages).toEqual([]);
             });
         });
     });
@@ -92,14 +92,14 @@ describe("Create Rest Action (useHTTPAction)", () => {
             expect(result.current.data).toBeNull();
             expect(result.current.makeRequest).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Working);
-            expect(result.current.errorMessage).toEqual("");
+            expect(result.current.errorMessages).toEqual([]);
 
             return promise.then(() => {
                 // When REST call is completed
                 expect(result.current.data).toBeNull();
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Error);
-                expect(result.current.errorMessage).toEqual("testError");
+                expect(result.current.errorMessages).toEqual(["testError"]);
             });
         });
     });

@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { assign, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +33,7 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
@@ -110,24 +112,38 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                             })
                         );
                     })
-                    .catch((): void => {
-                        notify(
-                            NotificationTypeV1.Error,
-                            t("message.update-error", {
-                                entity: t("label.subscription-groups"),
-                            })
-                        );
+                    .catch((error: AxiosError): void => {
+                        const errMessages = getErrorMessages(error);
+
+                        isEmpty(errMessages)
+                            ? notify(
+                                  NotificationTypeV1.Error,
+                                  t("message.update-error", {
+                                      entity: t("label.subscription-groups"),
+                                  })
+                              )
+                            : errMessages.map((err) =>
+                                  notify(NotificationTypeV1.Error, err)
+                              );
                     })
                     .finally((): void => {
                         // Redirect to alerts detail path
                         navigate(getAlertsViewPath(alert.id));
                     });
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", { entity: t("label.alert") })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.alert"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -153,12 +169,18 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.create-error", {
-                    entity: t("label.subscription-group"),
-                })
-            );
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.create-error", {
+                          entity: t("label.subscription-group"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return newSubscriptionGroup;
@@ -171,7 +193,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedSubscriptionGroups;
@@ -182,7 +210,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedAlerts;
@@ -225,8 +259,14 @@ export const AlertsUpdatePage: FunctionComponent = () => {
             .then((alert) => {
                 setAlert(alert);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally((): void => {
                 setLoading(false);

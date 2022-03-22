@@ -77,10 +77,6 @@ persistence:
 smtp:
   host: localhost
   port: 65
-  username: tobefedexternally
-  password: tobefedexternally
-  secretKeyRef:
-    name: smtp-credentials
 
 tls:
   enabled: false
@@ -109,6 +105,15 @@ auth:
 config:
   description: placeholder for common configs accross coordinator and worker
   jdbcParameters: allowPublicKeyRetrieval=true&sslMode=DISABLED
+
+# Section for dynamic secret generation
+secrets:
+  smtpUsername:
+    env: SMTP_USER
+    value: tobefedexternally
+  smtpPassword:
+    env: SMTP_PASSWORD
+    value: tobefedexternally
 
 # Optional: Enable for ingress
 traefik:

@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, MenuItem, TextField } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
@@ -34,6 +34,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     const { showDialog } = useDialog();
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
+    const commentRef = useRef<HTMLInputElement>();
 
     const handleChange = (
         event: React.ChangeEvent<{ value: unknown }>
@@ -46,22 +47,38 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             newSelectedFeedbackType !== currentlySelected
         ) {
             showDialog({
-                type: DialogType.ALERT,
-                text: t("message.change-confirmation-to", {
+                type: DialogType.CUSTOM,
+                title: t("message.change-confirmation-to", {
                     value: `"${OPTION_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
                 }),
+                children: (
+                    <TextField
+                        fullWidth
+                        multiline
+                        inputRef={commentRef}
+                        label="Comment"
+                        name="comment"
+                        rows={3}
+                    />
+                ),
                 okButtonLabel: t("label.change"),
-                onOk: () => handleFeedbackChangeOk(newSelectedFeedbackType),
+                onOk: () =>
+                    handleFeedbackChangeOk(
+                        newSelectedFeedbackType,
+                        commentRef.current?.value || ""
+                    ),
             });
         }
     };
 
     const handleFeedbackChangeOk = (
-        feedbackType: AnomalyFeedbackType
+        feedbackType: AnomalyFeedbackType,
+        comment: string
     ): void => {
         const updateRequestPayload = {
             ...anomalyFeedback,
             type: feedbackType,
+            comment,
         };
         updateAnomalyFeedback(anomalyId, updateRequestPayload)
             .then(() => {

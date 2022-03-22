@@ -156,6 +156,7 @@
         "chart-data": "Chart Data",
         "alert-template-configuration": "Alert Template Configuration",
         "anomaly-feedback": "Anomaly Feedback",
+        "comment": "Comment",
         "baseline-week-offset": "Baseline Week Offset"
     },
     "message": {

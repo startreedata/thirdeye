@@ -1,6 +1,6 @@
 {
-  "name": "HoltWinters with startree-holt-winters-template",
-  "description": "Uses startree-holt-winters-template.",
+  "name": "HoltWinters with template startree-holt-winters",
+  "description": "Uses template startree-holt-winters.",
   "template": {
     "name": "startree-holt-winters"
   },

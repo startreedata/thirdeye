@@ -6,7 +6,8 @@
       "name": "root",
       "type": "AnomalyDetector",
       "params": {
-        "component.min": "${max}",
+        "component.min": "${min}",
+        "component.max": "${max}",
         "component.metric": "met",
         "component.monitoringGranularity": "${monitoringGranularity}",
         "component.timestamp": "ts",

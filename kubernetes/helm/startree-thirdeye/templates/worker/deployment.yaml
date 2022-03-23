@@ -67,28 +67,19 @@ spec:
         args:
         - "server"
         env:
-          {{- range $secret := .Values.secrets }}
-          {{- range $pair := $secret.data }}
-          {{- if and $pair.env $pair.value }}
-          - name: {{ $pair.env }}
+          {{- range $name, $secret := .Values.secrets }}
+          {{- if and $secret.env $secret.value }}
+          - name: {{ $secret.env }}
             valueFrom:
               secretKeyRef:
-                name: {{ $secret.name }}
-                key: {{ $pair.key }}
-          {{- end }}
+                name: thirdeye-secrets
+                key: {{ $name }}
           {{- end }}
           {{- end }}
           - name: SMTP_HOST
             value: {{ .Values.smtp.host | quote }}
           - name: SMTP_PORT
             value: {{ .Values.smtp.port  | quote }}
-          {{- if .Values.sendgrid }}
-          - name: SENDGRID_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: sendgrid-api-key
-                key: key
-          {{- end }}
           {{- if .Values.worker.tls.enabled }}
           - name: JAVA_OPTS
             value: >

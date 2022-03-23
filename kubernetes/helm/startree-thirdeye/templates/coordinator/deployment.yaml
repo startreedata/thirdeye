@@ -66,15 +66,13 @@ spec:
         args: 
         - "server"
         env:
-          {{- range $secret := .Values.secrets }}
-          {{- range $pair := $secret.data }}
-          {{- if and $pair.env $pair.value }}
-          - name: {{ $pair.env }}
+          {{- range $name, $secret := .Values.secrets }}
+          {{- if and $secret.env $secret.value }}
+          - name: {{ $secret.env }}
             valueFrom:
               secretKeyRef:
-                name: {{ $secret.name }}
-                key: {{ $pair.key }}
-          {{- end }}
+                name: thirdeye-secrets
+                key: {{ $name }}
           {{- end }}
           {{- end }}
           - name: SMTP_HOST
@@ -102,10 +100,10 @@ spec:
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
           {{- end }}
-          {{- if .Values.config.holidayLoaderKey }}
+          {{- if .Values.secrets.holidayLoaderKey }}
           - name: holiday-loader-key
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
-            subPath: "holiday-loader-key.json"
+            subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
         resources:
@@ -122,8 +120,8 @@ spec:
         - name: keystore
           emptyDir: {}
         {{- end }}
-        {{- if .Values.config.holidayLoaderKey }}
+        {{- if .Values.secrets.holidayLoaderKey }}
         - name: holiday-loader-key
           secret:
-            secretName: holiday-loader-key
+            secretName: thirdeye-secrets
         {{- end }}

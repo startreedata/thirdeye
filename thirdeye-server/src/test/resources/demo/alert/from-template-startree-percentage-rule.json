@@ -1,5 +1,5 @@
 {
-  "name": "HoltWinters with template startree-percentage-rule",
+  "name": "Percentage rule with template startree-percentage-rule",
   "description": "Uses template startree-percentage-rule.",
   "cron": "0 0 0 1/1 * ? *",
   "template": {"name": "startree-percentage-rule"},

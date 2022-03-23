@@ -1,0 +1,19 @@
+{
+  "name": "Absolute rule with template startree-absolute-rule",
+  "description": "Uses template startree-absolute-rule.",
+  "cron": "0 0 0 1/1 * ? *",
+  "template": {"name": "startree-absolute-rule"},
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "sum",
+    "aggregationColumn": "views",
+    "baselineOffset": "P7D",
+    "monitoringGranularity": "P1D",
+    "completenessDelay": "P0D",
+    "pattern": "UP_OR_DOWN",
+    "absoluteChange": "30000"
+  }
+}

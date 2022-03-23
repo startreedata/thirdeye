@@ -12,7 +12,6 @@
         "component.monitoringGranularity": "${monitoringGranularity}",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
-        "component.timezone": "US/Pacific",
         "anomaly.source": "threshold-template/root",
         "type": "THRESHOLD"
       },

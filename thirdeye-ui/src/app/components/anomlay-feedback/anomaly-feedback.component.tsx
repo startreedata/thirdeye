@@ -1,4 +1,11 @@
-import { Box, Card, CardContent, MenuItem, TextField } from "@material-ui/core";
+import {
+    Button,
+    Card,
+    CardContent,
+    Grid,
+    MenuItem,
+    TextField,
+} from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useRef, useState } from "react";
@@ -31,6 +38,9 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
+    const [feedbackComment, setFeedbackComment] = useState(
+        anomalyFeedback.comment
+    );
     const { showDialog } = useDialog();
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
@@ -47,28 +57,41 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             newSelectedFeedbackType !== currentlySelected
         ) {
             showDialog({
-                type: DialogType.CUSTOM,
-                title: t("message.change-confirmation-to", {
+                type: DialogType.ALERT,
+                text: t("message.change-confirmation-to", {
                     value: `"${OPTION_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
                 }),
-                children: (
-                    <TextField
-                        fullWidth
-                        multiline
-                        inputRef={commentRef}
-                        label="Comment"
-                        name="comment"
-                        rows={3}
-                    />
-                ),
                 okButtonLabel: t("label.change"),
                 onOk: () =>
                     handleFeedbackChangeOk(
                         newSelectedFeedbackType,
-                        commentRef.current?.value || ""
+                        commentRef.current?.value || anomalyFeedback.comment
                     ),
             });
         }
+    };
+
+    const handleCommentUpdate = (): void => {
+        showDialog({
+            type: DialogType.CUSTOM,
+            title: "Update comment",
+            children: (
+                <TextField
+                    fullWidth
+                    multiline
+                    defaultValue={feedbackComment}
+                    inputRef={commentRef}
+                    name="comment"
+                    rows={3}
+                />
+            ),
+            okButtonLabel: t("label.change"),
+            onOk: () =>
+                handleFeedbackChangeOk(
+                    currentlySelected,
+                    commentRef.current?.value || feedbackComment
+                ),
+        });
     };
 
     const handleFeedbackChangeOk = (
@@ -89,8 +112,12 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     })
                 );
                 setCurrentlySelected(feedbackType);
+                setFeedbackComment(comment);
             })
             .catch((error: AxiosError) => {
+                // Reset comment on error
+                setFeedbackComment(anomalyFeedback.comment);
+
                 const errMessages = getErrorMessages(error);
 
                 isEmpty(errMessages)
@@ -110,26 +137,35 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     return (
         <Card className={className} variant="outlined">
             <CardContent>
-                <Box marginBottom="4px">
-                    <label>
-                        <strong>Is this an anomaly?</strong>
-                    </label>
-                </Box>
-                <TextField
-                    fullWidth
-                    select
-                    id="anomaly-feedback-select"
-                    value={currentlySelected}
-                    onChange={handleChange}
-                >
-                    {Object.keys(OPTION_TO_DESCRIPTIONS).map(
-                        (optionKey: string) => (
-                            <MenuItem key={optionKey} value={optionKey}>
-                                {OPTION_TO_DESCRIPTIONS[optionKey]}
-                            </MenuItem>
-                        )
-                    )}
-                </TextField>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <label>
+                            <strong>Is this an anomaly?</strong>
+                        </label>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            select
+                            id="anomaly-feedback-select"
+                            value={currentlySelected}
+                            onChange={handleChange}
+                        >
+                            {Object.keys(OPTION_TO_DESCRIPTIONS).map(
+                                (optionKey: string) => (
+                                    <MenuItem key={optionKey} value={optionKey}>
+                                        {OPTION_TO_DESCRIPTIONS[optionKey]}
+                                    </MenuItem>
+                                )
+                            )}
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button onClick={handleCommentUpdate}>
+                            View / Edit comment
+                        </Button>
+                    </Grid>
+                </Grid>
             </CardContent>
         </Card>
     );

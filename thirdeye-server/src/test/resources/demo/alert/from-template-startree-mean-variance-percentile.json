@@ -1,0 +1,22 @@
+{
+  "name": "Mean-Variance with template startree-mean-variance-percentile",
+  "description": "Uses template startree-mean-variance-percentile.",
+  "template":{"name":"startree-mean-variance-percentile"}
+,
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "PERCENTILETDIGEST",
+    "aggregationColumn": "views",
+    "aggregationParameter": "99",
+    "lookback": "P14D",
+    "monitoringGranularity": "P1D",
+    "completenessDelay": "P0D",
+    "pattern": "UP_OR_DOWN",
+    "sensitivity": "1",
+    "meanVarianceLookback": "14"
+  },
+  "cron": "0 0 0 1/1 * ? *"
+}

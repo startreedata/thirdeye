@@ -1,0 +1,20 @@
+{
+  "name": "Percentage rule with template startree-percentage-rule-percentile",
+  "description": "Uses template startree-percentage-rule-percentile.",
+  "cron": "0 0 0 1/1 * ? *",
+  "template": {"name": "startree-percentage-rule-percentile"},
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "PERCENTILETDIGEST",
+    "aggregationColumn": "views",
+    "aggregationParameter": "99",
+    "baselineOffset": "P7D",
+    "monitoringGranularity": "P1D",
+    "completenessDelay": "P0D",
+    "pattern": "UP_OR_DOWN",
+    "percentageChange": "0.3"
+  }
+}

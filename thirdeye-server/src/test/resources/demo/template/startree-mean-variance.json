@@ -1,0 +1,72 @@
+{
+  "name": "startree-mean-variance",
+  "description": "Mean-Variance template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "nodes": [
+    {
+      "name": "root",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.metric": "met",
+        "component.monitoringGranularity": "${monitoringGranularity}",
+        "component.lookback": "${meanVarianceLookback}",
+        "component.timestamp": "ts",
+        "anomaly.metric": "${aggregationColumn}",
+        "anomaly.source": "meanVariance-template/root",
+        "type": "MEAN_VARIANCE",
+        "component.pattern": "${pattern}",
+        "component.sensitivity": "${sensitivity}"
+      },
+      "inputs": [
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "missingDataPointsFiller",
+          "sourceProperty": "preparedCurrentDataWithHistory"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "missingDataPointsFiller",
+      "type": "TimeIndexFiller",
+      "inputs": [
+        {
+          "sourcePlanNode": "currentDataWithHistoryFetcher",
+          "sourceProperty": "currentDataWithHistory"
+        }
+      ],
+      "outputs": [
+        {
+          "outputName": "preparedCurrentDataWithHistory"
+        }
+      ]
+    },
+    {
+      "name": "currentDataWithHistoryFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000000000"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "currentDataWithHistory",
+          "outputName": "currentDataWithHistory"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "datasource": {
+      "name": "${dataSource}"
+    },
+    "dataset": {
+      "name": "${dataset}",
+      "completenessDelay": "${completenessDelay}"
+    },
+    "metric": {
+      "name": "${aggregationColumn}"
+    },
+    "granularity": "${monitoringGranularity}"
+  }
+}

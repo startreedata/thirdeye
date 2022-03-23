@@ -1,0 +1,23 @@
+{
+  "name": "HoltWinters with template startree-holt-winters-percentile",
+  "description": "Uses template startree-holt-winters-percentile.",
+  "template": {
+    "name": "startree-holt-winters-percentile"
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "PERCENTILETDIGEST",
+    "aggregationColumn": "views",
+    "aggregationParameter": "99",
+    "lookback": "P14D",
+    "monitoringGranularity": "P1D",
+    "completenessDelay": "P0D",
+    "pattern": "UP_OR_DOWN",
+    "sensitivity": "1",
+    "holtWintersLookback": "14"
+  },
+  "cron": "0 0 0 1/1 * ? *"
+}

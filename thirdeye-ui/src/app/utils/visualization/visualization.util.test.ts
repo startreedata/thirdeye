@@ -24,21 +24,18 @@ import {
 const systemLocale = Settings.defaultLocale;
 const systemZoneName = Settings.defaultZoneName;
 
-jest.mock("../number/number.util", () => ({
-    formatLargeNumber: jest.fn().mockImplementation((num) => num.toString()),
-}));
-
-jest.mock("../date-time/date-time.util", () => ({
-    formatYear: jest
+jest.mock("../../platform/utils", () => ({
+    formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
+    formatYearV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}year`),
-    formatMonthOfYear: jest
+    formatMonthOfYearV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}monthOfYear`),
-    formatDate: jest
+    formatDateV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}date`),
-    formatTime: jest
+    formatTimeV1: jest
         .fn()
         .mockImplementation((date) => `${date.toString()}time`),
 }));
@@ -59,7 +56,7 @@ describe("Visualization Util", () => {
 
     it("formatLargeNumberForVisualization should return empty string for invalid number", () => {
         expect(
-            formatLargeNumberForVisualization((null as unknown) as number)
+            formatLargeNumberForVisualization(null as unknown as number)
         ).toEqual("");
     });
 
@@ -81,7 +78,7 @@ describe("Visualization Util", () => {
 
     it("formatDateTimeForTimeAxis should return empty string for invalid date", () => {
         expect(
-            formatDateTimeForTimeAxis((null as unknown) as number, mockScale)
+            formatDateTimeForTimeAxis(null as unknown as number, mockScale)
         ).toEqual("");
     });
 
@@ -95,7 +92,7 @@ describe("Visualization Util", () => {
         expect(
             formatDateTimeForTimeAxis(
                 1,
-                (null as unknown) as ScaleTime<number, number>
+                null as unknown as ScaleTime<number, number>
             )
         ).toEqual("");
     });
@@ -172,7 +169,7 @@ describe("Visualization Util", () => {
     it("getTickValuesForTimeAxis should return empty array for invalid scale", () => {
         expect(
             getTickValuesForTimeAxis(
-                (null as unknown) as ScaleTime<number, number>
+                null as unknown as ScaleTime<number, number>
             )
         ).toEqual([]);
     });
@@ -196,7 +193,7 @@ describe("Visualization Util", () => {
         mockScaleDomain = [new Date(1577865600000), new Date(1672560000000)];
         const timeTickValues = getTickValuesForTimeAxis(
             mockScale,
-            (null as unknown) as number
+            null as unknown as number
         );
 
         expect(timeTickValues).toHaveLength(8);
@@ -241,14 +238,14 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationTimeSeriesPoints should return empty array for invalid alert evaluation", () => {
         expect(
             getAlertEvaluationTimeSeriesPoints(
-                (null as unknown) as AlertEvaluation
+                null as unknown as AlertEvaluation
             )
         ).toEqual([]);
     });
 
     it("getAlertEvaluationTimeSeriesPoints should return empty array for invalid detection evaluations", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
-        mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
+        mockAlertEvaluationCopy.detectionEvaluations = null as unknown as {
             [index: string]: DetectionEvaluation;
         };
 
@@ -269,7 +266,7 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationTimeSeriesPoints should return empty array for invalid data in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
-            data: (null as unknown) as DetectionData,
+            data: null as unknown as DetectionData,
         } as DetectionEvaluation;
 
         expect(
@@ -292,7 +289,7 @@ describe("Visualization Util", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
             data: {
-                timestamp: (null as unknown) as number[],
+                timestamp: null as unknown as number[],
             },
         } as DetectionEvaluation;
 
@@ -322,13 +319,13 @@ describe("Visualization Util", () => {
 
     it("getAlertEvaluationAnomalies should return empty array for invalid alert evaluation", () => {
         expect(
-            getAlertEvaluationAnomalies((null as unknown) as AlertEvaluation)
+            getAlertEvaluationAnomalies(null as unknown as AlertEvaluation)
         ).toEqual([]);
     });
 
     it("getAlertEvaluationAnomalies should return empty array for invalid detection evaluations", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
-        mockAlertEvaluationCopy.detectionEvaluations = (null as unknown) as {
+        mockAlertEvaluationCopy.detectionEvaluations = null as unknown as {
             [index: string]: DetectionEvaluation;
         };
 
@@ -349,7 +346,7 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationAnomalies should return empty array for invalid anomalies in detection evaluation", () => {
         const mockAlertEvaluationCopy = cloneDeep(mockAlertEvaluation);
         mockAlertEvaluationCopy.detectionEvaluations.detectionEvaluation1 = {
-            anomalies: (null as unknown) as Anomaly[],
+            anomalies: null as unknown as Anomaly[],
         } as DetectionEvaluation;
 
         expect(getAlertEvaluationAnomalies(mockAlertEvaluationCopy)).toEqual(
@@ -377,7 +374,7 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationTimeSeriesPointsMinTimestamp should return 0 for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMinTimestamp(
-                (null as unknown) as AlertEvaluationTimeSeriesPoint[]
+                null as unknown as AlertEvaluationTimeSeriesPoint[]
             )
         ).toEqual(0);
     });
@@ -397,7 +394,7 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationTimeSeriesPointsMaxTimestamp should return 0 for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMaxTimestamp(
-                (null as unknown) as AlertEvaluationTimeSeriesPoint[]
+                null as unknown as AlertEvaluationTimeSeriesPoint[]
             )
         ).toEqual(0);
     });
@@ -417,7 +414,7 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationTimeSeriesPointsMaxValue should return 0 for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointsMaxValue(
-                (null as unknown) as AlertEvaluationTimeSeriesPoint[]
+                null as unknown as AlertEvaluationTimeSeriesPoint[]
             )
         ).toEqual(0);
     });
@@ -451,7 +448,7 @@ describe("Visualization Util", () => {
     it("filterAlertEvaluationTimeSeriesPointsByTime should return empty array for invalid alert evaluation time series points", () => {
         expect(
             filterAlertEvaluationTimeSeriesPointsByTime(
-                (null as unknown) as AlertEvaluationTimeSeriesPoint[],
+                null as unknown as AlertEvaluationTimeSeriesPoint[],
                 1,
                 2
             )
@@ -468,7 +465,7 @@ describe("Visualization Util", () => {
         expect(
             filterAlertEvaluationTimeSeriesPointsByTime(
                 mockAlertEvaluationTimeSeriesPoints,
-                (null as unknown) as number,
+                null as unknown as number,
                 1
             )
         ).toEqual(mockAlertEvaluationTimeSeriesPoints);
@@ -476,14 +473,14 @@ describe("Visualization Util", () => {
             filterAlertEvaluationTimeSeriesPointsByTime(
                 mockAlertEvaluationTimeSeriesPoints,
                 1,
-                (null as unknown) as number
+                null as unknown as number
             )
         ).toEqual(mockAlertEvaluationTimeSeriesPoints);
         expect(
             filterAlertEvaluationTimeSeriesPointsByTime(
                 mockAlertEvaluationTimeSeriesPoints,
-                (null as unknown) as number,
-                (null as unknown) as number
+                null as unknown as number,
+                null as unknown as number
             )
         ).toEqual(mockAlertEvaluationTimeSeriesPoints);
     });
@@ -549,7 +546,7 @@ describe("Visualization Util", () => {
     it("getAlertEvaluationTimeSeriesPointAtTime should return null for invalid alert evaluation time series points", () => {
         expect(
             getAlertEvaluationTimeSeriesPointAtTime(
-                (null as unknown) as AlertEvaluationTimeSeriesPoint[],
+                null as unknown as AlertEvaluationTimeSeriesPoint[],
                 1
             )
         ).toBeNull();
@@ -563,7 +560,7 @@ describe("Visualization Util", () => {
         expect(
             getAlertEvaluationTimeSeriesPointAtTime(
                 mockAlertEvaluationTimeSeriesPoints,
-                (null as unknown) as number
+                null as unknown as number
             )
         ).toBeNull();
     });
@@ -604,9 +601,9 @@ describe("Visualization Util", () => {
 
 let mockScaleDomain: Date[] = [];
 
-const mockScale = ({
+const mockScale = {
     domain: jest.fn().mockImplementation(() => mockScaleDomain),
-} as unknown) as ScaleTime<number, number>;
+} as unknown as ScaleTime<number, number>;
 
 const mockAlertEvaluation = {
     alert: {} as Alert,

@@ -1,10 +1,9 @@
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 
 export interface AnomalyBreakdownComparisonHeatmapProps {
     anomalyId: number;
-    comparisonOffset?: AnomalyBreakdownAPIOffsetValues;
     anomaly?: Anomaly | null;
+    shouldTruncateText?: boolean;
 }
 
 export interface SummaryData {
@@ -21,12 +20,18 @@ export interface SummarizeDataFunctionParams {
 
 export interface AnomalyBreakdownComparisonData {
     current: number;
-    currentPercentage: number;
-    comparison: number;
-    comparisonPercentage: number;
-    percentageDiff: number;
+    baseline: number;
+    metricValueDiff: number;
+    metricValueDiffPercentage: number | null;
+    currentContributionPercentage: number;
+    baselineContributionPercentage: number;
+    contributionDiff: number;
     currentTotalCount: number;
-    comparisonTotalCount: number;
+    baselineTotalCount: number;
+}
+
+export interface DimensionDisplayData {
+    columnName: string;
 }
 
 export interface AnomalyBreakdownComparisonDataByDimensionColumn {

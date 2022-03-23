@@ -1,5 +1,4 @@
 import { Grid, Typography, useTheme } from "@material-ui/core";
-import { purple } from "@material-ui/core/colors";
 import {
     hierarchy,
     Treemap as VisxTreemap,
@@ -28,6 +27,7 @@ import {
 } from "./treemap.interfaces";
 import { useTreemapStyles } from "./treemap.styles";
 
+// #TODO move to a constants file
 const DEFAULT_TREEMAP_HEIGHT = 60;
 const RIGHT_BOUNDS_PADDING = 30;
 const margin = {
@@ -37,6 +37,7 @@ const margin = {
     bottom: 0,
 };
 const GRAY = "#EEEEEE";
+const PURPLE = "#5B6AEC";
 const OTHER = "other";
 
 function Treemap<Data>({
@@ -76,13 +77,8 @@ function TreemapInternal<Data>({
     const treemapClasses = useTreemapStyles();
     const theme = useTheme();
 
-    const {
-        tooltipTop,
-        tooltipLeft,
-        tooltipData,
-        showTooltip,
-        hideTooltip,
-    } = useTooltip<TreemapData<Data>>();
+    const { tooltipTop, tooltipLeft, tooltipData, showTooltip, hideTooltip } =
+        useTooltip<TreemapData<Data>>();
 
     const isOtherDimension = (id: string | undefined): boolean => {
         if (!id) {
@@ -101,8 +97,20 @@ function TreemapInternal<Data>({
         (d) => colorChangeValueAccessor(d) || 0
     );
     const colorScale = scaleLinear<string>({
-        domain: [Math.min(...colorValues), -1, 0, 1, Math.max(...colorValues)],
-        range: [theme.palette.error.main, GRAY, GRAY, GRAY, purple[500]],
+        domain: [
+            Math.min(...colorValues),
+            -25,
+            0,
+            25,
+            Math.max(...colorValues),
+        ],
+        range: [
+            theme.palette.error.main,
+            theme.palette.error.main,
+            GRAY,
+            PURPLE,
+            PURPLE,
+        ],
     });
 
     const root = hierarchy(data)
@@ -148,15 +156,10 @@ function TreemapInternal<Data>({
         if (!node || (node.data.id && isOtherDimension(node?.data?.id))) {
             return;
         }
-        let key = "";
-        if (node.data.data.parent) {
-            key = node.data.data.parent.toString();
-        }
+
         props.onDimensionClickHandler &&
-            props.onDimensionClickHandler({
-                key,
-                value: node.data.id || "",
-            });
+            node.data &&
+            props.onDimensionClickHandler(node.data);
     };
 
     return (
@@ -184,16 +187,23 @@ function TreemapInternal<Data>({
                                     .descendants()
                                     .reverse()
                                     .map((node, i) => {
-                                        const nodeWidth = node.x1 - node.x0 - 1;
-                                        const nodeHeight =
-                                            node.y1 - node.y0 - 1;
+                                        const nodeWidth = Math.max(
+                                            node.x1 - node.x0 - 1,
+                                            0
+                                        );
+                                        const nodeHeight = Math.max(
+                                            node.y1 - node.y0 - 1,
+                                            0
+                                        );
+
                                         let colorValue = -1;
 
                                         if (!isOtherDimension(node.data.id)) {
                                             if (node.data.data) {
-                                                colorValue = colorChangeValueAccessor(
-                                                    node.data.data
-                                                );
+                                                colorValue =
+                                                    colorChangeValueAccessor(
+                                                        node.data.data
+                                                    );
                                             } else if (node.value) {
                                                 colorValue = node.value;
                                             }
@@ -203,18 +213,12 @@ function TreemapInternal<Data>({
                                                 fill={colorScale(
                                                     colorValue || 0
                                                 )}
-                                                height={Math.max(
-                                                    node.y1 - node.y0 - 1,
-                                                    0
-                                                )}
-                                                width={Math.max(
-                                                    node.x1 - node.x0 - 1,
-                                                    0
-                                                )}
+                                                height={nodeHeight}
+                                                width={nodeWidth}
                                             />
                                         );
 
-                                        return (
+                                        return !nodeHeight ? null : (
                                             <Group
                                                 className={
                                                     props.onDimensionClickHandler
@@ -248,12 +252,15 @@ function TreemapInternal<Data>({
                                                             x={nodeWidth / 2}
                                                             y={nodeHeight / 2}
                                                         >
-                                                            {getShortText(
-                                                                node.data.id ||
-                                                                    EMPTY_STRING_DISPLAY,
-                                                                nodeWidth,
-                                                                nodeHeight
-                                                            )}
+                                                            {props.shouldTruncateText
+                                                                ? getShortText(
+                                                                      node.data
+                                                                          .id ||
+                                                                          EMPTY_STRING_DISPLAY,
+                                                                      nodeWidth,
+                                                                      nodeHeight
+                                                                  )
+                                                                : node.data.id}
                                                         </Text>
                                                     </>
                                                 )}

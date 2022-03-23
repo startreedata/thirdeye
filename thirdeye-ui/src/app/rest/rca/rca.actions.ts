@@ -15,12 +15,8 @@ import {
 } from "./rca.rest";
 
 export const useGetAnomalyMetricBreakdown = (): GetAnomalyMetricBreakdown => {
-    const {
-        data,
-        makeRequest,
-        status,
-        errorMessage,
-    } = useHTTPAction<AnomalyBreakdown>(getAnomalyMetricBreakdown);
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<AnomalyBreakdown>(getAnomalyMetricBreakdown);
 
     const getMetricBreakdown = (
         id: number,
@@ -33,31 +29,28 @@ export const useGetAnomalyMetricBreakdown = (): GetAnomalyMetricBreakdown => {
         anomalyMetricBreakdown: data,
         getMetricBreakdown,
         status,
-        errorMessage,
+        errorMessages,
     };
 };
 
-export const useGetAnomalyDimensionAnalysis = (): GetAnomalyDimensionAnalysis => {
-    const {
-        data,
-        makeRequest,
-        status,
-        errorMessage,
-    } = useHTTPAction<AnomalyDimensionAnalysisData>(
-        getDimensionAnalysisForAnomaly
-    );
+export const useGetAnomalyDimensionAnalysis =
+    (): GetAnomalyDimensionAnalysis => {
+        const { data, makeRequest, status, errorMessages } =
+            useHTTPAction<AnomalyDimensionAnalysisData>(
+                getDimensionAnalysisForAnomaly
+            );
 
-    const getDimensionAnalysisData = (
-        id: number,
-        params: AnomalyDimensionAnalysisRequest
-    ): Promise<AnomalyDimensionAnalysisData | undefined> => {
-        return makeRequest(id, params);
-    };
+        const getDimensionAnalysisData = (
+            id: number,
+            params: AnomalyDimensionAnalysisRequest
+        ): Promise<AnomalyDimensionAnalysisData | undefined> => {
+            return makeRequest(id, params);
+        };
 
-    return {
-        anomalyDimensionAnalysisData: data,
-        getDimensionAnalysisData,
-        status,
-        errorMessage,
+        return {
+            anomalyDimensionAnalysisData: data,
+            getDimensionAnalysisData,
+            status,
+            errorMessages,
+        };
     };
-};

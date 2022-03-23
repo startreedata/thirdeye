@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: repo.startreedata.io/external-docker-registry/ci-java-11
+    tag: latest
+
+caches:
+  - path: src/m2
+
+inputs:
+  - name: src
+
+params:
+  MVN_REPOSITORY_USERNAME: ((artifactory-username))
+  MVN_REPOSITORY_PASSWORD: ((artifactory-password))
+  GITHUB_PRIVATE_KEY: ((ssh-private-key))
+  GIT_BRANCH: ((git-branch))
+
+run:
+  path: src/.concourse/tasks/release-thirdeye/release-thirdeye.sh

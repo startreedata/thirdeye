@@ -4,13 +4,13 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SubscriptionGroupRendererProps } from "./subscription-group-renderer.interfaces";
 
-export const SubscriptionGroupRenderer: FunctionComponent<SubscriptionGroupRendererProps> = (
-    props: SubscriptionGroupRendererProps
-) => {
+export const SubscriptionGroupRenderer: FunctionComponent<
+    SubscriptionGroupRendererProps
+> = (props: SubscriptionGroupRendererProps) => {
     const { t } = useTranslation();
 
     return (
-        <Grid container item justify="flex-end">
+        <Grid container item justifyContent="flex-end">
             {/* Name */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">

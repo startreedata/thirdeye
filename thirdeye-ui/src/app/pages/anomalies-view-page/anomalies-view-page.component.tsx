@@ -1,60 +1,63 @@
-import { Grid } from "@material-ui/core";
+import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
+import { toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
-import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+} from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
-    filterAnomaliesByTime,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
+import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
-    const { evaluation, getEvaluation } = useGetEvaluation();
+    const {
+        evaluation,
+        getEvaluation,
+        status: getEvaluationRequestStatus,
+    } = useGetEvaluation();
     const { anomaly, getAnomaly } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
+    const [searchParams] = useSearchParams();
     const { showDialog } = useDialog();
-    const params = useParams<AnomaliesViewPageParams>();
-    const history = useHistory();
+    const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
+    const style = useAnomaliesViewPageStyles();
 
     useEffect(() => {
         // Time range refreshed, fetch anomaly
-        isValidNumberId(params.id) && getAnomaly(toNumber(params.id));
-    }, [timeRangeDuration]);
+        anomalyId &&
+            isValidNumberId(anomalyId) &&
+            getAnomaly(toNumber(anomalyId));
+    }, [anomalyId]);
 
     useEffect(() => {
         !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
@@ -67,26 +70,33 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         // Only filter for the current anomaly
         const anomalyDetectionResults =
             evaluation.detectionEvaluations.output_AnomalyDetectorResult_0;
-        anomalyDetectionResults.anomalies = filterAnomaliesByTime(
-            anomalyDetectionResults.anomalies,
-            anomaly.startTime,
-            anomaly.endTime
-        );
+        anomalyDetectionResults.anomalies = [anomaly];
         setAlertEvaluation(evaluation);
     }, [evaluation, anomaly]);
 
     useEffect(() => {
-        // Fetched alert changed, fetch alert evaluation
+        // Fetched alert or time range changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [anomaly]);
+    }, [anomaly, searchParams]);
 
-    if (!isValidNumberId(params.id)) {
+    useEffect(() => {
+        if (getEvaluationRequestStatus === ActionStatus.Error) {
+            notify(
+                NotificationTypeV1.Error,
+                t("message.error-while-fetching", {
+                    entity: t("label.chart-data"),
+                })
+            );
+        }
+    }, [getEvaluationRequestStatus]);
+
+    if (anomalyId && !isValidNumberId(anomalyId)) {
         // Invalid id
         notify(
             NotificationTypeV1.Error,
             t("message.invalid-id", {
                 entity: t("label.anomaly"),
-                id: params.id,
+                id: anomalyId,
             })
         );
 
@@ -94,17 +104,16 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }
 
     const fetchAlertEvaluation = (): void => {
-        if (!anomaly || !anomaly.alert) {
+        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+        if (!anomaly || !anomaly.alert || !start || !end) {
             setAlertEvaluation(null);
 
             return;
         }
         getEvaluation(
-            createAlertEvaluation(
-                anomaly.alert.id,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
+            createAlertEvaluation(anomaly.alert.id, Number(start), Number(end))
         );
     };
 
@@ -125,36 +134,76 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             );
 
             // Redirect to anomalies all path
-            history.push(getAnomaliesAllPath());
+            navigate(getAnomaliesAllPath());
         });
     };
 
     return (
         <PageV1>
-            <PageHeader title={uiAnomaly ? uiAnomaly.name : ""} />
+            <PageHeader
+                showCreateButton
+                showTimeRange
+                title={uiAnomaly ? uiAnomaly.name : ""}
+            />
             <PageContentsGridV1>
                 {/* Anomaly */}
-                <Grid item xs={12}>
-                    <AnomalyCard
-                        uiAnomaly={uiAnomaly}
-                        onDelete={handleAnomalyDelete}
-                    />
+                <Grid
+                    container
+                    item
+                    alignItems="stretch"
+                    justifyContent="space-between"
+                    xs={12}
+                >
+                    <Grid item lg={9} md={8} sm={12} xs={12}>
+                        <Paper className={style.fullHeight} elevation={0}>
+                            <AnomalyCard
+                                uiAnomaly={uiAnomaly}
+                                onDelete={handleAnomalyDelete}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item lg={3} md={4} sm={12} xs={12}>
+                        <Paper className={style.fullHeight} elevation={0}>
+                            {anomaly && (
+                                <AnomalyFeedback
+                                    anomalyFeedback={
+                                        anomaly.feedback || {
+                                            ...DEFAULT_FEEDBACK,
+                                        }
+                                    }
+                                    anomalyId={anomaly.id}
+                                    className={style.fullHeight}
+                                />
+                            )}
+                        </Paper>
+                    </Grid>
                 </Grid>
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    <AlertEvaluationTimeSeriesCard
-                        alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={500}
-                        maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                        onRefresh={fetchAlertEvaluation}
-                    />
+                    {getEvaluationRequestStatus === ActionStatus.Error && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator />
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {getEvaluationRequestStatus === ActionStatus.Done && (
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                            alertEvaluationTimeSeriesHeight={500}
+                            maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
+                            onRefresh={fetchAlertEvaluation}
+                        />
+                    )}
                 </Grid>
 
                 <Grid item xs={12}>
                     <AnomalyBreakdownComparisonHeatmap
                         anomaly={anomaly}
-                        anomalyId={toNumber(params.id)}
+                        anomalyId={toNumber(anomalyId)}
                     />
                 </Grid>
             </PageContentsGridV1>

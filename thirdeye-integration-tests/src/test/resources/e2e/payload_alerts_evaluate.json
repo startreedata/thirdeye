@@ -10,7 +10,7 @@
           "type": "AnomalyDetector",
           "params": {
             "component.percentageChange": "${percentageChange}",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.metric": "met",
             "component.timestamp": "ts",
             "anomaly.metric": "${metric}",
@@ -65,10 +65,16 @@
           ]
         }
       ],
-      "rca": {
-        "datasource": "${dataSource}",
-        "dataset": "${dataset}",
-        "metric": "purchases"
+      "metadata": {
+        "datasource": {
+          "name": "${dataSource}"
+        },
+        "dataset": {
+          "name": "${dataset}"
+        },
+        "metric": {
+          "name": "purchases"
+        }
       }
     },
     "templateProperties": {

@@ -2,7 +2,7 @@
   {
     "name": "threshold-alert-pull-request-merge-events",
     "description": "Threshold alert on pull request merge events",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0/2 * * ? *",
     "template": {
       "name": "threshold-template"
     },

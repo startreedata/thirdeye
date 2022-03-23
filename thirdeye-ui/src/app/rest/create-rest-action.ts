@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
 import "axios/index";
 import { useCallback, useState } from "react";
+import { getErrorMessages } from "../utils/rest/rest.util";
 import { ActionStatus } from "./actions.interfaces";
 
 interface FetchFunction<DataResponseType> {
@@ -12,7 +13,7 @@ export interface UseHTTPActionHook<DataResponseType> {
     data: DataResponseType | null;
     makeRequest: FetchFunction<DataResponseType | undefined>;
     status: ActionStatus;
-    errorMessage: string;
+    errorMessages: string[];
 }
 
 function useHTTPAction<DataResponseType>(
@@ -20,7 +21,7 @@ function useHTTPAction<DataResponseType>(
 ): UseHTTPActionHook<DataResponseType> {
     const [data, setData] = useState<DataResponseType | null>(null);
     const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
     const makeRequest = useCallback(async (...options) => {
         setStatus(ActionStatus.Working);
@@ -28,25 +29,20 @@ function useHTTPAction<DataResponseType>(
             const fetchedData = await restFunction(...options);
             setData(fetchedData);
             setStatus(ActionStatus.Done);
-            setErrorMessage("");
+            setErrorMessages([]);
 
             return fetchedData;
         } catch (error) {
             const axiosError = error as AxiosError;
             setData(null);
             setStatus(ActionStatus.Error);
-            setErrorMessage(
-                axiosError &&
-                    axiosError.response &&
-                    axiosError.response.data &&
-                    axiosError.response.data.message
-            );
+            setErrorMessages(getErrorMessages(axiosError));
         }
 
         return undefined;
     }, []);
 
-    return { data, makeRequest, status, errorMessage };
+    return { data, makeRequest, status, errorMessages };
 }
 
 export { useHTTPAction };

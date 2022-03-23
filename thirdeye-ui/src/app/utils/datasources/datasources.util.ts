@@ -2,7 +2,6 @@ import i18n from "i18next";
 import { cloneDeep, isEmpty, omit } from "lodash";
 import {
     Datasource,
-    DatasourceMetaList,
     DatasourceProperties,
 } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
@@ -10,24 +9,17 @@ import { deepSearchStringProperty } from "../search/search.util";
 
 export const createDefaultDatasource = (): Datasource => {
     return {
-        name: "new-datasource",
-        type: "datasource",
+        name: "mypinot",
+        type: "pinot",
         properties: {
-            zooKeeperURL: "localhost:2123",
-            clusterName: "QuickStartCluster",
-            controllerConnectionScheme: "http",
-            controllerHost: "localhost",
+            zookeeperUrl:
+                "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
+            clusterName: "pinot",
+            controllerConnectionScheme: "https",
+            controllerHost:
+                "pinot-pinot-controller-headless.managed.svc.cluster.local",
             controllerPort: 9000,
-            cacheLoaderClassName:
-                "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader",
         } as DatasourceProperties,
-        metaList: [
-            {
-                classRef:
-                    "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource",
-                properties: {},
-            } as DatasourceMetaList,
-        ],
     } as Datasource;
 };
 

@@ -8,9 +8,9 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 import { createEmptySubscriptionGroup } from "../../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupPropertiesFormProps } from "./subscription-group-properties-form.interfaces";
 
-export const SubscriptionGroupPropertiesForm: FunctionComponent<SubscriptionGroupPropertiesFormProps> = (
-    props: SubscriptionGroupPropertiesFormProps
-) => {
+export const SubscriptionGroupPropertiesForm: FunctionComponent<
+    SubscriptionGroupPropertiesFormProps
+> = (props: SubscriptionGroupPropertiesFormProps) => {
     const { t } = useTranslation();
     const { register, handleSubmit, errors } = useForm<SubscriptionGroup>({
         mode: "onSubmit",

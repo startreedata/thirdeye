@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2022 StarTree Inc. All rights reserved.
+  ~ Confidential and Proprietary Information of StarTree Inc.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.22.0-SNAPSHOT</version>
+    <version>1.37.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +19,10 @@
       <groupId>org.apache.pinot.thirdeye</groupId>
       <artifactId>thirdeye-spi</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.auto.service</groupId>
+      <artifactId>auto-service-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -30,6 +39,10 @@
       <artifactId>retrofit</artifactId>
       <version>${retrofit2.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sendgrid</groupId>
+      <artifactId>sendgrid-java</artifactId>
+    </dependency>
 
     <!--    Firing webhooks -->
     <dependency>
@@ -42,6 +55,10 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-email</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
     </dependency>
 
   </dependencies>

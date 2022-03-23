@@ -1,17 +1,17 @@
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import {
     deleteDataset,
     getAllDatasets,
@@ -19,23 +19,18 @@ import {
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
     const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
-
-    useEffect(() => {
         // Time range refreshed, fetch datasets
         fetchAllDatasets();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllDatasets = (): void => {
         setUiDatasets(null);
@@ -45,9 +40,15 @@ export const DatasetsAllPage: FunctionComponent = () => {
             .then((datasets) => {
                 fetchedUiDatasets = getUiDatasets(datasets);
             })
-            .catch(() =>
-                notify(NotificationTypeV1.Error, t("message.fetch-error"))
-            )
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            })
             .finally(() => setUiDatasets(fetchedUiDatasets));
     };
 
@@ -71,12 +72,20 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 // Remove deleted dataset from fetched datasets
                 removeUiDataset(dataset);
             })
-            .catch(() =>
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.delete-error", { entity: t("label.dataset") })
-                )
-            );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     const removeUiDataset = (dataset: Dataset): void => {

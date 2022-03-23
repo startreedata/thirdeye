@@ -1,13 +1,13 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
+import { kebabCase } from "lodash";
+import React, { FunctionComponent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
-} from "@startree-ui/platform-ui";
-import { kebabCase } from "lodash";
-import React, { FunctionComponent, useState } from "react";
-import { useTranslation } from "react-i18next";
+} from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
@@ -29,20 +29,16 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
     const [newDatasourceJSON, setNewDatasourceJSON] = useState(
         JSON.stringify(props.datasource || createDefaultDatasource())
     );
-    const [
-        datasourceConfigurationError,
-        setDatasourceConfigurationError,
-    ] = useState(false);
+    const [datasourceConfigurationError, setDatasourceConfigurationError] =
+        useState(false);
     const [
         datasourceConfigurationHelperText,
         setDatasourceConfigurationHelperText,
     ] = useState("");
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasourceWizardStep>(
-        DatasourceWizardStep.DATASOURCE_CONFIGURATION
-    );
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasourceWizardStep>(
+            DatasourceWizardStep.DATASOURCE_CONFIGURATION
+        );
     const { t } = useTranslation();
 
     const onDatasourceConfigurationChange = (value: string): void => {
@@ -177,17 +173,13 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                         <>
                             {/* Datasource configuration editor */}
                             <Grid item sm={12}>
-                                <JSONEditorV1
+                                <JSONEditorV1<Datasource>
+                                    hideValidationSuccessIcon
                                     error={datasourceConfigurationError}
                                     helperText={
                                         datasourceConfigurationHelperText
                                     }
-                                    value={
-                                        (newDatasource as unknown) as Record<
-                                            string,
-                                            unknown
-                                        >
-                                    }
+                                    value={newDatasource}
                                     onChange={onDatasourceConfigurationChange}
                                 />
                             </Grid>
@@ -200,14 +192,10 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                         <>
                             {/* Datasource information */}
                             <Grid item sm={12}>
-                                <JSONEditorV1
+                                <JSONEditorV1<Datasource>
+                                    hideValidationSuccessIcon
                                     readOnly
-                                    value={
-                                        (newDatasource as unknown) as Record<
-                                            string,
-                                            unknown
-                                        >
-                                    }
+                                    value={newDatasource}
                                 />
                             </Grid>
                         </>
@@ -219,7 +207,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                     container
                     alignItems="stretch"
                     className={datasourceWizardClasses.controlsContainer}
-                    justify="flex-end"
+                    justifyContent="flex-end"
                 >
                     {datasourceConfigurationError && (
                         <Grid item sm={12}>
@@ -241,7 +229,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                     </Grid>
 
                     <Grid item sm={12}>
-                        <Grid container justify="space-between">
+                        <Grid container justifyContent="space-between">
                             {/* Cancel button */}
                             <Grid item>
                                 <Grid container>

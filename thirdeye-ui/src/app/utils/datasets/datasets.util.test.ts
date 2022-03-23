@@ -12,10 +12,6 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../number/number.util", () => ({
-    formatNumber: jest.fn().mockImplementation((num) => num.toString()),
-}));
-
 describe("Datasets Util", () => {
     it("createEmptyUiDataset should create appropriate UI dataset", () => {
         expect(createEmptyUiDataset()).toEqual(mockEmptyUiDataset);
@@ -26,7 +22,7 @@ describe("Datasets Util", () => {
     });
 
     it("getUiDataset should return empty UI dataset for invalid dataset", () => {
-        expect(getUiDataset((null as unknown) as Dataset)).toEqual(
+        expect(getUiDataset(null as unknown as Dataset)).toEqual(
             mockEmptyUiDataset
         );
     });
@@ -36,7 +32,7 @@ describe("Datasets Util", () => {
     });
 
     it("getUiDatasets should return empty array for invalid dataset", () => {
-        expect(getUiDatasets((null as unknown) as Dataset[])).toEqual([]);
+        expect(getUiDatasets(null as unknown as Dataset[])).toEqual([]);
     });
 
     it("getUiDatasets should return empty array for empty datasets", () => {
@@ -49,7 +45,7 @@ describe("Datasets Util", () => {
 
     it("filterDatasets should return empty array for invalid UI datasets", () => {
         expect(
-            filterDatasets((null as unknown) as UiDataset[], mockSearchWords)
+            filterDatasets(null as unknown as UiDataset[], mockSearchWords)
         ).toEqual([]);
     });
 
@@ -59,7 +55,7 @@ describe("Datasets Util", () => {
 
     it("filterDatasets should return appropriate UI datasets for UI datasets and invalid search words", () => {
         expect(
-            filterDatasets(mockUiDatasets, (null as unknown) as string[])
+            filterDatasets(mockUiDatasets, null as unknown as string[])
         ).toEqual(mockUiDatasets);
     });
 

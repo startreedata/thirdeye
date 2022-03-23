@@ -1,26 +1,34 @@
-import { AuthExceptionCodeV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { AuthExceptionCodeV1 } from "../../platform/components/auth-provider-v1/auth-provider-v1.interfaces";
 import { LoginPage } from "./login-page.component";
 
-jest.mock("@startree-ui/platform-ui", () => ({
-    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
-        string,
-        unknown
-    >),
+jest.mock("../../platform/components/app-loading-indicator-v1", () => ({
+    AppLoadingIndicatorV1: jest
+        .fn()
+        .mockReturnValue("testAppLoadingIndicatorV1"),
+}));
+
+jest.mock("../../platform/components/auth-provider-v1", () => ({
     useAuthProviderV1: jest.fn().mockImplementation(() => ({
         authExceptionCode: mockAuthExceptionCode,
         login: mockLogin,
     })),
-    AppLoadingIndicatorV1: jest
-        .fn()
-        .mockReturnValue("testAppLoadingIndicatorV1"),
-    PageV1: jest.fn().mockImplementation((props) => props.children),
-    PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
-    PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),
+}));
+
+jest.mock("../../platform/components/notification-provider-v1", () => ({
     useNotificationProviderV1: jest
         .fn()
         .mockImplementation(() => ({ notify: mockNotify })),
+    NotificationTypeV1: {
+        Error: "error",
+    },
+}));
+
+jest.mock("../../platform/components/page-v1", () => ({
+    PageV1: jest.fn().mockImplementation((props) => props.children),
+    PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
+    PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -28,15 +36,6 @@ jest.mock("react-i18next", () => ({
         t: mockT,
     })),
 }));
-
-jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
-    () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setPageBreadcrumbs: jest.fn().mockReturnValue({}),
-        })),
-    })
-);
 
 describe("Login Page", () => {
     it("should invoke login when no blocking auth exception", () => {

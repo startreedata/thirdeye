@@ -1,5 +1,5 @@
 import axios from "axios";
-import { duplicateKeyForArrayQueryParams } from "../../utils/axios/axios.util";
+import { duplicateKeyForArrayQueryParams } from "../../platform/utils/axios/axios.util";
 import {
     AnomalyBreakdown,
     AnomalyBreakdownRequest,
@@ -14,7 +14,7 @@ export const getAnomalyMetricBreakdown = async (
     params: AnomalyBreakdownRequest
 ): Promise<AnomalyBreakdown> => {
     const response = await axios.get(
-        `${BASE_URL_RCA}/metrics/breakdown/anomaly/${id}`,
+        `${BASE_URL_RCA}/metrics/heatmap/anomaly/${id}`,
         {
             params,
             paramsSerializer: duplicateKeyForArrayQueryParams,

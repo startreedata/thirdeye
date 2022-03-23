@@ -1,26 +1,30 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { assign, isEmpty, toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import { assign, isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
     getAlert,
     getAllAlerts,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
-import { Alert, AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    EditableAlert,
+} from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     createSubscriptionGroup,
@@ -29,6 +33,7 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
@@ -36,34 +41,18 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const { getEvaluation } = useGetEvaluation();
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState<Alert>();
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const params = useParams<AlertsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: alert ? alert.name : "",
-                onClick: (): void => {
-                    if (alert) {
-                        history.push(getAlertsViewPath(alert.id));
-                    }
-                },
-            },
-        ]);
-    }, [alert]);
-
-    useEffect(() => {
-        notify(NotificationTypeV1.Success, "test");
         fetchAlert();
     }, []);
 
     const onAlertWizardFinish = (
-        newAlert: Alert,
+        newAlert: EditableAlert,
         subscriptionGroups: SubscriptionGroup[],
         omittedSubscriptionGroups: SubscriptionGroup[] = []
     ): void => {
@@ -73,7 +62,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
         newAlert = assign({ ...newAlert }, { id: alert?.id });
 
-        updateAlert(newAlert)
+        updateAlert(newAlert as Alert)
             .then((alert: Alert): void => {
                 notify(
                     NotificationTypeV1.Success,
@@ -85,7 +74,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                     isEmpty(omittedSubscriptionGroups)
                 ) {
                     // Redirect to alerts detail path
-                    history.push(getAlertsViewPath(alert.id));
+                    navigate(getAlertsViewPath(alert.id));
 
                     return;
                 }
@@ -101,14 +90,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 );
 
                 // Remove alert from subscription groups
-                const subscriptionGroupsToBeOmitted = omittedSubscriptionGroups.map(
-                    (subscriptionGroup) => ({
+                const subscriptionGroupsToBeOmitted =
+                    omittedSubscriptionGroups.map((subscriptionGroup) => ({
                         ...subscriptionGroup,
                         alerts: subscriptionGroup.alerts.filter(
                             (subGroupAlert) => subGroupAlert.id !== alert.id // Remove alert from list
                         ),
-                    })
-                );
+                    }));
 
                 const subscriptionGroupsToBeUpdated = [
                     ...subscriptionGroupsToBeAdded,
@@ -124,31 +112,46 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                             })
                         );
                     })
-                    .catch((): void => {
-                        notify(
-                            NotificationTypeV1.Error,
-                            t("message.update-error", {
-                                entity: t("label.subscription-groups"),
-                            })
-                        );
+                    .catch((error: AxiosError): void => {
+                        const errMessages = getErrorMessages(error);
+
+                        isEmpty(errMessages)
+                            ? notify(
+                                  NotificationTypeV1.Error,
+                                  t("message.update-error", {
+                                      entity: t("label.subscription-groups"),
+                                  })
+                              )
+                            : errMessages.map((err) =>
+                                  notify(NotificationTypeV1.Error, err)
+                              );
                     })
                     .finally((): void => {
                         // Redirect to alerts detail path
-                        history.push(getAlertsViewPath(alert.id));
+                        navigate(getAlertsViewPath(alert.id));
                     });
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", { entity: t("label.alert") })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.alert"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
     const onSubscriptionGroupWizardFinish = async (
         subscriptionGroup: SubscriptionGroup
     ): Promise<SubscriptionGroup> => {
-        let newSubscriptionGroup: SubscriptionGroup = (null as unknown) as SubscriptionGroup;
+        let newSubscriptionGroup: SubscriptionGroup =
+            null as unknown as SubscriptionGroup;
 
         if (!subscriptionGroup) {
             return newSubscriptionGroup;
@@ -166,12 +169,18 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.create-error", {
-                    entity: t("label.subscription-group"),
-                })
-            );
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.create-error", {
+                          entity: t("label.subscription-group"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return newSubscriptionGroup;
@@ -184,7 +193,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedSubscriptionGroups;
@@ -195,7 +210,13 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedAlerts;
@@ -221,7 +242,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
     const fetchAlert = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {
@@ -238,8 +259,14 @@ export const AlertsUpdatePage: FunctionComponent = () => {
             .then((alert) => {
                 setAlert(alert);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally((): void => {
                 setLoading(false);
@@ -253,22 +280,27 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
+                showTimeRange
                 title={t("label.update-entity", {
                     entity: t("label.alert"),
                 })}
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <AlertWizard
-                        alert={alert}
-                        getAlertEvaluation={fetchAlertEvaluation}
-                        getAllAlerts={fetchAllAlerts}
-                        getAllSubscriptionGroups={fetchAllSubscriptionGroups}
-                        onFinish={onAlertWizardFinish}
-                        onSubscriptionGroupWizardFinish={
-                            onSubscriptionGroupWizardFinish
-                        }
-                    />
+                    {alert && (
+                        <AlertWizard<Alert>
+                            alert={alert}
+                            getAlertEvaluation={fetchAlertEvaluation}
+                            getAllAlerts={fetchAllAlerts}
+                            getAllSubscriptionGroups={
+                                fetchAllSubscriptionGroups
+                            }
+                            onFinish={onAlertWizardFinish}
+                            onSubscriptionGroupWizardFinish={
+                                onSubscriptionGroupWizardFinish
+                            }
+                        />
+                    )}
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

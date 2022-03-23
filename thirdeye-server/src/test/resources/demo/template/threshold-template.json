@@ -1,21 +1,20 @@
 {
   "name": "threshold-template",
   "description": "Threshold Template",
-  "cron": "0 0/1 * 1/1 * ? * ",
+  "cron": "0 0 0/2 1/1 * ? *",
   "nodes": [
     {
       "name": "root",
       "type": "AnomalyDetector",
       "params": {
         "component.min": "${min}",
-        "component.monitoringGranularity": "2_HOURS",
+        "component.monitoringGranularity": "PT2H",
         "component.metric": "met",
         "component.max": "${max}",
         "component.timestamp": "ts",
         "anomaly.metric": "${metric}",
         "component.timezone": "US/Pacific",
         "type": "THRESHOLD",
-        "component.dimensions": [],
         "component.offset": "mo1m",
         "component.pattern": "down"
       },
@@ -44,9 +43,15 @@
       ]
     }
   ],
-  "rca": {
-    "datasource": "${dataSource}",
-    "dataset": "${dataset}",
-    "metric": "${metricColumn}"
+  "metadata": {
+    "datasource": {
+      "name": "${dataSource}"
+    },
+    "dataset": {
+      "name": "${dataset}"
+    },
+    "metric": {
+      "name": "${metricColumn}"
+    }
   }
 }

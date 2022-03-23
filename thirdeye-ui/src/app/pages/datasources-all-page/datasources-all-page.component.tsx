@@ -1,17 +1,17 @@
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import {
     deleteDatasource,
     getAllDatasources,
@@ -19,25 +19,20 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasources } from "../../utils/datasources/datasources.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const DatasourcesAllPage: FunctionComponent = () => {
     const [uiDatasources, setUiDatasources] = useState<UiDatasource[] | null>(
         null
     );
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
-
-    useEffect(() => {
         // Time range refreshed, fetch datasources
         fetchAllDatasources();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllDatasources = (): void => {
         setUiDatasources(null);
@@ -47,8 +42,14 @@ export const DatasourcesAllPage: FunctionComponent = () => {
             .then((datasources) => {
                 fetchedUiDatasources = getUiDatasources(datasources);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => {
                 setUiDatasources(fetchedUiDatasources);
@@ -77,14 +78,20 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 // Remove deleted datasource from fetched datasources
                 removeUiDatasource(datasource);
             })
-            .catch(() =>
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.delete-error", {
-                        entity: t("label.datasource"),
-                    })
-                )
-            );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     const removeUiDatasource = (datasource: Datasource): void => {
@@ -103,7 +110,7 @@ export const DatasourcesAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={2} />
+            <ConfigurationPageHeader selectedIndex={0} />
             <PageContentsGridV1 fullHeight>
                 <DatasourceListV1
                     datasources={uiDatasources}

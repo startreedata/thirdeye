@@ -4,13 +4,30 @@ import {
 } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 
 export interface AnomalyBreakdown {
-    [key: string]: {
-        [key: string]: number;
+    metric: {
+        name: string;
+        dataset: {
+            name: string;
+        };
+    };
+    current: {
+        breakdown: {
+            [key: string]: {
+                [key: string]: number;
+            };
+        };
+    };
+    baseline: {
+        breakdown: {
+            [key: string]: {
+                [key: string]: number;
+            };
+        };
     };
 }
 
 export interface AnomalyBreakdownRequest {
-    offset?: AnomalyBreakdownAPIOffsetValues;
+    baselineOffset?: AnomalyBreakdownAPIOffsetValues;
     timezone?: string;
     filters?: string[];
     limit?: number;

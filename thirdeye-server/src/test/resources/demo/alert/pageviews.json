@@ -1,12 +1,18 @@
 {
   "name": "pageviews",
   "description": "This is a sample detection",
-  "cron": "0 */1 * * * ?",
+  "cron": "0 0 0 1/1 * ? *",
   "template": {
-    "rca": {
-      "datasource": "${dataSource}",
-      "dataset": "${dataset}",
-      "metric": "views"
+    "metadata": {
+      "datasource": {
+        "name": "${dataSource}"
+      },
+      "dataset": {
+        "name": "${dataset}"
+      },
+      "metric": {
+        "name": "views"
+      }
     },
     "nodes": [
       {
@@ -15,7 +21,7 @@
         "params": {
           "type": "PERCENTAGE_CHANGE",
           "component.timezone": "US/Pacific",
-          "component.monitoringGranularity": "1_DAYS",
+          "component.monitoringGranularity": "P1D",
           "component.timestamp": "ts",
           "component.metric": "met",
           "component.percentageChange": "${percentageChange}",

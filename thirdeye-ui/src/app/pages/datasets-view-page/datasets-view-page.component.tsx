@@ -1,24 +1,24 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getDatasetsAllPath,
     getDatasetsUpdatePath,
@@ -27,28 +27,22 @@ import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 
 export const DatasetsViewPage: FunctionComponent = () => {
     const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const params = useParams<DatasetsViewPageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
-
-    useEffect(() => {
         // Time range refreshed, fetch dataset
         fetchDataset();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchDataset = (): void => {
         setUiDataset(null);
         let fetchedUiDataset = {} as UiDataset;
 
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             // Invalid id
             notify(
                 NotificationTypeV1.Error,
@@ -67,9 +61,15 @@ export const DatasetsViewPage: FunctionComponent = () => {
             .then((dataset) => {
                 fetchedUiDataset = getUiDataset(dataset);
             })
-            .catch(() =>
-                notify(NotificationTypeV1.Error, t("message.fetch-error"))
-            )
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            })
             .finally(() => setUiDataset(fetchedUiDataset));
     };
 
@@ -91,23 +91,34 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 );
 
                 // Redirect to datasets all path
-                history.push(getDatasetsAllPath());
+                navigate(getDatasetsAllPath());
             })
-            .catch(() =>
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.delete-error", { entity: t("label.dataset") })
-                )
-            );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     const handleDatasetEdit = (id: number): void => {
-        history.push(getDatasetsUpdatePath(id));
+        navigate(getDatasetsUpdatePath(id));
     };
 
     return (
         <PageV1>
-            <PageHeader title={uiDataset ? uiDataset.name : ""} />
+            <PageHeader
+                showCreateButton
+                title={uiDataset ? uiDataset.name : ""}
+            />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     {/* Dataset */}

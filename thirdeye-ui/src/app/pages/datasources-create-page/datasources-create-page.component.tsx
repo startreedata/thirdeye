@@ -1,29 +1,26 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
+} from "../../platform/components";
 import { createDatasource } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 
 export const DatasourcesCreatePage: FunctionComponent = () => {
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     const onDatasourceWizardFinish = (datasource: Datasource): void => {
         if (!datasource) {
@@ -39,15 +36,21 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                     })
                 );
                 // Redirect to datasources detail path
-                history.push(getDatasourcesViewPath(datasource.id));
+                navigate(getDatasourcesViewPath(datasource.id));
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.create-error", {
-                        entity: t("label.datasource"),
-                    })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.create-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 

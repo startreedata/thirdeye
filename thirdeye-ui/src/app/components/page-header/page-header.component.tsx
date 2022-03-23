@@ -1,12 +1,18 @@
 import { useMediaQuery, useTheme } from "@material-ui/core";
+import React, { FunctionComponent } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageHeaderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent } from "react";
+} from "../../platform/components";
+import { getTimeRangeDuration } from "../../utils/time-range/time-range.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
+import {
+    TimeRangeDuration,
+    TimeRangeQueryStringKey,
+} from "../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import { PageHeaderProps } from "./page-header.interfaces";
 
@@ -17,11 +23,36 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
         timeRangeDuration,
         recentCustomTimeRangeDurations,
         setTimeRangeDuration,
-        refreshTimeRange,
     } = useTimeRange();
     const theme = useTheme();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
+    const onHandleTimeRangeChange = (
+        timeRangeDuration: TimeRangeDuration
+    ): void => {
+        setTimeRangeDuration(timeRangeDuration);
+        searchParams.set(
+            TimeRangeQueryStringKey.TIME_RANGE,
+            timeRangeDuration.timeRange
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            timeRangeDuration.startTime.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            timeRangeDuration.endTime.toString()
+        );
+        setSearchParams(searchParams);
+    };
+
+    const onHandleRefresh = (): void => {
+        onHandleTimeRangeChange(
+            getTimeRangeDuration(timeRangeDuration.timeRange)
+        );
+    };
 
     return (
         <PageHeaderV1>
@@ -36,13 +67,13 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
                             recentCustomTimeRangeDurations
                         }
                         timeRangeDuration={timeRangeDuration}
-                        onChange={setTimeRangeDuration}
-                        onRefresh={refreshTimeRange}
+                        onChange={onHandleTimeRangeChange}
+                        onRefresh={onHandleRefresh}
                     />
                 )}
 
                 {/* Create options button */}
-                <CreateMenuButton />
+                {props.showCreateButton && <CreateMenuButton />}
             </PageHeaderActionsV1>
         </PageHeaderV1>
     );

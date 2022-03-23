@@ -3,11 +3,11 @@ export interface Datasource {
     name: string;
     type: string;
     properties: DatasourceProperties;
-    metaList: DatasourceMetaList[];
+    metaList?: DatasourceMetaList[];
 }
 
 export interface DatasourceProperties {
-    zooKeeperURL: string;
+    zookeeperUrl: string;
     clusterName: string;
     controllerConnectionScheme: string;
     controllerHost: string;

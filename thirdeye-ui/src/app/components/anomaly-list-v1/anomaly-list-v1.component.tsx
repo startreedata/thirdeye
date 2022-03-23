@@ -1,50 +1,42 @@
 import { Button, Typography } from "@material-ui/core";
+import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
     DataGridV1,
-    linkRendererV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+} from "../../platform/components";
+import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
-    getAnomaliesViewPath,
+    getAnomaliesAnomalyPath,
 } from "../../utils/routes/routes.util";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     props: AnomalyListV1Props
 ) => {
-    const [
-        selectedAnomaly,
-        setSelectedAnomaly,
-    ] = useState<DataGridSelectionModelV1>();
+    const [selectedAnomaly, setSelectedAnomaly] =
+        useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
 
     const anomalyNameRenderer = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAnomaly
     ): ReactNode => {
-        return linkRendererV1(
-            cellValue,
-            getAnomaliesViewPath(data.id as number)
-        );
+        return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
     };
 
     const alertNameRenderer = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAnomaly
     ): ReactNode => {
-        return linkRendererV1(
-            cellValue,
-            getAlertsViewPath(data.alertId as number)
-        );
+        return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
     };
 
     const deviationRenderer = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiAnomaly
     ): ReactNode => {
         return (
             <Typography
@@ -66,11 +58,9 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         }
 
         const anomalyId = selectedAnomaly.rowKeyValues[0];
-        const anomaly = (selectedAnomaly.rowKeyValueMap?.get(
-            anomalyId
-        ) as unknown) as UiAnomaly;
+        const anomaly = selectedAnomaly.rowKeyValueMap?.get(anomalyId);
 
-        props.onDelete && props.onDelete(anomaly);
+        props.onDelete && props.onDelete(anomaly as UiAnomaly);
     };
 
     const anomalyListColumns = useMemo(
@@ -139,16 +129,18 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     );
 
     return (
-        <DataGridV1
+        <DataGridV1<UiAnomaly>
             hideBorder
             columns={anomalyListColumns}
-            data={(props.anomalies as unknown) as Record<string, unknown>[]}
+            data={props.anomalies as UiAnomaly[]}
             rowKey="id"
+            searchFilterValue={props.searchFilterValue}
             searchPlaceholder={t("label.search-entity", {
                 entity: t("label.anomalies"),
             })}
             toolbarComponent={
                 <Button
+                    data-testid="button-delete"
                     disabled={isActionButtonDisable}
                     variant="contained"
                     onClick={handleAnomalyDelete}
@@ -156,6 +148,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                     {t("label.delete")}
                 </Button>
             }
+            onSearchFilterValueChange={props.onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}
         />
     );

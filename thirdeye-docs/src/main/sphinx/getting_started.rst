@@ -113,10 +113,10 @@ with the one shown below.
 
   databaseConfiguration:
     # Assuming a local MySQL server running on the default port 3306
-    url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true
+    url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
     user: uthirdeye
     password: pass
-    driver: com.mysql.jdbc.Driver
+    driver: com.mysql.cj.jdbc.Driver
 
 All set! ThirdEye is now configured to use MySQL as the persistence layer.
 

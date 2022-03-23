@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Copyright (c) 2022 StarTree Inc. All rights reserved.
+# Confidential and Proprietary Information of StarTree Inc.
+#
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then

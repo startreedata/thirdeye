@@ -1,22 +1,18 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
+import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { GeneralUnauthenticatedRouter } from "./general-unauthenticated.router";
 
 jest.mock(
-    "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component",
+    "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component",
     () => ({
-        useAppBreadcrumbs: jest.fn().mockImplementation(() => ({
-            setRouterBreadcrumbs: mockSetRouterBreadcrumbs,
-        })),
+        AppLoadingIndicatorV1: jest
+            .fn()
+            .mockReturnValue("testLoadingIndicatorV1"),
     })
 );
-
-jest.mock("@startree-ui/platform-ui", () => ({
-    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
-}));
 
 jest.mock("../../pages/login-page/login-page.component", () => ({
     LoginPage: jest.fn().mockReturnValue("testLoginPage"),
@@ -31,16 +27,6 @@ describe("General Unauthenticated Router", () => {
         );
 
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
-    });
-
-    it("should set appropriate router breadcrumbs", () => {
-        render(
-            <MemoryRouter>
-                <GeneralUnauthenticatedRouter />
-            </MemoryRouter>
-        );
-
-        expect(mockSetRouterBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
     it("should render login page at exact login path", async () => {
@@ -91,5 +77,3 @@ describe("General Unauthenticated Router", () => {
         ).resolves.toBeInTheDocument();
     });
 });
-
-const mockSetRouterBreadcrumbs = jest.fn();

@@ -7,7 +7,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -16,10 +16,9 @@ Content-Type: application/json
           "params": {
             "type": "THRESHOLD",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.max": "${max}",
             "component.min": "${min}",
             "component.offset": "mo1m",
@@ -55,7 +54,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -92,7 +91,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -101,10 +100,9 @@ Content-Type: application/json
           "params": {
             "type": "HOLT_WINTERS",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.pattern": "${pattern}",
             "component.sensitivity": "${sensitivity}",
             "anomaly.metric": "${metric}"
@@ -138,7 +136,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}) AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -176,7 +174,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -185,10 +183,9 @@ Content-Type: application/json
           "params": {
             "type": "ABSOLUTE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.absoluteChange": "${absoluteChange}",
             "component.offset": "${offset}",
             "component.pattern": "${pattern}",
@@ -228,7 +225,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -258,7 +255,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -296,7 +293,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -305,10 +302,9 @@ Content-Type: application/json
           "params": {
             "type": "MEAN_VARIANCE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.lookback": "${lookbackDetector}",
             "component.sensitivity": "${sensitivity}",
             "anomaly.metric": "${metric}"
@@ -342,7 +338,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -380,7 +376,7 @@ Content-Type: application/json
   "alert": {
     "name": "sample-alert",
     "description": "Sample description payload for testing",
-    "cron": "0 0/1 * 1/1 * ? *",
+    "cron": "0 0 0 1/1 * ? *",
     "template": {
       "nodes": [
         {
@@ -389,10 +385,9 @@ Content-Type: application/json
           "params": {
             "type": "PERCENTAGE_CHANGE",
             "component.timezone": "US/Pacific",
-            "component.monitoringGranularity": "1_DAYS",
+            "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.dimensions": [],
             "component.percentageChange": "${percentageChange}",
             "component.offset": "${offset}",
             "component.pattern": "${pattern}",
@@ -432,7 +427,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -462,7 +457,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [

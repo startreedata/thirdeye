@@ -1,19 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
-import React, {
-    FunctionComponent,
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from "react";
-import { useTranslation } from "react-i18next";
-import { Redirect, Route, Switch, useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import React, { FunctionComponent, lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
-    AppRoute,
-    getConfigurationPath,
+    AppRouteRelative,
     getSubscriptionGroupsAllPath,
-    getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
 
 const SubscriptionGroupsAllPage = lazy(() =>
@@ -47,69 +37,45 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const SubscriptionGroupsRouter: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { setRouterBreadcrumbs } = useAppBreadcrumbs();
-    const history = useHistory();
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        setRouterBreadcrumbs([
-            {
-                text: t("label.configuration"),
-                onClick: () => history.push(getConfigurationPath()),
-            },
-            {
-                text: t("label.subscription-groups"),
-                onClick: () => history.push(getSubscriptionGroupsPath()),
-            },
-        ]);
-        setLoading(false);
-    }, []);
-
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            <Switch>
+            <Routes>
                 {/* Subscription groups path */}
-                <Route exact path={AppRoute.SUBSCRIPTION_GROUPS}>
-                    {/* Redirect to subscription groups all path */}
-                    <Redirect to={getSubscriptionGroupsAllPath()} />
-                </Route>
+                {/* Redirect to subscription groups all path */}
+                <Route
+                    index
+                    element={
+                        <Navigate replace to={getSubscriptionGroupsAllPath()} />
+                    }
+                />
 
                 {/* Subscription groups all path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsAllPage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_ALL}
+                    element={<SubscriptionGroupsAllPage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}
                 />
 
                 {/* Subscription groups view path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsViewPage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_VIEW}
+                    element={<SubscriptionGroupsViewPage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_VIEW}
                 />
 
                 {/* Subscription groups create path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsCreatePage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_CREATE}
+                    element={<SubscriptionGroupsCreatePage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}
                 />
 
                 {/* Subscription groups update path */}
                 <Route
-                    exact
-                    component={SubscriptionGroupsUpdatePage}
-                    path={AppRoute.SUBSCRIPTION_GROUPS_UPDATE}
+                    element={<SubscriptionGroupsUpdatePage />}
+                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}
                 />
 
                 {/* No match found, render page not found */}
-                <Route component={PageNotFoundPage} />
-            </Switch>
+                <Route element={<PageNotFoundPage />} path="*" />
+            </Routes>
         </Suspense>
     );
 };

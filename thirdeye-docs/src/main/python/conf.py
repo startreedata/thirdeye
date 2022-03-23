@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+
+#  Copyright (c) 2022 StarTree Inc. All rights reserved.
+#  Confidential and Proprietary Information of StarTree Inc.
+
 #
 # Configuration file for the Sphinx documentation builder.
 #

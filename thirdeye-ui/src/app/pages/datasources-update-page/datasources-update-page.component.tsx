@@ -1,18 +1,18 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { assign, isEmpty, toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import { assign, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
+} from "../../platform/components";
 import {
     getDatasource,
     updateDatasource,
@@ -20,32 +20,18 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { omitNonUpdatableData } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
 import { DatasourcesUpdatePageParams } from "./datasources-update-page.interfaces";
 
 export const DatasourcesUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [datasource, setDatasource] = useState<Datasource>();
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const params = useParams<DatasourcesUpdatePageParams>();
     const { notify } = useNotificationProviderV1();
 
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        // Create page breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: datasource ? datasource.name : "",
-                onClick: (): void => {
-                    if (datasource) {
-                        history.push(getDatasourcesViewPath(datasource.id));
-                    }
-                },
-            },
-        ]);
-    }, [datasource]);
 
     useEffect(() => {
         const init = async (): Promise<void> => {
@@ -72,21 +58,27 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
                     })
                 );
                 // Redirect to datasources detail path
-                history.push(getDatasourcesViewPath(datasourceResponse.id));
+                navigate(getDatasourcesViewPath(datasourceResponse.id));
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.datasource"),
-                    })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
     const fetchDataSource = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
+        if (params.id && !isValidNumberId(params.id)) {
             notify(
                 NotificationTypeV1.Error,
                 t("message.invalid-id", {
@@ -103,8 +95,14 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
             .then((datasource) => {
                 setDatasource(datasource);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally((): void => {
                 setLoading(false);

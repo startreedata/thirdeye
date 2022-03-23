@@ -1,10 +1,13 @@
+import { HierarchyNode } from "d3-hierarchy";
 import React, { FunctionComponent } from "react";
-import { AnomalyFilterOption } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
 export interface TreemapProps<Data> {
     name: string;
+    shouldTruncateText?: boolean;
     treemapData: TreemapData<Data>[];
-    onDimensionClickHandler?: (treeMapNode: AnomalyFilterOption) => void;
+    onDimensionClickHandler?: (
+        treeMapNode: HierarchyNode<TreemapData<Data>>
+    ) => void;
     height?: number;
     tooltipElement?: React.FunctionComponent<TreemapData<Data>>;
     colorChangeValueAccessor?: (node: TreemapData<Data>) => number;

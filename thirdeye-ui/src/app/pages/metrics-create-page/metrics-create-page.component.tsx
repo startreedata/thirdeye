@@ -1,17 +1,16 @@
 import { Grid } from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
+} from "../../platform/components";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric } from "../../rest/dto/metric.interfaces";
@@ -19,15 +18,13 @@ import { createMetric } from "../../rest/metrics/metrics.rest";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";
 
 export const MetricsCreatePage: FunctionComponent = () => {
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const [loading, setLoading] = useState(true);
     const [datasets, setDatasets] = useState<Dataset[]>([]);
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
         fetchAllDatasets();
     }, []);
 
@@ -45,7 +42,7 @@ export const MetricsCreatePage: FunctionComponent = () => {
             );
 
             // Redirect to metrics detail path
-            history.push(getMetricsViewPath(metric?.id || 0));
+            navigate(getMetricsViewPath(metric?.id || 0));
         });
     };
 

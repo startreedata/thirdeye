@@ -1,11 +1,15 @@
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, isEmpty, isNil } from "lodash";
+import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
+import {
+    formatDateAndTimeV1,
+    formatDurationV1,
+    formatLargeNumberV1,
+    formatPercentageV1,
+} from "../../platform/utils";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { formatDateAndTime, formatDuration } from "../date-time/date-time.util";
-import { formatLargeNumber, formatPercentage } from "../number/number.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const EMPTY_STRING_DISPLAY = "<EMPTY_VALUE>";
@@ -72,33 +76,36 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     }
 
     // Current and predicted values
-    if (anomaly.avgCurrentVal) {
-        uiAnomaly.current = formatLargeNumber(anomaly.avgCurrentVal);
+    if (isNumber(anomaly.avgCurrentVal)) {
+        uiAnomaly.current = formatLargeNumberV1(anomaly.avgCurrentVal);
     }
-    if (anomaly.avgBaselineVal) {
-        uiAnomaly.predicted = formatLargeNumber(anomaly.avgBaselineVal);
+    if (isNumber(anomaly.avgBaselineVal)) {
+        uiAnomaly.predicted = formatLargeNumberV1(anomaly.avgBaselineVal);
     }
 
     // Calculate deviation if both current and average values are available
-    if (anomaly.avgCurrentVal && anomaly.avgBaselineVal) {
+    if (isNumber(anomaly.avgCurrentVal) && isNumber(anomaly.avgBaselineVal)) {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;
-        uiAnomaly.deviation = formatPercentage(deviation);
+        uiAnomaly.deviation = formatPercentageV1(deviation);
         uiAnomaly.negativeDeviation = deviation < 0;
     }
 
     // Start and end time
     if (anomaly.startTime) {
-        uiAnomaly.startTime = formatDateAndTime(anomaly.startTime);
+        uiAnomaly.startTime = formatDateAndTimeV1(anomaly.startTime);
     }
     if (anomaly.endTime) {
-        uiAnomaly.endTime = formatDateAndTime(anomaly.endTime);
+        uiAnomaly.endTime = formatDateAndTimeV1(anomaly.endTime);
     }
 
     // Duration
     if (anomaly.startTime && anomaly.endTime) {
-        uiAnomaly.duration = formatDuration(anomaly.startTime, anomaly.endTime);
+        uiAnomaly.duration = formatDurationV1(
+            anomaly.startTime,
+            anomaly.endTime
+        );
     }
 
     return uiAnomaly;

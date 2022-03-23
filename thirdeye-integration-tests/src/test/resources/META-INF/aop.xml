@@ -1,0 +1,9 @@
+<aspectj>
+  <aspects>
+    <aspect name="ai.startree.thirdeye.aspect.SystemTimeMockAspect"/>
+    <aspect name="ai.startree.thirdeye.aspect.DateMockAspect"/>
+    <aspect name="ai.startree.thirdeye.aspect.QuartzRandomizedIdleWaitTimeMockAspect"/>
+    <weaver options="-showWeaveInfo">
+    </weaver>
+  </aspects>
+</aspectj>

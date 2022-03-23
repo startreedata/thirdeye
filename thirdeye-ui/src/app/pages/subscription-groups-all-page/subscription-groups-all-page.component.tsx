@@ -1,17 +1,17 @@
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
+import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+} from "../../platform/components";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -20,26 +20,22 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
         UiSubscriptionGroup[] | null
     >(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
-
-    useEffect(() => {
         // Time range refreshed, fetch subscription groups
         fetchAllSubscriptionGroups();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllSubscriptionGroups = (): void => {
         setUiSubscriptionGroups(null);
@@ -48,11 +44,34 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         let fetchedAlerts: Alert[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertsResponse.status === PROMISES.REJECTED
+                            ? alertsResponse.reason
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.fetch-error")
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     fetchedAlerts = alertsResponse.value;
                 }
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedUiSubscriptionGroups = getUiSubscriptionGroups(
                         subscriptionGroupsResponse.value,
                         fetchedAlerts
@@ -114,7 +133,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <ConfigurationPageHeader selectedIndex={0} />
+            <ConfigurationPageHeader selectedIndex={4} />
             <PageContentsGridV1 fullHeight>
                 <SubscriptionGroupListV1
                     subscriptionGroups={uiSubscriptionGroups}

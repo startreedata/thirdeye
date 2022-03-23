@@ -152,7 +152,12 @@ export const AlertsCreatePage: FunctionComponent = () => {
             const errMessages = getErrorMessages(error as AxiosError);
 
             isEmpty(errMessages)
-                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.subscription-groups"),
+                      })
+                  )
                 : errMessages.map((err) =>
                       notify(NotificationTypeV1.Error, err)
                   );
@@ -169,7 +174,12 @@ export const AlertsCreatePage: FunctionComponent = () => {
             const errMessages = getErrorMessages(error as AxiosError);
 
             isEmpty(errMessages)
-                ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alerts"),
+                      })
+                  )
                 : errMessages.map((err) =>
                       notify(NotificationTypeV1.Error, err)
                   );

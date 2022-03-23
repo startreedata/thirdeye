@@ -156,7 +156,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                     isEmpty(errMessages)
                         ? notify(
                               NotificationTypeV1.Error,
-                              t("message.fetch-error")
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertResponse.status === PROMISES.REJECTED
+                                          ? "label.alert"
+                                          : "label.subscription-groups"
+                                  ),
+                              })
                           )
                         : errMessages.map((err) =>
                               notify(NotificationTypeV1.Error, err)

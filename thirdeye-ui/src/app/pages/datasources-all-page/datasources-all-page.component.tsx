@@ -46,7 +46,12 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 const errMessages = getErrorMessages(error);
 
                 isEmpty(errMessages)
-                    ? notify(NotificationTypeV1.Error, t("message.fetch-error"))
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.error-while-fetching", {
+                              entity: t("label.datasources"),
+                          })
+                      )
                     : errMessages.map((err) =>
                           notify(NotificationTypeV1.Error, err)
                       );

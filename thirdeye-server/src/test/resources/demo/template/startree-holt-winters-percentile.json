@@ -8,7 +8,7 @@
       "params": {
         "component.metric": "met",
         "component.monitoringGranularity": "${monitoringGranularity}",
-        "component.lookback": "${holtWintersLookback}",
+        "component.lookbackPeriod": "${lookback}",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
         "anomaly.source": "holtwinters-template/root",

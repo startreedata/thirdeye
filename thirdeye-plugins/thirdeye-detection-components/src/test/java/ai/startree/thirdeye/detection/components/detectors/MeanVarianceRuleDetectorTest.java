@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.detection.components.detectors;
 
+import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeLookbackSteps;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
@@ -84,7 +85,7 @@ public class MeanVarianceRuleDetectorTest {
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
+    spec.setLookbackPeriod("P10D");
     spec.setSensitivity(0); // corresponds to multiplying std by 1.5 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
@@ -164,7 +165,7 @@ public class MeanVarianceRuleDetectorTest {
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
+    spec.setLookbackPeriod("P10D");
     spec.setSensitivity(0);
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
@@ -198,7 +199,7 @@ public class MeanVarianceRuleDetectorTest {
 
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
+    spec.setLookbackPeriod("P10D");
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
@@ -237,7 +238,7 @@ public class MeanVarianceRuleDetectorTest {
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
-    spec.setLookback(10);
+    spec.setLookbackPeriod("P10D");
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
@@ -276,7 +277,7 @@ public class MeanVarianceRuleDetectorTest {
     MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
-    spec.setLookback(10);
+    spec.setLookbackPeriod("P10D");
     spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
     MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
     detector.init(spec);
@@ -294,5 +295,51 @@ public class MeanVarianceRuleDetectorTest {
             BooleanSeries.FALSE, // change is up
             BooleanSeries.TRUE)); // change is down
     assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  @Test
+  public void testComputeLookbackStepsWithDayGranularity() {
+    String lookbackPeriod = "P14D";
+    String monitoringGranularity = "P1D";
+    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+
+    assertThat(output).isEqualTo(14);
+  }
+
+  @Test
+  public void testComputeLookbackStepsWithHourlyGranularity() {
+    String lookbackPeriod = "P14D";
+    String monitoringGranularity = "PT1H";
+    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+
+    assertThat(output).isEqualTo(336);
+  }
+
+  @Test
+  public void testComputeLookbackStepsWithMinutelyGranularity() {
+    String lookbackPeriod = "P7D";
+    String monitoringGranularity = "PT1M";
+    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+
+    assertThat(output).isEqualTo(10080);
+  }
+
+  @Test
+  public void testComputeLookbackStepsWith15MinuteGranularity() {
+    String lookbackPeriod = "P7D";
+    String monitoringGranularity = "PT15M";
+    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+
+    assertThat(output).isEqualTo(672);
+  }
+
+  @Test
+  public void testComputeLookbackStepsWithLoobackAndPeriodNotDividingToInteger() {
+    // 10080minutes / 25 minutes = 403.2
+    String lookbackPeriod = "P7D";
+    String monitoringGranularity = "PT25M";
+    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+
+    assertThat(output).isEqualTo(403);
   }
 }

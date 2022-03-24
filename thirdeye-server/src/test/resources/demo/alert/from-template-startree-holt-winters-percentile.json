@@ -16,8 +16,7 @@
     "monitoringGranularity": "P1D",
     "completenessDelay": "P0D",
     "pattern": "UP_OR_DOWN",
-    "sensitivity": "1",
-    "holtWintersLookback": "14"
+    "sensitivity": "1"
   },
   "cron": "0 0 0 1/1 * ? *"
 }

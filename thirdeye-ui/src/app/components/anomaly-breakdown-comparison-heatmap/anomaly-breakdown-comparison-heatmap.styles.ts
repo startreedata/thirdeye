@@ -8,5 +8,14 @@ export const useAnomalyBreakdownComparisonHeatmapStyles = makeStyles(
                 background: theme.palette.secondary,
             },
         },
+        baselineWeekOffsetLabelContainer: {
+            [theme.breakpoints.down("xs")]: {
+                textAlign: "left",
+            },
+            [theme.breakpoints.up("sm")]: {
+                textAlign: "right",
+                marginRight: theme.spacing(1),
+            },
+        },
     })
 );

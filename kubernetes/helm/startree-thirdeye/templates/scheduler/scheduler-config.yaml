@@ -72,6 +72,7 @@ data:
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}
+      clientId: {{ .Values.ui.clientId }}
 
     # Prometheus compatible metrics will be exposed at /admin/prometheus
     prometheus:

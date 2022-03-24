@@ -89,6 +89,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     } else if (spec.getLookback() != null) {
       this.lookback = spec.getLookback();
     } // else uses default value - but not a good idea - maybe throw error
+    // fixme cyril remove deprecated lookback and only use lookbackPeriod in 2 months (mid-May)
   }
 
   @Override

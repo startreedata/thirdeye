@@ -73,6 +73,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when lookbackPeriod is used");
       this.lookback = computeLookbackSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
     } // else use default or set lookback - but not a good idea
+    // fixme cyril remove deprecated lookback and only use lookbackPeriod in 2 months (mid-May)
 
     checkArgument(lookback >= 5,
         String.format("Lookback is %d. Lookback should be greater than 5.", lookback));

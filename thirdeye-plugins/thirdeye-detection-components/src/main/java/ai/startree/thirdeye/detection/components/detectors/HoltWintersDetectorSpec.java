@@ -16,7 +16,10 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
   private double sensitivity = 5;
   private Pattern pattern = Pattern.UP_OR_DOWN;
   private String weekStart = "WEDNESDAY";
+  @Deprecated // kept for backward compatibility - prefer lookbackPeriod
   private Integer lookback = null;
+  /**Lookback period in ISO-8601 format eg P1D. Used with monitoringGranularity to compute lookback in steps.*/
+  private String lookbackPeriod = null;
 
   public double getAlpha() {
     return alpha;
@@ -87,6 +90,15 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
 
   public HoltWintersDetectorSpec setLookback(final Integer lookback) {
     this.lookback = lookback;
+    return this;
+  }
+
+  public String getLookbackPeriod() {
+    return lookbackPeriod;
+  }
+
+  public HoltWintersDetectorSpec setLookbackPeriod(final String lookbackPeriod) {
+    this.lookbackPeriod = lookbackPeriod;
     return this;
   }
 }

@@ -260,7 +260,12 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                     <Grid item sm={6} xs={12}>
                         <Grid container spacing={0}>
                             <Grid item sm={6} xs={12}>
-                                <Box p="10.5px 0">
+                                <Box
+                                    className={
+                                        classes.baselineWeekOffsetLabelContainer
+                                    }
+                                    p="10.5px 0"
+                                >
                                     <label>
                                         <strong>
                                             {t("label.baseline-week-offset")}:

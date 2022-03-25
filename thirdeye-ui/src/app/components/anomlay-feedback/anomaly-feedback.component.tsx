@@ -1,4 +1,5 @@
 import {
+    Box,
     Button,
     Card,
     CardContent,
@@ -38,15 +39,20 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
-    const [feedbackComment, setFeedbackComment] = useState(
+    const [modifiedFeedbackComment, setModifiedFeedbackComment] = useState(
         anomalyFeedback.comment
     );
+    const [updateHasError, setUpdateHasError] = useState(false);
     const { showDialog } = useDialog();
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
+    /*
+     * use a ref because there's a strange bug when the TextField in a dialog
+     * does not update the value through onChange callback
+     */
     const commentRef = useRef<HTMLInputElement>();
 
-    const handleChange = (
+    const handleLabelChange = (
         event: React.ChangeEvent<{ value: unknown }>
     ): void => {
         const newSelectedFeedbackType = event.target
@@ -65,31 +71,42 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                 onOk: () =>
                     handleFeedbackChangeOk(
                         newSelectedFeedbackType,
-                        commentRef.current?.value || anomalyFeedback.comment
+                        anomalyFeedback.comment
                     ),
             });
         }
     };
 
-    const handleCommentUpdate = (): void => {
+    const handleCommentUpdateClick = (): void => {
         showDialog({
             type: DialogType.CUSTOM,
-            title: "Update comment",
+            title: t("label.update-entity", { entity: t("label.comment") }),
             children: (
-                <TextField
-                    fullWidth
-                    multiline
-                    defaultValue={feedbackComment}
-                    inputRef={commentRef}
-                    name="comment"
-                    rows={3}
-                />
+                <>
+                    {updateHasError && (
+                        <Box
+                            color="warning.main"
+                            marginBottom="10px"
+                            marginTop="-15px"
+                        >
+                            {t("message.changes-not-saved")}
+                        </Box>
+                    )}
+                    <TextField
+                        fullWidth
+                        multiline
+                        defaultValue={modifiedFeedbackComment}
+                        inputRef={commentRef}
+                        name="comment"
+                        rows={3}
+                    />
+                </>
             ),
             okButtonLabel: t("label.change"),
             onOk: () =>
                 handleFeedbackChangeOk(
                     currentlySelected,
-                    commentRef.current?.value || feedbackComment
+                    commentRef.current?.value || modifiedFeedbackComment
                 ),
         });
     };
@@ -103,6 +120,10 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             type: feedbackType,
             comment,
         };
+
+        // Placeholder for modified comment in case request fails
+        setModifiedFeedbackComment(comment);
+
         updateAnomalyFeedback(anomalyId, updateRequestPayload)
             .then(() => {
                 notify(
@@ -111,14 +132,13 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         entity: t("label.anomaly-feedback"),
                     })
                 );
+                setUpdateHasError(false);
                 setCurrentlySelected(feedbackType);
-                setFeedbackComment(comment);
             })
             .catch((error: AxiosError) => {
-                // Reset comment on error
-                setFeedbackComment(anomalyFeedback.comment);
-
                 const errMessages = getErrorMessages(error);
+
+                setUpdateHasError(true);
 
                 isEmpty(errMessages)
                     ? notify(
@@ -149,7 +169,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                             select
                             id="anomaly-feedback-select"
                             value={currentlySelected}
-                            onChange={handleChange}
+                            onChange={handleLabelChange}
                         >
                             {Object.keys(OPTION_TO_DESCRIPTIONS).map(
                                 (optionKey: string) => (
@@ -161,7 +181,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         </TextField>
                     </Grid>
                     <Grid item xs={12}>
-                        <Button onClick={handleCommentUpdate}>
+                        <Button onClick={handleCommentUpdateClick}>
                             View / Edit comment
                         </Button>
                     </Grid>

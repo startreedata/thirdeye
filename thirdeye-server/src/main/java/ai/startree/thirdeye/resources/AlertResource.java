@@ -33,6 +33,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,7 +58,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
 
-  private static final String CRON_EVERY_1MIN = "0 */1 * * * ?";
+  private static final String CRON_EVERY_HOUR = "0 0 * * * ? *";
 
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
@@ -85,10 +86,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Override
   protected AlertDTO createDto(final ThirdEyePrincipal principal, final AlertApi api) {
-    ensureExists(api.getName(), "Name must be present");
-
     if (api.getCron() == null) {
-      api.setCron(CRON_EVERY_1MIN);
+      api.setCron(CRON_EVERY_HOUR);
     }
 
     return alertCreater.create(api
@@ -104,8 +103,12 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Override
   protected void validate(final AlertApi api, final AlertDTO existing) {
     super.validate(api, existing);
+    ensureExists(api.getName(), "Name must be present");
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
+    if (existing == null) {
+      alertCreater.ensureCreationIsPossible(api);
+    }
   }
 
   @Override
@@ -116,7 +119,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
     // Always set a default cron if not present.
     if (updated.getCron() == null) {
-      updated.setCron(CRON_EVERY_1MIN);
+      updated.setCron(CRON_EVERY_HOUR);
     }
   }
 
@@ -144,6 +147,25 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
     return Response.ok().build();
   }
+
+  @POST
+  @Timed
+  @Path("/validate")
+  @Produces(MediaType.APPLICATION_JSON)
+  // can be moved to CrudResource if /validate is needed for other entities.
+  public Response validateMultiple(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      List<AlertApi> list) {
+    ensureExists(list, "Invalid request");
+
+    for (AlertApi api : list) {
+      AlertDTO existing = api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
+      validate(api, existing);
+    }
+
+    return Response.ok().build();
+  }
+
 
   @Path("evaluate")
   @POST

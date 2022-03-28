@@ -96,7 +96,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     } else {
       // fixme cyril remove deprecated period and only use lookbackPeriod in 2 months (mid-May)
       // use default or set value - but not a good idea
-      period = spec.getPeriod();
+      this.period = spec.getPeriod();
     }
   }
 

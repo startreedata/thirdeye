@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -40,6 +40,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const {
         evaluation,
         getEvaluation,
+        errorMessages,
         status: getEvaluationRequestStatus,
     } = useGetEvaluation();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
@@ -116,6 +117,21 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             createAlertEvaluation(uiAnomaly.alertId, Number(start), Number(end))
         );
     };
+
+    useEffect(() => {
+        if (getEvaluationRequestStatus === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
+        }
+    }, [errorMessages, getEvaluationRequestStatus]);
 
     return (
         <PageV1>

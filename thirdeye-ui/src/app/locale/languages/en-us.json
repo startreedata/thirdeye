@@ -156,6 +156,7 @@
         "chart-data": "Chart Data",
         "alert-template-configuration": "Alert Template Configuration",
         "anomaly-feedback": "Anomaly Feedback",
+        "comment": "Comment",
         "baseline-week-offset": "Baseline Week Offset"
     },
     "message": {
@@ -197,6 +198,7 @@
         "authentication-disabled": "Authentication has been disabled.",
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
         "error-while-fetching": "An issue was experienced while retrieving {{entity}}",
-        "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range."
+        "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range.",
+        "changes-not-saved": "Changes have not been saved"
     }
 }

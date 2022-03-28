@@ -32,7 +32,9 @@ import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
+import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,11 +66,28 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   public void init(final MeanVarianceRuleDetectorSpec spec) {
     this.spec = spec;
     pattern = spec.getPattern();
-    lookback = spec.getLookback();
     sensitivity = spec.getSensitivity();
+
+    if (spec.getLookbackPeriod() != null) {
+      checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when lookbackPeriod is used");
+      this.lookback = computeSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
+    } else {
+      // fixme cyril remove deprecated lookback in spec and only use lookbackPeriod in 2 months (mid-May)
+      // use default or set lookback - not recommended
+      lookback = spec.getLookback();
+    }
 
     checkArgument(lookback >= 5,
         String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
+  }
+
+  protected static int computeSteps(final String periodString,
+      final String monitoringGranularityString) {
+    // mind that computing lookback only once is not exactly correct when a day has 25 hours or 23 hours - but very minor issue
+    final Period lookbackPeriod = Period.parse(periodString, ISOPeriodFormat.standard());
+    final Period monitoringGranularity = Period.parse(monitoringGranularityString, ISOPeriodFormat.standard());
+
+    return (int) (lookbackPeriod.toStandardDuration().getMillis()/monitoringGranularity.toStandardDuration().getMillis());
   }
 
   @Override

@@ -1,0 +1,20 @@
+{
+  "name": "Threshold with template startree-threshold-percentile",
+  "description": "Uses template startree-threshold-percentile.",
+  "template": {
+    "name": "startree-threshold-percentile"
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "PERCENTILETDIGEST",
+    "aggregationColumn": "views",
+    "aggregationParameter": "99",
+    "monitoringGranularity": "P1D",
+    "max": "10000",
+    "min": "200"
+  },
+  "cron": "0 0 0 1/1 * ? *"
+}

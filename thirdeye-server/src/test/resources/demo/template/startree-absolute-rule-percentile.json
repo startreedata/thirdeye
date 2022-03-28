@@ -1,0 +1,112 @@
+{
+  "name": "startree-absolute-rule-percentile",
+  "description": "Absolute rule template. Aggregation function with 2 operands: PERCENTILETDIGEST, DISTINCTCOUNTHLL,etc...",
+  "nodes": [
+    {
+      "name": "root",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.absoluteChange": "${absoluteChange}",
+        "component.monitoringGranularity": "${monitoringGranularity}",
+        "component.metric": "met",
+        "component.timestamp": "ts",
+        "anomaly.metric": "${aggregationColumn}",
+        "anomaly.source": "absolute-change-template/root",
+        "type": "ABSOLUTE_CHANGE",
+        "component.pattern": "${pattern}"
+      },
+      "inputs": [
+        {
+          "targetProperty": "baseline",
+          "sourcePlanNode": "baselineMissingDataManager",
+          "sourceProperty": "baselineOutput"
+        },
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "currentMissingDataManager",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "baselineMissingDataManager",
+      "type": "TimeIndexFiller",
+      "inputs": [
+        {
+          "sourcePlanNode": "baselineDataFetcher",
+          "sourceProperty": "baselineOutput"
+        }
+      ],
+      "outputs": [
+        {
+          "outputName": "baselineOutput"
+        }
+      ]
+    },
+    {
+      "name": "baselineDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(ts, '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "baselineOutput"
+        }
+      ]
+    },
+    {
+      "name": "currentMissingDataManager",
+      "type": "TimeIndexFiller",
+      "inputs": [
+        {
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "outputs": [
+        {
+          "outputName": "currentOutput"
+        }
+      ]
+    },
+    {
+      "name": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(ts) ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "currentOutput"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "datasource": {
+      "name": "${dataSource}"
+    },
+    "dataset": {
+      "name": "${dataset}",
+      "completenessDelay": "${completenessDelay}"
+    },
+    "metric": {
+      "name": "${aggregationColumn}"
+    },
+    "granularity": "${monitoringGranularity}"
+  },
+  "defaultProperties": {
+    "pattern": "UP_OR_DOWN",
+    "completenessDelay": "P0D",
+    "queryFilters": "",
+    "queryLimit": "100000000"
+  }
+}

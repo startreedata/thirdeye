@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class AlertTemplateRenderer {
@@ -121,7 +122,7 @@ public class AlertTemplateRenderer {
       final long startTimeMillis,
       final long endTimeMillis,
       final String alertName) throws IOException, ClassNotFoundException {
-    final Map<String, Object> properties = new HashMap<>();
+    final Map<String, Object> properties = Optional.ofNullable(template.getDefaultProperties()).orElse(new HashMap<>());
     if (templateProperties != null) {
       properties.putAll(templateProperties);
     }

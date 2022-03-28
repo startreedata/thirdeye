@@ -14,6 +14,7 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
     getAlert,
@@ -38,7 +39,11 @@ import { getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdatePage: FunctionComponent = () => {
-    const { getEvaluation } = useGetEvaluation();
+    const {
+        getEvaluation,
+        errorMessages,
+        status: getEvaluationStatus,
+    } = useGetEvaluation();
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState<Alert>();
     const { timeRangeDuration } = useTimeRange();
@@ -249,6 +254,21 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
         return fetchedAlertEvaluation;
     };
+
+    useEffect(() => {
+        if (getEvaluationStatus === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
+        }
+    }, [errorMessages, getEvaluationStatus]);
 
     const fetchAlert = (): void => {
         // Validate id from URL

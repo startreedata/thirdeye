@@ -89,7 +89,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setLookbackPeriod("P10D");
-    spec.setPeriod(3);
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -181,7 +181,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setLookbackPeriod("P10D");
-    spec.setPeriod(3);
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -217,7 +217,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setLookbackPeriod("P10D");
-    spec.setPeriod(3);
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -252,7 +252,7 @@ public class HoltWintersDetectorTest {
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setLookbackPeriod("P10D");
-    spec.setPeriod(3);
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -293,7 +293,7 @@ public class HoltWintersDetectorTest {
     spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
     spec.setLookbackPeriod("P10D");
-    spec.setPeriod(3);
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -334,7 +334,7 @@ public class HoltWintersDetectorTest {
     spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
     spec.setLookbackPeriod("P10D");
-    spec.setPeriod(3);
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);

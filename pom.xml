@@ -32,9 +32,6 @@
 
     <!-- Build ThirdEye UI -->
     <module>thirdeye-ui</module>
-
-    <!-- Build ThirdEye Documentation -->
-    <module>thirdeye-docs</module>
   </modules>
 
   <properties>
@@ -913,7 +910,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

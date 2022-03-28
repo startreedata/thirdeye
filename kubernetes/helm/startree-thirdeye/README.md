@@ -48,6 +48,32 @@ To install in namespace `te`, you can simply pass on the helm arguments directly
 helm install thirdeye . --namespace te
 ```
 
+To see the notifications in action ThirdEye can be configured to fire emails once it set up with an SMTP server. The following example
+uses the Google SMTP server.  
+Make sure you pass the `ui.publicUrl` as it will be used to form the anomaly page links shared in the email.
+
+```bash
+export SMTP_PASSWORD="password"
+export SMTP_USERNAME="from.email@gmail.com"
+export THIRDEYE_UI_PUBLIC_URL="http://localhost:8081"
+
+helm install thirdeye . \
+  --set ui.publicUrl="${THIRDEYE_UI_PUBLIC_URL}" \
+  --set smtp.host="smtp.gmail.com" \
+  --set smtp.port="465" \
+  --set secrets.smtpUsername.value=${SMTP_USERNAME} \
+  --set secrets.smtpPassword.value=${SMTP_PASSWORD}
+
+```
+
+## Upgrading ThirdEye
+```bash
+# For example, This upgrades ThirdEye to the desired development image.
+helm upgrade --install thirdeye -n "${namespace}" . \
+  --set image.tag=${VERSION} \
+  --set ui.image.tag=${VERSION}
+```
+
 ## Uninstalling ThirdEye
 
 Simply run one of the commands below depending on whether you are using a namespace or not.
@@ -57,7 +83,7 @@ helm uninstall thirdeye
 helm uninstall thirdeye --namespace te
 ```
 
-## Configuration
+## Configurations
 
 > Warning: The initdb.sql used for setting up the db is currently passed as a helm value to the charts.
 
@@ -150,23 +176,7 @@ But if you want pass a selected list of calendars it can be done as
 helm install thirdeye . \
   --set config.calendars="{en.australian#holiday@group.v.calendar.google.com,en.austrian#holiday@group.v.calendar.google.com}"
 ```
-### Email Configuration via SMTP
 
-ThirdEye can be configured to fire emails once it set up with an SMTP server. The following example
-uses the Google SMTP server.
-
-```bash
-# The ! is escaped with \!
-export SMTP_PASSWORD="password"
-export SMTP_USERNAME="from.email@gmail.com"
-
-helm install thirdeye . \
-  --set smtp.host="smtp.gmail.com" \
-  --set smtp.port="465" \
-  --set secrets.smtpUsername.value=${SMTP_USERNAME} \
-  --set secrets.smtpPassword.value=${SMTP_PASSWORD}
-
-```
 ### SSL/TLS Support
 
 To enable SSL/TLS on ThirdEye components the prerequisite is to have the certificates injected into the namespace as Secret

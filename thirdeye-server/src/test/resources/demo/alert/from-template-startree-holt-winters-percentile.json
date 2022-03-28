@@ -14,8 +14,6 @@
     "aggregationParameter": "99",
     "lookback": "P14D",
     "monitoringGranularity": "P1D",
-    "completenessDelay": "P0D",
-    "pattern": "UP_OR_DOWN",
     "sensitivity": "1"
   },
   "cron": "0 0 0 1/1 * ? *"

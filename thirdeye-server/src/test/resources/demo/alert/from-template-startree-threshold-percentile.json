@@ -13,7 +13,6 @@
     "aggregationColumn": "views",
     "aggregationParameter": "99",
     "monitoringGranularity": "P1D",
-    "completenessDelay": "P0D",
     "max": "10000",
     "min": "200"
   },

@@ -13,8 +13,6 @@
     "aggregationParameter": "99",
     "baselineOffset": "P7D",
     "monitoringGranularity": "P1D",
-    "completenessDelay": "P0D",
-    "pattern": "UP_OR_DOWN",
     "percentageChange": "0.3"
   }
 }

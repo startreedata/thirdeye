@@ -9,7 +9,7 @@ import static ai.startree.thirdeye.alert.AlertExceptionHandler.handleAlertEvalua
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 
-import ai.startree.thirdeye.detection.v2.plan.DataFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;

@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.dataframe.calcite;
 
-import static ai.startree.thirdeye.detection.v2.operator.SqlExecutionOperator.getDataTableFromResultSet;
+import static ai.startree.thirdeye.detectionpipeline.operator.SqlExecutionOperator.getDataTableFromResultSet;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;

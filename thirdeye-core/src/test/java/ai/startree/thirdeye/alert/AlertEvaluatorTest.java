@@ -8,9 +8,9 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.alert.AlertEvaluator.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.detection.v2.plan.AnomalyDetectorPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.DataFetcherPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.IndexFillerPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;

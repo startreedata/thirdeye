@@ -49,6 +49,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const {
         evaluation,
         getEvaluation,
+        errorMessages,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
     const { anomalies, getAnomalies } = useGetAnomalies();
@@ -86,14 +87,18 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         if (evaluationRequestStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.anomalies"),
-                })
-            );
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
         }
-    }, [evaluationRequestStatus]);
+    }, [errorMessages, evaluationRequestStatus]);
 
     const fetchAlertEvaluation = (): void => {
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);

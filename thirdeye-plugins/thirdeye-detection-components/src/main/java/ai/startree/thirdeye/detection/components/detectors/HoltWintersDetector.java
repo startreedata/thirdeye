@@ -4,7 +4,7 @@
  */
 package ai.startree.thirdeye.detection.components.detectors;
 
-import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeLookbackSteps;
+import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeSteps;
 import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
@@ -75,7 +75,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   @Override
   public void init(final HoltWintersDetectorSpec spec) {
     this.spec = spec;
-    period = spec.getPeriod();
     alpha = spec.getAlpha();
     beta = spec.getBeta();
     gamma = spec.getGamma();
@@ -85,11 +84,20 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when lookbackPeriod is used");
-      this.lookback = computeLookbackSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
+      this.lookback = computeSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
     } else if (spec.getLookback() != null) {
+      // fixme cyril remove deprecated lookback and only use lookbackPeriod in 2 months (mid-May)
       this.lookback = spec.getLookback();
-    } // else uses default value - but not a good idea - maybe throw error
-    // fixme cyril remove deprecated lookback and only use lookbackPeriod in 2 months (mid-May)
+    } // else uses default value - not recommended
+
+    if (spec.getSeasonalityPeriod() != null) {
+      checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when seasonalityPeriod is used");
+      this.period = computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
+    } else {
+      // fixme cyril remove deprecated period and only use lookbackPeriod in 2 months (mid-May)
+      // use default or set value - but not a good idea
+      period = spec.getPeriod();
+    }
   }
 
   @Override

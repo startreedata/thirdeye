@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.detection.components.detectors;
 
-import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeLookbackSteps;
+import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeSteps;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
@@ -299,36 +299,36 @@ public class MeanVarianceRuleDetectorTest {
 
   @Test
   public void testComputeLookbackStepsWithDayGranularity() {
-    String lookbackPeriod = "P14D";
+    String period = "P14D";
     String monitoringGranularity = "P1D";
-    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+    int output = computeSteps(period, monitoringGranularity);
 
     assertThat(output).isEqualTo(14);
   }
 
   @Test
   public void testComputeLookbackStepsWithHourlyGranularity() {
-    String lookbackPeriod = "P14D";
+    String period = "P14D";
     String monitoringGranularity = "PT1H";
-    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+    int output = computeSteps(period, monitoringGranularity);
 
     assertThat(output).isEqualTo(336);
   }
 
   @Test
   public void testComputeLookbackStepsWithMinutelyGranularity() {
-    String lookbackPeriod = "P7D";
+    String period = "P7D";
     String monitoringGranularity = "PT1M";
-    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+    int output = computeSteps(period, monitoringGranularity);
 
     assertThat(output).isEqualTo(10080);
   }
 
   @Test
   public void testComputeLookbackStepsWith15MinuteGranularity() {
-    String lookbackPeriod = "P7D";
+    String period = "P7D";
     String monitoringGranularity = "PT15M";
-    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+    int output = computeSteps(period, monitoringGranularity);
 
     assertThat(output).isEqualTo(672);
   }
@@ -336,9 +336,9 @@ public class MeanVarianceRuleDetectorTest {
   @Test
   public void testComputeLookbackStepsWithLoobackAndPeriodNotDividingToInteger() {
     // 10080minutes / 25 minutes = 403.2
-    String lookbackPeriod = "P7D";
+    String period = "P7D";
     String monitoringGranularity = "PT25M";
-    int output = computeLookbackSteps(lookbackPeriod, monitoringGranularity);
+    int output = computeSteps(period, monitoringGranularity);
 
     assertThat(output).isEqualTo(403);
   }

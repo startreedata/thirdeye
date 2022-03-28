@@ -14,7 +14,11 @@
         "anomaly.source": "holtwinters-template/root",
         "type": "HOLT_WINTERS",
         "component.pattern": "${pattern}",
-        "component.sensitivity": "${sensitivity}"
+        "component.sensitivity": "${sensitivity}",
+        "component.seasonalityPeriod": "${seasonalityPeriod}",
+        "component.alpha": "${alpha}",
+        "component.beta": "${beta}",
+        "component.gamma": "${gamma}"
       },
       "inputs": [
         {
@@ -73,6 +77,10 @@
     "pattern": "UP_OR_DOWN",
     "completenessDelay": "P0D",
     "queryFilters": "",
-    "queryLimit": "100000000"
+    "queryLimit": "100000000",
+    "seasonalityPeriod": "P7D",
+    "alpha": "-1",
+    "beta": "-1",
+    "gamma": "-1"
   }
 }

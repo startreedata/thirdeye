@@ -83,7 +83,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     this.sensitivity = spec.getSensitivity();
 
     if (spec.getLookbackPeriod() != null) {
-      checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when lookbackPeriod is used");
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when lookbackPeriod is used");
       this.lookback = computeSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
     } else if (spec.getLookback() != null) {
       // fixme cyril remove deprecated lookback and only use lookbackPeriod in 2 months (mid-May)
@@ -91,7 +92,8 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     } // else uses default value - not recommended
 
     if (spec.getSeasonalityPeriod() != null) {
-      checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when seasonalityPeriod is used");
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when seasonalityPeriod is used");
       this.period = computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
     } else {
       // fixme cyril remove deprecated period and only use lookbackPeriod in 2 months (mid-May)
@@ -244,10 +246,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
       // We need at least 2 periods of data
-      // fixme cyril period is in number of observations - prefer ISO 8601 or auto period
       if (trainingDF.size() < 2 * period) {
         // fixme cyril adding warn only to not change the behavior but I think this should throw an exception - it will fail later
-        LOG.warn("Not enough historical data available for Holt-Winters algorithm. Alert configuration may be incorrect.");
+        LOG.warn(
+            "Not enough historical data available for Holt-Winters algorithm. Alert configuration may be incorrect.");
         continue;
       }
 
@@ -267,6 +269,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
+        LOG.info("Optimized parameters for Holt-Winters: alpha: {}, beta: {}, gamma: {}",
+            params.getAlpha(),
+            params.getBeta(),
+            params.getGamma());
       } else {
         params = new HoltWintersParams(alpha, beta, gamma);
       }

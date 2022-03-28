@@ -19,12 +19,13 @@ export interface NotificationProviderV1ContextProps {
 }
 
 export interface NotificationV1 {
-    id: number;
+    id: string;
     type: NotificationTypeV1;
     message: string;
     nonDismissible: boolean;
     scope: NotificationScopeV1;
     onDismiss?: () => void;
+    createdAt: number;
 }
 
 export enum NotificationTypeV1 {

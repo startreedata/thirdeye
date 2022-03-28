@@ -75,12 +75,12 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   @Override
   public void init(final HoltWintersDetectorSpec spec) {
     this.spec = spec;
-    alpha = spec.getAlpha();
-    beta = spec.getBeta();
-    gamma = spec.getGamma();
-    pattern = requireNonNull(spec.getPattern(),
+    this.alpha = spec.getAlpha();
+    this.beta = spec.getBeta();
+    this.gamma = spec.getGamma();
+    this.pattern = requireNonNull(spec.getPattern(),
         "pattern is null. Allowed values : " + Arrays.toString(Pattern.values()));
-    sensitivity = spec.getSensitivity();
+    this.sensitivity = spec.getSensitivity();
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when lookbackPeriod is used");

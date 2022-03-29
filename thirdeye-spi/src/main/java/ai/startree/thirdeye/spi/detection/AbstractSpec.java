@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.spi.detection;
 
-import ai.startree.thirdeye.spi.Constants;
 import java.io.Serializable;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,7 +19,8 @@ public abstract class AbstractSpec implements Serializable {
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
 
-  private String timezone = Constants.DEFAULT_TIMEZONE;
+  @Deprecated
+  private String timezone = TimeSpec.DEFAULT_TIMEZONE;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
   /**
@@ -45,10 +45,12 @@ public abstract class AbstractSpec implements Serializable {
     return modelMapper.map(properties, specClass);
   }
 
+  @Deprecated
   public String getTimezone() {
     return timezone;
   }
 
+  @Deprecated
   public AbstractSpec setTimezone(final String timezone) {
     this.timezone = timezone;
     return this;

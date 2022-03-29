@@ -32,11 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
@@ -115,18 +111,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private DetectionResult buildDetectionResult(
       final AnomalyDetectorResult detectorV2Result) {
 
-    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
-        detectorV2Result.getDataFrame(),
-        genericDetectorSpec.getTimezone(),
-        Period.parse(genericDetectorSpec.getMonitoringGranularity(), ISOPeriodFormat.standard()));
+    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(detectorV2Result.getDataFrame());
 
     return DetectionResult.from(anomalies,
         TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
   }
 
-  private static List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df,
-      final String datasetTimezone,
-      final Period monitoringGranularityPeriod) {
+  private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {
     if (df.isEmpty()) {
       return Collections.emptyList();
     }
@@ -165,19 +156,11 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     }
 
     if (lastStartMillis >= 0) {
-      // last anomaly has not been closed - let's close it
-      // estimate end time of anomaly range
-      final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
-      // default: add 1 to lastTimestamp
-      long endMillis = lastTimestamp + 1;
-      if (datasetTimezone != null && monitoringGranularityPeriod != null) {
-        // exact computation of end of period
-        final DateTimeZone timezone = DateTimeZone.forID(datasetTimezone);
-        endMillis = new DateTime(lastTimestamp, timezone)
-            .plus(monitoringGranularityPeriod)
-            .getMillis();
-      }
-      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endMillis));
+      // last anomaly has not been closed - this means last data bucket is an anomaly
+      // assume end time of last anomaly bucket = endTime of the detection context
+      // if this holds not true in the future - maybe future design is bad - if not - see commit history for previous approach
+      // this can also be not true if the alert pipeline is misconfigured - eg completenessDelay is not used
+      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endTime));
     }
 
     return anomalies;

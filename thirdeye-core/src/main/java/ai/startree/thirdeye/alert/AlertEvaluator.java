@@ -18,10 +18,11 @@ import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -173,10 +174,12 @@ public class AlertEvaluator {
     if (filters.isEmpty()) {
       return;
     }
-    final RcaMetadataDTO rcaMetadataDTO = Objects.requireNonNull(templateWithProperties.getRca(),
-        "rca not found in alert config.");
-    final String dataset = Objects.requireNonNull(rcaMetadataDTO.getDataset(),
-        "rca$dataset not found in alert config.");
+    final AlertMetadataDTO alertMetadataDTO = Objects.requireNonNull(templateWithProperties.getMetadata(),
+        "metadata not found in alert config.");
+    final DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(alertMetadataDTO.getDataset(),
+        "metadata$dataset not found in alert config.");
+    final String dataset = Objects.requireNonNull(datasetConfigDTO.getDataset(),
+        "metadata$dataset$name not found in alert config.");
 
     final List<TimeseriesFilter> timeseriesFilters = filters
         .stream()

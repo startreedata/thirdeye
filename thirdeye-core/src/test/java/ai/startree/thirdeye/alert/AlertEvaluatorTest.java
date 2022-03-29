@@ -13,9 +13,10 @@ import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
 import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
 import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
 import java.util.HashMap;
@@ -32,8 +33,10 @@ public class AlertEvaluatorTest {
   @Test
   public void testInjectFilters() {
     AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null, null);
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setDataset(DATASET_NAME);
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
-        .setRca(new RcaMetadataDTO().setDataset(DATASET_NAME))
+        .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO))
         .setNodes(List.of(
             new PlanNodeBean().setName("root").setType(ANOMALY_DETECTOR_TYPE),
             new PlanNodeBean().setName("indexFiller1").setType(INDEX_FILLER_TYPE),

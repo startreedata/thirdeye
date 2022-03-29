@@ -26,6 +26,7 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
         alertTemplate,
         getAlertTemplate,
         status: alertTemplateRequestStatus,
+        errorMessages: alertTemplateErrors,
     } = useGetAlertTemplate();
     const { id: alertTemplateId } = useParams<AlertTemplatesUpdatePageParams>();
     const navigate = useNavigate();
@@ -76,6 +77,21 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
                       );
             });
     };
+
+    useEffect(() => {
+        if (alertTemplateRequestStatus === ActionStatus.Error) {
+            isEmpty(alertTemplateErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alert-template"),
+                      })
+                  )
+                : alertTemplateErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [alertTemplateRequestStatus, alertTemplateErrors]);
 
     if (alertTemplateRequestStatus === ActionStatus.Working) {
         return <AppLoadingIndicatorV1 />;

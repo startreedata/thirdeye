@@ -52,7 +52,12 @@ export const AlertsViewPage: FunctionComponent = () => {
         errorMessages,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
-    const { anomalies, getAnomalies } = useGetAnomalies();
+    const {
+        anomalies,
+        getAnomalies,
+        status: anomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -235,6 +240,21 @@ export const AlertsViewPage: FunctionComponent = () => {
     const onAnomalyBarClick = (anomaly: Anomaly): void => {
         navigate(getAnomaliesAnomalyPath(anomaly.id));
     };
+
+    useEffect(() => {
+        if (anomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
+        }
+    }, [anomaliesRequestStatus, anomaliesRequestErrors]);
 
     return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
         <AppLoadingIndicatorV1 />

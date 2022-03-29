@@ -1,9 +1,6 @@
 import { act, renderHook } from "@testing-library/react-hooks";
 import axios from "axios";
-import {
-    AnomalyBreakdownAPIOffsetValues,
-    AnomalyBreakdownAPIOffsetValuesV2,
-} from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { ActionStatus } from "../actions.interfaces";
 import {
     useGetAnomalyDimensionAnalysis,
@@ -69,7 +66,7 @@ describe("RCA Actions", () => {
             expect(result.current.anomalyDimensionAnalysisData).toBeNull();
             expect(result.current.getDimensionAnalysisData).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Initial);
-            expect(result.current.errorMessage).toEqual("");
+            expect(result.current.errorMessages).toEqual([]);
         });
 
         it("should update data appropriately when making a successful REST call", async () => {
@@ -83,7 +80,7 @@ describe("RCA Actions", () => {
             await act(async () => {
                 const promise = result.current.getDimensionAnalysisData(123, {
                     baselineOffset:
-                        AnomalyBreakdownAPIOffsetValuesV2.ONE_WEEK_AGO,
+                        AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
                 });
 
                 // Wait for state update
@@ -95,7 +92,7 @@ describe("RCA Actions", () => {
                 expect(result.current.anomalyDimensionAnalysisData).toBeNull();
                 expect(result.current.getDimensionAnalysisData).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Working);
-                expect(result.current.errorMessage).toEqual("");
+                expect(result.current.errorMessages).toEqual([]);
 
                 return promise.then(() => {
                     // When REST call is completed
@@ -106,7 +103,7 @@ describe("RCA Actions", () => {
                         result.current.getDimensionAnalysisData
                     ).toBeDefined();
                     expect(result.current.status).toEqual(ActionStatus.Done);
-                    expect(result.current.errorMessage).toEqual("");
+                    expect(result.current.errorMessages).toEqual([]);
                 });
             });
         });

@@ -1,7 +1,4 @@
-import {
-    AnomalyBreakdownAPIOffsetValues,
-    AnomalyBreakdownAPIOffsetValuesV2,
-} from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 
 export interface AnomalyBreakdown {
     metric: {
@@ -45,6 +42,19 @@ export interface AnomalyDimensionAnalysisDataGainerLoser {
     cost: number;
 }
 
+export interface AnomalyDimensionAnalysisMetricRow {
+    baselineValue: number;
+    currentValue: number;
+    sizeFactor: number;
+    changePercentage: number | string; // Can be "NaN"
+    contributionChange: number;
+    contributionToOverallChange: number;
+    names: string[];
+    otherDimensionValues: string[];
+    moreOtherDimensionNumber: number;
+    cost: number;
+}
+
 export interface AnomalyDimensionAnalysisData {
     metric: {
         name: string;
@@ -58,18 +68,7 @@ export interface AnomalyDimensionAnalysisData {
     currentTotalSize: number;
     globalRatio: number;
     dimensions: string[];
-    responseRows: {
-        baselineValue: number;
-        currentValue: number;
-        sizeFactor: number;
-        percentageChange: number;
-        contributionChange: number;
-        contributionToOverallChange: number;
-        names: string[];
-        otherDimensionValues: string[];
-        moreOtherDimensionNumber: number;
-        cost: number;
-    }[];
+    responseRows: AnomalyDimensionAnalysisMetricRow[];
     gainer: AnomalyDimensionAnalysisDataGainerLoser[];
     loser: AnomalyDimensionAnalysisDataGainerLoser[];
     dimensionCosts: {
@@ -94,7 +93,7 @@ export interface AnomalyDimensionAnalysisData {
  *                      Parameter format is [["continent","country"], ["dim1", "dim2", "dim3"]]
  */
 export interface AnomalyDimensionAnalysisRequest {
-    baselineOffset?: AnomalyBreakdownAPIOffsetValuesV2;
+    baselineOffset?: AnomalyBreakdownAPIOffsetValues;
     filters?: string[];
     summarySize?: number;
     depth?: number;

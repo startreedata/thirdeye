@@ -220,55 +220,6 @@ public class RootCauseMetricResource {
     return Response.ok(urnToAggregates).build();
   }
 
-  /**
-   * Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.
-   * Aligns time stamps if necessary and omits null values.
-   *
-   * @param anomalyId anomaly id
-   * @param offset offset identifier (e.g. "current", "wo2w")
-   * @param limit limit results to the top k elements, plus a rollup element
-   * @return aggregate value, or NaN if data not available
-   * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
-   */
-  @GET
-  @Path("/breakdown/anomaly/{id}")
-  @ApiOperation(value =
-      "Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.\n"
-          + "Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  public Response getAnomalyBreakdown(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-
-    if (limit == null) {
-      limit = LIMIT_DEFAULT;
-    }
-    Baseline range = parseOffset(offset, DateTimeZone.UTC);
-
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
-        anomalyId);
-    final Interval anomalyInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        DateTimeZone.UTC);
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
-        filters,
-        anomalyInterval,
-        range,
-        limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
-    return Response.ok(breakdown).build();
-  }
-
   @GET
   @Path("/heatmap/anomaly/{id}")
   @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")

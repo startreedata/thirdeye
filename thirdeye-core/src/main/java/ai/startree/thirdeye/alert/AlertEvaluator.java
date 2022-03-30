@@ -7,6 +7,7 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
+import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
@@ -17,7 +18,6 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -181,9 +181,7 @@ public class AlertEvaluator {
     final String dataset = Objects.requireNonNull(datasetConfigDTO.getDataset(),
         "metadata$dataset$name not found in alert config.");
 
-    final List<TimeseriesFilter> timeseriesFilters = filters
-        .stream()
-        .map(Predicate::parseFilterPredicate)
+    final List<TimeseriesFilter> timeseriesFilters = parseAndCombinePredicates(filters).stream()
         .map(p -> TimeseriesFilter.of(p, getDimensionType(p.getLhs(), dataset), dataset))
         .collect(Collectors.toList());
 

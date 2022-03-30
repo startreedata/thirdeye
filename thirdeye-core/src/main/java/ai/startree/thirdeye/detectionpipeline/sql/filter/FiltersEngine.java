@@ -9,6 +9,7 @@ import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,11 +18,13 @@ import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlBinaryOperator;
 import org.apache.calcite.sql.SqlCall;
+import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOrderBy;
 import org.apache.calcite.sql.SqlSelect;
@@ -65,9 +68,18 @@ public class FiltersEngine {
       null,
       null);
 
+  private static final SqlOperator IN_OPERATOR = new SqlBinaryOperator(SqlKind.IN.sql,
+      SqlKind.IN,
+      0,
+      true,
+      null,
+      null,
+      null);
+
   public static final Map<OPER, SqlOperator> PREDICATE_OPER_TO_CALCITE_OPER = Map.of(
       OPER.EQ, EQUALS_OPERATOR,
-      OPER.NEQ, NOT_EQUALS_OPERATOR
+      OPER.NEQ, NOT_EQUALS_OPERATOR,
+      OPER.IN, IN_OPERATOR
       // other predicates not supported for the moment
   );
 
@@ -111,7 +123,7 @@ public class FiltersEngine {
 
   private static SqlBasicCall timeseriesFilterToCalcitePredicate(final TimeseriesFilter filter) {
     SqlIdentifier leftOperand = prepareLeftOperand(filter);
-    SqlLiteral rightOperand = prepareRightOperand(filter);
+    SqlNode rightOperand = prepareRightOperand(filter);
     SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
 
     SqlOperator operator = Optional.ofNullable(PREDICATE_OPER_TO_CALCITE_OPER.get(
@@ -120,24 +132,53 @@ public class FiltersEngine {
     return new SqlBasicCall(operator, operands, SqlParserPos.ZERO);
   }
 
-  @NotNull
-  private static SqlIdentifier prepareLeftOperand(final TimeseriesFilter filter) {
-    List<String> identifiers = List.of(filter.getDataset(), filter.getPredicate().getLhs());
-    return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
+  private static SqlNode prepareRightOperand(final TimeseriesFilter filter) {
+    switch (filter.getPredicate().getOper()) {
+      case IN:
+        return getRightOperandForListPredicate(filter);
+      case EQ: case NEQ: case GE: case GT: case LE: case LT:
+        return getRightOperandForSimpleBinaryPredicate(filter);
+      default:
+        throw new UnsupportedOperationException(String.format("Operator to Calcite not implemented for operator: %s", filter.getPredicate().getOper()));
+    }
+
+  }
+
+  private static SqlNode getRightOperandForListPredicate(final TimeseriesFilter filter) {
+    switch (filter.getMetricType()) {
+      case STRING:
+        String[] rhsValues = (String[]) filter.getPredicate().getRhs();
+        List<SqlNode> nodes = Arrays.stream(rhsValues).map(FiltersEngine::sqlStringLiteralOf).collect(Collectors.toList());
+        return SqlNodeList.of(SqlParserPos.ZERO, nodes);
+      default:
+        throw new UnsupportedOperationException(
+            String.format("Unsupported DimensionType: %s", filter.getMetricType()));
+    }
   }
 
   @NotNull
-  private static SqlLiteral prepareRightOperand(final TimeseriesFilter filter) {
+  private static SqlNode getRightOperandForSimpleBinaryPredicate(final TimeseriesFilter filter) {
     switch (filter.getMetricType()) {
       case STRING:
-        return SqlLiteral.createCharString((String) filter.getPredicate().getRhs(),
-            SqlParserPos.ZERO);
-      // eg for numeric:   
+        final String rhsValue = (String) filter.getPredicate().getRhs();
+        return sqlStringLiteralOf(rhsValue);
+      // eg for numeric:
       // SqlLiteral.createExactNumeric(...)
       default:
         throw new UnsupportedOperationException(
             String.format("Unsupported DimensionType: %s", filter.getMetricType()));
     }
+  }
+
+  @NotNull
+  private static SqlCharStringLiteral sqlStringLiteralOf(final String rhsValue) {
+    return SqlLiteral.createCharString(rhsValue, SqlParserPos.ZERO);
+  }
+
+  @NotNull
+  private static SqlIdentifier prepareLeftOperand(final TimeseriesFilter filter) {
+    List<String> identifiers = List.of(filter.getDataset(), filter.getPredicate().getLhs());
+    return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
   }
 
   private class FilterVisitor extends SqlShuttle {

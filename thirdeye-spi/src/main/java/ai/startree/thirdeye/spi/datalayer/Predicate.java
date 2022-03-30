@@ -6,7 +6,12 @@
 package ai.startree.thirdeye.spi.datalayer;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -162,6 +167,34 @@ public class Predicate {
     final String value = filterString.substring(valueStart, valueEnd);
 
     return new Predicate(key, operator, value);
+  }
+
+  /**
+   * Parse a list of comparison string filter in format [col1=val1, col2=val2] to a list of predicate.
+   * [col1=val1, col1=val2] will be parsed as col1 IN (val1, val2)
+   * Other predicates are parsed normally.
+   **/
+  public static List<Predicate> parseAndCombinePredicates(List<String> filterStrings) {
+    Multimap<String, String> equalFilters = HashMultimap.create();
+    List<Predicate> predicates = new ArrayList<>();
+    for (String filter: filterStrings) {
+      Predicate predicate =  parseFilterPredicate(filter);
+      if (predicate.oper.equals(OPER.EQ)) {
+        equalFilters.put(predicate.lhs, (String) predicate.getRhs());
+      } else {
+        predicates.add(predicate);
+      }
+    }
+    for (String lhs : equalFilters.keySet()) {
+      Collection<String> values = equalFilters.get(lhs);
+      if (values.size() == 1) {
+        predicates.add(Predicate.EQ(lhs, values.iterator().next()));
+      } else {
+        predicates.add(Predicate.IN(lhs, values.toArray(new String[0])));
+      }
+    }
+
+    return predicates;
   }
 
   @Override

@@ -16,7 +16,7 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
   private Pattern pattern = Pattern.UP_OR_DOWN;
   /**Lookback period in ISO-8601 format eg P1D. Used with monitoringGranularity to compute lookback in steps.*/
   private String lookbackPeriod = null;
-  /**Biggest period in ISO-8601 format eg P7D. Used with monitoringGranularity to compute period in steps.*/
+  /**Biggest period in ISO-8601 format. Possible values are P7D and P1D. Used to take into account seasonality when computing mean-variance.*/
   private String seasonalityPeriod = null;
 
   public int getLookback() {

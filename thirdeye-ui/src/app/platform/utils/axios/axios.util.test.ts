@@ -2,6 +2,7 @@
 // All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { AxiosError } from "axios";
 import {
+    duplicateKeyForArrayQueryParams,
     getFulfilledResponseInterceptorV1,
     getRejectedResponseInterceptorV1,
     getRequestInterceptorV1,
@@ -70,6 +71,24 @@ describe("Axios Util", () => {
 
         expect(() => responseInterceptor(mockInternalServerError)).toThrow();
         expect(mockHandleUnauthenticatedAccess).not.toHaveBeenCalled();
+    });
+
+    describe("getDimensionAnalysisForAnomaly", () => {
+        it("should duplicate query param keys if array value", () => {
+            const result = duplicateKeyForArrayQueryParams({
+                foo: ["bar", "baz"],
+                hello: ["world"],
+                test: "key",
+            });
+
+            expect(result).toEqual("foo=bar&foo=baz&hello=world&test=key");
+        });
+
+        it("should return empty string if object is empty", () => {
+            const result = duplicateKeyForArrayQueryParams({});
+
+            expect(result).toEqual("");
+        });
     });
 });
 

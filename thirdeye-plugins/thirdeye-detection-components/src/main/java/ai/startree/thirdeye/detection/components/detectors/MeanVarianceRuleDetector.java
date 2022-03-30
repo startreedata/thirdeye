@@ -203,9 +203,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   private DoubleSeries buildPeriodMask(final DataFrame lookbackDf, final long forecastTime) {
     if (seasonality.equals(Period.ZERO) || seasonality.equals(Period.days(0))) {
+      // no seasonality --> no mask
       return DoubleSeries.fillValues(lookbackDf.size(), 1);
     }
-    // only supports P7D and P1D seasonalities
     // fixme cyril this implem does not not fail at DST - but datetimeZone is hardcoded to UTC so not DST
     DateTime forecastDateTime = new DateTime(forecastTime, DateTimeZone.UTC);
     DoubleSeries.Builder mask = DoubleSeries.builder();

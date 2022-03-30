@@ -223,7 +223,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
             && dt1.getSecondOfMinute() == dt2.getSecondOfMinute()
             && dt1.getMillisOfSecond() == dt2.getMillisOfSecond();
     if (seasonality.equals(Period.days(7))) {
-      return dt1.getDayOfWeek() == dt2.getDayOfWeek() && isSameTimeInDay;
+      return isSameTimeInDay && dt1.getDayOfWeek() == dt2.getDayOfWeek();
     } else if (seasonality.equals(Period.days(1))) {
       return isSameTimeInDay;
     } else {

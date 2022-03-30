@@ -8,7 +8,7 @@ import {
     MenuItem,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import { isNumber } from "lodash";
+import { isEmpty, isNumber } from "lodash";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -45,6 +45,7 @@ export const AlertTemplatesViewPage: FunctionComponent = () => {
         alertTemplate,
         getAlertTemplate,
         status: getAlertRequestStatus,
+        errorMessages: alertTemplateErrors,
     } = useGetAlertTemplate();
     const [
         alertTemplateOptionsAnchorElement,
@@ -64,14 +65,18 @@ export const AlertTemplatesViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         if (getAlertRequestStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.alert-template"),
-                })
-            );
+            isEmpty(alertTemplateErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alert-template"),
+                      })
+                  )
+                : alertTemplateErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
         }
-    }, [getAlertRequestStatus]);
+    }, [getAlertRequestStatus, alertTemplateErrors]);
 
     const handleDatasetOptionsClick = (
         event: MouseEvent<HTMLElement>

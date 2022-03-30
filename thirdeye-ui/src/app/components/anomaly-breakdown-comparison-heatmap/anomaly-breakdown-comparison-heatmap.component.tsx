@@ -56,6 +56,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         anomalyMetricBreakdown,
         getMetricBreakdown,
         status: anomalyBreakdownReqStatus,
+        errorMessages: anomalyBreakdownReqErrors,
     } = useGetAnomalyMetricBreakdown();
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
@@ -177,17 +178,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
 
-    useEffect(() => {
-        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.heatmap-data"),
-                })
-            );
-        }
-    }, [anomalyBreakdownReqStatus]);
-
     const handleNodeClick = (
         tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
         dimensionColumn: string
@@ -247,6 +237,21 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             e.target.value as AnomalyBreakdownAPIOffsetValues
         );
     };
+
+    useEffect(() => {
+        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
+            !isEmpty(anomalyBreakdownReqErrors)
+                ? anomalyBreakdownReqErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.heatmap-data"),
+                      })
+                  );
+        }
+    }, [anomalyBreakdownReqStatus, anomalyBreakdownReqErrors]);
 
     return (
         <Card variant="outlined">

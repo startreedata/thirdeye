@@ -36,6 +36,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         anomaly,
         getAnomaly,
         status: getAnomalyRequestStatus,
+        errorMessages: anomalyRequestErrors,
     } = useGetAnomaly();
     const {
         evaluation,
@@ -70,17 +71,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     useEffect(() => {
         fetchAlertEvaluation();
     }, [uiAnomaly, searchParams]);
-
-    useEffect(() => {
-        if (getEvaluationRequestStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.chart-data"),
-                })
-            );
-        }
-    }, [getEvaluationRequestStatus]);
 
     useEffect(() => {
         if (evaluation && anomaly) {
@@ -132,6 +122,21 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                   );
         }
     }, [errorMessages, getEvaluationRequestStatus]);
+
+    useEffect(() => {
+        if (getAnomalyRequestStatus === ActionStatus.Error) {
+            isEmpty(anomalyRequestErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomaly"),
+                      })
+                  )
+                : anomalyRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [getAnomalyRequestStatus, anomalyRequestErrors]);
 
     return (
         <PageV1>

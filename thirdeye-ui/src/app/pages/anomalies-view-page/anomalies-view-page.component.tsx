@@ -41,7 +41,12 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         errorMessages,
         status: getEvaluationRequestStatus,
     } = useGetEvaluation();
-    const { anomaly, getAnomaly } = useGetAnomaly();
+    const {
+        anomaly,
+        getAnomaly,
+        status: anomalyRequestStatus,
+        errorMessages: anomalyRequestErrors,
+    } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
@@ -142,6 +147,21 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             navigate(getAnomaliesAllPath());
         });
     };
+
+    useEffect(() => {
+        if (anomalyRequestStatus === ActionStatus.Error) {
+            isEmpty(anomalyRequestErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomaly"),
+                      })
+                  )
+                : anomalyRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [anomalyRequestStatus, anomalyRequestErrors]);
 
     return (
         <PageV1>

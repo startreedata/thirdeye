@@ -5,9 +5,15 @@ import {
     MenuItem,
     Select,
 } from "@material-ui/core";
-import { omit } from "lodash";
+import { isEmpty, omit } from "lodash";
 import React, { useEffect, useState } from "react";
-import { JSONEditorV1 } from "../../platform/components";
+import { useTranslation } from "react-i18next";
+import {
+    JSONEditorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
+import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
@@ -28,7 +34,14 @@ function AlertWizardConfigurationNew({
     const [currentWorkingConfiguration, setCurrentWorkingConfiguration] =
         useState(alertConfiguration);
     const [currentTemplate, setCurrentTemplate] = useState(selectedTemplateId);
-    const { alertTemplates, getAlertTemplates } = useGetAlertTemplates();
+    const {
+        alertTemplates,
+        getAlertTemplates,
+        status: alertTemplatesReqStatus,
+        errorMessages,
+    } = useGetAlertTemplates();
+    const { notify } = useNotificationProviderV1();
+    const { t } = useTranslation();
 
     useEffect(() => {
         getAlertTemplates();
@@ -68,6 +81,21 @@ function AlertWizardConfigurationNew({
         onTemplateIdChange(selected);
         setCurrentTemplate(selected);
     };
+
+    useEffect(() => {
+        if (alertTemplatesReqStatus === ActionStatus.Error) {
+            isEmpty(errorMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alert-template"),
+                      })
+                  )
+                : errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [alertTemplatesReqStatus, errorMessages]);
 
     return (
         <div>

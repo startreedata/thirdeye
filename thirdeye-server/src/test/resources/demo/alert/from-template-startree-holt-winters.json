@@ -1,0 +1,19 @@
+{
+  "name": "HoltWinters with template startree-holt-winters",
+  "description": "Uses template startree-holt-winters.",
+  "template": {
+    "name": "startree-holt-winters"
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "sum",
+    "aggregationColumn": "views",
+    "lookback": "P14D",
+    "monitoringGranularity": "P1D",
+    "sensitivity": "1"
+  },
+  "cron": "0 0 0 1/1 * ? *"
+}

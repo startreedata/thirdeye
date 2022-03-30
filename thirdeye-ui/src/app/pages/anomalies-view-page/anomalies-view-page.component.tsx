@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -38,9 +38,15 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const {
         evaluation,
         getEvaluation,
+        errorMessages,
         status: getEvaluationRequestStatus,
     } = useGetEvaluation();
-    const { anomaly, getAnomaly } = useGetAnomaly();
+    const {
+        anomaly,
+        getAnomaly,
+        status: anomalyRequestStatus,
+        errorMessages: anomalyRequestErrors,
+    } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
@@ -81,14 +87,18 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         if (getEvaluationRequestStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.chart-data"),
-                })
-            );
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
         }
-    }, [getEvaluationRequestStatus]);
+    }, [errorMessages, getEvaluationRequestStatus]);
 
     if (anomalyId && !isValidNumberId(anomalyId)) {
         // Invalid id
@@ -137,6 +147,21 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             navigate(getAnomaliesAllPath());
         });
     };
+
+    useEffect(() => {
+        if (anomalyRequestStatus === ActionStatus.Error) {
+            isEmpty(anomalyRequestErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomaly"),
+                      })
+                  )
+                : anomalyRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [anomalyRequestStatus, anomalyRequestErrors]);
 
     return (
         <PageV1>

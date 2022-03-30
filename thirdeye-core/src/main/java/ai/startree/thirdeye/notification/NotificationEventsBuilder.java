@@ -77,7 +77,7 @@ public class NotificationEventsBuilder {
   }
 
   public List<EventApi> getRelatedEvents(final Collection<? extends AnomalyResult> anomalies) {
-    DateTime windowStart = DateTime.now();
+    DateTime windowStart = DateTime.now(dateTimeZone);
     DateTime windowEnd = new DateTime(0);
 
     for (final AnomalyResult anomalyResult : anomalies) {

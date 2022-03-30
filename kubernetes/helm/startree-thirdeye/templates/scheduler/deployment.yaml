@@ -66,19 +66,17 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - "server"
-        {{- if .Values.scheduler.tls.enabled }}
         env:
-          {{- range $secret := .Values.secrets }}
-          {{- range $pair := $secret.data }}
-          {{- if and $pair.env $pair.value }}
-          - name: {{ $pair.env }}
+          {{- range $name, $secret := .Values.secrets }}
+          {{- if and $secret.env $secret.value }}
+          - name: {{ $secret.env }}
             valueFrom:
               secretKeyRef:
-                name: {{ $secret.name }}
-                key: {{ $pair.key }}
+                name: thirdeye-secrets
+                key: {{ $name }}
           {{- end }}
           {{- end }}
-          {{- end }}
+        {{- if .Values.scheduler.tls.enabled }}
           - name: JAVA_OPTS
             value: >
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
@@ -94,10 +92,10 @@ spec:
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
             subPath: "server.yaml"
             readOnly: true
-          {{- if .Values.config.holidayLoaderKey }}
+          {{- if .Values.secrets.holidayLoaderKey }}
           - name: holiday-loader-key
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
-            subPath: "holiday-loader-key.json"
+            subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
           {{- if .Values.scheduler.tls.enabled }}
@@ -119,9 +117,9 @@ spec:
         - name: keystore
           emptyDir: {}
         {{- end }}
-        {{- if .Values.config.holidayLoaderKey }}
+        {{- if .Values.secrets.holidayLoaderKey }}
         - name: holiday-loader-key
           secret:
-            secretName: holiday-loader-key
+            secretName: thirdeye-secrets
         {{- end }}
 {{ end }}

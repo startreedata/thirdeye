@@ -7,8 +7,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>thirdeye</artifactId>
-    <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.37.0-SNAPSHOT</version>
+    <groupId>ai.startree.thirdeye</groupId>
+    <version>1.39.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -17,22 +17,22 @@
   <dependencies>
     <!-- test dependencies -->
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-server</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-datasources</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-pinot</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-detection-components</artifactId>
       <scope>test</scope>
     </dependency>

@@ -109,7 +109,9 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                     isEmpty(errMessages)
                         ? notify(
                               NotificationTypeV1.Error,
-                              t("message.fetch-error")
+                              t("message.error-while-fetching", {
+                                  entity: t("label.subscription-groups"),
+                              })
                           )
                         : errMessages.map((err) =>
                               notify(NotificationTypeV1.Error, err)

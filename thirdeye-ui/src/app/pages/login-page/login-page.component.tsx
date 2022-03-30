@@ -10,7 +10,10 @@ import {
     useAuthProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { isBlockingAuthExceptionV1 } from "../../platform/utils";
+import {
+    AuthExceptionCodeV1Label,
+    isBlockingAuthExceptionV1,
+} from "../../platform/utils";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");
@@ -37,7 +40,10 @@ export const LoginPage: FunctionComponent = () => {
             notify(
                 NotificationTypeV1.Error,
                 t("message.authentication-error", {
-                    exceptionCode: exceptionCode,
+                    exceptionCode:
+                        AuthExceptionCodeV1Label[
+                            exceptionCode as AuthExceptionCodeV1
+                        ],
                 }),
                 true
             );

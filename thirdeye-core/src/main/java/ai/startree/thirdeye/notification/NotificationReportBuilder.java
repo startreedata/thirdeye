@@ -71,7 +71,7 @@ public class NotificationReportBuilder {
     final List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
-    DateTime startTime = DateTime.now();
+    DateTime startTime = DateTime.now(dateTimeZone);
     DateTime endTime = new DateTime(0L);
     for (final AnomalyResult anomalyResult : anomalies) {
       if (anomalyResult instanceof MergedAnomalyResultDTO) {

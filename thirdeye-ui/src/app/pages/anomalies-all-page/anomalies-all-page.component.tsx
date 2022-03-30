@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -25,8 +26,11 @@ import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
-    const { getAnomalies, status: getAnomaliesRequestStatus } =
-        useGetAnomalies();
+    const {
+        getAnomalies,
+        status: getAnomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -108,6 +112,21 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         }
         setSearchParams(searchParams);
     };
+
+    useEffect(() => {
+        if (getAnomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
+        }
+    }, [getAnomaliesRequestStatus, anomaliesRequestErrors]);
 
     return (
         <PageV1>

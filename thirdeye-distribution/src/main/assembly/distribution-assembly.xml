@@ -58,8 +58,12 @@
       <outputDirectory>plugins/kafka/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notifications/target/thirdeye-notifications-${project.version}-dist</directory>
-      <outputDirectory>plugins/notifications-default/</outputDirectory>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-email/target/thirdeye-notification-email-${project.version}-dist</directory>
+      <outputDirectory>plugins/notification-email/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-webhook/target/thirdeye-notification-webhook-${project.version}-dist</directory>
+      <outputDirectory>plugins/notification-webhook/</outputDirectory>
     </fileSet>
 
   </fileSets>

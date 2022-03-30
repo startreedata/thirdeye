@@ -22,7 +22,8 @@
     <module>thirdeye-detection-components</module>
     <module>thirdeye-pinot</module>
     <module>thirdeye-kafka</module>
-    <module>thirdeye-notifications</module>
+    <module>thirdeye-notification-email</module>
+    <module>thirdeye-notification-webhook</module>
   </modules>
 
   <dependencies>

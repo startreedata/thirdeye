@@ -34,7 +34,11 @@
     </dependency>
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
-      <artifactId>thirdeye-notifications</artifactId>
+      <artifactId>thirdeye-notification-email</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-notification-webhook</artifactId>
     </dependency>
 
     <!-- test dependencies -->

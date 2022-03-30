@@ -34,6 +34,13 @@ public class FilterEngineTest {
       "tableName");
   private static final String STRING_FILTER_NOT_EQUAL_TO_STRING = " AND (tableName.country <> 'US')";
 
+  private static final TimeseriesFilter STRING_FILTER_IN = TimeseriesFilter.of(
+      new Predicate("browser", OPER.IN, new String[]{"chrome", "safari"}),
+          DimensionType.STRING,
+          "tableName"
+          );
+  private static final String STRING_FILTER_IN_TO_STRING = " AND (tableName.browser IN ('chrome', 'safari'))";
+
   @Test
   public void testNoFilters() throws SqlParseException {
     final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
@@ -66,6 +73,19 @@ public class FilterEngineTest {
     final String output = filtersEngine.prepareQuery();
 
     final String expected = query + STRING_FILTER_NOT_EQUAL_TO_STRING;
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testSingleFilterInString() throws SqlParseException {
+    final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
+    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+        query,
+        List.of(STRING_FILTER_IN));
+    final String output = filtersEngine.prepareQuery();
+
+    final String expected = query + STRING_FILTER_IN_TO_STRING;
 
     assertThatQueriesAreTheSame(output, expected);
   }

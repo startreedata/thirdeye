@@ -14,7 +14,11 @@ import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import {
+    AnomalyBreakdownAPIOffsetValues,
+    BASELINE_OPTIONS,
+    OFFSET_TO_HUMAN_READABLE,
+} from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -37,7 +41,6 @@ import {
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
 import {
     formatTreemapData,
-    OFFSET_TO_HUMAN_READABLE,
     OFFSET_TO_MILLISECONDS,
     summarizeDimensionValueData,
 } from "./anomaly-breakdown-comparison-heatmap.utils";
@@ -215,21 +218,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         return node.size;
     };
 
-    const baselineOptions: {
-        key: AnomalyBreakdownAPIOffsetValues;
-        description: string;
-    }[] = [];
-    Object.values(AnomalyBreakdownAPIOffsetValues).forEach(
-        (offsetKey: AnomalyBreakdownAPIOffsetValues) => {
-            if (offsetKey !== AnomalyBreakdownAPIOffsetValues.CURRENT) {
-                baselineOptions.push({
-                    key: offsetKey,
-                    description: OFFSET_TO_HUMAN_READABLE[offsetKey],
-                });
-            }
-        }
-    );
-
     const onHandleComparisonOffsetSelection = (
         e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
     ): void => {
@@ -286,7 +274,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                     value={comparisonOffset}
                                     onChange={onHandleComparisonOffsetSelection}
                                 >
-                                    {baselineOptions.map((option) => (
+                                    {BASELINE_OPTIONS.map((option) => (
                                         <MenuItem
                                             key={option.key}
                                             value={option.key}

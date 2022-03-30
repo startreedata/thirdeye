@@ -45,10 +45,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         );
     };
 
-    const handleTabIndexChange = (
-        _event: React.ChangeEvent,
-        newValue: number
-    ): void => {
+    const handleTabIndexChange = (_event: unknown, newValue: number): void => {
         setSelectedTabIndex(newValue);
     };
 

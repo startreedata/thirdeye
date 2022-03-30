@@ -147,7 +147,6 @@ public class Predicate {
    * rhs is parsed as a string.
    * Only compatible with comparison operators.
    */
-  // todo cyril implement test for when dimension is empty string
   public static Predicate parseFilterPredicate(String filterString) {
     Matcher m = COMPARISON_OPERATORS_PATTERN.matcher(filterString);
     if (!m.find()) {

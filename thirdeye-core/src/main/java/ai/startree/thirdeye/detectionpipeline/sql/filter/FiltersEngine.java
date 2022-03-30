@@ -121,7 +121,6 @@ public class FiltersEngine {
         Collectors.toList());
   }
 
-  //fixme cyril I'm around here and this will get difficult
   private static SqlBasicCall timeseriesFilterToCalcitePredicate(final TimeseriesFilter filter) {
     SqlIdentifier leftOperand = prepareLeftOperand(filter);
     SqlNode rightOperand = prepareRightOperand(filter);

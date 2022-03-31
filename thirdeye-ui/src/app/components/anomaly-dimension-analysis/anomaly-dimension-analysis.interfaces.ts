@@ -1,11 +1,26 @@
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import {
+    AnomalyDimensionAnalysisData,
+    AnomalyDimensionAnalysisMetricRow,
+} from "../../rest/dto/rca.interfaces";
 
-export interface AnomalyBreakdownComparisonHeatmapProps {
+export interface AnomalyDimensionAnalysisProps {
     anomalyId: number;
-    shouldTruncateText?: boolean;
-    comparisonOffset?: AnomalyBreakdownAPIOffsetValues;
-    anomaly: Anomaly | null;
+    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    anomaly: Anomaly;
+}
+export interface AnomalyDimensionAnalysisTableProps {
+    anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;
+    anomaly: Anomaly;
+}
+
+export interface AnomalyDimensionAnalysisMetricRowProps {
+    dataset: string;
+    metric: string;
+    row: AnomalyDimensionAnalysisMetricRow;
+    totalSum: number;
+    dimensionColumns: string[];
 }
 
 export interface SummaryData {
@@ -22,18 +37,12 @@ export interface SummarizeDataFunctionParams {
 
 export interface AnomalyBreakdownComparisonData {
     current: number;
-    baseline: number;
-    metricValueDiff: number;
-    metricValueDiffPercentage: number | null;
-    currentContributionPercentage: number;
-    baselineContributionPercentage: number;
-    contributionDiff: number;
+    currentPercentage: number;
+    comparison: number;
+    comparisonPercentage: number;
+    percentageDiff: number;
     currentTotalCount: number;
-    baselineTotalCount: number;
-}
-
-export interface DimensionDisplayData {
-    columnName: string;
+    comparisonTotalCount: number;
 }
 
 export interface AnomalyBreakdownComparisonDataByDimensionColumn {

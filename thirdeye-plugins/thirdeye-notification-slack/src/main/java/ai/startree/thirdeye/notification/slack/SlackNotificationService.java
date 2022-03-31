@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.notification.slack;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.slack.api.model.block.Blocks.asBlocks;
 import static com.slack.api.model.block.Blocks.context;
 import static com.slack.api.model.block.Blocks.divider;
@@ -18,9 +19,11 @@ import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import com.slack.api.Slack;
+import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.block.composition.BlockCompositions;
 import com.slack.api.webhook.Payload;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -28,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class SlackNotificationService implements NotificationService {
 
+  public static final int MAX_ANOMALIES_TO_REPORT = 5;
   private static final Logger LOG = LoggerFactory.getLogger(SlackNotificationService.class);
 
   private final String webhookUrl;
@@ -44,12 +48,13 @@ public class SlackNotificationService implements NotificationService {
     service.notify(null);
   }
 
-  private static String notificationText(final AnomalyReportApi reportApi) {
+  private static String anomalyReportToText(final AnomalyReportApi reportApi) {
     final AnomalyReportDataApi data = reportApi.getData();
     final String msg = String.format(
-        "<%s|*%s Deviation*> Started %s %s. Duration: %s, Value: %s Baseline: %s",
+        "<%s|*%s Deviation%s*> Started %s %s. Duration: %s, Value: %s Baseline: %s",
         reportApi.getUrl(),
         data.getLift(),
+        optional(reportApi.getData().getMetric()).map(m -> " in " + m).orElse(""),
         data.getStartDateTime(),
         data.getTimezone(),
         data.getDuration(),
@@ -59,9 +64,25 @@ public class SlackNotificationService implements NotificationService {
     return msg;
   }
 
-  private static String headerString(final NotificationPayloadApi api) {
+  private static String header(final NotificationPayloadApi api) {
     final int nAnomalies = api.getAnomalyReports().size();
-    return String.format("*Alert!* *%d %s* found from *%s to %s (%s)*\n\n",
+    return String.format("*Alert! :alert: * <%s|*%d %s*> found from *%s to %s (%s)*\n\n",
+        allAnomaliesUrl(api),
+        nAnomalies,
+        nAnomalies == 1 ? "anomaly" : "anomalies",
+        api.getReport().getStartTime(),
+        api.getReport().getEndTime(),
+        api.getReport().getTimeZone()
+    );
+  }
+
+  private static String allAnomaliesUrl(final NotificationPayloadApi api) {
+    return String.format("%s/anomalies/all", api.getReport().getDashboardHost());
+  }
+
+  private static String notificationMsg(final NotificationPayloadApi api) {
+    final int nAnomalies = api.getAnomalyReports().size();
+    return String.format("Alert! %d %s found from %s to %s (%s)",
         nAnomalies,
         nAnomalies == 1 ? "anomaly" : "anomalies",
         api.getReport().getStartTime(),
@@ -98,17 +119,29 @@ public class SlackNotificationService implements NotificationService {
   private Payload buildPayload(final NotificationPayloadApi api) {
     final List<String> anomalyTexts = api.getAnomalyReports()
         .stream()
-        .map(SlackNotificationService::notificationText)
+        .limit(MAX_ANOMALIES_TO_REPORT)
+        .map(SlackNotificationService::anomalyReportToText)
         .collect(Collectors.toList());
 
+    final List<LayoutBlock> blocks = new ArrayList<>(asBlocks(
+        section(builder -> builder.text(markdownText(header(api)))),
+        divider(),
+        context(builder -> builder.elements(anomalyTexts.stream()
+            .map(BlockCompositions::markdownText)
+            .collect(Collectors.toList())
+        ))));
+
+    /* Slack fails to show entire msg if the list is too long. */
+    if (api.getAnomalyReports().size() > MAX_ANOMALIES_TO_REPORT) {
+      blocks.add(section(builder -> builder.text(markdownText(
+          String.format("Showing %d most recent anomalies. <%s|View All>",
+              MAX_ANOMALIES_TO_REPORT,
+              allAnomaliesUrl(api))
+      ))));
+    }
     return Payload.builder()
-        .blocks(asBlocks(
-            section(builder -> builder.text(markdownText(headerString(api)))),
-            divider(),
-            context(builder -> builder.elements(anomalyTexts.stream()
-                .map(BlockCompositions::markdownText)
-                .collect(Collectors.toList())
-            ))))
+        .text(notificationMsg(api))
+        .blocks(blocks)
         .build();
   }
 }

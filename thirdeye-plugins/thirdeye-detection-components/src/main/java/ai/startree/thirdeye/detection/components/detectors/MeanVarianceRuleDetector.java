@@ -82,6 +82,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     }
 
     if (spec.getSeasonalityPeriod() != null) {
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when seasonalityPeriod is used");
       final Period seasonality = Period.parse(spec.getSeasonalityPeriod(),
           ISOPeriodFormat.standard());
       checkArgument(seasonality.equals(Period.days(7)) || seasonality.equals(Period.days(1)),

@@ -73,7 +73,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   }
 
   @POST
-  @Path("onboard-recommended")
+  @Path("load-defaults")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response loadRecommendedTemplates(

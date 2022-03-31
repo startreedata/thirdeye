@@ -14,7 +14,8 @@
         "anomaly.source": "meanVariance-template/root",
         "type": "MEAN_VARIANCE",
         "component.pattern": "${pattern}",
-        "component.sensitivity": "${sensitivity}"
+        "component.sensitivity": "${sensitivity}",
+        "component.seasonalityPeriod": "${seasonalityPeriod}"
       },
       "inputs": [
         {
@@ -73,6 +74,7 @@
     "pattern": "UP_OR_DOWN",
     "completenessDelay": "P0D",
     "queryFilters": "",
-    "queryLimit": "100000000"
+    "queryLimit": "100000000",
+    "seasonalityPeriod": "PT0S"
   }
 }

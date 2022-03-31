@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
+import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -235,12 +236,12 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
-  public void testGetBreakdown() {
-    // todo cyril replace by metrics/heatmap/anomaly/{id} once frontend has changed
-    Response response = request("api/rca/metrics/breakdown/anomaly/" + anomalyId).get();
+  public void testGetHeatmap() {
+    Response response = request("api/rca/metrics/heatmap/anomaly/" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    Map<String, ?> breakdown = response.readEntity(Map.class);
-    assertThat(breakdown.size()).isGreaterThan(0);
+    HeatMapResultApi heatmap = response.readEntity(HeatMapResultApi.class);
+    assertThat(heatmap.getBaseline().getBreakdown().size()).isGreaterThan(0);
+    assertThat(heatmap.getCurrent().getBreakdown().size()).isGreaterThan(0);
   }
 
   private Builder request(final String urlFragment) {

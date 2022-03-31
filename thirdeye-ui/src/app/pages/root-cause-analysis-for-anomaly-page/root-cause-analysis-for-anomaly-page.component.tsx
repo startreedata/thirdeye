@@ -223,7 +223,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     </Paper>
                 </Grid>
 
-                {/* Trending */}
+                {/* Dimension Related */}
                 <Grid item xs={12}>
                     {anomaly && (
                         <AnalysisTabs

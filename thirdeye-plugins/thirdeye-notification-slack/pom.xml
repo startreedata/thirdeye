@@ -12,7 +12,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-notifications</artifactId>
+  <artifactId>thirdeye-notification-slack</artifactId>
 
   <dependencies>
     <dependency>
@@ -34,32 +34,13 @@
       <artifactId>metrics-core</artifactId>
       <scope>compile</scope>
     </dependency>
+
+    <!--    Slack API Client -->
     <dependency>
-      <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>retrofit</artifactId>
-      <version>${retrofit2.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sendgrid</groupId>
-      <artifactId>sendgrid-java</artifactId>
+      <groupId>com.slack.api</groupId>
+      <artifactId>slack-api-client</artifactId>
     </dependency>
 
-    <!--    Firing webhooks -->
-    <dependency>
-      <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>converter-jackson</artifactId>
-      <version>${retrofit2.version}</version>
-    </dependency>
-
-    <!-- Firing emails -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-email</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
 
   </dependencies>
 

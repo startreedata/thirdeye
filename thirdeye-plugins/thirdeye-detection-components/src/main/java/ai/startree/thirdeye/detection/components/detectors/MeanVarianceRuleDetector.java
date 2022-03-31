@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
+import java.util.Set;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -48,12 +49,17 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     BaselineProvider<MeanVarianceRuleDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
+  private static final Set<Period> SUPPORTED_SEASONALITIES = Set.of(
+      Period.days(7), // weekly seasonality
+      Period.days(1), // daily seasonality
+      Period.ZERO     // special value for no seasonality
+  );
 
   private Pattern pattern;
   private double sensitivity;
   private int lookback;
   private MeanVarianceRuleDetectorSpec spec;
-  private Period seasonality = Period.ZERO; // PT0S - special keyword to mean no seasonality POD also understood
+  private Period seasonality = Period.ZERO; // PT0S: special period for no seasonality
 
   /**
    * Mapping of sensitivity to sigma on range of 0.5 - 1.5
@@ -86,8 +92,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
           "monitoringGranularity is required when seasonalityPeriod is used");
       final Period seasonality = Period.parse(spec.getSeasonalityPeriod(),
           ISOPeriodFormat.standard());
-      checkArgument(seasonality.equals(Period.days(7)) || seasonality.equals(Period.days(1)),
-          String.format("Unsupported period %s. Supported periods are P7D and P1D", seasonality));
+      checkArgument(SUPPORTED_SEASONALITIES.contains(seasonality),
+          String.format(
+              "Unsupported period %s. Supported periods are P7D and P1D, or PTOS for no seasonality.",
+              seasonality));
       int minimumLookbackRequired =
           2 * computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
       checkArgument(minimumLookbackRequired <= lookback,
@@ -205,7 +213,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   }
 
   private DoubleSeries buildPeriodMask(final DataFrame lookbackDf, final long forecastTime) {
-    if (seasonality.equals(Period.ZERO) || seasonality.equals(Period.days(0))) {
+    if (seasonality.equals(Period.ZERO)) {
       // no seasonality --> no mask
       return DoubleSeries.fillValues(lookbackDf.size(), 1);
     }

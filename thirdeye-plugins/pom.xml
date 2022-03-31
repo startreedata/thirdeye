@@ -24,6 +24,7 @@
     <module>thirdeye-kafka</module>
     <module>thirdeye-notification-email</module>
     <module>thirdeye-notification-webhook</module>
+    <module>thirdeye-notification-slack</module>
   </modules>
 
   <dependencies>

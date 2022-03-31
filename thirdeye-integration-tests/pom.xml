@@ -40,6 +40,10 @@
       <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-notification-webhook</artifactId>
     </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-notification-slack</artifactId>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>

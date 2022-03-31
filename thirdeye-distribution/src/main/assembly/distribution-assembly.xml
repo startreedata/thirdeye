@@ -65,6 +65,10 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-webhook/target/thirdeye-notification-webhook-${project.version}-dist</directory>
       <outputDirectory>plugins/notification-webhook/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-slack/target/thirdeye-notification-slack-${project.version}-dist</directory>
+      <outputDirectory>plugins/notification-slack/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

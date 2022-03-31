@@ -180,6 +180,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       final long forecastTime = forecastDF.getLong(COL_TIME, k);
       final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
       final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime);
+      // todo cyril implement median
       final double mean = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask).mean().value();
       final double std = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask).std().value();
       //calculate baseline, error , upper and lower bound for prediction window.

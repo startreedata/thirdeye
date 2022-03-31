@@ -157,6 +157,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             {selectedTabIndex === 0 && (
                 <Box mt={-4}>
                     <AnomalyBreakdownComparisonHeatmap
+                        anomaly={anomaly}
                         anomalyId={toNumber(anomalyId)}
                         comparisonOffset={comparisonOffset}
                     />

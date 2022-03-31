@@ -5,10 +5,8 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.FileUtils.getFilesFromResourcesFolder;
-import static ai.startree.thirdeye.util.FileUtils.readJsonObject;
+import static ai.startree.thirdeye.util.FileUtils.readJsonObjectsFromResourcesFolder;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
-import static com.google.api.client.util.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
@@ -25,11 +23,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
@@ -80,7 +75,10 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("updateExisting") boolean updateExisting) {
 
-    List<AlertTemplateApi> alertTemplates = getAlertTemplatesFromResources();
+    List<AlertTemplateApi> alertTemplates = readJsonObjectsFromResourcesFolder(
+        RESOURCES_TEMPLATES_PATH,
+        this.getClass(),
+        AlertTemplateApi.class);
     List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (AlertTemplateApi templateApi : alertTemplates) {
@@ -101,15 +99,5 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
     }
 
     return respondOk(upserted);
-  }
-
-  private List<AlertTemplateApi> getAlertTemplatesFromResources() {
-    final File[] files = getFilesFromResourcesFolder(RESOURCES_TEMPLATES_PATH,
-        this.getClass().getClassLoader());
-    checkArgument(files != null, "No templates file found in templates resources.");
-
-    return Arrays.stream(files)
-        .map(file -> readJsonObject(file, AlertTemplateApi.class))
-        .collect(Collectors.toList());
   }
 }

@@ -37,7 +37,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
     });
 
     it("should show all the UI components for valid data responses", async () => {
-        expect.assertions(8);
+        expect.assertions(7);
 
         render(
             <AnomalyBreakdownComparisonHeatmap
@@ -52,12 +52,6 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         );
 
         expect(filterDataControlsContainer).toBeInTheDocument();
-
-        const tooltipReferenceContainer = await screen.findByText(
-            "Tooltip Reference"
-        );
-
-        expect(tooltipReferenceContainer).toBeInTheDocument();
 
         // Ensure a treemap shows for each dimension in the data payload.
         // These are the labels for each treemap

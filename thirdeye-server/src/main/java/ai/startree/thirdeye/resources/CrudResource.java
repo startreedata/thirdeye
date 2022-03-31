@@ -42,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,6 +137,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   /**
    * Initialize Request Cache
+   *
    * @return cache container
    */
   protected RequestCache createRequestCache() {
@@ -193,16 +195,24 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       List<ApiT> list) {
     ensureExists(list, "Invalid request");
 
+    return respondOk(internalCreateMultiple(principal, list));
+  }
+
+  /**
+   * Child classes should use this method and not reimplement creation logic in other places.
+   */
+  @NotNull
+  final protected List<ApiT> internalCreateMultiple(final ThirdEyePrincipal principal,
+      final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    return respondOk(list.stream()
+    return list.stream()
         .peek(api1 -> validate(api1, null))
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(dto -> toApi(dto, cache))
-        .collect(Collectors.toList())
-    );
+        .collect(Collectors.toList());
   }
 
   @PUT
@@ -211,12 +221,22 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response editMultiple(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
+
+    return respondOk(internalEditMultiple(principal, list));
+  }
+
+  /**
+   * Child classes should use this method and not reimplement edit logic in other places.
+   */
+  @NotNull
+  final protected List<ApiT> internalEditMultiple(final ThirdEyePrincipal principal,
+      final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    return respondOk(list.stream()
+    return list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .map(dto -> toApi(dto, cache))
-        .collect(Collectors.toList()));
+        .collect(Collectors.toList());
   }
 
   @GET

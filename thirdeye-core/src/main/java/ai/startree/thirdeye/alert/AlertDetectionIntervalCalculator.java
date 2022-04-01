@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public class AlertDetectionIntervalCalculator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+  private static final Interval DUMMY_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
@@ -41,8 +42,7 @@ public class AlertDetectionIntervalCalculator {
   public Interval getCorrectedInterval(final AlertApi alertApi, final long taskStartMillis,
       final long taskEndMillis) throws IOException, ClassNotFoundException {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
-        0L,
-        0L);
+        DUMMY_INTERVAL);
     // alertApi does not have an idea if it's new alert tested in the create alert flow
     long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
 
@@ -64,8 +64,7 @@ public class AlertDetectionIntervalCalculator {
       final long taskEndMillis) throws IOException, ClassNotFoundException {
     // render properties - startTime/endTime not important - objective is to get metadata
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-        0L,
-        0L);
+        DUMMY_INTERVAL);
 
     return getCorrectedInterval(alertDTO.getId(),
         new DateTime(taskStartMillis, DateTimeZone.UTC),

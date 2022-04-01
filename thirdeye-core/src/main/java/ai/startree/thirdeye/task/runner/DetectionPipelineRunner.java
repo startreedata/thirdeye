@@ -47,10 +47,8 @@ public class DetectionPipelineRunner {
   private DetectionPipelineResult executePlan(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
 
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-        alert,
-        detectionInterval.getStartMillis(),
-        detectionInterval.getEndMillis());
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
+        detectionInterval);
 
     final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),

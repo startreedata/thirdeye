@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 
 @Singleton
 public class RootCauseAnalysisInfoFetcher {
@@ -80,9 +82,9 @@ public class RootCauseAnalysisInfoFetcher {
       tryMigrateAlertFromRcaToMetadata(alertDTO);
     }
 
-    // render properties - startTime/endTime not important
+    // render properties - detectionInterval not important
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-        alertDTO, 0L, 0L);
+        alertDTO, new Interval(0L, 0L, DateTimeZone.UTC));
     // parse metadata
     AlertMetadataDTO alertMetadataDto = Objects.requireNonNull(templateWithProperties.getMetadata(),
         "metadata not found in alert config.");

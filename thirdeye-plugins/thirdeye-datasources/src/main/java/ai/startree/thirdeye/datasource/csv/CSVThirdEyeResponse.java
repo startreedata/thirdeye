@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * The response of ThirdEye if the data source is a CSV file.
@@ -71,7 +72,7 @@ public class CSVThirdEyeResponse extends BaseThirdEyeResponse {
       timeBucketId = SpiUtils.computeBucketIndex(
           dataTimeSpec.getDataGranularity(),
           request.getStartTimeInclusive(),
-          new DateTime(time));
+          new DateTime(time, DateTimeZone.UTC));
     }
 
     List<String> dimensions = new ArrayList<>();

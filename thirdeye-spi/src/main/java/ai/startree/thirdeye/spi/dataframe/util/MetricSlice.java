@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * Selector for time series and aggregate values of a specific metric, independent of
@@ -131,8 +132,8 @@ public final class MetricSlice {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("metricId", metricId)
-        .add("start", new DateTime(start))
-        .add("end", new DateTime(end))
+        .add("start", new DateTime(start, DateTimeZone.UTC))
+        .add("end", new DateTime(end, DateTimeZone.UTC))
         .add("filters", filters)
         .add("granularity", granularity)
         .toString();

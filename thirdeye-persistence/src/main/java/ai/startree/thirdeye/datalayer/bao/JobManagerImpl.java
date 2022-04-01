@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 @Singleton
 public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobManager {
@@ -43,7 +44,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
 
   @Override
   public List<JobDTO> findByStatusWithinDays(JobStatus status, int days) {
-    DateTime activeDate = new DateTime().minusDays(days);
+    DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
     Predicate statusPredicate = Predicate.EQ("status", status.toString());
     Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
@@ -67,7 +68,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   @Override
   @Transactional
   public int deleteRecordsOlderThanDaysWithStatus(int days, JobStatus status) {
-    DateTime expireDate = new DateTime().minusDays(days);
+    DateTime expireDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
     Predicate statusPredicate = Predicate.EQ("status", status.toString());
     Predicate timestampPredicate = Predicate.LT("updateTime", expireTimestamp);

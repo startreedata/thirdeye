@@ -15,6 +15,7 @@ import java.util.TreeMap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 /**
@@ -31,7 +32,7 @@ public class TimeSeries implements MetricTimeSeries {
   /**
    * The max (exclusive) and min (inclusive) timestamp of this time series.
    */
-  private Interval timeSeriesInterval = new Interval(0L, 0L);
+  private Interval timeSeriesInterval = new Interval(0L, 0L, DateTimeZone.UTC);
 
   public TimeSeries() {
   }
@@ -53,7 +54,7 @@ public class TimeSeries implements MetricTimeSeries {
       long minTimestamp = timeSeries.firstEntry().getKey();
       long maxTimestamp = timeSeries.lastEntry().getKey() + 1; // end time exclusive
 
-      timeSeriesInterval = new Interval(minTimestamp, maxTimestamp);
+      timeSeriesInterval = new Interval(minTimestamp, maxTimestamp, DateTimeZone.UTC);
     }
   }
 

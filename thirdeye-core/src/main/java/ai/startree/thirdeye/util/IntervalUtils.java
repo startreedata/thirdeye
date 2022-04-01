@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 public class IntervalUtils {
@@ -48,7 +49,8 @@ public class IntervalUtils {
       } else {
         Interval newTop = new Interval(
             Math.min(top.getStart().getMillis(), target.getStart().getMillis()),
-            Math.max(top.getEnd().getMillis(), target.getEnd().getMillis()));
+            Math.max(top.getEnd().getMillis(), target.getEnd().getMillis()),
+            DateTimeZone.UTC);
         intervalStack.pop();
         intervalStack.push(newTop);
       }

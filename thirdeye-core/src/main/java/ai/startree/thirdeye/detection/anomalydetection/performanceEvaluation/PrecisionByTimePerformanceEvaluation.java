@@ -11,6 +11,7 @@ import ai.startree.thirdeye.util.IntervalUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 /**
@@ -44,7 +45,7 @@ public class PrecisionByTimePerformanceEvaluation extends BasePerformanceEvaluat
 
     for (MergedAnomalyResultDTO detectedAnomaly : detectedAnomalies) {
       Interval anomalyInterval = new Interval(detectedAnomaly.getStartTime(),
-          detectedAnomaly.getEndTime());
+          detectedAnomaly.getEndTime(), DateTimeZone.UTC);
       DimensionMap dimensions = detectedAnomaly.getDimensions();
       for (Interval knownAnomalyInterval : knownAnomalyIntervals.get(dimensions)) {
         if (!dimensionToDetectedAnomalyTimeLength.containsKey(dimensions)) {

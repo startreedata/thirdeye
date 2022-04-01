@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 /**
@@ -229,7 +230,7 @@ public class DetectionHealth {
           if (anomaly.getStartTime() <= end) {
             end = Math.max(end, anomaly.getEndTime());
           } else {
-            intervals.add(new Interval(start, end));
+            intervals.add(new Interval(start, end, DateTimeZone.UTC));
             start = anomaly.getStartTime();
             end = anomaly.getEndTime();
           }

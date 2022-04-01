@@ -317,7 +317,7 @@ public class HoltWintersDetectorTest {
   @Test
   public void testAnomaliesDownOnly() throws DetectorException {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_202, DateTimeZone.UTC);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,

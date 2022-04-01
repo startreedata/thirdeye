@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.alert;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
@@ -27,6 +28,12 @@ import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**Compute a detection interval, based on task start and end.
+ * Applies completenessDelay and monitoringGranularity rounding.
+ * monitoringGranularity rounding uses metadata$dataset$timezone, defaults to UTC if not set.
+ * todo cyril document this
+ * */
 @Singleton
 public class AlertDetectionIntervalCalculator {
 
@@ -44,11 +51,11 @@ public class AlertDetectionIntervalCalculator {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
         DUMMY_INTERVAL);
     // alertApi does not have an idea if it's new alert tested in the create alert flow
-    long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
+    final long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
 
     return getCorrectedInterval(alertId,
-        new DateTime(taskStartMillis, DateTimeZone.UTC),
-        new DateTime(taskEndMillis, DateTimeZone.UTC),
+        taskStartMillis,
+        taskEndMillis,
         templateWithProperties);
   }
 
@@ -67,15 +74,19 @@ public class AlertDetectionIntervalCalculator {
         DUMMY_INTERVAL);
 
     return getCorrectedInterval(alertDTO.getId(),
-        new DateTime(taskStartMillis, DateTimeZone.UTC),
-        new DateTime(taskEndMillis, DateTimeZone.UTC),
+        taskStartMillis,
+        taskEndMillis,
         templateWithProperties);
   }
 
   @NotNull
   @VisibleForTesting
-  protected static Interval getCorrectedInterval(final long alertId, final DateTime taskStart,
-      final DateTime taskEnd, final AlertTemplateDTO templateWithProperties) {
+  protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
+      final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
+    final DateTimeZone alertDateTimeZone = getDateTimeZone(templateWithProperties);
+    final DateTime taskStart = new DateTime(taskStartMillis, alertDateTimeZone);
+    final DateTime taskEnd = new DateTime(taskEndMillis, alertDateTimeZone);
+
     DateTime correctedStart = taskStart;
     DateTime correctedEnd = taskEnd;
     // apply delay correction
@@ -130,6 +141,16 @@ public class AlertDetectionIntervalCalculator {
         .map(DatasetConfigDTO::getCompletenessDelay)
         .map(delayString -> Period.parse(delayString, ISOPeriodFormat.standard()))
         .orElse(null);
+  }
+
+  @Nullable
+  private static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
+    // fixme cyril metadata$dataset$timezone is not the best place, given timezone is relatede to metadata$monitoringGranularity - it is a quick implementation for client
+    return Optional.ofNullable(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getDataset)
+        .map(DatasetConfigDTO::getTimezone)
+        .map(DateTimeZone::forID)
+        .orElse(Constants.DEFAULT_TIMEZONE);
   }
 
   @Nullable

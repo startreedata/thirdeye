@@ -123,10 +123,8 @@ public class AlertEvaluator {
               request.getEnd().getTime());
 
       // apply template properties
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-          request.getAlert(),
-          detectionInterval.getStartMillis(),
-          detectionInterval.getEndMillis());
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
+          detectionInterval);
 
       // inject custom evaluation context
       injectEvaluationContext(templateWithProperties, request.getEvaluationContext());

@@ -6,10 +6,12 @@
 package ai.startree.thirdeye.spi;
 
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTimeZone;
 
 public interface Constants {
 
-  String DEFAULT_TIMEZONE = "America/Los_Angeles";
+  DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
+  String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
 
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";

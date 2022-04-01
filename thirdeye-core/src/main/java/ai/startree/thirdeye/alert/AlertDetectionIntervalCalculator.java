@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.alert;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
@@ -28,12 +27,10 @@ import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-/**Compute a detection interval, based on task start and end.
+/**
+ * Compute a detection interval, based on task start and end.
  * Applies completenessDelay and monitoringGranularity rounding.
- * monitoringGranularity rounding uses metadata$dataset$timezone, defaults to UTC if not set.
- * todo cyril document this
- * */
+ */
 @Singleton
 public class AlertDetectionIntervalCalculator {
 
@@ -83,9 +80,8 @@ public class AlertDetectionIntervalCalculator {
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
-    final DateTimeZone alertDateTimeZone = getDateTimeZone(templateWithProperties);
-    final DateTime taskStart = new DateTime(taskStartMillis, alertDateTimeZone);
-    final DateTime taskEnd = new DateTime(taskEndMillis, alertDateTimeZone);
+    final DateTime taskStart = new DateTime(taskStartMillis, DateTimeZone.UTC);
+    final DateTime taskEnd = new DateTime(taskEndMillis, DateTimeZone.UTC);
 
     DateTime correctedStart = taskStart;
     DateTime correctedEnd = taskEnd;
@@ -115,6 +111,8 @@ public class AlertDetectionIntervalCalculator {
     }
 
     // apply granularity correction
+    // granularity correction is compatible with datetimezone, but UTC is hardcoded above
+    // given that grouping is performed by Pinot, it is UTC grouping - other dbs may manage timezone-aware grouping
     final Period granularity = getGranularity(templateWithProperties);
     if (granularity != null) {
       // if alert has already run: start = lastTimestamp = correctedEnd = floor(end) and floor(floor(x)) = floor(x)
@@ -141,16 +139,6 @@ public class AlertDetectionIntervalCalculator {
         .map(DatasetConfigDTO::getCompletenessDelay)
         .map(delayString -> Period.parse(delayString, ISOPeriodFormat.standard()))
         .orElse(null);
-  }
-
-  @Nullable
-  private static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
-    // fixme cyril metadata$dataset$timezone is not the best place, given timezone is relatede to metadata$monitoringGranularity - it is a quick implementation for client
-    return Optional.ofNullable(templateWithProperties.getMetadata())
-        .map(AlertMetadataDTO::getDataset)
-        .map(DatasetConfigDTO::getTimezone)
-        .map(DateTimeZone::forID)
-        .orElse(Constants.DEFAULT_TIMEZONE);
   }
 
   @Nullable

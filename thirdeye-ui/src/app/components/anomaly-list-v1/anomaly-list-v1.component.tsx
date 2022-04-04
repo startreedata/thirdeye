@@ -3,10 +3,19 @@ import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
+    DataGridSortOrderV1,
     DataGridV1,
 } from "../../platform/components";
-import { linkRendererV1 } from "../../platform/utils";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import {
+    formatDateAndTimeV1,
+    formatDurationV1,
+    formatLargeNumberV1,
+    formatPercentageV1,
+    linkRendererV1,
+    numberSortComparatorV1,
+} from "../../platform/utils";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { getAnomalyName } from "../../utils/anomalies/anomalies.util";
 import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
@@ -17,33 +26,59 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     props: AnomalyListV1Props
 ) => {
     const [selectedAnomaly, setSelectedAnomaly] =
-        useState<DataGridSelectionModelV1<UiAnomaly>>();
+        useState<DataGridSelectionModelV1<Anomaly>>();
     const { t } = useTranslation();
 
     const anomalyNameRenderer = (
-        cellValue: Record<string, unknown>,
-        data: UiAnomaly
-    ): ReactNode => {
-        return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
-    };
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode =>
+        linkRendererV1(getAnomalyName(data), getAnomaliesAnomalyPath(data.id));
 
     const alertNameRenderer = (
-        cellValue: Record<string, unknown>,
-        data: UiAnomaly
-    ): ReactNode => {
-        return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
-    };
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode =>
+        linkRendererV1(data.alert.name, getAlertsViewPath(data.alert.id));
+
+    const durationRenderer = (
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode => formatDurationV1(data.startTime, data.endTime);
+
+    const startTimeRenderer = (
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode => formatDateAndTimeV1(data.startTime);
+
+    const endTimeRenderer = (
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode => formatDateAndTimeV1(data.endTime);
+
+    const currentRenderer = (
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode => formatLargeNumberV1(data.avgCurrentVal);
+
+    const predictedRenderer = (
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
+    ): ReactNode => formatLargeNumberV1(data.avgBaselineVal);
 
     const deviationRenderer = (
-        cellValue: Record<string, unknown>,
-        data: UiAnomaly
+        _cellValue: Record<string, unknown>,
+        data: Anomaly
     ): ReactNode => {
+        const deviationVal =
+            (data.avgCurrentVal - data.avgBaselineVal) / data.avgBaselineVal;
+
         return (
             <Typography
-                color={data.negativeDeviation ? "error" : undefined}
+                color={deviationVal < 0 ? "error" : undefined}
                 variant="body2"
             >
-                {cellValue}
+                {formatPercentageV1(deviationVal)}
             </Typography>
         );
     };
@@ -60,14 +95,46 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         const anomalyId = selectedAnomaly.rowKeyValues[0];
         const anomaly = selectedAnomaly.rowKeyValueMap?.get(anomalyId);
 
-        props.onDelete && props.onDelete(anomaly as UiAnomaly);
+        props.onDelete && props.onDelete(anomaly as Anomaly);
+    };
+
+    const sortDeviation = (
+        data1: Anomaly,
+        data2: Anomaly,
+        order: DataGridSortOrderV1
+    ): number => {
+        const val1 = !isNaN(
+            (data1.avgCurrentVal - data1.avgBaselineVal) / data1.avgBaselineVal
+        )
+            ? (data1.avgCurrentVal - data1.avgBaselineVal) /
+              data1.avgBaselineVal
+            : 0;
+        const val2 = !isNaN(
+            (data2.avgCurrentVal - data2.avgBaselineVal) / data2.avgBaselineVal
+        )
+            ? (data2.avgCurrentVal - data2.avgBaselineVal) /
+              data2.avgBaselineVal
+            : 0;
+
+        return numberSortComparatorV1(val1, val2, order);
+    };
+
+    const sortDuration = (
+        data1: Anomaly,
+        data2: Anomaly,
+        order: DataGridSortOrderV1
+    ): number => {
+        const duration1 = data1.endTime - data1.startTime;
+        const duration2 = data2.endTime - data2.startTime;
+
+        return numberSortComparatorV1(duration1, duration2, order);
     };
 
     const anomalyListColumns = useMemo(
         () => [
             {
-                key: "name",
-                dataKey: "name",
+                key: "id",
+                dataKey: "id",
                 header: t("label.name"),
                 sortable: true,
                 minWidth: 200,
@@ -87,6 +154,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 header: t("label.duration"),
                 sortable: true,
                 minWidth: 150,
+                customCellRenderer: durationRenderer,
+                sortComparatorFn: sortDuration,
             },
             {
                 key: "startTime",
@@ -94,6 +163,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 header: t("label.start"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: startTimeRenderer,
             },
             {
                 key: "endTime",
@@ -101,38 +171,42 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 header: t("label.end"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: endTimeRenderer,
             },
             {
                 key: "current",
-                dataKey: "current",
+                dataKey: "avgCurrentVal",
                 header: t("label.current"),
                 sortable: true,
                 minWidth: 150,
+                customCellRenderer: currentRenderer,
             },
             {
                 key: "predicted",
-                dataKey: "predicted",
+                dataKey: "avgBaselineVal",
                 header: t("label.predicted"),
                 sortable: true,
                 minWidth: 150,
+                customCellRenderer: predictedRenderer,
             },
             {
                 key: "deviation",
-                dataKey: "deviation",
+                dataKey: "avgCurrentVal",
                 header: t("label.deviation"),
                 sortable: true,
                 minWidth: 150,
                 customCellRenderer: deviationRenderer,
+                sortComparatorFn: sortDeviation,
             },
         ],
         [anomalyNameRenderer, alertNameRenderer, deviationRenderer]
     );
 
     return (
-        <DataGridV1<UiAnomaly>
+        <DataGridV1<Anomaly>
             hideBorder
             columns={anomalyListColumns}
-            data={props.anomalies as UiAnomaly[]}
+            data={props.anomalies}
             rowKey="id"
             searchFilterValue={props.searchFilterValue}
             searchPlaceholder={t("label.search-entity", {

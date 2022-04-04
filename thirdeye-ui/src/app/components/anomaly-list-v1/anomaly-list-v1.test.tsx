@@ -7,7 +7,9 @@ import {
 } from "@testing-library/react";
 import React from "react";
 import { DataGridColumnV1 } from "../../platform/components/data-grid-v1/data-grid-v1";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { Metric } from "../../rest/dto/metric.interfaces";
 import { AnomalyListV1 } from "./anomaly-list-v1.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
@@ -27,13 +29,24 @@ jest.mock("../../platform/utils", () => ({
         .mockImplementation((value: string, id: number) => (
             <a href={`testHref${id}`}>{value}</a>
         )),
+    formatDurationV1: jest
+        .fn()
+        .mockImplementation(
+            (startTime, endTime) =>
+                `${startTime.toString()} ${endTime.toString()}`
+        ),
+    formatDateAndTimeV1: jest
+        .fn()
+        .mockImplementation((date) => date.toString()),
+    formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
+    formatPercentageV1: jest.fn().mockImplementation((num) => num.toString()),
 }));
 
 jest.mock("../../platform/components/data-grid-v1", () => ({
     DataGridV1: jest.fn().mockImplementation((props) => (
         <>
             {Array.isArray(props.data) && props.data.length ? (
-                props.data.map((anomaly: UiAnomaly) => {
+                props.data.map((anomaly: Anomaly) => {
                     const mockAnomaly = { ...anomaly };
 
                     return (
@@ -55,11 +68,11 @@ jest.mock("../../platform/components/data-grid-v1", () => ({
                             {Array.isArray(props.columns) &&
                             props.columns.length
                                 ? props.columns.map(
-                                      (column: DataGridColumnV1<UiAnomaly>) =>
+                                      (column: DataGridColumnV1<Anomaly>) =>
                                           column.customCellRenderer &&
                                           column.customCellRenderer(
                                               anomaly[
-                                                  column.key as keyof UiAnomaly
+                                                  column.key as keyof Anomaly
                                               ] as unknown as Record<
                                                   string,
                                                   unknown
@@ -139,7 +152,7 @@ describe("AnomalyListV1", () => {
 
         fireEvent.click(screen.getByTestId("button-delete"));
 
-        expect(mockMethod).toHaveBeenNthCalledWith(1, mockUiAnomaly);
+        expect(mockMethod).toHaveBeenNthCalledWith(1, mockAnomaly);
     });
 
     it("component should render link with appropriate href", async () => {
@@ -156,16 +169,35 @@ describe("AnomalyListV1", () => {
     });
 });
 
-const mockUiAnomaly = {
+const mockAnomaly = {
     id: 1,
-    name: "testAnomaly",
-    alertName: "testAlert",
-    alertId: 2,
-} as UiAnomaly;
+    startTime: 1,
+    endTime: 2,
+    avgCurrentVal: 1,
+    avgBaselineVal: 1,
+    score: 1,
+    weight: 1,
+    impactToGlobal: 1,
+    sourceType: "DEFAULT_ANOMALY_DETECTION",
+    created: 1,
+    notified: true,
+    message: "message",
+    alert: {
+        description: "desc",
+        cron: "cron",
+        id: 1,
+        name: "testAnomaly",
+    } as Alert,
+    metric: {} as Metric,
+    children: [],
+    type: "DEVIATION",
+    severity: "CRITICAL",
+    child: false,
+} as Anomaly;
 
 const mockMethod = jest.fn();
 
 const mockDefaultProps = {
-    anomalies: [mockUiAnomaly],
+    anomalies: [mockAnomaly],
     onDelete: mockMethod,
 } as AnomalyListV1Props;

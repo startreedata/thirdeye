@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import ai.startree.thirdeye.detectionpipeline.utils.EpochTimeConverter;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
@@ -17,6 +15,7 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,7 @@ public abstract class DetectionPipelineOperator implements Operator {
   private static final TimeConverter TIME_CONVERTER = new EpochTimeConverter(TimeUnit.MILLISECONDS.toString());
 
   protected PlanNodeBean planNode;
-  protected long startTime;
-  protected long endTime;
+  protected Interval detectionInterval;
   protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
   protected Map<String, DetectionPipelineResult> inputMap;
   protected Map<String, String> outputKeyMap = new HashMap<>();
@@ -57,9 +55,7 @@ public abstract class DetectionPipelineOperator implements Operator {
   @Override
   public void init(final OperatorContext context) {
     planNode = context.getPlanNode();
-    startTime = context.getStartTime();
-    endTime = context.getEndTime();
-    checkArgument(startTime <= endTime, "start time cannot be greater than end time");
+    detectionInterval = context.getDetectionInterval();
 
     resultMap = new HashMap<>();
     inputMap = context.getInputsMap();
@@ -83,12 +79,8 @@ public abstract class DetectionPipelineOperator implements Operator {
     return planNode;
   }
 
-  public long getStartTime() {
-    return startTime;
-  }
-
-  public long getEndTime() {
-    return endTime;
+  public Interval getDetectionInterval() {
+    return detectionInterval;
   }
 
   protected void setOutput(String key, final DetectionPipelineResult output) {

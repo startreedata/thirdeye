@@ -7,29 +7,20 @@ package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import java.util.Map;
+import org.joda.time.Interval;
 
 public class OperatorContext {
-  private long startTime;
-  private long endTime;
+  private Interval detectionInterval;
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, DetectionPipelineResult> inputsMap;
 
-  public long getStartTime() {
-    return startTime;
+  public Interval getDetectionInterval() {
+    return detectionInterval;
   }
 
-  public OperatorContext setStartTime(final long startTime) {
-    this.startTime = startTime;
-    return this;
-  }
-
-  public long getEndTime() {
-    return endTime;
-  }
-
-  public OperatorContext setEndTime(final long endTime) {
-    this.endTime = endTime;
+  public OperatorContext setDetectionInterval(final Interval detectionInterval) {
+    this.detectionInterval = detectionInterval;
     return this;
   }
 

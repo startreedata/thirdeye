@@ -20,8 +20,7 @@ public class IndexFillerPlanNode extends DetectionPipelinePlanNode {
   public Operator buildOperator() throws Exception {
     final TimeIndexFillerOperator timeIndexFillerOperator = new TimeIndexFillerOperator();
     timeIndexFillerOperator.init(new OperatorContext()
-        .setStartTime(this.startTime)
-        .setEndTime(this.endTime)
+        .setDetectionInterval(this.detectionInterval)
         .setPlanNode(planNodeBean)
         .setInputsMap(inputsMap)
     );

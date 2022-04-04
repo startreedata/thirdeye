@@ -16,8 +16,6 @@ import ai.startree.thirdeye.spi.detection.IndexFiller;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +42,7 @@ public class TimeIndexFillerOperator extends DetectionPipelineOperator {
     final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
     checkArgument(timeSeriesMap.size() == 1,
         OPERATOR_NAME + " must have exactly 1 DataTable in input");
-    final Interval interval = new Interval(startTime, endTime, DateTimeZone.UTC);
-    final DataTable dataTable = timeIndexFiller.fillIndex(interval,
+    final DataTable dataTable = timeIndexFiller.fillIndex(detectionInterval,
         timeSeriesMap.values().iterator().next());
     resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
   }

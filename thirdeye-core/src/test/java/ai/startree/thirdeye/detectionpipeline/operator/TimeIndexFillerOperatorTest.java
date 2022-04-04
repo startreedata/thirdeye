@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
@@ -15,7 +17,8 @@ import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.testng.Assert;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
 public class TimeIndexFillerOperatorTest {
@@ -58,19 +61,20 @@ public class TimeIndexFillerOperatorTest {
     final DataTable inputDataTable = SimpleDataTable.fromDataFrame(dataFrame);
 
     final OperatorContext context = new OperatorContext()
+        .setDetectionInterval(new Interval(0L, 1L, DateTimeZone.UTC)) // ignored with FROM_DATA
         .setPlanNode(planNodeBean)
         .setInputsMap(ImmutableMap.of("baseline", inputDataTable))
         .setProperties(properties);
 
     timeIndexFillerOperator.init(context);
     timeIndexFillerOperator.execute();
-    Assert.assertEquals(timeIndexFillerOperator.getOutputs().size(), 1);
+    assertThat(timeIndexFillerOperator.getOutputs().size()).isEqualTo(1);
 
     DataTable detectionPipelineResult = (DataTable) timeIndexFillerOperator.getOutputs().get("currentOutput");
     final DataFrame expectedDataFrame = new DataFrame();
     expectedDataFrame.addSeries("ts", OCTOBER_22_MILLIS, OCTOBER_23_MILLIS, OCTOBER_24_MILLIS);
     expectedDataFrame.addSeries("met", METRIC_VALUE, ZERO_FILLER, METRIC_VALUE);
-    Assert.assertEquals(detectionPipelineResult.getDataFrame(), expectedDataFrame);
+    assertThat(detectionPipelineResult.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
   @Test
@@ -106,26 +110,25 @@ public class TimeIndexFillerOperatorTest {
     dataFrame.addSeries("met", METRIC_VALUE, METRIC_VALUE);
     final DataTable inputDataTable = SimpleDataTable.fromDataFrame(dataFrame);
 
+    final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
     final OperatorContext context = new OperatorContext()
-        .setStartTime(startTime)
-        .setEndTime(endTime)
+        .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setInputsMap(ImmutableMap.of("baseline", inputDataTable))
         .setProperties(properties);
 
     timeIndexFillerOperator.init(context);
-    Assert.assertEquals(timeIndexFillerOperator.getStartTime(), startTime);
-    Assert.assertEquals(timeIndexFillerOperator.getEndTime(), endTime);
+    assertThat(timeIndexFillerOperator.getDetectionInterval()).isEqualTo(detectionInterval);
 
     timeIndexFillerOperator.execute();
 
-    Assert.assertEquals(timeIndexFillerOperator.getOutputs().size(), 1);
+    assertThat(timeIndexFillerOperator.getOutputs().size()).isEqualTo(1);
 
     DataTable detectionPipelineResult = (DataTable) timeIndexFillerOperator.getOutputs().get("currentOutput");
     final DataFrame expectedDataFrame = new DataFrame();
     expectedDataFrame.addSeries("ts", OCTOBER_22_MILLIS, OCTOBER_23_MILLIS, OCTOBER_24_MILLIS, OCTOBER_25_MILLIS);
     expectedDataFrame.addSeries("met", ZERO_FILLER, METRIC_VALUE, METRIC_VALUE, ZERO_FILLER);
-    Assert.assertEquals(detectionPipelineResult.getDataFrame(), expectedDataFrame);
+    assertThat(detectionPipelineResult.getDataFrame()).isEqualTo(expectedDataFrame);
   }
 
 }

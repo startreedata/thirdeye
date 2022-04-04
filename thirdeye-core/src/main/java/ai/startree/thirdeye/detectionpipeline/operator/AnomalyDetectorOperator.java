@@ -104,7 +104,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   private List<Interval> getMonitoringWindows() {
-    return singletonList(new Interval(startTime, endTime, DateTimeZone.UTC));
+    return singletonList(detectionInterval);
   }
 
   @Override

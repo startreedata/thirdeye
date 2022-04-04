@@ -1,10 +1,16 @@
 import { Chip } from "@material-ui/core";
 import React from "react";
+import {
+    AnomalyBreakdownAPIOffsetsToWeeks,
+    AnomalyBreakdownAPIOffsetValues,
+    OFFSET_TO_HUMAN_READABLE,
+} from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
+import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
@@ -53,31 +59,43 @@ export const generateOtherDimensionTooltipString = (
     )}`;
 };
 
+export const offsetMilliseconds = (
+    timestamp: number,
+    offset: AnomalyBreakdownAPIOffsetValues
+): number => {
+    return (
+        timestamp -
+        WEEK_IN_MILLISECONDS * AnomalyBreakdownAPIOffsetsToWeeks[offset]
+    );
+};
+
 export const generateComparisonChartOptions = (
-    current: AlertEvaluation,
-    baseline: AlertEvaluation,
-    anomaly: Anomaly
+    nonFiltered: AlertEvaluation,
+    filtered: AlertEvaluation,
+    anomaly: Anomaly,
+    comparisonOffset: AnomalyBreakdownAPIOffsetValues
 ): TimeSeriesChartProps => {
     const series = [
         {
-            name: "Current",
-            data: current.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
+            name: "Non Filtered",
+            data: nonFiltered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
                 (value, idx) => {
                     return {
                         y: value,
-                        x: current.detectionEvaluations
+                        x: nonFiltered.detectionEvaluations
                             .output_AnomalyDetectorResult_0.data.timestamp[idx],
                     };
                 }
             ),
+            enabled: false,
         },
         {
-            name: "Baseline",
-            data: baseline.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
+            name: "Filtered",
+            data: filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
                 (value, idx) => {
                     return {
                         y: value,
-                        x: baseline.detectionEvaluations
+                        x: filtered.detectionEvaluations
                             .output_AnomalyDetectorResult_0.data.timestamp[idx],
                     };
                 }
@@ -93,7 +111,17 @@ export const generateComparisonChartOptions = (
                 {
                     start: anomaly.startTime,
                     end: anomaly.endTime,
-                    name: "Anomaly",
+                    name: "Anomaly Period",
+                    color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
+                    opacity: 0.2,
+                },
+                {
+                    start: offsetMilliseconds(
+                        anomaly.startTime,
+                        comparisonOffset
+                    ),
+                    end: offsetMilliseconds(anomaly.endTime, comparisonOffset),
+                    name: OFFSET_TO_HUMAN_READABLE[comparisonOffset],
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,
                 },

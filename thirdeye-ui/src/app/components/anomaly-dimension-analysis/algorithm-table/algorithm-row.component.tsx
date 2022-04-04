@@ -44,6 +44,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     totalSum,
     dimensionColumns,
     anomaly,
+    comparisonOffset,
 }) => {
     const [open, setOpen] = useState(false);
     const classes = useAlgorithmRowExpandedStyles();
@@ -107,6 +108,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                         {open && (
                             <AlgorithmRowExpanded
                                 anomaly={anomaly}
+                                comparisonOffset={comparisonOffset}
                                 dimensionColumns={dimensionColumns}
                                 row={row}
                             />

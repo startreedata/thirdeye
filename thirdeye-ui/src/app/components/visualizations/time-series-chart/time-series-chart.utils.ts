@@ -39,3 +39,7 @@ export function normalizeSeries(series: Series[]): Series[] {
         };
     });
 }
+
+export const syncEnabledDisabled = (seriesData: Series): boolean => {
+    return seriesData.enabled === undefined ? true : seriesData.enabled;
+};

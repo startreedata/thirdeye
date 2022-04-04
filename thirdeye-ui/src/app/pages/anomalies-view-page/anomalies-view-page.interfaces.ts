@@ -10,6 +10,14 @@ export enum AnomalyBreakdownAPIOffsetValues {
     FOUR_WEEKS_AGO = "P4W",
 }
 
+export const AnomalyBreakdownAPIOffsetsToWeeks = {
+    [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
+    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: 1,
+    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2,
+    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3,
+    [AnomalyBreakdownAPIOffsetValues.FOUR_WEEKS_AGO]: 4,
+};
+
 export const OFFSET_TO_HUMAN_READABLE = {
     [AnomalyBreakdownAPIOffsetValues.CURRENT]: "",
     [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: "One Week Ago",

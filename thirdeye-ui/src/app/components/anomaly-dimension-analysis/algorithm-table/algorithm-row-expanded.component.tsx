@@ -26,7 +26,7 @@ import {
 
 export const AlgorithmRowExpanded: FunctionComponent<
     AlgorithmRowExpandedProps
-> = ({ row, anomaly, dimensionColumns }) => {
+> = ({ row, anomaly, dimensionColumns, comparisonOffset }) => {
     const commonClasses = useCommonStyles();
     const {
         evaluation: nonFilteredEvaluationData,
@@ -66,7 +66,8 @@ export const AlgorithmRowExpanded: FunctionComponent<
                     generateComparisonChartOptions(
                         nonFilteredEvaluationData,
                         filteredEvaluationData,
-                        anomaly
+                        anomaly,
+                        comparisonOffset
                     )
                 );
             }

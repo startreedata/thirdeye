@@ -11,7 +11,7 @@ import { AlgorithmTableProps } from "./algorithm-table.interfaces";
 
 export const AnomalyDimensionAnalysisTable: FunctionComponent<
     AlgorithmTableProps
-> = ({ anomalyDimensionAnalysisData, anomaly }) => {
+> = ({ anomalyDimensionAnalysisData, anomaly, comparisonOffset }) => {
     const totalSum = anomalyDimensionAnalysisData.responseRows.reduce(
         (countSoFar, current) => {
             return countSoFar + current.cost;
@@ -38,6 +38,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<
                 {data.map((row) => (
                     <AlgorithmRow
                         anomaly={anomaly}
+                        comparisonOffset={comparisonOffset}
                         dataset={
                             anomalyDimensionAnalysisData.metric.dataset.name
                         }

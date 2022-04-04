@@ -29,8 +29,7 @@ export const PlotBand: FunctionComponent<PlotBandProps> = ({
             {plotBand.name && (
                 <Text
                     style={{ fontSize: "0.75em" }}
-                    width={width}
-                    x={(xScale(plotBand.start) as number) - width * 2}
+                    x={xScale(plotBand.start)}
                     y={yScale.range()[1] - 5}
                 >
                     {plotBand.name}

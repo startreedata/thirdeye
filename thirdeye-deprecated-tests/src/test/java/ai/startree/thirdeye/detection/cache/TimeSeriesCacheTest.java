@@ -39,6 +39,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -57,8 +59,8 @@ public class TimeSeriesCacheTest {
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
       .setMetricFunctions(Collections.singletonList(metricFunction))
-      .setStartTimeInclusive(0)
-      .setEndTimeExclusive(10000)
+      .setStartTimeInclusive(new DateTime(0, DateTimeZone.UTC))
+      .setEndTimeExclusive(new DateTime(10000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))
       .setLimit(12345)
       .build("ref");

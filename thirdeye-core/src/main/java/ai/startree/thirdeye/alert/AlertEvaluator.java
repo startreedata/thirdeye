@@ -123,10 +123,8 @@ public class AlertEvaluator {
               request.getEnd().getTime());
 
       // apply template properties
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-          request.getAlert(),
-          detectionInterval.getStartMillis(),
-          detectionInterval.getEndMillis());
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
+          detectionInterval);
 
       // inject custom evaluation context
       injectEvaluationContext(templateWithProperties, request.getEvaluationContext());
@@ -139,11 +137,8 @@ public class AlertEvaluator {
       }
 
       final Map<String, DetectionPipelineResult> result = executorService
-          .submit(() -> planExecutor.runPipeline(
-              templateWithProperties.getNodes(),
-              detectionInterval.getStartMillis(),
-              detectionInterval.getEndMillis()
-          ))
+          .submit(() -> planExecutor.runPipeline(templateWithProperties.getNodes(),
+              detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
       return toApi(result)

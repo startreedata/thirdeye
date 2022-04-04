@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.Interval;
 
 public class DataFetcherOperator extends DetectionPipelineOperator {
 
@@ -64,7 +63,6 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Interval detectionInterval = new Interval(startTime, endTime);
     final DataTable dataTable = dataFetcher.getDataTable(detectionInterval);
     resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
   }

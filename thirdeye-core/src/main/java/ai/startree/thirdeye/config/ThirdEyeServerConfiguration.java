@@ -56,6 +56,9 @@ public class ThirdEyeServerConfiguration extends Configuration {
   @JsonProperty("prometheus")
   private PrometheusConfiguration prometheusConfiguration = new PrometheusConfiguration();
 
+  @JsonProperty("time")
+  private TimeConfiguration timeConfiguration = new TimeConfiguration();
+
   private String configPath = "config";
 
   private String phantomJsPath = "";
@@ -248,6 +251,16 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setPrometheusConfiguration(
       final PrometheusConfiguration prometheusConfiguration) {
     this.prometheusConfiguration = prometheusConfiguration;
+    return this;
+  }
+
+  public TimeConfiguration getTimeConfiguration() {
+    return timeConfiguration;
+  }
+
+  public ThirdEyeServerConfiguration setTimeConfiguration(
+      final TimeConfiguration timeConfiguration) {
+    this.timeConfiguration = timeConfiguration;
     return this;
   }
 }

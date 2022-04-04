@@ -58,6 +58,10 @@ public class ThirdEyeServerConfigurationModule extends AbstractModule {
     bind(NotificationConfiguration.class)
         .toProvider(configuration::getNotificationConfiguration)
         .in(Scopes.SINGLETON);
+
+    bind(TimeConfiguration.class)
+        .toProvider(configuration::getTimeConfiguration)
+        .in(Scopes.SINGLETON);
   }
 
   @Singleton

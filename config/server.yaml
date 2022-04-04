@@ -57,6 +57,9 @@ taskDriver:
   enabled: true
   id: 0 # must be a non-negative integer unique per instance/worker
 
+time:
+  timezone: UTC
+
 mockEvents:
   enabled: true
   generators:

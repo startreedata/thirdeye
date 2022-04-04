@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import ai.startree.thirdeye.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -135,6 +136,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   @Override
   public DataTable fillIndex(Interval detectionInterval, final DataTable dataTable)
       throws Exception {
+    Objects.requireNonNull(detectionInterval);
     initWithRuntimeInfo(detectionInterval, dataTable);
 
     DataFrame rawData = dataTable.getDataFrame();

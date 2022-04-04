@@ -14,6 +14,7 @@ import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 /**
@@ -57,7 +58,7 @@ public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFi
         .get(me.getId());
     double currentValue = anomaly.getAvgCurrentVal();
 
-    Interval anomalyInterval = new Interval(anomaly.getStartTime(), anomaly.getEndTime());
+    Interval anomalyInterval = new Interval(anomaly.getStartTime(), anomaly.getEndTime(), DateTimeZone.UTC);
 
     // apply multiplier if the metric is aggregated by SUM or COUNT
     double hourlyMultiplier = SpiUtils.isAggCumulative(metric) ?

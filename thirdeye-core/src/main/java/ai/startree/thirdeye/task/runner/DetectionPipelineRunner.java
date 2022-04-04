@@ -47,15 +47,12 @@ public class DetectionPipelineRunner {
   private DetectionPipelineResult executePlan(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
 
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-        alert,
-        detectionInterval.getStartMillis(),
-        detectionInterval.getEndMillis());
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
+        detectionInterval);
 
     final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),
-        detectionInterval.getStartMillis(),
-        detectionInterval.getEndMillis());
+        detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();

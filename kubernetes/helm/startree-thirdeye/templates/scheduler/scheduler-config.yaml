@@ -69,6 +69,9 @@ data:
     taskDriver:
       enabled: false
       id: 0 # must be a non-negative integer unique per instance/worker
+    
+    time:
+      timezone: {{ .Values.time.timezone }}
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}

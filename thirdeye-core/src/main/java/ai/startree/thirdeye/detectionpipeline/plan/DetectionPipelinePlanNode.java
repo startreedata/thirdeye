@@ -15,6 +15,7 @@ import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelinePlanNode.class);
 
   protected PlanNodeBean planNodeBean = null;
-  protected long startTime = -1;
-  protected long endTime = -1;
+  protected Interval detectionInterval = null;
   protected Map<String, DetectionPipelineResult> inputsMap = new HashMap<>();
 
   private PlanNodeContext context;
@@ -41,8 +41,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     this.context = planNodeContext;
 
     this.planNodeBean = planNodeContext.getPlanNodeBean();
-    this.startTime = planNodeContext.getStartTime();
-    this.endTime = planNodeContext.getEndTime();
+    this.detectionInterval = planNodeContext.getDetectionInterval();
   }
 
   @Override
@@ -50,12 +49,8 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     return requireNonNull(context, "node not initialized! " + getClass().getSimpleName());
   }
 
-  public long getStartTime() {
-    return startTime;
-  }
-
-  public long getEndTime() {
-    return endTime;
+  public Interval getDetectionInterval() {
+    return detectionInterval;
   }
 
   @Override

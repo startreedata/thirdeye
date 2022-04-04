@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,20 +45,20 @@ public class DataFetcherOperatorTest {
   @Test
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setParams(ImmutableMap.of("component.dataSource", dataSourceName))
         .setOutputs(ImmutableList.of());
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache);
-    final OperatorContext context = new OperatorContext().setStartTime(startTime)
-        .setEndTime(endTime)
+    final long startTime = System.currentTimeMillis();
+    final long endTime = startTime + 1000L;
+    final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
+    final OperatorContext context = new OperatorContext()
+        .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
-    Assert.assertEquals(dataFetcherOperator.getStartTime(), startTime);
-    Assert.assertEquals(dataFetcherOperator.getEndTime(), endTime);
+    assertThat(dataFetcherOperator.getDetectionInterval()).isEqualTo(detectionInterval);
   }
 
   @Test
@@ -78,14 +81,14 @@ public class DataFetcherOperatorTest {
 
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache);
-    final OperatorContext context = new OperatorContext().setStartTime(startTime)
-        .setEndTime(endTime)
+    final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
+    final OperatorContext context = new OperatorContext()
+        .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setProperties(properties);
     dataFetcherOperator.init(context);
 
-    Assert.assertEquals(dataFetcherOperator.getStartTime(), startTime);
-    Assert.assertEquals(dataFetcherOperator.getEndTime(), endTime);
+    assertThat(dataFetcherOperator.getDetectionInterval()).isEqualTo(detectionInterval);
 
     final BaseComponent<DataFetcherSpec> pinotDataFetcher = dataFetcherOperator.getDataFetcher();
 

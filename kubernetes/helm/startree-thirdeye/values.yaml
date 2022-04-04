@@ -87,6 +87,9 @@ tls:
 prometheus:
   enabled: false
 
+time:
+  timezone: UTC
+
 auth:
   enabled: false
   oauth:

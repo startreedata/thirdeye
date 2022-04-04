@@ -1,5 +1,4 @@
 import { AxisBottom, AxisLeft } from "@visx/axis";
-import { curveMonotoneX } from "@visx/curve";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { LinePath } from "@visx/shape";
@@ -74,7 +73,6 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                 if (seriesData.enabled) {
                     return (
                         <LinePath<DataPoint>
-                            curve={curveMonotoneX}
                             data={seriesData.data}
                             key={seriesData.name || `${idx}`}
                             stroke={colorScale(seriesData.name as string)}

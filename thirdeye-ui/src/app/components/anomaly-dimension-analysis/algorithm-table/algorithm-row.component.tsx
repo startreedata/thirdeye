@@ -8,10 +8,12 @@ import {
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
+import { createStyles, withStyles } from "@material-ui/styles";
+import classNames from "classnames";
 import React, { FunctionComponent, useState } from "react";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { AlgorithmRowExpanded } from "./algorithm-row-expanded.component";
+import { useAlgorithmRowExpandedStyles } from "./algorithm-row-expanded.styles";
 import { AlgorithmRowProps } from "./algorithm-table.interfaces";
 import {
     generateName,
@@ -35,18 +37,6 @@ const ScoreIndicator = withStyles(() =>
     })
 )(LinearProgress);
 
-/**
- * Make the row on top of the one with expanded content blend by removing
- * the bottom border
- */
-const useRowStyles = makeStyles({
-    root: {
-        "& > *": {
-            borderBottom: "unset",
-        },
-    },
-});
-
 export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     dataset,
     metric,
@@ -56,18 +46,23 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     anomaly,
 }) => {
     const [open, setOpen] = useState(false);
-    const classes = useRowStyles();
+    const classes = useAlgorithmRowExpandedStyles();
     const nameDisplay = generateName(
         row as unknown as AnomalyDimensionAnalysisMetricRow,
         metric,
         dataset,
         dimensionColumns
     );
+    const parentRowClasses = [classes.root];
+
+    if (open) {
+        parentRowClasses.push(classes.expandedRowParent);
+    }
 
     return (
         <>
             {/** Main Content */}
-            <TableRow className={classes.root}>
+            <TableRow className={classNames(...parentRowClasses)}>
                 <TableCell component="th" scope="row">
                     {row.names.includes(SERVER_VALUE_FOR_OTHERS) ? (
                         <Tooltip
@@ -105,12 +100,8 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
             {/** Expanded Content */}
             <TableRow>
                 <TableCell
+                    className={open ? classes.expandedRow : ""}
                     colSpan={6}
-                    style={{
-                        paddingBottom: 0,
-                        paddingTop: 0,
-                        backgroundColor: "rgba(247, 249, 255)",
-                    }}
                 >
                     <Collapse unmountOnExit in={open} timeout="auto">
                         {open && (

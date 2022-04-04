@@ -100,7 +100,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
             {/** Expanded Content */}
             <TableRow>
                 <TableCell
-                    className={open ? classes.expandedRow : ""}
+                    className={open ? classes.expandedRow : classes.closedRow}
                     colSpan={6}
                 >
                     <Collapse unmountOnExit in={open} timeout="auto">

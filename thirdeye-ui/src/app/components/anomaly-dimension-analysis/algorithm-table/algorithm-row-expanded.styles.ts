@@ -18,4 +18,7 @@ export const useAlgorithmRowExpandedStyles = makeStyles((theme) => ({
         paddingBottom: theme.spacing(1),
         backgroundColor: "rgba(247, 249, 255)",
     },
+    closedRow: {
+        padding: 0,
+    },
 }));

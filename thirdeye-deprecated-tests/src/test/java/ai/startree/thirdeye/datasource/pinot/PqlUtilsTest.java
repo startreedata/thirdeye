@@ -180,8 +180,8 @@ public class PqlUtilsTest {
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setMetricFunctions(Collections.singletonList(metricFunction))
-        .setStartTimeInclusive(1000)
-        .setEndTimeExclusive(2000)
+        .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")
         .setLimit(12345)
         .build("ref");
@@ -214,8 +214,8 @@ public class PqlUtilsTest {
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setMetricFunctions(Collections.singletonList(metricFunction))
-        .setStartTimeInclusive(1000)
-        .setEndTimeExclusive(2000)
+        .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")
         .build("ref");
 

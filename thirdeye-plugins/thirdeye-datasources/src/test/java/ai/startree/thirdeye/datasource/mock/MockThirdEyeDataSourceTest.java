@@ -21,7 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Period;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -156,8 +158,8 @@ public class MockThirdEyeDataSourceTest {
         metricId, "tracking", null, null);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(time - TimeUnit.DAYS.toMillis(1))
-        .setEndTimeExclusive(time)
+        .setStartTimeInclusive(new DateTime(time, DateTimeZone.UTC).minus(Period.days(1)))
+        .setEndTimeExclusive(new DateTime(time, DateTimeZone.UTC))
         .addMetricFunction(metricFunction)
         .setGroupBy("browser")
         .build("ref");

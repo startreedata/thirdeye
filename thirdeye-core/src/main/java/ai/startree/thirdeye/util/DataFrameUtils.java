@@ -325,8 +325,8 @@ public class DataFrameUtils {
     }
 
     return ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(slice.getStart())
-        .setEndTimeExclusive(slice.getEnd())
+        .setStartTimeInclusive(new DateTime(slice.getStart(), DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(slice.getEnd(), DateTimeZone.UTC))
         .setFilterSet(slice.getFilters())
         .setMetricFunctions(functions)
         .setDataSource(dataset.getDataSource());

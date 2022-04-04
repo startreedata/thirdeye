@@ -178,18 +178,8 @@ public class ThirdEyeRequest {
       return this;
     }
 
-    public ThirdEyeRequestBuilder setStartTimeInclusive(long startTimeMillis) {
-      this.startTime = new DateTime(startTimeMillis, DateTimeZone.UTC);
-      return this;
-    }
-
     public ThirdEyeRequestBuilder setStartTimeInclusive(DateTime startTime) {
       this.startTime = startTime;
-      return this;
-    }
-
-    public ThirdEyeRequestBuilder setEndTimeExclusive(long endTimeMillis) {
-      this.endTime = new DateTime(endTimeMillis, DateTimeZone.UTC);
       return this;
     }
 

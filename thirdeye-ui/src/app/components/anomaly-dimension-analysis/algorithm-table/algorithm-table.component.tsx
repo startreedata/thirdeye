@@ -31,6 +31,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<
                     <TableCell>Name</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Impact Score</TableCell>
+                    <TableCell />
                 </TableRow>
             </TableHead>
             <TableBody>

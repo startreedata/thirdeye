@@ -1,5 +1,6 @@
 import { useTheme } from "@material-ui/core";
-import { AxisBottom, Text, TickRendererProps } from "@visx/visx";
+import { AxisBottom, TickRendererProps } from "@visx/axis";
+import { Text } from "@visx/text";
 import React, { FunctionComponent, ReactNode } from "react";
 import {
     formatDateTimeForTimeAxis,

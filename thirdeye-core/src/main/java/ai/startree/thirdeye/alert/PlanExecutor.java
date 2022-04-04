@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.joda.time.Interval;
 
 @Singleton
 public class PlanExecutor {
@@ -82,14 +83,12 @@ public class PlanExecutor {
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
   public Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> planNodeBeans,
-      final long startTime,
-      final long endTime)
+      final Interval detectionInterval)
       throws Exception {
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
         planNodeBeans,
-        startTime,
-        endTime);
+        detectionInterval);
 
     /* The context stores all the outputs from all the nodes */
     final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
@@ -104,13 +103,12 @@ public class PlanExecutor {
 
   @VisibleForTesting
   Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
-      final long startTime, final long endTime) {
+      final Interval detectionInterval) {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean planNodeBean : planNodeBeans) {
       final PlanNode planNode = planNodeFactory.build(
           planNodeBean,
-          startTime,
-          endTime,
+          detectionInterval,
           pipelinePlanNodes
       );
 

@@ -41,8 +41,8 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     this.context = planNodeContext;
 
     this.planNodeBean = planNodeContext.getPlanNodeBean();
-    this.startTime = planNodeContext.getStartTime();
-    this.endTime = planNodeContext.getEndTime();
+    this.startTime = planNodeContext.getDetectionInterval().getStartMillis();
+    this.endTime = planNodeContext.getDetectionInterval().getEndMillis();
   }
 
   @Override

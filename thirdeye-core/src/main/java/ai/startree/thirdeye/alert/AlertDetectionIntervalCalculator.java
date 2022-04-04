@@ -30,6 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Compute a detection interval, based on task start and end.
  * Applies completenessDelay and monitoringGranularity rounding.
+ *
+ * For detections/evaluations, this is the entrypoint that changes long startTime and endTimes into an Interval detectionInterval with a timeZone.
+ * todo timeZone is harcoded to UTC. This could be parametrized.
  */
 @Singleton
 public class AlertDetectionIntervalCalculator {
@@ -80,6 +83,7 @@ public class AlertDetectionIntervalCalculator {
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
+    // todo cyril datetimeZone info starts here
     final DateTime taskStart = new DateTime(taskStartMillis, DateTimeZone.UTC);
     final DateTime taskEnd = new DateTime(taskEndMillis, DateTimeZone.UTC);
 

@@ -52,8 +52,7 @@ public class DetectionPipelineRunner {
 
     final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),
-        detectionInterval.getStartMillis(),
-        detectionInterval.getEndMillis());
+        detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();

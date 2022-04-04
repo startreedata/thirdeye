@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -51,6 +53,7 @@ public class PlanExecutorTest {
     final String nodeName = "root";
     node.init(new PlanNodeContext()
         .setName(nodeName)
+        .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC))
         .setPlanNodeBean(new PlanNodeBean()
             .setInputs(Collections.emptyList())
             .setParams(ImmutableMap.of(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
@@ -108,7 +111,7 @@ public class PlanExecutorTest {
 
     final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
-        0L, System.currentTimeMillis());
+        new Interval(0L, System.currentTimeMillis(), DateTimeZone.UTC));
     PlanExecutor.executePlanNode(
         pipelinePlanNodes,
         context,

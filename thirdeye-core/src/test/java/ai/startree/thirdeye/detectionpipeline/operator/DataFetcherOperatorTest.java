@@ -45,13 +45,13 @@ public class DataFetcherOperatorTest {
   @Test
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setParams(ImmutableMap.of("component.dataSource", dataSourceName))
         .setOutputs(ImmutableList.of());
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache);
+    final long startTime = System.currentTimeMillis();
+    final long endTime = startTime + 1000L;
     final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(detectionInterval)

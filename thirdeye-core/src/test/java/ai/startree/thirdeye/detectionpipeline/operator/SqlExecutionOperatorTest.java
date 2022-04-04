@@ -55,8 +55,6 @@ public class SqlExecutionOperatorTest {
     params.putAll(customParams);
 
     final DetectionPipelineOperator sqlExecutionOperator = new SqlExecutionOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("SqlExecution")
@@ -74,6 +72,8 @@ public class SqlExecutionOperatorTest {
             new OutputBean().setOutputKey("1").setOutputName("sql_1")
         ));
     final Map<String, Object> properties = ImmutableMap.of();
+    final long startTime = System.currentTimeMillis();
+    final long endTime = startTime + 1000L;
     final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(detectionInterval)

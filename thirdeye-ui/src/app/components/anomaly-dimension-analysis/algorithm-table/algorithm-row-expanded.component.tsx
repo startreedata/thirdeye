@@ -65,7 +65,8 @@ export const AlgorithmRowExpanded: FunctionComponent<
                 setChartData(
                     generateComparisonChartOptions(
                         nonFilteredEvaluationData,
-                        filteredEvaluationData
+                        filteredEvaluationData,
+                        anomaly
                     )
                 );
             }

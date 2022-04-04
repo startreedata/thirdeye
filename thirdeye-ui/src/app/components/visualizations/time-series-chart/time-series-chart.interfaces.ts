@@ -10,10 +10,20 @@ export interface Series {
     enabled?: boolean;
 }
 
+export interface PlotBand {
+    start: number;
+    end: number;
+    name: string;
+    onClick?: (plotBand: PlotBand) => void;
+    color?: string;
+    opacity?: number;
+}
+
 export interface XAxisOptions {
     useUTC?: boolean;
     hideTime?: boolean;
     enabled?: boolean;
+    plotBands?: PlotBand[];
 }
 export interface TimeSeriesChartProps {
     series: Series[];

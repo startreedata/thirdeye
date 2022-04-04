@@ -57,7 +57,14 @@ const COLOR_PALETTE = [
  *  const chartOptions = {
  *     yAxis: true,
  *     xAxis: {
- *         enabled: false
+ *         enabled: false,
+ *         plotBands: [{
+ *             name: "Anomaly",
+ *             start: 1639353600000,
+ *             end: 1639526400000,
+ *             color: "#000",
+ *             opacity: 0.25
+ *         }]
  *     },
  *     series,
  *     legend: false,
@@ -210,6 +217,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     showXAxis={isXAxisEnabled}
                     showYAxis={isYAxisEnabled}
                     width={width}
+                    xAxisOptions={xAxis}
                     xMax={xMax}
                     yMax={yMax}
                 />

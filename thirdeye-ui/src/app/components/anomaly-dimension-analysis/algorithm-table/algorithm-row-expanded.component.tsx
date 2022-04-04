@@ -15,8 +15,11 @@ import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
+import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AlgorithmRowExpandedProps } from "./algorithm-table.interfaces";
 import {
+    generateComparisonChartOptions,
     SERVER_VALUE_ALL_VALUES,
     SERVER_VALUE_FOR_OTHERS,
 } from "./algorithm-table.utils";
@@ -38,6 +41,9 @@ export const AlgorithmRowExpanded: FunctionComponent<
         status: getFilteredEvaluationStatus,
     } = useGetEvaluation();
     const [searchParams] = useSearchParams();
+    const [chartData, setChartData] = useState<TimeSeriesChartProps | null>(
+        null
+    );
     const [chartDataIsLoading, setChartDataIsLoading] = useState(true);
     const [chartDataIsHasError, setChartDataIsHasError] = useState(false);
     const { notify } = useNotificationProviderV1();
@@ -46,6 +52,7 @@ export const AlgorithmRowExpanded: FunctionComponent<
     const hasNegativeDeviation = deviation < 0;
 
     useEffect(() => {
+        setChartData(null);
         fetchAlertEvaluation();
     }, [anomaly, searchParams]);
 
@@ -54,7 +61,14 @@ export const AlgorithmRowExpanded: FunctionComponent<
             getFilteredEvaluationStatus !== ActionStatus.Working &&
             getNonFilteredEvaluationStatus !== ActionStatus.Working
         ) {
-            console.log(filteredEvaluationData, nonFilteredEvaluationData);
+            if (nonFilteredEvaluationData && filteredEvaluationData) {
+                setChartData(
+                    generateComparisonChartOptions(
+                        nonFilteredEvaluationData,
+                        filteredEvaluationData
+                    )
+                );
+            }
             setChartDataIsLoading(false);
         } else {
             setChartDataIsLoading(true);
@@ -130,6 +144,7 @@ export const AlgorithmRowExpanded: FunctionComponent<
                 <Grid item md={9} sm={7} xs={12}>
                     {chartDataIsLoading && <AppLoadingIndicatorV1 />}
                     {chartDataIsHasError && <NoDataIndicator />}
+                    {chartData && <TimeSeriesChart {...chartData} />}
                 </Grid>
                 <Grid item md={3} sm={5} xs={12}>
                     <Box padding="5px">

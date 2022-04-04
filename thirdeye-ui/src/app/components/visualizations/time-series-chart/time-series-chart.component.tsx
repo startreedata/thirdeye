@@ -96,7 +96,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     // Legend should take on the value of the option if it exists otherwise default to true
     const isLegendEnabled = legend === undefined ? true : legend;
-    const isBrushEnabled = brush === undefined ? true : brush;
+    const isBrushEnabled = brush === undefined ? false : brush;
     const isXAxisEnabled =
         xAxis === undefined
             ? true

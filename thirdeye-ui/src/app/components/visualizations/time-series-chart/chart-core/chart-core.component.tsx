@@ -39,7 +39,10 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
 }) => {
     // Scales
     const dateScale = useMemo(() => {
-        const minMaxTimestamp = getMinMax(series, (d) => d.x);
+        const minMaxTimestamp = getMinMax(
+            series.filter((s) => s.enabled),
+            (d) => d.x
+        );
 
         return scaleTime<number>({
             range: [0, xMax],
@@ -54,7 +57,13 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
         () =>
             scaleLinear<number>({
                 range: [yMax, 0],
-                domain: [0, getMinMax(series, (d) => d.y)[1] || 0],
+                domain: [
+                    0,
+                    getMinMax(
+                        series.filter((s) => s.enabled),
+                        (d) => d.y
+                    )[1] || 0,
+                ],
                 nice: true,
             }),
         [yMax, series]

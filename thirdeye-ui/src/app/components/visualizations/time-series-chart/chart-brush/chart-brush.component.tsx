@@ -35,7 +35,10 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     );
 
     // Scales
-    const minMaxTimestamp = getMinMax(series, (d) => d.x);
+    const minMaxTimestamp = getMinMax(
+        series.filter((s) => s.enabled),
+        (d) => d.x
+    );
     const dateScale = useMemo(
         () =>
             scaleTime<number>({
@@ -51,7 +54,13 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
         () =>
             scaleLinear<number>({
                 range: [yBrushMax, 0],
-                domain: [0, getMinMax(series, (d) => d.y)[1] || 0],
+                domain: [
+                    0,
+                    getMinMax(
+                        series.filter((s) => s.enabled),
+                        (d) => d.y
+                    )[1] || 0,
+                ],
                 nice: true,
             }),
         [yBrushMax, series]

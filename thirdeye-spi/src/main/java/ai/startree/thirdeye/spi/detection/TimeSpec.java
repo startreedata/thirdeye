@@ -14,8 +14,7 @@ public class TimeSpec {
   private static final TimeGranularity DEFAULT_TIME_GRANULARITY = new TimeGranularity(1,
       TimeUnit.DAYS);
   public static String SINCE_EPOCH_FORMAT = TimeFormat.EPOCH.toString();
-  public static String DEFAULT_TIMEZONE = "UTC";
-  
+
   private String columnName;
   private TimeGranularity dataGranularity = DEFAULT_TIME_GRANULARITY;
   private String format = SINCE_EPOCH_FORMAT; //sinceEpoch or yyyyMMdd

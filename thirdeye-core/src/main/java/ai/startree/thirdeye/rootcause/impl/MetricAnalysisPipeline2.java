@@ -292,7 +292,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     Collections.sort(slices, new Comparator<MetricSlice>() {
       @Override
       public int compare(MetricSlice o1, MetricSlice o2) {
-        return Long.compare(o1.getStart(), o2.getStart());
+        return Long.compare(o1.getStartMillis(), o2.getStartMillis());
       }
     });
     LOG.info("Fetching {} slices:\n{}", slices.size(), StringUtils.join(slices, "\n"));

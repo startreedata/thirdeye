@@ -109,7 +109,7 @@ public class TimeSeriesCacheBuilder {
             if (entry.getKey().containSlice(slice)) {
               DataFrame df = entry.getValue()
                   .filter(entry.getValue().getLongs(DataFrame.COL_TIME)
-                      .between(slice.getStart(), slice.getEnd()))
+                      .between(slice.getStartMillis(), slice.getEndMillis()))
                   .dropNull(DataFrame.COL_TIME);
               // double check if it is cache hit
               if (df.getLongs(DataFrame.COL_TIME).size() > 0) {

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.datasource.auto.onboard;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
@@ -56,7 +57,7 @@ public class ConfigGenerator {
     datasetConfigDTO.setTimeDuration(columnSize);
     datasetConfigDTO.setTimeUnit(columnUnit);
     datasetConfigDTO.setTimeFormat(timeFormatStr);
-    datasetConfigDTO.setTimezone(TimeSpec.DEFAULT_TIMEZONE);
+    datasetConfigDTO.setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
     // set the data granularity of epoch timestamp dataset to minute-level
     if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
         .getTimeUnit()

@@ -98,8 +98,8 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
       builder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctions));
 
       // Set start and end time
-      builder.setStartTimeInclusive(cubeSpec.getInterval().getStartMillis());
-      builder.setEndTimeExclusive(cubeSpec.getInterval().getEndMillis());
+      builder.setStartTimeInclusive(cubeSpec.getInterval().getStart());
+      builder.setEndTimeExclusive(cubeSpec.getInterval().getEnd());
 
       // Set groupBy and filter
       builder.setGroupBy(groupBy);

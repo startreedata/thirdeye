@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -28,8 +30,8 @@ public class CSVThirdEyeResponseTest {
   public void beforeMethod() {
     ThirdEyeRequest request = ThirdEyeRequest.
         newBuilder()
-        .setStartTimeInclusive(0)
-        .setEndTimeExclusive(100)
+        .setStartTimeInclusive(new DateTime(0, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(100, DateTimeZone.UTC))
         .addGroupBy("country")
         .addMetricFunction(
             new MetricFunction(MetricAggFunction.AVG, "views", 0L, "source", null, null))

@@ -319,13 +319,13 @@ public class RootCauseMetricResource {
   private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
     final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
     LOG.info("RCA metric analysis - Base slice: {} - {}",
-        formatter.print(baseSlice.getStart()),
-        formatter.print(baseSlice.getEnd()));
+        formatter.print(baseSlice.getStartMillis()),
+        formatter.print(baseSlice.getEndMillis()));
     for (int i = 0; i < slices.size(); i++) {
       LOG.info("RCA metric analysis - Offset Slice {}:  {} - {}",
           i,
-          formatter.print(slices.get(i).getStart()),
-          formatter.print(slices.get(i).getEnd()));
+          formatter.print(slices.get(i).getStartMillis()),
+          formatter.print(slices.get(i).getEndMillis()));
     }
   }
 
@@ -338,8 +338,7 @@ public class RootCauseMetricResource {
       final TimeGranularity timeGranularity) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricId,
-        interval.getStartMillis(),
-        interval.getEndMillis(),
+        interval,
         filters,
         timeGranularity);
 
@@ -360,8 +359,7 @@ public class RootCauseMetricResource {
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
     MetricSlice baseSlice = MetricSlice.from(metricId,
-        start,
-        end,
+        new Interval(start, end, dateTimeZone),
         filters,
         findMetricGranularity(metricId));
     Baseline range = parseOffset(offset, dateTimeZone);
@@ -400,7 +398,7 @@ public class RootCauseMetricResource {
       futures.put(slice, this.executor.submit(() -> {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
         if (df.isEmpty()) {
-          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStart())
+          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStartMillis())
               .addSeries(DataFrame.COL_VALUE, Double.NaN).setIndex(DataFrame.COL_TIME);
         }
         return df;

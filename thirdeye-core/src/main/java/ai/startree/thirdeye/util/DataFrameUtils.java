@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 
 /**
@@ -234,7 +233,6 @@ public class DataFrameUtils {
     TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
         .orElse(dataset.bucketTimeGranularity());
 
-    DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();
 
     DateTime start = slice.getStart().withFields(SpiUtils.makeOrigin(period.getPeriodType()));

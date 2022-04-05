@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.api;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -16,7 +17,7 @@ public class TimeColumnApi {
   private String name;
   private Duration interval;
   private String format = TimeSpec.SINCE_EPOCH_FORMAT;
-  private String timezone = TimeSpec.DEFAULT_TIMEZONE;
+  private String timezone = Constants.DEFAULT_TIMEZONE_STRING;
 
   public String getName() {
     return name;

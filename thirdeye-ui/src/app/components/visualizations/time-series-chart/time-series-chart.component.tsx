@@ -1,5 +1,6 @@
 import { ParentSize } from "@visx/responsive";
 import { scaleOrdinal } from "@visx/scale";
+import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
@@ -13,8 +14,10 @@ import {
     normalizeSeries,
     syncEnabledDisabled,
 } from "./time-series-chart.utils";
+import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
+import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 
-const TOP_CHART_HEIGHT_RATIO = 0.9;
+const TOP_CHART_HEIGHT_RATIO = 0.8;
 const CHART_SEPARATION = 50;
 const CHART_MARGINS = {
     top: 20,
@@ -95,7 +98,7 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
 
 export const TimeSeriesChartInternal: FunctionComponent<
     TimeSeriesChartInternalProps
-> = ({ series, legend, brush, height, width, xAxis, yAxis }) => {
+> = ({ series, legend, brush, height, width, xAxis, yAxis, tooltip }) => {
     const [processedMainChartSeries, setProcessedMainChartSeries] =
         useState<Series[]>(series);
     const [processedBrushChartSeries, setProcessedBrushChartSeries] =
@@ -103,10 +106,13 @@ export const TimeSeriesChartInternal: FunctionComponent<
     const [enabledDisabledMapping, setEnabledDisabledMapping] = useState<
         boolean[]
     >(series.map(syncEnabledDisabled));
+    const tooltipUtils = useTooltip<{ xValue: number }>();
+    const { tooltipData, tooltipLeft, tooltipTop } = tooltipUtils;
 
     // Legend should take on the value of the option if it exists otherwise default to true
     const isLegendEnabled = legend === undefined ? true : legend;
     const isBrushEnabled = brush === undefined ? false : brush;
+    const isTooltipEnabled = tooltip === undefined ? true : tooltip;
     const isXAxisEnabled =
         xAxis === undefined
             ? true
@@ -114,7 +120,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
             ? true
             : xAxis.enabled;
     const isYAxisEnabled = yAxis === undefined ? true : yAxis;
-    let topChartHeight;
+    let topChartHeight: number;
     let brushChartHeight;
     let topChartBottomMargin;
 
@@ -211,7 +217,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     };
 
     return (
-        <>
+        <div style={{ position: "relative" }}>
             <svg height={height} width={width}>
                 <ChartCore
                     colorScale={colorScale}
@@ -219,11 +225,29 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     series={processedMainChartSeries}
                     showXAxis={isXAxisEnabled}
                     showYAxis={isYAxisEnabled}
+                    tooltipUtils={tooltipUtils}
                     width={width}
                     xAxisOptions={xAxis}
                     xMax={xMax}
                     yMax={yMax}
-                />
+                >
+                    {(xScale, yScale) => {
+                        if (tooltipData && tooltipTop && tooltipLeft) {
+                            return (
+                                <TooltipMarkers
+                                    chartHeight={topChartHeight}
+                                    colorScale={colorScale}
+                                    series={processedMainChartSeries}
+                                    xScale={xScale}
+                                    xValue={tooltipData.xValue}
+                                    yScale={yScale}
+                                />
+                            );
+                        }
+
+                        return undefined;
+                    }}
+                </ChartCore>
                 {isBrushEnabled && (
                     <ChartBrush
                         colorScale={colorScale}
@@ -235,11 +259,26 @@ export const TimeSeriesChartInternal: FunctionComponent<
                             CHART_MARGINS.top
                         }
                         width={width}
+                        xAxisOptions={xAxis}
                         onBrushChange={handleBrushChange}
                         onBrushClick={handleBrushClick}
                     />
                 )}
             </svg>
+            {isTooltipEnabled && tooltipData && tooltipLeft && (
+                <TooltipWithBounds
+                    // set this to random so it correctly updates with parent bounds
+                    key={Math.random()}
+                    left={tooltipLeft + CHART_MARGINS.left}
+                    top={tooltipTop}
+                >
+                    <TooltipPopover
+                        colorScale={colorScale}
+                        series={processedMainChartSeries}
+                        xValue={tooltipData.xValue}
+                    />
+                </TooltipWithBounds>
+            )}
             {isLegendEnabled && (
                 <Legend
                     colorScale={colorScale}
@@ -247,6 +286,6 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     onSeriesClick={handleSeriesClickFromLegend}
                 />
             )}
-        </>
+        </div>
     );
 };

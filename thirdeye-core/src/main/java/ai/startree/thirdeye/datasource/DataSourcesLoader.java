@@ -14,6 +14,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -31,20 +32,24 @@ public class DataSourcesLoader {
 
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final MetricRegistry metricRegistry;
   private final Map<String, ThirdEyeDataSourceFactory> dataSourceFactoryMap = new HashMap<>();
 
   @Inject
   public DataSourcesLoader(
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final MetricRegistry metricRegistry) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.metricRegistry = metricRegistry;
   }
 
   public void addThirdEyeDataSourceFactory(ThirdEyeDataSourceFactory f) {
     checkState(!dataSourceFactoryMap.containsKey(f.name()),
         "Duplicate ThirdEyeDataSourceFactory: " + f.name());
 
+    f.setMetricRegistry(metricRegistry);
     dataSourceFactoryMap.put(f.name(), f);
   }
 

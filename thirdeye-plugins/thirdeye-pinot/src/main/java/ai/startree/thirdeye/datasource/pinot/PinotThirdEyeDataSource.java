@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
@@ -69,12 +70,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private ThirdEyeDataSourceContext context;
   private SqlExpressionBuilder sqlExpressionBuilder;
   private SqlLanguage sqlLanguage;
+  private MetricRegistry metricRegistry;
 
   public PinotThirdEyeDataSource(
       final SqlExpressionBuilder sqlExpressionBuilder,
-      final PinotSqlLanguage sqlLanguage) {
+      final PinotSqlLanguage sqlLanguage,
+      final MetricRegistry metricRegistry) {
     this.sqlExpressionBuilder = sqlExpressionBuilder;
     this.sqlLanguage = sqlLanguage;
+    this.metricRegistry = metricRegistry;
   }
 
   /**
@@ -154,7 +158,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
 
     try {
-      pinotResponseCacheLoader = new PinotControllerResponseCacheLoader();
+      pinotResponseCacheLoader = new PinotControllerResponseCacheLoader(metricRegistry);
       pinotResponseCacheLoader.init(properties);
     } catch (Exception e) {
       throw new RuntimeException(e);

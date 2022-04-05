@@ -85,6 +85,12 @@
       <version>0.7.6</version>
     </dependency>
 
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>4.0.7</version>
+    </dependency>
+
     <!-- test -->
     <dependency>
       <groupId>org.mockito</groupId>

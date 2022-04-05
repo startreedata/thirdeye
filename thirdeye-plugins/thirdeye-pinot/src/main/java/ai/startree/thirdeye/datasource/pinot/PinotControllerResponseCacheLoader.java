@@ -6,6 +6,8 @@
 package ai.startree.thirdeye.datasource.pinot;
 
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +52,13 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   }
 
   private final AtomicInteger activeConnections = new AtomicInteger();
+  private final Meter dataSourceQueries;
   private Connection[] connections;
+
+  public PinotControllerResponseCacheLoader(final MetricRegistry metricRegistry) {
+    super();
+    dataSourceQueries = metricRegistry.meter("PinotDataSourceRequests");
+  }
 
   private static Connection[] fromHostList(final List<String> thirdeyeBrokers, JsonAsyncHttpPinotClientTransport transport) throws Exception {
     Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers, transport);
@@ -155,6 +163,7 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
           long end = System.currentTimeMillis();
           LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
               activeConnections);
+          dataSourceQueries.mark();
 
           return ResultSetUtils.toThirdEyeResultSetGroup(resultSetGroup);
         }

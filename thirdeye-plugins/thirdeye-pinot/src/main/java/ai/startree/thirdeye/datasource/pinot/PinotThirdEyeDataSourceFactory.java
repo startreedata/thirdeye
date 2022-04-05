@@ -8,8 +8,11 @@ package ai.startree.thirdeye.datasource.pinot;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import com.codahale.metrics.MetricRegistry;
 
 public class PinotThirdEyeDataSourceFactory implements ThirdEyeDataSourceFactory {
+
+  private MetricRegistry metricRegistry;
 
   @Override
   public String name() {
@@ -19,9 +22,14 @@ public class PinotThirdEyeDataSourceFactory implements ThirdEyeDataSourceFactory
   @Override
   public ThirdEyeDataSource build(final ThirdEyeDataSourceContext context) {
     final ThirdEyeDataSource ds = new PinotThirdEyeDataSource(new PinotSqlExpressionBuilder(),
-        new PinotSqlLanguage());
+        new PinotSqlLanguage(), metricRegistry);
     ds.init(context);
 
     return ds;
+  }
+
+  @Override
+  public void setMetricRegistry(final MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
   }
 }

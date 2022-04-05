@@ -1,8 +1,8 @@
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 
 export interface AnomalyListV1Props {
-    anomalies: UiAnomaly[] | null;
-    onDelete?: (uiAnomaly: UiAnomaly) => void;
+    anomalies: Anomaly[] | null;
+    onDelete?: (anomaly: Anomaly) => void;
     searchFilterValue?: string | null;
     onSearchFilterValueChange?: (value: string) => void;
 }

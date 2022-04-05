@@ -290,3 +290,15 @@ export const getShortText = (
 
     return textToShow;
 };
+
+export const getAnomalyDeviation = (anomaly: Anomaly): number => {
+    const deviation =
+        (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
+        anomaly.avgBaselineVal;
+
+    return isNaN(deviation) ? 0 : deviation;
+};
+
+export const getAnomalyDuration = (anomaly: Anomaly): number => {
+    return anomaly.endTime - anomaly.startTime;
+};

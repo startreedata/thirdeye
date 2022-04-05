@@ -237,10 +237,8 @@ public class DataFrameUtils {
     DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();
 
-    DateTime start = new DateTime(slice.getStartMillis(), timezone)
-        .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.getEndMillis(),
-        timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime start = slice.getStart().withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = slice.getEnd().withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
     MetricSlice alignedSlice = MetricSlice
         .from(slice.getMetricId(),
@@ -325,8 +323,8 @@ public class DataFrameUtils {
     }
 
     return ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(new DateTime(slice.getStartMillis(), DateTimeZone.UTC))
-        .setEndTimeExclusive(new DateTime(slice.getEndMillis(), DateTimeZone.UTC))
+        .setStartTimeInclusive(slice.getStart())
+        .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
         .setMetricFunctions(functions)
         .setDataSource(dataset.getDataSource());

@@ -1,16 +1,13 @@
 import { Box, useTheme } from "@material-ui/core";
+import { Brush } from "@visx/brush";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
-import {
-    Brush,
-    Group,
-    localPoint,
-    ParentSize,
-    Point,
-    scaleLinear,
-    scaleTime,
-    useTooltip,
-} from "@visx/visx";
+import { localPoint } from "@visx/event";
+import { Group } from "@visx/group";
+import { Point } from "@visx/point";
+import { ParentSize } from "@visx/responsive";
+import { scaleLinear, scaleTime } from "@visx/scale";
+import { useTooltip } from "@visx/tooltip";
 import { cloneDeep, debounce, isEmpty } from "lodash";
 import React, {
     FunctionComponent,

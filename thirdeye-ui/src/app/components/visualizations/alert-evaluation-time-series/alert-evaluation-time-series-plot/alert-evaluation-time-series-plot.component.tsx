@@ -1,4 +1,4 @@
-import { AreaClosed, LinePath } from "@visx/visx";
+import { AreaClosed, LinePath } from "@visx/shape";
 import React, { FunctionComponent } from "react";
 import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";

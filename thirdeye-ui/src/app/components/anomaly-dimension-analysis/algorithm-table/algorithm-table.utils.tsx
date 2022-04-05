@@ -1,7 +1,9 @@
 import { Chip } from "@material-ui/core";
 import React from "react";
+import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
+import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
 export const SERVER_VALUE_ALL_VALUES = "(ALL)";
@@ -47,4 +49,41 @@ export const generateOtherDimensionTooltipString = (
     return `${SERVER_VALUE_FOR_OTHERS} includes: ${dimensionValuesForOther.join(
         ", "
     )}`;
+};
+
+export const generateComparisonChartOptions = (
+    current: AlertEvaluation,
+    baseline: AlertEvaluation
+): TimeSeriesChartProps => {
+    const series = [
+        {
+            name: "Current",
+            data: current.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
+                (value, idx) => {
+                    return {
+                        y: value,
+                        x: current.detectionEvaluations
+                            .output_AnomalyDetectorResult_0.data.timestamp[idx],
+                    };
+                }
+            ),
+        },
+        {
+            name: "Baseline",
+            data: baseline.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
+                (value, idx) => {
+                    return {
+                        y: value,
+                        x: baseline.detectionEvaluations
+                            .output_AnomalyDetectorResult_0.data.timestamp[idx],
+                    };
+                }
+            ),
+        },
+    ];
+
+    return {
+        height: 150,
+        series,
+    };
 };

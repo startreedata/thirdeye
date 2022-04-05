@@ -21,7 +21,7 @@ export interface ZoomState {
     isDragging: boolean;
 }
 
-export type VisxZoomProps = ProvidedZoom & ZoomState;
+export type VisxZoomProps = ProvidedZoom<unknown> & ZoomState;
 
 export interface MouseHoverMarkerProps {
     x?: number;

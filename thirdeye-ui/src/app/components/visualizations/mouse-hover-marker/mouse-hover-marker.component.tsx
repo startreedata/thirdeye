@@ -1,4 +1,4 @@
-import { Bar, Circle, Line } from "@visx/visx";
+import { Bar, Circle, Line } from "@visx/shape";
 import React, { FunctionComponent, MouseEvent, TouchEvent } from "react";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";

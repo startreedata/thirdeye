@@ -117,7 +117,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final DataFrame breakdown = dfAll.append(results);
     // add time column containing start time of slice
     return breakdown
-        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(breakdown.size(), slice.getStart()))
+        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(breakdown.size(), slice.getStartMillis()))
         .setIndex(DataFrame.COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
   }
 
@@ -142,7 +142,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
         .get(dataset.getDataset());
-    if (slice.getStart() > maxTime) {
+    if (slice.getStartMillis() > maxTime) {
       return emptyDataframe(dimensions);
     }
 
@@ -155,7 +155,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // fill in timestamps
     return aggregate
-        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(aggregate.size(), slice.getStart()))
+        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(aggregate.size(), slice.getStartMillis()))
         .setIndex(DataFrame.COL_TIME);
   }
 

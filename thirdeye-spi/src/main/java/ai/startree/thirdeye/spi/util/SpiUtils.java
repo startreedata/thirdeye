@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.util;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
@@ -162,7 +163,7 @@ public class SpiUtils {
   public static DateTimeZone getDateTimeZone(final DatasetConfigDTO datasetConfig) {
     final String timezone = datasetConfig != null
         ? datasetConfig.getTimezone()
-        : TimeSpec.DEFAULT_TIMEZONE;
+        : Constants.DEFAULT_TIMEZONE_STRING;
     return DateTimeZone.forID(timezone);
   }
 

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -182,8 +184,8 @@ public class CSVThirdEyeDataSourceTest {
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.HOURS))
-        .setStartTimeInclusive(2000000)
-        .setEndTimeExclusive(10800000)
+        .setStartTimeInclusive(new DateTime(2000000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(10800000, DateTimeZone.UTC))
         .build("ref");
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
         request,
@@ -204,8 +206,8 @@ public class CSVThirdEyeDataSourceTest {
         .addMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
-        .setStartTimeInclusive(1000000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(1000000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
         request,
@@ -230,8 +232,8 @@ public class CSVThirdEyeDataSourceTest {
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setFilterSet(filter)
-        .setStartTimeInclusive(3600000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(3600000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
 
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
@@ -258,8 +260,8 @@ public class CSVThirdEyeDataSourceTest {
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setFilterSet(filter)
-        .setStartTimeInclusive(3600000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(3600000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
 
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
@@ -286,8 +288,8 @@ public class CSVThirdEyeDataSourceTest {
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setFilterSet(filter)
-        .setStartTimeInclusive(3600000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(3600000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
 
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(

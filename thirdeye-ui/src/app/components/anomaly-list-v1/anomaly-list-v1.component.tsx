@@ -15,7 +15,11 @@ import {
     numberSortComparatorV1,
 } from "../../platform/utils";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { getAnomalyName } from "../../utils/anomalies/anomalies.util";
+import {
+    getAnomalyDeviation,
+    getAnomalyDuration,
+    getAnomalyName,
+} from "../../utils/anomalies/anomalies.util";
 import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
@@ -70,15 +74,14 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         _cellValue: Record<string, unknown>,
         data: Anomaly
     ): ReactNode => {
-        const deviationVal =
-            (data.avgCurrentVal - data.avgBaselineVal) / data.avgBaselineVal;
+        const deviation = getAnomalyDeviation(data);
 
         return (
             <Typography
-                color={deviationVal < 0 ? "error" : undefined}
+                color={deviation < 0 ? "error" : undefined}
                 variant="body2"
             >
-                {formatPercentageV1(deviationVal)}
+                {formatPercentageV1(deviation)}
             </Typography>
         );
     };
@@ -103,18 +106,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         data2: Anomaly,
         order: DataGridSortOrderV1
     ): number => {
-        const val1 = !isNaN(
-            (data1.avgCurrentVal - data1.avgBaselineVal) / data1.avgBaselineVal
-        )
-            ? (data1.avgCurrentVal - data1.avgBaselineVal) /
-              data1.avgBaselineVal
-            : 0;
-        const val2 = !isNaN(
-            (data2.avgCurrentVal - data2.avgBaselineVal) / data2.avgBaselineVal
-        )
-            ? (data2.avgCurrentVal - data2.avgBaselineVal) /
-              data2.avgBaselineVal
-            : 0;
+        const val1 = getAnomalyDeviation(data1);
+        const val2 = getAnomalyDeviation(data2);
 
         return numberSortComparatorV1(val1, val2, order);
     };
@@ -124,8 +117,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         data2: Anomaly,
         order: DataGridSortOrderV1
     ): number => {
-        const duration1 = data1.endTime - data1.startTime;
-        const duration2 = data2.endTime - data2.startTime;
+        const duration1 = getAnomalyDuration(data1);
+        const duration2 = getAnomalyDuration(data2);
 
         return numberSortComparatorV1(duration1, duration2, order);
     };
@@ -133,10 +126,10 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     const anomalyListColumns = useMemo(
         () => [
             {
-                key: "id",
-                dataKey: "id",
+                key: "name",
+                dataKey: "name",
                 header: t("label.name"),
-                sortable: true,
+                sortable: false,
                 minWidth: 200,
                 customCellRenderer: anomalyNameRenderer,
             },

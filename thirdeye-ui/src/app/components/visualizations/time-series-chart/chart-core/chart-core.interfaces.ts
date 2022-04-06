@@ -1,6 +1,10 @@
 import { AxisScale } from "@visx/axis";
 import React from "react";
-import { DataPoint, Series } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    Series,
+    XAxisOptions,
+} from "../time-series-chart.interfaces";
 
 export interface ChartCoreProps {
     series: Series[];
@@ -11,6 +15,7 @@ export interface ChartCoreProps {
     xMax: number;
     margin: { top: number; right: number; bottom: number; left: number };
     showXAxis?: boolean;
+    xAxisOptions?: XAxisOptions;
     showYAxis?: boolean;
     top?: number;
     left?: number;

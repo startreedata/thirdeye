@@ -2,6 +2,8 @@ import { DataPoint, Series } from "./time-series-chart.interfaces";
 
 const DEFAULT_CHART_TYPE = "line";
 
+export const DEFAULT_PLOTBAND_COLOR = "rgba(23, 233, 217, .5)";
+
 /**
  * Helper function to extract the values from the `data` array of objects
  */
@@ -35,3 +37,7 @@ export function normalizeSeries(series: Series[]): Series[] {
         };
     });
 }
+
+export const syncEnabledDisabled = (seriesData: Series): boolean => {
+    return seriesData.enabled === undefined ? true : seriesData.enabled;
+};

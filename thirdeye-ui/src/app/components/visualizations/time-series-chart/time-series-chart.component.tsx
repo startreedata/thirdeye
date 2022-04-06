@@ -9,7 +9,10 @@ import {
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
 } from "./time-series-chart.interfaces";
-import { normalizeSeries } from "./time-series-chart.utils";
+import {
+    normalizeSeries,
+    syncEnabledDisabled,
+} from "./time-series-chart.utils";
 
 const TOP_CHART_HEIGHT_RATIO = 0.9;
 const CHART_SEPARATION = 50;
@@ -57,7 +60,14 @@ const COLOR_PALETTE = [
  *  const chartOptions = {
  *     yAxis: true,
  *     xAxis: {
- *         enabled: false
+ *         enabled: false,
+ *         plotBands: [{
+ *             name: "Anomaly",
+ *             start: 1639353600000,
+ *             end: 1639526400000,
+ *             color: "#000",
+ *             opacity: 0.25
+ *         }]
  *     },
  *     series,
  *     legend: false,
@@ -92,7 +102,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         useState<Series[]>(series);
     const [enabledDisabledMapping, setEnabledDisabledMapping] = useState<
         boolean[]
-    >(series.map(() => true));
+    >(series.map(syncEnabledDisabled));
 
     // Legend should take on the value of the option if it exists otherwise default to true
     const isLegendEnabled = legend === undefined ? true : legend;
@@ -156,7 +166,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     useEffect(() => {
         setProcessedMainChartSeries(normalizeSeries(series));
         setProcessedBrushChartSeries(normalizeSeries(series));
-        setEnabledDisabledMapping(series.map(() => true));
+        setEnabledDisabledMapping(series.map(syncEnabledDisabled));
     }, [series]);
 
     /**
@@ -210,6 +220,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     showXAxis={isXAxisEnabled}
                     showYAxis={isYAxisEnabled}
                     width={width}
+                    xAxisOptions={xAxis}
                     xMax={xMax}
                     yMax={yMax}
                 />

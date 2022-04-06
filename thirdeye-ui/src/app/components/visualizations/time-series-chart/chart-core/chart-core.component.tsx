@@ -3,6 +3,7 @@ import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { LinePath } from "@visx/shape";
 import React, { FunctionComponent, useMemo } from "react";
+import { PlotBand } from "../plot-band/plot-band.component";
 import { DataPoint, Series } from "../time-series-chart.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
 import { ChartCoreProps } from "./chart-core.interfaces";
@@ -36,6 +37,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     xAccessor = (d: DataPoint) => new Date(d.x),
     yAccessor = (d: DataPoint) => d.y,
     children,
+    xAxisOptions,
 }) => {
     // Scales
     const dateScale = useMemo(() => {
@@ -94,6 +96,18 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                     return;
                 }
             })}
+            {xAxisOptions &&
+                xAxisOptions.plotBands &&
+                xAxisOptions.plotBands.map((plotBand, idx) => {
+                    return (
+                        <PlotBand
+                            key={`plotband-${idx}`}
+                            plotBand={plotBand}
+                            xScale={xScaleToUse}
+                            yScale={yScaleToUse}
+                        />
+                    );
+                })}
             {showXAxis && (
                 <AxisBottom
                     numTicks={width > 520 ? 10 : 5}

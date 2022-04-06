@@ -61,6 +61,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
                             anomalyDimensionAnalysisData={
                                 anomalyDimensionAnalysisData
                             }
+                            comparisonOffset={comparisonOffset}
                         />
                     )}
             </CardContent>

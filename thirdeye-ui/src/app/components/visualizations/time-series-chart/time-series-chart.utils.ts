@@ -1,8 +1,6 @@
 import { DataPoint, Series } from "./time-series-chart.interfaces";
 
-export const LINE = "line";
-export const BAR = "bar";
-const DEFAULT_CHART_TYPE = LINE;
+const DEFAULT_CHART_TYPE = "line";
 
 export const DEFAULT_PLOTBAND_COLOR = "rgba(23, 233, 217, .5)";
 

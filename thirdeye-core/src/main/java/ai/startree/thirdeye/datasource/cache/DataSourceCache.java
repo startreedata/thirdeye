@@ -6,11 +6,11 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
-import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
@@ -69,7 +69,7 @@ public class DataSourceCache {
     if(dataSource.isEmpty()) {
       // remove redundant cache if datasource was recently deleted
       removeDataSource(name);
-      throw badRequest(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
+      throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
     }
     final DataSourceWrapper cachedEntry = cache.get(name);
     if (cachedEntry != null) {

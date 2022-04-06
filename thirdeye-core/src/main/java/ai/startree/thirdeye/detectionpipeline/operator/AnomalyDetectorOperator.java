@@ -94,6 +94,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .flatMap(Collection::stream)
             .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
 
+    optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Object::toString)
+        .ifPresent(anomalyDataset -> detectionPipelineResult.getDetectionResults().stream()
+            .map(DetectionResult::getAnomalies)
+            .flatMap(Collection::stream)
+            .forEach(anomaly -> anomaly.setCollection(anomalyDataset)));
+
     // Annotate each anomaly with source info
     optional(planNode.getParams().get("anomaly.source"))
         .map(Object::toString)

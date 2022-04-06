@@ -84,7 +84,7 @@ public class MockDataProvider implements DataProvider {
       out = out.filter(new Series.LongConditional() {
         @Override
         public boolean apply(long... values) {
-          return values[0] >= slice.getStart() && values[0] < slice.getEnd();
+          return values[0] >= slice.getStartMillis() && values[0] < slice.getEndMillis();
         }
       }, DataFrame.COL_TIME).dropNull();
 

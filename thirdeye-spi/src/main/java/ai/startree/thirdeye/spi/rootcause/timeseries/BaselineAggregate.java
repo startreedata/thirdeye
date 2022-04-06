@@ -234,8 +234,8 @@ public class BaselineAggregate implements Baseline {
     List<MetricSlice> slices = new ArrayList<>();
     for (Period offset : this.offsets) {
       slices.add(slice
-          .withStart(new DateTime(slice.getStart(), this.timeZone).plus(offset).getMillis())
-          .withEnd(new DateTime(slice.getEnd(), this.timeZone).plus(offset).getMillis()));
+          .withStart(new DateTime(slice.getStart(), this.timeZone).plus(offset))
+          .withEnd(new DateTime(slice.getEnd(), this.timeZone).plus(offset)));
     }
     return slices;
   }
@@ -281,12 +281,12 @@ public class BaselineAggregate implements Baseline {
         .addSeries(COL_VALUE, mapWithNull(output, this.type.getFunction(), sliceColumnNames))
         // align times
         .addSeries(COL_TIME,
-            this.toTimestampSeries(referenceSlice.getStart(), output.getLongs(COL_TIME)))
+            this.toTimestampSeries(referenceSlice.getStartMillis(), output.getLongs(COL_TIME)))
         // drop slice columns
         .dropSeries(sliceColumnNames)
         // filter by original time range - (not an in-place operation)
-        .filter(output.getLongs(COL_TIME).gte(referenceSlice.getStart())
-            .and(output.getLongs(COL_TIME).lt(referenceSlice.getEnd())))
+        .filter(output.getLongs(COL_TIME).gte(referenceSlice.getStartMillis())
+            .and(output.getLongs(COL_TIME).lt(referenceSlice.getEndMillis())))
         .dropNull(output.getIndexNames());
   }
 
@@ -295,17 +295,17 @@ public class BaselineAggregate implements Baseline {
       final MetricSlice referenceSlice) {
     // check if offset corresponds to configuration
     Period period = new Period(
-        new DateTime(referenceSlice.getStart(), this.timeZone),
-        new DateTime(slice.getStart(), this.timeZone),
+        new DateTime(referenceSlice.getStartMillis(), this.timeZone),
+        new DateTime(slice.getStartMillis(), this.timeZone),
         this.periodType);
     if (!offsets.contains(period)) {
       return null;
     }
 
-    String sliceColName = String.valueOf(slice.getStart());
+    String sliceColName = String.valueOf(slice.getStartMillis());
     DataFrame dfTransform = new DataFrame(data);
     dfTransform.addSeries(COL_TIME,
-        this.toVirtualSeries(slice.getStart(), dfTransform.getLongs(COL_TIME)));
+        this.toVirtualSeries(slice.getStartMillis(), dfTransform.getLongs(COL_TIME)));
     dfTransform = eliminateDuplicates(dfTransform);
     dfTransform.renameSeries(COL_VALUE, sliceColName);
 

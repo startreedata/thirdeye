@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.datasource.sql;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class SqlDataset {
   @JsonProperty
   private final String granularity = "1DAYS";
   @JsonProperty
-  private final String timezone = TimeSpec.DEFAULT_TIMEZONE;
+  private final String timezone = Constants.DEFAULT_TIMEZONE_STRING;
   @JsonProperty
   private final String dataFile = "";
   @JsonProperty

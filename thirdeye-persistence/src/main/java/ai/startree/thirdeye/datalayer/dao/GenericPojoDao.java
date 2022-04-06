@@ -420,6 +420,7 @@ public class GenericPojoDao {
         final E e = getBean(genericJsonEntity, pojoClass);
         e.setId(genericJsonEntity.getId());
         e.setVersion(genericJsonEntity.getVersion());
+        e.setCreateTime(genericJsonEntity.getCreateTime());
         e.setUpdateTime(genericJsonEntity.getUpdateTime());
         return e;
       }, null);

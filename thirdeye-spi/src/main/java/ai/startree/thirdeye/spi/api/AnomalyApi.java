@@ -34,7 +34,10 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   private AlertApi alert;
   private AlertNodeApi alertNode;
+
+  @Deprecated
   private MetricApi metric;
+  private AlertMetadataApi metadata;
 
   private List<AnomalyApi> children; // ids of the anomalies this anomaly merged from
   private Boolean isChild;
@@ -170,12 +173,23 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
     return this;
   }
 
+  @Deprecated
   public MetricApi getMetric() {
     return metric;
   }
 
+  @Deprecated
   public AnomalyApi setMetric(final MetricApi metric) {
     this.metric = metric;
+    return this;
+  }
+
+  public AlertMetadataApi getMetadata() {
+    return metadata;
+  }
+
+  public AnomalyApi setMetadata(final AlertMetadataApi metadata) {
+    this.metadata = metadata;
     return this;
   }
 

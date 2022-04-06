@@ -8,10 +8,13 @@ package ai.startree.thirdeye.spi.api;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
 
   private Long id;
+  private Date created;
+  private Date updated;
   private TaskType taskType;
   private Long workerId;
   private JobApi job;
@@ -32,6 +35,24 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
   @Override
   public TaskApi setId(Long id) {
     this.id = id;
+    return this;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public TaskApi setCreated(final Date created) {
+    this.created = created;
+    return this;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public TaskApi setUpdated(final Date updated) {
+    this.updated = updated;
     return this;
   }
 

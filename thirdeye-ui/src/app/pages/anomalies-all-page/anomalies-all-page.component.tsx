@@ -62,9 +62,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
         getAnomalies({ startTime: Number(start), endTime: Number(end) }).then(
             (anomalies) => {
-                if (anomalies && anomalies.length) {
-                    setAnomalies(anomalies);
-                }
+                setAnomalies(anomalies ?? []);
             }
         );
     };

@@ -50,6 +50,8 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .put("startTime", "startTime")
       .put("endTime", "endTime")
       .put("isChild", "child")
+      .put("metadata.metric.name", "metric")
+      .put("metadata.dataset.name", "collection")
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;

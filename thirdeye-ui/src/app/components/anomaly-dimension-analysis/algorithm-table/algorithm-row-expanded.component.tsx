@@ -67,7 +67,8 @@ export const AlgorithmRowExpanded: FunctionComponent<
                         nonFilteredEvaluationData,
                         filteredEvaluationData,
                         anomaly,
-                        comparisonOffset
+                        comparisonOffset,
+                        t
                     )
                 );
             }

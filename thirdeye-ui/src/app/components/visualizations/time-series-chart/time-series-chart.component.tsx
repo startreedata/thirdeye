@@ -232,7 +232,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     yMax={yMax}
                 >
                     {(xScale, yScale) => {
-                        if (tooltipData && tooltipTop && tooltipLeft) {
+                        if (tooltipData) {
                             return (
                                 <TooltipMarkers
                                     chartHeight={topChartHeight}
@@ -265,7 +265,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     />
                 )}
             </svg>
-            {isTooltipEnabled && tooltipData && tooltipLeft && (
+            {isTooltipEnabled && !!tooltipData && !!tooltipLeft && (
                 <TooltipWithBounds
                     // set this to random so it correctly updates with parent bounds
                     key={Math.random()}

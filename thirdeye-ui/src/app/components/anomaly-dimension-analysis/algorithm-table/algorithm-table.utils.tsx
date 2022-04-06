@@ -73,11 +73,12 @@ export const generateComparisonChartOptions = (
     nonFiltered: AlertEvaluation,
     filtered: AlertEvaluation,
     anomaly: Anomaly,
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues
+    comparisonOffset: AnomalyBreakdownAPIOffsetValues,
+    translation: (labelName: string) => string = (s) => s
 ): TimeSeriesChartProps => {
     const series = [
         {
-            name: "Non Filtered",
+            name: translation("non-filtered"),
             data: nonFiltered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
                 (value, idx) => {
                     return {
@@ -90,7 +91,7 @@ export const generateComparisonChartOptions = (
             enabled: false,
         },
         {
-            name: "Filtered",
+            name: translation("filtered"),
             data: filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
                 (value, idx) => {
                     return {
@@ -111,7 +112,7 @@ export const generateComparisonChartOptions = (
                 {
                     start: anomaly.startTime,
                     end: anomaly.endTime,
-                    name: "Anomaly Period",
+                    name: translation("anomaly-period"),
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,
                 },

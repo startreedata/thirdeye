@@ -16,6 +16,7 @@ public enum ThirdEyeStatus {
   ERR_DATA_UNAVAILABLE("Data not available! %s"),
   ERR_CRON_INVALID("Failed to parse cron expression: %s"),
   ERR_TEMPLATE_MISSING_PROPERTY("Failed to apply templateProperties to template. Missing property: %s"),
+  ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Invalid metadata? Error caused by : %s"),
   ERR_ALERT_PIPELINE_EXECUTION("Failed to run alert pipeline. Error caused by : %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is null!"),

@@ -7,11 +7,13 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DETECTION_INTERVAL_COMPUTATION;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -117,10 +119,7 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      Interval detectionInterval = alertDetectionIntervalCalculator
-          .getCorrectedInterval(request.getAlert(),
-              request.getStart().getTime(),
-              request.getEnd().getTime());
+      Interval detectionInterval = computeDetectionInterval(request);
 
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
@@ -149,6 +148,18 @@ public class AlertEvaluator {
       handleAlertEvaluationException(e);
     }
     return null;
+  }
+
+  private Interval computeDetectionInterval(final AlertEvaluationApi request) {
+    Interval detectionInterval;
+    try {
+      detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
+          request.getStart().getTime(),
+          request.getEnd().getTime());
+    } catch (Exception e) {
+      throw new ThirdEyeException(ERR_DETECTION_INTERVAL_COMPUTATION, e.getMessage());
+    }
+    return detectionInterval;
   }
 
   private void injectEvaluationContext(final AlertTemplateDTO templateWithProperties,

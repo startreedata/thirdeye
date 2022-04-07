@@ -1,4 +1,5 @@
 
+{{ if .Values.worker.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -235,3 +236,4 @@ data:
               trustStoreFilePath: 'trust/store/path/truststore_file' # e.g. '/etc/riddler/cacerts'
               trustStorePassword: ''
           # add your store of choice here
+{{ end }}

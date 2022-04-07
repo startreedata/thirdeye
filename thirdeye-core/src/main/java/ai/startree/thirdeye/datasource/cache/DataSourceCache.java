@@ -19,6 +19,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,7 +46,7 @@ public class DataSourceCache {
   private final Map<String, DataSourceWrapper> cache = new HashMap<>();
 
   private final Counter datasourceExceptionCounter;
-  private final Counter datasourceDurationCounter;
+  private final Histogram datasourceCallDuration;
   private final Counter datasourceCallCounter;
 
   @Inject
@@ -58,7 +59,7 @@ public class DataSourceCache {
     executorService = Executors.newCachedThreadPool();
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
-    datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
+    datasourceCallDuration = metricRegistry.histogram("datasourceCallDuration");
     datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
@@ -122,7 +123,7 @@ public class DataSourceCache {
       datasourceExceptionCounter.inc();
       throw e;
     } finally {
-      datasourceDurationCounter.inc(System.nanoTime() - tStart);
+      datasourceCallDuration.update(System.nanoTime() - tStart);
     }
   }
 

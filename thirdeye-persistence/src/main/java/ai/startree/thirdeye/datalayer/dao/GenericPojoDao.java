@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,8 +57,8 @@ public class GenericPojoDao {
 
   private final Counter dbReadCallCounter;
   private final Counter dbWriteCallCounter;
-  private final Counter dbReadDurationCounter;
-  private final Counter dbWriteDurationCounter;
+  private final Histogram dbReadDuration;
+  private final Histogram dbWriteDuration;
   private final Counter dbReadByteCounter;
   private final Counter dbWriteByteCounter;
   private final Counter dbExceptionCounter;
@@ -78,9 +79,9 @@ public class GenericPojoDao {
 
     dbReadCallCounter = metricRegistry.counter("dbReadCallCounter");
     dbWriteByteCounter = metricRegistry.counter("dbWriteByteCounter");
-    dbWriteDurationCounter = metricRegistry.counter("dbWriteDurationCounter");
+    dbWriteDuration = metricRegistry.histogram("dbWriteDuration");
     dbWriteCallCounter = metricRegistry.counter("dbWriteCallCounter");
-    dbReadDurationCounter = metricRegistry.counter("dbReadDurationCounter");
+    dbReadDuration = metricRegistry.histogram("dbReadDuration");
     dbReadByteCounter = metricRegistry.counter("dbReadByteCounter");
     dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
     dbCallCounter = metricRegistry.counter("dbCallCounter");
@@ -163,7 +164,7 @@ public class GenericPojoDao {
       }, null);
     } finally {
       dbWriteCallCounter.inc();
-      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -239,7 +240,7 @@ public class GenericPojoDao {
       }, 0);
     } finally {
       dbWriteCallCounter.inc();
-      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -257,7 +258,7 @@ public class GenericPojoDao {
       return runTask(connection -> addUpdateToConnection(pojo, predicate, connection), 0);
     } finally {
       dbWriteCallCounter.inc();
-      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -329,7 +330,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -368,7 +369,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -390,7 +391,7 @@ public class GenericPojoDao {
       }, -1);
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -426,7 +427,7 @@ public class GenericPojoDao {
       }, null);
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -452,7 +453,7 @@ public class GenericPojoDao {
       }, null);
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -484,7 +485,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -530,7 +531,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -584,7 +585,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -632,7 +633,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -665,7 +666,7 @@ public class GenericPojoDao {
       }, Collections.emptyList());
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -697,7 +698,7 @@ public class GenericPojoDao {
       }
     } finally {
       dbReadCallCounter.inc();
-      dbReadDurationCounter.inc(System.nanoTime() - tStart);
+      dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -722,7 +723,7 @@ public class GenericPojoDao {
       }, 0);
     } finally {
       dbWriteCallCounter.inc();
-      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteDuration.update(System.nanoTime() - tStart);
     }
   }
 
@@ -780,7 +781,7 @@ public class GenericPojoDao {
       }, 0);
     } finally {
       dbWriteCallCounter.inc();
-      dbWriteDurationCounter.inc(System.nanoTime() - tStart);
+      dbWriteDuration.update(System.nanoTime() - tStart);
     }
   }
 

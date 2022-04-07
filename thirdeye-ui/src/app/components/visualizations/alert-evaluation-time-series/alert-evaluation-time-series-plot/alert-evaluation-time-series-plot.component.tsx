@@ -1,13 +1,13 @@
-import { AreaClosed, LinePath } from "@visx/visx";
+import { AreaClosed, LinePath } from "@visx/shape";
 import React, { FunctionComponent } from "react";
 import { Dimension } from "../../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../../utils/material-ui/palette.util";
 import { AnomaliesPlot } from "../../anomalies-plot/anomalies-plot.component";
 import { AlertEvaluationTimeSeriesPlotProps } from "./alert-evaluation-time-series-plot.interfaces";
 
-export const AlertEvaluationTimeSeriesPlot: FunctionComponent<AlertEvaluationTimeSeriesPlotProps> = (
-    props: AlertEvaluationTimeSeriesPlotProps
-) => {
+export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
+    AlertEvaluationTimeSeriesPlotProps
+> = (props: AlertEvaluationTimeSeriesPlotProps) => {
     return (
         <>
             {/* Anomalies */}

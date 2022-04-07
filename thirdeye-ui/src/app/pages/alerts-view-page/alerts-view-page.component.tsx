@@ -1,35 +1,34 @@
-import { Box, Button, Grid } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
-import {
-    AppLoadingIndicatorV1,
-    DropdownButtonTypeV1,
-    DropdownButtonV1,
-    PageContentsCardV1,
-    PageContentsGridV1,
-    PageHeaderActionsV1,
-    PageHeaderTextV1,
-    PageHeaderV1,
-    PageV1,
-} from "@startree-ui/platform-ui";
-import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
+import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { AlertCardV1 } from "../../components/entity-cards/alert-card-v1/alert-card-v1.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import {
+    AppLoadingIndicatorV1,
+    JSONEditorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
     deleteAlert,
     getAlert,
-    getAlertEvaluation,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
@@ -37,61 +36,107 @@ import {
     createAlertEvaluation,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAlertsAllPath,
-    getAlertsUpdatePath,
+    getAnomaliesAnomalyPath,
 } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
+    const {
+        evaluation,
+        getEvaluation,
+        errorMessages,
+        status: evaluationRequestStatus,
+    } = useGetEvaluation();
+    const {
+        anomalies,
+        getAnomalies,
+        status: anomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
-    const [
-        alertEvaluation,
-        setAlertEvaluation,
-    ] = useState<AlertEvaluation | null>(null);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
+    const [alertEvaluation, setAlertEvaluation] =
+        useState<AlertEvaluation | null>(null);
+    const [searchParams] = useSearchParams();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
-    const params = useParams<AlertsViewPageParams>();
-    const history = useHistory();
+    const { id: alertId } = useParams<AlertsViewPageParams>();
+    const navigate = useNavigate();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
-
-    useEffect(() => {
-        // Time range refreshed, fetch alert
         fetchAlert();
-    }, [timeRangeDuration]);
+    }, [alertId]);
+
+    useEffect(() => {
+        if (evaluation) {
+            if (anomalies) {
+                evaluation.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies =
+                    anomalies;
+            }
+            setAlertEvaluation(evaluation);
+        }
+    }, [evaluation, anomalies]);
 
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
         fetchAlertEvaluation();
-    }, [uiAlert]);
+    }, [uiAlert, searchParams]);
+
+    useEffect(() => {
+        if (evaluationRequestStatus === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
+        }
+    }, [errorMessages, evaluationRequestStatus]);
+
+    const fetchAlertEvaluation = (): void => {
+        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+        if (!uiAlert || !uiAlert.alert || !start || !end) {
+            setAlertEvaluation(null);
+
+            return;
+        }
+        getAnomalies({
+            alertId: uiAlert.alert.id,
+            startTime: Number(start),
+            endTime: Number(end),
+        });
+        getEvaluation(
+            createAlertEvaluation(uiAlert.alert, Number(start), Number(end))
+        );
+    };
 
     const fetchAlert = (): void => {
         setUiAlert(null);
         let fetchedUiAlert = {} as UiAlert;
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
 
-        if (!isValidNumberId(params.id)) {
+        if (alertId && !isValidNumberId(alertId)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.alert"),
-                    id: params.id,
-                }),
-                getErrorSnackbarOption()
+                    id: alertId,
+                })
             );
 
             setUiAlert(fetchedUiAlert);
@@ -101,16 +146,45 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
 
         Promise.allSettled([
-            getAlert(toNumber(params.id)),
+            getAlert(toNumber(alertId)),
             getAllSubscriptionGroups(),
         ])
             .then(([alertResponse, subscriptionGroupsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertResponse.status === PROMISES.REJECTED
+                            ? alertResponse.reason
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertResponse.status === PROMISES.REJECTED
+                                          ? "label.alert"
+                                          : "label.subscription-groups"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
                 }
-                if (alertResponse.status === "fulfilled") {
+                if (alertResponse.status === PROMISES.FULFILLED) {
                     fetchedUiAlert = getUiAlert(
                         alertResponse.value,
                         fetchedSubscriptionGroups
@@ -123,38 +197,15 @@ export const AlertsViewPage: FunctionComponent = () => {
             });
     };
 
-    const fetchAlertEvaluation = (): void => {
-        setAlertEvaluation(null);
-        let fetchedAlertEvaluation = {} as AlertEvaluation;
-
-        if (!uiAlert || !uiAlert.alert) {
-            setAlertEvaluation(fetchedAlertEvaluation);
-
-            return;
-        }
-
-        getAlertEvaluation(
-            createAlertEvaluation(
-                uiAlert.alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
-        )
-            .then((alertEvaluation) => {
-                fetchedAlertEvaluation = alertEvaluation;
-            })
-            .finally(() => setAlertEvaluation(fetchedAlertEvaluation));
-    };
-
     const handleAlertChange = (uiAlert: UiAlert): void => {
         if (!uiAlert.alert) {
             return;
         }
 
         updateAlert(uiAlert.alert).then((alert) => {
-            enqueueSnackbar(
-                t("message.update-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", { entity: t("label.alert") })
             );
 
             // Replace updated alert as fetched alert
@@ -176,122 +227,95 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
         deleteAlert(uiAlert.id).then(() => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
             );
 
             // Redirect to alerts all path
-            history.push(getAlertsAllPath());
+            navigate(getAlertsAllPath());
         });
     };
 
-    const handleAlertStateToggle = (): void => {
-        if (uiAlert && uiAlert.alert) {
-            uiAlert.alert.active = !uiAlert.alert.active;
-            handleAlertChange(uiAlert);
-        }
+    const onAnomalyBarClick = (anomaly: Anomaly): void => {
+        navigate(getAnomaliesAnomalyPath(anomaly.id));
     };
 
-    const handleAlertEdit = (): void => {
-        if (uiAlert) {
-            history.push(getAlertsUpdatePath(uiAlert.id));
+    useEffect(() => {
+        if (anomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
         }
-    };
+    }, [anomaliesRequestStatus, anomaliesRequestErrors]);
 
-    const handleAlertMenuOnclick = (id: number | string, _: string): void => {
-        switch (id) {
-            case "activateDeactivateAlert":
-                handleAlertStateToggle();
-
-                break;
-            case "editAlert":
-                handleAlertEdit();
-
-                break;
-            case "deleteAlert":
-                handleAlertDelete();
-
-                break;
-            default:
-                break;
-        }
-    };
-
-    const alertMenuItems = [
-        {
-            id: "activateDeactivateAlert",
-            text: uiAlert?.active
-                ? t("label.deactivate-entity", {
-                      entity: t("label.alert"),
-                  })
-                : t("label.activate-entity", {
-                      entity: t("label.alert"),
-                  }),
-        },
-        {
-            id: "editAlert",
-            text: t("label.edit-entity", {
-                entity: t("label.alert"),
-            }),
-        },
-        {
-            id: "deleteAlert",
-            text: t("label.delete-entity", {
-                entity: t("label.alert"),
-            }),
-        },
-    ];
-
-    return !uiAlert ? (
+    return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
         <AppLoadingIndicatorV1 />
     ) : (
         <PageV1>
-            <PageHeaderV1>
-                <PageHeaderTextV1>
-                    {uiAlert.name}
-                    <Box component="span" paddingLeft={3}>
-                        <Button
-                            disableRipple
-                            startIcon={
-                                uiAlert.active ? (
-                                    <CheckIcon color="primary" />
-                                ) : (
-                                    <CloseIcon color="error" />
-                                )
-                            }
-                        >
-                            {t("label.active")}
-                        </Button>
-                    </Box>
-                </PageHeaderTextV1>
-                <PageHeaderActionsV1>
-                    <DropdownButtonV1
-                        dropdownMenuItems={alertMenuItems}
-                        type={DropdownButtonTypeV1.MoreOptions}
-                        onClick={handleAlertMenuOnclick}
-                    >
-                        {t("label.create")}
-                    </DropdownButtonV1>
-                </PageHeaderActionsV1>
-            </PageHeaderV1>
+            <PageHeader showCreateButton showTimeRange title={uiAlert.name} />
 
             <PageContentsGridV1>
-                {/* Alert Details Card*/}
-                <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <AlertCardV1 showCreatedBy uiAlert={uiAlert} />
-                    </PageContentsCardV1>
-                </Grid>
-
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    <AlertEvaluationTimeSeriesCard
-                        alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={300}
-                        title={uiAlert.name}
-                        onRefresh={fetchAlertEvaluation}
+                    {evaluationRequestStatus === ActionStatus.Error && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator />
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {evaluationRequestStatus === ActionStatus.Done && (
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                            alertEvaluationTimeSeriesHeight={500}
+                            title={uiAlert.name}
+                            onAnomalyBarClick={onAnomalyBarClick}
+                            onRefresh={fetchAlertEvaluation}
+                        />
+                    )}
+                </Grid>
+
+                {/* Alert Details Card*/}
+                <Grid item xs={12}>
+                    <AlertCard
+                        anomalies={anomalies}
+                        uiAlert={uiAlert}
+                        onChange={handleAlertChange}
+                        onDelete={handleAlertDelete}
                     />
+                </Grid>
+
+                {/* Readonly detection configuration */}
+                <Grid item sm={12}>
+                    <Card variant="outlined">
+                        <CardHeader
+                            title={t("label.detection-configuration")}
+                            titleTypographyProps={{ variant: "h6" }}
+                        />
+                        <CardContent>
+                            <JSONEditorV1
+                                disableValidation
+                                readOnly
+                                value={
+                                    uiAlert.alert as unknown as Record<
+                                        string,
+                                        unknown
+                                    >
+                                }
+                            />
+                        </CardContent>
+                    </Card>
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

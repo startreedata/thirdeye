@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { codeTypographyOptions } from "../../../utils/material-ui/typography.util";
+import { codeTypographyOptionsV1 } from "../../../platform/utils";
 
 export const useMetricCardStyles = makeStyles((theme) => ({
     active: {
@@ -9,6 +9,6 @@ export const useMetricCardStyles = makeStyles((theme) => ({
         color: theme.palette.text.disabled,
     },
     query: {
-        ...codeTypographyOptions.body2,
+        ...codeTypographyOptionsV1.body2,
     },
 }));

@@ -1,5 +1,6 @@
 import { useTheme } from "@material-ui/core";
-import { AxisBottom, Text, TickRendererProps } from "@visx/visx";
+import { AxisBottom, TickRendererProps } from "@visx/axis";
+import { Text } from "@visx/text";
 import React, { FunctionComponent, ReactNode } from "react";
 import {
     formatDateTimeForTimeAxis,
@@ -33,19 +34,19 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
             numTicks = props.numTicks;
         } else if (
             props.parentWidth &&
-            props.parentWidth < theme.breakpoints.width("sm")
+            props.parentWidth < theme.breakpoints.values.sm
         ) {
             // Parent container width roughly equal to screen width xs
             numTicks = NUM_TICKS_XS;
         } else if (
             props.parentWidth &&
-            props.parentWidth < theme.breakpoints.width("md")
+            props.parentWidth < theme.breakpoints.values.md
         ) {
             // Parent container width roughly equal to screen width sm
             numTicks = NUM_TICKS_SM;
         } else if (
             props.parentWidth &&
-            props.parentWidth < theme.breakpoints.width("lg")
+            props.parentWidth < theme.breakpoints.values.lg
         ) {
             // Parent container width roughly equal to screen width md
             numTicks = NUM_TICKS_MD;
@@ -76,9 +77,8 @@ export const TimeAxisBottom: FunctionComponent<TimeAxisBottomProps> = (
         ) {
             // String contains both date and time which need to be rendered in two parts one below
             // the other
-            const dateParts = tickRendererProps.formattedValue.split(
-                SEPARATOR_DATE_TIME
-            );
+            const dateParts =
+                tickRendererProps.formattedValue.split(SEPARATOR_DATE_TIME);
             dateString = dateParts && dateParts[0] && dateParts[0];
             timeString = dateParts && dateParts[1] && dateParts[1];
         }

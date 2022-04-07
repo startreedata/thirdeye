@@ -8,10 +8,15 @@ export interface UiAlert {
     userId: number;
     createdBy: string;
     detectionTypes: string[];
-    filteredBy: string[];
     datasetAndMetrics: UiAlertDatasetAndMetric[];
     subscriptionGroups: UiAlertSubscriptionGroup[];
+    renderedMetadata: RenderedMetadata[];
     alert: Alert | null;
+}
+
+interface RenderedMetadata {
+    key: string;
+    value: string;
 }
 
 export interface UiAlertDatasetAndMetric {

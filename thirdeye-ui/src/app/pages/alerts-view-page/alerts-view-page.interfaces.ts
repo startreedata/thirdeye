@@ -1,3 +1,3 @@
-export interface AlertsViewPageParams {
+export type AlertsViewPageParams = {
     id: string;
-}
+};

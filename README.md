@@ -38,22 +38,21 @@ ThirdEye is not a generic dashboard builder toolkit. ThirdEye attempts to bring 
 
 ## Documentation
 
-Detailed documentation can be found at [ThirdEye documentation](https://thirdeye.readthedocs.io) for a complete description of ThirdEye's features.
+Detailed documentation can be found at [ThirdEye documentation](https://dev.startree.ai/docs/thirdeye/) for a complete description of ThirdEye's features.
 
-- [Quick Start](https://thirdeye.readthedocs.io/en/latest/quick_start.html)
-- [Data Sources Setup](https://thirdeye.readthedocs.io/en/latest/datasources.html)
-- [Production Settings](https://thirdeye.readthedocs.io/en/latest/production.html)
-- [Alert Setup](https://thirdeye.readthedocs.io/en/latest/alert_setup.html)
+- [Getting started](https://dev.startree.ai/docs/thirdeye/getting-started/)
+- [Data Sources Setup](https://dev.startree.ai/docs/thirdeye/how-tos/database/)
+- [Alert Setup](https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration)
 
 ## Build
 
 ### Prerequisite
 ThirdEye requires Java 8.
-We recommend using MySQL 5.7 with ThirdEye.
+We recommend using MySQL 8.0 with ThirdEye.
 ThirdEye UI requires internal npm packages. Make sure you can access them. See [thirdeye-ui prerequisites](./thirdeye-ui/README.md#configure-node-package-manager-npm-for-use-with-artifactory)
 
 ### Database setup
-If you have MySQL 5.7 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
+If you have MySQL 8.0 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
 create the database and tables.
 
 Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql-docker-start.sh`
@@ -69,8 +68,8 @@ mvn install
 # To skip tests during build
 mvn install -DskipTests
 
-# If you are working on backend, You may skip the ui and docs modules
-mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs'
+# If you are working on backend, You may skip the ui module
+mvn install -pl '!thirdeye-ui'
 
 # To Skip Integration tests
 mvn install -pl '!thirdeye-integration-tests'
@@ -127,7 +126,7 @@ docker run \
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
 ### Running ThirdEye Coordinator in debug mode
-After setting up IntelliJ, navigate to `org.apache.pinot.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
+After setting up IntelliJ, navigate to `ai.startree.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.
 
 In the debug configuration settings, set the following values:

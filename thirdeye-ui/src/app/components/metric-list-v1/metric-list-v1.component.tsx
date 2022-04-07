@@ -1,32 +1,28 @@
-import { Button, Grid, Link, useTheme } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
+import { Button, Grid, Link } from "@material-ui/core";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "@startree-ui/platform-ui";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+} from "../../platform/components";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import {
     getMetricsUpdatePath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
+import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { MetricListV1Props } from "./metric-list-v1.interfaces";
 
 export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     props: MetricListV1Props
 ) => {
     const { t } = useTranslation();
-    const [
-        selectedMetric,
-        setSelectedMetric,
-    ] = useState<DataGridSelectionModelV1>();
-    const history = useHistory();
-    const theme = useTheme();
+    const [selectedMetric, setSelectedMetric] =
+        useState<DataGridSelectionModelV1<UiMetric>>();
+    const navigate = useNavigate();
 
     const handleMetricDelete = (): void => {
         if (!selectedMetric) {
@@ -58,7 +54,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
         const selectedSubScriptionGroupId = selectedMetric
             .rowKeyValues[0] as number;
 
-        history.push(getMetricsUpdatePath(selectedSubScriptionGroupId));
+        navigate(getMetricsUpdatePath(selectedSubScriptionGroupId));
     };
 
     const isActionButtonDisable = !(
@@ -66,21 +62,15 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     );
 
     const handleMetricViewDetailsById = (id: number): void => {
-        history.push(getMetricsViewPath(id));
+        navigate(getMetricsViewPath(id));
     };
 
     const renderLink = (
         cellValue: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiMetric
     ): ReactElement => {
         return (
-            <Link
-                onClick={() =>
-                    handleMetricViewDetailsById(
-                        ((data as unknown) as UiMetric).id
-                    )
-                }
-            >
+            <Link onClick={() => handleMetricViewDetailsById(data.id)}>
                 {cellValue}
             </Link>
         );
@@ -88,29 +78,11 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
 
     const renderMetricStatus = (
         _: Record<string, unknown>,
-        data: Record<string, unknown>
+        data: UiMetric
     ): ReactElement => {
-        const active = ((data as unknown) as UiMetric).active;
+        const active = data.active;
 
-        return (
-            <>
-                {/* Active */}
-                {active && (
-                    <CheckIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.success.main}
-                    />
-                )}
-
-                {/* Inactive */}
-                {!active && (
-                    <CloseIcon
-                        fontSize="small"
-                        htmlColor={theme.palette.error.main}
-                    />
-                )}
-            </>
-        );
+        return <ActiveIndicator active={active} />;
     };
 
     const metricColumns = [
@@ -169,12 +141,10 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1
+                <DataGridV1<UiMetric>
                     hideBorder
                     columns={metricColumns}
-                    data={
-                        (props.metrics as unknown) as Record<string, unknown>[]
-                    }
+                    data={props.metrics as UiMetric[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

@@ -1,4 +1,4 @@
-{{- if .Values.traefik.enabled -}}
+{{- if and .Values.traefik.enabled ( not .Values.tls.enabled ) -}}
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`{{ .Release.Name }}.{{ .Release.Namespace }}.{{ required "domain is required." .Values.domain }}`)
+    - match: Host(`thirdeye.{{ required "domain is required." .Values.domain }}`)
       kind: Rule
       services:
         - name: {{ include "thirdeye.ui.headless" . }}

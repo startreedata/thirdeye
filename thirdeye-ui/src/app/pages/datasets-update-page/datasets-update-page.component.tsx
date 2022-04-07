@@ -1,48 +1,37 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
-import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
+import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useParams } from "react-router-dom";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
+import { useNavigate, useParams } from "react-router-dom";
 import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { getDataset, updateDataset } from "../../rest/datasets/datasets.rest";
 import { getAllDatasources } from "../../rest/datasources/datasources.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasetsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { DatasetsUpdatePageParams } from "./datasets-update-page.interfaces";
 
 export const DatasetsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
     const [dataset, setDataset] = useState<Dataset>();
     const [datasources, setDatasources] = useState<Datasource[]>([]);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<DatasetsUpdatePageParams>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        // Fetched dataset changed, set breadcrumbs
-        setPageBreadcrumbs([
-            {
-                text: dataset ? dataset.name : "",
-                onClick: (): void => {
-                    if (dataset) {
-                        history.push(getDatasetsViewPath(dataset.id));
-                    }
-                },
-            },
-        ]);
-    }, [dataset]);
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         fetchDataset();
@@ -55,35 +44,41 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
 
         updateDataset(dataset)
             .then((dataset: Dataset): void => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.update-success", {
                         entity: t("label.dataset"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Redirect to datasets detail path
-                history.push(getDatasetsViewPath(dataset.id));
+                navigate(getDatasetsViewPath(dataset.id));
             })
-            .catch((): void => {
-                enqueueSnackbar(
-                    t("message.update-error", {
-                        entity: t("label.dataset"),
-                    }),
-                    getErrorSnackbarOption()
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.dataset"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
     const fetchDataset = (): void => {
         // Validate id from URL
-        if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
+        if (params.id && !isValidNumberId(params.id)) {
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.dataset"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
             setLoading(false);
 
@@ -97,20 +92,38 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
             .then(([datasetResponse, datasourcesResponse]): void => {
                 // Determine if any of the calls failed
                 if (
-                    datasetResponse.status === "rejected" ||
-                    datasourcesResponse.status === "rejected"
+                    datasetResponse.status === PROMISES.REJECTED ||
+                    datasourcesResponse.status === PROMISES.REJECTED
                 ) {
-                    enqueueSnackbar(
-                        t("message.fetch-error"),
-                        getErrorSnackbarOption()
-                    );
+                    const axiosError =
+                        datasourcesResponse.status === PROMISES.REJECTED
+                            ? datasourcesResponse.reason
+                            : datasetResponse.status === PROMISES.REJECTED
+                            ? datasetResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      datasourcesResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.datasources"
+                                          : "label.dataset"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 }
 
                 // Attempt to gather data
-                if (datasetResponse.status === "fulfilled") {
+                if (datasetResponse.status === PROMISES.FULFILLED) {
                     setDataset(datasetResponse.value);
                 }
-                if (datasourcesResponse.status === "fulfilled") {
+                if (datasourcesResponse.status === PROMISES.FULFILLED) {
                     setDatasources(datasourcesResponse.value);
                 }
             })
@@ -124,17 +137,26 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            {dataset && (
-                <DatasetWizard
-                    dataset={dataset}
-                    datasources={datasources}
-                    onFinish={onDatasetWizardFinish}
-                />
-            )}
+        <PageV1>
+            <PageHeader
+                title={t("label.update-entity", {
+                    entity: t("label.dataset"),
+                })}
+            />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {dataset && (
+                        <DatasetWizard
+                            dataset={dataset}
+                            datasources={datasources}
+                            onFinish={onDatasetWizardFinish}
+                        />
+                    )}
 
-            {/* No data available message */}
-            {!dataset && <NoDataIndicator />}
-        </PageContents>
+                    {/* No data available message */}
+                    {!dataset && <NoDataIndicator />}
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

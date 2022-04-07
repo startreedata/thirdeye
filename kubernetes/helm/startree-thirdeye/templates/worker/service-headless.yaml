@@ -14,7 +14,16 @@ spec:
   clusterIP: None
   ports:
     # [pod_name].[service_name].[namespace].svc.cluster.local
-    - port: {{ .Values.worker.port }}
+    - name: http
+      protocol: TCP
+      port: {{ .Values.worker.port }}
+      targetPort: {{ .Values.worker.port }}
+    {{- if .Values.worker.tls.enabled }}
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443
+    {{- end }}
   selector:
     app: {{ include "thirdeye.name" . }}
     release: {{ .Release.Name }}

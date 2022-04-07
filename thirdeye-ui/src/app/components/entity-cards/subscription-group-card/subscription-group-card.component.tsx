@@ -11,7 +11,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import {
     getAlertsViewPath,
@@ -24,14 +24,14 @@ import { TextHighlighter } from "../../text-highlighter/text-highlighter.compone
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
 import { SubscriptionGroupCardProps } from "./subscription-group-card.interfaces";
 
-export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps> = (
-    props: SubscriptionGroupCardProps
-) => {
+export const SubscriptionGroupCard: FunctionComponent<
+    SubscriptionGroupCardProps
+> = (props: SubscriptionGroupCardProps) => {
     const [
         subscriptionGroupOptionsAnchorElement,
         setSubscriptionGroupOptionsAnchorElement,
     ] = useState<HTMLElement | null>();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const handleSubscriptionGroupOptionsClick = (
@@ -49,9 +49,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             return;
         }
 
-        history.push(
-            getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id)
-        );
+        navigate(getSubscriptionGroupsViewPath(props.uiSubscriptionGroup.id));
         handleSubscriptionGroupOptionsClose();
     };
 
@@ -60,9 +58,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             return;
         }
 
-        history.push(
-            getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id)
-        );
+        navigate(getSubscriptionGroupsUpdatePath(props.uiSubscriptionGroup.id));
         handleSubscriptionGroupOptionsClose();
     };
 
@@ -82,7 +78,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
             return;
         }
 
-        history.push(getAlertsViewPath(uiSubscriptionGroupAlert.id));
+        navigate(getAlertsViewPath(uiSubscriptionGroupAlert.id));
     };
 
     return (
@@ -93,6 +89,7 @@ export const SubscriptionGroupCard: FunctionComponent<SubscriptionGroupCardProps
                         <>
                             {/* Subscription group options button */}
                             <IconButton
+                                color="secondary"
                                 onClick={handleSubscriptionGroupOptionsClick}
                             >
                                 <MoreVertIcon />

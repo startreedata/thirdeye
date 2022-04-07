@@ -1,4 +1,4 @@
-import { Bar, Circle, Line } from "@visx/visx";
+import { Bar, Circle, Line } from "@visx/shape";
 import React, { FunctionComponent, MouseEvent, TouchEvent } from "react";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
@@ -31,15 +31,23 @@ export const MouseHoverMarker: FunctionComponent<MouseHoverMarkerProps> = (
         }
     };
 
+    const handleClick = (event: MouseEvent<SVGRectElement>): void => {
+        if (props.onMouseClick) {
+            props.onMouseClick(event);
+        }
+    };
+
     return (
         <>
             {/* Mouse hover region  */}
             <Bar
+                cursor={props.cursor || "default"}
                 height={props.yScale && props.yScale.range()[0]}
                 opacity={0}
                 width={props.xScale && props.xScale.range()[1]}
                 x={props.xScale && props.xScale.range()[0]}
                 y={props.yScale && props.yScale.range()[1]}
+                onClick={handleClick}
                 onMouseDown={props.zoom && props.zoom.dragStart}
                 onMouseLeave={handleMouseLeave}
                 onMouseMove={handleMouseMove}

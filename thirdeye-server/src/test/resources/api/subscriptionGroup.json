@@ -14,5 +14,40 @@
         ]
       }
     }
+  },
+  {
+    "name": "sg-with-spec",
+    "cron": "*/1 * * * * ?",
+    "specs": [
+      {
+        "type": "email-smtp",
+        "params": {
+          "smtp": {
+            "host": "${SMTP_HOST}",
+            "port": "${SMTP_PORT}",
+            "user": "${SMTP_USER}",
+            "password": "${SMTP_PASSWORD}"
+          },
+          "emailRecipients": {
+            "from": "thirdeye-alerts@startree.ai",
+            "to": [
+              "suvodeep@startree.ai"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "slack-webhook",
+    "cron": "*/1 * * * * ?",
+    "specs": [
+      {
+        "type": "slack",
+        "params": {
+          "webhookUrl": "${SLACK_WEBHOOK_URL}"
+        }
+      }
+    ]
   }
 ]

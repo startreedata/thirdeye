@@ -17,7 +17,6 @@
       "format": "SIMPLE_DATE_FORMAT:yyyyMMdd",
       "timezone": "US/Pacific"
     },
-    "expectedDelay": 86400,
     "dataSource":  {
       "name": "PinotThirdEyeDataSource"
     }

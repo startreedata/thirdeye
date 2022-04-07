@@ -1,18 +1,17 @@
-import {
-    PageContentsGridV1,
-    PageHeaderTextV1,
-    PageHeaderV1,
-    PageV1,
-} from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { CreateMenuButton } from "../../components/create-menu-button.component/create-menu-button.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import {
     deleteAlert,
     getAllAlerts,
@@ -23,27 +22,22 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getUiAlert, getUiAlerts } from "../../utils/alerts/alerts.util";
-import { getSuccessSnackbarOption } from "../../utils/snackbar/snackbar.util";
+import { PROMISES } from "../../utils/constants/constants.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
-    const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         // Time range refreshed, fetch alerts
         fetchAllAlerts();
-    }, [timeRangeDuration]);
+    }, []);
 
     const fetchAllAlerts = (): void => {
         setUiAlerts(null);
@@ -52,12 +46,43 @@ export const AlertsAllPage: FunctionComponent = () => {
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
         Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
             .then(([alertsResponse, subscriptionGroupsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertsResponse.status === PROMISES.REJECTED
+                            ? alertsResponse.reason
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertsResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.alerts"
+                                          : "label.subscription-groups"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
                 }
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     fetchedUiAlerts = getUiAlerts(
                         alertsResponse.value,
                         fetchedSubscriptionGroups
@@ -76,9 +101,9 @@ export const AlertsAllPage: FunctionComponent = () => {
         }
 
         updateAlert(uiAlert.alert).then((alert) => {
-            enqueueSnackbar(
-                t("message.update-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", { entity: t("label.alert") })
             );
 
             // Replace updated alert in fetched alerts
@@ -97,9 +122,9 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
         deleteAlert(uiAlert.id).then((alert) => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
             );
 
             // Remove deleted alert from fetched alerts
@@ -140,10 +165,8 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
-                <PageHeaderTextV1>{t("label.alerts")}</PageHeaderTextV1>
-                <CreateMenuButton />
-            </PageHeaderV1>
+            <PageHeader showCreateButton title={t("label.alerts")} />
+
             <PageContentsGridV1 fullHeight>
                 {/* Alert list */}
                 <AlertListV1

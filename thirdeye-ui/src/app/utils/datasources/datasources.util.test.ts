@@ -27,13 +27,13 @@ describe("Datasources Util", () => {
     });
 
     it("getUiDatasource should return empty UI datasource for invalid datasource", () => {
-        expect(getUiDatasource((null as unknown) as Datasource)).toEqual(
+        expect(getUiDatasource(null as unknown as Datasource)).toEqual(
             mockEmptyUiDatasource
         );
     });
 
     it("getUiDatasources should return empty array for invalid datasources", () => {
-        expect(getUiDatasources((null as unknown) as Datasource[])).toEqual([]);
+        expect(getUiDatasources(null as unknown as Datasource[])).toEqual([]);
     });
 
     it("getUiDatasources should return empty array for empty datasources", () => {
@@ -55,7 +55,7 @@ describe("Datasources Util", () => {
     it("filterDatasources should return empty array for invalid UI datasources", () => {
         expect(
             filterDatasources(
-                (null as unknown) as UiDatasource[],
+                null as unknown as UiDatasource[],
                 mockSearchWords
             )
         ).toEqual([]);
@@ -67,7 +67,7 @@ describe("Datasources Util", () => {
 
     it("filterDatasources should return appropriate UI datasources for UI datasources and invalid search words", () => {
         expect(
-            filterDatasources(mockUiDatasources, (null as unknown) as string[])
+            filterDatasources(mockUiDatasources, null as unknown as string[])
         ).toEqual(mockUiDatasources);
     });
 
@@ -86,24 +86,16 @@ describe("Datasources Util", () => {
 });
 
 const mockDefaultDatasource = {
-    name: "new-datasource",
-    type: "datasource",
+    name: "mypinot",
+    type: "pinot",
     properties: {
-        zooKeeperURL: "localhost:2123",
-        clusterName: "QuickStartCluster",
-        controllerConnectionScheme: "http",
-        controllerHost: "localhost",
+        zookeeperUrl: "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
+        clusterName: "pinot",
+        controllerConnectionScheme: "https",
+        controllerHost:
+            "pinot-pinot-controller-headless.managed.svc.cluster.local",
         controllerPort: 9000,
-        cacheLoaderClassName:
-            "org.apache.pinot.thirdeye.datasource.pinot.PinotControllerResponseCacheLoader",
     },
-    metaList: [
-        {
-            classRef:
-                "org.apache.pinot.thirdeye.auto.onboard.AutoOnboardPinotMetadataSource",
-            properties: {},
-        },
-    ],
 };
 
 const mockEmptyUiDatasource = {
@@ -118,7 +110,7 @@ const mockDatasource1 = {
     name: "testNameDatasource1",
     type: "testTypeDatasource1",
     properties: {
-        zooKeeperURL: "testURLDatasource1",
+        zookeeperUrl: "testURLDatasource1",
         clusterName: "testClusterDatasource1",
         controllerConnectionScheme: "http",
         controllerHost: "localhost",

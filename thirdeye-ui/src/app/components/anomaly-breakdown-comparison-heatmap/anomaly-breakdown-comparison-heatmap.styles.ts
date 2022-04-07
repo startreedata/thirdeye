@@ -1,0 +1,21 @@
+import { makeStyles } from "@material-ui/core";
+
+export const useAnomalyBreakdownComparisonHeatmapStyles = makeStyles(
+    (theme) => ({
+        filtersContainer: {
+            "& .filter-chip": {
+                margin: theme.spacing(1),
+                background: theme.palette.secondary,
+            },
+        },
+        baselineWeekOffsetLabelContainer: {
+            [theme.breakpoints.down("xs")]: {
+                textAlign: "left",
+            },
+            [theme.breakpoints.up("sm")]: {
+                textAlign: "right",
+                marginRight: theme.spacing(1),
+            },
+        },
+    })
+);

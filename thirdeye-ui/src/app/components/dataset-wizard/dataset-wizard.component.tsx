@@ -1,15 +1,8 @@
-import {
-    Box,
-    Button,
-    Grid,
-    Step,
-    StepLabel,
-    Stepper,
-    Typography,
-} from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { createEmptyDataset } from "../../utils/datasets/datasets.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
@@ -31,10 +24,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
     const [newDataset, setNewDataset] = useState<Dataset>(
         props.dataset || createEmptyDataset()
     );
-    const [
-        currentWizardStep,
-        setCurrentWizardStep,
-    ] = useState<DatasetWizardStep>(DatasetWizardStep.DATASET_PROPERTIES);
+    const [currentWizardStep, setCurrentWizardStep] =
+        useState<DatasetWizardStep>(DatasetWizardStep.DATASET_PROPERTIES);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -88,166 +79,174 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
         );
     };
 
+    const stepLabelFn = (step: string): string => {
+        return t(`label.${kebabCase(DatasetWizardStep[+step])}`);
+    };
+
     return (
         <>
+            {/* Stepper */}
             <Grid container>
-                {/* Stepper */}
                 <Grid item sm={12}>
-                    <Stepper alternativeLabel activeStep={currentWizardStep}>
-                        {Object.values(DatasetWizardStep)
-                            .filter(
-                                (datasetWizardStep) =>
-                                    typeof datasetWizardStep === "string"
-                            )
-                            .map((datasetWizardStep, index) => (
-                                <Step key={index}>
-                                    <StepLabel>
-                                        {t(
-                                            `label.${kebabCase(
-                                                datasetWizardStep as string
-                                            )}`
-                                        )}
-                                    </StepLabel>
-                                </Step>
-                            ))}
-                    </Stepper>
-                </Grid>
+                    <StepperV1
+                        activeStep={currentWizardStep.toString()}
+                        stepLabelFn={stepLabelFn}
+                        steps={Object.values(DatasetWizardStep).reduce(
+                            (steps, datasetWizardStep) => {
+                                if (typeof datasetWizardStep === "number") {
+                                    steps.push(datasetWizardStep.toString());
+                                }
 
-                {/* Step label */}
-                <Grid item sm={12}>
-                    <Typography variant="h5">
-                        {t(
-                            `label.${kebabCase(
-                                DatasetWizardStep[currentWizardStep]
-                            )}`
+                                return steps;
+                            },
+                            [] as string[]
                         )}
-                    </Typography>
+                    />
+                </Grid>
+            </Grid>
+
+            <PageContentsCardV1>
+                <Grid container>
+                    {/* Step label */}
+                    <Grid item sm={12}>
+                        <Typography variant="h5">
+                            {t(
+                                `label.${kebabCase(
+                                    DatasetWizardStep[currentWizardStep]
+                                )}`
+                            )}
+                        </Typography>
+                    </Grid>
+
+                    {/* Spacer */}
+                    <Grid item sm={12} />
+
+                    {/* Dataset properties */}
+                    {currentWizardStep ===
+                        DatasetWizardStep.DATASET_PROPERTIES && (
+                        <>
+                            {/* Dataset properties form */}
+                            <Grid item sm={12}>
+                                <DatasetPropertiesForm
+                                    dataset={newDataset}
+                                    datasources={props.datasources}
+                                    id={FORM_ID_DATASET_PROPERTIES}
+                                    onSubmit={onSubmitDatasetPropertiesForm}
+                                />
+                            </Grid>
+
+                            {/* Spacer */}
+                            <Grid item sm={12} />
+                        </>
+                    )}
+
+                    {/* Review and submit */}
+                    {currentWizardStep ===
+                        DatasetWizardStep.REVIEW_AND_SUBMIT && (
+                        <>
+                            {/* Dataset information */}
+                            <DatasetRenderer dataset={newDataset} />
+                        </>
+                    )}
                 </Grid>
 
                 {/* Spacer */}
-                <Grid item sm={12} />
+                <Box padding={2} />
 
-                {/* Dataset properties */}
-                {currentWizardStep === DatasetWizardStep.DATASET_PROPERTIES && (
-                    <>
-                        {/* Dataset properties form */}
-                        <Grid item sm={12}>
-                            <DatasetPropertiesForm
-                                dataset={newDataset}
-                                datasources={props.datasources}
-                                id={FORM_ID_DATASET_PROPERTIES}
-                                onSubmit={onSubmitDatasetPropertiesForm}
-                            />
-                        </Grid>
+                {/* Controls */}
+                <Grid
+                    container
+                    alignItems="stretch"
+                    className={datasetWizardClasses.controlsContainer}
+                    direction="column"
+                    justifyContent="flex-end"
+                >
+                    {/* Separator */}
+                    <Grid item>
+                        <Box
+                            border={Dimension.WIDTH_BORDER_DEFAULT}
+                            borderBottom={0}
+                            borderColor={Palette.COLOR_BORDER_DEFAULT}
+                            borderLeft={0}
+                            borderRight={0}
+                        />
+                    </Grid>
 
-                        {/* Spacer */}
-                        <Grid item sm={12} />
-                    </>
-                )}
-
-                {/* Review and submit */}
-                {currentWizardStep === DatasetWizardStep.REVIEW_AND_SUBMIT && (
-                    <>
-                        {/* Dataset information */}
-                        <DatasetRenderer dataset={newDataset} />
-                    </>
-                )}
-            </Grid>
-
-            {/* Spacer */}
-            <Box padding={2} />
-
-            {/* Controls */}
-            <Grid
-                container
-                alignItems="stretch"
-                className={datasetWizardClasses.controlsContainer}
-                direction="column"
-                justify="flex-end"
-            >
-                {/* Separator */}
-                <Grid item>
-                    <Box
-                        border={Dimension.WIDTH_BORDER_DEFAULT}
-                        borderBottom={0}
-                        borderColor={Palette.COLOR_BORDER_DEFAULT}
-                        borderLeft={0}
-                        borderRight={0}
-                    />
-                </Grid>
-
-                <Grid item>
-                    <Grid container justify="space-between">
-                        {/* Cancel button */}
-                        <Grid item>
-                            {props.showCancel && (
-                                <Button
-                                    color="primary"
-                                    size="large"
-                                    variant="outlined"
-                                    onClick={onCancel}
-                                >
-                                    {t("label.cancel")}
-                                </Button>
-                            )}
-                        </Grid>
-
-                        <Grid item>
-                            <Grid container>
-                                {/* Back button */}
-                                <Grid item>
+                    <Grid item>
+                        <Grid container justifyContent="space-between">
+                            {/* Cancel button */}
+                            <Grid item>
+                                {props.showCancel && (
                                     <Button
                                         color="primary"
-                                        disabled={
-                                            currentWizardStep ===
-                                            DatasetWizardStep.DATASET_PROPERTIES
-                                        }
                                         size="large"
                                         variant="outlined"
-                                        onClick={onBack}
+                                        onClick={onCancel}
                                     >
-                                        {t("label.back")}
+                                        {t("label.cancel")}
                                     </Button>
-                                </Grid>
+                                )}
+                            </Grid>
 
-                                {/* Next button */}
-                                <Grid item>
-                                    {/* Submit button for dataset properties form in 
+                            <Grid item>
+                                <Grid container>
+                                    {/* Back button */}
+                                    <Grid item>
+                                        <Button
+                                            color="primary"
+                                            disabled={
+                                                currentWizardStep ===
+                                                DatasetWizardStep.DATASET_PROPERTIES
+                                            }
+                                            size="large"
+                                            variant="outlined"
+                                            onClick={onBack}
+                                        >
+                                            {t("label.back")}
+                                        </Button>
+                                    </Grid>
+
+                                    {/* Next button */}
+                                    <Grid item>
+                                        {/* Submit button for dataset properties form in 
                                     first step */}
-                                    {currentWizardStep ===
-                                        DatasetWizardStep.DATASET_PROPERTIES && (
-                                        <Button
-                                            color="primary"
-                                            form={FORM_ID_DATASET_PROPERTIES}
-                                            size="large"
-                                            type="submit"
-                                            variant="contained"
-                                        >
-                                            {t("label.next")}
-                                        </Button>
-                                    )}
+                                        {currentWizardStep ===
+                                            DatasetWizardStep.DATASET_PROPERTIES && (
+                                            <Button
+                                                color="primary"
+                                                form={
+                                                    FORM_ID_DATASET_PROPERTIES
+                                                }
+                                                size="large"
+                                                type="submit"
+                                                variant="contained"
+                                            >
+                                                {t("label.next")}
+                                            </Button>
+                                        )}
 
-                                    {/* Next button for all other steps */}
-                                    {currentWizardStep !==
-                                        DatasetWizardStep.DATASET_PROPERTIES && (
-                                        <Button
-                                            color="primary"
-                                            size="large"
-                                            variant="contained"
-                                            onClick={onNext}
-                                        >
-                                            {currentWizardStep ===
-                                            DatasetWizardStep.REVIEW_AND_SUBMIT
-                                                ? t("label.finish")
-                                                : t("label.next")}
-                                        </Button>
-                                    )}
+                                        {/* Next button for all other steps */}
+                                        {currentWizardStep !==
+                                            DatasetWizardStep.DATASET_PROPERTIES && (
+                                            <Button
+                                                color="primary"
+                                                size="large"
+                                                variant="contained"
+                                                onClick={onNext}
+                                            >
+                                                {currentWizardStep ===
+                                                DatasetWizardStep.REVIEW_AND_SUBMIT
+                                                    ? t("label.finish")
+                                                    : t("label.next")}
+                                            </Button>
+                                        )}
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
+            </PageContentsCardV1>
         </>
     );
 };

@@ -1,24 +1,25 @@
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
     AuthExceptionCodeV1,
-    isBlockingAuthExceptionV1,
+    NotificationTypeV1,
     PageHeaderTextV1,
     PageHeaderV1,
     PageV1,
     useAuthProviderV1,
-} from "@startree-ui/platform-ui";
-import { useSnackbar } from "notistack";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { getErrorSnackbarOption } from "../../utils/snackbar/snackbar.util";
+    useNotificationProviderV1,
+} from "../../platform/components";
+import {
+    AuthExceptionCodeV1Label,
+    isBlockingAuthExceptionV1,
+} from "../../platform/utils";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");
     const { authExceptionCode, login } = useAuthProviderV1();
-    const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { t } = useTranslation();
-    const { enqueueSnackbar } = useSnackbar();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         if (
@@ -36,18 +37,18 @@ export const LoginPage: FunctionComponent = () => {
     useEffect(() => {
         if (isBlockingAuthExceptionV1(exceptionCode as AuthExceptionCodeV1)) {
             // Display blocking auth exception
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.authentication-error", {
-                    exceptionCode: exceptionCode,
+                    exceptionCode:
+                        AuthExceptionCodeV1Label[
+                            exceptionCode as AuthExceptionCodeV1
+                        ],
                 }),
-                getErrorSnackbarOption()
+                true
             );
         }
     }, [exceptionCode]);
-
-    useEffect(() => {
-        setPageBreadcrumbs([]);
-    }, []);
 
     // Loading indicator
     if (!isBlockingAuthExceptionV1(exceptionCode as AuthExceptionCodeV1)) {

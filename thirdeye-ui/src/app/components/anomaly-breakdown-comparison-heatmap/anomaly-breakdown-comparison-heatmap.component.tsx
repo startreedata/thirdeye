@@ -1,0 +1,348 @@
+import {
+    Box,
+    CardContent,
+    Chip,
+    Divider,
+    Grid,
+    TextField,
+    Typography,
+} from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import { HierarchyNode } from "d3-hierarchy";
+import { isEmpty, isString, pull } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
+import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
+import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
+import { Treemap } from "../visualizations/treemap/treemap.component";
+import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
+import {
+    AnomalyBreakdownComparisonData,
+    AnomalyBreakdownComparisonDataByDimensionColumn,
+    AnomalyBreakdownComparisonHeatmapProps,
+    AnomalyFilterOption,
+    DimensionDisplayData,
+} from "./anomaly-breakdown-comparison-heatmap.interfaces";
+import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
+import {
+    formatTreemapData,
+    summarizeDimensionValueData,
+} from "./anomaly-breakdown-comparison-heatmap.utils";
+import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
+
+export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
+    AnomalyBreakdownComparisonHeatmapProps
+> = ({ anomalyId, shouldTruncateText = true, comparisonOffset }) => {
+    const classes = useAnomalyBreakdownComparisonHeatmapStyles();
+    const { t } = useTranslation();
+    const {
+        anomalyMetricBreakdown,
+        getMetricBreakdown,
+        status: anomalyBreakdownReqStatus,
+        errorMessages: anomalyBreakdownReqErrors,
+    } = useGetAnomalyMetricBreakdown();
+    const [breakdownComparisonData, setBreakdownComparisonData] = useState<
+        AnomalyBreakdownComparisonDataByDimensionColumn[] | null
+    >(null);
+    const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
+        []
+    );
+    const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
+        AnomalyFilterOption[]
+    >([]);
+    const { notify } = useNotificationProviderV1();
+
+    useEffect(() => {
+        if (!anomalyMetricBreakdown) {
+            setBreakdownComparisonData(null);
+
+            return;
+        }
+
+        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
+            [];
+
+        if (anomalyFilterOptions.length === 0) {
+            let optionsMenu: AnomalyFilterOption[] = [];
+            Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
+                (dimensionColumnName) => {
+                    const options = Object.keys(
+                        anomalyMetricBreakdown.current.breakdown[
+                            dimensionColumnName
+                        ]
+                    ).map((value) => ({
+                        key: dimensionColumnName,
+                        value,
+                    }));
+                    optionsMenu = [...optionsMenu, ...options];
+                }
+            );
+            setAnomalyFilterOptions(optionsMenu);
+        }
+
+        Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
+            (dimensionColumnName) => {
+                const [currentTotal, currentDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.current.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
+                const [baselineTotal, baselineDimensionValuesData] =
+                    summarizeDimensionValueData(
+                        anomalyMetricBreakdown.baseline.breakdown[
+                            dimensionColumnName
+                        ]
+                    );
+                const dimensionComparisonData: {
+                    [key: string]: AnomalyBreakdownComparisonData;
+                } = {};
+
+                Object.keys(currentDimensionValuesData).forEach(
+                    (dimension: string) => {
+                        const currentDataForDimension =
+                            currentDimensionValuesData[dimension];
+                        const baselineDataForDimension =
+                            baselineDimensionValuesData[dimension] || {};
+                        const baselineMetricValue =
+                            baselineDataForDimension.count || 0;
+
+                        dimensionComparisonData[dimension] = {
+                            current: currentDataForDimension.count,
+                            baseline: baselineMetricValue,
+                            metricValueDiff:
+                                currentDataForDimension.count -
+                                baselineMetricValue,
+                            metricValueDiffPercentage: null,
+                            currentContributionPercentage:
+                                currentDataForDimension.percentage || 0,
+                            baselineContributionPercentage:
+                                baselineDataForDimension.percentage || 0,
+                            contributionDiff:
+                                (currentDataForDimension.percentage || 0) -
+                                (baselineDataForDimension.percentage || 0),
+                            currentTotalCount: currentTotal,
+                            baselineTotalCount: baselineTotal,
+                        };
+
+                        if (baselineMetricValue > 0) {
+                            dimensionComparisonData[
+                                dimension
+                            ].metricValueDiffPercentage =
+                                ((currentDataForDimension.count -
+                                    baselineMetricValue) /
+                                    baselineMetricValue) *
+                                100;
+                        }
+                    }
+                );
+
+                breakdownComparisonDataByDimensionColumn.push({
+                    column: dimensionColumnName,
+                    dimensionComparisonData,
+                });
+            }
+        );
+        setBreakdownComparisonData(breakdownComparisonDataByDimensionColumn);
+    }, [anomalyMetricBreakdown]);
+
+    useEffect(() => {
+        getMetricBreakdown(anomalyId, {
+            baselineOffset: comparisonOffset,
+            filters: [
+                ...anomalyFilters.map(
+                    (option) => `${option.key}=${option.value}`
+                ),
+            ],
+        });
+    }, [anomalyId, comparisonOffset, anomalyFilters]);
+
+    const handleNodeClick = (
+        tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
+        dimensionColumn: string
+    ): void => {
+        if (!tileData) {
+            return;
+        }
+
+        const resultantFilters: AnomalyFilterOption[] = [
+            ...anomalyFilters,
+            {
+                key: dimensionColumn,
+                value: tileData.data.id,
+            },
+        ];
+        setAnomalyFilters([...resultantFilters]);
+    };
+
+    const handleNodeFilterOnDelete = (node: AnomalyFilterOption): void => {
+        const resultantFilters = pull(anomalyFilters, node);
+        setAnomalyFilters([...resultantFilters]);
+    };
+
+    const handleOnChangeFilter = (options: AnomalyFilterOption[]): void => {
+        setAnomalyFilters([...options]);
+    };
+
+    const colorChangeValueAccessor = (
+        node: TreemapData<AnomalyBreakdownComparisonData>
+    ): number => {
+        if (node.extraData) {
+            return node.extraData.contributionDiff * 100;
+        }
+
+        return node.size;
+    };
+
+    useEffect(() => {
+        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
+            !isEmpty(anomalyBreakdownReqErrors)
+                ? anomalyBreakdownReqErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.heatmap-data"),
+                      })
+                  );
+        }
+    }, [anomalyBreakdownReqStatus, anomalyBreakdownReqErrors]);
+
+    return (
+        <>
+            <CardContent>
+                {anomalyFilterOptions && (
+                    <Grid container className={classes.filtersContainer}>
+                        <Grid item xs={12}>
+                            <Box mt={2}>
+                                <Typography variant="h6">
+                                    Filter Data Controls
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Autocomplete
+                                freeSolo
+                                multiple
+                                getOptionLabel={(option: AnomalyFilterOption) =>
+                                    isString(option.value)
+                                        ? option.value || EMPTY_STRING_DISPLAY
+                                        : ""
+                                }
+                                groupBy={(option: AnomalyFilterOption) =>
+                                    isString(option.key) ? option.key : ""
+                                }
+                                options={anomalyFilterOptions || []}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        fullWidth
+                                        placeholder={t(
+                                            "message.anomaly-filter-search"
+                                        )}
+                                        variant="outlined"
+                                    />
+                                )}
+                                renderTags={() =>
+                                    anomalyFilters.map(
+                                        (
+                                            option: AnomalyFilterOption,
+                                            index
+                                        ) => (
+                                            <Chip
+                                                className="filter-chip"
+                                                key={`${index}_${option.value}`}
+                                                label={`${option.key}=${
+                                                    option.value ||
+                                                    EMPTY_STRING_DISPLAY
+                                                }`}
+                                                onDelete={() =>
+                                                    handleNodeFilterOnDelete(
+                                                        option
+                                                    )
+                                                }
+                                            />
+                                        )
+                                    )
+                                }
+                                value={anomalyFilters}
+                                onChange={(_e, options) =>
+                                    handleOnChangeFilter(
+                                        options as AnomalyFilterOption[]
+                                    )
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                )}
+            </CardContent>
+            <CardContent>
+                {/* Loading Indicator when requests are in flight */}
+                {anomalyBreakdownReqStatus === ActionStatus.Working && (
+                    <Box pb={20} pt={20}>
+                        <AppLoadingIndicatorV1 />
+                    </Box>
+                )}
+
+                {/* If breakdownComparisonData is not empty render treemaps */}
+                {anomalyBreakdownReqStatus === ActionStatus.Done &&
+                    !isEmpty(breakdownComparisonData) &&
+                    React.Children.toArray(
+                        breakdownComparisonData &&
+                            breakdownComparisonData.map((data) => (
+                                <>
+                                    <Divider />
+                                    <Treemap<
+                                        AnomalyBreakdownComparisonData &
+                                            DimensionDisplayData
+                                    >
+                                        colorChangeValueAccessor={
+                                            colorChangeValueAccessor
+                                        }
+                                        name={data.column}
+                                        shouldTruncateText={shouldTruncateText}
+                                        tooltipElement={DimensionHeatmapTooltip}
+                                        treemapData={formatTreemapData(
+                                            data,
+                                            data.column
+                                        )}
+                                        onDimensionClickHandler={(node) =>
+                                            handleNodeClick(node, data.column)
+                                        }
+                                    />
+                                </>
+                            ))
+                    )}
+
+                {/* Indicate no data if breakdown data is missing and requests are complete */}
+                {anomalyBreakdownReqStatus === ActionStatus.Done &&
+                    isEmpty(breakdownComparisonData) && (
+                        <Grid item xs={12}>
+                            <Box pb={20} pt={20}>
+                                <Typography align="center" variant="body1">
+                                    {t("message.no-data")}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                    )}
+
+                {/* Indicate no data if there was an error */}
+                {anomalyBreakdownReqStatus === ActionStatus.Error && (
+                    <Grid item xs={12}>
+                        <Box pb={20} pt={20}>
+                            <NoDataIndicator />
+                        </Box>
+                    </Grid>
+                )}
+            </CardContent>
+        </>
+    );
+};

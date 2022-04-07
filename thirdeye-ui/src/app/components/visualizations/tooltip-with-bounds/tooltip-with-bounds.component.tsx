@@ -1,4 +1,4 @@
-import { TooltipWithBounds as VisxTooltipWithBounds } from "@visx/visx";
+import { TooltipWithBounds as VisxTooltipWithBounds } from "@visx/tooltip";
 import React, { FunctionComponent } from "react";
 import { TooltipWithBoundsProps } from "./tooltip-with-bounds.interfaces";
 import { useTooltipWithBoundsStyles } from "./tooltip-with-bounds.styles";

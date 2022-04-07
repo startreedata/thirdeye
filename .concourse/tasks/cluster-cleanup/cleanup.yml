@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: mcr.microsoft.com/azure-cli
+    tag: latest
+
+inputs:
+  - name: environment
+
+outputs:
+  - name: version
+
+params:
+  AZURE_CLIENT_ID: ((azure-client-id))
+  AZURE_CLIENT_SECRET: ((azure-client-secret))
+  AZURE_TENANT_ID: ((azure-tenant-id))
+
+run:
+  path: ci-src/.concourse/tasks/cluster-cleanup/cleanup.sh
+

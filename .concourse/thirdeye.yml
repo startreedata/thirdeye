@@ -57,6 +57,12 @@ jobs:
         environment: environment-azure
       params:
         VERSION_FILE: version/version
+    - task: cluster-cleanup
+      file: ci-src/.concourse/tasks/cluster-cleanup/cleanup.yml
+      input_mapping:
+        environment: environment-azure
+      params:
+        VERSION_FILE: version/version
   ensure:
     put: environment-azure
     params:

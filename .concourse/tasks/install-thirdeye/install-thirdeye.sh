@@ -44,9 +44,6 @@ set -x && \
     --username ${STARTREE_HELM_USERNAME} \
     --password ${STARTREE_HELM_PASSWORD} && \
   ./helm repo update && \
-  ./kubectl delete ns ${TEST_NAMESPACE} && \
-  echo "pausing for 10s after cleanup" && \
-  sleep 10s && \
   ./kubectl create ns ${TEST_NAMESPACE} && \
   echo HELM_VERSION && \
   ./helm install ${DEPLOYMENT_NAME} internal/${TE_CHART_NAME} --version $HELM_VERSION -n ${TEST_NAMESPACE} --devel && \

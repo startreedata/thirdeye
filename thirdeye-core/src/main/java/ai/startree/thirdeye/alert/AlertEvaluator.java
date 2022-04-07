@@ -152,6 +152,7 @@ public class AlertEvaluator {
   }
 
   private Interval computeDetectionInterval(final AlertEvaluationApi request) {
+    // this method only exists to catch exception and translate into a TE exception
     Interval detectionInterval;
     try {
       detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),

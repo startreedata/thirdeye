@@ -1,11 +1,12 @@
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
-import { LinePath } from "@visx/shape";
-import React, { FunctionComponent, useMemo } from "react";
+import { Bar, LinePath } from "@visx/shape";
+import React, { FunctionComponent, MouseEvent, useMemo } from "react";
 import { PlotBand } from "../plot-band/plot-band.component";
 import { DataPoint, Series } from "../time-series-chart.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
+import { determineXPointForHover } from "../tooltip/tooltip.utils";
 import { ChartCoreProps } from "./chart-core.interfaces";
 
 const axisLeftTickLabelProps = {
@@ -38,7 +39,10 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     yAccessor = (d: DataPoint) => d.y,
     children,
     xAxisOptions,
+    tooltipUtils,
 }) => {
+    const marginTop = top || margin.top;
+    const marginLeft = left || margin.left;
     // Scales
     const dateScale = useMemo(() => {
         const minMaxTimestamp = getMinMax(
@@ -66,7 +70,6 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         (d) => d.y
                     )[1] || 0,
                 ],
-                nice: true,
             }),
         [yMax, series]
     );
@@ -78,8 +81,33 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     const xScaleToUse = xScale || dateScale;
     const yScaleToUse = yScale || dataScale;
 
+    // Open the tooltip from the time series parent
+    const handleMouseOver = (event: MouseEvent<SVGRectElement>): void => {
+        const [xValue, coords] = determineXPointForHover(
+            event,
+            series,
+            dateScale,
+            marginLeft
+        );
+
+        if (xValue === null || coords === null) {
+            tooltipUtils && tooltipUtils.hideTooltip();
+
+            return;
+        }
+
+        tooltipUtils &&
+            tooltipUtils.showTooltip({
+                tooltipLeft: dateScale(xValue),
+                tooltipTop: coords.y - marginTop,
+                tooltipData: {
+                    xValue: xValue,
+                },
+            });
+    };
+
     return (
-        <Group left={left || margin.left} top={top || margin.top}>
+        <Group left={marginLeft} top={marginTop}>
             {series.map((seriesData: Series, idx: number) => {
                 if (seriesData.enabled) {
                     return (
@@ -96,6 +124,19 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                     return;
                 }
             })}
+            {tooltipUtils && (
+                /* Mouse hover region for tooltip */
+                <Bar
+                    cursor="default"
+                    height={yScaleToUse.range()[0]}
+                    opacity={0}
+                    width={xScaleToUse.range()[1]}
+                    x={xScaleToUse.range()[0]}
+                    y={yScaleToUse.range()[1]}
+                    onMouseLeave={tooltipUtils.hideTooltip}
+                    onMouseMove={handleMouseOver}
+                />
+            )}
             {xAxisOptions &&
                 xAxisOptions.plotBands &&
                 xAxisOptions.plotBands.map((plotBand, idx) => {
@@ -123,7 +164,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                     tickLabelProps={() => axisLeftTickLabelProps}
                 />
             )}
-            {children}
+            {children && children(xScaleToUse, yScaleToUse)}
         </Group>
     );
 };

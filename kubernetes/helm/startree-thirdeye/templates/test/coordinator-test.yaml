@@ -7,10 +7,7 @@ metadata:
 spec:
   containers:
     - name: test-container
-      image: adoptopenjdk/openjdk8:alpine
-      command:
-        - /bin/sh
-        - -ec
-        - |
-          wget -nv http://thirdeye-startree-thirdeye-coordinator:8080/internal/ping
+      image: busybox
+      command: [ 'wget' ]
+      args: [ {{ printf "http://%s:%s" ( include "thirdeye.coordinator.headless" . ) {{ .Values.coordinator.port }} }} ]
   restartPolicy: Never

@@ -17,6 +17,7 @@ public class DataSourceBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(DataSourceBuilder.class);
   private static final String MYSQL_FLYWAY_PATH = "classpath:db/migration/mysql";
   private static final String H2_FLYWAY_PATH = "classpath:db/migration/h2";
+  private static final String FLYWAY_BASELINE_VERSION = "1.40.0";
 
   public DataSource build(final DatabaseConfiguration dbConfig) {
     final DataSource dataSource = createDataSource(dbConfig);
@@ -36,8 +37,13 @@ public class DataSourceBuilder {
         .getURL());
 
     Flyway flyway = Flyway.configure()
+        .dataSource(dataSource)
         .locations(flywayLocations)
-        .dataSource(dataSource).load();
+        // below is necessary for migration of existing databases.
+        // Flyway will not run sql scripts <= FLYWAY_BASELINE_VERSION for existing database without flyway metadata
+        // See https://flywaydb.org/documentation/configuration/parameters/baselineOnMigrate
+        .baselineOnMigrate(true)
+        .baselineVersion(FLYWAY_BASELINE_VERSION).load();
     flyway.migrate();
   }
 

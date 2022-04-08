@@ -8,6 +8,7 @@ image_resource:
     tag: latest
 
 inputs:
+  - name: ci-src
   - name: environment
 
 outputs:

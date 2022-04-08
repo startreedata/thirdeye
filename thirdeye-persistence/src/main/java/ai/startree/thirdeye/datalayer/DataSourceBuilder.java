@@ -6,48 +6,50 @@
 package ai.startree.thirdeye.datalayer;
 
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.sql.Connection;
+import java.sql.SQLException;
 import org.apache.tomcat.jdbc.pool.DataSource;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataSourceBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSourceBuilder.class);
-  private static final String DEFAULT_DATABASE_PATH = "jdbc:h2:./config/h2db";
-  private static final String DEFAULT_DATABASE_FILE = "./config/h2db.mv.db";
+  private static final String MYSQL_FLYWAY_PATH = "classpath:db/migration/mysql";
+  private static final String H2_FLYWAY_PATH = "classpath:db/migration/h2";
 
   public DataSource build(final DatabaseConfiguration dbConfig) {
     final DataSource dataSource = createDataSource(dbConfig);
 
-    // create schema for default database
-    createSchemaIfReqd(dataSource, dbConfig);
+    try {
+      migrateDatabase(dataSource);
+    } catch (SQLException e) {
+      throw new RuntimeException("Failed creating/migrating database schema", e);
+    }
+
     return dataSource;
   }
 
-  private void createSchemaIfReqd(
-      final DataSource dataSource,
-      final DatabaseConfiguration dbConfig) {
-    if (dbConfig.getUrl().equals(DEFAULT_DATABASE_PATH)
-        && !new File(DEFAULT_DATABASE_FILE).exists()) {
-      try {
-        LOG.info("Creating database schema for default URL '{}'", DEFAULT_DATABASE_PATH);
-        Connection conn = dataSource.getConnection();
-        final ScriptRunner scriptRunner = new ScriptRunner(conn, false);
-        scriptRunner.setDelimiter(";");
+  protected static void migrateDatabase(final javax.sql.DataSource dataSource) throws SQLException {
+    String flywayLocations = getSqlScriptsLocations(dataSource.getConnection()
+        .getMetaData()
+        .getURL());
 
-        InputStream createSchema = this.getClass()
-            .getResourceAsStream("/db/create-schema.sql");
-        scriptRunner.runScript(new InputStreamReader(createSchema));
-      } catch (Exception e) {
-        LOG.error("Could not create database schema. Attempting to use existing.", e);
-      }
-    } else {
-      LOG.info("Using existing database at '{}'", dbConfig.getUrl());
+    Flyway flyway = Flyway.configure()
+        .locations(flywayLocations)
+        .dataSource(dataSource).load();
+    flyway.migrate();
+  }
+
+  /**
+   * Returns the flyway locations with the sql scripts corresponding to the database.
+   * Supports h2 and MySql.
+   */
+  private static String getSqlScriptsLocations(final String url) {
+    if (url.startsWith("jdbc:h2")) {
+      return H2_FLYWAY_PATH;
     }
+    return MYSQL_FLYWAY_PATH;
   }
 
   private DataSource createDataSource(final DatabaseConfiguration dbConfig) {

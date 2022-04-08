@@ -24,6 +24,7 @@ public class TestDbEnv {
   private final Injector injector;
 
   public TestDbEnv() {
+    // fixme things should work with h2 out of the box
     final DataSource dataSource = createDataSource();
     injector = Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
 

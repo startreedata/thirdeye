@@ -29,8 +29,6 @@ public class PluginClassLoader extends URLClassLoader {
       .add("org.h2")
       .add("com.mysql")
       .add("javax.activation")
-      .add("com.codahale.metrics.MetricRegistry")
-      .add("com.codahale.metrics.Meter")
       .build();
 
   private final ClassLoader parentClassLoader;

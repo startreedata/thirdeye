@@ -142,7 +142,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
     // data sources and caches
     this.timestamp = System.currentTimeMillis();
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
-        datasetConfigDAO, new MetricRegistry());
+        datasetConfigDAO);
     dataSourceCache = new DataSourceCache(
         mock(DataSourceManager.class),
         dataSourcesLoader,

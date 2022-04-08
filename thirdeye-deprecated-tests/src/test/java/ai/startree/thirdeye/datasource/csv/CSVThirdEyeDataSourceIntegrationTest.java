@@ -71,7 +71,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     Assert.assertNotNull(configDTO.getId());
 
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
-        datasetConfigDAO, new MetricRegistry());
+        datasetConfigDAO);
     final DataSourceCache dataSourceCache = new DataSourceCache(mock(DataSourceManager.class),
         dataSourcesLoader,
         new MetricRegistry());

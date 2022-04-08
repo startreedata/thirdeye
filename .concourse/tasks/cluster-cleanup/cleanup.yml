@@ -20,4 +20,3 @@ params:
 
 run:
   path: ci-src/.concourse/tasks/cluster-cleanup/cleanup.sh
-

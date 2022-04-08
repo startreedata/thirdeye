@@ -37,7 +37,6 @@
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
       <artifactId>retrofit</artifactId>
-      <version>${retrofit2.version}</version>
     </dependency>
     <dependency>
       <groupId>com.sendgrid</groupId>

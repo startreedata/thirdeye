@@ -13,6 +13,8 @@ import ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetec
 import ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetectorSpec;
 import ai.startree.thirdeye.detection.components.detectors.PercentageChangeRuleDetector;
 import ai.startree.thirdeye.detection.components.detectors.PercentageChangeRuleDetectorSpec;
+import ai.startree.thirdeye.detection.components.detectors.RemoteHttpDetector;
+import ai.startree.thirdeye.detection.components.detectors.RemoteHttpDetectorSpec;
 import ai.startree.thirdeye.detection.components.detectors.ThresholdRuleDetector;
 import ai.startree.thirdeye.detection.components.detectors.ThresholdRuleDetectorSpec;
 import ai.startree.thirdeye.detection.components.triggers.ConsoleOutputTrigger;
@@ -54,6 +56,11 @@ public class DetectionComponentsPlugin implements Plugin {
             "MEAN_VARIANCE",
             MeanVarianceRuleDetectorSpec.class,
             MeanVarianceRuleDetector.class
+        ),
+        new GenericAnomalyDetectorFactory<>(
+            "REMOTE_HTTP",
+            RemoteHttpDetectorSpec.class,
+            RemoteHttpDetector.class
         )
     );
   }

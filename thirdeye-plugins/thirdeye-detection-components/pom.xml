@@ -26,6 +26,14 @@
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service-annotations</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>converter-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>retrofit</artifactId>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>
@@ -48,6 +56,7 @@
       <artifactId>hsqldb</artifactId>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>

@@ -50,6 +50,16 @@
       <artifactId>reflections</artifactId>
     </dependency>
 
+    <!-- database migration-->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-mysql</artifactId>
+    </dependency>
+
     <!-- demo dependencies -->
     <dependency>
       <groupId>com.h2database</groupId>

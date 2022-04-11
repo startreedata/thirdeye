@@ -82,6 +82,7 @@
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
     <swagger.version>1.3.17-1</swagger.version>
     <testcontainers.version>1.15.3</testcontainers.version>
+    <flyway.version>8.5.7</flyway.version>
   </properties>
 
   <licenses>
@@ -742,6 +743,16 @@
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-persist</artifactId>
         <version>${guice.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>${flyway.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-mysql</artifactId>
+        <version>${flyway.version}</version>
       </dependency>
 
       <!-- macro dependencies -->

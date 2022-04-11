@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.database.ThirdEyeMySQLContainer;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
@@ -40,6 +39,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -88,7 +88,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    persistenceDbContainer = new ThirdEyeMySQLContainer(MYSQL_DOCKER_IMAGE);
+    persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE);
     persistenceDbContainer.start();
 
     // Setup plugins dir so ThirdEye can load it

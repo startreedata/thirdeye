@@ -1,7 +1,10 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { resolvePath, useLocation, useNavigate } from "react-router-dom";
 import { useTimeRange } from "../../../components/time-range/time-range-provider/time-range-provider.component";
-import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import {
+    TimeRange,
+    TimeRangeQueryStringKey,
+} from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { useLastUsedSearchParams } from "../../../stores/last-used-params/last-used-search-params.store";
 import { RedirectWithDefaultParamsProps } from "./redirect-with-default-params.interfaces";
 
@@ -14,6 +17,8 @@ import { RedirectWithDefaultParamsProps } from "./redirect-with-default-params.i
  * @param {boolean} replace - Indicates to replace the history entry with the new path
  * @param {string} useStoredLastUsedParamsPathKey - [Optional] If passed, use the stored last used
  * @param {string} pathKeyOverride - [Optional] use this as the key to find in the store
+ * @param {function} customDurationGenerator - [Optional] if passed, used this function to
+ *                                                        determine the default time range
  * search string if it exists
  */
 export const RedirectWithDefaultParams: FunctionComponent<
@@ -24,6 +29,7 @@ export const RedirectWithDefaultParams: FunctionComponent<
     children,
     useStoredLastUsedParamsPathKey,
     pathKeyOverride,
+    customDurationGenerator,
 }) => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -38,17 +44,33 @@ export const RedirectWithDefaultParams: FunctionComponent<
     }
 
     if (!searchString) {
-        const timeRangeQuery = new URLSearchParams([
-            [TimeRangeQueryStringKey.TIME_RANGE, timeRangeDuration.timeRange],
-            [
-                TimeRangeQueryStringKey.START_TIME,
-                timeRangeDuration.startTime.toString(),
-            ],
-            [
-                TimeRangeQueryStringKey.END_TIME,
-                timeRangeDuration.endTime.toString(),
-            ],
-        ]);
+        let timeRangeQuery;
+        if (customDurationGenerator) {
+            const [customTimeStart, customTimeEnd] = customDurationGenerator();
+            timeRangeQuery = new URLSearchParams([
+                [TimeRangeQueryStringKey.TIME_RANGE, TimeRange.CUSTOM],
+                [
+                    TimeRangeQueryStringKey.START_TIME,
+                    customTimeStart.toString(),
+                ],
+                [TimeRangeQueryStringKey.END_TIME, customTimeEnd.toString()],
+            ]);
+        } else {
+            timeRangeQuery = new URLSearchParams([
+                [
+                    TimeRangeQueryStringKey.TIME_RANGE,
+                    timeRangeDuration.timeRange,
+                ],
+                [
+                    TimeRangeQueryStringKey.START_TIME,
+                    timeRangeDuration.startTime.toString(),
+                ],
+                [
+                    TimeRangeQueryStringKey.END_TIME,
+                    timeRangeDuration.endTime.toString(),
+                ],
+            ]);
+        }
         searchString = timeRangeQuery.toString();
     }
 

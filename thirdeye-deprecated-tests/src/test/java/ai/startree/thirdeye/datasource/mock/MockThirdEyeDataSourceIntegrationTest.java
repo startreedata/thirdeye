@@ -69,7 +69,7 @@ public class MockThirdEyeDataSourceIntegrationTest {
             dimensions,
             limit,
             reference,
-            metricConfigDAO,
+            metricConfigDAO.findById(slice.getMetricId()),
             datasetConfigDAO,
             thirdEyeCacheRegistry);
   }

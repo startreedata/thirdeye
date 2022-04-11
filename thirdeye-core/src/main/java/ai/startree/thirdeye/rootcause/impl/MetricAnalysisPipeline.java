@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -273,11 +274,10 @@ public class MetricAnalysisPipeline extends Pipeline {
       jointFilters.putAll(filters);
       jointFilters.putAll(me.getFilters());
 
-      MetricSlice slice = MetricSlice.from(me.getId(), start, end, jointFilters, this.granularity);
+      MetricSlice slice = MetricSlice.from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), start, end, jointFilters, this.granularity);
       try {
         requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.metricDAO, this.datasetDAO,
-                thirdEyeCacheRegistry));
+            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.datasetDAO, thirdEyeCacheRegistry));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }

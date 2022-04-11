@@ -20,7 +20,6 @@ import ai.startree.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.detection.cache.TimeSeriesCache;
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import ai.startree.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -281,15 +280,10 @@ public class DataProviderTest {
         cacheRegistry, CacheConfig.getInstance(),
         mock(TimeSeriesCache.class), dataSourceCache);
 
-    // provider
-    final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(
-        CacheConfig.getInstance(),
-        timeSeriesLoader);
     this.provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
-        timeSeriesCacheBuilder,
         new AnomaliesCacheBuilder(anomalyDAO, CacheConfig.getInstance()));
   }
 

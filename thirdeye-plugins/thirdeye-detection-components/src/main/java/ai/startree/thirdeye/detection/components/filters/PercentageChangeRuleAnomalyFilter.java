@@ -8,6 +8,7 @@ package ai.startree.thirdeye.detection.components.filters;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
 import ai.startree.thirdeye.spi.detection.BaselineParsingUtils;
 import ai.startree.thirdeye.spi.detection.InputDataFetcher;
@@ -62,7 +63,7 @@ public class PercentageChangeRuleAnomalyFilter implements
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     List<MetricSlice> slices = new ArrayList<>();
     MetricSlice currentSlice = MetricSlice
-        .from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
     // customize baseline offset
     if (baseline != null) {
       slices.addAll(this.baseline.scatter(currentSlice));

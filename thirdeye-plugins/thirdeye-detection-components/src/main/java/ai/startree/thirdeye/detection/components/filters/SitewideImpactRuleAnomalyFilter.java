@@ -89,7 +89,7 @@ public class SitewideImpactRuleAnomalyFilter implements
     MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     List<MetricSlice> slices = new ArrayList<>();
     MetricSlice currentSlice = MetricSlice
-        .from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
 
     // customize baseline offset
     MetricSlice baselineSlice = null;
@@ -103,11 +103,11 @@ public class SitewideImpactRuleAnomalyFilter implements
       // if global metric is not set
       MetricEntity siteWideEntity = MetricEntity.fromURN(anomaly.getMetricUrn());
       siteWideSlice = MetricSlice
-          .from(siteWideEntity.getId(), anomaly.getStartTime(), anomaly.getEndTime());
+          .from((MetricConfigDTO) new MetricConfigDTO().setId(siteWideEntity.getId()), anomaly.getStartTime(), anomaly.getEndTime());
     } else {
       MetricEntity siteWideEntity = MetricEntity.fromURN(this.siteWideMetricUrn);
       siteWideSlice = MetricSlice
-          .from(siteWideEntity.getId(), anomaly.getStartTime(), anomaly.getEndTime(),
+          .from((MetricConfigDTO) new MetricConfigDTO().setId(siteWideEntity.getId()), anomaly.getStartTime(), anomaly.getEndTime(),
               siteWideEntity.getFilters());
     }
     slices.add(siteWideSlice);

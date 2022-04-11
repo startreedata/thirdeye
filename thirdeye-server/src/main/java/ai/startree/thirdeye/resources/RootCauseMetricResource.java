@@ -250,7 +250,7 @@ public class RootCauseMetricResource {
     );
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        rootCauseAnalysisInfo.getMetricConfigDTO(),
         filters,
         currentInterval,
         getSimpleRange(),
@@ -258,7 +258,7 @@ public class RootCauseMetricResource {
         rootCauseAnalysisInfo.getDatasetConfigDTO());
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        rootCauseAnalysisInfo.getMetricConfigDTO(),
         filters,
         baselineInterval,
         getSimpleRange(),
@@ -330,14 +330,14 @@ public class RootCauseMetricResource {
   }
 
   private Map<String, Map<String, Double>> computeBreakdown(
-      final long metricId,
+      final MetricConfigDTO metricConfigDTO,
       final List<String> filters,
       final Interval interval,
       final Baseline range,
       final int limit,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.from(metricId,
+    MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
         filters,
         datasetConfigDTO.bucketTimeGranularity(),
@@ -360,7 +360,7 @@ public class RootCauseMetricResource {
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
     MetricSlice baseSlice = MetricSlice.from(
-        metricId,
+        findMetricConfig(metricId),
         new Interval(start, end, dateTimeZone),
         filters,
         findMetricGranularity(metricId),
@@ -440,6 +440,13 @@ public class RootCauseMetricResource {
     }
 
     return output;
+  }
+
+  @Deprecated
+  // prefer getting MetricConfigDTO from RootCauseAnalysisInfo
+  private MetricConfigDTO findMetricConfig(final long metricId) {
+    return ensureExists(metricDAO.findById(metricId),
+        String.format("metric id: %d", metricId));
   }
 
   @Deprecated

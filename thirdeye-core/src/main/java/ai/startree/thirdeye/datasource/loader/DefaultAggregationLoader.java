@@ -12,7 +12,6 @@ import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
@@ -42,17 +41,14 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private static final long TIMEOUT = 600000;
   private static final String ROLLUP_NAME = "OTHER";
 
-  private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public DefaultAggregationLoader(MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
+  public DefaultAggregationLoader(DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final DataSourceCache dataSourceCache) {
-    this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.dataSourceCache = dataSourceCache;
@@ -60,14 +56,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   @Override
   public DataFrame loadBreakdown(MetricSlice slice, int limit) throws Exception {
-    final long metricId = slice.getMetricId();
-
-    // fetch meta data
-    MetricConfigDTO metric = this.metricDAO.findById(metricId);
-    if (metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", metricId));
-    }
-
+    MetricConfigDTO metric = slice.getMetricConfigDTO();
     DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
     if (dataset == null) {
       throw new IllegalArgumentException(
@@ -92,7 +81,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     for (String dimension : dimensions) {
       RequestContainer rc = DataFrameUtils
           .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
-              this.metricDAO, this.datasetDAO,
+              metric, this.datasetDAO,
               thirdEyeCacheRegistry);
       Future<ThirdEyeResponse> res = dataSourceCache
           .getQueryResultAsync(rc.getRequest());
@@ -125,7 +114,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
   @Override
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
       throws Exception {
-    // fixme cyril datasetName should be in Slice / or move the maxTime upper in the stack --> refactor later
+    MetricConfigDTO metric = slice.getMetricConfigDTO();
     LOG.info("Aggregating '{}'", slice);
     final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
         .get(Objects.requireNonNull(slice.getDatasetName()));
@@ -134,7 +123,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     }
 
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", this.metricDAO,
+        .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", metric,
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = dataSourceCache
         .getQueryResult(rc.getRequest());

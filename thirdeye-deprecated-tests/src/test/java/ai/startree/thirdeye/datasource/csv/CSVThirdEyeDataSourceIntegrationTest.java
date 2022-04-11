@@ -101,7 +101,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
       int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     return DataFrameUtils
-        .makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO,
+        .makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO.findById(slice.getMetricId()), datasetConfigDAO,
             thirdEyeCacheRegistry);
   }
 }

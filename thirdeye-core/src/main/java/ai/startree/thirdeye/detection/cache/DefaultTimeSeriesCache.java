@@ -12,6 +12,7 @@ import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
@@ -123,7 +124,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
       long requestSliceEnd = request.getEndTimeExclusive().getMillis();
 
       if (cacheResponse.isMissingStartSlice(requestSliceStart)) {
-        slice = MetricSlice.from(metricId, requestSliceStart, cacheResponse.getFirstTimestamp(),
+        slice = MetricSlice.from((MetricConfigDTO) new MetricConfigDTO().setId(metricId), requestSliceStart, cacheResponse.getFirstTimestamp(),
             request.getFilterSet(),
             request.getGroupByTimeGranularity());
         result = fetchSliceFromSource(slice);
@@ -133,7 +134,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
 
       if (cacheResponse.isMissingEndSlice(requestSliceEnd)) {
         // we add one time granularity to start because the start is inclusive.
-        slice = MetricSlice.from(metricId,
+        slice = MetricSlice.from((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
             cacheResponse.getLastTimestamp() + request.getGroupByTimeGranularity().toMillis(),
             requestSliceEnd,
             request.getFilterSet(), request.getGroupByTimeGranularity());
@@ -153,8 +154,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
     TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO,
-            thirdEyeCacheRegistry);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
     return this.dataSourceCache.getQueryResult(rc.getRequest());
   }
 

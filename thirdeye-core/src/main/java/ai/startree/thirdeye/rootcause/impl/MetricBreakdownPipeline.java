@@ -164,7 +164,7 @@ public class MetricBreakdownPipeline extends Pipeline {
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO.findById(slice.getMetricId()),
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 

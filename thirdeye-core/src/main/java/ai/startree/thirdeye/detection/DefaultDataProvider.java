@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.detection;
 
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import ai.startree.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -57,7 +56,6 @@ public class DefaultDataProvider implements DataProvider {
   private final EventManager eventDAO;
   private final EvaluationManager evaluationDAO;
 
-  private final TimeSeriesCacheBuilder timeseriesCache;
   private final AnomaliesCacheBuilder anomaliesCache;
 
   @Inject
@@ -65,13 +63,11 @@ public class DefaultDataProvider implements DataProvider {
       DatasetConfigManager datasetDAO,
       EventManager eventDAO,
       EvaluationManager evaluationDAO,
-      TimeSeriesCacheBuilder timeseriesCache,
       AnomaliesCacheBuilder anomaliesCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.eventDAO = eventDAO;
     this.evaluationDAO = evaluationDAO;
-    this.timeseriesCache = timeseriesCache;
     this.anomaliesCache = anomaliesCache;
   }
 
@@ -81,23 +77,7 @@ public class DefaultDataProvider implements DataProvider {
 
   @Override
   public Map<MetricSlice, DataFrame> fetchTimeseries(Collection<MetricSlice> slices) {
-    try {
-      Map<MetricSlice, MetricSlice> alignedMetricSlicesToOriginalSlice = new HashMap<>();
-      for (MetricSlice slice : slices) {
-        alignedMetricSlicesToOriginalSlice.put(alignSlice(slice), slice);
-      }
-      Map<MetricSlice, DataFrame> cacheResult = timeseriesCache
-          .fetchSlices(alignedMetricSlicesToOriginalSlice.keySet());
-      Map<MetricSlice, DataFrame> timeseriesResult = new HashMap<>();
-      for (Map.Entry<MetricSlice, DataFrame> entry : cacheResult.entrySet()) {
-        // make a copy of the result so that cache won't be contaminated by client code
-        timeseriesResult
-            .put(alignedMetricSlicesToOriginalSlice.get(entry.getKey()), entry.getValue().copy());
-      }
-      return timeseriesResult;
-    } catch (Exception e) {
-      throw new DataProviderException("fetch time series failed", e);
-    }
+    throw new UnsupportedOperationException("fetchTimeseries not supported anymore");
   }
 
   @Override

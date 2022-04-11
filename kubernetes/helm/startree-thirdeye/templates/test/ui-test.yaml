@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ui-test
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: test-container
+      image: busybox
+      command: [ 'wget' ]
+      args: [ {{ printf "http://%s:%s" ( include "thirdeye.ui.headless" . ) {{ .Values.ui.port }} }} ]
+  restartPolicy: Never

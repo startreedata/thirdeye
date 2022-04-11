@@ -48,6 +48,27 @@ describe("Redirect With Default Params", () => {
         );
     });
 
+    it("should have called navigate with the time range values from customDurationGenerator in query string", async () => {
+        const customDurationGenerator = (): [number, number] => {
+            return [500, 600];
+        };
+        render(
+            <RedirectWithDefaultParams
+                customDurationGenerator={customDurationGenerator}
+                replace={false}
+                to="path-to-redirect-to"
+            >
+                Hello world
+            </RedirectWithDefaultParams>
+        );
+
+        expect(await screen.findByText("Hello world")).toBeInTheDocument();
+        expect(mockNavigate).toHaveBeenLastCalledWith(
+            "path-to-redirect-to?timeRange=CUSTOM&startTime=500&endTime=600",
+            { replace: false }
+        );
+    });
+
     it("should have called navigate with the time range values in query string if there are no last used paths for key", async () => {
         mockGetLastUsedForPath.mockReturnValue(undefined);
         render(

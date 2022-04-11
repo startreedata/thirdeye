@@ -3,4 +3,5 @@ export interface RedirectWithDefaultParamsProps {
     replace?: boolean;
     useStoredLastUsedParamsPathKey?: boolean;
     pathKeyOverride?: string;
+    customDurationGenerator?: () => [number, number];
 }

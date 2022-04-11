@@ -8,6 +8,12 @@ resource_types:
     source:
       repository: pcfabr/azure-blobstore-resource
 
+  - name: slack
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag: latest
+
 resources:
   - name: ci-src
     type: git
@@ -33,6 +39,12 @@ resources:
       uri: ((git-uri))
       branch: versions-((git-branch))
       file: startree-thirdeye-helm-chart-version
+
+  - name: slack
+    type: slack
+    icon: slack
+    source:
+      url: ((slack-webhook-url))
 
 jobs:
 - name: helm-deployment-validation
@@ -67,3 +79,17 @@ jobs:
     put: environment-azure
     params:
       release: environment-azure
+  on_success:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        Thirdeye Helm Charts have been tested successfully.
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure:
+    put: slack
+    params:
+      channel: ((slack-channel))
+      text: |
+        <!channel> Failed to test Thirdeye Helm Charts.
+        ((concourse-url))/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME

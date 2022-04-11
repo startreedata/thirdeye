@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,7 +18,9 @@ import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
 import { getMetric, updateMetric } from "../../rest/metrics/metrics.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getMetricsViewPath } from "../../utils/routes/routes.util";
 import { MetricsUpdatePageParams } from "./metrics-update-page.interfaces";
 
@@ -73,17 +76,38 @@ export const MetricsUpdatePage: FunctionComponent = () => {
             .then(([metricResponse, datasetsResponse]): void => {
                 // Determine if any of the calls failed
                 if (
-                    metricResponse.status === "rejected" ||
-                    datasetsResponse.status === "rejected"
+                    metricResponse.status === PROMISES.REJECTED ||
+                    datasetsResponse.status === PROMISES.REJECTED
                 ) {
-                    notify(NotificationTypeV1.Error, t("message.fetch-error"));
+                    const axiosError =
+                        datasetsResponse.status === PROMISES.REJECTED
+                            ? datasetsResponse.reason
+                            : metricResponse.status === PROMISES.REJECTED
+                            ? metricResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      datasetsResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.datasets"
+                                          : "label.metric"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
                 }
 
                 // Attempt to gather data
-                if (metricResponse.status === "fulfilled") {
+                if (metricResponse.status === PROMISES.FULFILLED) {
                     setMetric(metricResponse.value);
                 }
-                if (datasetsResponse.status === "fulfilled") {
+                if (datasetsResponse.status === PROMISES.FULFILLED) {
                     setDatasets(datasetsResponse.value);
                 }
             })

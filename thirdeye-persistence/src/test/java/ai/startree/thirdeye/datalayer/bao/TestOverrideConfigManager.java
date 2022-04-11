@@ -16,13 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestOverrideConfigManager {
 
-  private final DateTime now = new DateTime();
+  private final DateTime now = new DateTime(DateTimeZone.UTC);
   private Long overrideConfigId1 = null;
   private OverrideConfigManager overrideConfigDAO;
 

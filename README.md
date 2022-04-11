@@ -38,12 +38,11 @@ ThirdEye is not a generic dashboard builder toolkit. ThirdEye attempts to bring 
 
 ## Documentation
 
-Detailed documentation can be found at [ThirdEye documentation](https://thirdeye.readthedocs.io) for a complete description of ThirdEye's features.
+Detailed documentation can be found at [ThirdEye documentation](https://dev.startree.ai/docs/thirdeye/) for a complete description of ThirdEye's features.
 
-- [Quick Start](https://thirdeye.readthedocs.io/en/latest/quick_start.html)
-- [Data Sources Setup](https://thirdeye.readthedocs.io/en/latest/datasources.html)
-- [Production Settings](https://thirdeye.readthedocs.io/en/latest/production.html)
-- [Alert Setup](https://thirdeye.readthedocs.io/en/latest/alert_setup.html)
+- [Getting started](https://dev.startree.ai/docs/thirdeye/getting-started/)
+- [Data Sources Setup](https://dev.startree.ai/docs/thirdeye/how-tos/database/)
+- [Alert Setup](https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration)
 
 ## Build
 
@@ -69,8 +68,8 @@ mvn install
 # To skip tests during build
 mvn install -DskipTests
 
-# If you are working on backend, You may skip the ui and docs modules
-mvn install -pl '!thirdeye-ui' -pl '!thirdeye-docs'
+# If you are working on backend, You may skip the ui module
+mvn install -pl '!thirdeye-ui'
 
 # To Skip Integration tests
 mvn install -pl '!thirdeye-integration-tests'

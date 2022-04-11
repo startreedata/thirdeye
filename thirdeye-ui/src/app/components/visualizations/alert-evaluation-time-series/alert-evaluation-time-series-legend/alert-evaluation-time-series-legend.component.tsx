@@ -1,5 +1,6 @@
 import { Grid, Typography, useTheme } from "@material-ui/core";
-import { Legend, LegendItem, LegendLabel, scaleOrdinal } from "@visx/visx";
+import { Legend, LegendItem, LegendLabel } from "@visx/legend";
+import { scaleOrdinal } from "@visx/scale";
 import classnames from "classnames";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
@@ -60,7 +61,7 @@ export const AlertEvaluationTimeSeriesLegend: FunctionComponent<
     return (
         <Legend scale={legendScale}>
             {(labels) => (
-                <Grid container justify="space-between" spacing={0}>
+                <Grid container justifyContent="space-between" spacing={0}>
                     {labels &&
                         labels.map((label, index) => (
                             <Grid item key={index}>

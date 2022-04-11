@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -20,7 +21,9 @@ import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
@@ -80,11 +83,41 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             getAllAlerts(),
         ])
             .then(([subscriptionGroupResponse, alertsResponse]): void => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertsResponse.status === PROMISES.REJECTED
+                            ? alertsResponse.reason
+                            : subscriptionGroupResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertsResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.alerts"
+                                          : "label.subscription-group"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (subscriptionGroupResponse.status === "fulfilled") {
+                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
                     setSubscriptionGroup(subscriptionGroupResponse.value);
                 }
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     setAlerts(alertsResponse.value);
                 }
             })

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +131,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   @Override
   @Transactional
   public int deleteRecordsOlderThanDaysWithStatus(final int days, final TaskStatus status) {
-    final DateTime expireDate = new DateTime().minusDays(days);
+    final DateTime expireDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     final Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
 
     final Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
@@ -147,7 +148,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
 
   @Override
   public List<TaskDTO> findByStatusWithinDays(final TaskStatus status, final int days) {
-    final DateTime activeDate = new DateTime().minusDays(days);
+    final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
     final Predicate statusPredicate = Predicate.EQ("status", status.toString());
     final Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
@@ -157,7 +158,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   @Override
   public List<TaskDTO> findByStatusesAndTypeWithinDays(final List<TaskStatus> statuses,
       final TaskType type, final int days) {
-    final DateTime activeDate = new DateTime().minusDays(days);
+    final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
     final Predicate statusPredicate = Predicate
         .IN("status", statuses.stream().map(Enum::toString).toArray());
@@ -168,9 +169,9 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
 
   @Override
   public List<TaskDTO> findTimeoutTasksWithinDays(final int days, final long maxTaskTime) {
-    final DateTime activeDate = new DateTime().minusDays(days);
+    final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    final DateTime timeoutDate = new DateTime().minus(maxTaskTime);
+    final DateTime timeoutDate = new DateTime(DateTimeZone.UTC).minus(maxTaskTime);
     final Timestamp timeoutTimestamp = new Timestamp(timeoutDate.getMillis());
     final Predicate statusPredicate = Predicate.EQ("status", TaskStatus.RUNNING.toString());
     final Predicate daysTimestampPredicate = Predicate.GE("createTime", activeTimestamp);

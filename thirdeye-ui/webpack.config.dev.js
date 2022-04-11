@@ -120,7 +120,8 @@ module.exports = {
         proxy: [
             {
                 context: "/api",
-                target: "http://23.99.9.151:8080/",
+                target:
+                    process.env.TE_DEV_PROXY_SERVER || "http://localhost:8080/",
                 changeOrigin: true,
             },
         ],

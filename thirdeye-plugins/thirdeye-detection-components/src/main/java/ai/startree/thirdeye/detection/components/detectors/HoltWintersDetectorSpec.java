@@ -12,11 +12,17 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
   private double alpha = -1;
   private double beta = -1;
   private double gamma = -1;
+  @Deprecated // kept for backward compatibility - prefer seasonalityPeriod
   private int period = 7;
   private double sensitivity = 5;
   private Pattern pattern = Pattern.UP_OR_DOWN;
   private String weekStart = "WEDNESDAY";
+  @Deprecated // kept for backward compatibility - prefer lookbackPeriod
   private Integer lookback = null;
+  /**Lookback period in ISO-8601 format eg P1D. Used with monitoringGranularity to compute lookback in steps.*/
+  private String lookbackPeriod = null;
+  /*Biggest period in ISO-8601 format eg P7D. Used with monitoringGranularity to compute period in steps.*/
+  private String seasonalityPeriod = null;
 
   public double getAlpha() {
     return alpha;
@@ -81,12 +87,32 @@ public class HoltWintersDetectorSpec extends AbstractSpec {
     return this;
   }
 
+  @Deprecated
   public Integer getLookback() {
     return lookback;
   }
 
+  @Deprecated
   public HoltWintersDetectorSpec setLookback(final Integer lookback) {
     this.lookback = lookback;
+    return this;
+  }
+
+  public String getLookbackPeriod() {
+    return lookbackPeriod;
+  }
+
+  public HoltWintersDetectorSpec setLookbackPeriod(final String lookbackPeriod) {
+    this.lookbackPeriod = lookbackPeriod;
+    return this;
+  }
+
+  public String getSeasonalityPeriod() {
+    return seasonalityPeriod;
+  }
+
+  public HoltWintersDetectorSpec setSeasonalityPeriod(final String seasonalityPeriod) {
+    this.seasonalityPeriod = seasonalityPeriod;
     return this;
   }
 }

@@ -268,4 +268,19 @@ public class TimeUtilsTest {
 
     assertThat(output).isEqualTo(expected);
   }
+
+  @Test
+  public void testFloorByPeriodWithCustomTimezone() {
+    // 23H30 utc --> means 1h30 CEST. Flooring by day should not give the same result.
+    final long APRIL_1_2022_23H30 = 1648855800000L;
+    final DateTime dtUTC = new DateTime(APRIL_1_2022_23H30, DateTimeZone.forID("UTC"));
+    final long flooredUTC = floorByPeriod(dtUTC, Period.days(1)).getMillis();
+    final long expectedUTC = 1648771200000L; //APRIL_1_2022_00H00 UTC
+    assertThat(flooredUTC).isEqualTo(expectedUTC);
+
+    final DateTime dtCEST = new DateTime(APRIL_1_2022_23H30, DateTimeZone.forID("Europe/Amsterdam"));
+    final long flooredCEST = floorByPeriod(dtCEST, Period.days(1)).getMillis();
+    final long expectedCEST = 1648850400000L; //APRIL_1_2022_22H00 UTC = APRIL_2_2022_00H00 CEST
+    assertThat(flooredCEST).isEqualTo(expectedCEST);
+  }
 }

@@ -220,55 +220,6 @@ public class RootCauseMetricResource {
     return Response.ok(urnToAggregates).build();
   }
 
-  /**
-   * Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.
-   * Aligns time stamps if necessary and omits null values.
-   *
-   * @param anomalyId anomaly id
-   * @param offset offset identifier (e.g. "current", "wo2w")
-   * @param limit limit results to the top k elements, plus a rollup element
-   * @return aggregate value, or NaN if data not available
-   * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
-   */
-  @GET
-  @Path("/breakdown/anomaly/{id}")
-  @ApiOperation(value =
-      "Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.\n"
-          + "Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  public Response getAnomalyBreakdown(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-
-    if (limit == null) {
-      limit = LIMIT_DEFAULT;
-    }
-    Baseline range = parseOffset(offset, DateTimeZone.UTC);
-
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
-        anomalyId);
-    final Interval anomalyInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        DateTimeZone.UTC);
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
-        filters,
-        anomalyInterval,
-        range,
-        limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
-    return Response.ok(breakdown).build();
-  }
-
   @GET
   @Path("/heatmap/anomaly/{id}")
   @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
@@ -368,13 +319,13 @@ public class RootCauseMetricResource {
   private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
     final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
     LOG.info("RCA metric analysis - Base slice: {} - {}",
-        formatter.print(baseSlice.getStart()),
-        formatter.print(baseSlice.getEnd()));
+        formatter.print(baseSlice.getStartMillis()),
+        formatter.print(baseSlice.getEndMillis()));
     for (int i = 0; i < slices.size(); i++) {
       LOG.info("RCA metric analysis - Offset Slice {}:  {} - {}",
           i,
-          formatter.print(slices.get(i).getStart()),
-          formatter.print(slices.get(i).getEnd()));
+          formatter.print(slices.get(i).getStartMillis()),
+          formatter.print(slices.get(i).getEndMillis()));
     }
   }
 
@@ -387,8 +338,7 @@ public class RootCauseMetricResource {
       final TimeGranularity timeGranularity) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricId,
-        interval.getStartMillis(),
-        interval.getEndMillis(),
+        interval,
         filters,
         timeGranularity);
 
@@ -409,8 +359,7 @@ public class RootCauseMetricResource {
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
     MetricSlice baseSlice = MetricSlice.from(metricId,
-        start,
-        end,
+        new Interval(start, end, dateTimeZone),
         filters,
         findMetricGranularity(metricId));
     Baseline range = parseOffset(offset, dateTimeZone);
@@ -449,7 +398,7 @@ public class RootCauseMetricResource {
       futures.put(slice, this.executor.submit(() -> {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
         if (df.isEmpty()) {
-          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStart())
+          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStartMillis())
               .addSeries(DataFrame.COL_VALUE, Double.NaN).setIndex(DataFrame.COL_TIME);
         }
         return df;

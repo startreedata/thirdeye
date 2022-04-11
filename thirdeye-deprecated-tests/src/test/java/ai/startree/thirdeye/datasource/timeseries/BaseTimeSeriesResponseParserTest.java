@@ -16,11 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * A base test class for providing the mocked ThirdEye response which could be used to test Response Parsers.
+ * A base test class for providing the mocked ThirdEye response which could be used to test Response
+ * Parsers.
  */
 public class BaseTimeSeriesResponseParserTest {
 
@@ -84,8 +87,8 @@ public class BaseTimeSeriesResponseParserTest {
     List<String> dimensionNames = getDimensionNames();
 
     ThirdEyeRequest.ThirdEyeRequestBuilder requestBuilder = new ThirdEyeRequest.ThirdEyeRequestBuilder();
-    requestBuilder.setStartTimeInclusive(1);
-    requestBuilder.setEndTimeExclusive(4);
+    requestBuilder.setStartTimeInclusive(new DateTime(1, DateTimeZone.UTC));
+    requestBuilder.setEndTimeExclusive(new DateTime(4, DateTimeZone.UTC));
     requestBuilder.setMetricFunctions(metricFunctions);
     requestBuilder.setGroupBy(dimensionNames);
     requestBuilder.setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.MILLISECONDS));

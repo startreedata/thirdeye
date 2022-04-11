@@ -50,26 +50,26 @@ public class PercentageChangeRuleAnomalyFilterTest {
 
     Map<MetricSlice, DataFrame> aggregates = new HashMap<>();
     aggregates.put(slice1,
-        new DataFrame().addSeries(DataFrame.COL_TIME, slice1.getStart()).addSeries(
+        new DataFrame().addSeries(DataFrame.COL_TIME, slice1.getStartMillis()).addSeries(
             DataFrame.COL_VALUE, 150).setIndex(DataFrame.COL_TIME));
     aggregates.put(baselineSlice1,
-        new DataFrame().addSeries(DataFrame.COL_TIME, baselineSlice1.getStart()).addSeries(
+        new DataFrame().addSeries(DataFrame.COL_TIME, baselineSlice1.getStartMillis()).addSeries(
             DataFrame.COL_VALUE, 200).setIndex(DataFrame.COL_TIME));
     aggregates.put(slice2,
         new DataFrame().addSeries(DataFrame.COL_VALUE, 500)
-            .addSeries(DataFrame.COL_TIME, slice2.getStart()).setIndex(
+            .addSeries(DataFrame.COL_TIME, slice2.getStartMillis()).setIndex(
             DataFrame.COL_TIME));
     aggregates.put(baselineSlice2,
         new DataFrame().addSeries(DataFrame.COL_VALUE, 1000)
-            .addSeries(DataFrame.COL_TIME, baselineSlice2.getStart()).setIndex(
+            .addSeries(DataFrame.COL_TIME, baselineSlice2.getStartMillis()).setIndex(
             DataFrame.COL_TIME));
     aggregates.put(slice3,
         new DataFrame().addSeries(DataFrame.COL_VALUE, 200)
-            .addSeries(DataFrame.COL_TIME, slice3.getStart()).setIndex(
+            .addSeries(DataFrame.COL_TIME, slice3.getStartMillis()).setIndex(
             DataFrame.COL_TIME));
     aggregates.put(baselineSlice3,
         new DataFrame().addSeries(DataFrame.COL_VALUE, 150)
-            .addSeries(DataFrame.COL_TIME, baselineSlice3.getStart()).setIndex(
+            .addSeries(DataFrame.COL_TIME, baselineSlice3.getStartMillis()).setIndex(
             DataFrame.COL_TIME));
 
     this.testDataProvider = new MockDataProvider().setAggregates(aggregates);

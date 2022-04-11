@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 public class DatalayerTestUtils {
 
@@ -62,8 +63,8 @@ public class DatalayerTestUtils {
     jobSpec.setStatus(Constants.JobStatus.SCHEDULED);
     jobSpec.setTaskType(TaskType.DETECTION);
     jobSpec.setScheduleStartTime(System.currentTimeMillis());
-    jobSpec.setWindowStartTime(new DateTime().minusHours(20).getMillis());
-    jobSpec.setWindowEndTime(new DateTime().minusHours(10).getMillis());
+    jobSpec.setWindowStartTime(new DateTime(DateTimeZone.UTC).minusHours(20).getMillis());
+    jobSpec.setWindowEndTime(new DateTime(DateTimeZone.UTC).minusHours(10).getMillis());
     jobSpec.setConfigId(100);
     return jobSpec;
   }

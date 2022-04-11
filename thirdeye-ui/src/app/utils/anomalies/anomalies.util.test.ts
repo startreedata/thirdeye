@@ -7,6 +7,8 @@ import {
     filterAnomalies,
     filterAnomaliesByTime,
     getAnomaliesAtTime,
+    getAnomalyDeviation,
+    getAnomalyDuration,
     getAnomalyName,
     getUiAnomalies,
     getUiAnomaly,
@@ -82,6 +84,18 @@ describe("Anomalies Util", () => {
 
     it("getUiAnomalies should return appropriate UI anomalies for anomalies", () => {
         expect(getUiAnomalies(mockAnomalies)).toEqual(mockUiAnomalies);
+    });
+
+    it("getAnomalyDeviation should return the fraction for an anomaly", () => {
+        expect(getAnomalyDeviation(mockAnomaly1)).toEqual(-0.2);
+    });
+
+    it("getAnomalyDeviation should return 0 for NaN deviation for an anomaly", () => {
+        expect(getAnomalyDeviation(mockAnomaly6)).toEqual(0);
+    });
+
+    it("getAnomalyDuration should return 1 for an anomaly", () => {
+        expect(getAnomalyDuration(mockAnomaly1)).toEqual(1);
     });
 
     it("filterAnomalies should return empty array for invalid UI anomalies", () => {
@@ -252,6 +266,14 @@ const mockAnomaly5 = {
     endTime: 110,
     avgCurrentVal: 0,
     avgBaselineVal: 5,
+} as Anomaly;
+
+const mockAnomaly6 = {
+    id: 1,
+    startTime: 100,
+    endTime: 110,
+    avgCurrentVal: 0,
+    avgBaselineVal: 0,
 } as Anomaly;
 
 const mockAnomalies = [

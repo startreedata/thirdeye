@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
 jest.mock("../../platform/components", () => ({
@@ -37,12 +37,12 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
     });
 
     it("should show all the UI components for valid data responses", async () => {
-        expect.assertions(8);
+        expect.assertions(7);
 
         render(
             <AnomalyBreakdownComparisonHeatmap
-                anomaly={mockAnomalyDetailsResponse as Anomaly}
                 anomalyId={451751}
+                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
             />
         );
 
@@ -52,12 +52,6 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         );
 
         expect(filterDataControlsContainer).toBeInTheDocument();
-
-        const tooltipReferenceContainer = await screen.findByText(
-            "Tooltip Reference"
-        );
-
-        expect(tooltipReferenceContainer).toBeInTheDocument();
 
         // Ensure a treemap shows for each dimension in the data payload.
         // These are the labels for each treemap
@@ -84,8 +78,8 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
 
         render(
             <AnomalyBreakdownComparisonHeatmap
-                anomaly={mockAnomalyDetailsResponse as Anomaly}
                 anomalyId={451751}
+                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
                 shouldTruncateText={false}
             />
         );
@@ -114,8 +108,8 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
 
         render(
             <AnomalyBreakdownComparisonHeatmap
-                anomaly={mockAnomalyDetailsResponse as Anomaly}
                 anomalyId={451751}
+                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
             />
         );
 
@@ -179,21 +173,6 @@ const MOCK_HEATMAP_DATA_RESPONSE = {
             version: { "0.1": 21366.0, "0.2": 87034.0, "0.3": 985108.0 },
         },
     },
-};
-
-const mockAnomalyDetailsResponse = {
-    id: 451751,
-    startTime: 1585353600000,
-    endTime: 1585526400000,
-    avgCurrentVal: 360957.0,
-    avgBaselineVal: 196314.0,
-    score: 0.0,
-    weight: 0.0,
-    impactToGlobal: 0.0,
-    sourceType: "ANOMALY_REPLAY",
-    created: 1640811064046,
-    notified: true,
-    alert: { id: 451747, name: "pageviews-percentage-change" },
 };
 
 const mockNotify = jest.fn();

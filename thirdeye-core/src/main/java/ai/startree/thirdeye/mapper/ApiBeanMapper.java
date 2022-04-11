@@ -9,6 +9,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AlertMetadataApi;
 import ai.startree.thirdeye.spi.api.AlertNodeApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -216,7 +217,15 @@ public abstract class ApiBeanMapper {
   }
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
-    AnomalyApi anomalyApi = new AnomalyApi()
+    final MetricApi metricApi = optional(dto.getMetric())
+        .map(metric -> new MetricApi().setName(metric))
+        .orElse(null);
+
+    final DatasetApi datasetApi = optional(dto.getCollection())
+        .map(datasetName -> new DatasetApi().setName(datasetName))
+        .orElse(null);
+
+    final AnomalyApi anomalyApi = new AnomalyApi()
         .setId(dto.getId())
         .setStartTime(new Date(dto.getStartTime()))
         .setEndTime(new Date(dto.getEndTime()))
@@ -229,16 +238,17 @@ public abstract class ApiBeanMapper {
         .setSourceType(dto.getAnomalyResultSource())
         .setNotified(dto.isNotified())
         .setMessage(dto.getMessage())
-        .setMetric(optional(dto.getMetric())
-            .map(metric -> new MetricApi().setName(metric))
-            .orElse(null));
+        .setMetric(metricApi)
+        .setMetadata(new AlertMetadataApi()
+            .setMetric(metricApi)
+            .setDataset(datasetApi)
+        )
+        ;
     if (dto.getMetricUrn() != null) {
       anomalyApi
           .setMetric(toMetricApi(dto.getMetricUrn())
               .setName(dto.getMetric())
-              .setDataset(new DatasetApi()
-                  .setName(dto.getCollection())
-              )
+              .setDataset(datasetApi)
           );
     }
     anomalyApi.setAlert(new AlertApi()

@@ -207,7 +207,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                     container
                     alignItems="stretch"
                     className={datasourceWizardClasses.controlsContainer}
-                    justify="flex-end"
+                    justifyContent="flex-end"
                 >
                     {datasourceConfigurationError && (
                         <Grid item sm={12}>
@@ -229,7 +229,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                     </Grid>
 
                     <Grid item sm={12}>
-                        <Grid container justify="space-between">
+                        <Grid container justifyContent="space-between">
                             {/* Cancel button */}
                             <Grid item>
                                 <Grid container>

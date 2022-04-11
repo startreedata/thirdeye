@@ -7,5 +7,5 @@ export enum ActionStatus {
 
 export interface ActionHook {
     status: ActionStatus;
-    errorMessage: string;
+    errorMessages: string[];
 }

@@ -60,6 +60,9 @@ data:
       enabled: {{ not .Values.worker.enabled }}
       id: 0 # must be a non-negative integer unique per instance/worker
 
+    time:
+      timezone: {{ .Values.time.timezone }}
+
 
     mockEvents:
       enabled: false
@@ -106,6 +109,7 @@ data:
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}
+      clientId: {{ .Values.ui.clientId }}
 
     # Prometheus compatible metrics will be exposed at /admin/prometheus
     prometheus:

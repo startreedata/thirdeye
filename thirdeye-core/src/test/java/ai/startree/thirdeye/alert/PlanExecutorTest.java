@@ -5,22 +5,22 @@
 
 package ai.startree.thirdeye.alert;
 
-import static ai.startree.thirdeye.detection.v2.operator.ForkJoinOperator.K_COMBINER;
-import static ai.startree.thirdeye.detection.v2.operator.ForkJoinOperator.K_ENUMERATOR;
-import static ai.startree.thirdeye.detection.v2.operator.ForkJoinOperator.K_ROOT;
+import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_COMBINER;
+import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ENUMERATOR;
+import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ROOT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.detection.v2.operator.CombinerOperator;
-import ai.startree.thirdeye.detection.v2.operator.CombinerOperator.CombinerResult;
-import ai.startree.thirdeye.detection.v2.operator.EchoOperator;
-import ai.startree.thirdeye.detection.v2.operator.EchoOperator.EchoResult;
-import ai.startree.thirdeye.detection.v2.plan.CombinerPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.EchoPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.EnumeratorPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.ForkJoinPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.PlanNodeFactory;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator.CombinerResult;
+import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
+import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator.EchoResult;
+import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -51,6 +53,7 @@ public class PlanExecutorTest {
     final String nodeName = "root";
     node.init(new PlanNodeContext()
         .setName(nodeName)
+        .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC))
         .setPlanNodeBean(new PlanNodeBean()
             .setInputs(Collections.emptyList())
             .setParams(ImmutableMap.of(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
@@ -108,7 +111,7 @@ public class PlanExecutorTest {
 
     final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
-        0L, System.currentTimeMillis());
+        new Interval(0L, System.currentTimeMillis(), DateTimeZone.UTC));
     PlanExecutor.executePlanNode(
         pipelinePlanNodes,
         context,

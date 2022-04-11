@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -18,6 +20,8 @@ import {
     deleteSubscriptionGroup,
     getAllSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { PROMISES } from "../../utils/constants/constants.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
@@ -40,11 +44,41 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         let fetchedAlerts: Alert[] = [];
         Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
             .then(([subscriptionGroupsResponse, alertsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertsResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertsResponse.status === PROMISES.REJECTED
+                            ? alertsResponse.reason
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertsResponse.status ===
+                                          PROMISES.REJECTED
+                                          ? "label.alerts"
+                                          : "label.subscription-groups"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (alertsResponse.status === "fulfilled") {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     fetchedAlerts = alertsResponse.value;
                 }
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedUiSubscriptionGroups = getUiSubscriptionGroups(
                         subscriptionGroupsResponse.value,
                         fetchedAlerts

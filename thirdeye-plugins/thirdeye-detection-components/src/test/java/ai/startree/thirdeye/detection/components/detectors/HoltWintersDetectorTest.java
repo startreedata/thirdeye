@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.HashMap;
 import java.util.Map;
 import org.assertj.core.data.Offset;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
@@ -72,7 +73,7 @@ public class HoltWintersDetectorTest {
   @Test
   public void testNoAnomalies() throws DetectorException {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -88,8 +89,8 @@ public class HoltWintersDetectorTest {
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
-    spec.setPeriod(3);
+    spec.setLookbackPeriod("P10D");
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -161,7 +162,7 @@ public class HoltWintersDetectorTest {
             0,
             0,
             0);
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -180,8 +181,8 @@ public class HoltWintersDetectorTest {
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
-    spec.setPeriod(3);
+    spec.setLookbackPeriod("P10D");
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -200,7 +201,7 @@ public class HoltWintersDetectorTest {
   public void testDetectionRunsOnIntervalOnly() throws DetectorException {
     // test anomaly analysis is only conducted on the interval
     // notice the interval is smaller than the dataframe data
-    Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -216,8 +217,8 @@ public class HoltWintersDetectorTest {
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
-    spec.setPeriod(3);
+    spec.setLookbackPeriod("P10D");
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -235,7 +236,7 @@ public class HoltWintersDetectorTest {
   @Test
   public void testAnomaliesUpAndDown() throws DetectorException {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -251,8 +252,8 @@ public class HoltWintersDetectorTest {
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    spec.setLookback(10);
-    spec.setPeriod(3);
+    spec.setLookbackPeriod("P10D");
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -275,7 +276,7 @@ public class HoltWintersDetectorTest {
   @Test
   public void testAnomaliesUpOnly() throws DetectorException {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -292,8 +293,8 @@ public class HoltWintersDetectorTest {
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.UP);
-    spec.setLookback(10);
-    spec.setPeriod(3);
+    spec.setLookbackPeriod("P10D");
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);
@@ -316,7 +317,7 @@ public class HoltWintersDetectorTest {
   @Test
   public void testAnomaliesDownOnly() throws DetectorException {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -333,8 +334,8 @@ public class HoltWintersDetectorTest {
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
     spec.setMonitoringGranularity("P1D");
     spec.setPattern(Pattern.DOWN);
-    spec.setLookback(10);
-    spec.setPeriod(3);
+    spec.setLookbackPeriod("P10D");
+    spec.setSeasonalityPeriod("P3D");
     spec.setSensitivity(0); // corresponds to zscore of 1
     HoltWintersDetector detector = new HoltWintersDetector();
     detector.init(spec);

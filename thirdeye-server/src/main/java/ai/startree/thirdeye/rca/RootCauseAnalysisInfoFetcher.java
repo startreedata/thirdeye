@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.rca;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
@@ -27,8 +28,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 
 @Singleton
 public class RootCauseAnalysisInfoFetcher {
@@ -80,20 +82,15 @@ public class RootCauseAnalysisInfoFetcher {
       tryMigrateAlertFromRcaToMetadata(alertDTO);
     }
 
-    // render properties - startTime/endTime not important
+    // render properties - detectionInterval not important
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-        alertDTO, 0L, 0L);
+        alertDTO, new Interval(0L, 0L, DateTimeZone.UTC));
     // parse metadata
-    AlertMetadataDTO alertMetadataDto = Objects.requireNonNull(templateWithProperties.getMetadata(),
-        "metadata not found in alert config.");
-    final MetricConfigDTO metadataMetricDTO = Objects.requireNonNull(alertMetadataDto.getMetric(),
-        "metadata$metric not found in alert config.");
-    final String metricName = Objects.requireNonNull(metadataMetricDTO.getName(),
-        "metadata$metric$name not found in alert config.");
-    final DatasetConfigDTO metadataDatasetDTO = Objects.requireNonNull(alertMetadataDto.getDataset(),
-        "metadata$dataset not found in alert config.");
-    final String datasetName = Objects.requireNonNull(metadataDatasetDTO.getDataset(),
-        "metadata$dataset$dataset not found in alert config.");
+    AlertMetadataDTO alertMetadataDto = ensureExists(templateWithProperties.getMetadata(), ERR_MISSING_CONFIGURATION_FIELD,"metadata.");
+    final MetricConfigDTO metadataMetricDTO = ensureExists(alertMetadataDto.getMetric(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$metric");
+    final String metricName = ensureExists(metadataMetricDTO.getName(), ERR_MISSING_CONFIGURATION_FIELD,"metadata$metric$name");
+    final DatasetConfigDTO metadataDatasetDTO = ensureExists(alertMetadataDto.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset");
+    final String datasetName = ensureExists(metadataDatasetDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset$dataset");
 
     // take config from persistence - makes it sure dataset/metric DTO configs are correct for RCA
     final MetricConfigDTO metricConfigDTO = ensureExists(

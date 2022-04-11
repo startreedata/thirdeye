@@ -1,8 +1,6 @@
 import {
     Box,
-    Card,
     CardContent,
-    CardHeader,
     Chip,
     Divider,
     Grid,
@@ -14,13 +12,11 @@ import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { formatDateAndTimeV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
@@ -37,26 +33,20 @@ import {
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
 import {
     formatTreemapData,
-    OFFSET_TO_HUMAN_READABLE,
-    OFFSET_TO_MILLISECONDS,
     summarizeDimensionValueData,
 } from "./anomaly-breakdown-comparison-heatmap.utils";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
 export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     AnomalyBreakdownComparisonHeatmapProps
-> = ({
-    anomalyId,
-    comparisonOffset = AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
-    anomaly,
-    shouldTruncateText = true,
-}: AnomalyBreakdownComparisonHeatmapProps) => {
+> = ({ anomalyId, shouldTruncateText = true, comparisonOffset }) => {
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
     const {
         anomalyMetricBreakdown,
         getMetricBreakdown,
         status: anomalyBreakdownReqStatus,
+        errorMessages: anomalyBreakdownReqErrors,
     } = useGetAnomalyMetricBreakdown();
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
@@ -174,17 +164,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
 
-    useEffect(() => {
-        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.heatmap-data"),
-                })
-            );
-        }
-    }, [anomalyBreakdownReqStatus]);
-
     const handleNodeClick = (
         tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
         dimensionColumn: string
@@ -222,74 +201,24 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         return node.size;
     };
 
+    useEffect(() => {
+        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
+            !isEmpty(anomalyBreakdownReqErrors)
+                ? anomalyBreakdownReqErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.heatmap-data"),
+                      })
+                  );
+        }
+    }, [anomalyBreakdownReqStatus, anomalyBreakdownReqErrors]);
+
     return (
-        <Card variant="outlined">
-            <CardHeader
-                title="Heatmap of Change in Contribution"
-                titleTypographyProps={{ variant: "h5" }}
-            />
-
+        <>
             <CardContent>
-                {breakdownComparisonData &&
-                    breakdownComparisonData.length > 0 &&
-                    anomaly && (
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Typography variant="h6">
-                                    Tooltip Reference
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={6}>
-                                <div>
-                                    <strong>
-                                        &quot;{t("label.current")}&quot;
-                                    </strong>{" "}
-                                    Data Date Range
-                                </div>
-                                <div>
-                                    {formatDateAndTimeV1(anomaly.startTime)}
-                                    <strong> to </strong>
-                                    {formatDateAndTimeV1(anomaly.endTime)}
-                                </div>
-                            </Grid>
-                            <Grid item xs={6}>
-                                <div>
-                                    <strong>
-                                        &quot;{t("label.baseline")}&quot;
-                                    </strong>
-                                    <span>
-                                        {" "}
-                                        Data Date Range (
-                                        {
-                                            OFFSET_TO_HUMAN_READABLE[
-                                                comparisonOffset
-                                            ]
-                                        }
-                                        )
-                                    </span>
-                                </div>
-                                <div>
-                                    {formatDateAndTimeV1(
-                                        anomaly.startTime -
-                                            OFFSET_TO_MILLISECONDS[
-                                                comparisonOffset
-                                            ]
-                                    )}
-                                    <strong> to </strong>
-                                    {formatDateAndTimeV1(
-                                        anomaly.endTime -
-                                            OFFSET_TO_MILLISECONDS[
-                                                comparisonOffset
-                                            ]
-                                    )}
-                                </div>
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Divider />
-                            </Grid>
-                        </Grid>
-                    )}
                 {anomalyFilterOptions && (
                     <Grid container className={classes.filtersContainer}>
                         <Grid item xs={12}>
@@ -414,6 +343,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                     </Grid>
                 )}
             </CardContent>
-        </Card>
+        </>
     );
 };

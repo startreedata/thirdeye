@@ -4,6 +4,7 @@
  */
 package ai.startree.thirdeye.detection.components.detectors;
 
+import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeSteps;
 import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
@@ -14,7 +15,7 @@ import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;
@@ -71,127 +72,34 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private HoltWintersDetectorSpec spec;
   private int lookback = 60;
 
-  private static double calculateInitialLevel(final double[] y) {
-    return y[0];
-  }
-
-  /**
-   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-   *
-   * @return - Initial trend - Bt[1]
-   */
-  private static double calculateInitialTrend(final double[] y, final int period) {
-    double sum = 0;
-
-    for (int i = 0; i < period; i++) {
-      sum += y[period + i] - y[i];
-    }
-
-    return sum / (period * period);
-  }
-
-  /**
-   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-   *
-   * @return - Seasonal Indices.
-   */
-  private static double[] calculateSeasonalIndices(final double[] y, final int period,
-      final int seasons) {
-    final double[] seasonalMean = new double[seasons];
-    final double[] seasonalIndices = new double[period];
-
-    final double[] averagedObservations = new double[y.length];
-
-    for (int i = 0; i < seasons; i++) {
-      for (int j = 0; j < period; j++) {
-        seasonalMean[i] += y[(i * period) + j];
-      }
-      seasonalMean[i] /= period;
-    }
-
-    for (int i = 0; i < seasons; i++) {
-      for (int j = 0; j < period; j++) {
-        // zero case
-        if (seasonalMean[i] == 0 && y[(i * period) + j] == 0) {
-          // no seasonality
-          averagedObservations[(i * period) + j] = 1;
-        }
-        // case seasonalMean = 0 and y[(i * period) + j] != 0 cannot happen if all values are positive
-        // very unlikely to happen if at least one value is not null
-        // fixme cyril add logging if this happens (or reimplement HW) - for the moment returns a nan
-        else {
-          averagedObservations[(i * period) + j] = y[(i * period) + j] / seasonalMean[i];
-        }
-      }
-    }
-
-    for (int i = 0; i < period; i++) {
-      for (int j = 0; j < seasons; j++) {
-        seasonalIndices[i] += averagedObservations[(j * period) + i];
-      }
-      seasonalIndices[i] /= seasons;
-    }
-
-    return seasonalIndices;
-  }
-
-  /**
-   * Returns the error bound of given list based on mean, std and given zscore
-   *
-   * @param givenNumbers double list
-   * @param zscore zscore used to multiply by std
-   * @return the error bound
-   */
-  private static double calculateErrorBound(final List<Double> givenNumbers, final double zscore) {
-    // no data: cannot compute mean and variance
-    if (givenNumbers.size() == 0) {
-      return 0;
-    }
-    // one point: cannot compute variance - apply rule of thumb
-    if (givenNumbers.size() == 1) {
-      return Math.abs(givenNumbers.get(0)) / 2;
-    }
-    // calculate the mean value (= average)
-    double sum = 0.0;
-    for (final double num : givenNumbers) {
-      sum += num;
-    }
-    final double mean = sum / givenNumbers.size();
-
-    // calculate standard deviation
-    double squaredDifferenceSum = 0.0;
-    for (final double num : givenNumbers) {
-      squaredDifferenceSum += (num - mean) * (num - mean);
-    }
-    final double variance = squaredDifferenceSum / givenNumbers.size();
-    final double standardDeviation = Math.sqrt(variance);
-
-    return zscore * standardDeviation;
-  }
-
-  /**
-   * Mapping of sensitivity to zscore on range of 1 - 3
-   *
-   * @param sensitivity double from 0 to 10. Values outside this range are clipped to 0, 10
-   * @return zscore
-   */
-  private static double zscore(double sensitivity) {
-    return 1 + 0.2 * (10 - Math.max(Math.min(sensitivity, 10), 0));
-  }
-
   @Override
   public void init(final HoltWintersDetectorSpec spec) {
     this.spec = spec;
-    period = spec.getPeriod();
-    alpha = spec.getAlpha();
-    beta = spec.getBeta();
-    gamma = spec.getGamma();
-    pattern = requireNonNull(spec.getPattern(),
+    this.alpha = spec.getAlpha();
+    this.beta = spec.getBeta();
+    this.gamma = spec.getGamma();
+    this.pattern = requireNonNull(spec.getPattern(),
         "pattern is null. Allowed values : " + Arrays.toString(Pattern.values()));
-    sensitivity = spec.getSensitivity();
+    this.sensitivity = spec.getSensitivity();
 
-    optional(spec.getLookback())
-        .ifPresent(lookback -> this.lookback = lookback);
+    if (spec.getLookbackPeriod() != null) {
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when lookbackPeriod is used");
+      this.lookback = computeSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
+    } else if (spec.getLookback() != null) {
+      // fixme cyril remove deprecated lookback and only use lookbackPeriod in 2 months (mid-May)
+      this.lookback = spec.getLookback();
+    } // else uses default value - not recommended
+
+    if (spec.getSeasonalityPeriod() != null) {
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when seasonalityPeriod is used");
+      this.period = computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
+    } else {
+      // fixme cyril remove deprecated period and only use lookbackPeriod in 2 months (mid-May)
+      // use default or set value - but not a good idea
+      this.period = spec.getPeriod();
+    }
   }
 
   @Override
@@ -219,7 +127,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
         .addSeries(COL_DIFF_VIOLATION,
-            inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+            inputDf.getDoubles(COL_DIFF).abs().gt(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return
@@ -338,10 +246,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
       // We need at least 2 periods of data
-      // fixme cyril period is in number of observations - prefer ISO 8601 or auto period
       if (trainingDF.size() < 2 * period) {
         // fixme cyril adding warn only to not change the behavior but I think this should throw an exception - it will fail later
-        LOG.warn("Not enough historical data available for Holt-Winters algorithm. Alert configuration may be incorrect.");
+        LOG.warn(
+            "Not enough historical data available for Holt-Winters algorithm. Alert configuration may be incorrect.");
         continue;
       }
 
@@ -361,6 +269,10 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
+        LOG.info("Optimized parameters for Holt-Winters: alpha: {}, beta: {}, gamma: {}",
+            params.getAlpha(),
+            params.getBeta(),
+            params.getGamma());
       } else {
         params = new HoltWintersParams(alpha, beta, gamma);
       }
@@ -464,6 +376,114 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double getGamma() {
       return gamma;
     }
+  }
+
+  private static double calculateInitialLevel(final double[] y) {
+    return y[0];
+  }
+
+  /**
+   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
+   *
+   * @return - Initial trend - Bt[1]
+   */
+  private static double calculateInitialTrend(final double[] y, final int period) {
+    double sum = 0;
+
+    for (int i = 0; i < period; i++) {
+      sum += y[period + i] - y[i];
+    }
+
+    return sum / (period * period);
+  }
+
+  /**
+   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
+   *
+   * @return - Seasonal Indices.
+   */
+  private static double[] calculateSeasonalIndices(final double[] y, final int period,
+      final int seasons) {
+    final double[] seasonalMean = new double[seasons];
+    final double[] seasonalIndices = new double[period];
+
+    final double[] averagedObservations = new double[y.length];
+
+    for (int i = 0; i < seasons; i++) {
+      for (int j = 0; j < period; j++) {
+        seasonalMean[i] += y[(i * period) + j];
+      }
+      seasonalMean[i] /= period;
+    }
+
+    for (int i = 0; i < seasons; i++) {
+      for (int j = 0; j < period; j++) {
+        // zero case
+        if (seasonalMean[i] == 0 && y[(i * period) + j] == 0) {
+          // no seasonality
+          averagedObservations[(i * period) + j] = 1;
+        }
+        // case seasonalMean = 0 and y[(i * period) + j] != 0 cannot happen if all values are positive
+        // very unlikely to happen if at least one value is not null
+        // fixme cyril add logging if this happens (or reimplement HW) - for the moment returns a nan
+        else {
+          averagedObservations[(i * period) + j] = y[(i * period) + j] / seasonalMean[i];
+        }
+      }
+    }
+
+    for (int i = 0; i < period; i++) {
+      for (int j = 0; j < seasons; j++) {
+        seasonalIndices[i] += averagedObservations[(j * period) + i];
+      }
+      seasonalIndices[i] /= seasons;
+    }
+
+    return seasonalIndices;
+  }
+
+  /**
+   * Returns the error bound of given list based on mean, std and given zscore
+   *
+   * @param givenNumbers double list
+   * @param zscore zscore used to multiply by std
+   * @return the error bound
+   */
+  private static double calculateErrorBound(final List<Double> givenNumbers, final double zscore) {
+    // no data: cannot compute mean and variance
+    if (givenNumbers.size() == 0) {
+      return 0;
+    }
+    // one point: cannot compute variance - apply rule of thumb
+    if (givenNumbers.size() == 1) {
+      return Math.abs(givenNumbers.get(0)) / 2;
+    }
+    // calculate the mean value (= average)
+    double sum = 0.0;
+    for (final double num : givenNumbers) {
+      sum += num;
+    }
+    final double mean = sum / givenNumbers.size();
+
+    // calculate standard deviation
+    double squaredDifferenceSum = 0.0;
+    for (final double num : givenNumbers) {
+      squaredDifferenceSum += (num - mean) * (num - mean);
+    }
+    final double variance = squaredDifferenceSum / givenNumbers.size();
+    final double standardDeviation = Math.sqrt(variance);
+
+    return zscore * standardDeviation;
+  }
+
+  /**
+   * Mapping of sensitivity to zscore on range of 1 - 3
+   *
+   * @param sensitivity double from 0 to 10. Values outside this range are clipped to 0, 10
+   * @return zscore
+   */
+  private static double zscore(double sensitivity) {
+    return 1 + 0.2 * (10 - Math.max(Math.min(sensitivity, 10), 0));
   }
 
   /**

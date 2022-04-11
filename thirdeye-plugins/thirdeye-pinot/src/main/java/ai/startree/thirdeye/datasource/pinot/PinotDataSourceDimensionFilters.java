@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,7 @@ public class PinotDataSourceDimensionFilters {
       // left blank
     }
 
-    DateTime endDateTime = new DateTime(maxTime).plusMillis(1);
+    DateTime endDateTime = new DateTime(maxTime, DateTimeZone.UTC).plusMillis(1);
     DateTime startDateTime = endDateTime.minusDays(7);
 
     Map<String, List<String>> filters = null;

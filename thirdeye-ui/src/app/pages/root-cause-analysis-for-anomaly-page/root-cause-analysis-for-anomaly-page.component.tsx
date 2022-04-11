@@ -1,13 +1,13 @@
 import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
-import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -36,10 +36,12 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         anomaly,
         getAnomaly,
         status: getAnomalyRequestStatus,
+        errorMessages: anomalyRequestErrors,
     } = useGetAnomaly();
     const {
         evaluation,
         getEvaluation,
+        errorMessages,
         status: getEvaluationRequestStatus,
     } = useGetEvaluation();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
@@ -69,17 +71,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     useEffect(() => {
         fetchAlertEvaluation();
     }, [uiAnomaly, searchParams]);
-
-    useEffect(() => {
-        if (getEvaluationRequestStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.chart-data"),
-                })
-            );
-        }
-    }, [getEvaluationRequestStatus]);
 
     useEffect(() => {
         if (evaluation && anomaly) {
@@ -116,6 +107,36 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             createAlertEvaluation(uiAnomaly.alertId, Number(start), Number(end))
         );
     };
+
+    useEffect(() => {
+        if (getEvaluationRequestStatus === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
+        }
+    }, [errorMessages, getEvaluationRequestStatus]);
+
+    useEffect(() => {
+        if (getAnomalyRequestStatus === ActionStatus.Error) {
+            isEmpty(anomalyRequestErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomaly"),
+                      })
+                  )
+                : anomalyRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [getAnomalyRequestStatus, anomalyRequestErrors]);
 
     return (
         <PageV1>
@@ -202,12 +223,14 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     </Paper>
                 </Grid>
 
-                {/* Trending */}
+                {/* Dimension Related */}
                 <Grid item xs={12}>
-                    <AnomalyBreakdownComparisonHeatmap
-                        anomaly={anomaly}
-                        anomalyId={toNumber(anomalyId)}
-                    />
+                    {anomaly && (
+                        <AnalysisTabs
+                            anomaly={anomaly}
+                            anomalyId={toNumber(anomalyId)}
+                        />
+                    )}
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

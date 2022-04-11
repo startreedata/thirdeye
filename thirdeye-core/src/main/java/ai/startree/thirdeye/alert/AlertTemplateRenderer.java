@@ -9,7 +9,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.detection.v2.plan.AnomalyDetectorPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.joda.time.Interval;
 
 @Singleton
 public class AlertTemplateRenderer {
@@ -43,17 +45,16 @@ public class AlertTemplateRenderer {
    * Render the alert template API for /evaluate
    *
    * @param alert the alert API
-   * @param startMillis start time
-   * @param endMillis end time
+   * @param detectionInterval interval of detection
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertApi alert, long startMillis, long endMillis)
+  public AlertTemplateDTO renderAlert(AlertApi alert, final Interval detectionInterval)
       throws IOException, ClassNotFoundException {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
     if (alert.getId() != null) {
       final AlertDTO alertDto = ensureExists(alertManager.findById(alert.getId()));
-      return renderAlert(alertDto, startMillis, endMillis);
+      return renderAlert(alertDto, detectionInterval);
     }
 
     final AlertTemplateApi templateApi = alert.getTemplate();
@@ -63,8 +64,7 @@ public class AlertTemplateRenderer {
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
     return renderAlertInternal(alertTemplateDTO,
         templateProperties,
-        startMillis,
-        endMillis,
+        detectionInterval,
         alert.getName());
   }
 
@@ -72,31 +72,27 @@ public class AlertTemplateRenderer {
    * Render the alert template for Alert task execution
    *
    * @param alert the alert DTO (persisted in db)
-   * @param startMillis start time
-   * @param endMillis end time
+   * @param detectionInterval interval of detection
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertDTO alert, long startMillis, long endMillis)
+  public AlertTemplateDTO renderAlert(AlertDTO alert, final Interval detectionInterval)
       throws IOException, ClassNotFoundException {
     return renderAlertInternal(
         alert.getTemplate(),
         alert.getTemplateProperties(),
-        startMillis,
-        endMillis,
+        detectionInterval,
         alert.getName());
   }
 
   private AlertTemplateDTO renderAlertInternal(final AlertTemplateDTO alertTemplateInsideAlertDto,
       final Map<String, Object> templateProperties,
-      final long startMillis,
-      final long endMillis,
+      final Interval detectionInterval,
       final String alertName)
       throws IOException, ClassNotFoundException {
     final AlertTemplateDTO template = getTemplate(alertTemplateInsideAlertDto);
     return applyContext(template,
         templateProperties,
-        startMillis,
-        endMillis,
+        detectionInterval,
         alertName);
   }
 
@@ -118,16 +114,15 @@ public class AlertTemplateRenderer {
 
   private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
       final Map<String, Object> templateProperties,
-      final long startTimeMillis,
-      final long endTimeMillis,
+      final Interval detectionInterval,
       final String alertName) throws IOException, ClassNotFoundException {
-    final Map<String, Object> properties = new HashMap<>();
+    final Map<String, Object> properties = Optional.ofNullable(template.getDefaultProperties()).orElse(new HashMap<>());
     if (templateProperties != null) {
       properties.putAll(templateProperties);
     }
 
-    properties.put("startTime", startTimeMillis);
-    properties.put("endTime", endTimeMillis);
+    properties.put("startTime", detectionInterval.getStartMillis());
+    properties.put("endTime", detectionInterval.getEndMillis());
     // add source metadata to each node
     if (template.getNodes() != null) {
       template.getNodes().stream()

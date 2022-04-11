@@ -1,4 +1,5 @@
 import { Grid } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -14,18 +15,21 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import {
-    deleteAnomaly,
-    getAnomalies,
-} from "../../rest/anomalies/anomalies.rest";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
+import { getAnomalyName } from "../../utils/anomalies/anomalies.util";
 import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
+    const {
+        getAnomalies,
+        status: getAnomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
+    const [anomalies, setAnomalies] = useState<Anomaly[] | null>(null);
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -35,50 +39,68 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         fetchAnomaliesByTime();
     }, [searchParams]);
 
+    useEffect(() => {
+        if (
+            getAnomaliesRequestStatus === ActionStatus.Done &&
+            anomalies &&
+            anomalies.length === 0
+        ) {
+            notify(
+                NotificationTypeV1.Info,
+                t("message.no-data-for-entity-for-date-range", {
+                    entity: t("label.anomalies"),
+                })
+            );
+        }
+    }, [getAnomaliesRequestStatus, anomalies]);
+
     const fetchAnomaliesByTime = (): void => {
-        setUiAnomalies(null);
+        setAnomalies(null);
 
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
 
-        let fetchedUiAnomalies: UiAnomaly[] = [];
-        getAnomalies({ startTime: Number(start), endTime: Number(end) })
-            .then((anomalies) => {
-                fetchedUiAnomalies = getUiAnomalies(anomalies);
-            })
-            .finally(() => setUiAnomalies(fetchedUiAnomalies));
+        getAnomalies({ startTime: Number(start), endTime: Number(end) }).then(
+            (anomalies) => {
+                if (anomalies && anomalies.length) {
+                    setAnomalies(anomalies);
+                }
+            }
+        );
     };
 
-    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
+    const handleAnomalyDelete = (anomaly: Anomaly): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
+            text: t("message.delete-confirmation", {
+                name: getAnomalyName(anomaly),
+            }),
             okButtonLabel: t("label.delete"),
-            onOk: () => handleAnomalyDeleteOk(uiAnomaly),
+            onOk: () => handleAnomalyDeleteOk(anomaly),
         });
     };
 
-    const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
-        deleteAnomaly(uiAnomaly.id).then((anomaly): void => {
+    const handleAnomalyDeleteOk = (anomaly: Anomaly): void => {
+        deleteAnomaly(anomaly.id).then((anomaly): void => {
             notify(
                 NotificationTypeV1.Success,
                 t("message.delete-success", { entity: t("label.anomaly") })
             );
 
             // Remove deleted anomaly from fetched anomalies
-            removeUiAnomaly(anomaly);
+            removeAnomaly(anomaly);
         });
     };
 
-    const removeUiAnomaly = (anomaly: Anomaly): void => {
+    const removeAnomaly = (anomaly: Anomaly): void => {
         if (!anomaly) {
             return;
         }
 
-        setUiAnomalies(
-            (uiAnomalies) =>
-                uiAnomalies &&
-                uiAnomalies.filter((uiAnomaly) => uiAnomaly.id !== anomaly.id)
+        setAnomalies(
+            (anomalies) =>
+                anomalies &&
+                anomalies.filter((currAnomaly) => currAnomaly.id !== anomaly.id)
         );
     };
 
@@ -91,6 +113,21 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         setSearchParams(searchParams);
     };
 
+    useEffect(() => {
+        if (getAnomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
+        }
+    }, [getAnomaliesRequestStatus, anomaliesRequestErrors]);
+
     return (
         <PageV1>
             <PageHeader
@@ -101,10 +138,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>
+                    {/* Anomaly list */}
                     <PageContentsCardV1 disablePadding fullHeight>
-                        {/* Anomaly list */}
                         <AnomalyListV1
-                            anomalies={uiAnomalies}
+                            anomalies={anomalies}
                             searchFilterValue={searchParams.get(
                                 SEARCH_TERM_QUERY_PARAM_KEY
                             )}

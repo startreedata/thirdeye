@@ -10,7 +10,6 @@ import {
     getAlertTemplatesCreatePath,
     getDatasetsOnboardPath,
     getDatasourcesCreatePath,
-    getMetricsCreatePath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
 
@@ -24,10 +23,6 @@ export const CreateMenuButton: FunctionComponent = () => {
 
     const handleCreateSubscriptionGroup = (): void => {
         navigate(getSubscriptionGroupsCreatePath());
-    };
-
-    const handleCreateMetric = (): void => {
-        navigate(getMetricsCreatePath());
     };
 
     const handleOnBoardDataset = (): void => {
@@ -56,12 +51,6 @@ export const CreateMenuButton: FunctionComponent = () => {
             }),
         },
         {
-            id: "createMetric",
-            text: t("label.create-entity", {
-                entity: t("label.metric"),
-            }),
-        },
-        {
             id: "onboardDataset",
             text: t("label.onboard-entity", {
                 entity: t("label.dataset"),
@@ -81,10 +70,7 @@ export const CreateMenuButton: FunctionComponent = () => {
         },
     ];
 
-    const handleShortcutCreateOnclick = (
-        id: number | string,
-        _: string
-    ): void => {
+    const handleShortcutCreateOnclick = (id: number | string): void => {
         switch (id) {
             case "createAlert":
                 handleCreateAlert();
@@ -94,10 +80,7 @@ export const CreateMenuButton: FunctionComponent = () => {
                 handleCreateSubscriptionGroup();
 
                 break;
-            case "createMetric":
-                handleCreateMetric();
 
-                break;
             case "onboardDataset":
                 handleOnBoardDataset();
 

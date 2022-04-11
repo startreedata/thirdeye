@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
 import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
-import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
@@ -57,30 +56,35 @@ public class InternalResource {
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
+  private final HttpDetectorResource httpDetectorResource;
   private final DatabaseAdminResource databaseAdminResource;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationTaskRunner notificationTaskRunner;
-  private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final NotificationSchemeFactory notificationSchemeFactory;
 
   @Inject
   public InternalResource(
+      final HttpDetectorResource httpDetectorResource,
       final DatabaseAdminResource databaseAdminResource,
       final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationTaskRunner notificationTaskRunner,
-      final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
       final NotificationSchemeFactory notificationSchemeFactory) {
+    this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
-    this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationSchemeFactory = notificationSchemeFactory;
+  }
+
+  @Path("http-detector")
+  public HttpDetectorResource getHttpDetectorResource() {
+    return httpDetectorResource;
   }
 
   @Path("db-admin")
@@ -90,13 +94,13 @@ public class InternalResource {
 
   @GET
   @Path("ping")
-  public Response ping(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response ping() {
     return Response.ok("pong").build();
   }
 
   @GET
   @Path("version")
-  public Response getVersion(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response getVersion() {
     return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();
   }
 

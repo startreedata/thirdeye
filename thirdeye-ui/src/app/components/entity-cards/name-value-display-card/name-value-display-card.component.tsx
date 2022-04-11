@@ -49,7 +49,7 @@ export function NameValueDisplayCard<T>(
                         <Grid
                             container
                             alignItems="center"
-                            justify="space-between"
+                            justifyContent="space-between"
                         >
                             {/* Name */}
                             <Grid item>

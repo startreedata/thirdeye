@@ -29,67 +29,60 @@ public final class MetricSlice {
   private final long metricId;
   private final Interval interval;
   private final Multimap<String, String> filters;
+  // make below fields non nullable if possible
   private final @Nullable
   TimeGranularity granularity;
+  private final @Nullable String datasetName;
+
 
   MetricSlice(long metricId, final @NonNull Interval interval, Multimap<String, String> filters,
-      TimeGranularity granularity) {
+      @Nullable TimeGranularity granularity, @Nullable final String datasetName) {
     this.metricId = metricId;
     this.interval = interval;
     this.filters = filters;
     this.granularity = granularity;
+    this.datasetName = datasetName;
   }
 
-  public static MetricSlice from (final long metricId, final Interval interval) {
-    return new MetricSlice(metricId, interval, ArrayListMultimap.create(), null);
+  public static MetricSlice from (final long metricId, final Interval interval, final String datasetName) {
+    return new MetricSlice(metricId, interval, ArrayListMultimap.create(), null, datasetName);
   }
 
   public static MetricSlice from(final long metricId, final Interval interval,
-      final Multimap<String, String> filters) {
-    return new MetricSlice(metricId, interval, filters, null);
+      final Multimap<String, String> filters, final String datasetName) {
+    return new MetricSlice(metricId, interval, filters, null, datasetName);
   }
 
   /**
    * Filters in format dim1=val1, dim2!=val2
    */
   public static MetricSlice from(final long metricId, final Interval interval,
-      final List<String> filters, TimeGranularity granularity) {
+      final List<String> filters, TimeGranularity granularity, final String datasetName) {
     List<FilterPredicate> predicates = EntityUtils.extractFilterPredicates(filters);
     Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
-    return new MetricSlice(metricId, interval, filtersMap, granularity);
+    return new MetricSlice(metricId, interval, filtersMap, granularity, datasetName);
   }
 
   public static MetricSlice from(final long metricId, final Interval interval,
-      final Multimap<String, String> filters, TimeGranularity granularity) {
-    return new MetricSlice(metricId, interval, filters, granularity);
+      final Multimap<String, String> filters, TimeGranularity granularity, final String datasetName) {
+    return new MetricSlice(metricId, interval, filters, granularity, datasetName);
   }
 
   @Deprecated
   public static MetricSlice from(long metricId, long start, long end) {
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), ArrayListMultimap.create(), null);
+    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), ArrayListMultimap.create(), null, null);
   }
 
   @Deprecated
   public static MetricSlice from(long metricId, long start, long end,
       Multimap<String, String> filters) {
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filters, null);
-  }
-
-  /**
-   * Filters in format dim1=val1, dim2!=val2
-   */
-  @Deprecated
-  public static MetricSlice from(long metricId, long start, long end,
-      List<String> filters, TimeGranularity granularity) {
-    List<FilterPredicate> predicates = EntityUtils.extractFilterPredicates(filters);
-    Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filtersMap, granularity);
+    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filters, null, null);
   }
 
   @Deprecated
   public static MetricSlice from(long metricId, long start, long end,
       Multimap<String, String> filters, TimeGranularity granularity) {
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filters, granularity);
+    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filters, granularity, null);
   }
 
   public long getMetricId() {
@@ -120,38 +113,43 @@ public final class MetricSlice {
     return granularity;
   }
 
+  public @Nullable String getDatasetName() {
+    return datasetName;
+  }
+
   public MetricSlice withStart(DateTime start) {
-    return new MetricSlice(metricId, interval.withStart(start), filters, granularity);
+    return new MetricSlice(metricId, interval.withStart(start), filters, granularity, datasetName);
   }
 
   @Deprecated
   public MetricSlice withStart(long start) {
-    return new MetricSlice(metricId, interval.withStartMillis(start), filters, granularity);
+    return new MetricSlice(metricId, interval.withStartMillis(start), filters, granularity, datasetName);
   }
 
   public MetricSlice withEnd(DateTime end) {
-    return new MetricSlice(metricId, interval.withEnd(end), filters, granularity);
+    return new MetricSlice(metricId, interval.withEnd(end), filters, granularity, datasetName);
   }
 
   @Deprecated
   public MetricSlice withEnd(long end) {
-    return new MetricSlice(metricId, interval.withEndMillis(end), filters, granularity);
+    return new MetricSlice(metricId, interval.withEndMillis(end), filters, granularity, datasetName);
   }
 
   public MetricSlice withFilters(Multimap<String, String> filters) {
-    return new MetricSlice(metricId, interval, filters, granularity);
+    return new MetricSlice(metricId, interval, filters, granularity, datasetName);
   }
 
   public MetricSlice withGranularity(TimeGranularity granularity) {
-    return new MetricSlice(metricId, interval, filters, granularity);
+    return new MetricSlice(metricId, interval, filters, granularity, datasetName);
   }
 
   /**
    * check if current metric slice contains another metric slice
    */
   public boolean containSlice(MetricSlice slice) {
-    return slice.metricId == this.metricId && slice.granularity.equals(this.granularity) && slice
+    return slice.metricId == this.metricId && Objects.equals(slice.granularity, this.granularity) && slice
         .getFilters().equals(this.getFilters()) &&
+        Objects.equals(slice.datasetName, this.datasetName) &&
         this.interval.contains(slice.interval);
   }
 
@@ -166,7 +164,8 @@ public final class MetricSlice {
     MetricSlice that = (MetricSlice) o;
     return metricId == that.metricId && Objects.equals(interval, that.interval) && Objects
         .equals(filters, that.filters)
-        && Objects.equals(granularity, that.granularity);
+        && Objects.equals(granularity, that.granularity)
+        && Objects.equals(datasetName, that.datasetName);
   }
 
   @Override
@@ -182,6 +181,7 @@ public final class MetricSlice {
         .add("end", interval.getEnd())
         .add("filters", filters)
         .add("granularity", granularity)
+        .add("datasetName", datasetName)
         .toString();
   }
 }

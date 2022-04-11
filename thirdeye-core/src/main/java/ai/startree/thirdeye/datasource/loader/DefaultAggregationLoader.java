@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -124,24 +125,10 @@ public class DefaultAggregationLoader implements AggregationLoader {
   @Override
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
       throws Exception {
-    final long metricId = slice.getMetricId();
-
-    // fetch meta data
-    MetricConfigDTO metric = this.metricDAO.findById(metricId);
-    if (metric == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve metric id %d", metricId));
-    }
-
-    DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(
-          String.format("Could not resolve dataset '%s'", metric.getDataset()));
-    }
-
+    // fixme cyril datasetName should be in Slice / or move the maxTime upper in the stack --> refactor later
     LOG.info("Aggregating '{}'", slice);
-
     final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
-        .get(dataset.getDataset());
+        .get(Objects.requireNonNull(slice.getDatasetName()));
     if (slice.getStartMillis() > maxTime) {
       return emptyDataframe(dimensions);
     }

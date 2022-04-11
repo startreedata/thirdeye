@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 public class OAuthIntegrationTest {
 
   public static final Logger log = LoggerFactory.getLogger(OAuthIntegrationTest.class);
-  public static final String THIRDEYE_CONFIG = "./src/test/resources/e2e/config";
+  public static final String THIRDEYE_CONFIG = "./src/test/resources/auth";
 
   private static final String KEY_SET_FILENAME = "keyset.json";
   private static final String ISSUER = "http://identity.example.com";
@@ -57,7 +57,7 @@ public class OAuthIntegrationTest {
     oauthSetup();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
-        resourceFilePath("e2e/config/server.yaml"),
+        resourceFilePath("auth/server.yaml"),
         config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", db.getDbConfig().getUrl()),

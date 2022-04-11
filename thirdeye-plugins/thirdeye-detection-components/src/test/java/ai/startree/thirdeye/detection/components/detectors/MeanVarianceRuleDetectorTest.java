@@ -425,4 +425,12 @@ public class MeanVarianceRuleDetectorTest {
 
     assertThat(output).isEqualTo(403);
   }
+
+  @Test
+  public void testComputeLookbackStepsWithYearPeriod() {
+    String period = "P365D";
+    String monitoringGranularity = "P1D";
+    int output = computeSteps(period, monitoringGranularity);
+    assertThat(output).isEqualTo(365);
+  }
 }

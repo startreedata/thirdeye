@@ -1,4 +1,5 @@
 import { AxisScale } from "@visx/axis";
+import { UseTooltipParams } from "@visx/tooltip/lib/hooks/useTooltip";
 import React from "react";
 import {
     DataPoint,
@@ -17,9 +18,13 @@ export interface ChartCoreProps {
     showXAxis?: boolean;
     xAxisOptions?: XAxisOptions;
     showYAxis?: boolean;
+    tooltipUtils?: UseTooltipParams<{ xValue: number }>;
     top?: number;
     left?: number;
-    children?: React.ReactNode;
+    children?: (
+        xScale: AxisScale<number>,
+        yScale: AxisScale<number>
+    ) => React.ReactElement | undefined;
     yAccessor?: (d: DataPoint) => number;
     xAccessor?: (d: DataPoint) => Date;
     colorScale: (name: string) => string;

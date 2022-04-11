@@ -1,5 +1,5 @@
 import { Bounds } from "@visx/brush/lib/types";
-import { Series } from "../time-series-chart.interfaces";
+import { Series, XAxisOptions } from "../time-series-chart.interfaces";
 
 export interface ChartBrushProps {
     series: Series[];
@@ -9,4 +9,5 @@ export interface ChartBrushProps {
     colorScale: (name: string) => string;
     onBrushChange: (domain: Bounds | null) => void;
     onBrushClick: () => void;
+    xAxisOptions?: XAxisOptions;
 }

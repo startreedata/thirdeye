@@ -27,6 +27,7 @@ export interface XAxisOptions {
 }
 export interface TimeSeriesChartProps {
     series: Series[];
+    tooltip?: boolean;
     xAxis?: XAxisOptions;
     yAxis?: boolean;
     legend?: boolean;

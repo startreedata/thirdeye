@@ -3,6 +3,7 @@ import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import React, { FunctionComponent, useMemo, useRef } from "react";
 import { ChartCore } from "../chart-core/chart-core.component";
+import { ChartCoreProps } from "../chart-core/chart-core.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
 import { ChartBrushProps } from "./chart-brush.interfaces";
 
@@ -21,6 +22,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     top,
     onBrushChange,
     onBrushClick,
+    xAxisOptions,
 }) => {
     const brushRef = useRef<BaseBrush>(null);
 
@@ -66,10 +68,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
         [yBrushMax, series]
     );
 
-    const chartOptions = {
-        chart: {
-            height: height,
-        },
+    const chartOptions: ChartCoreProps = {
         series,
         width,
         yMax: yBrushMax,
@@ -83,23 +82,37 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
         yScale: dataScale,
     };
 
+    if (xAxisOptions && xAxisOptions.plotBands) {
+        chartOptions.xAxisOptions = { ...xAxisOptions };
+        chartOptions.xAxisOptions.plotBands = xAxisOptions.plotBands.map(
+            (plotBand) => {
+                const clone = { ...plotBand };
+                clone.name = "";
+
+                return clone;
+            }
+        );
+    }
+
     return (
         <ChartCore {...chartOptions}>
-            <Brush
-                useWindowMoveEvents
-                brushDirection="horizontal"
-                handleSize={8}
-                height={yBrushMax}
-                innerRef={brushRef}
-                margin={BRUSH_MARGIN}
-                resizeTriggerAreas={["left", "right"]}
-                selectedBoxStyle={SELECTED_BRUSH_STYLE}
-                width={xBrushMax}
-                xScale={dateScale}
-                yScale={dataScale}
-                onChange={onBrushChange}
-                onClick={onBrushClick}
-            />
+            {() => (
+                <Brush
+                    useWindowMoveEvents
+                    brushDirection="horizontal"
+                    handleSize={8}
+                    height={yBrushMax}
+                    innerRef={brushRef}
+                    margin={BRUSH_MARGIN}
+                    resizeTriggerAreas={["left", "right"]}
+                    selectedBoxStyle={SELECTED_BRUSH_STYLE}
+                    width={xBrushMax}
+                    xScale={dateScale}
+                    yScale={dataScale}
+                    onChange={onBrushChange}
+                    onClick={onBrushClick}
+                />
+            )}
         </ChartCore>
     );
 };

@@ -56,6 +56,7 @@ public class InternalResource {
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
+  private final HttpDetectorResource httpDetectorResource;
   private final DatabaseAdminResource databaseAdminResource;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationTaskRunner notificationTaskRunner;
@@ -65,18 +66,25 @@ public class InternalResource {
 
   @Inject
   public InternalResource(
+      final HttpDetectorResource httpDetectorResource,
       final DatabaseAdminResource databaseAdminResource,
       final NotificationServiceRegistry notificationServiceRegistry,
       final NotificationTaskRunner notificationTaskRunner,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
       final NotificationSchemeFactory notificationSchemeFactory) {
+    this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationSchemeFactory = notificationSchemeFactory;
+  }
+
+  @Path("http-detector")
+  public HttpDetectorResource getHttpDetectorResource() {
+    return httpDetectorResource;
   }
 
   @Path("db-admin")

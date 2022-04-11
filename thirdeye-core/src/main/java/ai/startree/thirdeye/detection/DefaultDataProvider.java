@@ -19,7 +19,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -38,7 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
@@ -58,7 +56,6 @@ public class DefaultDataProvider implements DataProvider {
   private final DatasetConfigManager datasetDAO;
   private final EventManager eventDAO;
   private final EvaluationManager evaluationDAO;
-  private final AggregationLoader aggregationLoader;
 
   private final TimeSeriesCacheBuilder timeseriesCache;
   private final AnomaliesCacheBuilder anomaliesCache;
@@ -68,14 +65,12 @@ public class DefaultDataProvider implements DataProvider {
       DatasetConfigManager datasetDAO,
       EventManager eventDAO,
       EvaluationManager evaluationDAO,
-      AggregationLoader aggregationLoader,
       TimeSeriesCacheBuilder timeseriesCache,
       AnomaliesCacheBuilder anomaliesCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.eventDAO = eventDAO;
     this.evaluationDAO = evaluationDAO;
-    this.aggregationLoader = aggregationLoader;
     this.timeseriesCache = timeseriesCache;
     this.anomaliesCache = anomaliesCache;
   }
@@ -108,21 +103,7 @@ public class DefaultDataProvider implements DataProvider {
   @Override
   public Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices,
       final List<String> dimensions, int limit) {
-    try {
-      Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
-      for (final MetricSlice slice : slices) {
-        futures.put(slice, this.executor.submit(
-            () -> aggregationLoader.loadAggregate(slice, dimensions, limit)));
-      }
-
-      Map<MetricSlice, DataFrame> output = new HashMap<>();
-      for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
-        output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
-      }
-      return output;
-    } catch (Exception e) {
-      throw new DataProviderException(e);
-    }
+    throw new UnsupportedOperationException("fetchAggregates not supported anymore");
   }
 
   /**

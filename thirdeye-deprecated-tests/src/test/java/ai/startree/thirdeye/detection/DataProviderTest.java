@@ -16,14 +16,12 @@ import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.datasource.csv.CSVThirdEyeDataSource;
-import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.detection.cache.TimeSeriesCache;
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import ai.startree.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
@@ -38,7 +36,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
@@ -46,7 +43,6 @@ import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.spi.detection.model.EventSlice;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.io.InputStreamReader;
@@ -278,11 +274,6 @@ public class DataProviderTest {
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
-    // aggregation loader
-    final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO,
-        datasetDAO,
-        cacheRegistry, dataSourceCache);
-
     // time series loader
     DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
         TestDbEnv.getInstance().getMetricConfigDAO(),
@@ -298,7 +289,6 @@ public class DataProviderTest {
         datasetDAO,
         eventDAO,
         evaluationDAO,
-        aggregationLoader,
         timeSeriesCacheBuilder,
         new AnomaliesCacheBuilder(anomalyDAO, CacheConfig.getInstance()));
   }
@@ -340,15 +330,6 @@ public class DataProviderTest {
         .assertTrue(metrics.contains(makeMetric(this.metricIds.get(1), "myMetric2", "myDataset2")));
     Assert
         .assertTrue(metrics.contains(makeMetric(this.metricIds.get(2), "myMetric3", "myDataset1")));
-  }
-
-  @Test
-  public void testFetchAggregation() {
-    MetricSlice metricSlice = MetricSlice
-        .from(this.metricIds.get(1), 0L, 32400000L, ArrayListMultimap.create());
-    Map<MetricSlice, DataFrame> aggregates = this.provider
-        .fetchAggregates(singletonList(metricSlice), Collections.emptyList(), 1);
-    Assert.assertEquals(aggregates.keySet().size(), 1);
   }
 
   @Test

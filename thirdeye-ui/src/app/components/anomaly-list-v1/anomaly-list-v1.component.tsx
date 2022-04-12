@@ -1,25 +1,18 @@
 import { Button, Typography } from "@material-ui/core";
-import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
+import React, {
+    FunctionComponent,
+    ReactNode,
+    useCallback,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
-    DataGridSortOrderV1,
     DataGridV1,
 } from "../../platform/components";
-import {
-    formatDateAndTimeV1,
-    formatDurationV1,
-    formatLargeNumberV1,
-    formatPercentageV1,
-    linkRendererV1,
-    numberSortComparatorV1,
-} from "../../platform/utils";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import {
-    getAnomalyDeviation,
-    getAnomalyDuration,
-    getAnomalyName,
-} from "../../utils/anomalies/anomalies.util";
+import { linkRendererV1 } from "../../platform/utils";
+import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
@@ -30,61 +23,55 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     props: AnomalyListV1Props
 ) => {
     const [selectedAnomaly, setSelectedAnomaly] =
-        useState<DataGridSelectionModelV1<Anomaly>>();
+        useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
 
-    const anomalyNameRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode =>
-        linkRendererV1(getAnomalyName(data), getAnomaliesAnomalyPath(data.id));
+    const anomalyNameRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
+        },
+        []
+    );
 
-    const alertNameRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode =>
-        linkRendererV1(data.alert.name, getAlertsViewPath(data.alert.id));
+    const alertNameRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
+        },
+        []
+    );
 
-    const durationRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode => formatDurationV1(data.startTime, data.endTime);
+    const deviationRenderer = useCallback(
+        (_: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return (
+                <Typography
+                    color={data.negativeDeviation ? "error" : undefined}
+                    variant="body2"
+                >
+                    {data.deviation}
+                </Typography>
+            );
+        },
+        []
+    );
+    const currentRenderer = useCallback(
+        (_: Record<string, unknown>, data: UiAnomaly): ReactNode =>
+            // use formatted value to display
+            data.current,
+        []
+    );
 
-    const startTimeRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode => formatDateAndTimeV1(data.startTime);
+    const predicatedRenderer = useCallback(
+        (_: Record<string, unknown>, data: UiAnomaly): ReactNode =>
+            // use formatted value to display
+            data.predicted,
+        []
+    );
 
-    const endTimeRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode => formatDateAndTimeV1(data.endTime);
-
-    const currentRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode => formatLargeNumberV1(data.avgCurrentVal);
-
-    const predictedRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode => formatLargeNumberV1(data.avgBaselineVal);
-
-    const deviationRenderer = (
-        _cellValue: Record<string, unknown>,
-        data: Anomaly
-    ): ReactNode => {
-        const deviation = getAnomalyDeviation(data);
-
-        return (
-            <Typography
-                color={deviation < 0 ? "error" : undefined}
-                variant="body2"
-            >
-                {formatPercentageV1(deviation)}
-            </Typography>
-        );
-    };
+    const durationRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => data.duration,
+        []
+    );
 
     const isActionButtonDisable = !(
         selectedAnomaly && selectedAnomaly.rowKeyValues.length === 1
@@ -98,29 +85,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         const anomalyId = selectedAnomaly.rowKeyValues[0];
         const anomaly = selectedAnomaly.rowKeyValueMap?.get(anomalyId);
 
-        props.onDelete && props.onDelete(anomaly as Anomaly);
-    };
-
-    const sortDeviation = (
-        data1: Anomaly,
-        data2: Anomaly,
-        order: DataGridSortOrderV1
-    ): number => {
-        const val1 = getAnomalyDeviation(data1);
-        const val2 = getAnomalyDeviation(data2);
-
-        return numberSortComparatorV1(val1, val2, order);
-    };
-
-    const sortDuration = (
-        data1: Anomaly,
-        data2: Anomaly,
-        order: DataGridSortOrderV1
-    ): number => {
-        const duration1 = getAnomalyDuration(data1);
-        const duration2 = getAnomalyDuration(data2);
-
-        return numberSortComparatorV1(duration1, duration2, order);
+        props.onDelete && props.onDelete(anomaly as UiAnomaly);
     };
 
     const anomalyListColumns = useMemo(
@@ -129,7 +94,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 key: "name",
                 dataKey: "name",
                 header: t("label.name"),
-                sortable: false,
+                sortable: true,
                 minWidth: 200,
                 customCellRenderer: anomalyNameRenderer,
             },
@@ -143,12 +108,11 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             },
             {
                 key: "duration",
-                dataKey: "duration",
+                dataKey: "durationVal",
                 header: t("label.duration"),
                 sortable: true,
                 minWidth: 150,
                 customCellRenderer: durationRenderer,
-                sortComparatorFn: sortDuration,
             },
             {
                 key: "startTime",
@@ -156,7 +120,6 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 header: t("label.start"),
                 sortable: true,
                 minWidth: 200,
-                customCellRenderer: startTimeRenderer,
             },
             {
                 key: "endTime",
@@ -164,11 +127,10 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 header: t("label.end"),
                 sortable: true,
                 minWidth: 200,
-                customCellRenderer: endTimeRenderer,
             },
             {
                 key: "current",
-                dataKey: "avgCurrentVal",
+                dataKey: "currentVal",
                 header: t("label.current"),
                 sortable: true,
                 minWidth: 150,
@@ -176,30 +138,36 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             },
             {
                 key: "predicted",
-                dataKey: "avgBaselineVal",
+                dataKey: "predictedVal",
                 header: t("label.predicted"),
                 sortable: true,
                 minWidth: 150,
-                customCellRenderer: predictedRenderer,
+                customCellRenderer: predicatedRenderer,
             },
             {
                 key: "deviation",
-                dataKey: "avgCurrentVal",
+                dataKey: "deviationVal",
                 header: t("label.deviation"),
                 sortable: true,
                 minWidth: 150,
                 customCellRenderer: deviationRenderer,
-                sortComparatorFn: sortDeviation,
             },
         ],
-        [anomalyNameRenderer, alertNameRenderer, deviationRenderer]
+        [
+            anomalyNameRenderer,
+            alertNameRenderer,
+            deviationRenderer,
+            currentRenderer,
+            predicatedRenderer,
+            durationRenderer,
+        ]
     );
 
     return (
-        <DataGridV1<Anomaly>
+        <DataGridV1<UiAnomaly>
             hideBorder
             columns={anomalyListColumns}
-            data={props.anomalies}
+            data={props.anomalies as UiAnomaly[]}
             rowKey="id"
             searchFilterValue={props.searchFilterValue}
             searchPlaceholder={t("label.search-entity", {

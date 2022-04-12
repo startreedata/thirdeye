@@ -7,8 +7,6 @@ import {
     filterAnomalies,
     filterAnomaliesByTime,
     getAnomaliesAtTime,
-    getAnomalyDeviation,
-    getAnomalyDuration,
     getAnomalyName,
     getUiAnomalies,
     getUiAnomaly,
@@ -84,18 +82,6 @@ describe("Anomalies Util", () => {
 
     it("getUiAnomalies should return appropriate UI anomalies for anomalies", () => {
         expect(getUiAnomalies(mockAnomalies)).toEqual(mockUiAnomalies);
-    });
-
-    it("getAnomalyDeviation should return the fraction for an anomaly", () => {
-        expect(getAnomalyDeviation(mockAnomaly1)).toEqual(-0.2);
-    });
-
-    it("getAnomalyDeviation should return 0 for NaN deviation for an anomaly", () => {
-        expect(getAnomalyDeviation(mockAnomaly6)).toEqual(0);
-    });
-
-    it("getAnomalyDuration should return 1 for an anomaly", () => {
-        expect(getAnomalyDuration(mockAnomaly1)).toEqual(1);
     });
 
     it("filterAnomalies should return empty array for invalid UI anomalies", () => {
@@ -221,10 +207,14 @@ const mockEmptyUiAnomaly = {
     alertName: "label.no-data-marker",
     alertId: -1,
     current: "label.no-data-marker",
+    currentVal: -1,
     predicted: "label.no-data-marker",
+    predictedVal: -1,
     deviation: "label.no-data-marker",
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "label.no-data-marker",
+    durationVal: 0,
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
 };
@@ -268,14 +258,6 @@ const mockAnomaly5 = {
     avgBaselineVal: 5,
 } as Anomaly;
 
-const mockAnomaly6 = {
-    id: 1,
-    startTime: 100,
-    endTime: 110,
-    avgCurrentVal: 0,
-    avgBaselineVal: 0,
-} as Anomaly;
-
 const mockAnomalies = [
     mockAnomaly1,
     mockAnomaly2,
@@ -292,8 +274,12 @@ const mockUiAnomaly1 = {
     current: "4",
     predicted: "5",
     deviation: "-0.2",
+    currentVal: 4,
+    predictedVal: 5,
+    deviationVal: -0.2,
     negativeDeviation: true,
     duration: "2 3",
+    durationVal: 1,
     startTime: "2",
     endTime: "3",
 };
@@ -306,8 +292,12 @@ const mockUiAnomaly2 = {
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
+    currentVal: -1,
+    predictedVal: -1,
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "8 9",
+    durationVal: 1,
     startTime: "8",
     endTime: "9",
 };
@@ -320,8 +310,12 @@ const mockUiAnomaly3 = {
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
+    currentVal: -1,
+    predictedVal: -1,
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "3 8",
+    durationVal: 5,
     startTime: "3",
     endTime: "8",
 };
@@ -334,8 +328,12 @@ const mockUiAnomaly4 = {
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
+    currentVal: -1,
+    predictedVal: -1,
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "label.no-data-marker",
+    durationVal: 0,
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
 };
@@ -348,8 +346,12 @@ const mockUiAnomaly5 = {
     current: "0",
     predicted: "5",
     deviation: "-1",
+    currentVal: 0,
+    predictedVal: 5,
+    deviationVal: -1,
     negativeDeviation: true,
     duration: "100 110",
+    durationVal: 10,
     startTime: "100",
     endTime: "110",
 };

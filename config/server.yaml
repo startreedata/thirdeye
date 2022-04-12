@@ -16,6 +16,10 @@ server:
       keyStorePath: config/tls-key.keystore
       keyStorePassword: password
 
+  adminConnectors:
+    - type: http
+      port: 8090
+
 logging:
   level: INFO
   loggers:

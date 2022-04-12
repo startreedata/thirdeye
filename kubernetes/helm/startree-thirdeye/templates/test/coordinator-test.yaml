@@ -9,5 +9,5 @@ spec:
     - name: test-container
       image: busybox
       command: [ 'wget' ]
-      args: [ {{ printf "http://%s:%s" ( include "thirdeye.coordinator.headless" . ) {{ .Values.coordinator.port }} }} ]
+      args: [ "http://{{ template "thirdeye.coordinator.headless" . }}:{{ .Values.coordinator.port }}" ]
   restartPolicy: Never

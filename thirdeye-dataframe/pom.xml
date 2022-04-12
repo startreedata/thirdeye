@@ -13,8 +13,8 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>thirdeye-spi</artifactId>
-  <name>thirdeye-spi</name>
+  <artifactId>thirdeye-dataframe</artifactId>
+  <name>thirdeye-dataframe</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -23,44 +23,33 @@
 
   <dependencies>
     <dependency>
-      <groupId>ai.startree.thirdeye</groupId>
-      <artifactId>thirdeye-dataframe</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
+      <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.8.5</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
+      <groupId>com.udojava</groupId>
+      <artifactId>EvalEx</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.nimbusds</groupId>
-      <artifactId>nimbus-jose-jwt</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.modelmapper</groupId>
-      <artifactId>modelmapper</artifactId>
-      <version>0.7.6</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <!-- test -->

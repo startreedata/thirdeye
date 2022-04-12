@@ -3,9 +3,10 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.datasource.resultset;
+package ai.startree.thirdeye.datasource.pinot;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;

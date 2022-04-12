@@ -25,7 +25,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetDataTable;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
 import ai.startree.thirdeye.spi.detection.TimeSpec;

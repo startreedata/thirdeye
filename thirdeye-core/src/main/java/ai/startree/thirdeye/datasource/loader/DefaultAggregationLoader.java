@@ -13,7 +13,6 @@ import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.RequestContainer;
 import com.google.inject.Inject;

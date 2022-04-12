@@ -25,8 +25,8 @@ import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
+import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
@@ -148,7 +148,7 @@ public class DataCubeSummaryCalculator {
       checkArgument(dimensions.size() > 0);
       this.dimensions = dimensions;
       // fixme cyril prefer parsing to List<Predicate>
-      this.dataFilters = ParsedUrn.toFiltersMap(EntityUtils.extractFilterPredicates(filters));
+      this.dataFilters = ParsedUrn.toFiltersMap(SpiUtils.extractFilterPredicates(filters));
       checkArgument(summarySize > 1);
       this.summarySize = summarySize;
       checkArgument(depth >= 0);

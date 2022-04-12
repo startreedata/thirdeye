@@ -5,12 +5,11 @@
 
 package ai.startree.thirdeye.rootcause;
 
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
 import ai.startree.thirdeye.rootcause.impl.EntityMappingPipeline;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

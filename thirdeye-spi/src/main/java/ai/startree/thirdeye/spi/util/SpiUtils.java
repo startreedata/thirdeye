@@ -10,6 +10,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
@@ -23,6 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
@@ -35,6 +39,7 @@ public class SpiUtils {
 
   public static final String FILTER_VALUE_ASSIGNMENT_SEPARATOR = "=";
   public static final String FILTER_CLAUSE_SEPARATOR = ";";
+  public static final Pattern PATTERN_FILTER_OPERATOR = Pattern.compile("!=|>=|<=|==|>|<|=");
   private static final Splitter SEMICOLON_SPLITTER = Splitter.on(";").omitEmptyStrings();
   private static final Splitter EQUALS_SPLITTER = Splitter.on("=").omitEmptyStrings();
   private static final Joiner SEMICOLON = Joiner.on(";");
@@ -292,6 +297,51 @@ public class SpiUtils {
   public static boolean isAggCumulative(MetricConfigDTO metric) {
     MetricAggFunction aggFunction = metric.getDefaultAggFunction();
     return aggFunction.equals(MetricAggFunction.SUM) || aggFunction.equals(MetricAggFunction.COUNT);
+  }
+
+  /**
+   * Returns the filter predicate for a given filter string
+   *
+   * <br/><b>Example:</b>
+   * <pre>
+   *   >> "country != us"
+   *   << {"country", "!=", "us"}
+   * </pre>
+   *
+   * @param filterString raw (decoded) filter string
+   * @return filter predicate
+   */
+  // todo cyril return a Predicate
+  public static FilterPredicate extractFilterPredicate(String filterString) {
+    Matcher m = PATTERN_FILTER_OPERATOR.matcher(filterString);
+    if (!m.find()) {
+      throw new IllegalArgumentException(
+          String.format("Could not find filter predicate operator. Expected regex '%s'",
+              PATTERN_FILTER_OPERATOR.pattern()));
+    }
+
+    int keyStart = 0;
+    int keyEnd = m.start();
+    String key = filterString.substring(keyStart, keyEnd);
+
+    int opStart = m.start();
+    int opEnd = m.end();
+    String operator = filterString.substring(opStart, opEnd);
+
+    int valueStart = m.end();
+    int valueEnd = filterString.length();
+    String value = filterString.substring(valueStart, valueEnd);
+
+    return new FilterPredicate(key, operator, value);
+  }
+
+  public static List<FilterPredicate> extractFilterPredicates(List<String> filters) {
+    return filters.stream().map(SpiUtils::extractFilterPredicate).collect(Collectors.toList());
+  }
+
+  public static boolean isFilterOperatorExists(String any) {
+    Matcher m = PATTERN_FILTER_OPERATOR.matcher(any);
+    return m.find();
   }
 
   public enum TimeFormat {

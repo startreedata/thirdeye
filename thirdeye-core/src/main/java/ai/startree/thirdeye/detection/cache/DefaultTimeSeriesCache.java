@@ -7,6 +7,7 @@ package ai.startree.thirdeye.detection.cache;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -17,7 +18,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.ThirdEyeUtils;

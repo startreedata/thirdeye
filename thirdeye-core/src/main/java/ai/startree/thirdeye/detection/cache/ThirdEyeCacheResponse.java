@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.detection.cache;
 
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.util.IntervalUtils;
 import java.util.ArrayList;
 import java.util.List;

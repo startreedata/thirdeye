@@ -5,8 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.util;
 
-import ai.startree.thirdeye.spi.rootcause.impl.EntityType;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
+import ai.startree.thirdeye.rootcause.entity.EntityType;
 import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
 import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
 import com.google.common.collect.ArrayListMultimap;

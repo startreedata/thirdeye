@@ -6,8 +6,12 @@
 package ai.startree.thirdeye.rootcause.impl;
 
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.DatasetEntity;
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -15,10 +19,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.DatasetEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

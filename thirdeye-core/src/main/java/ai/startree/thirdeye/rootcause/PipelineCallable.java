@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.rootcause;
 
 import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
 import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
 import java.util.Collections;
 import java.util.HashMap;

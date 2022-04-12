@@ -6,10 +6,10 @@
 package ai.startree.thirdeye.rootcause.impl;
 
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
 import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
 
 /**
  * NullPipeline serves as a dummy implementation or sink that emits as output any received inputs.

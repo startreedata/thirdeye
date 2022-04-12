@@ -3,10 +3,10 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.rootcause.impl;
+package ai.startree.thirdeye.rootcause.entity;
 
+import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -5,11 +5,11 @@
 
 package ai.startree.thirdeye.resources;
 
+import ai.startree.thirdeye.rootcause.entity.AnomalyEventEntity;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
-import ai.startree.thirdeye.spi.rootcause.impl.AnomalyEventEntity;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;

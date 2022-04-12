@@ -3,19 +3,22 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.rootcause.util;
+package ai.startree.thirdeye.rootcause.util;
 
+import ai.startree.thirdeye.rootcause.entity.AnomalyEventEntity;
+import ai.startree.thirdeye.rootcause.entity.DatasetEntity;
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
+import ai.startree.thirdeye.rootcause.entity.DimensionsEntity;
+import ai.startree.thirdeye.rootcause.entity.EntityType;
+import ai.startree.thirdeye.rootcause.entity.HyperlinkEntity;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.rootcause.entity.ServiceEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.spi.rootcause.Entity;
 import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.impl.AnomalyEventEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.DatasetEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionsEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.EntityType;
-import ai.startree.thirdeye.spi.rootcause.impl.HyperlinkEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.ServiceEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
+import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
+import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.io.UnsupportedEncodingException;
@@ -31,17 +34,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Utility class to simplify type-checking and extraction of entities
  */
 public class EntityUtils {
-
-  private static final Pattern PATTERN_FILTER_OPERATOR = Pattern.compile("!=|>=|<=|==|>|<|=");
 
   private static final Map<String, String> FILTER_TO_OPERATOR = new LinkedHashMap<>();
 
@@ -458,7 +456,7 @@ public class EntityUtils {
 
         try {
           // attempt parsing current filter fragment
-          predicates.add(extractFilterPredicate(currentFragment));
+          predicates.add(SpiUtils.extractFilterPredicate(currentFragment));
           currentFragment = decodeURNComponent(filterFragments[i - 1]);
         } catch (IllegalArgumentException ignore) {
           // merge filter fragment with next if it doesn't parse
@@ -468,7 +466,7 @@ public class EntityUtils {
       }
 
       // last (combined) filter fragment must parse
-      predicates.add(extractFilterPredicate(currentFragment));
+      predicates.add(SpiUtils.extractFilterPredicate(currentFragment));
     }
 
     return new ParsedUrn(prefixes, predicates);
@@ -505,50 +503,5 @@ public class EntityUtils {
           String.format("Expected type '%s' but got '%s'", type.getPrefix(), urn));
     }
     return parseUrnString(urn, filterOffset);
-  }
-
-  /**
-   * Returns the filter predicate for a given filter string
-   *
-   * <br/><b>Example:</b>
-   * <pre>
-   *   >> "country != us"
-   *   << {"country", "!=", "us"}
-   * </pre>
-   *
-   * @param filterString raw (decoded) filter string
-   * @return filter predicate
-   */
-  // todo cyril return a Predicate
-  public static FilterPredicate extractFilterPredicate(String filterString) {
-    Matcher m = PATTERN_FILTER_OPERATOR.matcher(filterString);
-    if (!m.find()) {
-      throw new IllegalArgumentException(
-          String.format("Could not find filter predicate operator. Expected regex '%s'",
-              PATTERN_FILTER_OPERATOR.pattern()));
-    }
-
-    int keyStart = 0;
-    int keyEnd = m.start();
-    String key = filterString.substring(keyStart, keyEnd);
-
-    int opStart = m.start();
-    int opEnd = m.end();
-    String operator = filterString.substring(opStart, opEnd);
-
-    int valueStart = m.end();
-    int valueEnd = filterString.length();
-    String value = filterString.substring(valueStart, valueEnd);
-
-    return new FilterPredicate(key, operator, value);
-  }
-
-  public static List<FilterPredicate> extractFilterPredicates(List<String> filters) {
-    return filters.stream().map(EntityUtils::extractFilterPredicate).collect(Collectors.toList());
-  }
-
-  public static boolean isFilterOperatorExists(String any) {
-    Matcher m = PATTERN_FILTER_OPERATOR.matcher(any);
-    return m.find();
   }
 }

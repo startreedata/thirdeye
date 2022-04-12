@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.entity.EntityType;
 import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.impl.EntityType;
 import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
 import java.util.Arrays;
 import java.util.Collections;

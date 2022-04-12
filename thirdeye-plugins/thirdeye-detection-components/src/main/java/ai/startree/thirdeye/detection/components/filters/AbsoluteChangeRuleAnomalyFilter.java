@@ -13,8 +13,8 @@ import ai.startree.thirdeye.spi.detection.InputDataFetcher;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.model.InputDataSpec;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
+import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +51,12 @@ public class AbsoluteChangeRuleAnomalyFilter implements
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
-    MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     List<MetricSlice> slices = new ArrayList<>();
     MetricSlice currentSlice =
-        MetricSlice.from(me.getId(), anomaly.getStartTime(), anomaly.getEndTime(), me.getFilters());
+        MetricSlice.from(-1L,
+            anomaly.getStartTime(),
+            anomaly.getEndTime(),
+            ArrayListMultimap.create());
 
     // customize baseline offset
     if (baseline != null) {

@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionsEntity;
+import ai.startree.thirdeye.rootcause.entity.DimensionsEntity;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.testng.Assert;

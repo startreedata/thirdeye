@@ -6,8 +6,14 @@
 package ai.startree.thirdeye.rootcause.impl;
 
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.AnomalyEventEntity;
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.HyperbolaStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.LinearStartTimeStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.QuadraticTriangularStartTimeStrategy;
@@ -16,12 +22,6 @@ import ai.startree.thirdeye.rootcause.util.ScoreUtils.TriangularStartTimeStrateg
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.AnomalyEventEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;

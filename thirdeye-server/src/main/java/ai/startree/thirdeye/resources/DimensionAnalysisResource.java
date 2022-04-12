@@ -123,14 +123,13 @@ public class DimensionAnalysisResource {
     DimensionAnalysisResultApi resultApi;
     try {
       resultApi = dataCubeSummaryCalculator.computeCube(
-          rootCauseAnalysisInfo.getMetricConfigDTO().getName(),
-          rootCauseAnalysisInfo.getDatasetConfigDTO().getName(),
+          rootCauseAnalysisInfo.getMetricConfigDTO(),
+          rootCauseAnalysisInfo.getDatasetConfigDTO(),
           currentInterval,
           baselineInterval,
           summarySize,
           depth,
           doOneSideError,
-          rootCauseAnalysisInfo.getMetricConfigDTO().getDerivedMetricExpression(),
           dimensions,
           excludedDimensions,
           filters,

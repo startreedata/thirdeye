@@ -8,15 +8,12 @@ package ai.startree.thirdeye.cube.data.dbclient;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.datasource.MetricExpression;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -26,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -55,7 +51,6 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   private final static int TIME_OUT_VALUE = 1200;
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
 
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final DataSourceCache dataSourceCache;
   private final CubeMetric<R> cubeMetric;
 
@@ -63,35 +58,31 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * Constructs a Cube client.
    *
    */
-  public CubeFetcherImpl(DataSourceCache dataSourceCache,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry, CubeMetric<R> cubeMetric) {
+  public CubeFetcherImpl(DataSourceCache dataSourceCache, CubeMetric<R> cubeMetric) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.cubeMetric = cubeMetric;
   }
 
   /**
    * Construct bulks ThirdEye requests.
    *
-   * @param dataset the data set to be queries.
+   * @param datasetConfigDTO dataset config.
    * @param cubeSpecs the spec to retrieve the metrics.
    * @param groupBy groupBy for database.
    * @param filterSets the data filter.
    * @return a list of ThirdEye requests.
    */
   protected Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(
-      String dataset,
-      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets)
-      throws ExecutionException {
+      DatasetConfigDTO datasetConfigDTO,
+      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets) {
 
     Map<CubeTag, ThirdEyeRequestMetricExpressions> requests = new HashMap<>();
-    DatasetConfigDTO datasetConfigDTO = thirdEyeCacheRegistry.getDatasetConfigCache().get(dataset);
 
     for (CubeSpec cubeSpec : cubeSpecs) {
       // Set dataset and metric
-      MetricConfigDTO metricConfigDTO = thirdEyeCacheRegistry.getMetricConfigCache().get(new MetricDataset(cubeSpec.getMetric(), dataset));
-      // todo cyril use non deprecated builder
-      MetricExpression metricExpression = new MetricExpression(cubeSpec.getMetric(), cubeSpec.getMetric(), MetricAggFunction.SUM, dataset);
+      MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
+      // todo cyril add DefaultAggFunction to custom rcaInfoFetcher to allow custom aggregationfunction
+      MetricExpression metricExpression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
       List<MetricFunction> metricFunctions = List.of(new MetricFunction(metricConfigDTO, datasetConfigDTO));
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();

@@ -19,7 +19,6 @@ import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.ratio.RatioCubeMetric;
 import ai.startree.thirdeye.cube.summary.Summary;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
@@ -27,12 +26,15 @@ import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.ParsedUrn;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,25 +47,22 @@ public class DataCubeSummaryCalculator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
 
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
   private final DataSourceCache dataSourceCache;
 
   @Inject
   public DataCubeSummaryCalculator(
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final MetricConfigManager metricDAO,
       final DataSourceCache dataSourceCache) {
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.metricConfigManager = metricDAO;
     this.dataSourceCache = dataSourceCache;
   }
 
   public DimensionAnalysisResultApi computeCube(
-      final String metricName, final String datasetName,
+      final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
-      final String derivedMetricExpression, final List<String> dimensions,
+      final List<String> dimensions,
       final List<String> excludedDimensions,
       final List<String> filters, final List<List<String>> hierarchies)
       throws Exception {
@@ -72,9 +71,8 @@ public class DataCubeSummaryCalculator {
         .filter(dim -> !excludedDimensions.contains(dim)).collect(Collectors.toUnmodifiableList()));
 
     CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
-        derivedMetricExpression,
-        datasetName,
-        metricName,
+        datasetConfigDTO,
+        metricConfigDTO,
         currentInterval,
         currentBaseline,
         filteredDimensions,
@@ -97,9 +95,8 @@ public class DataCubeSummaryCalculator {
     private final Pattern SIMPLE_RATIO_METRIC_EXPRESSION_PARSER = Pattern.compile(
         "^id(?<" + NUMERATOR_GROUP_NAME + ">\\d*)\\/id(?<" + DENOMINATOR_GROUP_NAME + ">\\d*)$");
 
-    private final String derivedMetricExpression;
-    private final String datasetName;
-    private final String metricName;
+    private final DatasetConfigDTO datasetConfigDTO;
+    private final MetricConfigDTO metricConfigDTO;
     private final Interval currentInterval;
     private final Interval baselineInterval;
     private final Dimensions dimensions;
@@ -112,9 +109,8 @@ public class DataCubeSummaryCalculator {
     /**
      * Cube Algorithm Runner. Select the relevant algorithm based on the config and run it.
      *
-     * @param datasetName dataset name.
-     * @param metricName metric name
-     * @param derivedMetricExpression derivedMetricExpression String from MetricConfigDTO.
+     * @param datasetConfigDTO dataset config.
+     * @param metricConfigDTO metric config
      * @param currentInterval current time interval.
      * @param baselineInterval baseline time interval.
      * @param dimensions the dimensions to be considered in the summary. If the variable depth
@@ -131,17 +127,15 @@ public class DataCubeSummaryCalculator {
      *     side)
      */
     public CubeAlgorithmRunner(
-        final String derivedMetricExpression,
-        final String datasetName,
-        final String metricName,
+        final DatasetConfigDTO datasetConfigDTO,
+        final MetricConfigDTO metricConfigDTO,
         final Interval currentInterval,
         final Interval baselineInterval,
         final Dimensions dimensions,
         final List<String> filters, final int summarySize, final int depth,
         final List<List<String>> hierarchies, final boolean doOneSideError) {
-      this.derivedMetricExpression = derivedMetricExpression;
-      this.datasetName = datasetName;
-      this.metricName = metricName;
+      this.datasetConfigDTO = datasetConfigDTO;
+      this.metricConfigDTO = metricConfigDTO;
       this.currentInterval = currentInterval;
       this.baselineInterval = baselineInterval;
       Preconditions.checkNotNull(dimensions);
@@ -170,27 +164,27 @@ public class DataCubeSummaryCalculator {
       } else {
         // additive - nominal case
         cubeMetric =
-            new AdditiveCubeMetric(datasetName, metricName, currentInterval, baselineInterval);
+            new AdditiveCubeMetric(datasetConfigDTO, metricConfigDTO, currentInterval, baselineInterval);
         costFunction = new BalancedCostFunction();
       }
 
       final CubeFetcher<? extends Row> cubeFetcher =
-          new CubeFetcherImpl<>(dataSourceCache, thirdEyeCacheRegistry, cubeMetric);
+          new CubeFetcherImpl<>(dataSourceCache, cubeMetric);
 
       return buildSummary(cubeFetcher, costFunction);
     }
 
     private CubeMetric<? extends Row> buildRatioCubeMetric() {
-      Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetricExpression);
+      Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(metricConfigDTO.getDerivedMetricExpression());
       // Extract numerator and denominator id
       long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
       long denominatorId = Long.parseLong(matcher.group(DENOMINATOR_GROUP_NAME));
 
       // Get numerator and denominator's metric name
-      String numeratorMetric = metricConfigManager.findById(numeratorId).getName();
-      String denominatorMetric = metricConfigManager.findById(denominatorId).getName();
+      MetricConfigDTO numeratorMetric = Objects.requireNonNull(metricConfigManager.findById(numeratorId));
+      MetricConfigDTO denominatorMetric = Objects.requireNonNull(metricConfigManager.findById(denominatorId));
       // Generate cube result
-      return new RatioCubeMetric(datasetName,
+      return new RatioCubeMetric(datasetConfigDTO,
           numeratorMetric,
           denominatorMetric,
           currentInterval,
@@ -202,8 +196,8 @@ public class DataCubeSummaryCalculator {
      * metric.
      */
     private boolean isRatioMetric() {
-      if (!Strings.isNullOrEmpty(derivedMetricExpression)) {
-        Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(derivedMetricExpression);
+      if (!Strings.isNullOrEmpty(metricConfigDTO.getDerivedMetricExpression())) {
+        Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(metricConfigDTO.getDerivedMetricExpression());
         return matcher.matches();
       }
       return false;
@@ -224,8 +218,8 @@ public class DataCubeSummaryCalculator {
       }
 
       response.setMetric(new MetricApi()
-          .setName(metricName)
-          .setDataset(new DatasetApi().setName(datasetName))
+          .setName(metricConfigDTO.getName())
+          .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset()))
       );
 
       return response;

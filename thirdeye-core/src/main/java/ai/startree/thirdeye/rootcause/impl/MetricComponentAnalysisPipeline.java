@@ -195,7 +195,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     String ref = String.format("%d", slice.getMetricId());
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, metricDAO,
-            this.datasetDAO, thirdEyeCacheRegistry);
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
@@ -206,8 +206,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO,
-            this.datasetDAO, thirdEyeCacheRegistry);
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO, this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);

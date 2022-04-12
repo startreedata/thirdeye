@@ -254,6 +254,7 @@ public class DataFrameUtils {
    * Constructs and wraps a request for a simple metric.
    *
    * Assumes the slice contains a complete metricConfigDTO.
+   * Assumes the slice contains a complete datasetConfigDTO.
    *
    * @param slice metric data slice
    * @param dimensions dimensions to group by
@@ -264,19 +265,20 @@ public class DataFrameUtils {
   public static RequestContainer makeAggregateRequest(MetricSlice slice,
       List<String> dimensions,
       int limit,
-      String reference,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      String reference) {
     MetricConfigDTO metricConfigDTO = Objects.requireNonNull(slice.getMetricConfigDTO());
+    DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(slice.getDatasetConfigDTO());
 
-    MetricExpression expression = new MetricExpression(
-        metricConfigDTO.getName(),
-        Optional.ofNullable(metricConfigDTO.getDerivedMetricExpression()).orElse(metricConfigDTO.getName()),
-        metricConfigDTO.getDefaultAggFunction(),
-        metricConfigDTO.getDataset());
+    // todo cyril - after refactoring: both contain the same info : proof it's not relevant to have both - remove --> maybe at the end remove both- it only contains metricConfig and datasetConfig
+    MetricExpression expression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
+    MetricFunction function = new MetricFunction(metricConfigDTO, datasetConfigDTO);
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, List.of(expression),
-        thirdEyeCacheRegistry
-    )
+    ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
+        .setStartTimeInclusive(slice.getStart())
+        .setEndTimeExclusive(slice.getEnd())
+        .setFilterSet(slice.getFilters())
+        .setMetricFunctions(List.of(function))
+        .setDataSource(slice.getDatasetConfigDTO().getDataSource())
         .setGroupBy(dimensions)
         .setLimit(limit)
         .build(reference);
@@ -291,9 +293,7 @@ public class DataFrameUtils {
       int limit,
       String reference,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
+      DatasetConfigManager datasetDAO) {
     MetricConfigDTO metricConfigDTO = metricDAO.findById(slice.getMetricId());
     if (metricConfigDTO == null) {
       throw new IllegalArgumentException(
@@ -311,8 +311,7 @@ public class DataFrameUtils {
             .withDatasetConfigDto(dataset),
         dimensions,
         limit,
-        reference,
-        thirdEyeCacheRegistry);
+        reference);
   }
 
   /**
@@ -342,8 +341,7 @@ public class DataFrameUtils {
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     List<MetricFunction> functions = new ArrayList<>();
     for (MetricExpression exp : expressions) {
-      functions.addAll(exp.computeMetricFunctions(
-          thirdEyeCacheRegistry));
+      functions.addAll(exp.computeMetricFunctions(thirdEyeCacheRegistry));
     }
 
     return ThirdEyeRequest.newBuilder()

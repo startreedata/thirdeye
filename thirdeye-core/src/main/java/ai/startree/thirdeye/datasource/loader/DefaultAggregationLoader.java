@@ -70,8 +70,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     // submit requests
     for (String dimension : dimensions) {
       RequestContainer rc = DataFrameUtils
-          .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
-              thirdEyeCacheRegistry);
+          .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref");
       Future<ThirdEyeResponse> res = dataSourceCache
           .getQueryResultAsync(rc.getRequest());
 
@@ -114,8 +113,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice,
         new ArrayList<>(dimensions),
         limit,
-        "ref",
-        thirdEyeCacheRegistry);
+        "ref");
     ThirdEyeResponse res = dataSourceCache.getQueryResult(rc.getRequest());
     final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
 

@@ -165,16 +165,16 @@ public class CallGraphPipeline extends Pipeline {
       // prepare requests
       RequestContainer rcCurrCount = DataFrameUtils
           .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", metricDAO,
-              datasetDAO, thirdEyeCacheRegistry);
+              datasetDAO);
       RequestContainer rcCurrLatency = DataFrameUtils
           .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", metricDAO,
-              datasetDAO, thirdEyeCacheRegistry);
+              datasetDAO);
       RequestContainer rcBaseCount = DataFrameUtils
           .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", metricDAO,
-              datasetDAO, thirdEyeCacheRegistry);
+              datasetDAO);
       RequestContainer rcBaseLatency = DataFrameUtils
           .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", metricDAO,
-              datasetDAO, thirdEyeCacheRegistry);
+              datasetDAO);
 
       // send requests
       Future<ThirdEyeResponse> resCurrCount = this.cache

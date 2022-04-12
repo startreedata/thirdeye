@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -44,6 +45,16 @@ public class MetricExpression {
   private final MetricAggFunction aggFunction;
   private final String dataset;
 
+
+  public MetricExpression(final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO) {
+    this(metricConfigDTO.getName(),
+        Optional.ofNullable(metricConfigDTO.getDerivedMetricExpression()).orElse(metricConfigDTO.getName()),
+        metricConfigDTO.getDefaultAggFunction(),
+        datasetConfigDTO.getDataset()
+    );
+  }
+
+  @Deprecated
   public MetricExpression(String expressionName, String expression, MetricAggFunction aggFunction,
       String dataset) {
     this.expressionName = expressionName;

@@ -7,7 +7,6 @@ package ai.startree.thirdeye.util;
 
 import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.MetricExpression;
@@ -62,15 +61,6 @@ public abstract class ThirdEyeUtils {
         new TimeGranularity(datasetConfig.bucketTimeGranularity()), timeFormat);
   }
 
-  public static MetricExpression getMetricExpressionFromMetricConfig(MetricConfigDTO metricConfig) {
-    String expression = optional(metricConfig.getDerivedMetricExpression())
-        .orElse(metricConfig.getName());
-    return new MetricExpression(metricConfig.getName(),
-        expression,
-        metricConfig.getDefaultAggFunction(),
-        metricConfig.getDataset());
-  }
-
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     DatasetConfigDTO datasetConfig = null;
@@ -88,19 +78,18 @@ public abstract class ThirdEyeUtils {
       final MetricConfigManager metricConfigManager,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricConfigDTO metricConfig = metricConfigManager
-        .findById(me.getId());
+    MetricConfigDTO metricConfig = metricConfigManager.findById(me.getId());
     if (metricConfig == null) {
       return new ArrayList<>();
     }
     if (metricConfig.getDerivedMetricExpression() == null) {
-      return Collections
-          .singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
+      return Collections.singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
     } else {
-      MetricExpression metricExpression = ThirdEyeUtils
-          .getMetricExpressionFromMetricConfig(metricConfig);
-      List<MetricFunction> functions = metricExpression.computeMetricFunctions(
-          thirdEyeCacheRegistry);
+      MetricExpression metricExpression = new MetricExpression(metricConfig.getName(),
+          metricConfig.getDerivedMetricExpression(),
+          metricConfig.getDefaultAggFunction(),
+          metricConfig.getDataset());
+      List<MetricFunction> functions = metricExpression.computeMetricFunctions(thirdEyeCacheRegistry);
       return functions.stream().map(
           f -> datasetConfigManager.findByDataset(f.getDataset())).collect(Collectors.toList());
     }

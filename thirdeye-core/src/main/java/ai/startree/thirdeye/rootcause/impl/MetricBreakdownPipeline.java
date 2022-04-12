@@ -165,7 +165,7 @@ public class MetricBreakdownPipeline extends Pipeline {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
         .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO,
-            this.datasetDAO, thirdEyeCacheRegistry);
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);

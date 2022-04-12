@@ -90,6 +90,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
     for (CubeSpec cubeSpec : cubeSpecs) {
       // Set dataset and metric
       MetricConfigDTO metricConfigDTO = thirdEyeCacheRegistry.getMetricConfigCache().get(new MetricDataset(cubeSpec.getMetric(), dataset));
+      // todo cyril use non deprecated builder
       MetricExpression metricExpression = new MetricExpression(cubeSpec.getMetric(), cubeSpec.getMetric(), MetricAggFunction.SUM, dataset);
       List<MetricFunction> metricFunctions = List.of(new MetricFunction(metricConfigDTO, datasetConfigDTO));
 

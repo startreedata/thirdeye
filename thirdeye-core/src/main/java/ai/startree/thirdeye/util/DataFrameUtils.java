@@ -269,13 +269,12 @@ public class DataFrameUtils {
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     MetricConfigDTO metricConfigDTO = Objects.requireNonNull(slice.getMetricConfigDTO());
-    DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(slice.getDatasetConfigDTO());
 
     List<MetricExpression> expressions = Utils.convertToMetricExpressions(metricConfigDTO.getName(),
         metricConfigDTO.getDefaultAggFunction(), metricConfigDTO.getDataset(),
         thirdEyeCacheRegistry);
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, datasetConfigDTO, expressions,
+    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, expressions,
         thirdEyeCacheRegistry
     )
         .setGroupBy(dimensions)
@@ -324,9 +323,21 @@ public class DataFrameUtils {
    * @param expressions metric expressions
    * @return ThirdeyeRequestBuilder
    */
+  @Deprecated
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
       DatasetConfigDTO dataset,
+      List<MetricExpression> expressions,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
+    datasetConfigDTO.setDataSource(dataset.getDataSource());
+
+    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO),
+        expressions, thirdEyeCacheRegistry);
+  }
+
+  private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
+      MetricSlice slice,
       List<MetricExpression> expressions,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     List<MetricFunction> functions = new ArrayList<>();
@@ -340,6 +351,6 @@ public class DataFrameUtils {
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
         .setMetricFunctions(functions)
-        .setDataSource(dataset.getDataSource());
+        .setDataSource(slice.getDatasetConfigDTO().getDataSource());
   }
 }

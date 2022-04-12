@@ -15,7 +15,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
-import ai.startree.thirdeye.util.Utils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -86,11 +85,8 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
     for (CubeSpec cubeSpec : cubeSpecs) {
       // Set dataset and metric
-      List<MetricExpression> metricExpressions =
-          Utils.convertToMetricExpressions(cubeSpec.getMetric(), MetricAggFunction.SUM, dataset,
-              thirdEyeCacheRegistry);
-      List<MetricFunction> metricFunctions = metricExpressions.get(0).computeMetricFunctions(
-          thirdEyeCacheRegistry);
+      MetricExpression metricExpression = new MetricExpression(cubeSpec.getMetric(), cubeSpec.getMetric(), MetricAggFunction.SUM, dataset);
+      List<MetricFunction> metricFunctions = metricExpression.computeMetricFunctions(thirdEyeCacheRegistry);
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
 
@@ -107,7 +103,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
       requests.put(cubeSpec.getTag(),
           new ThirdEyeRequestMetricExpressions(builder.build(cubeSpec.getTag().toString()),
-              metricExpressions));
+              List.of(metricExpression)));
     }
 
     return requests;

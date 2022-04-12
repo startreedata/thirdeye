@@ -250,20 +250,20 @@ public class RootCauseMetricResource {
     );
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        rootCauseAnalysisInfo.getMetricConfigDTO(),
         filters,
         currentInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+        rootCauseAnalysisInfo.getDatasetConfigDTO());
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        rootCauseAnalysisInfo.getMetricConfigDTO(),
         filters,
         baselineInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+        rootCauseAnalysisInfo.getDatasetConfigDTO());
 
     // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
     fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
@@ -330,17 +330,17 @@ public class RootCauseMetricResource {
   }
 
   private Map<String, Map<String, Double>> computeBreakdown(
-      final long metricId,
+      final MetricConfigDTO metricConfigDTO,
       final List<String> filters,
       final Interval interval,
       final Baseline range,
       final int limit,
-      final TimeGranularity timeGranularity) throws Exception {
+      final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.from(metricId,
+    MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
         filters,
-        timeGranularity);
+        datasetConfigDTO);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -358,10 +358,13 @@ public class RootCauseMetricResource {
       final long end,
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
-    MetricSlice baseSlice = MetricSlice.from(metricId,
+    DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
+    MetricSlice baseSlice = MetricSlice.from(
+        findMetricConfig(metricId),
         new Interval(start, end, dateTimeZone),
         filters,
-        findMetricGranularity(metricId));
+        datasetConfigDTO
+    );
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -439,6 +442,13 @@ public class RootCauseMetricResource {
   }
 
   @Deprecated
+  // prefer getting MetricConfigDTO from RootCauseAnalysisInfo
+  private MetricConfigDTO findMetricConfig(final long metricId) {
+    return ensureExists(metricDAO.findById(metricId),
+        String.format("metric id: %d", metricId));
+  }
+
+  @Deprecated
   // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
   private TimeGranularity findMetricGranularity(final Long metricId) {
     final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
@@ -447,5 +457,16 @@ public class RootCauseMetricResource {
         String.format("dataset name: %s", metric.getDataset()));
 
     return dataset.bucketTimeGranularity();
+  }
+
+  @Deprecated
+  // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
+  private DatasetConfigDTO findDataset(final long metricId) {
+    final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
+        String.format("metric id: %d", metricId));
+    final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
+        String.format("dataset name: %s", metric.getDataset()));
+
+    return dataset;
   }
 }

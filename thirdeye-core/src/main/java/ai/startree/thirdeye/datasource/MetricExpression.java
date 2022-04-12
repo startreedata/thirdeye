@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +44,16 @@ public class MetricExpression {
   private final MetricAggFunction aggFunction;
   private final String dataset;
 
-  public MetricExpression(String expression, String dataset) {
-    this(expression.replaceAll("[\\s]+", ""), expression, dataset);
+
+  public MetricExpression(final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO) {
+    this(metricConfigDTO.getName(),
+        Optional.ofNullable(metricConfigDTO.getDerivedMetricExpression()).orElse(metricConfigDTO.getName()),
+        metricConfigDTO.getDefaultAggFunction(),
+        datasetConfigDTO.getDataset()
+    );
   }
 
-  public MetricExpression(String expressionName, String expression, String dataset) {
-    this(expressionName, expression, MetricAggFunction.SUM, dataset);
-  }
-
+  @Deprecated
   public MetricExpression(String expressionName, String expression, MetricAggFunction aggFunction,
       String dataset) {
     this.expressionName = expressionName;
@@ -104,12 +106,13 @@ public class MetricExpression {
     return expression;
   }
 
+  @Deprecated
   public List<MetricFunction> computeMetricFunctions(
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry
   ) {
     try {
       Scope scope = Scope.create();
-      Set<String> metricTokens = new TreeSet<>(); // can be either metric names or ids ! :-/
+      Set<String> metricTokens; // can be either metric names or ids ! :-/
 
       // expression parser errors out on variables starting with _
       // we're replacing the __COUNT default metric, with an escaped string

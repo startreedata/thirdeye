@@ -12,7 +12,6 @@ import ai.startree.thirdeye.detection.cache.TimeSeriesCache;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import ai.startree.thirdeye.util.DataFrameUtils;
@@ -27,7 +26,6 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultTimeSeriesLoader.class);
 
-  private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final CacheConfig cacheConfig;
@@ -35,13 +33,11 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public DefaultTimeSeriesLoader(MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
+  public DefaultTimeSeriesLoader(DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final CacheConfig cacheConfig,
       final TimeSeriesCache timeSeriesCache,
       final DataSourceCache dataSourceCache) {
-    this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.cacheConfig = cacheConfig;
@@ -60,8 +56,7 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
     LOG.info("Loading time series for '{}'", slice);
 
     TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO,
-            thirdEyeCacheRegistry);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse response;
     if (cacheConfig.useCentralizedCache()) {
       response = timeSeriesCache.fetchTimeSeries(rc.getRequest());

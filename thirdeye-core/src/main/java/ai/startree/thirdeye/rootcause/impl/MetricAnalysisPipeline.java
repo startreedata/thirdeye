@@ -276,8 +276,7 @@ public class MetricAnalysisPipeline extends Pipeline {
       MetricSlice slice = MetricSlice.from(me.getId(), start, end, jointFilters, this.granularity);
       try {
         requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.metricDAO, this.datasetDAO,
-                thirdEyeCacheRegistry));
+            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.datasetDAO, thirdEyeCacheRegistry));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }

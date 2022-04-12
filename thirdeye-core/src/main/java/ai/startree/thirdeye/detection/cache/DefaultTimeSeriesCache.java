@@ -153,8 +153,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
     TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO,
-            thirdEyeCacheRegistry);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
     return this.dataSourceCache.getQueryResult(rc.getRequest());
   }
 

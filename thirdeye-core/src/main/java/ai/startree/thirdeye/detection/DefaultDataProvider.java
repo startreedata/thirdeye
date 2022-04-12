@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.detection;
 
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import ai.startree.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -19,10 +18,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.spi.detection.model.EvaluationSlice;
 import ai.startree.thirdeye.spi.detection.model.EventSlice;
@@ -35,14 +32,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +51,7 @@ public class DefaultDataProvider implements DataProvider {
   private final DatasetConfigManager datasetDAO;
   private final EventManager eventDAO;
   private final EvaluationManager evaluationDAO;
-  private final AggregationLoader aggregationLoader;
 
-  private final TimeSeriesCacheBuilder timeseriesCache;
   private final AnomaliesCacheBuilder anomaliesCache;
 
   @Inject
@@ -68,15 +59,11 @@ public class DefaultDataProvider implements DataProvider {
       DatasetConfigManager datasetDAO,
       EventManager eventDAO,
       EvaluationManager evaluationDAO,
-      AggregationLoader aggregationLoader,
-      TimeSeriesCacheBuilder timeseriesCache,
       AnomaliesCacheBuilder anomaliesCache) {
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.eventDAO = eventDAO;
     this.evaluationDAO = evaluationDAO;
-    this.aggregationLoader = aggregationLoader;
-    this.timeseriesCache = timeseriesCache;
     this.anomaliesCache = anomaliesCache;
   }
 
@@ -86,43 +73,13 @@ public class DefaultDataProvider implements DataProvider {
 
   @Override
   public Map<MetricSlice, DataFrame> fetchTimeseries(Collection<MetricSlice> slices) {
-    try {
-      Map<MetricSlice, MetricSlice> alignedMetricSlicesToOriginalSlice = new HashMap<>();
-      for (MetricSlice slice : slices) {
-        alignedMetricSlicesToOriginalSlice.put(alignSlice(slice), slice);
-      }
-      Map<MetricSlice, DataFrame> cacheResult = timeseriesCache
-          .fetchSlices(alignedMetricSlicesToOriginalSlice.keySet());
-      Map<MetricSlice, DataFrame> timeseriesResult = new HashMap<>();
-      for (Map.Entry<MetricSlice, DataFrame> entry : cacheResult.entrySet()) {
-        // make a copy of the result so that cache won't be contaminated by client code
-        timeseriesResult
-            .put(alignedMetricSlicesToOriginalSlice.get(entry.getKey()), entry.getValue().copy());
-      }
-      return timeseriesResult;
-    } catch (Exception e) {
-      throw new DataProviderException("fetch time series failed", e);
-    }
+    throw new UnsupportedOperationException("fetchTimeseries not supported anymore");
   }
 
   @Override
   public Map<MetricSlice, DataFrame> fetchAggregates(Collection<MetricSlice> slices,
       final List<String> dimensions, int limit) {
-    try {
-      Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
-      for (final MetricSlice slice : slices) {
-        futures.put(slice, this.executor.submit(
-            () -> aggregationLoader.loadAggregate(slice, dimensions, limit)));
-      }
-
-      Map<MetricSlice, DataFrame> output = new HashMap<>();
-      for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
-        output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
-      }
-      return output;
-    } catch (Exception e) {
-      throw new DataProviderException(e);
-    }
+    throw new UnsupportedOperationException("fetchAggregates not supported anymore");
   }
 
   /**
@@ -220,41 +177,6 @@ public class DefaultDataProvider implements DataProvider {
       output.putAll(slice, evaluations.stream().filter(slice::match).collect(Collectors.toList()));
     }
     return output;
-  }
-
-  /**
-   * Aligns a metric slice based on its granularity, or the dataset granularity.
-   *
-   * @param slice metric slice
-   * @return aligned metric slice
-   */
-  private MetricSlice alignSlice(MetricSlice slice) {
-    MetricConfigDTO metric = this.metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
-
-    DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id %d", metric.getDataset(),
-              slice.getMetricId()));
-    }
-
-    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
-        .orElse(dataset.bucketTimeGranularity());
-
-    // align to time buckets and request time zone
-    // if granularity is more than 1 day, align to the daily boundary
-    // this alignment is required by the Pinot datasource, otherwise, it may return wrong results
-    long offset = DateTimeZone.forID(dataset.getTimezone()).getOffset(slice.getStartMillis());
-    long timeGranularity = Math.min(granularity.toMillis(), TimeUnit.DAYS.toMillis(1));
-    long start = ((slice.getStartMillis() + offset) / timeGranularity) * timeGranularity - offset;
-    long end = ((slice.getEndMillis() + offset + timeGranularity - 1) / timeGranularity) * timeGranularity
-        - offset;
-
-    return slice.withStart(start).withEnd(end).withGranularity(granularity);
   }
 
   @Override

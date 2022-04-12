@@ -86,8 +86,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     RequestContainer requestContainer = makeAggregateRequest(slice,
         Collections.emptyList(),
         -1,
-        "ref",
-        thirdEyeCacheRegistry);
+        "ref");
     ThirdEyeResponse response = dataSourceCache
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
@@ -98,10 +97,8 @@ public class CSVThirdEyeDataSourceIntegrationTest {
   }
 
   private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
+      int limit, String reference)
       throws Exception {
-    return DataFrameUtils
-        .makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO,
-            thirdEyeCacheRegistry);
+    return DataFrameUtils.makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO);
   }
 }

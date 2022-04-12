@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeRequest {
 
   private final List<MetricFunction> metricFunctions;
+  // todo Cyril prefer joda interval - like MetricSlice
   private final DateTime startTime;
   private final DateTime endTime;
   private final Multimap<String, String> filterSet;

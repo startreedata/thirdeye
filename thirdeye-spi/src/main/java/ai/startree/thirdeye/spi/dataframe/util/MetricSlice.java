@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.spi.dataframe.util;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
@@ -26,74 +28,84 @@ import org.joda.time.Interval;
  */
 public final class MetricSlice {
 
-  private final long metricId;
+  private final @NonNull MetricConfigDTO metricConfigDTO;
   private final Interval interval;
   private final Multimap<String, String> filters;
-  private final @Nullable
-  TimeGranularity granularity;
+  private final @NonNull DatasetConfigDTO datasetConfigDTO;
 
-  MetricSlice(long metricId, final @NonNull Interval interval, Multimap<String, String> filters,
-      TimeGranularity granularity) {
-    this.metricId = metricId;
+  MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO, final @NonNull Interval interval,
+      Multimap<String, String> filters, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    this.metricConfigDTO = metricConfigDTO;
     this.interval = interval;
     this.filters = filters;
-    this.granularity = granularity;
+    this.datasetConfigDTO = datasetConfigDTO;
   }
 
-  public static MetricSlice from (final long metricId, final Interval interval) {
-    return new MetricSlice(metricId, interval, ArrayListMultimap.create(), null);
+  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
+      final Interval interval, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    return new MetricSlice(metricConfigDTO,
+        interval,
+        ArrayListMultimap.create(),
+        datasetConfigDTO);
   }
 
-  public static MetricSlice from(final long metricId, final Interval interval,
-      final Multimap<String, String> filters) {
-    return new MetricSlice(metricId, interval, filters, null);
+  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
+      final Interval interval,
+      final Multimap<String, String> filters, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
   }
 
   /**
    * Filters in format dim1=val1, dim2!=val2
    */
-  public static MetricSlice from(final long metricId, final Interval interval,
-      final List<String> filters, TimeGranularity granularity) {
+  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
+      final Interval interval,
+      final List<String> filters,
+      final @NonNull DatasetConfigDTO datasetConfigDTO) {
     List<FilterPredicate> predicates = EntityUtils.extractFilterPredicates(filters);
     Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
-    return new MetricSlice(metricId, interval, filtersMap, granularity);
+    return new MetricSlice(metricConfigDTO, interval, filtersMap, datasetConfigDTO);
   }
 
-  public static MetricSlice from(final long metricId, final Interval interval,
-      final Multimap<String, String> filters, TimeGranularity granularity) {
-    return new MetricSlice(metricId, interval, filters, granularity);
-  }
-
-  @Deprecated
-  public static MetricSlice from(long metricId, long start, long end) {
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), ArrayListMultimap.create(), null);
+  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
+      final Interval interval,
+      final Multimap<String, String> filters, TimeGranularity granularity,
+      final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
   }
 
   @Deprecated
-  public static MetricSlice from(long metricId, long start, long end,
+  public static MetricSlice from(final long metricId, long start, long end) {
+    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
+        new Interval(start, end, DateTimeZone.UTC),
+        ArrayListMultimap.create(),
+        new DatasetConfigDTO());
+  }
+
+  @Deprecated
+  public static MetricSlice from(final long metricId, long start, long end,
       Multimap<String, String> filters) {
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filters, null);
-  }
-
-  /**
-   * Filters in format dim1=val1, dim2!=val2
-   */
-  @Deprecated
-  public static MetricSlice from(long metricId, long start, long end,
-      List<String> filters, TimeGranularity granularity) {
-    List<FilterPredicate> predicates = EntityUtils.extractFilterPredicates(filters);
-    Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filtersMap, granularity);
+    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
+        new Interval(start, end, DateTimeZone.UTC),
+        filters,
+        new DatasetConfigDTO());
   }
 
   @Deprecated
-  public static MetricSlice from(long metricId, long start, long end,
+  public static MetricSlice from(final long metricId, long start, long end,
       Multimap<String, String> filters, TimeGranularity granularity) {
-    return new MetricSlice(metricId, new Interval(start, end, DateTimeZone.UTC), filters, granularity);
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setNonAdditiveBucketSize(granularity.getSize());
+    datasetConfigDTO.setNonAdditiveBucketUnit(granularity.getUnit());
+    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
+        new Interval(start, end, DateTimeZone.UTC),
+        filters,
+        new DatasetConfigDTO());
   }
 
+  @Deprecated
   public long getMetricId() {
-    return metricId;
+    return metricConfigDTO.getId();
   }
 
   @Deprecated
@@ -106,52 +118,87 @@ public final class MetricSlice {
     return interval.getEndMillis();
   }
 
-  public DateTime getStart() {return interval.getStart();}
+  public @NonNull MetricConfigDTO getMetricConfigDTO() {
+    return metricConfigDTO;
+  }
 
-  public DateTime getEnd() {return interval.getEnd();}
+  public @NonNull DatasetConfigDTO getDatasetConfigDTO() {return datasetConfigDTO;}
 
-  public Interval getInterval() {return interval;}
+  public DateTime getStart() {
+    return interval.getStart();
+  }
+
+  public DateTime getEnd() {
+    return interval.getEnd();
+  }
+
+  public Interval getInterval() {
+    return interval;
+  }
 
   public Multimap<String, String> getFilters() {
     return filters;
   }
 
+  @Deprecated
   public @Nullable TimeGranularity getGranularity() {
-    return granularity;
+    return datasetConfigDTO.bucketTimeGranularity();
+  }
+
+  @Deprecated
+  public @Nullable String getDatasetName() {
+    return datasetConfigDTO.getDataset();
   }
 
   public MetricSlice withStart(DateTime start) {
-    return new MetricSlice(metricId, interval.withStart(start), filters, granularity);
+    return new MetricSlice(metricConfigDTO,
+        interval.withStart(start),
+        filters,
+        datasetConfigDTO);
   }
 
   @Deprecated
   public MetricSlice withStart(long start) {
-    return new MetricSlice(metricId, interval.withStartMillis(start), filters, granularity);
+    return new MetricSlice(metricConfigDTO,
+        interval.withStartMillis(start),
+        filters,
+        datasetConfigDTO);
   }
 
   public MetricSlice withEnd(DateTime end) {
-    return new MetricSlice(metricId, interval.withEnd(end), filters, granularity);
+    return new MetricSlice(metricConfigDTO,
+        interval.withEnd(end),
+        filters,
+        datasetConfigDTO);
   }
 
   @Deprecated
   public MetricSlice withEnd(long end) {
-    return new MetricSlice(metricId, interval.withEndMillis(end), filters, granularity);
+    return new MetricSlice(metricConfigDTO,
+        interval.withEndMillis(end),
+        filters,
+        datasetConfigDTO);
   }
 
   public MetricSlice withFilters(Multimap<String, String> filters) {
-    return new MetricSlice(metricId, interval, filters, granularity);
+    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
   }
 
-  public MetricSlice withGranularity(TimeGranularity granularity) {
-    return new MetricSlice(metricId, interval, filters, granularity);
+  public MetricSlice withMetricConfigDto(MetricConfigDTO metricConfigDTO) {
+    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
+  }
+
+  public MetricSlice withDatasetConfigDto(DatasetConfigDTO datasetConfigDto) {
+    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDto);
   }
 
   /**
    * check if current metric slice contains another metric slice
    */
   public boolean containSlice(MetricSlice slice) {
-    return slice.metricId == this.metricId && slice.granularity.equals(this.granularity) && slice
-        .getFilters().equals(this.getFilters()) &&
+    return Objects.equals(slice.metricConfigDTO, this.metricConfigDTO) &&
+        slice.getFilters().equals(this.getFilters()) &&
+        Objects.equals(slice.datasetConfigDTO, this.datasetConfigDTO) &&
         this.interval.contains(slice.interval);
   }
 
@@ -164,24 +211,25 @@ public final class MetricSlice {
       return false;
     }
     MetricSlice that = (MetricSlice) o;
-    return metricId == that.metricId && Objects.equals(interval, that.interval) && Objects
-        .equals(filters, that.filters)
-        && Objects.equals(granularity, that.granularity);
+    return Objects.equals(metricConfigDTO, that.metricConfigDTO) &&
+        Objects.equals(interval, that.interval) &&
+        Objects.equals(filters, that.filters) &&
+        Objects.equals(datasetConfigDTO, that.datasetConfigDTO);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metricId, interval, filters, granularity);
+    return Objects.hash(metricConfigDTO, interval, filters, datasetConfigDTO);
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("metricId", metricId)
+        .add("metricId", metricConfigDTO.getId())
         .add("start", interval.getStart())
         .add("end", interval.getEnd())
         .add("filters", filters)
-        .add("granularity", granularity)
+        .add("dataset", datasetConfigDTO.getDataset())
         .toString();
   }
 }

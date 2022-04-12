@@ -103,7 +103,19 @@ public class RootCauseAnalysisInfoFetcher {
     final DatasetConfigDTO datasetConfigDTO = ensureExists(datasetDAO.findByDataset(metricConfigDTO.getDataset()),
         String.format("Dataset name: %s", metricConfigDTO.getDataset()));
 
+    addCustomFields(metricConfigDTO, metadataMetricDTO);
+    addCustomFields(datasetConfigDTO, metadataDatasetDTO);
+
     return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO);
+  }
+
+  private void addCustomFields(final DatasetConfigDTO datasetConfigDTO, final DatasetConfigDTO metadataDatasetDTO) {
+    // fields that can be configured at the alert level can be added here
+  }
+
+  private void addCustomFields(final MetricConfigDTO metricConfigDTO, final MetricConfigDTO metadataMetricDTO) {
+    // fields that can be configured at the alert level can be added here
+    Optional.ofNullable(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
   }
 
   private void tryMigrateTemplateFromRcaToMetadata(final AlertTemplateDTO alertTemplateInsideAlertDto) {

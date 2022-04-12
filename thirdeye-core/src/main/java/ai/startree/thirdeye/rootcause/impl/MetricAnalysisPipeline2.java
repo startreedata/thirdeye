@@ -129,10 +129,10 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     Set<MetricSlice> slicesRaw = new HashSet<>();
     for (MetricEntity me : metrics) {
       MetricSlice sliceTrain = MetricSlice
-          .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), anomalyRange.getStart() - TRAINING_WINDOW, anomalyRange.getStart(),
+          .from(me.getId(), anomalyRange.getStart() - TRAINING_WINDOW, anomalyRange.getStart(),
               me.getFilters(), this.granularity);
       MetricSlice sliceTest = MetricSlice
-          .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), anomalyRange.getStart(), anomalyRange.getEnd(), me.getFilters(),
+          .from(me.getId(), anomalyRange.getStart(), anomalyRange.getEnd(), me.getFilters(),
               this.granularity);
 
       trainingSet.put(me, sliceTrain);

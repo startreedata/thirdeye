@@ -133,9 +133,9 @@ public class MetricBreakdownPipeline extends Pipeline {
     for (MetricEntity me : metricsEntities) {
       try {
         final MetricSlice sliceCurrent = MetricSlice
-            .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), anomaly.getStart(), anomaly.getEnd(), me.getFilters());
+            .from(me.getId(), anomaly.getStart(), anomaly.getEnd(), me.getFilters());
         final MetricSlice sliceBaseline = MetricSlice
-            .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), baseline.getStart(), baseline.getEnd(), me.getFilters());
+            .from(me.getId(), baseline.getStart(), baseline.getEnd(), me.getFilters());
 
         DataFrame dfScores = getDimensionScores(sliceCurrent, sliceBaseline);
 
@@ -164,7 +164,7 @@ public class MetricBreakdownPipeline extends Pipeline {
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO.findById(slice.getMetricId()),
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO,
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 

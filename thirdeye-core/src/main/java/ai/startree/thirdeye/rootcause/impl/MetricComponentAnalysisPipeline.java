@@ -135,7 +135,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
     // metric total for score calculation
     final MetricSlice sliceTotal = MetricSlice
-        .from((MetricConfigDTO) new MetricConfigDTO().setId(metric.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
+        .from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
     final double total;
     try {
       total = getTotal(sliceTotal);
@@ -147,9 +147,9 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     for (int k = 0; k < this.k; k++) {
       try {
         final MetricSlice sliceCurrent = MetricSlice
-            .from((MetricConfigDTO) new MetricConfigDTO().setId(metric.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
+            .from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
         final MetricSlice sliceBaseline = MetricSlice
-            .from((MetricConfigDTO) new MetricConfigDTO().setId(metric.getId()), baseline.getStart(), baseline.getEnd(), filters);
+            .from(metric.getId(), baseline.getStart(), baseline.getEnd(), filters);
 
         final double subTotal = getTotal(sliceCurrent);
 
@@ -194,7 +194,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
   private double getTotal(MetricSlice slice) throws Exception {
     String ref = String.format("%d", slice.getMetricId());
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, metricDAO.findById(slice.getMetricId()),
+        .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, metricDAO,
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
@@ -206,7 +206,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO.findById(slice.getMetricId()),
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO,
             this.datasetDAO, thirdEyeCacheRegistry);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 

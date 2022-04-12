@@ -152,29 +152,29 @@ public class CallGraphPipeline extends Pipeline {
 
     // data slices
     MetricSlice sliceCurrCount = MetricSlice
-        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricCount.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
+        .from(metricCount.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
     MetricSlice sliceCurrLatency = MetricSlice
-        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricLatency.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
+        .from(metricLatency.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
     MetricSlice sliceBaseCount = MetricSlice
-        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricCount.getId()), baseline.getStart(), baseline.getEnd(), filters);
+        .from(metricCount.getId(), baseline.getStart(), baseline.getEnd(), filters);
     MetricSlice sliceBaseLatency = MetricSlice
-        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricLatency.getId()), baseline.getStart(), baseline.getEnd(), filters);
+        .from(metricLatency.getId(), baseline.getStart(), baseline.getEnd(), filters);
 
     // fetch data
     try {
       // prepare requests
       RequestContainer rcCurrCount = DataFrameUtils
-          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", metricDAO.findById(sliceCurrCount.getMetricId()),
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", metricDAO,
+              datasetDAO, thirdEyeCacheRegistry);
       RequestContainer rcCurrLatency = DataFrameUtils
-          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", metricDAO.findById(sliceCurrLatency.getMetricId()),
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", metricDAO,
+              datasetDAO, thirdEyeCacheRegistry);
       RequestContainer rcBaseCount = DataFrameUtils
-          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", metricDAO.findById(sliceBaseCount.getMetricId()),
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", metricDAO,
+              datasetDAO, thirdEyeCacheRegistry);
       RequestContainer rcBaseLatency = DataFrameUtils
-          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", metricDAO.findById(sliceBaseLatency.getMetricId()),
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", metricDAO,
+              datasetDAO, thirdEyeCacheRegistry);
 
       // send requests
       Future<ThirdEyeResponse> resCurrCount = this.cache

@@ -56,16 +56,16 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   @Override
   public DataFrame loadBreakdown(MetricSlice slice, int limit) throws Exception {
-    MetricConfigDTO metric = slice.getMetricConfigDTO();
-    DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
+    MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
+    DatasetConfigDTO datasetConfigDTO = this.datasetDAO.findByDataset(metricConfigDTO.getDataset());
+    if (datasetConfigDTO == null) {
       throw new IllegalArgumentException(
-          String.format("Could not resolve dataset '%s'", metric.getDataset()));
+          String.format("Could not resolve datasetConfigDTO '%s'", metricConfigDTO.getDataset()));
     }
 
-    List<String> dimensions = new ArrayList<>(dataset.getDimensions());
+    List<String> dimensions = new ArrayList<>(datasetConfigDTO.getDimensions());
     dimensions.removeAll(slice.getFilters().keySet());
-    dimensions.remove(dataset.getTimeColumn());
+    dimensions.remove(datasetConfigDTO.getTimeColumn());
 
     LOG.info("De-Aggregating '{}' for dimensions '{}'", slice, dimensions);
 
@@ -81,7 +81,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     for (String dimension : dimensions) {
       RequestContainer rc = DataFrameUtils
           .makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref",
-              metric, this.datasetDAO,
+              datasetConfigDTO,
               thirdEyeCacheRegistry);
       Future<ThirdEyeResponse> res = dataSourceCache
           .getQueryResultAsync(rc.getRequest());
@@ -107,24 +107,34 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final DataFrame breakdown = dfAll.append(results);
     // add time column containing start time of slice
     return breakdown
-        .addSeries(DataFrame.COL_TIME, LongSeries.fillValues(breakdown.size(), slice.getStartMillis()))
+        .addSeries(DataFrame.COL_TIME,
+            LongSeries.fillValues(breakdown.size(), slice.getStartMillis()))
         .setIndex(DataFrame.COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
   }
 
   @Override
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
       throws Exception {
-    MetricConfigDTO metric = slice.getMetricConfigDTO();
+    MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
+    DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(metricConfigDTO.getDataset());
+    if (datasetConfigDTO == null) {
+      throw new IllegalArgumentException(
+          String.format("Could not resolve datasetConfigDTO '%s'", metricConfigDTO.getDataset()));
+    }
+
     LOG.info("Aggregating '{}'", slice);
     final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
         .get(Objects.requireNonNull(slice.getDatasetName()));
+
     if (slice.getStartMillis() > maxTime) {
       return emptyDataframe(dimensions);
     }
-
-    RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref", metric,
-            this.datasetDAO, thirdEyeCacheRegistry);
+    RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice,
+        new ArrayList<>(dimensions),
+        limit,
+        "ref",
+        datasetConfigDTO,
+        thirdEyeCacheRegistry);
     ThirdEyeResponse res = dataSourceCache
         .getQueryResult(rc.getRequest());
     final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);

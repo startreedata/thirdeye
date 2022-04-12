@@ -72,20 +72,20 @@ public final class MetricSlice {
   }
 
   @Deprecated
-  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO, long start, long end) {
-    return new MetricSlice(metricConfigDTO, new Interval(start, end, DateTimeZone.UTC), ArrayListMultimap.create(), null, null);
+  public static MetricSlice from(final long metricId, long start, long end) {
+    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId), new Interval(start, end, DateTimeZone.UTC), ArrayListMultimap.create(), null, null);
   }
 
   @Deprecated
-  public static MetricSlice from(final@NonNull MetricConfigDTO metricConfigDTO, long start, long end,
+  public static MetricSlice from(final long metricId, long start, long end,
       Multimap<String, String> filters) {
-    return new MetricSlice(metricConfigDTO, new Interval(start, end, DateTimeZone.UTC), filters, null, null);
+    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId), new Interval(start, end, DateTimeZone.UTC), filters, null, null);
   }
 
   @Deprecated
-  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO, long start, long end,
+  public static MetricSlice from(final long metricId, long start, long end,
       Multimap<String, String> filters, TimeGranularity granularity) {
-    return new MetricSlice(metricConfigDTO, new Interval(start, end, DateTimeZone.UTC), filters, granularity, null);
+    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId), new Interval(start, end, DateTimeZone.UTC), filters, granularity, null);
   }
 
   @Deprecated
@@ -148,6 +148,10 @@ public final class MetricSlice {
   }
 
   public MetricSlice withGranularity(TimeGranularity granularity) {
+    return new MetricSlice(metricConfigDTO, interval, filters, granularity, datasetName);
+  }
+
+  public MetricSlice withMetricConfigDto(MetricConfigDTO metricConfigDTO) {
     return new MetricSlice(metricConfigDTO, interval, filters, granularity, datasetName);
   }
 

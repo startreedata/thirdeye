@@ -44,14 +44,6 @@ public class MetricExpression {
   private final MetricAggFunction aggFunction;
   private final String dataset;
 
-  public MetricExpression(String expression, String dataset) {
-    this(expression.replaceAll("[\\s]+", ""), expression, dataset);
-  }
-
-  public MetricExpression(String expressionName, String expression, String dataset) {
-    this(expressionName, expression, MetricAggFunction.SUM, dataset);
-  }
-
   public MetricExpression(String expressionName, String expression, MetricAggFunction aggFunction,
       String dataset) {
     this.expressionName = expressionName;

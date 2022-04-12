@@ -12,7 +12,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
-import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -70,25 +69,6 @@ public abstract class ThirdEyeUtils {
         expression,
         metricConfig.getDefaultAggFunction(),
         metricConfig.getDataset());
-  }
-
-  public static String getDerivedMetricExpression(String metricExpressionName,
-      String dataset,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws ExecutionException {
-    final MetricDataset metricDataset = new MetricDataset(metricExpressionName, dataset);
-
-    MetricConfigDTO metricConfig = thirdEyeCacheRegistry
-        .getMetricConfigCache()
-        .get(metricDataset);
-
-    String derivedMetricExpression;
-    if (metricConfig != null && metricConfig.getDerivedMetricExpression() != null) {
-      derivedMetricExpression = metricConfig.getDerivedMetricExpression();
-    } else {
-      derivedMetricExpression = metricConfig.getName();
-    }
-    return derivedMetricExpression;
   }
 
   public static DatasetConfigDTO getDatasetConfigFromName(String dataset,

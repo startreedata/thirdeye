@@ -25,14 +25,24 @@ import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const {
+        anomalies: fetchedAnomalies,
         getAnomalies,
         status: getAnomaliesRequestStatus,
         errorMessages: anomaliesRequestErrors,
     } = useGetAnomalies();
-    const [anomalies, setAnomalies] = useState<Anomaly[] | null>(null);
+
+    // We need internal state to avoid refetch of anomalies after action like delete
+    const [anomalies, setAnomalies] = useState<Anomaly[] | null>(
+        fetchedAnomalies
+    );
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+
+    // Always sync anomalies with fetched one
+    useEffect(() => {
+        setAnomalies(fetchedAnomalies);
+    }, [fetchedAnomalies]);
 
     useEffect(() => {
         // Time range refreshed, fetch anomalies
@@ -55,18 +65,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, [getAnomaliesRequestStatus, anomalies]);
 
     const fetchAnomaliesByTime = (): void => {
-        setAnomalies(null);
-
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
 
-        getAnomalies({ startTime: Number(start), endTime: Number(end) }).then(
-            (anomalies) => {
-                if (anomalies && anomalies.length) {
-                    setAnomalies(anomalies);
-                }
-            }
-        );
+        getAnomalies({ startTime: Number(start), endTime: Number(end) });
     };
 
     const handleAnomalyDelete = (anomaly: Anomaly): void => {

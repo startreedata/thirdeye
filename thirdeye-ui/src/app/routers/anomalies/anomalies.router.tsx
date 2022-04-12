@@ -4,7 +4,7 @@ import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
-import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { SaveLastUsedSearchParams } from "../../utils/routes/save-last-used-search-params/save-last-used-search-params.component";
 
 const AnomaliesAllPage = lazy(() =>
@@ -52,7 +52,6 @@ export const AnomaliesRouter: FunctionComponent = () => {
                             <RedirectWithDefaultParams
                                 replace
                                 useStoredLastUsedParamsPathKey
-                                pathKeyOverride={AppRoute.ANOMALIES_ALL_RANGE}
                                 to={AppRouteRelative.ANOMALIES_ALL_RANGE}
                             />
                         }

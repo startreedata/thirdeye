@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,12 +106,13 @@ public class MetricExpression {
     return expression;
   }
 
+  @Deprecated
   public List<MetricFunction> computeMetricFunctions(
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry
   ) {
     try {
       Scope scope = Scope.create();
-      Set<String> metricTokens = new TreeSet<>(); // can be either metric names or ids ! :-/
+      Set<String> metricTokens; // can be either metric names or ids ! :-/
 
       // expression parser errors out on variables starting with _
       // we're replacing the __COUNT default metric, with an escaped string

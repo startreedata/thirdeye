@@ -73,6 +73,7 @@ public abstract class ThirdEyeUtils {
     return datasetConfig;
   }
 
+  @Deprecated
   public static List<DatasetConfigDTO> getDatasetConfigsFromMetricUrn(String metricUrn,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager,

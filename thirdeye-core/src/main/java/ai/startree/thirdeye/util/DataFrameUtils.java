@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -123,8 +122,7 @@ public class DataFrameUtils {
     }
 
     MetricExpression me = expressions.iterator().next();
-    Collection<MetricFunction> functions = me.computeMetricFunctions(
-        thirdEyeCacheRegistry);
+    Collection<MetricFunction> functions = me.computeMetricFunctions(thirdEyeCacheRegistry);
 
     Map<String, Double> context = new HashMap<>();
     double[] values = new double[df.size()];
@@ -266,13 +264,9 @@ public class DataFrameUtils {
       List<String> dimensions,
       int limit,
       String reference) {
-    MetricConfigDTO metricConfigDTO = Objects.requireNonNull(slice.getMetricConfigDTO());
-    DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(slice.getDatasetConfigDTO());
-
-    // todo cyril - after refactoring: both contain the same info : proof it's not relevant to have both - remove --> maybe at the end remove both- it only contains metricConfig and datasetConfig
-    MetricExpression expression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
-    MetricFunction function = new MetricFunction(metricConfigDTO, datasetConfigDTO);
-
+    // todo cyril - after refactoring: both contain the same info : proof it's not relevant to have both - remove --> maybe at the end remove both - it seems slice is MetricSlice is enough
+    MetricExpression expression = new MetricExpression(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
+    MetricFunction function = new MetricFunction(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(slice.getStart())
         .setEndTimeExclusive(slice.getEnd())

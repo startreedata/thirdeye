@@ -26,6 +26,13 @@ public class MetricFunction implements Comparable<MetricFunction> {
 
   }
 
+  public MetricFunction(final MetricConfigDTO metricConfig, final DatasetConfigDTO datasetConfig) {
+    // todo cyril only store this: don't store the other things
+    // todo cyril then remove this metric function entirely
+    this(metricConfig.getDefaultAggFunction(), metricConfig.getName(), metricConfig.getId(), datasetConfig.getDataset(), metricConfig, datasetConfig);
+  }
+
+  @Deprecated
   public MetricFunction(
       @JsonProperty("functionName") MetricAggFunction functionName,
       @JsonProperty("metricName") String metricName,

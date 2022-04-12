@@ -10,6 +10,9 @@ import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.datasource.cache.MetricDataset;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
@@ -23,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -77,14 +81,17 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    */
   protected Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(
       String dataset,
-      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets) {
+      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets)
+      throws ExecutionException {
 
     Map<CubeTag, ThirdEyeRequestMetricExpressions> requests = new HashMap<>();
+    DatasetConfigDTO datasetConfigDTO = thirdEyeCacheRegistry.getDatasetConfigCache().get(dataset);
 
     for (CubeSpec cubeSpec : cubeSpecs) {
       // Set dataset and metric
+      MetricConfigDTO metricConfigDTO = thirdEyeCacheRegistry.getMetricConfigCache().get(new MetricDataset(cubeSpec.getMetric(), dataset));
       MetricExpression metricExpression = new MetricExpression(cubeSpec.getMetric(), cubeSpec.getMetric(), MetricAggFunction.SUM, dataset);
-      List<MetricFunction> metricFunctions = metricExpression.computeMetricFunctions(thirdEyeCacheRegistry);
+      List<MetricFunction> metricFunctions = List.of(new MetricFunction(metricConfigDTO, datasetConfigDTO));
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
 

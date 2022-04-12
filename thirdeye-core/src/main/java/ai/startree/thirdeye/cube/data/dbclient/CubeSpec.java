@@ -12,6 +12,7 @@ import org.joda.time.Interval;
  * The spec that specifies the metric and its time range to be retrieved from the data base.
  */
 public class CubeSpec {
+  // todo cyril put the metricConfigDTO directly
 
   private CubeTag tag;
   private String metric;

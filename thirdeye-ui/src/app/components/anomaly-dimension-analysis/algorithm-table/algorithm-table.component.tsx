@@ -1,10 +1,4 @@
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-} from "@material-ui/core";
+import { Table, TableCell, TableHead, TableRow } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { AlgorithmRow } from "./algorithm-row.component";
 import { AlgorithmTableProps } from "./algorithm-table.interfaces";
@@ -34,24 +28,18 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<
                     <TableCell />
                 </TableRow>
             </TableHead>
-            <TableBody>
-                {data.map((row) => (
-                    <AlgorithmRow
-                        anomaly={anomaly}
-                        comparisonOffset={comparisonOffset}
-                        dataset={
-                            anomalyDimensionAnalysisData.metric.dataset.name
-                        }
-                        dimensionColumns={
-                            anomalyDimensionAnalysisData.dimensions
-                        }
-                        key={row.names.join()}
-                        metric={anomalyDimensionAnalysisData.metric.name}
-                        row={row}
-                        totalSum={totalSum}
-                    />
-                ))}
-            </TableBody>
+            {data.map((row) => (
+                <AlgorithmRow
+                    anomaly={anomaly}
+                    comparisonOffset={comparisonOffset}
+                    dataset={anomalyDimensionAnalysisData.metric.dataset.name}
+                    dimensionColumns={anomalyDimensionAnalysisData.dimensions}
+                    key={row.names.join()}
+                    metric={anomalyDimensionAnalysisData.metric.name}
+                    row={row}
+                    totalSum={totalSum}
+                />
+            ))}
         </Table>
     );
 };

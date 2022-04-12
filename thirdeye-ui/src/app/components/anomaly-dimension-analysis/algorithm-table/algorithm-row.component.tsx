@@ -1,6 +1,7 @@
 import {
     Collapse,
     LinearProgress,
+    TableBody,
     TableCell,
     TableRow,
     Tooltip,
@@ -9,7 +10,6 @@ import {
 import IconButton from "@material-ui/core/IconButton";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { createStyles, withStyles } from "@material-ui/styles";
-import classNames from "classnames";
 import React, { FunctionComponent, useState } from "react";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { AlgorithmRowExpanded } from "./algorithm-row-expanded.component";
@@ -54,16 +54,12 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
         dataset,
         dimensionColumns
     );
-    const parentRowClasses = [classes.root];
-
-    if (open) {
-        parentRowClasses.push(classes.expandedRowParent);
-    }
+    const parentRowClasses = open ? classes.expandedRowParent : null;
 
     return (
-        <>
+        <TableBody className={parentRowClasses}>
             {/** Main Content */}
-            <TableRow className={classNames(...parentRowClasses)}>
+            <TableRow className={classes.root}>
                 <TableCell component="th" scope="row">
                     {row.names.includes(SERVER_VALUE_FOR_OTHERS) ? (
                         <Tooltip
@@ -116,6 +112,6 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                     </Collapse>
                 </TableCell>
             </TableRow>
-        </>
+        </TableBody>
     );
 };

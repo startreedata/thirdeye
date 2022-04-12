@@ -153,6 +153,16 @@ export const getAnomaliesAllPath = (searchTerm?: string): string => {
     return `${AppRoute.ANOMALIES_ALL}?${urlQuery.toString()}`;
 };
 
+export const getAnomaliesAllRangePath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.ANOMALIES_ALL_RANGE}?${urlQuery.toString()}`;
+};
+
 export const getAnomaliesAnomalyPath = (id: number): string => {
     let path: string = AppRoute.ANOMALIES_ANOMALY;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);

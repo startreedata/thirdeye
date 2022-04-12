@@ -54,10 +54,10 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
         dataset,
         dimensionColumns
     );
-    const parentRowClasses = open ? classes.expandedRowParent : null;
+    const parentRowClasses = open ? classes.expandedRowParent : "";
 
     return (
-        <TableBody className={parentRowClasses}>
+        <TableBody classes={{ root: parentRowClasses }}>
             {/** Main Content */}
             <TableRow className={classes.root}>
                 <TableCell component="th" scope="row">

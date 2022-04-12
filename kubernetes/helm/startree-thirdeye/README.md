@@ -1,4 +1,4 @@
-# ThirdEye (Alpha)
+# ThirdEye
 
 This helm chart installs ThirdEye with a Pinot Quickstart Cluster. It sets up the following
 components.

@@ -119,7 +119,7 @@ public class SqlUtils {
       Map<String, Object> contextMap = combineValuesAndBuildContextMap(filterContextMap);
       String whereClause = GroovyTemplateUtils.renderTemplate(metricConfig.getWhere(), contextMap);
       //remove "and" prefix if there is one
-      whereClause = whereClause.replaceFirst("^ *[aA][nN][dD] *", "");
+      whereClause = whereClause.replaceFirst("^ *[aA][nN][dD] +", "");
       sb.append(" AND ").append(whereClause);
     }
 

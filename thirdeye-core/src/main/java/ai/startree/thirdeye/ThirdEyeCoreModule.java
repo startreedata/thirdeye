@@ -11,14 +11,12 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfigurationModule;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
-import ai.startree.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import ai.startree.thirdeye.detection.DefaultDataProvider;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.detection.cache.CacheDAO;
 import ai.startree.thirdeye.detection.cache.DefaultTimeSeriesCache;
 import ai.startree.thirdeye.detection.cache.TimeSeriesCache;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
-import ai.startree.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -44,7 +42,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
     install(new ThirdEyeServerConfigurationModule(configuration));
 
     bind(DataProvider.class).to(DefaultDataProvider.class).in(Scopes.SINGLETON);
-    bind(TimeSeriesLoader.class).to(DefaultTimeSeriesLoader.class).in(Scopes.SINGLETON);
     bind(TimeSeriesCache.class).to(DefaultTimeSeriesCache.class).in(Scopes.SINGLETON);
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
   }

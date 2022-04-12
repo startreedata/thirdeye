@@ -19,30 +19,21 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { getAnomalyName } from "../../utils/anomalies/anomalies.util";
+import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
 import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
     const {
-        anomalies: fetchedAnomalies,
         getAnomalies,
         status: getAnomaliesRequestStatus,
         errorMessages: anomaliesRequestErrors,
     } = useGetAnomalies();
-
-    // We need internal state to avoid refetch of anomalies after action like delete
-    const [anomalies, setAnomalies] = useState<Anomaly[] | null>(
-        fetchedAnomalies
-    );
     const { showDialog } = useDialog();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    // Always sync anomalies with fetched one
-    useEffect(() => {
-        setAnomalies(fetchedAnomalies);
-    }, [fetchedAnomalies]);
 
     useEffect(() => {
         // Time range refreshed, fetch anomalies
@@ -52,8 +43,8 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     useEffect(() => {
         if (
             getAnomaliesRequestStatus === ActionStatus.Done &&
-            anomalies &&
-            anomalies.length === 0
+            uiAnomalies &&
+            uiAnomalies.length === 0
         ) {
             notify(
                 NotificationTypeV1.Info,
@@ -62,47 +53,54 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 })
             );
         }
-    }, [getAnomaliesRequestStatus, anomalies]);
+    }, [getAnomaliesRequestStatus, uiAnomalies]);
 
     const fetchAnomaliesByTime = (): void => {
+        setUiAnomalies(null);
+
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
 
-        getAnomalies({ startTime: Number(start), endTime: Number(end) });
+        let fetchedUiAnomalies: UiAnomaly[] = [];
+        getAnomalies({ startTime: Number(start), endTime: Number(end) })
+            .then((anomalies) => {
+                if (anomalies && anomalies.length) {
+                    fetchedUiAnomalies = getUiAnomalies(anomalies);
+                }
+            })
+            .finally(() => setUiAnomalies(fetchedUiAnomalies));
     };
 
-    const handleAnomalyDelete = (anomaly: Anomaly): void => {
+    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
-                name: getAnomalyName(anomaly),
-            }),
+            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
             okButtonLabel: t("label.delete"),
-            onOk: () => handleAnomalyDeleteOk(anomaly),
+            onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
     };
 
-    const handleAnomalyDeleteOk = (anomaly: Anomaly): void => {
-        deleteAnomaly(anomaly.id).then((anomaly): void => {
+    const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
+        deleteAnomaly(uiAnomaly.id).then((anomaly): void => {
             notify(
                 NotificationTypeV1.Success,
                 t("message.delete-success", { entity: t("label.anomaly") })
             );
 
             // Remove deleted anomaly from fetched anomalies
-            removeAnomaly(anomaly);
+            removeUiAnomaly(anomaly);
         });
     };
 
-    const removeAnomaly = (anomaly: Anomaly): void => {
+    const removeUiAnomaly = (anomaly: Anomaly): void => {
         if (!anomaly) {
             return;
         }
 
-        setAnomalies(
-            (anomalies) =>
-                anomalies &&
-                anomalies.filter((currAnomaly) => currAnomaly.id !== anomaly.id)
+        setUiAnomalies(
+            (uiAnomalies) =>
+                uiAnomalies &&
+                uiAnomalies.filter((uiAnomaly) => uiAnomaly.id !== anomaly.id)
         );
     };
 
@@ -143,7 +141,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                     {/* Anomaly list */}
                     <PageContentsCardV1 disablePadding fullHeight>
                         <AnomalyListV1
-                            anomalies={anomalies}
+                            anomalies={uiAnomalies}
                             searchFilterValue={searchParams.get(
                                 SEARCH_TERM_QUERY_PARAM_KEY
                             )}

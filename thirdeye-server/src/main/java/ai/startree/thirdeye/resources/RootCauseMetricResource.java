@@ -340,8 +340,7 @@ public class RootCauseMetricResource {
     MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
         filters,
-        datasetConfigDTO.bucketTimeGranularity(),
-        datasetConfigDTO.getDataset());
+        datasetConfigDTO);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -359,12 +358,12 @@ public class RootCauseMetricResource {
       final long end,
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
+    DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
     MetricSlice baseSlice = MetricSlice.from(
         findMetricConfig(metricId),
         new Interval(start, end, dateTimeZone),
         filters,
-        findMetricGranularity(metricId),
-        findDatasetName(metricId)
+        datasetConfigDTO
     );
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = range.scatter(baseSlice);
@@ -462,12 +461,12 @@ public class RootCauseMetricResource {
 
   @Deprecated
   // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
-  private String findDatasetName(final long metricId) {
+  private DatasetConfigDTO findDataset(final long metricId) {
     final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
         String.format("metric id: %d", metricId));
     final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
         String.format("dataset name: %s", metric.getDataset()));
 
-    return dataset.getDataset();
+    return dataset;
   }
 }

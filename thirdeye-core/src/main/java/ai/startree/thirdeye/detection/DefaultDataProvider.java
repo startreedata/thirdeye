@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.spi.detection.model.EvaluationSlice;
 import ai.startree.thirdeye.spi.detection.model.EventSlice;
@@ -33,13 +32,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,41 +177,6 @@ public class DefaultDataProvider implements DataProvider {
       output.putAll(slice, evaluations.stream().filter(slice::match).collect(Collectors.toList()));
     }
     return output;
-  }
-
-  /**
-   * Aligns a metric slice based on its granularity, or the dataset granularity.
-   *
-   * @param slice metric slice
-   * @return aligned metric slice
-   */
-  private MetricSlice alignSlice(MetricSlice slice) {
-    MetricConfigDTO metric = this.metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
-
-    DatasetConfigDTO dataset = this.datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id %d", metric.getDataset(),
-              slice.getMetricId()));
-    }
-
-    TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
-        .orElse(dataset.bucketTimeGranularity());
-
-    // align to time buckets and request time zone
-    // if granularity is more than 1 day, align to the daily boundary
-    // this alignment is required by the Pinot datasource, otherwise, it may return wrong results
-    long offset = DateTimeZone.forID(dataset.getTimezone()).getOffset(slice.getStartMillis());
-    long timeGranularity = Math.min(granularity.toMillis(), TimeUnit.DAYS.toMillis(1));
-    long start = ((slice.getStartMillis() + offset) / timeGranularity) * timeGranularity - offset;
-    long end = ((slice.getEndMillis() + offset + timeGranularity - 1) / timeGranularity) * timeGranularity
-        - offset;
-
-    return slice.withStart(start).withEnd(end).withGranularity(granularity);
   }
 
   @Override

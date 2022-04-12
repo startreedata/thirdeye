@@ -260,18 +260,16 @@ public class DataFrameUtils {
    * @param dimensions dimensions to group by
    * @param limit top k element limit ({@code -1} for default)
    * @param reference unique identifier for request
-   * @param datasetConfigDTO dataset config
    * @return RequestContainer
    */
   public static RequestContainer makeAggregateRequest(MetricSlice slice,
       List<String> dimensions,
       int limit,
       String reference,
-      DatasetConfigDTO datasetConfigDTO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
     MetricConfigDTO metricConfigDTO = Objects.requireNonNull(slice.getMetricConfigDTO());
-    Objects.requireNonNull(datasetConfigDTO);
+    DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(slice.getDatasetConfigDTO());
 
     List<MetricExpression> expressions = Utils.convertToMetricExpressions(metricConfigDTO.getName(),
         metricConfigDTO.getDefaultAggFunction(), metricConfigDTO.getDataset(),
@@ -310,7 +308,12 @@ public class DataFrameUtils {
               metricConfigDTO.getId()));
     }
 
-    return makeAggregateRequest(slice.withMetricConfigDto(metricConfigDTO), dimensions, limit, reference, dataset, thirdEyeCacheRegistry);
+    return makeAggregateRequest(slice.withMetricConfigDto(metricConfigDTO)
+            .withDatasetConfigDto(dataset),
+        dimensions,
+        limit,
+        reference,
+        thirdEyeCacheRegistry);
   }
 
   /**

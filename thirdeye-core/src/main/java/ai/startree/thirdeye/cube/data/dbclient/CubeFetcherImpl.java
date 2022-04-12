@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -78,8 +77,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    */
   protected Map<CubeTag, ThirdEyeRequestMetricExpressions> constructBulkRequests(
       String dataset,
-      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets)
-      throws ExecutionException {
+      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets) {
 
     Map<CubeTag, ThirdEyeRequestMetricExpressions> requests = new HashMap<>();
 

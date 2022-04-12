@@ -213,17 +213,17 @@ public class DataFrameUtils {
       String reference, DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    MetricConfigDTO metric = slice.getMetricConfigDTO();
+    MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
 
-    DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
+    DatasetConfigDTO dataset = datasetDAO.findByDataset(metricConfigDTO.getDataset());
     if (dataset == null) {
       throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
-              metric.getId()));
+          .format("Could not resolve dataset '%s' for metric id '%d'", metricConfigDTO.getDataset(),
+              metricConfigDTO.getId()));
     }
 
-    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset(),
+    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metricConfigDTO.getName(),
+        metricConfigDTO.getDefaultAggFunction(), metricConfigDTO.getDataset(),
         thirdEyeCacheRegistry);
 
     TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
@@ -251,8 +251,7 @@ public class DataFrameUtils {
   }
 
   /**
-   * Constructs and wraps a request for a metric with derived expressions. Resolves all
-   * required dependencies from the Thirdeye database.
+   * Constructs and wraps a request for a simple metric.
    *
    * Assumes the slice contains a complete metricConfigDTO.
    *
@@ -266,22 +265,23 @@ public class DataFrameUtils {
       List<String> dimensions,
       int limit,
       String reference,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     MetricConfigDTO metricConfigDTO = Objects.requireNonNull(slice.getMetricConfigDTO());
 
-    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metricConfigDTO.getName(),
-        metricConfigDTO.getDefaultAggFunction(), metricConfigDTO.getDataset(),
-        thirdEyeCacheRegistry);
+    MetricExpression expression = new MetricExpression(
+        metricConfigDTO.getName(),
+        Optional.ofNullable(metricConfigDTO.getDerivedMetricExpression()).orElse(metricConfigDTO.getName()),
+        metricConfigDTO.getDefaultAggFunction(),
+        metricConfigDTO.getDataset());
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, expressions,
+    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, List.of(expression),
         thirdEyeCacheRegistry
     )
         .setGroupBy(dimensions)
         .setLimit(limit)
         .build(reference);
 
-    return new RequestContainer(request, expressions);
+    return new RequestContainer(request, List.of(expression));
   }
 
   @Deprecated

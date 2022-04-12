@@ -133,9 +133,9 @@ public class MetricBreakdownPipeline extends Pipeline {
     for (MetricEntity me : metricsEntities) {
       try {
         final MetricSlice sliceCurrent = MetricSlice
-            .from(me.getId(), anomaly.getStart(), anomaly.getEnd(), me.getFilters());
+            .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), anomaly.getStart(), anomaly.getEnd(), me.getFilters());
         final MetricSlice sliceBaseline = MetricSlice
-            .from(me.getId(), baseline.getStart(), baseline.getEnd(), me.getFilters());
+            .from((MetricConfigDTO) new MetricConfigDTO().setId(me.getId()), baseline.getStart(), baseline.getEnd(), me.getFilters());
 
         DataFrame dfScores = getDimensionScores(sliceCurrent, sliceBaseline);
 

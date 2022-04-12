@@ -152,13 +152,13 @@ public class CallGraphPipeline extends Pipeline {
 
     // data slices
     MetricSlice sliceCurrCount = MetricSlice
-        .from(metricCount.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricCount.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
     MetricSlice sliceCurrLatency = MetricSlice
-        .from(metricLatency.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricLatency.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
     MetricSlice sliceBaseCount = MetricSlice
-        .from(metricCount.getId(), baseline.getStart(), baseline.getEnd(), filters);
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricCount.getId()), baseline.getStart(), baseline.getEnd(), filters);
     MetricSlice sliceBaseLatency = MetricSlice
-        .from(metricLatency.getId(), baseline.getStart(), baseline.getEnd(), filters);
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(metricLatency.getId()), baseline.getStart(), baseline.getEnd(), filters);
 
     // fetch data
     try {

@@ -135,7 +135,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
     // metric total for score calculation
     final MetricSlice sliceTotal = MetricSlice
-        .from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+        .from((MetricConfigDTO) new MetricConfigDTO().setId(metric.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
     final double total;
     try {
       total = getTotal(sliceTotal);
@@ -147,9 +147,9 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     for (int k = 0; k < this.k; k++) {
       try {
         final MetricSlice sliceCurrent = MetricSlice
-            .from(metric.getId(), anomaly.getStart(), anomaly.getEnd(), filters);
+            .from((MetricConfigDTO) new MetricConfigDTO().setId(metric.getId()), anomaly.getStart(), anomaly.getEnd(), filters);
         final MetricSlice sliceBaseline = MetricSlice
-            .from(metric.getId(), baseline.getStart(), baseline.getEnd(), filters);
+            .from((MetricConfigDTO) new MetricConfigDTO().setId(metric.getId()), baseline.getStart(), baseline.getEnd(), filters);
 
         final double subTotal = getTotal(sliceCurrent);
 

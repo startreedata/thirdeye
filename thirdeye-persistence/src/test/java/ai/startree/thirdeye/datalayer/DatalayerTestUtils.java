@@ -17,7 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Lists;

@@ -6,7 +6,7 @@
 package ai.startree.thirdeye.datasource.loader;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.List;
 
 public interface AggregationLoader {

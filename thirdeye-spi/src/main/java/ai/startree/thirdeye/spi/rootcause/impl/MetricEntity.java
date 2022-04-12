@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.spi.rootcause.impl;
 
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.rootcause.Entity;
 import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;

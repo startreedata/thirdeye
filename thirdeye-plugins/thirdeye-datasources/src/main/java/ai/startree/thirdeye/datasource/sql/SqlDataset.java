@@ -6,7 +6,7 @@
 package ai.startree.thirdeye.datasource.sql;
 
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;

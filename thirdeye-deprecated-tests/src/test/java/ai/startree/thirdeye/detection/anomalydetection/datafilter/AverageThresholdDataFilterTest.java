@@ -8,7 +8,7 @@ package ai.startree.thirdeye.detection.anomalydetection.datafilter;
 import ai.startree.thirdeye.metric.MetricSchema;
 import ai.startree.thirdeye.metric.MetricTimeSeries;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;

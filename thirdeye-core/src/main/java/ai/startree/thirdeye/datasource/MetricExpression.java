@@ -9,7 +9,7 @@ import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import java.util.ArrayList;
 import java.util.HashMap;

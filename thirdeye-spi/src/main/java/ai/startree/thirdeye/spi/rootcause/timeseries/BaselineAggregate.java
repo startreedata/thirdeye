@@ -10,7 +10,7 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Grouping;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;
 import java.util.Arrays;

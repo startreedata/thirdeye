@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.detection.components.filters;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
@@ -15,6 +14,7 @@ import ai.startree.thirdeye.spi.detection.InputDataFetcher;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.model.InputData;
 import ai.startree.thirdeye.spi.detection.model.InputDataSpec;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
 import com.google.common.base.Preconditions;

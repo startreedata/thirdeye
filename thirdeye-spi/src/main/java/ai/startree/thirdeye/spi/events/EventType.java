@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.detection.events;
+package ai.startree.thirdeye.spi.events;
 
 public enum EventType {
   HOLIDAY, DEPLOYMENT, HISTORICAL_ANOMALY, CUSTOM

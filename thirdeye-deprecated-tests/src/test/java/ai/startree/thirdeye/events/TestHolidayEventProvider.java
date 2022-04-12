@@ -9,7 +9,7 @@ import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.DAORegistry;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;

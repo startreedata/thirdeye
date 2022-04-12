@@ -8,7 +8,7 @@ package ai.startree.thirdeye.detection.anomalydetection.function;
 import ai.startree.thirdeye.detection.anomalydetection.context.TimeSeries;
 import ai.startree.thirdeye.metric.MetricSchema;
 import ai.startree.thirdeye.metric.MetricTimeSeries;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import java.util.ArrayList;
 import java.util.List;
 import org.joda.time.DateTimeZone;

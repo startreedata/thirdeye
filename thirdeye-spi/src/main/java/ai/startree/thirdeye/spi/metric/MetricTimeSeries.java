@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.detection;
+package ai.startree.thirdeye.spi.metric;
 
 import java.util.Set;
 import org.joda.time.Interval;

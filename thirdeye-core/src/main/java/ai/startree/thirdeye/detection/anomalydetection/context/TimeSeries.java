@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.detection.anomalydetection.context;
 
-import ai.startree.thirdeye.spi.detection.MetricTimeSeries;
+import ai.startree.thirdeye.spi.metric.MetricTimeSeries;
 import java.io.IOException;
 import java.util.List;
 import java.util.NavigableMap;

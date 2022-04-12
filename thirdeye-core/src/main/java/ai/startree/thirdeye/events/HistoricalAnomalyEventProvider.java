@@ -8,7 +8,7 @@ package ai.startree.thirdeye.events;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

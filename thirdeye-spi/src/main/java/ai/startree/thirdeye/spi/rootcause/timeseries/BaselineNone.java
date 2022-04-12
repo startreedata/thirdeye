@@ -8,7 +8,7 @@ package ai.startree.thirdeye.spi.rootcause.timeseries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

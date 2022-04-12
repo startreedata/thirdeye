@@ -15,7 +15,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;

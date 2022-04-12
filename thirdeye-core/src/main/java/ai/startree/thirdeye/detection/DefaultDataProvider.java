@@ -7,7 +7,6 @@ package ai.startree.thirdeye.detection;
 
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
@@ -23,6 +22,7 @@ import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.spi.detection.model.EvaluationSlice;
 import ai.startree.thirdeye.spi.detection.model.EventSlice;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;

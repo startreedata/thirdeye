@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.detection.metric;
+package ai.startree.thirdeye.spi.metric;
 
 /**
  * Represents the various data types supported for a metric<br/>

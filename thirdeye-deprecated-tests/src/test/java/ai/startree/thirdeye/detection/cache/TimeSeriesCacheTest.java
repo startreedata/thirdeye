@@ -104,8 +104,7 @@ public class TimeSeriesCacheTest {
         datasetDAO,
         dataSourceCache);
 
-    cache = new DefaultTimeSeriesCache(metricDAO,
-        datasetDAO,
+    cache = new DefaultTimeSeriesCache(datasetDAO,
         cacheDAO,
         thirdEyeCacheRegistry,
         config,

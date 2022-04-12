@@ -11,10 +11,10 @@ server:
     - type: http
       port: 8080
       idleTimeout: 620s
-    - type: https
-      port: 443
-      keyStorePath: config/tls-key.keystore
-      keyStorePassword: password
+#    - type: https
+#      port: 443
+#      keyStorePath: config/tls-key.keystore
+#      keyStorePassword: password
 
   adminConnectors:
     - type: http

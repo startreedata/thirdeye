@@ -7,10 +7,10 @@ export const HelpIconWithTooltip: FunctionComponent<
     InfoIconWithTooltipProps
 > = ({ href, tooltipTitle }) => {
     return (
-        <IconButton color="secondary">
-            <Tooltip placement="top" title={tooltipTitle}>
+        <Tooltip placement="top" title={tooltipTitle}>
+            <IconButton color="secondary">
                 <HelpLinkIconV1 displayInline externalLink href={href} />
-            </Tooltip>
-        </IconButton>
+            </IconButton>
+        </Tooltip>
     );
 };

@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.metric;
 
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

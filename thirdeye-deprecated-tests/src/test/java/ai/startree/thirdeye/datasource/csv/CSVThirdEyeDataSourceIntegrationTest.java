@@ -12,13 +12,13 @@ import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.RequestContainer;
 import com.codahale.metrics.MetricRegistry;
@@ -86,8 +86,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     RequestContainer requestContainer = makeAggregateRequest(slice,
         Collections.emptyList(),
         -1,
-        "ref",
-        thirdEyeCacheRegistry);
+        "ref");
     ThirdEyeResponse response = dataSourceCache
         .getQueryResult(requestContainer.getRequest());
     DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
@@ -98,10 +97,8 @@ public class CSVThirdEyeDataSourceIntegrationTest {
   }
 
   private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
+      int limit, String reference)
       throws Exception {
-    return DataFrameUtils
-        .makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO,
-            thirdEyeCacheRegistry);
+    return DataFrameUtils.makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO);
   }
 }

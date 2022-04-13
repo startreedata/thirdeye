@@ -71,16 +71,17 @@ public class DetectionResult implements DetectionPipelineResult {
    * @param rawData the raw data map with column name and the values.
    * @return the detection result contains the raw data table
    */
-  public static DetectionResult from(Map<String, List> rawData) {
+  public static DetectionResult from(final Map<String, List> rawData) {
     return new DetectionResult(Collections.emptyList(), TimeSeries.empty(), rawData);
   }
 
   public static DetectionResult from(final DataFrame dataFrame) {
-    Map<String, List> rawData = new HashMap<>();
+    final Map<String, List> rawData = new HashMap<>();
     dataFrame.getSeriesNames().forEach(name -> rawData.put(name, dataFrame.getSeries().get(name).getObjects().toListTyped()));
     return from(rawData);
   }
 
+  @Override
   public List<MergedAnomalyResultDTO> getAnomalies() {
     return anomalies;
   }

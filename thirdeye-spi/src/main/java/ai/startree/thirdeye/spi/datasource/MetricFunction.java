@@ -9,7 +9,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
@@ -26,6 +26,13 @@ public class MetricFunction implements Comparable<MetricFunction> {
 
   }
 
+  public MetricFunction(final MetricConfigDTO metricConfig, final DatasetConfigDTO datasetConfig) {
+    // todo cyril only store this: don't store the other things
+    // todo cyril then remove this metric function entirely
+    this(metricConfig.getDefaultAggFunction(), metricConfig.getName(), metricConfig.getId(), datasetConfig.getDataset(), metricConfig, datasetConfig);
+  }
+
+  @Deprecated
   public MetricFunction(
       @JsonProperty("functionName") MetricAggFunction functionName,
       @JsonProperty("metricName") String metricName,

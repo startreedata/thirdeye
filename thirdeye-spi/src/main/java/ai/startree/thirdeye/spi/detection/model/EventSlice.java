@@ -19,12 +19,12 @@ public class EventSlice {
   final Multimap<String, String> filters;
 
   public EventSlice() {
-    this.start = -1;
-    this.end = -1;
-    this.filters = ArrayListMultimap.create();
+    start = -1;
+    end = -1;
+    filters = ArrayListMultimap.create();
   }
 
-  public EventSlice(long start, long end, Multimap<String, String> filters) {
+  public EventSlice(final long start, final long end, final Multimap<String, String> filters) {
     this.start = start;
     this.end = end;
     this.filters = filters;
@@ -42,31 +42,19 @@ public class EventSlice {
     return filters;
   }
 
-  public EventSlice withStart(long start) {
-    return new EventSlice(start, this.end, this.filters);
-  }
-
-  public EventSlice withEnd(long end) {
-    return new EventSlice(this.start, end, this.filters);
-  }
-
-  public EventSlice withFilters(Multimap<String, String> filters) {
-    return new EventSlice(this.start, this.end, filters);
-  }
-
-  public boolean match(EventDTO event) {
-    if (this.start >= 0 && event.getEndTime() <= this.start) {
+  public boolean match(final EventDTO event) {
+    if (start >= 0 && event.getEndTime() <= start) {
       return false;
     }
-    if (this.end >= 0 && event.getStartTime() >= this.end) {
+    if (end >= 0 && event.getStartTime() >= end) {
       return false;
     }
 
-    for (String dimName : this.filters.keySet()) {
+    for (final String dimName : filters.keySet()) {
       if (event.getTargetDimensionMap().containsKey(dimName)) {
         boolean anyMatch = false;
-        for (String dimValue : event.getTargetDimensionMap().get(dimName)) {
-          anyMatch |= this.filters.get(dimName).contains(dimValue);
+        for (final String dimValue : event.getTargetDimensionMap().get(dimName)) {
+          anyMatch |= filters.get(dimName).contains(dimValue);
         }
         if (!anyMatch) {
           return false;

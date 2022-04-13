@@ -10,10 +10,10 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
 import ai.startree.thirdeye.spi.detection.InputDataFetcher;
 import ai.startree.thirdeye.spi.detection.model.InputDataSpec;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 /**
@@ -50,14 +50,13 @@ public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFi
 
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
-    MetricEntity me = MetricEntity.fromURN(anomaly.getMetricUrn());
     MetricConfigDTO metric = dataFetcher
-        .fetchData(new InputDataSpec().withMetricIds(Collections.singleton(me.getId())))
+        .fetchData(new InputDataSpec().withMetricIds(Collections.singleton(-1L)))
         .getMetrics()
-        .get(me.getId());
+        .get(-1);
     double currentValue = anomaly.getAvgCurrentVal();
 
-    Interval anomalyInterval = new Interval(anomaly.getStartTime(), anomaly.getEndTime());
+    Interval anomalyInterval = new Interval(anomaly.getStartTime(), anomaly.getEndTime(), DateTimeZone.UTC);
 
     // apply multiplier if the metric is aggregated by SUM or COUNT
     double hourlyMultiplier = SpiUtils.isAggCumulative(metric) ?

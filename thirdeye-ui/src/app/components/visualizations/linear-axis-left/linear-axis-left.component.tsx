@@ -1,4 +1,5 @@
-import { AxisLeft, Text, TickRendererProps } from "@visx/visx";
+import { AxisLeft, TickRendererProps } from "@visx/axis";
+import { Text } from "@visx/text";
 import React, { FunctionComponent, ReactNode } from "react";
 import { formatLargeNumberForVisualization } from "../../../utils/visualization/visualization.util";
 import { LinearAxisLeftProps } from "./linear-axis-left.interfaces";

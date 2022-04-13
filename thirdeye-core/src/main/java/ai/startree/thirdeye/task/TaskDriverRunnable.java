@@ -11,6 +11,7 @@ import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
@@ -45,7 +46,7 @@ public class TaskDriverRunnable implements Runnable {
   private final TaskDriverConfiguration config;
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
-  private final Counter taskDurationCounter;
+  private final Histogram taskDuration;
   private final Counter taskExceptionCounter;
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
@@ -67,7 +68,7 @@ public class TaskDriverRunnable implements Runnable {
     this.workerId = workerId;
     this.taskRunnerFactory = taskRunnerFactory;
 
-    taskDurationCounter = metricRegistry.counter("taskDurationCounter");
+    taskDuration = metricRegistry.histogram("taskDuration");
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
@@ -115,7 +116,7 @@ public class TaskDriverRunnable implements Runnable {
       MDC.clear();
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
-      taskDurationCounter.inc(elapsedTime);
+      taskDuration.update(elapsedTime);
     }
   }
 

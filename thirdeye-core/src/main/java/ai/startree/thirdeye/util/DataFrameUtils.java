@@ -12,7 +12,6 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -22,6 +21,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponseRow;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 
 /**
@@ -123,8 +122,7 @@ public class DataFrameUtils {
     }
 
     MetricExpression me = expressions.iterator().next();
-    Collection<MetricFunction> functions = me.computeMetricFunctions(
-        thirdEyeCacheRegistry);
+    Collection<MetricFunction> functions = me.computeMetricFunctions(thirdEyeCacheRegistry);
 
     Map<String, Double> context = new HashMap<>();
     double[] values = new double[df.size()];
@@ -206,41 +204,33 @@ public class DataFrameUtils {
    *
    * @param slice metric data slice
    * @param reference unique identifier for request
-   * @param metricDAO metric config DAO
    * @param datasetDAO dataset config DAO
    * @return TimeSeriesRequestContainer
    */
   public static TimeSeriesRequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
-      String reference, MetricConfigManager metricDAO, DatasetConfigManager datasetDAO,
+      String reference, DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    MetricConfigDTO metric = metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
+    MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
 
-    DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
+    DatasetConfigDTO dataset = datasetDAO.findByDataset(metricConfigDTO.getDataset());
     if (dataset == null) {
       throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
-              metric.getId()));
+          .format("Could not resolve dataset '%s' for metric id '%d'", metricConfigDTO.getDataset(),
+              metricConfigDTO.getId()));
     }
 
-    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset(),
+    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metricConfigDTO.getName(),
+        metricConfigDTO.getDefaultAggFunction(), metricConfigDTO.getDataset(),
         thirdEyeCacheRegistry);
 
     TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
         .orElse(dataset.bucketTimeGranularity());
 
-    DateTimeZone timezone = DateTimeZone.forID(dataset.getTimezone());
     Period period = granularity.toPeriod();
 
-    DateTime start = new DateTime(slice.getStart(), timezone)
-        .withFields(SpiUtils.makeOrigin(period.getPeriodType()));
-    DateTime end = new DateTime(slice.getEnd(),
-        timezone).withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime start = slice.getStart().withFields(SpiUtils.makeOrigin(period.getPeriodType()));
+    DateTime end = slice.getEnd().withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
     MetricSlice alignedSlice = MetricSlice
         .from(slice.getMetricId(),
@@ -259,50 +249,63 @@ public class DataFrameUtils {
   }
 
   /**
-   * Constructs and wraps a request for a metric with derived expressions. Resolves all
-   * required dependencies from the Thirdeye database.
+   * Constructs and wraps a request for a simple metric.
+   *
+   * Assumes the slice contains a complete metricConfigDTO.
+   * Assumes the slice contains a complete datasetConfigDTO.
    *
    * @param slice metric data slice
    * @param dimensions dimensions to group by
    * @param limit top k element limit ({@code -1} for default)
    * @param reference unique identifier for request
-   * @param metricDAO metric config DAO
-   * @param datasetDAO dataset config DAO
    * @return RequestContainer
    */
   public static RequestContainer makeAggregateRequest(MetricSlice slice,
       List<String> dimensions,
       int limit,
-      String reference,
-      MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
-    MetricConfigDTO metric = metricDAO.findById(slice.getMetricId());
-    if (metric == null) {
-      throw new IllegalArgumentException(
-          String.format("Could not resolve metric id %d", slice.getMetricId()));
-    }
-
-    DatasetConfigDTO dataset = datasetDAO.findByDataset(metric.getDataset());
-    if (dataset == null) {
-      throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id '%d'", metric.getDataset(),
-              metric.getId()));
-    }
-
-    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metric.getName(),
-        metric.getDefaultAggFunction(), metric.getDataset(),
-        thirdEyeCacheRegistry);
-
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(slice, dataset, expressions,
-        thirdEyeCacheRegistry
-    )
+      String reference) {
+    // todo cyril - after refactoring: both contain the same info : proof it's not relevant to have both - remove --> maybe at the end remove both - it seems slice is MetricSlice is enough
+    MetricExpression expression = new MetricExpression(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
+    MetricFunction function = new MetricFunction(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
+    ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
+        .setStartTimeInclusive(slice.getStart())
+        .setEndTimeExclusive(slice.getEnd())
+        .setFilterSet(slice.getFilters())
+        .setMetricFunctions(List.of(function))
+        .setDataSource(slice.getDatasetConfigDTO().getDataSource())
         .setGroupBy(dimensions)
         .setLimit(limit)
         .build(reference);
 
-    return new RequestContainer(request, expressions);
+    return new RequestContainer(request, List.of(expression));
+  }
+
+  @Deprecated
+  // use above - do not pass DAOs to dataframe utils
+  public static RequestContainer makeAggregateRequest(MetricSlice slice,
+      List<String> dimensions,
+      int limit,
+      String reference,
+      MetricConfigManager metricDAO,
+      DatasetConfigManager datasetDAO) {
+    MetricConfigDTO metricConfigDTO = metricDAO.findById(slice.getMetricId());
+    if (metricConfigDTO == null) {
+      throw new IllegalArgumentException(
+          String.format("Could not resolve metric '%s'", slice.getMetricId()));
+    }
+
+    DatasetConfigDTO dataset = datasetDAO.findByDataset(metricConfigDTO.getDataset());
+    if (dataset == null) {
+      throw new IllegalArgumentException(String
+          .format("Could not resolve dataset '%s' for metric id '%d'", metricConfigDTO.getDataset(),
+              metricConfigDTO.getId()));
+    }
+
+    return makeAggregateRequest(slice.withMetricConfigDto(metricConfigDTO)
+            .withDatasetConfigDto(dataset),
+        dimensions,
+        limit,
+        reference);
   }
 
   /**
@@ -313,15 +316,26 @@ public class DataFrameUtils {
    * @param expressions metric expressions
    * @return ThirdeyeRequestBuilder
    */
+  @Deprecated
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
       DatasetConfigDTO dataset,
       List<MetricExpression> expressions,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+    DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
+    datasetConfigDTO.setDataSource(dataset.getDataSource());
+
+    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO),
+        expressions, thirdEyeCacheRegistry);
+  }
+
+  private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
+      MetricSlice slice,
+      List<MetricExpression> expressions,
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     List<MetricFunction> functions = new ArrayList<>();
     for (MetricExpression exp : expressions) {
-      functions.addAll(exp.computeMetricFunctions(
-          thirdEyeCacheRegistry));
+      functions.addAll(exp.computeMetricFunctions(thirdEyeCacheRegistry));
     }
 
     return ThirdEyeRequest.newBuilder()
@@ -329,6 +343,6 @@ public class DataFrameUtils {
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
         .setMetricFunctions(functions)
-        .setDataSource(dataset.getDataSource());
+        .setDataSource(slice.getDatasetConfigDTO().getDataSource());
   }
 }

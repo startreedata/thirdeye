@@ -10,12 +10,12 @@ import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class PinotDatasetOnboarderTest {
     assertThat(datasetConfig.getDimensions()).isEqualTo(schema.getDimensionNames());
     assertThat(datasetConfig.getTimeColumn()).isEqualTo(oldTimeColumnName);
     assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
-    assertThat(datasetConfig.getTimezone()).isEqualTo(TimeSpec.DEFAULT_TIMEZONE);
+    assertThat(datasetConfig.getTimezone()).isEqualTo(Constants.DEFAULT_TIMEZONE_STRING);
     assertThat(datasetConfig.getActive()).isTrue();
 
     List<MetricConfigDTO> metricConfigs = metricConfigDAO.findByDataset(dataset);
@@ -170,7 +170,7 @@ public class PinotDatasetOnboarderTest {
     assertThat(datasetConfigDAO.findAll().size()).isEqualTo(1);
     datasetConfig = datasetConfigDAO.findByDataset(dataset);
     assertThat(datasetConfig.getTimeFormat()).isEqualTo("EPOCH");
-    assertThat(datasetConfig.getTimezone()).isEqualTo(TimeSpec.DEFAULT_TIMEZONE);
+    assertThat(datasetConfig.getTimezone()).isEqualTo(Constants.DEFAULT_TIMEZONE_STRING);
   }
 
   @Test(dependsOnMethods = {"testRefreshDataset"})

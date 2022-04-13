@@ -7,17 +7,16 @@ package ai.startree.thirdeye.detection.cache;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
@@ -45,7 +44,6 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultTimeSeriesCache.class);
 
-  private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;
   private final DataSourceCache dataSourceCache;
   private final CacheDAO cacheDAO;
@@ -54,14 +52,12 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   private final CacheConfig cacheConfig;
 
   @Inject
-  public DefaultTimeSeriesCache(MetricConfigManager metricDAO,
-      final DatasetConfigManager datasetDAO,
+  public DefaultTimeSeriesCache(final DatasetConfigManager datasetDAO,
       @Nullable final CacheDAO cacheDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final CacheConfig cacheConfig,
       final DataSourceCache dataSourceCache) {
     this.cacheConfig = cacheConfig;
-    this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.dataSourceCache = dataSourceCache;
     this.cacheDAO = cacheDAO;
@@ -153,8 +149,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
     TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.metricDAO, this.datasetDAO,
-            thirdEyeCacheRegistry);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
     return this.dataSourceCache.getQueryResult(rc.getRequest());
   }
 

@@ -134,8 +134,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
         .setName(context.getName())
         .setPlanNodeBean(context.getPlanNodeBean())
         .setProperties(context.getProperties())
-        .setStartTime(context.getStartTime())
-        .setEndTime(context.getEndTime());
+        .setDetectionInterval(context.getDetectionInterval());
   }
 
   @Override

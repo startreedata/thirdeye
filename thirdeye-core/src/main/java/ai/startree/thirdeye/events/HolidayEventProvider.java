@@ -7,7 +7,7 @@ package ai.startree.thirdeye.events;
 
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

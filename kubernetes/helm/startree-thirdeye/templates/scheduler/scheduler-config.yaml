@@ -1,4 +1,5 @@
 
+{{ if .Values.scheduler.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -69,6 +70,9 @@ data:
     taskDriver:
       enabled: false
       id: 0 # must be a non-negative integer unique per instance/worker
+    
+    time:
+      timezone: {{ .Values.time.timezone }}
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}
@@ -271,3 +275,4 @@ data:
               trustStoreFilePath: 'trust/store/path/truststore_file' # e.g. '/etc/riddler/cacerts'
               trustStorePassword: ''
           # add your store of choice here
+{{ end }}

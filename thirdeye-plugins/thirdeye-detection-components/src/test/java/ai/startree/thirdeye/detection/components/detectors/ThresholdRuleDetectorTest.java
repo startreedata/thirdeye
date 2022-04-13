@@ -18,6 +18,7 @@ import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.HashMap;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
@@ -33,7 +34,7 @@ public class ThresholdRuleDetectorTest {
   @Test
   public void testNoAnomalies() throws DetectorException {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -89,7 +90,7 @@ public class ThresholdRuleDetectorTest {
   public void testDetectionRunsOnIntervalOnly() throws DetectorException {
     // test anomaly analysis is only conducted on the interval
     // notice the interval is smaller than the dataframe data
-    Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,
@@ -118,7 +119,7 @@ public class ThresholdRuleDetectorTest {
 
   @Test
   public void testAnomaliesUpAndDown() throws DetectorException {
-    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021);
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
         .addSeries(DataFrame.COL_TIME,

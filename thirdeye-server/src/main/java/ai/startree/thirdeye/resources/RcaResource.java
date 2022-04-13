@@ -10,13 +10,13 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.rca.RootCauseAnalysisService;
 import ai.startree.thirdeye.rca.RootCauseEntityFormatter;
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.RCAFramework;
 import ai.startree.thirdeye.rootcause.RCAFrameworkExecutionResult;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;

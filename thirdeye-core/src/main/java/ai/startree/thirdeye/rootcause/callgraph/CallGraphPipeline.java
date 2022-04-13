@@ -7,21 +7,21 @@ package ai.startree.thirdeye.rootcause.callgraph;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.DimensionsEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionsEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.ArrayListMultimap;
@@ -164,17 +164,17 @@ public class CallGraphPipeline extends Pipeline {
     try {
       // prepare requests
       RequestContainer rcCurrCount = DataFrameUtils
-          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", metricDAO,
+              datasetDAO);
       RequestContainer rcCurrLatency = DataFrameUtils
-          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", metricDAO,
+              datasetDAO);
       RequestContainer rcBaseCount = DataFrameUtils
-          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", metricDAO,
+              datasetDAO);
       RequestContainer rcBaseLatency = DataFrameUtils
-          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
+          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", metricDAO,
+              datasetDAO);
 
       // send requests
       Future<ThirdEyeResponse> resCurrCount = this.cache

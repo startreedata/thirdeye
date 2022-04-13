@@ -8,7 +8,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.39.0-SNAPSHOT</version>
+    <version>1.42.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -22,7 +22,9 @@
     <module>thirdeye-detection-components</module>
     <module>thirdeye-pinot</module>
     <module>thirdeye-kafka</module>
-    <module>thirdeye-notifications</module>
+    <module>thirdeye-notification-email</module>
+    <module>thirdeye-notification-webhook</module>
+    <module>thirdeye-notification-slack</module>
   </modules>
 
   <dependencies>

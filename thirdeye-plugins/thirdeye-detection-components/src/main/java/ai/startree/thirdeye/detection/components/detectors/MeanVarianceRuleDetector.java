@@ -31,6 +31,9 @@ import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
+import java.util.Set;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
@@ -46,20 +49,26 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     BaselineProvider<MeanVarianceRuleDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
+  private static final Set<Period> SUPPORTED_SEASONALITIES = Set.of(
+      Period.days(7), // weekly seasonality
+      Period.days(1), // daily seasonality
+      Period.ZERO     // special value for no seasonality
+  );
 
   private Pattern pattern;
   private double sensitivity;
   private int lookback;
   private MeanVarianceRuleDetectorSpec spec;
+  private Period seasonality = Period.ZERO; // PT0S: special period for no seasonality
 
   /**
    * Mapping of sensitivity to sigma on range of 0.5 - 1.5
-   *
-   * @param sensitivity double from 0 to 10. Values outside this range are clipped to 0, 10
-   * @return sigma
+   * 10 corresponds to sigma of 0.5
+   * 0 corresponds to sigma of 1.5
+   * Sensitivity value has no bounds, but it is recommended to be between 0 and 10.
    */
   private static double sigma(final double sensitivity) {
-    return 0.5 + 0.1 * (10 - Math.max(Math.min(sensitivity, 10), 0));
+    return 0.5 + 0.1 * (10 - sensitivity);
   }
 
   @Override
@@ -69,12 +78,35 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     sensitivity = spec.getSensitivity();
 
     if (spec.getLookbackPeriod() != null) {
-      checkArgument(spec.getMonitoringGranularity() != null, "monitoringGranularity is required when lookbackPeriod is used");
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when lookbackPeriod is used");
       this.lookback = computeSteps(spec.getLookbackPeriod(), spec.getMonitoringGranularity());
     } else {
       // fixme cyril remove deprecated lookback in spec and only use lookbackPeriod in 2 months (mid-May)
       // use default or set lookback - not recommended
       lookback = spec.getLookback();
+    }
+
+    if (spec.getSeasonalityPeriod() != null) {
+      checkArgument(spec.getMonitoringGranularity() != null,
+          "monitoringGranularity is required when seasonalityPeriod is used");
+      final Period seasonality = Period.parse(spec.getSeasonalityPeriod(),
+          ISOPeriodFormat.standard());
+      checkArgument(SUPPORTED_SEASONALITIES.contains(seasonality),
+          String.format(
+              "Unsupported period %s. Supported periods are P7D and P1D, or PTOS for no seasonality.",
+              seasonality));
+      int minimumLookbackRequired =
+          2 * computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
+      checkArgument(minimumLookbackRequired <= lookback,
+          String.format(
+              "Not enough history to compute variance with seasonality. Lookback: %s. LookbackPeriod: %s, SeasonalityPeriod: %s. Minimum lookback steps required: %s",
+              lookback,
+              spec.getLookbackPeriod(),
+              spec.getSeasonalityPeriod(),
+              minimumLookbackRequired));
+
+      this.seasonality = seasonality;
     }
 
     checkArgument(lookback >= 5,
@@ -85,9 +117,11 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       final String monitoringGranularityString) {
     // mind that computing lookback only once is not exactly correct when a day has 25 hours or 23 hours - but very minor issue
     final Period lookbackPeriod = Period.parse(periodString, ISOPeriodFormat.standard());
-    final Period monitoringGranularity = Period.parse(monitoringGranularityString, ISOPeriodFormat.standard());
+    final Period monitoringGranularity = Period.parse(monitoringGranularityString,
+        ISOPeriodFormat.standard());
 
-    return (int) (lookbackPeriod.toStandardDuration().getMillis()/monitoringGranularity.toStandardDuration().getMillis());
+    return (int) (lookbackPeriod.toStandardDuration().getMillis()
+        / monitoringGranularity.toStandardDuration().getMillis());
   }
 
   @Override
@@ -115,7 +149,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
         .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
         .addSeries(COL_DIFF_VIOLATION,
-            inputDf.getDoubles(COL_DIFF).abs().gte(inputDf.getDoubles(COL_ERROR)))
+            inputDf.getDoubles(COL_DIFF).abs().gt(inputDf.getDoubles(COL_ERROR)))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return new SimpleAnomalyDetectorResult(inputDf);
@@ -151,11 +185,14 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     // https://nestedsoftware.com/2018/03/20/calculating-a-moving-average-on-streaming-data-5a7k.22879.html
     // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
     for (int k = 0; k < size; k++) {
-      final DataFrame lookbackDf = getLookbackDf(inputDF, forecastDF.getLong(COL_TIME, k));
-      double mean = lookbackDf.getDoubles(COL_VALUE).mean().value();
-      double std = lookbackDf.getDoubles(COL_VALUE).std().value();
+      final long forecastTime = forecastDF.getLong(COL_TIME, k);
+      final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
+      final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime);
+      // todo cyril implement median
+      final double mean = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask).mean().value();
+      final double std = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask).std().value();
       //calculate baseline, error , upper and lower bound for prediction window.
-      resultTimeArray[k] = forecastDF.getLong(COL_TIME, k);
+      resultTimeArray[k] = forecastTime;
       baselineArray[k] = mean;
       errorArray[k] = sigma(sensitivity) * std;
       upperBoundArray[k] = baselineArray[k] + errorArray[k];
@@ -173,6 +210,36 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .addSeries(COL_ERROR, DoubleSeries.buildFrom(errorArray));
 
     return resultDF;
+  }
+
+  private DoubleSeries buildPeriodMask(final DataFrame lookbackDf, final long forecastTime) {
+    if (seasonality.equals(Period.ZERO)) {
+      // no seasonality --> no mask
+      return DoubleSeries.fillValues(lookbackDf.size(), 1);
+    }
+    // fixme cyril this implem does not not fail at DST - but datetimeZone is hardcoded to UTC so not DST
+    DateTime forecastDateTime = new DateTime(forecastTime, DateTimeZone.UTC);
+    DoubleSeries.Builder mask = DoubleSeries.builder();
+    LongSeries lookbackEpochs = lookbackDf.get(COL_TIME).getLongs();
+    for (int idx = 0; idx < lookbackEpochs.size(); idx++) {
+      DateTime lookbackDateTime = new DateTime(lookbackEpochs.get(idx), DateTimeZone.UTC);
+      mask.addValues(isSeasonalityMatch(forecastDateTime, lookbackDateTime) ? 1. : null);
+    }
+    return mask.build();
+  }
+
+  private boolean isSeasonalityMatch(final DateTime dt1, final DateTime dt2) {
+    final boolean isSameTimeInDay =
+        dt1.getHourOfDay() == dt2.getHourOfDay() && dt1.getMinuteOfHour() == dt2.getMinuteOfHour()
+            && dt1.getSecondOfMinute() == dt2.getSecondOfMinute()
+            && dt1.getMillisOfSecond() == dt2.getMillisOfSecond();
+    if (seasonality.equals(Period.days(7))) {
+      return isSameTimeInDay && dt1.getDayOfWeek() == dt2.getDayOfWeek();
+    } else if (seasonality.equals(Period.days(1))) {
+      return isSameTimeInDay;
+    } else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   private DataFrame getLookbackDf(final DataFrame inputDF, final long endTimeMillis) {

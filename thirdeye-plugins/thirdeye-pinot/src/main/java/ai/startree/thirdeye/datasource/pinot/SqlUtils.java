@@ -12,9 +12,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO.DimensionAsMetricProperties;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -81,7 +81,6 @@ public class SqlUtils {
       Multimap<String, String> filterSet,
       Map<String, Map<String, Object[]>> filterContextMap,
       TimeSpec dataTimeSpec) throws IOException, ClassNotFoundException {
-    // TODO handle request.getFilterClause()
 
     return getSql(metricFunction, request.getStartTimeInclusive(), request.getEndTimeExclusive(),
         filterSet,
@@ -119,6 +118,8 @@ public class SqlUtils {
     if (StringUtils.isNotBlank(metricConfig.getWhere())) {
       Map<String, Object> contextMap = combineValuesAndBuildContextMap(filterContextMap);
       String whereClause = GroovyTemplateUtils.renderTemplate(metricConfig.getWhere(), contextMap);
+      //remove "and" prefix if there is one
+      whereClause = whereClause.replaceFirst("^ *[aA][nN][dD] +", "");
       sb.append(" AND ").append(whereClause);
     }
 
@@ -168,7 +169,7 @@ public class SqlUtils {
     }
     return builder.toString();
   }
-  
+
   /**
    * Returns pqls to handle tables where metric names are a single dimension column,
    * and the metric values are all in a single value column

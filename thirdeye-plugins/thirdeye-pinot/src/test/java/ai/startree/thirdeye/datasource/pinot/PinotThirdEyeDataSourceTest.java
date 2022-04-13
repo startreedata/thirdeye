@@ -6,7 +6,7 @@
 package ai.startree.thirdeye.datasource.pinot;
 
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

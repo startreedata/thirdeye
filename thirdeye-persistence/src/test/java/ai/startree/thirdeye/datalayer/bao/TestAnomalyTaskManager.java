@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -163,8 +164,8 @@ public class TestAnomalyTaskManager {
     jobSpec.setJobName("Test_Anomaly_Task");
     jobSpec.setStatus(TaskStatus.WAITING);
     jobSpec.setTaskType(TaskType.DETECTION);
-    jobSpec.setStartTime(new DateTime().minusDays(20).getMillis());
-    jobSpec.setEndTime(new DateTime().minusDays(10).getMillis());
+    jobSpec.setStartTime(new DateTime(DateTimeZone.UTC).minusDays(20).getMillis());
+    jobSpec.setEndTime(new DateTime(DateTimeZone.UTC).minusDays(10).getMillis());
     jobSpec.setTaskInfo(new ObjectMapper().writeValueAsString(new MockTaskInfo()));
     jobSpec.setJobId(anomalyJobSpec.getId());
     return jobSpec;

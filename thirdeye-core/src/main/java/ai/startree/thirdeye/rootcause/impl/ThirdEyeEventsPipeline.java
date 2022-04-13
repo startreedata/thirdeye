@@ -5,9 +5,16 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
+import ai.startree.thirdeye.rootcause.entity.EventEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.HyperbolaStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.LinearStartTimeStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.QuadraticTriangularStartTimeStrategy;
@@ -16,13 +23,6 @@ import ai.startree.thirdeye.rootcause.util.ScoreUtils.TriangularStartTimeStrateg
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.EventEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

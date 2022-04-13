@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.calcite.sql.parser.SqlParseException;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -34,7 +35,7 @@ public class MacroEngineTest {
   private static final SqlExpressionBuilder MOCK_SQL_EXPRESSION_BUILDER = new TestSqlExpressionBuilder();
   private static final long INPUT_START_TIME = 11111111L;
   private static final long INPUT_END_TIME = 22222222L;
-  private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME, INPUT_END_TIME);
+  private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME, INPUT_END_TIME, DateTimeZone.UTC);
   private static final String IDENTIFIER_QUOTE_STRING = "\"";
   private static final String LITERAL_QUOTE_STRING = "'";
 

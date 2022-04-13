@@ -7,11 +7,15 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DETECTION_INTERVAL_COMPUTATION;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -35,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -117,16 +120,11 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      Interval detectionInterval = alertDetectionIntervalCalculator
-          .getCorrectedInterval(request.getAlert(),
-              request.getStart().getTime(),
-              request.getEnd().getTime());
+      Interval detectionInterval = computeDetectionInterval(request);
 
       // apply template properties
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-          request.getAlert(),
-          detectionInterval.getStartMillis(),
-          detectionInterval.getEndMillis());
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
+          detectionInterval);
 
       // inject custom evaluation context
       injectEvaluationContext(templateWithProperties, request.getEvaluationContext());
@@ -139,11 +137,8 @@ public class AlertEvaluator {
       }
 
       final Map<String, DetectionPipelineResult> result = executorService
-          .submit(() -> planExecutor.runPipeline(
-              templateWithProperties.getNodes(),
-              detectionInterval.getStartMillis(),
-              detectionInterval.getEndMillis()
-          ))
+          .submit(() -> planExecutor.runPipeline(templateWithProperties.getNodes(),
+              detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
       return toApi(result)
@@ -154,6 +149,19 @@ public class AlertEvaluator {
       handleAlertEvaluationException(e);
     }
     return null;
+  }
+
+  private Interval computeDetectionInterval(final AlertEvaluationApi request) {
+    // this method only exists to catch exception and translate into a TE exception
+    Interval detectionInterval;
+    try {
+      detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
+          request.getStart().getTime(),
+          request.getEnd().getTime());
+    } catch (Exception e) {
+      throw new ThirdEyeException(ERR_DETECTION_INTERVAL_COMPUTATION, e.getMessage());
+    }
+    return detectionInterval;
   }
 
   private void injectEvaluationContext(final AlertTemplateDTO templateWithProperties,
@@ -174,12 +182,9 @@ public class AlertEvaluator {
     if (filters.isEmpty()) {
       return;
     }
-    final AlertMetadataDTO alertMetadataDTO = Objects.requireNonNull(templateWithProperties.getMetadata(),
-        "metadata not found in alert config.");
-    final DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(alertMetadataDTO.getDataset(),
-        "metadata$dataset not found in alert config.");
-    final String dataset = Objects.requireNonNull(datasetConfigDTO.getDataset(),
-        "metadata$dataset$name not found in alert config.");
+    final AlertMetadataDTO alertMetadataDTO = ensureExists(templateWithProperties.getMetadata(), ERR_MISSING_CONFIGURATION_FIELD,"metadata");
+    final DatasetConfigDTO datasetConfigDTO = ensureExists(alertMetadataDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset");
+    final String dataset = ensureExists(datasetConfigDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset$name");
 
     final List<TimeseriesFilter> timeseriesFilters = parseAndCombinePredicates(filters).stream()
         .map(p -> TimeseriesFilter.of(p, getDimensionType(p.getLhs(), dataset), dataset))

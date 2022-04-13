@@ -7,25 +7,25 @@ package ai.startree.thirdeye.rootcause.impl;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import java.util.ArrayList;
@@ -292,7 +292,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     Collections.sort(slices, new Comparator<MetricSlice>() {
       @Override
       public int compare(MetricSlice o1, MetricSlice o2) {
-        return Long.compare(o1.getStart(), o2.getStart());
+        return Long.compare(o1.getStartMillis(), o2.getStartMillis());
       }
     });
     LOG.info("Fetching {} slices:\n{}", slices.size(), StringUtils.join(slices, "\n"));
@@ -337,8 +337,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     for (MetricSlice slice : slices) {
       try {
         requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.metricDAO,
-                this.datasetDAO, thirdEyeCacheRegistry));
+            .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.datasetDAO, thirdEyeCacheRegistry));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request. Skipping."), ex);
       }

@@ -7,7 +7,7 @@ package ai.startree.thirdeye.datalayer;
 
 import ai.startree.thirdeye.detection.detector.email.filter.AlphaBetaAlertFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

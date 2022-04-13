@@ -159,7 +159,12 @@
         "anomaly-feedback": "Anomaly Feedback",
         "view-configuration-docs": "View configuration documentation",
         "comment": "Comment",
-        "baseline-week-offset": "Baseline Week Offset"
+        "baseline-week-offset": "Baseline Week Offset",
+        "dimension-analysis-data": "Dimension Analysis Data",
+        "dimension-analysis-row-chart-data": "Dimension Analysis Row Chart Data",
+        "anomaly-period": "Anomaly Period",
+        "non-filtered": "Non Filtered",
+        "filtered": "Filtered"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

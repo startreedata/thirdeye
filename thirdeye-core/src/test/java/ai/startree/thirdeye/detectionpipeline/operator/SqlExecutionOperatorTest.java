@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
@@ -16,6 +18,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -51,8 +55,6 @@ public class SqlExecutionOperatorTest {
     params.putAll(customParams);
 
     final DetectionPipelineOperator sqlExecutionOperator = new SqlExecutionOperator();
-    final long startTime = System.currentTimeMillis();
-    final long endTime = startTime + 1000L;
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("SqlExecution")
@@ -70,8 +72,11 @@ public class SqlExecutionOperatorTest {
             new OutputBean().setOutputKey("1").setOutputName("sql_1")
         ));
     final Map<String, Object> properties = ImmutableMap.of();
-    final OperatorContext context = new OperatorContext().setStartTime(startTime)
-        .setEndTime(endTime)
+    final long startTime = System.currentTimeMillis();
+    final long endTime = startTime + 1000L;
+    final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
+    final OperatorContext context = new OperatorContext()
+        .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setInputsMap(ImmutableMap.of("baseline_data", new SimpleDataTable(
             ImmutableList.of("ts", "met"),
@@ -86,8 +91,7 @@ public class SqlExecutionOperatorTest {
         )))
         .setProperties(properties);
     sqlExecutionOperator.init(context);
-    Assert.assertEquals(sqlExecutionOperator.getStartTime(), startTime);
-    Assert.assertEquals(sqlExecutionOperator.getEndTime(), endTime);
+    assertThat(sqlExecutionOperator.getDetectionInterval()).isEqualTo(detectionInterval);
     sqlExecutionOperator.execute();
     Assert.assertEquals(sqlExecutionOperator.getOutputs().size(), 3);
     Assert.assertEquals(sqlExecutionOperator.getOutputs()

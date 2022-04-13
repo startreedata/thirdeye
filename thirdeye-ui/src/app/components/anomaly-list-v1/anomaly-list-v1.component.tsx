@@ -1,5 +1,11 @@
 import { Button, Typography } from "@material-ui/core";
-import React, { FunctionComponent, ReactNode, useMemo, useState } from "react";
+import React, {
+    FunctionComponent,
+    ReactNode,
+    useCallback,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
@@ -20,33 +26,52 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
 
-    const anomalyNameRenderer = (
-        cellValue: Record<string, unknown>,
-        data: UiAnomaly
-    ): ReactNode => {
-        return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
-    };
+    const anomalyNameRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
+        },
+        []
+    );
 
-    const alertNameRenderer = (
-        cellValue: Record<string, unknown>,
-        data: UiAnomaly
-    ): ReactNode => {
-        return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
-    };
+    const alertNameRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
+        },
+        []
+    );
 
-    const deviationRenderer = (
-        cellValue: Record<string, unknown>,
-        data: UiAnomaly
-    ): ReactNode => {
-        return (
-            <Typography
-                color={data.negativeDeviation ? "error" : undefined}
-                variant="body2"
-            >
-                {cellValue}
-            </Typography>
-        );
-    };
+    const deviationRenderer = useCallback(
+        (_: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return (
+                <Typography
+                    color={data.negativeDeviation ? "error" : undefined}
+                    variant="body2"
+                >
+                    {data.deviation}
+                </Typography>
+            );
+        },
+        []
+    );
+    const currentRenderer = useCallback(
+        (_: Record<string, unknown>, data: UiAnomaly): ReactNode =>
+            // use formatted value to display
+            data.current,
+        []
+    );
+
+    const predicatedRenderer = useCallback(
+        (_: Record<string, unknown>, data: UiAnomaly): ReactNode =>
+            // use formatted value to display
+            data.predicted,
+        []
+    );
+
+    const durationRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => data.duration,
+        []
+    );
 
     const isActionButtonDisable = !(
         selectedAnomaly && selectedAnomaly.rowKeyValues.length === 1
@@ -83,10 +108,11 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             },
             {
                 key: "duration",
-                dataKey: "duration",
+                dataKey: "durationVal",
                 header: t("label.duration"),
                 sortable: true,
                 minWidth: 150,
+                customCellRenderer: durationRenderer,
             },
             {
                 key: "startTime",
@@ -104,28 +130,37 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             },
             {
                 key: "current",
-                dataKey: "current",
+                dataKey: "currentVal",
                 header: t("label.current"),
                 sortable: true,
                 minWidth: 150,
+                customCellRenderer: currentRenderer,
             },
             {
                 key: "predicted",
-                dataKey: "predicted",
+                dataKey: "predictedVal",
                 header: t("label.predicted"),
                 sortable: true,
                 minWidth: 150,
+                customCellRenderer: predicatedRenderer,
             },
             {
                 key: "deviation",
-                dataKey: "deviation",
+                dataKey: "deviationVal",
                 header: t("label.deviation"),
                 sortable: true,
                 minWidth: 150,
                 customCellRenderer: deviationRenderer,
             },
         ],
-        [anomalyNameRenderer, alertNameRenderer, deviationRenderer]
+        [
+            anomalyNameRenderer,
+            alertNameRenderer,
+            deviationRenderer,
+            currentRenderer,
+            predicatedRenderer,
+            durationRenderer,
+        ]
     );
 
     return (

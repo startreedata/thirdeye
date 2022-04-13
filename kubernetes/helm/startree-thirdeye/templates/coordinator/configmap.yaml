@@ -60,6 +60,9 @@ data:
       enabled: {{ not .Values.worker.enabled }}
       id: 0 # must be a non-negative integer unique per instance/worker
 
+    time:
+      timezone: {{ .Values.time.timezone }}
+
 
     mockEvents:
       enabled: false

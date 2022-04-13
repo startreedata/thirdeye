@@ -1,0 +1,18 @@
+{
+  "name": "baselineDataFetcher",
+  "type": "DataFetcher",
+  "params": {
+    "dataSource": "${dataSourceName}",
+    "startTime": "${start}",
+    "endTime": "${end}",
+    "table": "${table}",
+    "query": "SELECT \"date\" as ${timestamp}, count(*) as ${metricName} FROM ${table} WHERE \"date\" >= ${start} AND \"date\" < ${end} GROUP BY \"date\" LIMIT 100"
+  },
+  "inputs": [],
+  "outputs": [
+    {
+      "outputKey": "output",
+      "outputName": "current"
+    }
+  ]
+}

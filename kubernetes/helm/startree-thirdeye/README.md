@@ -1,4 +1,4 @@
-# ThirdEye (Alpha)
+# ThirdEye
 
 This helm chart installs ThirdEye with a Pinot Quickstart Cluster. It sets up the following
 components.
@@ -84,8 +84,6 @@ helm uninstall thirdeye --namespace te
 ```
 
 ## Configurations
-
-> Warning: The initdb.sql used for setting up the db is currently passed as a helm value to the charts.
 
 Please see [values.yaml](values.yaml) for configurable parameters. Specify parameters
 using `--set key=value[,key=value]` argument to `helm install`

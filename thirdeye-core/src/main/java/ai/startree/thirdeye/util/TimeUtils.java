@@ -25,6 +25,7 @@ public class TimeUtils {
   /**
    * See https://stackoverflow.com/questions/8933158/how-do-i-round-a-datetime-to-the-nearest-period
    * Floors correctly only if 1 Time unit is used in the Period.
+   * Takes the DateTimeZone in account. See testFloorByPeriodWithCustomTimezone.
    */
   public static DateTime floorByPeriod(DateTime dt, Period period) {
     if (period.getYears() != 0) {

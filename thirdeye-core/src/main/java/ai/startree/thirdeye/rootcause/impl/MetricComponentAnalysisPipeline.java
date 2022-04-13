@@ -8,24 +8,24 @@ package ai.startree.thirdeye.rootcause.impl;
 import ai.startree.thirdeye.cube.data.cube.Cube;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.HashMultimap;
@@ -194,8 +194,8 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
   private double getTotal(MetricSlice slice) throws Exception {
     String ref = String.format("%d", slice.getMetricId());
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, this.metricDAO,
-            this.datasetDAO, thirdEyeCacheRegistry);
+        .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, metricDAO,
+            this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
@@ -206,8 +206,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
     RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, this.metricDAO,
-            this.datasetDAO, thirdEyeCacheRegistry);
+        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO, this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);

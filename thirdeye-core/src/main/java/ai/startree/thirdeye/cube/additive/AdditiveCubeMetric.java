@@ -13,6 +13,8 @@ import ai.startree.thirdeye.cube.data.dbclient.CubeSpec;
 import ai.startree.thirdeye.cube.data.dbclient.CubeTag;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -31,8 +33,8 @@ public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AdditiveCubeMetric.class);
 
-  private final String dataset;
-  private final String metricName;
+  private final DatasetConfigDTO datasetConfigDTO;
+  private final MetricConfigDTO metricConfigDTO;
   private final Interval currentInterval;
   private final Interval baselineInterval;
 
@@ -40,26 +42,21 @@ public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
    * Constructs an Additive cube metric.
    */
   public AdditiveCubeMetric(
-      String dataset,
-      String metricName,
+      DatasetConfigDTO datasetConfigDTO,
+      MetricConfigDTO metricConfigDTO,
       Interval currentInterval,
       Interval baselineInterval) {
-    checkArgument(!Strings.isNullOrEmpty(dataset));
-    this.dataset = dataset;
-    checkArgument(!Strings.isNullOrEmpty(metricName));
-    this.metricName = metricName;
+    checkArgument(!Strings.isNullOrEmpty(datasetConfigDTO.getDataset()));
+    checkArgument(!Strings.isNullOrEmpty(metricConfigDTO.getName()));
+    this.datasetConfigDTO = datasetConfigDTO;
+    this.metricConfigDTO = metricConfigDTO;
     this.currentInterval = Preconditions.checkNotNull(currentInterval);
     this.baselineInterval = Preconditions.checkNotNull(baselineInterval);
   }
 
   @Override
-  public String getDataset() {
-    return dataset;
-  }
-
-  @Override
-  public String getMetric() {
-    return metricName;
+  public DatasetConfigDTO getDataset() {
+    return datasetConfigDTO;
   }
 
   @Override
@@ -67,9 +64,9 @@ public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 
     cubeSpecs
-        .add(new CubeSpec(CubeTag.Baseline, metricName, baselineInterval));
+        .add(new CubeSpec(CubeTag.Baseline, metricConfigDTO, baselineInterval));
     cubeSpecs
-        .add(new CubeSpec(CubeTag.Current, metricName, currentInterval));
+        .add(new CubeSpec(CubeTag.Current, metricConfigDTO, currentInterval));
 
     return cubeSpecs;
   }

@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeRequest {
 
   private final List<MetricFunction> metricFunctions;
+  // todo Cyril prefer joda interval - like MetricSlice
   private final DateTime startTime;
   private final DateTime endTime;
   private final Multimap<String, String> filterSet;
@@ -178,18 +178,8 @@ public class ThirdEyeRequest {
       return this;
     }
 
-    public ThirdEyeRequestBuilder setStartTimeInclusive(long startTimeMillis) {
-      this.startTime = new DateTime(startTimeMillis, DateTimeZone.UTC);
-      return this;
-    }
-
     public ThirdEyeRequestBuilder setStartTimeInclusive(DateTime startTime) {
       this.startTime = startTime;
-      return this;
-    }
-
-    public ThirdEyeRequestBuilder setEndTimeExclusive(long endTimeMillis) {
-      this.endTime = new DateTime(endTimeMillis, DateTimeZone.UTC);
       return this;
     }
 

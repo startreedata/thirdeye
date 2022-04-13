@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Alert, AlertEvaluation, EditableAlert } from "../dto/alert.interfaces";
+import { GetEvaluationRequestPayload } from "./alerts.interfaces";
 
 const BASE_URL_ALERTS = "/api/alerts";
 
@@ -46,12 +47,16 @@ export const deleteAlert = async (id: number): Promise<Alert> => {
 };
 
 export const getAlertEvaluation = async (
-    alertEvaluation: AlertEvaluation
+    alertEvaluation: AlertEvaluation,
+    filters?: string[] // array of strings in `column=value` format
 ): Promise<AlertEvaluation> => {
-    const response = await axios.post(
-        `${BASE_URL_ALERTS}/evaluate`,
-        alertEvaluation
-    );
+    const payload: GetEvaluationRequestPayload = { ...alertEvaluation };
+
+    if (filters && filters.length > 0) {
+        payload["evaluationContext"] = { filters };
+    }
+
+    const response = await axios.post(`${BASE_URL_ALERTS}/evaluate`, payload);
 
     return response.data;
 };

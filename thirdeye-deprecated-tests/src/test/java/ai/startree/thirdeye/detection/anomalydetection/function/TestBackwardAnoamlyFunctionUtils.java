@@ -8,11 +8,12 @@ package ai.startree.thirdeye.detection.anomalydetection.function;
 import ai.startree.thirdeye.detection.anomalydetection.context.TimeSeries;
 import ai.startree.thirdeye.metric.MetricSchema;
 import ai.startree.thirdeye.metric.MetricTimeSeries;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
@@ -35,8 +36,8 @@ public class TestBackwardAnoamlyFunctionUtils {
     metricTimeSeries.set(TimeUnit.DAYS.toMillis(140), TEST_METRIC, 5);
 
     List<Interval> intervalList = new ArrayList<>();
-    intervalList.add(new Interval(TimeUnit.DAYS.toMillis(140), TimeUnit.DAYS.toMillis(168)));
-    intervalList.add(new Interval(0, TimeUnit.DAYS.toMillis(140)));
+    intervalList.add(new Interval(TimeUnit.DAYS.toMillis(140), TimeUnit.DAYS.toMillis(168), DateTimeZone.UTC));
+    intervalList.add(new Interval(0, TimeUnit.DAYS.toMillis(140), DateTimeZone.UTC));
 
     List<TimeSeries> timeSeriesList =
         BackwardAnomalyFunctionUtils

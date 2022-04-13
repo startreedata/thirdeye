@@ -5,10 +5,11 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
@@ -57,14 +58,16 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
       final Map<String, Object> params) {
-    final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
-        "Must have 'type' in detector config");
+    final String type = ensureExists(MapUtils.getString(params, PROP_TYPE),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "'type' in detector config");
 
     final Map<String, Object> componentSpec = getComponentSpec(params);
     // get generic detector info
     genericDetectorSpec = AbstractSpec.fromProperties(componentSpec, GenericDetectorSpec.class);
-    requireNonNull(genericDetectorSpec.getMonitoringGranularity(),
-        "monitoringGranularity is mandatory in v2 interface");
+    ensureExists(genericDetectorSpec.getMonitoringGranularity(),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "'monitoringGranularity' in detector config");
 
     return new DetectionRegistry()
         .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
@@ -94,6 +97,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .flatMap(Collection::stream)
             .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
 
+    optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Object::toString)
+        .ifPresent(anomalyDataset -> detectionPipelineResult.getDetectionResults().stream()
+            .map(DetectionResult::getAnomalies)
+            .flatMap(Collection::stream)
+            .forEach(anomaly -> anomaly.setCollection(anomalyDataset)));
+
     // Annotate each anomaly with source info
     optional(planNode.getParams().get("anomaly.source"))
         .map(Object::toString)
@@ -104,7 +114,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   private List<Interval> getMonitoringWindows() {
-    return singletonList(new Interval(startTime, endTime));
+    return singletonList(detectionInterval);
   }
 
   @Override

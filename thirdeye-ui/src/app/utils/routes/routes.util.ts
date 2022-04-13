@@ -17,6 +17,7 @@ export const AppRouteRelative = {
     ALERTS_UPDATE: `update`,
     ANOMALIES: "anomalies",
     ANOMALIES_ALL: "all",
+    ANOMALIES_ALL_RANGE: "range",
     ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
     ANOMALIES_ANOMALY_VIEW: `view`,
     CONFIGURATION: "configuration",
@@ -63,6 +64,7 @@ export const AppRoute = {
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
+    ANOMALIES_ALL_RANGE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}`,
     ANOMALIES_ANOMALY: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}`,
     ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`,
     CONFIGURATION: `/${AppRouteRelative.CONFIGURATION}`,
@@ -149,6 +151,16 @@ export const getAnomaliesAllPath = (searchTerm?: string): string => {
     }
 
     return `${AppRoute.ANOMALIES_ALL}?${urlQuery.toString()}`;
+};
+
+export const getAnomaliesAllRangePath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.ANOMALIES_ALL_RANGE}?${urlQuery.toString()}`;
 };
 
 export const getAnomaliesAnomalyPath = (id: number): string => {

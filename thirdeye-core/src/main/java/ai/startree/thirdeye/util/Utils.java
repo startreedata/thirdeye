@@ -7,11 +7,14 @@ package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.datasource.cache.MetricDataset;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +35,7 @@ public class Utils {
     }
     ArrayList<String> metricExpressionNames;
     try {
-      TypeReference<ArrayList<String>> valueTypeRef = new TypeReference<ArrayList<String>>() {
+      TypeReference<ArrayList<String>> valueTypeRef = new TypeReference<>() {
       };
       metricExpressionNames = OBJECT_MAPPER.readValue(metricsJson, valueTypeRef);
     } catch (Exception e) {
@@ -43,9 +46,10 @@ public class Utils {
       }
     }
     for (String metricExpressionName : metricExpressionNames) {
-      String derivedMetricExpression = ThirdEyeUtils
-          .getDerivedMetricExpression(metricExpressionName, dataset,
-              thirdEyeCacheRegistry);
+      MetricConfigDTO metricConfig = thirdEyeCacheRegistry.getMetricConfigCache()
+          .get(new MetricDataset(metricExpressionName, dataset));
+      String derivedMetricExpression = Optional.ofNullable(metricConfig.getDerivedMetricExpression())
+          .orElse(metricConfig.getName());
       MetricExpression metricExpression = new MetricExpression(metricExpressionName,
           derivedMetricExpression,
           aggFunction, dataset);

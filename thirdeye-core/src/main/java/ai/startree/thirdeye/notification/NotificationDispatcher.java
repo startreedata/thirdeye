@@ -12,6 +12,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.util.StringTemplateUtils;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -23,13 +26,25 @@ public class NotificationDispatcher {
 
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemesMigrator notificationSchemesMigrator;
+  private final Counter notificationDispatchCounter;
+  private final Counter notificationDispatchSuccessCounter;
+  private final Counter notificationDispatchExceptionCounter;
+  private final Histogram notificationDispatchDuration;
 
   @Inject
   public NotificationDispatcher(
       final NotificationServiceRegistry notificationServiceRegistry,
-      final NotificationSchemesMigrator notificationSchemesMigrator) {
+      final NotificationSchemesMigrator notificationSchemesMigrator,
+      final MetricRegistry metricRegistry) {
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemesMigrator = notificationSchemesMigrator;
+    this.notificationDispatchCounter = metricRegistry.counter("notificationDispatchCounter");
+    this.notificationDispatchSuccessCounter = metricRegistry.counter(
+        "notificationDispatchSuccessCounter");
+    this.notificationDispatchExceptionCounter = metricRegistry.counter(
+        "notificationDispatchExceptionCounter");
+    this.notificationDispatchDuration = metricRegistry.histogram(
+        "notificationDispatchDuration");
   }
 
   public void dispatch(final SubscriptionGroupDTO subscriptionGroup,
@@ -40,7 +55,19 @@ public class NotificationDispatcher {
         .stream()
         .map(this::substituteEnvironmentVariables)
         .map(this::getNotificationService)
-        .forEach(service -> service.notify(payload));
+        .forEach(service -> {
+          try {
+            final long tStart = System.currentTimeMillis();
+            service.notify(payload);
+            notificationDispatchDuration.update(System.currentTimeMillis() - tStart);
+            notificationDispatchSuccessCounter.inc();
+          } catch (Exception exception) {
+            notificationDispatchExceptionCounter.inc();
+            throw exception;
+          } finally {
+            notificationDispatchCounter.inc();
+          }
+        });
   }
 
   private NotificationService getNotificationService(final NotificationSpecDTO spec) {

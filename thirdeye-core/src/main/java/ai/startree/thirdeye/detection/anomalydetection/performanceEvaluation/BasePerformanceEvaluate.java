@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 public abstract class BasePerformanceEvaluate implements PerformanceEvaluate {
@@ -26,7 +27,7 @@ public abstract class BasePerformanceEvaluate implements PerformanceEvaluate {
         anomalyIntervals.put(mergedAnomaly.getDimensions(), new ArrayList<Interval>());
       }
       anomalyIntervals.get(mergedAnomaly.getDimensions()).add(
-          new Interval(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime()));
+          new Interval(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime(), DateTimeZone.UTC));
     }
     return anomalyIntervals;
   }
@@ -38,7 +39,7 @@ public abstract class BasePerformanceEvaluate implements PerformanceEvaluate {
       List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList) {
     List<Interval> anomalyIntervals = new ArrayList<>();
     for (MergedAnomalyResultDTO mergedAnomaly : mergedAnomalyResultDTOList) {
-      anomalyIntervals.add(new Interval(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime()));
+      anomalyIntervals.add(new Interval(mergedAnomaly.getStartTime(), mergedAnomaly.getEndTime(),DateTimeZone.UTC));
     }
     return anomalyIntervals;
   }

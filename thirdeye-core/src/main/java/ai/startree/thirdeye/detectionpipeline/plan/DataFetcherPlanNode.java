@@ -42,8 +42,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   public Operator buildOperator() throws Exception {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     dataFetcherOperator.init(new OperatorContext()
-        .setStartTime(this.startTime)
-        .setEndTime(this.endTime)
+        .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
     );

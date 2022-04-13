@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
@@ -47,7 +48,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 23 missing in the middle
@@ -81,7 +84,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_26_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_26_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 23 and october 25 missing
@@ -120,7 +125,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 18 missing left
@@ -153,7 +160,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 24 missing right
@@ -187,7 +196,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 19 missing before detection period - october 23 missing in the detection period
@@ -235,7 +246,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 23 missing in the middle
@@ -271,7 +284,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 23 missing in the middle
@@ -309,7 +324,9 @@ public class TimeIndexFillerTest {
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
-    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS, OCTOBER_25_MILLIS);
+    final Interval inputInterval = new Interval(OCTOBER_22_MILLIS,
+        OCTOBER_25_MILLIS,
+        DateTimeZone.UTC);
 
     final DataFrame dataFrame = new DataFrame();
     // october 23 missing in the middle - lookback missing

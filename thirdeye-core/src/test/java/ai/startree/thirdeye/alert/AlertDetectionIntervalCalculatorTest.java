@@ -18,7 +18,7 @@ public class AlertDetectionIntervalCalculatorTest {
       "yyyy-MM-dd HH:mm:ss.SSS z");
 
   private static final long ALERT_ID = 0;
-  public static final String DATASET_NAME = "my_dataset";
+  private static final String DATASET_NAME = "my_dataset";
 
   @Test
   public void testGetCorrectedIntervalNoMetadata() {
@@ -27,8 +27,8 @@ public class AlertDetectionIntervalCalculatorTest {
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO();
     Interval output = getCorrectedInterval(ALERT_ID,
-        inputTaskStart,
-        inputTaskEnd,
+        inputTaskStart.getMillis(),
+        inputTaskEnd.getMillis(),
         inputAlertTemplate);
     Interval expected = new Interval(inputTaskStart, inputTaskEnd);
 
@@ -45,8 +45,8 @@ public class AlertDetectionIntervalCalculatorTest {
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO().setMetadata(new AlertMetadataDTO().setDataset(
         datasetConfigDTO));
     Interval output = getCorrectedInterval(ALERT_ID,
-        inputTaskStart,
-        inputTaskEnd,
+        inputTaskStart.getMillis(),
+        inputTaskEnd.getMillis(),
         inputAlertTemplate);
     Interval expected = new Interval(inputTaskStart, inputTaskEnd);
 
@@ -64,8 +64,8 @@ public class AlertDetectionIntervalCalculatorTest {
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO));
     Interval output = getCorrectedInterval(ALERT_ID,
-        inputTaskStart,
-        inputTaskEnd,
+        inputTaskStart.getMillis(),
+        inputTaskEnd.getMillis(),
         inputAlertTemplate);
 
     Interval expected = new Interval(
@@ -88,8 +88,8 @@ public class AlertDetectionIntervalCalculatorTest {
             .setGranularity("PT1H")  // granularity of 1H
         );
     Interval output = getCorrectedInterval(ALERT_ID,
-        inputTaskStart,
-        inputTaskEnd,
+        inputTaskStart.getMillis(),
+        inputTaskEnd.getMillis(),
         inputAlertTemplate);
 
     Interval expected = new Interval(
@@ -113,8 +113,8 @@ public class AlertDetectionIntervalCalculatorTest {
             .setGranularity("PT5M")  // granularity of 5 minutes
         );
     Interval output = getCorrectedInterval(ALERT_ID,
-        inputTaskStart,
-        inputTaskEnd,
+        inputTaskStart.getMillis(),
+        inputTaskEnd.getMillis(),
         inputAlertTemplate);
 
     Interval expected = new Interval(
@@ -136,8 +136,8 @@ public class AlertDetectionIntervalCalculatorTest {
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO));
     Interval output = getCorrectedInterval(ALERT_ID,
-        inputTaskStart,
-        inputTaskEnd,
+        inputTaskStart.getMillis(),
+        inputTaskEnd.getMillis(),
         inputAlertTemplate);
 
     Interval expected = new Interval(

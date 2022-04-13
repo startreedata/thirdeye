@@ -32,8 +32,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
@@ -43,9 +41,6 @@ import org.slf4j.LoggerFactory;
 public class DefaultDataProvider implements DataProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultDataProvider.class);
-  private static final long TIMEOUT = 60000;
-
-  private final ExecutorService executor = Executors.newCachedThreadPool();
 
   private final MetricConfigManager metricDAO;
   private final DatasetConfigManager datasetDAO;

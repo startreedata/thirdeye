@@ -7,6 +7,7 @@ package ai.startree.thirdeye.rootcause.impl;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
@@ -24,7 +25,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import com.google.common.collect.ArrayListMultimap;

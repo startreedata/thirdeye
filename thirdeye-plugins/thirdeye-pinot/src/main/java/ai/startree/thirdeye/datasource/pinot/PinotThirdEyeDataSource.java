@@ -30,7 +30,7 @@ import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
+import ai.startree.thirdeye.spi.util.FilterPredicate;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;

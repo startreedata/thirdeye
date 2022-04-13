@@ -8,12 +8,11 @@ package ai.startree.thirdeye.detection.components.filters;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
-import ai.startree.thirdeye.spi.detection.BaselineParsingUtils;
+import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.detection.InputDataFetcher;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.model.InputDataSpec;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,7 @@ public class AbsoluteChangeRuleAnomalyFilter implements
     this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
     // customize baseline offset
     if (StringUtils.isNotBlank(spec.getOffset())) {
-      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
+//      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
     }
     this.threshold = spec.getThreshold();
   }
@@ -52,29 +51,25 @@ public class AbsoluteChangeRuleAnomalyFilter implements
   @Override
   public boolean isQualified(MergedAnomalyResultDTO anomaly) {
     List<MetricSlice> slices = new ArrayList<>();
-    MetricSlice currentSlice =
-        MetricSlice.from(-1L,
-            anomaly.getStartTime(),
-            anomaly.getEndTime(),
-            ArrayListMultimap.create());
+    MetricSlice currentSlice = MetricSlice.from(-1L,
+        anomaly.getStartTime(),
+        anomaly.getEndTime(),
+        ArrayListMultimap.create());
 
     // customize baseline offset
     if (baseline != null) {
       slices.addAll(this.baseline.scatter(currentSlice));
     }
 
-    Map<MetricSlice, DataFrame> aggregates =
-        this.dataFetcher.fetchData(new InputDataSpec().withAggregateSlices(slices)).getAggregates();
+    Map<MetricSlice, DataFrame> aggregates = this.dataFetcher.fetchData(new InputDataSpec().withAggregateSlices(
+        slices)).getAggregates();
 
     double currentValue = anomaly.getAvgCurrentVal();
-    double baselineValue =
-        baseline == null ? anomaly.getAvgBaselineVal()
-            : this.baseline.gather(currentSlice, aggregates).getDouble(
-                DataFrame.COL_VALUE, 0);
+    double baselineValue = baseline == null ? anomaly.getAvgBaselineVal()
+        : this.baseline.gather(currentSlice, aggregates).getDouble(DataFrame.COL_VALUE, 0);
     // if inconsistent with up/down, filter the anomaly
-    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern
-        .equals(Pattern.UP)) || (
-        currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {
+    if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern.equals(
+        Pattern.UP)) || (currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {
       return false;
     }
     return Math.abs(currentValue - baselineValue) >= this.threshold;

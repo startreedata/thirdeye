@@ -7,6 +7,8 @@ package ai.startree.thirdeye.rootcause.callgraph;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
@@ -20,8 +22,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.ArrayListMultimap;

@@ -6,8 +6,8 @@
 package ai.startree.thirdeye.rootcause.timeseries;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;

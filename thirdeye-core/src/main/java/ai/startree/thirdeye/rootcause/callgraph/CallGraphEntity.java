@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.rootcause.callgraph;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.entity.EntityType;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collections;

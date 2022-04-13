@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.rca;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 
 /**
  * Default formatter that applies to any Entity. Provides minimal information and serves as

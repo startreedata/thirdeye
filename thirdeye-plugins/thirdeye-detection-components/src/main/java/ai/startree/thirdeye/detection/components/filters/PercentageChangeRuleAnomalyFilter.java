@@ -8,12 +8,11 @@ package ai.startree.thirdeye.detection.components.filters;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
-import ai.startree.thirdeye.spi.detection.BaselineParsingUtils;
+import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.detection.InputDataFetcher;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.model.InputDataSpec;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class PercentageChangeRuleAnomalyFilter implements
     this.pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
     // customize baseline offset
     if (StringUtils.isNotBlank(spec.getOffset())) {
-      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
+//      this.baseline = BaselineParsingUtils.parseOffset(spec.getOffset(), spec.getTimezone());
     }
     this.threshold = spec.getThreshold();
     this.upThreshold = spec.getUpThreshold();

@@ -7,13 +7,13 @@ package ai.startree.thirdeye.detection.components;
 
 import ai.startree.thirdeye.detection.DetectionTestUtils;
 import ai.startree.thirdeye.detection.MockDataProvider;
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

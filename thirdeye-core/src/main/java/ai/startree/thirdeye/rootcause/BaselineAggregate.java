@@ -3,13 +3,15 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.rootcause.timeseries;
+package ai.startree.thirdeye.rootcause;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Grouping;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;

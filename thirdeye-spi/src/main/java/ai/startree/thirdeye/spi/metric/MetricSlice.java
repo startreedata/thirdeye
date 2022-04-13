@@ -8,13 +8,9 @@ package ai.startree.thirdeye.spi.metric;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
-import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
-import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,7 +29,8 @@ public final class MetricSlice {
   private final Multimap<String, String> filters;
   private final @NonNull DatasetConfigDTO datasetConfigDTO;
 
-  MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO, final @NonNull Interval interval,
+  public MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO,
+      final @NonNull Interval interval,
       Multimap<String, String> filters, final @NonNull DatasetConfigDTO datasetConfigDTO) {
     this.metricConfigDTO = metricConfigDTO;
     this.interval = interval;
@@ -53,18 +50,6 @@ public final class MetricSlice {
       final Interval interval,
       final Multimap<String, String> filters, final @NonNull DatasetConfigDTO datasetConfigDTO) {
     return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
-  }
-
-  /**
-   * Filters in format dim1=val1, dim2!=val2
-   */
-  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
-      final Interval interval,
-      final List<String> filters,
-      final @NonNull DatasetConfigDTO datasetConfigDTO) {
-    List<FilterPredicate> predicates = SpiUtils.extractFilterPredicates(filters);
-    Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
-    return new MetricSlice(metricConfigDTO, interval, filtersMap, datasetConfigDTO);
   }
 
   public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
@@ -122,7 +107,9 @@ public final class MetricSlice {
     return metricConfigDTO;
   }
 
-  public @NonNull DatasetConfigDTO getDatasetConfigDTO() {return datasetConfigDTO;}
+  public @NonNull DatasetConfigDTO getDatasetConfigDTO() {
+    return datasetConfigDTO;
+  }
 
   public DateTime getStart() {
     return interval.getStart();

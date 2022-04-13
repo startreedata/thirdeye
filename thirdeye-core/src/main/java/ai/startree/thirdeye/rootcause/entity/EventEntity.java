@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.entity;
 
-import ai.startree.thirdeye.spi.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.Entity;
 import java.util.ArrayList;
 import java.util.List;
 

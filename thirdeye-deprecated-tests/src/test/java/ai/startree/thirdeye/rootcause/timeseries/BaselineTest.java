@@ -5,15 +5,15 @@
 
 package ai.startree.thirdeye.rootcause.timeseries;
 
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.rootcause.entity;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
+import ai.startree.thirdeye.util.ParsedUrn;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;

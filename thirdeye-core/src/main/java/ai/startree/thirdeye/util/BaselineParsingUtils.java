@@ -3,12 +3,12 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.detection;
+package ai.startree.thirdeye.util;
 
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineNone;
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
+import ai.startree.thirdeye.rootcause.BaselineNone;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.joda.time.DateTimeZone;

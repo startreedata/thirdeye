@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
@@ -16,7 +17,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.HashSet;

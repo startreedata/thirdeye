@@ -5,13 +5,14 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.spi.detection.BaselineParsingUtils.parseOffset;
+import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
@@ -24,12 +25,15 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.detection.BaselineParsingUtils;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
+import ai.startree.thirdeye.spi.util.FilterPredicate;
+import ai.startree.thirdeye.spi.util.SpiUtils;
+import ai.startree.thirdeye.util.BaselineParsingUtils;
+import ai.startree.thirdeye.util.ParsedUrn;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -60,6 +64,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -111,6 +116,18 @@ public class RootCauseMetricResource {
     this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
 
     this.executor = Executors.newCachedThreadPool();
+  }
+
+  /**
+   * Filters in format dim1=val1, dim2!=val2
+   */
+  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
+      final Interval interval,
+      final List<String> filters,
+      final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    List<FilterPredicate> predicates = SpiUtils.extractFilterPredicates(filters);
+    Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
+    return new MetricSlice(metricConfigDTO, interval, filtersMap, datasetConfigDTO);
   }
 
   /**
@@ -337,7 +354,7 @@ public class RootCauseMetricResource {
       final int limit,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
+    MetricSlice baseSlice = from(metricConfigDTO,
         interval,
         filters,
         datasetConfigDTO);
@@ -359,7 +376,7 @@ public class RootCauseMetricResource {
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
     DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
-    MetricSlice baseSlice = MetricSlice.from(
+    MetricSlice baseSlice = from(
         findMetricConfig(metricId),
         new Interval(start, end, dateTimeZone),
         filters,

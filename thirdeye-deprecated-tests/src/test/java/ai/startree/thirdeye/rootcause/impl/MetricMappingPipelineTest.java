@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.MockDatasetConfigManager;
 import ai.startree.thirdeye.rootcause.MockEntityToEntityMappingManager;
 import ai.startree.thirdeye.rootcause.MockMetricConfigManager;
@@ -14,7 +15,6 @@ import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;

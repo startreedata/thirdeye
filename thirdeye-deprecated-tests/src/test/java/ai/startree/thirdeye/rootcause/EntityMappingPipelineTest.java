@@ -9,7 +9,6 @@ import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
 import ai.startree.thirdeye.rootcause.impl.EntityMappingPipeline;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

@@ -5,13 +5,13 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;

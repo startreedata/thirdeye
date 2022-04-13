@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.rootcause.entity;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
+import ai.startree.thirdeye.util.ParsedUrn;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

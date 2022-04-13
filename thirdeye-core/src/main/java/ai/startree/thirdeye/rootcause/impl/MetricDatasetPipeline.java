@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
@@ -15,7 +16,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

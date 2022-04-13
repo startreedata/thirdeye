@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.rootcause;
 
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import java.util.HashSet;
 import java.util.Set;
 

@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
@@ -12,8 +14,6 @@ import ai.startree.thirdeye.rootcause.PipelineResult;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

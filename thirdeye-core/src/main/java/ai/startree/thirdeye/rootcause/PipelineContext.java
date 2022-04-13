@@ -6,8 +6,6 @@
 package ai.startree.thirdeye.rootcause;
 
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
 import java.util.Map;
 import java.util.Set;
 

@@ -3,8 +3,9 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.rootcause.util;
+package ai.startree.thirdeye.util;
 
+import ai.startree.thirdeye.spi.util.FilterPredicate;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.Collection;
@@ -98,12 +99,13 @@ public final class ParsedUrn {
   public static Multimap<String, String> toFiltersMap(Collection<FilterPredicate> predicates) {
     Multimap<String, String> filters = TreeMultimap.create();
     for (FilterPredicate predicate : predicates) {
-      if (!OPERATOR_TO_FILTER.containsKey(predicate.operator)) {
+      if (!OPERATOR_TO_FILTER.containsKey(predicate.getOperator())) {
         throw new IllegalArgumentException(String
-            .format("Operator '%s' could not be translated to filter prefix", predicate.operator));
+            .format("Operator '%s' could not be translated to filter prefix",
+                predicate.getOperator()));
       }
-      String prefix = OPERATOR_TO_FILTER.get(predicate.operator);
-      filters.put(predicate.key, prefix + predicate.value);
+      String prefix = OPERATOR_TO_FILTER.get(predicate.getOperator());
+      filters.put(predicate.getKey(), prefix + predicate.getValue());
     }
     return filters;
   }

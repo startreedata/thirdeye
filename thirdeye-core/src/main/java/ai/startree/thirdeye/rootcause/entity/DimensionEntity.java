@@ -5,9 +5,9 @@
 
 package ai.startree.thirdeye.rootcause.entity;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;

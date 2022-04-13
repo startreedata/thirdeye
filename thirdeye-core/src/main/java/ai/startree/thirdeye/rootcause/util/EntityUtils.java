@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.rootcause.util;
 
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.entity.AnomalyEventEntity;
 import ai.startree.thirdeye.rootcause.entity.DatasetEntity;
 import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
@@ -14,11 +16,9 @@ import ai.startree.thirdeye.rootcause.entity.HyperlinkEntity;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.rootcause.entity.ServiceEntity;
 import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
-import ai.startree.thirdeye.spi.rootcause.util.ParsedUrn;
+import ai.startree.thirdeye.spi.util.FilterPredicate;
 import ai.startree.thirdeye.spi.util.SpiUtils;
+import ai.startree.thirdeye.util.ParsedUrn;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.io.UnsupportedEncodingException;

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
@@ -21,7 +22,6 @@ import ai.startree.thirdeye.rootcause.util.ScoreUtils.TimeRangeStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.TriangularStartTimeStrategy;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;

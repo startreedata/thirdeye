@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+import { Color } from "../../../utils/material-ui/color.util";
 
 export const useAlgorithmRowExpandedStyles = makeStyles((theme) => ({
     /**
@@ -11,9 +12,8 @@ export const useAlgorithmRowExpandedStyles = makeStyles((theme) => ({
         },
     },
     expandedRowParent: {
-        boxShadow:
-            "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;",
-        backgroundColor: "rgb(250, 250, 250)",
+        boxShadow: `${Color.BOX_SHADOW_BLACK} 0px 1px 2px 0px, ${Color.BOX_SHADOW_BLACK} 0px 1px 3px 1px;`,
+        backgroundColor: Color.OFF_WHITE,
     },
     expandedRow: {
         paddingTop: theme.spacing(1),

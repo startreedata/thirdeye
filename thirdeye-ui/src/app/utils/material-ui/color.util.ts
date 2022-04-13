@@ -19,4 +19,6 @@ export const Color = {
     RED_1: "#E57373",
     RED_2: "#F44336",
     RED_3: "#D32f2f",
+    OFF_WHITE: "rgb(250, 250, 250)",
+    BOX_SHADOW_BLACK: "rgba(60, 64, 67, 0.15)",
 } as const;

@@ -1,17 +1,9 @@
-import {
-    Box,
-    Button,
-    Grid,
-    IconButton,
-    Tooltip,
-    Typography,
-} from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    InfoIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
@@ -21,6 +13,7 @@ import { createDefaultDatasource } from "../../utils/datasources/datasources.uti
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
+import { InfoIconWithTooltip } from "../info-icon-with-tooltip/info-icon-with-tooltip.component";
 import {
     DatasourceWizardProps,
     DatasourceWizardStep,
@@ -172,24 +165,15 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
                             {currentWizardStep ===
                                 DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
-                                <a
+                                <InfoIconWithTooltip
                                     href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
-                                    rel="noreferrer"
                                     target="_blank"
-                                >
-                                    <IconButton color="secondary">
-                                        <Tooltip
-                                            placement="top"
-                                            title={
-                                                t(
-                                                    "label.view-configuration-docs"
-                                                ) as string
-                                            }
-                                        >
-                                            <InfoIconV1 />
-                                        </Tooltip>
-                                    </IconButton>
-                                </a>
+                                    tooltipTitle={
+                                        t(
+                                            "label.view-configuration-docs"
+                                        ) as string
+                                    }
+                                />
                             )}
                         </Typography>
                     </Grid>

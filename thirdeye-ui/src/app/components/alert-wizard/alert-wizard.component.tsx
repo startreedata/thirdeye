@@ -1,11 +1,4 @@
-import {
-    Box,
-    Button,
-    Grid,
-    IconButton,
-    Tooltip,
-    Typography,
-} from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
@@ -13,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
-    InfoIconV1,
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsCardV1,
@@ -35,6 +27,7 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
+import { InfoIconWithTooltip } from "../info-icon-with-tooltip/info-icon-with-tooltip.component";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
@@ -352,24 +345,15 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     )}
                                     {currentWizardStep ===
                                         AlertWizardStep.DETECTION_CONFIGURATION && (
-                                        <a
+                                        <InfoIconWithTooltip
                                             href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
-                                            rel="noreferrer"
                                             target="_blank"
-                                        >
-                                            <IconButton color="secondary">
-                                                <Tooltip
-                                                    placement="top"
-                                                    title={
-                                                        t(
-                                                            "label.view-configuration-docs"
-                                                        ) as string
-                                                    }
-                                                >
-                                                    <InfoIconV1 />
-                                                </Tooltip>
-                                            </IconButton>
-                                        </a>
+                                            tooltipTitle={
+                                                t(
+                                                    "label.view-configuration-docs"
+                                                ) as string
+                                            }
+                                        />
                                     )}
                                 </Typography>
                             </Grid>

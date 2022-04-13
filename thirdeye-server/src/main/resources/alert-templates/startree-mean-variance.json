@@ -66,7 +66,8 @@
       "completenessDelay": "${completenessDelay}"
     },
     "metric": {
-      "name": "${aggregationColumn}"
+      "name": "${aggregationColumn}",
+      "where": "${queryFilters}"
     },
     "granularity": "${monitoringGranularity}"
   },

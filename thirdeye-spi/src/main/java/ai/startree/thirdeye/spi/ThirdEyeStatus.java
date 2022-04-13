@@ -33,6 +33,7 @@ public enum ThirdEyeStatus {
   ERR_TIMEOUT("Operation timed out!"),
   ERR_UNKNOWN("%s"),
   HEALTHY("Healthy"),
+  ERR_RCA_DIM_ANALYSIS("Failed running the dimension analysis: %s"),
   UNHEALTHY("Unhealthy %s : %s");
 
   final String message;

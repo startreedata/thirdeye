@@ -11,6 +11,8 @@ import ai.startree.thirdeye.cube.data.dbclient.CubeSpec;
 import ai.startree.thirdeye.cube.data.dbclient.CubeTag;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,21 +25,21 @@ import org.joda.time.Interval;
  */
 public class RatioCubeMetric implements CubeMetric<RatioRow> {
 
-  private final String dataset;
-  private final String numeratorMetricName;
-  private final String denominatorMetricName;
+  private final DatasetConfigDTO datasetConfigDTO;
+  private final MetricConfigDTO numeratorMetricName;
+  private final MetricConfigDTO denominatorMetricName;
   private final Interval currentInterval;
   private final Interval baselineInterval;
 
   /**
    * Constructs an Additive cube metric.
    */
-  public RatioCubeMetric(String dataset,
-      String numeratorMetricName,
-      String denominatorMetricName,
-      Interval currentInterval,
-      Interval baselineInterval) {
-    this.dataset = dataset;
+  public RatioCubeMetric(final DatasetConfigDTO datasetConfigDTO,
+      final MetricConfigDTO numeratorMetricName,
+      final MetricConfigDTO denominatorMetricName,
+      final Interval currentInterval,
+      final Interval baselineInterval) {
+    this.datasetConfigDTO = datasetConfigDTO;
     this.numeratorMetricName = numeratorMetricName;
     this.denominatorMetricName = denominatorMetricName;
     this.currentInterval = currentInterval;
@@ -45,13 +47,8 @@ public class RatioCubeMetric implements CubeMetric<RatioRow> {
   }
 
   @Override
-  public String getDataset() {
-    return dataset;
-  }
-
-  @Override
-  public String getMetric() {
-    return numeratorMetricName + "/" + denominatorMetricName;
+  public DatasetConfigDTO getDataset() {
+    return datasetConfigDTO;
   }
 
   @Override

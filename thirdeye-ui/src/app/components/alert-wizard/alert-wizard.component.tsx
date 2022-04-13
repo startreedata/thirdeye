@@ -347,7 +347,6 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                         AlertWizardStep.DETECTION_CONFIGURATION && (
                                         <InfoIconWithTooltip
                                             href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
-                                            target="_blank"
                                             tooltipTitle={
                                                 t(
                                                     "label.view-configuration-docs"

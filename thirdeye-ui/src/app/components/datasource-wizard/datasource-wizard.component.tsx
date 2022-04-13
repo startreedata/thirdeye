@@ -167,7 +167,6 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                 DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
                                 <InfoIconWithTooltip
                                     href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
-                                    target="_blank"
                                     tooltipTitle={
                                         t(
                                             "label.view-configuration-docs"

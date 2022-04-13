@@ -27,7 +27,7 @@ import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
-import { InfoIconWithTooltip } from "../info-icon-with-tooltip/info-icon-with-tooltip.component";
+import { HelpIconWithTooltip } from "../help-icon-with-tooltip/help-icon-with-tooltip.component";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
@@ -345,7 +345,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     )}
                                     {currentWizardStep ===
                                         AlertWizardStep.DETECTION_CONFIGURATION && (
-                                        <InfoIconWithTooltip
+                                        <HelpIconWithTooltip
                                             href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
                                             tooltipTitle={
                                                 t(

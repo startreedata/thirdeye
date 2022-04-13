@@ -7,6 +7,7 @@ import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedb
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { HelpIconWithTooltip } from "../../components/help-icon-with-tooltip/help-icon-with-tooltip.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
@@ -169,7 +170,16 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 showCreateButton
                 showTimeRange
                 title={uiAnomaly ? uiAnomaly.name : ""}
-            />
+            >
+                <HelpIconWithTooltip
+                    href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                    tooltipTitle={
+                        t(
+                            "label.how-to-perform-root-cause-analysis-doc"
+                        ) as string
+                    }
+                />
+            </PageHeader>
             <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid

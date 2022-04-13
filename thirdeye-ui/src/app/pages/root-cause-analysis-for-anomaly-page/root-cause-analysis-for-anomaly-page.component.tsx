@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
+import { HelpIconWithTooltip } from "../../components/help-icon-with-tooltip/help-icon-with-tooltip.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
@@ -140,7 +141,16 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader showTimeRange title={pageTitle} />
+            <PageHeader showTimeRange title={pageTitle}>
+                <HelpIconWithTooltip
+                    href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                    tooltipTitle={
+                        t(
+                            "label.how-to-perform-root-cause-analysis-doc"
+                        ) as string
+                    }
+                />
+            </PageHeader>
             <PageContentsGridV1>
                 {/* Anomaly Summary */}
                 <Grid item xs={12}>

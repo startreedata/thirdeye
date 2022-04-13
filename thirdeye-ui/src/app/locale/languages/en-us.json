@@ -164,7 +164,8 @@
         "dimension-analysis-row-chart-data": "Dimension Analysis Row Chart Data",
         "anomaly-period": "Anomaly Period",
         "non-filtered": "Non Filtered",
-        "filtered": "Filtered"
+        "filtered": "Filtered",
+        "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

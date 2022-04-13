@@ -1,9 +1,9 @@
 import { IconButton, Tooltip } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { HelpLinkIconV1 } from "../../platform/components";
-import { InfoIconWithTooltipProps } from "./info-icon-with-tooltip.interfaces";
+import { InfoIconWithTooltipProps } from "./help-icon-with-tooltip.interfaces";
 
-export const InfoIconWithTooltip: FunctionComponent<
+export const HelpIconWithTooltip: FunctionComponent<
     InfoIconWithTooltipProps
 > = ({ href, tooltipTitle }) => {
     return (

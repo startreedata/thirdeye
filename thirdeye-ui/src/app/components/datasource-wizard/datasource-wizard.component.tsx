@@ -13,7 +13,7 @@ import { createDefaultDatasource } from "../../utils/datasources/datasources.uti
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
-import { InfoIconWithTooltip } from "../info-icon-with-tooltip/info-icon-with-tooltip.component";
+import { HelpIconWithTooltip } from "../help-icon-with-tooltip/help-icon-with-tooltip.component";
 import {
     DatasourceWizardProps,
     DatasourceWizardStep,
@@ -165,7 +165,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
                             {currentWizardStep ===
                                 DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
-                                <InfoIconWithTooltip
+                                <HelpIconWithTooltip
                                     href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
                                     tooltipTitle={
                                         t(

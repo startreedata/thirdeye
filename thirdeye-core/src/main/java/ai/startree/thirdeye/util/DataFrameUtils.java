@@ -104,13 +104,12 @@ public class DataFrameUtils {
    * metrics.
    *
    * @param response thirdeye client response
-   * @param metricFunction metricFunction
    * @return response as dataframe
    */
-  public static DataFrame evaluateResponse(ThirdEyeResponse response, MetricFunction metricFunction) {
+  public static DataFrame evaluateResponse(ThirdEyeResponse response) {
     // only the name is used to rename the result column --> inline this?
     DataFrame res = parseResponse(response);
-    return res.renameSeries(metricFunction.toString(),DataFrame.COL_VALUE);
+    return res.renameSeries(response.getRequest().getMetricFunction().toString(),DataFrame.COL_VALUE);
   }
 
   /**

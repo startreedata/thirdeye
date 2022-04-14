@@ -29,7 +29,6 @@ import ai.startree.thirdeye.util.DataFrameUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
@@ -123,18 +121,11 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
       // TODO make training data cacheable (e.g. align to hours, days)
 
-      printSlices(rangeCurrent.scatter(sliceTest));
-      printSlices(rangeCurrent.scatter(sliceTrain));
-      printSlices(rangeBaseline.scatter(sliceTest));
-      printSlices(rangeBaseline.scatter(sliceTrain));
-
       slicesRaw.addAll(rangeCurrent.scatter(sliceTest));
       slicesRaw.addAll(rangeCurrent.scatter(sliceTrain));
       slicesRaw.addAll(rangeBaseline.scatter(sliceTest));
       slicesRaw.addAll(rangeBaseline.scatter(sliceTrain));
     }
-
-    printSlices(slicesRaw);
 
     // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
     List<ThirdEyeRequest> requestList = makeRequests(slicesRaw);
@@ -170,7 +161,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response, requests.get(id).getMetricFunction());
+        df = DataFrameUtils.evaluateResponse(response);
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
         continue;
@@ -236,17 +227,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     LOG.info("Generated {} MetricEntities with valid scores", output.size());
 
     return new PipelineResult(context, output);
-  }
-
-  private void printSlices(Collection<MetricSlice> slicesRaw) {
-    List<MetricSlice> slices = new ArrayList<>(slicesRaw);
-    Collections.sort(slices, new Comparator<MetricSlice>() {
-      @Override
-      public int compare(MetricSlice o1, MetricSlice o2) {
-        return Long.compare(o1.getStartMillis(), o2.getStartMillis());
-      }
-    });
-    LOG.info("Fetching {} slices:\n{}", slices.size(), StringUtils.join(slices, "\n"));
   }
 
   private boolean isDailyData(long metricId) {

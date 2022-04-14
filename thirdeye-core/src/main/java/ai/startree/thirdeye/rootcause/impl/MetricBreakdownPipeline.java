@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
@@ -87,7 +86,6 @@ public class MetricBreakdownPipeline extends Pipeline {
   private Set<String> excludeDimensions;
   private int k;
   private boolean ignoreScore;
-  private ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   @Override
   public void init(final PipelineInitContext context) {
@@ -96,7 +94,6 @@ public class MetricBreakdownPipeline extends Pipeline {
     this.metricDAO = context.getMetricConfigManager();
     this.datasetDAO = context.getDatasetConfigManager();
     this.cache = context.getDataSourceCache();
-    this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
 
     this.executor = Executors.newFixedThreadPool(
         MapUtils.getInteger(properties, PROP_PARALLELISM, PROP_PARALLELISM_DEFAULT));
@@ -173,8 +170,7 @@ public class MetricBreakdownPipeline extends Pipeline {
         this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res,
-        thirdEyeRequest.getMetricFunction());
+    DataFrame raw = DataFrameUtils.evaluateResponse(res);
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));

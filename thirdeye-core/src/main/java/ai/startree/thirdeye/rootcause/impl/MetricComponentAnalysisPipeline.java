@@ -201,8 +201,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
         this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res,
-        thirdEyeRequest.getMetricFunction());
+    DataFrame raw = DataFrameUtils.evaluateResponse(res);
 
     return raw.getDoubles(DataFrame.COL_VALUE).doubleValue();
   }
@@ -217,8 +216,7 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
         this.datasetDAO);
     ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res,
-        thirdEyeRequest.getMetricFunction());
+    DataFrame raw = DataFrameUtils.evaluateResponse(res);
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));

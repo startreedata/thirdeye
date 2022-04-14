@@ -15,7 +15,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
@@ -99,14 +98,8 @@ public class TimeSeriesCacheTest {
 
     executor = Executors.newSingleThreadExecutor();
 
-    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new ThirdEyeCacheRegistry(
-        metricDAO,
-        datasetDAO,
-        dataSourceCache);
-
     cache = new DefaultTimeSeriesCache(datasetDAO,
         cacheDAO,
-        thirdEyeCacheRegistry,
         config,
         dataSourceCache);
   }

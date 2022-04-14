@@ -160,7 +160,7 @@ public class MockThirdEyeDataSourceTest {
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(new DateTime(time, DateTimeZone.UTC).minus(Period.days(1)))
         .setEndTimeExclusive(new DateTime(time, DateTimeZone.UTC))
-        .addMetricFunction(metricFunction)
+        .setMetricFunction(metricFunction)
         .setGroupBy("browser")
         .build("ref");
 

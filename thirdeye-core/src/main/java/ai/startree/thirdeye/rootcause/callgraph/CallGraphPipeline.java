@@ -369,9 +369,8 @@ public class CallGraphPipeline extends Pipeline {
   private DataFrame getResponse(Future<ThirdEyeResponse> response,
       ThirdEyeRequest thirdEyeRequest,
       List<String> dimensions) throws Exception {
-    return DataFrameUtils
-        .evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS),
-            thirdEyeRequest.getMetricFunction().get(0))
+    return DataFrameUtils.evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS),
+            thirdEyeRequest.getMetricFunction())
         .dropSeries(COL_TIME)
         .setIndex(dimensions);
   }

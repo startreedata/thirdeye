@@ -158,10 +158,7 @@ public class PinotDataSourceDimensionFilters {
 
     for (String dimension : dimensions) {
       ThirdEyeRequest.ThirdEyeRequestBuilder requestBuilder = new ThirdEyeRequest.ThirdEyeRequestBuilder();
-      List<MetricFunction> metricFunctions = Collections.singletonList(metricFunction);
-      // fixme cyril single metric function
-      requestBuilder.setMetricFunction(metricFunctions);
-
+      requestBuilder.setMetricFunction(metricFunction);
       requestBuilder.setStartTimeInclusive(start);
       requestBuilder.setEndTimeExclusive(end);
       requestBuilder.setGroupBy(dimension);

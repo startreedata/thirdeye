@@ -36,7 +36,7 @@ public class ThirdEyeCacheResponseTest {
       COLLECTION, null, null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-      .setMetricFunctions(Collections.singletonList(metricFunction))
+      .setMetricFunction(Collections.singletonList(metricFunction))
       .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
       .setEndTimeExclusive(new DateTime(20000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))

@@ -89,7 +89,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
         "ref");
     ThirdEyeResponse response = dataSourceCache.getQueryResult(thirdEyeRequest);
     DataFrame df = DataFrameUtils.evaluateResponse(response,
-        thirdEyeRequest.getMetricFunctions().get(0));
+        thirdEyeRequest.getMetricFunction());
 
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));

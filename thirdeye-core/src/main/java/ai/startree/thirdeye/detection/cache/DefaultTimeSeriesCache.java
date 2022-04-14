@@ -109,7 +109,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
       cacheResponse.mergeSliceIntoRows(result);
     } else {
 
-      long metricId = request.getMetricFunctions().get(0).getMetricId();
+      long metricId = request.getMetricFunction().getMetricId();
       long requestSliceStart = request.getStartTimeInclusive().getMillis();
       long requestSliceEnd = request.getEndTimeExclusive().getMillis();
 
@@ -160,7 +160,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
     List<String[]> rows = new ArrayList<>();
     ThirdEyeRequest request = cacheResponse.getCacheRequest().getRequest();
 
-    String dataset = request.getMetricFunctions().get(0).getDataset();
+    String dataset = request.getMetricFunction().getDataset();
     DatasetConfigDTO datasetDTO = datasetDAO.findByDataset(dataset);
     TimeSpec timeSpec = ThirdEyeUtils.getTimeSpecFromDatasetConfig(datasetDTO);
     DateTimeZone timeZone = DateTimeZone.forID(datasetDTO.getTimezone());

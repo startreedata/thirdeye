@@ -205,8 +205,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response, requests.get(id).getMetricFunctions()
-            .get(0));
+        df = DataFrameUtils.evaluateResponse(response, requests.get(id).getMetricFunction());
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
         continue;

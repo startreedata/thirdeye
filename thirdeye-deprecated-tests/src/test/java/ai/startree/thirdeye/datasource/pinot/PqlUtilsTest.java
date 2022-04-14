@@ -180,7 +180,7 @@ public class PqlUtilsTest {
 
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setMetricFunctions(Collections.singletonList(metricFunction))
+        .setMetricFunction(Collections.singletonList(metricFunction))
         .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
         .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")
@@ -214,7 +214,7 @@ public class PqlUtilsTest {
             TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setMetricFunctions(Collections.singletonList(metricFunction))
+        .setMetricFunction(Collections.singletonList(metricFunction))
         .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
         .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")

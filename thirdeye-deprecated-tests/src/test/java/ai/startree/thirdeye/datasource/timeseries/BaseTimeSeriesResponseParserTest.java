@@ -89,7 +89,7 @@ public class BaseTimeSeriesResponseParserTest {
     ThirdEyeRequest.ThirdEyeRequestBuilder requestBuilder = new ThirdEyeRequest.ThirdEyeRequestBuilder();
     requestBuilder.setStartTimeInclusive(new DateTime(1, DateTimeZone.UTC));
     requestBuilder.setEndTimeExclusive(new DateTime(4, DateTimeZone.UTC));
-    requestBuilder.setMetricFunctions(metricFunctions);
+    requestBuilder.setMetricFunction(metricFunctions);
     requestBuilder.setGroupBy(dimensionNames);
     requestBuilder.setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.MILLISECONDS));
     ThirdEyeRequest thirdEyeRequest = requestBuilder.build("test");
@@ -187,7 +187,7 @@ public class BaseTimeSeriesResponseParserTest {
     function3.setMetricName("m3");
     function3.setFunctionName(MetricAggFunction.SUM);
 
-    return new ArrayList<MetricFunction>() {{
+    return new ArrayList<>() {{
       add(function1);
       add(function2);
       add(function3);

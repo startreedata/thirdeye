@@ -148,23 +148,6 @@ public abstract class ThirdEyeUtils {
     return decimalFormat.format(value);
   }
 
-  //TODO: currently assuming all metrics in one request are for the same data source
-  // It would be better to not assume that, and split the thirdeye request into more requests depending upon the data sources
-  public static String getDataSourceFromMetricFunctions(List<MetricFunction> metricFunctions) {
-    String dataSource = null;
-    for (MetricFunction metricFunction : metricFunctions) {
-      String functionDatasetDatasource = metricFunction.getDatasetConfig().getDataSource();
-      if (dataSource == null) {
-        dataSource = functionDatasetDatasource;
-      } else if (!dataSource.equals(functionDatasetDatasource)) {
-        throw new IllegalStateException(
-            "All metric funcitons of one request must belong to the same data source. "
-                + dataSource + " is not equal to" + functionDatasetDatasource);
-      }
-    }
-    return dataSource;
-  }
-
   /**
    * Prints messages and stack traces of the given list of exceptions in a string.
    *

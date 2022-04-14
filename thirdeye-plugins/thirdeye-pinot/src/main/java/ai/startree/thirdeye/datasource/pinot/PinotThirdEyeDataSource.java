@@ -181,68 +181,67 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       LinkedHashMap<MetricFunction, List<ThirdEyeResultSet>> metricFunctionToResultSetList = new LinkedHashMap<>();
 
       TimeSpec timeSpec = null;
-      for (MetricFunction metricFunction : request.getMetricFunctions()) {
-        String dataset = metricFunction.getDataset();
-        DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
-        TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-        if (timeSpec == null) {
-          timeSpec = dataTimeSpec;
-        }
+      final MetricFunction metricFunction = request.getMetricFunction();
+      String dataset = metricFunction.getDataset();
+      DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
+      TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+      if (timeSpec == null) {
+        timeSpec = dataTimeSpec;
+      }
 
-        MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
-        Multimap<String, String> filterSetFromView;
-        Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
-        if (metricConfig != null && metricConfig.getViews() != null
-            && metricConfig.getViews().size() > 0) {
-          Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
-          filterContextMap = convertToContextMap(viewToTEResultSet);
-          filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
-        } else {
-          filterSetFromView = request.getFilterSet();
-        }
+      MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
+      Multimap<String, String> filterSetFromView;
+      Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
+      if (metricConfig != null && metricConfig.getViews() != null
+          && metricConfig.getViews().size() > 0) {
+        Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
+        filterContextMap = convertToContextMap(viewToTEResultSet);
+        filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
+      } else {
+        filterSetFromView = request.getFilterSet();
+      }
 
-        Multimap<String, String> decoratedFilterSet = filterSetFromView;
-        // Decorate filter set for pre-computed (non-additive) dataset
-        // NOTE: We do not decorate the filter if the metric name is '*', which is used by count(*) query, because
-        // the results are usually meta-data and should be shown regardless the filter setting.
-        if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
-          decoratedFilterSet =
-              generateFilterSetWithPreAggregatedDimensionValue(filterSetFromView,
-                  request.getGroupBy(),
-                  datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
-                  datasetConfig.getPreAggregatedKeyword());
-        }
-        String sql;
-        if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
-          sql = SqlUtils
-              .getDimensionAsMetricSql(request, metricFunction, decoratedFilterSet,
-                  filterContextMap, dataTimeSpec,
-                  datasetConfig);
-        } else {
-          sql = SqlUtils
-              .getSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
-        }
+      Multimap<String, String> decoratedFilterSet = filterSetFromView;
+      // Decorate filter set for pre-computed (non-additive) dataset
+      // NOTE: We do not decorate the filter if the metric name is '*', which is used by count(*) query, because
+      // the results are usually meta-data and should be shown regardless the filter setting.
+      if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
+        decoratedFilterSet =
+            generateFilterSetWithPreAggregatedDimensionValue(filterSetFromView,
+                request.getGroupBy(),
+                datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
+                datasetConfig.getPreAggregatedKeyword());
+      }
+      String sql;
+      if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
+        sql = SqlUtils
+            .getDimensionAsMetricSql(request, metricFunction, decoratedFilterSet,
+                filterContextMap, dataTimeSpec,
+                datasetConfig);
+      } else {
+        sql = SqlUtils
+            .getSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
+      }
 
-        ThirdEyeResultSetGroup resultSetGroup;
-        final long tStartFunction = System.nanoTime();
-        try {
-          resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
-          if (metricConfig != null) {
+      ThirdEyeResultSetGroup resultSetGroup;
+      final long tStartFunction = System.nanoTime();
+      try {
+        resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
+        if (metricConfig != null) {
 //            RequestStatisticsLogger.getRequestLog()
 //                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
 //                    tStartFunction, System.nanoTime());
-          }
-        } catch (Exception e) {
-          if (metricConfig != null) {
+        }
+      } catch (Exception e) {
+        if (metricConfig != null) {
 //            RequestStatisticsLogger.getRequestLog()
 //                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
 //                    tStartFunction, System.nanoTime(), e);
-          }
-          throw e;
         }
-
-        metricFunctionToResultSetList.put(metricFunction, resultSetGroup.getResultSets());
+        throw e;
       }
+
+      metricFunctionToResultSetList.put(metricFunction, resultSetGroup.getResultSets());
 
       List<String[]> resultRows = ThirdEyeResultSetUtils
           .parseResultSets(request, metricFunctionToResultSetList,

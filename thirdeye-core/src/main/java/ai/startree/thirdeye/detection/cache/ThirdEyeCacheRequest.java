@@ -42,7 +42,7 @@ public class ThirdEyeCacheRequest {
   }
 
   public long getMetricId() {
-    return request.getMetricFunctions().get(0).getMetricId();
+    return request.getMetricFunction().getMetricId();
   }
 
   public String getMetricUrn() {

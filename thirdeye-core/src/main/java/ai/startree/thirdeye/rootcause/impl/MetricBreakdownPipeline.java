@@ -174,7 +174,7 @@ public class MetricBreakdownPipeline extends Pipeline {
     ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
     DataFrame raw = DataFrameUtils.evaluateResponse(res,
-        thirdEyeRequest.getMetricFunctions().get(0));
+        thirdEyeRequest.getMetricFunction());
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));

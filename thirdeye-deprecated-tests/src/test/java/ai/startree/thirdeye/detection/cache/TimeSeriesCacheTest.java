@@ -57,7 +57,7 @@ public class TimeSeriesCacheTest {
       null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-      .setMetricFunctions(Collections.singletonList(metricFunction))
+      .setMetricFunction(Collections.singletonList(metricFunction))
       .setStartTimeInclusive(new DateTime(0, DateTimeZone.UTC))
       .setEndTimeExclusive(new DateTime(10000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))

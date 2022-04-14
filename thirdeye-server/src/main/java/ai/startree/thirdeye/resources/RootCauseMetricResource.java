@@ -27,7 +27,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.FilterPredicate;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -463,17 +462,6 @@ public class RootCauseMetricResource {
   private MetricConfigDTO findMetricConfig(final long metricId) {
     return ensureExists(metricDAO.findById(metricId),
         String.format("metric id: %d", metricId));
-  }
-
-  @Deprecated
-  // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
-  private TimeGranularity findMetricGranularity(final Long metricId) {
-    final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
-        String.format("metric id: %d", metricId));
-    final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
-        String.format("dataset name: %s", metric.getDataset()));
-
-    return dataset.bucketTimeGranularity();
   }
 
   @Deprecated

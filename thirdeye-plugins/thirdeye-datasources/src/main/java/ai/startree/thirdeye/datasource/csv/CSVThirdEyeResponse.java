@@ -80,10 +80,9 @@ public class CSVThirdEyeResponse extends BaseThirdEyeResponse {
       dimensions.add(dataframe.getString(dimension, rowId));
     }
 
-    List<Double> metrics = new ArrayList<>();
-    for (MetricFunction function : request.getMetricFunctions()) {
-      metrics.add(dataframe.getDouble(function.toString(), rowId));
-    }
+    List<Double> metrics = List.of(
+        dataframe.getDouble(request.getMetricFunction().toString(), rowId)
+    );
     return new ThirdEyeResponseRow(timeBucketId, dimensions, metrics);
   }
 

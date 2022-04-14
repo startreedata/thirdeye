@@ -59,6 +59,6 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
       response = dataSourceCache.getQueryResult(thirdEyeRequest);
     }
 
-    return DataFrameUtils.evaluateResponse(response, thirdEyeRequest.getMetricFunctions().get(0));
+    return DataFrameUtils.evaluateResponse(response, thirdEyeRequest.getMetricFunction());
   }
 }

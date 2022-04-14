@@ -83,12 +83,12 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
       MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
       // todo cyril add DefaultAggFunction to custom rcaInfoFetcher to allow custom aggregationfunction
       MetricExpression metricExpression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
-      List<MetricFunction> metricFunctions = List.of(new MetricFunction(metricConfigDTO, datasetConfigDTO));
+      MetricFunction  metricFunction = new MetricFunction(metricConfigDTO, datasetConfigDTO);
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
 
-      builder.setMetricFunctions(metricFunctions);
-      builder.setDataSource(ThirdEyeUtils.getDataSourceFromMetricFunctions(metricFunctions));
+      builder.setMetricFunction(metricFunction);
+      builder.setDataSource(datasetConfigDTO.getDataSource());
 
       // Set start and end time
       builder.setStartTimeInclusive(cubeSpec.getInterval().getStart());
@@ -128,27 +128,11 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param rowTable the storage for rows
    * @param tag true if the response is for baseline values
    */
-  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions,
-      List<MetricExpression> metricExpressions,
-      List<MetricFunction> metricFunctions, ThirdEyeResponse response,
+  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions, ThirdEyeResponse response,
       Map<List<String>, R> rowTable, CubeTag tag) {
-    Map<String, Double> context = new HashMap<>();
     for (int rowIdx = 0; rowIdx < response.getNumRows(); ++rowIdx) {
-      double value = 0d;
       // If the metric expression is a single metric function, then we get the value immediately
-      if (metricFunctions.size() <= 1) {
-        value = response.getRow(rowIdx).getMetrics().get(0);
-      } else { // Otherwise, we need to evaluate the expression
-        for (int metricFuncIdx = 0; metricFuncIdx < metricFunctions.size(); ++metricFuncIdx) {
-          double contextValue = response.getRow(rowIdx).getMetrics().get(metricFuncIdx);
-          context.put(metricFunctions.get(metricFuncIdx).getMetricName(), contextValue);
-        }
-        try {
-          value = MetricExpression.evaluateExpression(metricExpressions.get(0), context);
-        } catch (Exception e) {
-          LOG.warn(e.getMessage());
-        }
-      }
+      double value = response.getRow(rowIdx).getMetrics().get(0);
       List<String> dimensionValues = response.getRow(rowIdx).getDimensions();
       fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
     }
@@ -188,10 +172,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
         if (thirdEyeResponse.getNumRows() == 0) {
           LOG.warn("Get 0 rows from the request(s): {}", thirdEyeRequest);
         }
-        List<MetricExpression> metricExpressions = entry.getValue().getMetricExpressions();
-        buildMetricFunctionOrExpressionsRows(dimensions, metricExpressions,
-            thirdEyeRequest.getMetricFunctions(),
-            thirdEyeResponse, rowOfSameLevel, tag);
+        buildMetricFunctionOrExpressionsRows(dimensions, thirdEyeResponse, rowOfSameLevel, tag);
       }
       if (rowOfSameLevel.size() == 0) {
         LOG.warn("Failed to retrieve non-zero results for requests of level {}. BulkRequest: {}",

@@ -178,7 +178,8 @@ public class DataFrameUtils {
         .setStartTimeInclusive(slice.getStart())
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
-        .setMetricFunctions(List.of(function))
+        // fixme cyril single metric function
+        .setMetricFunction(List.of(function))
         .setDataSource(slice.getDatasetConfigDTO().getDataSource())
         .setGroupBy(dimensions)
         .setLimit(limit)
@@ -241,7 +242,8 @@ public class DataFrameUtils {
         .setStartTimeInclusive(slice.getStart())
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
-        .setMetricFunctions(functions)
+        // fixme cyril single metric function
+        .setMetricFunction(functions)
         .setGroupByTimeGranularity(slice.getGranularity())
         .setDataSource(slice.getDatasetConfigDTO().getDataSource());
   }

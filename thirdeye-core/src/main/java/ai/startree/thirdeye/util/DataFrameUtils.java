@@ -132,18 +132,15 @@ public class DataFrameUtils {
         .orElse(datasetConfigDTO.bucketTimeGranularity());
 
     Period period = granularity.toPeriod();
-
     DateTime start = slice.getStart().withFields(SpiUtils.makeOrigin(period.getPeriodType()));
     DateTime end = slice.getEnd().withFields(SpiUtils.makeOrigin(period.getPeriodType()));
 
-    MetricSlice alignedSlice = MetricSlice
-        .from(slice.getMetricId(),
-            start.getMillis(),
-            end.getMillis(),
-            slice.getFilters(),
-            slice.getGranularity());
-
-    return makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, function)
+    return ThirdEyeRequest.newBuilder()
+        .setStartTimeInclusive(start)
+        .setEndTimeExclusive(end)
+        .setFilterSet(slice.getFilters())
+        .setMetricFunction(function)
+        .setDataSource(datasetConfigDTO.getDataSource())
         .setGroupByTimeGranularity(granularity)
         .build(reference);
   }
@@ -202,38 +199,5 @@ public class DataFrameUtils {
         dimensions,
         limit,
         reference);
-  }
-
-  /**
-   * Helper: Returns a pre-populated ThirdeyeRequestBuilder instance. Removes invalid filter values.
-   *
-   * @param slice metric data slice
-   * @param dataset dataset dto
-   * @param function metric function
-   * @return ThirdeyeRequestBuilder
-   */
-  @Deprecated
-  // todo cyril refactor this
-  private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
-      MetricSlice slice,
-      DatasetConfigDTO dataset,
-      MetricFunction function) {
-    DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
-    datasetConfigDTO.setDataSource(dataset.getDataSource());
-
-    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO), function);
-  }
-
-  private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
-      MetricSlice slice,
-      MetricFunction function) {
-
-    return ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(slice.getStart())
-        .setEndTimeExclusive(slice.getEnd())
-        .setFilterSet(slice.getFilters())
-        .setMetricFunction(function)
-        .setGroupByTimeGranularity(slice.getGranularity())
-        .setDataSource(slice.getDatasetConfigDTO().getDataSource());
   }
 }

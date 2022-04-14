@@ -221,7 +221,7 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
     for (const alertEvaluationTimeSeriesPoint of alertEvaluationTimeSeriesPoints) {
         // Current
         if (
-            isFinite(alertEvaluationTimeSeriesPoint.current) &&
+            Number.isFinite(alertEvaluationTimeSeriesPoint.current) &&
             maxValue < alertEvaluationTimeSeriesPoint.current
         ) {
             maxValue = alertEvaluationTimeSeriesPoint.current;
@@ -229,7 +229,7 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
 
         // Baseline
         if (
-            isFinite(alertEvaluationTimeSeriesPoint.expected) &&
+            Number.isFinite(alertEvaluationTimeSeriesPoint.expected) &&
             maxValue < alertEvaluationTimeSeriesPoint.expected
         ) {
             maxValue = alertEvaluationTimeSeriesPoint.expected;
@@ -237,7 +237,7 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
 
         // Upper bound
         if (
-            isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
+            Number.isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
             maxValue < alertEvaluationTimeSeriesPoint.upperBound
         ) {
             maxValue = alertEvaluationTimeSeriesPoint.upperBound;
@@ -245,7 +245,7 @@ export const getAlertEvaluationTimeSeriesPointsMaxValue = (
 
         // Lower bound
         if (
-            isFinite(alertEvaluationTimeSeriesPoint.lowerBound) &&
+            Number.isFinite(alertEvaluationTimeSeriesPoint.lowerBound) &&
             maxValue < alertEvaluationTimeSeriesPoint.lowerBound
         ) {
             maxValue = alertEvaluationTimeSeriesPoint.lowerBound;

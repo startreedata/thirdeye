@@ -27,26 +27,36 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                         // Area to be plot between upper and lower bound whenever both available or
                         // between current and upper/lower bound (whichever available)
                         if (
-                            isFinite(
+                            Number.isFinite(
                                 alertEvaluationTimeSeriesPoint.upperBound
                             ) &&
-                            isFinite(alertEvaluationTimeSeriesPoint.lowerBound)
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.lowerBound
+                            )
                         ) {
                             // Upper and lower bound both available
                             return true;
                         }
 
                         if (
-                            isFinite(alertEvaluationTimeSeriesPoint.current) &&
-                            isFinite(alertEvaluationTimeSeriesPoint.upperBound)
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.current
+                            ) &&
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.upperBound
+                            )
                         ) {
                             // Current and upper bound available
                             return true;
                         }
 
                         if (
-                            isFinite(alertEvaluationTimeSeriesPoint.current) &&
-                            isFinite(alertEvaluationTimeSeriesPoint.lowerBound)
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.current
+                            ) &&
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.lowerBound
+                            )
                         ) {
                             // Current and lower bound available
                             return true;
@@ -71,7 +81,9 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                         // Lower bound or current
                         props.yScale &&
                         props.yScale(
-                            isFinite(alertEvaluationTimeSeriesPoint.lowerBound)
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.lowerBound
+                            )
                                 ? alertEvaluationTimeSeriesPoint.lowerBound
                                 : alertEvaluationTimeSeriesPoint.current
                         )
@@ -80,7 +92,9 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                         // Upper bound or current
                         props.yScale &&
                         props.yScale(
-                            isFinite(alertEvaluationTimeSeriesPoint.upperBound)
+                            Number.isFinite(
+                                alertEvaluationTimeSeriesPoint.upperBound
+                            )
                                 ? alertEvaluationTimeSeriesPoint.upperBound
                                 : alertEvaluationTimeSeriesPoint.current
                         )
@@ -94,7 +108,7 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                 <LinePath
                     data={props.alertEvaluationTimeSeriesPoints}
                     defined={(alertEvaluationTimeSeriesPoint) =>
-                        isFinite(alertEvaluationTimeSeriesPoint.expected)
+                        Number.isFinite(alertEvaluationTimeSeriesPoint.expected)
                     }
                     stroke={Palette.COLOR_VISUALIZATION_STROKE_BASELINE}
                     strokeDasharray={Dimension.DASHARRAY_VISUALIZATION_BASELINE}
@@ -115,7 +129,7 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                 <LinePath
                     data={props.alertEvaluationTimeSeriesPoints}
                     defined={(alertEvaluationTimeSeriesPoint) =>
-                        isFinite(alertEvaluationTimeSeriesPoint.current)
+                        Number.isFinite(alertEvaluationTimeSeriesPoint.current)
                     }
                     stroke={Palette.COLOR_VISUALIZATION_STROKE_CURRENT}
                     strokeWidth={Dimension.WIDTH_VISUALIZATION_STROKE_CURRENT}

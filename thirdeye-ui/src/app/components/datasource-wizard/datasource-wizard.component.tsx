@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tooltip, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
@@ -8,6 +8,7 @@ import {
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
+    TooltipV1,
 } from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
@@ -165,7 +166,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
                             {currentWizardStep ===
                                 DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
-                                <Tooltip
+                                <TooltipV1
                                     placement="top"
                                     title={
                                         t(
@@ -173,13 +174,15 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                         ) as string
                                     }
                                 >
-                                    <HelpLinkIconV1
-                                        displayInline
-                                        enablePadding
-                                        externalLink
-                                        href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
-                                    />
-                                </Tooltip>
+                                    <span>
+                                        <HelpLinkIconV1
+                                            displayInline
+                                            enablePadding
+                                            externalLink
+                                            href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                        />
+                                    </span>
+                                </TooltipV1>
                             )}
                         </Typography>
                     </Grid>

@@ -33,8 +33,7 @@ public class CSVThirdEyeResponseTest {
         .setStartTimeInclusive(new DateTime(0, DateTimeZone.UTC))
         .setEndTimeExclusive(new DateTime(100, DateTimeZone.UTC))
         .addGroupBy("country")
-        .addMetricFunction(
-            new MetricFunction(MetricAggFunction.AVG, "views", 0L, "source", null, null))
+        .setMetricFunction(new MetricFunction(MetricAggFunction.AVG, "views", 0L, "source", null, null))
         .build("");
     response = new CSVThirdEyeResponse(
         request,

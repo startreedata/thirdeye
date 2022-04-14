@@ -63,33 +63,31 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
     TimeSpec timeSpec = null;
     String sourceName = "";
     try {
-      for (MetricFunction metricFunction : request.getMetricFunctions()) {
-        String dataset = metricFunction.getDataset();
-        DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
-        TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+      // fixme cyril refactor this
+      MetricFunction metricFunction = request.getMetricFunction();
+      String dataset = metricFunction.getDataset();
+      DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
+      TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
 
-        if (timeSpec == null) {
-          timeSpec = dataTimeSpec;
-        }
-
-        String[] tableComponents = dataset.split("\\.");
-        sourceName = tableComponents[0];
-        String dbName = tableComponents[1];
-
-        String sqlQuery = SqlUtils
-            .getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName,
-                metricConfigManager);
-        ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(
-            new SqlQuery(sqlQuery,
-                sourceName,
-                dbName,
-                metricFunction.getMetricName(),
-                request.getGroupBy(),
-                request.getGroupByTimeGranularity(),
-                dataTimeSpec));
-
-        metricFunctionToResultSetList.put(metricFunction, thirdEyeResultSetGroup.getResultSets());
+      if (timeSpec == null) {
+        timeSpec = dataTimeSpec;
       }
+
+      String[] tableComponents = dataset.split("\\.");
+      sourceName = tableComponents[0];
+      String dbName = tableComponents[1];
+
+      String sqlQuery = SqlUtils.getSql(request, request.getFilterSet(), dataTimeSpec, sourceName);
+      ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(
+          new SqlQuery(sqlQuery,
+              sourceName,
+              dbName,
+              metricFunction.getMetricName(),
+              request.getGroupBy(),
+              request.getGroupByTimeGranularity(),
+              dataTimeSpec));
+
+      metricFunctionToResultSetList.put(metricFunction, thirdEyeResultSetGroup.getResultSets());
       List<String[]> resultRows = ThirdEyeResultSetUtils
           .parseResultSets(request, metricFunctionToResultSetList,
               sourceName);

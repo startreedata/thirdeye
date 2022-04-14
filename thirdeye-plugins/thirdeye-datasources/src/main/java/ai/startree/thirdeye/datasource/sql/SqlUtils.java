@@ -9,7 +9,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -141,12 +140,10 @@ public class SqlUtils {
    * Due to the summation, all metric column values can be assumed to be doubles.
    */
   public static String getSql(ThirdEyeRequest request,
-      MetricFunction metricFunction,
       Multimap<String, String> filterSet,
       TimeSpec dataTimeSpec,
-      String sourceName,
-      final MetricConfigManager metricConfigManager) {
-    return getSql(metricFunction,
+      String sourceName) {
+    return getSql(request.getMetricFunction(),
         request.getStartTimeInclusive(),
         request.getEndTimeExclusive(),
         filterSet,
@@ -154,8 +151,7 @@ public class SqlUtils {
         request.getGroupByTimeGranularity(),
         dataTimeSpec,
         request.getLimit(),
-        sourceName,
-        metricConfigManager);
+        sourceName);
   }
 
   /**
@@ -230,16 +226,13 @@ public class SqlUtils {
       TimeGranularity timeGranularity,
       TimeSpec dataTimeSpec,
       int limit,
-      String sourceName,
-      final MetricConfigManager metricConfigManager) {
+      String sourceName) {
 
-    MetricConfigDTO metricConfig = DataSourceUtils
-        .getMetricConfigFromId(metricFunction.getMetricId(),
-            metricConfigManager);
+    MetricConfigDTO metricConfigDTO = metricFunction.getMetricConfig();
     String dataset = metricFunction.getDataset();
 
     StringBuilder sb = new StringBuilder();
-    String selectionClause = getSelectionClause(metricConfig, metricFunction, groupBy,
+    String selectionClause = getSelectionClause(metricConfigDTO, metricFunction, groupBy,
         timeGranularity, dataTimeSpec);
     String tableName = computeSqlTableName(dataset);
 
@@ -259,7 +252,7 @@ public class SqlUtils {
     }
 
     if (limit > 0) {
-      sb.append(" ORDER BY " + getSelectMetricClause(metricConfig, metricFunction) + " DESC");
+      sb.append(" ORDER BY " + getSelectMetricClause(metricConfigDTO, metricFunction) + " DESC");
     }
 
     limit = limit > 0 ? limit : DEFAULT_LIMIT;

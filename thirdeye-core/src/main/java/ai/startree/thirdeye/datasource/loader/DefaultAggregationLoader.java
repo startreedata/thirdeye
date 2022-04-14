@@ -5,23 +5,21 @@
 
 package ai.startree.thirdeye.datasource.loader;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -38,13 +36,10 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private static final long TIMEOUT = 600000;
   private static final String ROLLUP_NAME = "OTHER";
 
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public DefaultAggregationLoader(final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
-      final DataSourceCache dataSourceCache) {
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
   }
 
@@ -63,25 +58,25 @@ public class DefaultAggregationLoader implements AggregationLoader {
             DataFrame.COL_VALUE + ":DOUBLE").build()
         .setIndex(COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
 
-    Map<String, RequestContainer> requests = new HashMap<>();
+    Map<String, ThirdEyeRequest> requests = new HashMap<>();
     Map<String, Future<ThirdEyeResponse>> responses = new HashMap<>();
 
     // submit requests
     for (String dimension : dimensions) {
-      RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref");
-      Future<ThirdEyeResponse> res = dataSourceCache.getQueryResultAsync(rc.getRequest());
+      ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice, Collections.singletonList(dimension), limit, "ref");
+      Future<ThirdEyeResponse> res = dataSourceCache.getQueryResultAsync(thirdEyeRequest);
 
-      requests.put(dimension, rc);
+      requests.put(dimension, thirdEyeRequest);
       responses.put(dimension, res);
     }
 
     // collect responses
     List<DataFrame> results = new ArrayList<>();
     for (String dimension : dimensions) {
-      RequestContainer rc = requests.get(dimension);
+      ThirdEyeRequest thirdEyeRequest = requests.get(dimension);
       ThirdEyeResponse res = responses.get(dimension)
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
-      DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+      DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, thirdEyeRequest.getMetricFunction());
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))
           .addSeries(COL_DIMENSION_VALUE, dfRaw.get(dimension))
@@ -101,18 +96,12 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
       throws Exception {
     LOG.info("Aggregating '{}'", slice);
-    final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
-        .get(Objects.requireNonNull(slice.getDatasetName()));
-
-    if (slice.getStartMillis() > maxTime) {
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref");
+    ThirdEyeResponse res = dataSourceCache.getQueryResult(thirdEyeRequest);
+    if (res.getNumRows() == 0) {
       return emptyDataframe(dimensions);
     }
-    RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice,
-        new ArrayList<>(dimensions),
-        limit,
-        "ref");
-    ThirdEyeResponse res = dataSourceCache.getQueryResult(rc.getRequest());
-    final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+    final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, thirdEyeRequest.getMetricFunction());
 
     // fill in timestamps
     return aggregate

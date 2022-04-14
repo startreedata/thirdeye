@@ -25,6 +25,7 @@ public class MetricConfigDTO extends AbstractDTO {
   private String alias;
   private Set<String> tags;
   private MetricType datatype;
+  @Deprecated // derived columns are named in Pinot + custom derived in TE not relevant anymore
   private String derivedMetricExpression;
   private String aggregationColumn;
   private MetricAggFunction defaultAggFunction;

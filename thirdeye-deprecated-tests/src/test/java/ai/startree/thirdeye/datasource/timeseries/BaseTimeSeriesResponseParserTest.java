@@ -81,15 +81,15 @@ public class BaseTimeSeriesResponseParserTest {
       thirdEyeResponse.addRow(row3);
     }
 
-    List<MetricFunction> metricFunctions = getMetricFunctions();
-    thirdEyeResponse.setMetricFunctions(metricFunctions);
+    MetricFunction metricFunction = getMetricFunctions();
+    thirdEyeResponse.setMetricFunctions(List.of(metricFunction));
 
     List<String> dimensionNames = getDimensionNames();
 
     ThirdEyeRequest.ThirdEyeRequestBuilder requestBuilder = new ThirdEyeRequest.ThirdEyeRequestBuilder();
     requestBuilder.setStartTimeInclusive(new DateTime(1, DateTimeZone.UTC));
     requestBuilder.setEndTimeExclusive(new DateTime(4, DateTimeZone.UTC));
-    requestBuilder.setMetricFunctions(metricFunctions);
+    requestBuilder.setMetricFunction(metricFunction);
     requestBuilder.setGroupBy(dimensionNames);
     requestBuilder.setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.MILLISECONDS));
     ThirdEyeRequest thirdEyeRequest = requestBuilder.build("test");
@@ -174,24 +174,12 @@ public class BaseTimeSeriesResponseParserTest {
     }};
   }
 
-  private static List<MetricFunction> getMetricFunctions() {
+  private static MetricFunction getMetricFunctions() {
     final MetricFunction function1 = new MetricFunction();
     function1.setMetricName("m1");
     function1.setFunctionName(MetricAggFunction.SUM);
 
-    final MetricFunction function2 = new MetricFunction();
-    function2.setMetricName("m2");
-    function2.setFunctionName(MetricAggFunction.SUM);
-
-    final MetricFunction function3 = new MetricFunction();
-    function3.setMetricName("m3");
-    function3.setFunctionName(MetricAggFunction.SUM);
-
-    return new ArrayList<MetricFunction>() {{
-      add(function1);
-      add(function2);
-      add(function3);
-    }};
+    return function1;
   }
 
   private static List<String> getDimensionNames() {

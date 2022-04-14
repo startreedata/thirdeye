@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.detection.anomaly.detection.trigger.utils;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -42,19 +41,16 @@ public class DatasetTriggerInfoRepo {
   private final AlertManager detectionConfigDAO;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final int refreshFreqInMin = 1;
   private Set<String> dataSourceWhitelist = new HashSet<>();
 
   @Inject
   private DatasetTriggerInfoRepo(final AlertManager detectionConfigManager,
       final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final MetricConfigManager metricConfigManager) {
     this.detectionConfigDAO = detectionConfigManager;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
 
     this.datasetRefreshTimeMap = new ConcurrentHashMap<>();
     this.executorService = new ScheduledThreadPoolExecutor(1, r -> {
@@ -102,8 +98,7 @@ public class DatasetTriggerInfoRepo {
         }
         List<DatasetConfigDTO> datasetConfigs = ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
             datasetConfigManager,
-            metricConfigManager,
-            thirdEyeCacheRegistry);
+            metricConfigManager);
         for (DatasetConfigDTO datasetConfig : datasetConfigs) {
           String datasetName = datasetConfig.getDataset();
           if (!datasetRefreshTimeMap.containsKey(datasetName)

@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.detection.cache;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
@@ -20,7 +19,6 @@ import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -48,20 +46,17 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   private final DataSourceCache dataSourceCache;
   private final CacheDAO cacheDAO;
   private final ExecutorService executor;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final CacheConfig cacheConfig;
 
   @Inject
   public DefaultTimeSeriesCache(final DatasetConfigManager datasetDAO,
       @Nullable final CacheDAO cacheDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final CacheConfig cacheConfig,
       final DataSourceCache dataSourceCache) {
     this.cacheConfig = cacheConfig;
     this.datasetDAO = datasetDAO;
     this.dataSourceCache = dataSourceCache;
     this.cacheDAO = cacheDAO;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
 
     int maxParallelInserts = cacheConfig.getCentralizedCacheConfig().getMaxParallelInserts();
     this.executor = Executors.newFixedThreadPool(maxParallelInserts);
@@ -114,7 +109,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
       cacheResponse.mergeSliceIntoRows(result);
     } else {
 
-      long metricId = request.getMetricFunctions().get(0).getMetricId();
+      long metricId = request.getMetricFunction().getMetricId();
       long requestSliceStart = request.getStartTimeInclusive().getMillis();
       long requestSliceEnd = request.getEndTimeExclusive().getMillis();
 
@@ -148,9 +143,8 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    * @throws Exception if fetching from data source had an exception somewhere
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
-    TimeSeriesRequestContainer rc = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
-    return this.dataSourceCache.getQueryResult(rc.getRequest());
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeTimeSeriesRequestAligned(slice, "ref");
+    return this.dataSourceCache.getQueryResult(thirdEyeRequest);
   }
 
   /**
@@ -165,7 +159,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
     List<String[]> rows = new ArrayList<>();
     ThirdEyeRequest request = cacheResponse.getCacheRequest().getRequest();
 
-    String dataset = request.getMetricFunctions().get(0).getDataset();
+    String dataset = request.getMetricFunction().getDataset();
     DatasetConfigDTO datasetDTO = datasetDAO.findByDataset(dataset);
     TimeSpec timeSpec = ThirdEyeUtils.getTimeSpecFromDatasetConfig(datasetDTO);
     DateTimeZone timeZone = DateTimeZone.forID(datasetDTO.getTimezone());

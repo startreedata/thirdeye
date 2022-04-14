@@ -14,7 +14,6 @@ import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -36,7 +35,7 @@ public class ThirdEyeCacheResponseTest {
       COLLECTION, null, null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-      .setMetricFunctions(Collections.singletonList(metricFunction))
+      .setMetricFunction(metricFunction)
       .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
       .setEndTimeExclusive(new DateTime(20000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))

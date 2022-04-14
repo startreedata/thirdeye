@@ -26,7 +26,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * <br/><b>NOTE:</b> this is the successor to {@code MetricCorrelationRankingPipeline}, and can
  * be used as a drop-in replacement that handles MetricEntities with filter URNs
  *
- * @see MetricCorrelationRankingPipeline
+ * see MetricCorrelationRankingPipeline
  */
 public class MetricAnalysisPipeline extends Pipeline {
 
@@ -88,11 +87,13 @@ public class MetricAnalysisPipeline extends Pipeline {
     this.cache = context.getDataSourceCache();
     this.strategyFactory = parseStrategyFactory(
         MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
-    this.granularity = TimeGranularity.fromString(MapUtils.getString(properties, PROP_GRANULARITY, PROP_GRANULARITY_DEFAULT));
+    this.granularity = TimeGranularity.fromString(MapUtils.getString(properties,
+        PROP_GRANULARITY,
+        PROP_GRANULARITY_DEFAULT));
   }
 
   private static ScoringStrategyFactory parseStrategyFactory(String strategy) {
-    switch(strategy) {
+    switch (strategy) {
       case STRATEGY_THRESHOLD:
         return new ThresholdStrategyFactory(0.90, 0.95, 0.975, 0.99, 1.00);
       default:
@@ -124,16 +125,15 @@ public class MetricAnalysisPipeline extends Pipeline {
     LOG.info("Processing {} metrics", metrics.size());
 
     // generate requests
-    List<TimeSeriesRequestContainer> requestList = new ArrayList<>();
+    List<ThirdEyeRequest> requestList = new ArrayList<>();
     requestList.addAll(makeRequests(metrics, trainingBaselineStart, testCurrentEnd, filters));
 
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
-    Map<String, TimeSeriesRequestContainer> requests = new HashMap<>();
-    for (TimeSeriesRequestContainer rc : requestList) {
-      final ThirdEyeRequest req = rc.getRequest();
-      requests.put(req.getRequestReference(), rc);
-      thirdeyeRequests.add(req);
+    Map<String, ThirdEyeRequest> requests = new HashMap<>();
+    for (ThirdEyeRequest thirdEyeRequest : requestList) {
+      requests.put(thirdEyeRequest.getRequestReference(), thirdEyeRequest);
+      thirdeyeRequests.add(thirdEyeRequest);
     }
 
     Collection<Future<ThirdEyeResponse>> futures = submitRequests(thirdeyeRequests);
@@ -149,7 +149,8 @@ public class MetricAnalysisPipeline extends Pipeline {
         throw new RuntimeException(e);
       } catch (Exception e) {
         LOG.warn("Error executing request '{}'. Skipping.",
-            requestList.get(i).getRequest().getRequestReference(), e);
+            requestList.get(i).getRequestReference(),
+            e);
         continue;
       } finally {
         i++;
@@ -159,7 +160,8 @@ public class MetricAnalysisPipeline extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response, requests.get(id), thirdEyeCacheRegistry);
+        df = DataFrameUtils.evaluateResponse(response,
+            requests.get(id).getMetricFunction());
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
         continue;
@@ -265,18 +267,18 @@ public class MetricAnalysisPipeline extends Pipeline {
     }
   }
 
-  private List<TimeSeriesRequestContainer> makeRequests(Collection<MetricEntity> metrics,
+  private List<ThirdEyeRequest> makeRequests(Collection<MetricEntity> metrics,
       long start, long end, Multimap<String, String> filters) {
-    List<TimeSeriesRequestContainer> requests = new ArrayList<>();
+    List<ThirdEyeRequest> requests = new ArrayList<>();
     for (MetricEntity me : metrics) {
       Multimap<String, String> jointFilters = ArrayListMultimap.create();
       jointFilters.putAll(filters);
       jointFilters.putAll(me.getFilters());
 
+      // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
       MetricSlice slice = MetricSlice.from(me.getId(), start, end, jointFilters, this.granularity);
       try {
-        requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, me.getUrn(), this.datasetDAO, thirdEyeCacheRegistry));
+        requests.add(DataFrameUtils.makeTimeSeriesRequestAligned(slice, me.getUrn()));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }

@@ -17,10 +17,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import java.net.URL;
@@ -83,22 +83,25 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     thirdEyeCacheRegistry.initializeCaches();
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
-    RequestContainer requestContainer = makeAggregateRequest(slice,
+    ThirdEyeRequest thirdEyeRequest = makeAggregateRequest(slice,
         Collections.emptyList(),
         -1,
         "ref");
-    ThirdEyeResponse response = dataSourceCache
-        .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        thirdEyeCacheRegistry);
+    ThirdEyeResponse response = dataSourceCache.getQueryResult(thirdEyeRequest);
+    DataFrame df = DataFrameUtils.evaluateResponse(response,
+        thirdEyeRequest.getMetricFunction());
 
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));
   }
 
-  private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference)
-      throws Exception {
-    return DataFrameUtils.makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO);
+  private ThirdEyeRequest makeAggregateRequest(MetricSlice slice, List<String> dimensions,
+      int limit, String reference) {
+    return DataFrameUtils.makeAggregateRequest(slice,
+        dimensions,
+        limit,
+        reference,
+        metricConfigDAO,
+        datasetConfigDAO);
   }
 }

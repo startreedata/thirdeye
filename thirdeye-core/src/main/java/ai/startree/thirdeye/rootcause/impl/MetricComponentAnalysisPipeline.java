@@ -24,10 +24,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -102,12 +102,12 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
 
     if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
+      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(
+          PROP_EXCLUDE_DIMENSIONS));
     } else {
       this.excludeDimensions = PROP_EXCLUDE_DIMENSIONS_DEFAULT;
     }
   }
-
 
   @Override
   public PipelineResult run(PipelineContext context) {
@@ -193,23 +193,32 @@ public class MetricComponentAnalysisPipeline extends Pipeline {
 
   private double getTotal(MetricSlice slice) throws Exception {
     String ref = String.format("%d", slice.getMetricId());
-    RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.emptyList(), -1, ref, metricDAO,
-            this.datasetDAO);
-    ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice,
+        Collections.emptyList(),
+        -1,
+        ref,
+        metricDAO,
+        this.datasetDAO);
+    ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+    DataFrame raw = DataFrameUtils.evaluateResponse(res,
+        thirdEyeRequest.getMetricFunction());
 
     return raw.getDoubles(DataFrame.COL_VALUE).doubleValue();
   }
 
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
-    RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO, this.datasetDAO);
-    ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice,
+        Collections.singletonList(dimension),
+        -1,
+        ref,
+        metricDAO,
+        this.datasetDAO);
+    ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+    DataFrame raw = DataFrameUtils.evaluateResponse(res,
+        thirdEyeRequest.getMetricFunction());
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));

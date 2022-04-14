@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.rootcause.Entity;
@@ -27,7 +26,6 @@ import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,14 +62,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
   private static final long TRAINING_WINDOW = TimeUnit.DAYS.toMillis(7);
 
-  private static final String STRATEGY_THRESHOLD = "threshold";
-
-  private static final String PROP_STRATEGY = "strategy";
-  private static final String PROP_STRATEGY_DEFAULT = STRATEGY_THRESHOLD;
-
-  private static final String PROP_GRANULARITY = "granularity";
-  private static final String PROP_GRANULARITY_DEFAULT = "15_MINUTES";
-
   private static final String COL_TIME = DataFrame.COL_TIME;
   private static final String COL_VALUE = DataFrame.COL_VALUE;
   private static final String COL_CURRENT = "current";
@@ -82,34 +72,27 @@ public class MetricAnalysisPipeline2 extends Pipeline {
   private final DatasetConfigManager datasetDAO;
   private final ScoringStrategyFactory strategyFactory;
   private final TimeGranularity granularity;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
    *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
    * @param strategyFactory scoring strategy for differences
    * @param granularity time series target granularity
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
    */
-  public MetricAnalysisPipeline2(String outputName,
-      Set<String> inputNames,
-      ScoringStrategyFactory strategyFactory,
+  public MetricAnalysisPipeline2(ScoringStrategyFactory strategyFactory,
       TimeGranularity granularity,
       DataSourceCache cache,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      DatasetConfigManager datasetDAO) {
     super();
     this.cache = cache;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.strategyFactory = strategyFactory;
     this.granularity = granularity;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -153,35 +136,15 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
     printSlices(slicesRaw);
 
-    List<TimeSeriesRequestContainer> requestList = makeRequests(slicesRaw);
-
-//    // NOTE: baseline lookback only affects amount of training data, training is always WoW
-//    // NOTE: data window is aligned to metric time granularity
-//    final long trainingBaselineStart = baselineRange.getStart() - TRAINING_OFFSET;
-//    final long trainingBaselineEnd = anomalyRange.getStart() - TRAINING_OFFSET;
-//    final long trainingCurrentStart = baselineRange.getStart();
-//    final long trainingCurrentEnd = anomalyRange.getStart();
-//
-//    final long testBaselineStart = baselineRange.getStart();
-//    final long testBaselineEnd = baselineRange.getEnd();
-//    final long testCurrentStart = anomalyRange.getStart();
-//    final long testCurrentEnd = anomalyRange.getEnd();
-//
-//    Multimap<String, String> filters = DimensionEntity.makeFilterSet(context);
-//
-//    LOG.info("Processing {} metrics", metrics.size());
-//
-//    // generate requests
-//    List<TimeSeriesRequestContainer> requestList = new ArrayList<>();
-//    requestList.addAll(makeRequests(metrics, trainingBaselineStart, testCurrentEnd, filters));
+    // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
+    List<ThirdEyeRequest> requestList = makeRequests(slicesRaw);
 
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
-    Map<String, TimeSeriesRequestContainer> requests = new HashMap<>();
-    for (TimeSeriesRequestContainer rc : requestList) {
-      final ThirdEyeRequest req = rc.getRequest();
-      requests.put(req.getRequestReference(), rc);
-      thirdeyeRequests.add(req);
+    Map<String, ThirdEyeRequest> requests = new HashMap<>();
+    for (ThirdEyeRequest thirdEyeRequest : requestList) {
+      requests.put(thirdEyeRequest.getRequestReference(), thirdEyeRequest);
+      thirdeyeRequests.add(thirdEyeRequest);
     }
 
     Collection<Future<ThirdEyeResponse>> futures = submitRequests(thirdeyeRequests);
@@ -197,7 +160,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
         throw new RuntimeException(e);
       } catch (Exception e) {
         LOG.warn("Error executing request '{}'. Skipping.",
-            requestList.get(i).getRequest().getRequestReference(), e);
+            requestList.get(i).getRequestReference(), e);
         continue;
       } finally {
         i++;
@@ -207,7 +170,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response, requests.get(id), thirdEyeCacheRegistry);
+        df = DataFrameUtils.evaluateResponse(response, requests.get(id).getMetricFunction());
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
         continue;
@@ -247,18 +210,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
         DataFrame testBaseline = rangeBaseline.gather(sliceTest, data);
         DataFrame trainingCurrent = rangeCurrent.gather(sliceTrain, data);
         DataFrame trainingBaseline = rangeBaseline.gather(sliceTrain, data);
-
-//        LOG.info("Preparing training and test data for metric '{}'", me.getUrn());
-//        DataFrame trainingBaseline = extractTimeRange(timeseries, trainingBaselineStart, trainingBaselineEnd);
-//        DataFrame trainingCurrent = extractTimeRange(timeseries, trainingCurrentStart, trainingCurrentEnd);
-//        DataFrame testBaseline = extractTimeRange(timeseries, testBaselineStart, testBaselineEnd);
-//        DataFrame testCurrent = extractTimeRange(timeseries, testCurrentStart, testCurrentEnd);
-
-//        LOG.info("timeseries ({} rows): {}", timeseries.size(), timeseries.head(20));
-//        LOG.info("trainingBaseline ({} rows): from {} to {}", trainingBaseline.size(), trainingBaselineStart, trainingBaselineEnd);
-//        LOG.info("trainingCurrent ({} rows): from {} to {}", trainingCurrent.size(), trainingCurrentStart, trainingCurrentEnd);
-//        LOG.info("testBaseline ({} rows): from {} to {}", testBaseline.size(), testBaselineStart, testBaselineEnd);
-//        LOG.info("testCurrent ({} rows): from {} to {}", testCurrent.size(), testCurrentStart, testCurrentEnd);
 
         DataFrame trainingDiff = diffTimeseries(trainingCurrent, trainingBaseline);
         DataFrame testDiff = diffTimeseries(testCurrent, testBaseline);
@@ -332,26 +283,17 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     }
   }
 
-  private List<TimeSeriesRequestContainer> makeRequests(Collection<MetricSlice> slices) {
-    List<TimeSeriesRequestContainer> requests = new ArrayList<>();
+  private List<ThirdEyeRequest> makeRequests(Collection<MetricSlice> slices) {
+    List<ThirdEyeRequest> requests = new ArrayList<>();
     for (MetricSlice slice : slices) {
       try {
-        requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.datasetDAO, thirdEyeCacheRegistry));
+        // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
+        requests.add(DataFrameUtils.makeTimeSeriesRequestAligned(slice, makeIdentifier(slice)));
       } catch (Exception ex) {
-        LOG.warn(String.format("Could not make request. Skipping."), ex);
+        LOG.warn("Could not make request. Skipping. ", ex);
       }
     }
     return requests;
-  }
-
-  private static ScoringStrategyFactory parseStrategyFactory(String strategy) {
-    switch (strategy) {
-      case STRATEGY_THRESHOLD:
-        return new ThresholdStrategyFactory(0.90, 0.95, 0.975, 0.99, 1.00);
-      default:
-        throw new IllegalArgumentException(String.format("Unknown strategy '%s'", strategy));
-    }
   }
 
   private static String makeIdentifier(MetricSlice slice) {

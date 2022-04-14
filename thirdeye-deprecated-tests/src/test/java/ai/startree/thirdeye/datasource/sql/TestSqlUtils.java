@@ -42,12 +42,10 @@ public class TestSqlUtils {
     this.testDbEnv = new TestDbEnv();
     this.metricDataset = new MetricDataset(metric, dataset);
 
-    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito
-        .mock(LoadingCache.class);
+    LoadingCache<String, DatasetConfigDTO> mockDatasetConfigCache = Mockito.mock(LoadingCache.class);
     Mockito.when(mockDatasetConfigCache.get(this.dataset)).thenReturn(new DatasetConfigDTO());
 
-    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito
-        .mock(LoadingCache.class);
+    LoadingCache<MetricDataset, MetricConfigDTO> mockMetricConfigCache = Mockito.mock(LoadingCache.class);
     Mockito.when(mockMetricConfigCache.get(this.metricDataset)).thenReturn(new MetricConfigDTO());
 
     TestDbEnv.getInstance(ThirdEyeCacheRegistry.class)
@@ -56,16 +54,15 @@ public class TestSqlUtils {
         .registerMetricConfigCache(mockMetricConfigCache);
 
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
-    metricConfigDTO.setDataset(this.dataset);
-    metricConfigDTO.setName(this.metricDataset.getMetricName());
-    metricConfigDTO
-        .setAlias(this.metricDataset.getDataset() + "::" + this.metricDataset.getMetricName());
+    metricConfigDTO.setDataset(this.dataset)
+        .setName(this.metricDataset.getMetricName())
+        .setAlias(this.metricDataset.getDataset() + "::" + this.metricDataset.getMetricName())
+        .setDefaultAggFunction(MetricAggFunction.SUM);
 
-    metricFunction = new MetricFunction();
-    metricFunction.setDataset(dataset);
-    metricFunction.setMetricId(1L);
-    metricFunction.setMetricName(metric);
-    metricFunction.setFunctionName(MetricAggFunction.SUM);
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setDataset(dataset);
+
+    metricFunction = new MetricFunction(metricConfigDTO, datasetConfigDTO);
 
     TestDbEnv.getInstance().getMetricConfigDAO().save(metricConfigDTO);
   }
@@ -84,6 +81,7 @@ public class TestSqlUtils {
     DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
         .withZone(DateTimeZone.UTC);
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
+        .setMetricFunction(metricFunction)
         .setDataSource(this.dataset)
         .setLimit(100)
         .setGroupBy("country")
@@ -95,8 +93,7 @@ public class TestSqlUtils {
     String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
     TimeSpec timeSpec = new TimeSpec("date", timeGranularity, timeFormat);
     String actualSql = SqlUtils
-        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset,
-            TestDbEnv.getInstance().getMetricConfigDAO());
+        .getSql(request, HashMultimap.create(), timeSpec, this.dataset);
     String expected = "SELECT date, country, SUM(metric) FROM table WHERE  date = 18383 GROUP BY date, country ORDER BY SUM(metric) DESC LIMIT 100";
     Assert.assertEquals(actualSql, expected);
   }
@@ -107,6 +104,7 @@ public class TestSqlUtils {
     DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
         .withZone(DateTimeZone.UTC);
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
+        .setMetricFunction(metricFunction)
         .setDataSource(this.dataset)
         .setGroupBy("country")
         .setStartTimeInclusive(DateTime.parse("2020-05-01", formatter))
@@ -117,8 +115,7 @@ public class TestSqlUtils {
     String timeFormat = TimeSpec.SINCE_EPOCH_FORMAT;
     TimeSpec timeSpec = new TimeSpec("date", timeGranularity, timeFormat);
     String actual = SqlUtils
-        .getSql(request, this.metricFunction, HashMultimap.create(), timeSpec, this.dataset,
-            TestDbEnv.getInstance().getMetricConfigDAO());
+        .getSql(request, HashMultimap.create(), timeSpec, this.dataset);
     String expected = "SELECT date, country, SUM(metric) FROM table WHERE  date = 18383 GROUP BY date, country LIMIT 100000";
     Assert.assertEquals(actual, expected);
   }

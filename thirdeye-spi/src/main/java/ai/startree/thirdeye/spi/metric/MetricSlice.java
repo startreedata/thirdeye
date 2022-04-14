@@ -56,6 +56,7 @@ public final class MetricSlice {
       final Interval interval,
       final Multimap<String, String> filters, TimeGranularity granularity,
       final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    // todo cyril set granularity
     return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
   }
 

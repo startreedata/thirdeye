@@ -12,18 +12,13 @@ import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parsii.eval.Expression;
 import parsii.eval.Parser;
 import parsii.eval.Scope;
-import parsii.eval.Variable;
 import parsii.tokenizer.ParseException;
 
 /**
@@ -44,15 +39,6 @@ public class MetricExpression {
   private final MetricAggFunction aggFunction;
   private final String dataset;
 
-
-  public MetricExpression(final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO) {
-    this(metricConfigDTO.getName(),
-        Optional.ofNullable(metricConfigDTO.getDerivedMetricExpression()).orElse(metricConfigDTO.getName()),
-        metricConfigDTO.getDefaultAggFunction(),
-        datasetConfigDTO.getDataset()
-    );
-  }
-
   @Deprecated
   public MetricExpression(String expressionName, String expression, MetricAggFunction aggFunction,
       String dataset) {
@@ -60,33 +46,6 @@ public class MetricExpression {
     this.expression = expression;
     this.aggFunction = aggFunction;
     this.dataset = dataset;
-  }
-
-  public static double evaluateExpression(MetricExpression expression, Map<String, Double> context)
-      throws Exception {
-    return evaluateExpression(expression.getExpression(), context);
-  }
-
-  public static double evaluateExpression(String expressionString, Map<String, Double> context)
-      throws Exception {
-
-    Scope scope = Scope.create();
-    expressionString = expressionString.replace(COUNT_METRIC, COUNT_METRIC_ESCAPED);
-    Map<String, Double> metricValueContext = context;
-    if (context.containsKey(COUNT_METRIC)) {
-      metricValueContext = new HashMap<>(context);
-      metricValueContext.put(COUNT_METRIC_ESCAPED, context.get(COUNT_METRIC));
-    }
-    Expression expression = Parser.parse(expressionString, scope);
-    for (String metricName : metricValueContext.keySet()) {
-      Variable variable = scope.create(metricName);
-      if (!metricValueContext.containsKey(metricName)) {
-        throw new Exception(
-            "No value set for metric:" + metricName + "  in the context:" + metricValueContext);
-      }
-      variable.setValue(metricValueContext.get(metricName));
-    }
-    return expression.evaluate();
   }
 
   public String getExpressionName() {

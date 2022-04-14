@@ -7,30 +7,15 @@ package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import org.joda.time.DateTime;
 import org.joda.time.Period;
 
 public class TimeSeriesRequestContainer extends RequestContainer {
 
-  final DateTime start;
-  final DateTime end;
-  final Period granularity;
+  private final Period granularity;
 
-  public TimeSeriesRequestContainer(ThirdEyeRequest request, MetricExpression expression,
-      DateTime start,
-      DateTime end, Period granularity) {
+  public TimeSeriesRequestContainer(ThirdEyeRequest request, MetricExpression expression, Period granularity) {
     super(request, expression);
-    this.start = start;
-    this.end = end;
     this.granularity = granularity;
-  }
-
-  public DateTime getStart() {
-    return start;
-  }
-
-  public DateTime getEnd() {
-    return end;
   }
 
   public Period getGranularity() {

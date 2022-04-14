@@ -189,7 +189,7 @@ public class DataFrameUtils {
       throws Exception {
     return makeTimestamps(evaluateExpression(parseResponse(response), rc.getExpression(),
             thirdEyeCacheRegistry),
-        rc.start, rc.getGranularity());
+        rc.getRequest().getStartTimeInclusive(), rc.getGranularity());
   }
 
   /**
@@ -239,7 +239,7 @@ public class DataFrameUtils {
         .setGroupByTimeGranularity(granularity)
         .build(reference);
 
-    return new TimeSeriesRequestContainer(request, expression, start, end, granularity.toPeriod());
+    return new TimeSeriesRequestContainer(request, expression, granularity.toPeriod());
   }
 
   /**

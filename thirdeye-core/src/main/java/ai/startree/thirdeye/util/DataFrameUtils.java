@@ -152,7 +152,7 @@ public class DataFrameUtils {
             slice.getFilters(),
             slice.getGranularity());
 
-    return makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, List.of(function))
+    return makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, function)
         .setGroupByTimeGranularity(granularity)
         .build(reference);
   }
@@ -178,8 +178,7 @@ public class DataFrameUtils {
         .setStartTimeInclusive(slice.getStart())
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
-        // fixme cyril single metric function
-        .setMetricFunction(List.of(function))
+        .setMetricFunction(function)
         .setDataSource(slice.getDatasetConfigDTO().getDataSource())
         .setGroupBy(dimensions)
         .setLimit(limit)
@@ -219,31 +218,29 @@ public class DataFrameUtils {
    *
    * @param slice metric data slice
    * @param dataset dataset dto
-   * @param functions metric functions
+   * @param function metric function
    * @return ThirdeyeRequestBuilder
    */
   @Deprecated
-  // todo cyril this can be removed
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
       DatasetConfigDTO dataset,
-      List<MetricFunction> functions) {
+      MetricFunction function) {
     DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
     datasetConfigDTO.setDataSource(dataset.getDataSource());
 
-    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO), functions);
+    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO), function);
   }
 
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
-      List<MetricFunction> functions) {
+      MetricFunction function) {
 
     return ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(slice.getStart())
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
-        // fixme cyril single metric function
-        .setMetricFunction(functions)
+        .setMetricFunction(function)
         .setGroupByTimeGranularity(slice.getGranularity())
         .setDataSource(slice.getDatasetConfigDTO().getDataSource());
   }

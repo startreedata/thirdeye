@@ -46,7 +46,7 @@ public class ThirdEyeResultSetUtils {
     if (numGroupByKeys > 0) {
       hasGroupBy = true;
     }
-    int numMetrics = request.getMetricFunction().size();
+    int numMetrics = 1;
     int numCols = numGroupByKeys + numMetrics;
     boolean hasGroupByTime = false;
     if (request.getGroupByTimeGranularity() != null) {

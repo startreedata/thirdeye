@@ -216,12 +216,12 @@ public class DataFrameUtils {
    * @param reference unique identifier for request
    * @return RequestContainer
    */
-  public static RequestContainer makeAggregateRequest(MetricSlice slice,
+  public static ThirdEyeRequest makeAggregateRequest(MetricSlice slice,
       List<String> dimensions,
       int limit,
       String reference) {
     MetricFunction function = new MetricFunction(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
-    ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
+    return ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(slice.getStart())
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
@@ -230,13 +230,11 @@ public class DataFrameUtils {
         .setGroupBy(dimensions)
         .setLimit(limit)
         .build(reference);
-
-    return new RequestContainer(request);
   }
 
   @Deprecated
   // use above - do not pass DAOs to dataframe utils
-  public static RequestContainer makeAggregateRequest(MetricSlice slice,
+  public static ThirdEyeRequest makeAggregateRequest(MetricSlice slice,
       List<String> dimensions,
       int limit,
       String reference,

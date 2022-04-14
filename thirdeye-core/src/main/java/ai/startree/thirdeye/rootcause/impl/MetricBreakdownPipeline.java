@@ -22,10 +22,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.ArrayList;
@@ -103,13 +103,15 @@ public class MetricBreakdownPipeline extends Pipeline {
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
 
     if (properties.containsKey(PROP_INCLUDE_DIMENSIONS)) {
-      this.includeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_INCLUDE_DIMENSIONS));
+      this.includeDimensions = new HashSet<>((Collection<String>) properties.get(
+          PROP_INCLUDE_DIMENSIONS));
     } else {
       this.includeDimensions = new HashSet<>();
     }
 
     if (properties.containsKey(PROP_EXCLUDE_DIMENSIONS)) {
-      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(PROP_EXCLUDE_DIMENSIONS));
+      this.excludeDimensions = new HashSet<>((Collection<String>) properties.get(
+          PROP_EXCLUDE_DIMENSIONS));
     } else {
       this.excludeDimensions = new HashSet<>();
     }
@@ -163,12 +165,16 @@ public class MetricBreakdownPipeline extends Pipeline {
 
   private DataFrame getContribution(MetricSlice slice, String dimension) throws Exception {
     String ref = String.format("%d-%s", slice.getMetricId(), dimension);
-    RequestContainer rc = DataFrameUtils
-        .makeAggregateRequest(slice, Collections.singletonList(dimension), -1, ref, metricDAO,
-            this.datasetDAO);
-    ThirdEyeResponse res = this.cache.getQueryResult(rc.getRequest());
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice,
+        Collections.singletonList(dimension),
+        -1,
+        ref,
+        metricDAO,
+        this.datasetDAO);
+    ThirdEyeResponse res = this.cache.getQueryResult(thirdEyeRequest);
 
-    DataFrame raw = DataFrameUtils.evaluateResponse(res, rc.getRequest().getMetricFunctions().get(0));
+    DataFrame raw = DataFrameUtils.evaluateResponse(res,
+        thirdEyeRequest.getMetricFunctions().get(0));
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));

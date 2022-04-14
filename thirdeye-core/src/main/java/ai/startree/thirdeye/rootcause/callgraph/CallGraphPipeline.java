@@ -20,10 +20,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -163,28 +163,28 @@ public class CallGraphPipeline extends Pipeline {
     // fetch data
     try {
       // prepare requests
-      RequestContainer rcCurrCount = DataFrameUtils
+      ThirdEyeRequest rcCurrCount = DataFrameUtils
           .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", metricDAO,
               datasetDAO);
-      RequestContainer rcCurrLatency = DataFrameUtils
+      ThirdEyeRequest rcCurrLatency = DataFrameUtils
           .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", metricDAO,
               datasetDAO);
-      RequestContainer rcBaseCount = DataFrameUtils
+      ThirdEyeRequest rcBaseCount = DataFrameUtils
           .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", metricDAO,
               datasetDAO);
-      RequestContainer rcBaseLatency = DataFrameUtils
+      ThirdEyeRequest rcBaseLatency = DataFrameUtils
           .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", metricDAO,
               datasetDAO);
 
       // send requests
       Future<ThirdEyeResponse> resCurrCount = this.cache
-          .getQueryResultAsync(rcCurrCount.getRequest());
+          .getQueryResultAsync(rcCurrCount);
       Future<ThirdEyeResponse> resCurrLatency = this.cache
-          .getQueryResultAsync(rcCurrLatency.getRequest());
+          .getQueryResultAsync(rcCurrLatency);
       Future<ThirdEyeResponse> resBaseCount = this.cache
-          .getQueryResultAsync(rcBaseCount.getRequest());
+          .getQueryResultAsync(rcBaseCount);
       Future<ThirdEyeResponse> resBaseLatency = this.cache
-          .getQueryResultAsync(rcBaseLatency.getRequest());
+          .getQueryResultAsync(rcBaseLatency);
 
       // fetch responses
       DataFrame dfCurrCount = getResponse(resCurrCount, rcCurrCount, explore);
@@ -362,16 +362,16 @@ public class CallGraphPipeline extends Pipeline {
    * Retrieves and processes a raw aggregation response. drops time column and sets index.
    *
    * @param response thirdeye response
-   * @param container request container
+   * @param thirdEyeRequest request
    * @param dimensions dimensions to serve as index
    * @return response as formatted dataframe
    */
   private DataFrame getResponse(Future<ThirdEyeResponse> response,
-      RequestContainer container,
+      ThirdEyeRequest thirdEyeRequest,
       List<String> dimensions) throws Exception {
     return DataFrameUtils
         .evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS),
-            container.getRequest().getMetricFunctions().get(0))
+            thirdEyeRequest.getMetricFunctions().get(0))
         .dropSeries(COL_TIME)
         .setIndex(dimensions);
   }

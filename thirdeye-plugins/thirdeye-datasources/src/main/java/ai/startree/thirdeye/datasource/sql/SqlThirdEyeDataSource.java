@@ -63,6 +63,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
     TimeSpec timeSpec = null;
     String sourceName = "";
     try {
+      // fixme cyril refactor this
       MetricFunction metricFunction = request.getMetricFunction();
       String dataset = metricFunction.getDataset();
       DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
@@ -76,9 +77,7 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
       sourceName = tableComponents[0];
       String dbName = tableComponents[1];
 
-      String sqlQuery = SqlUtils
-          .getSql(request, metricFunction, request.getFilterSet(), dataTimeSpec, sourceName,
-              metricConfigManager);
+      String sqlQuery = SqlUtils.getSql(request, request.getFilterSet(), dataTimeSpec, sourceName);
       ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(
           new SqlQuery(sqlQuery,
               sourceName,

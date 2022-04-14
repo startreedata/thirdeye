@@ -9,7 +9,6 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.detection.cache.TimeSeriesCache;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
@@ -29,8 +28,7 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public DefaultTimeSeriesLoader(DatasetConfigManager datasetDAO,
-      final CacheConfig cacheConfig,
+  public DefaultTimeSeriesLoader(final CacheConfig cacheConfig,
       final TimeSeriesCache timeSeriesCache,
       final DataSourceCache dataSourceCache) {
     this.cacheConfig = cacheConfig;

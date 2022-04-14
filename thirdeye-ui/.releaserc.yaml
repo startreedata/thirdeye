@@ -1,0 +1,75 @@
+---
+# Release branches
+branches:
+    - name: master
+
+# Concourse is not recognized as a CI provider
+ci: false
+
+plugins:
+    - - "@semantic-release/commit-analyzer"
+      - preset: conventionalcommits
+        releaseRules:
+            # Pull request types and scopes that trigger a release for this project
+            - type: major
+              scope: ui
+              release: major
+            - type: feat
+              scope: ui
+              release: minor
+            - type: fix
+              scope: ui
+              release: patch
+
+            # Pull request types and scopes that do not trigger a release for this project
+            - type: major
+              scope:
+              release: false
+            - type: major
+              scope: repo
+              release: false
+
+            - type: fix
+              scope:
+              release: false
+            - type: fix
+              scope: repo
+              release: false
+
+            - type: feat
+              scope:
+              release: minor
+            - type: feat
+              scope: repo
+              release: minor
+
+            # Pull request types that do not trigger a release
+            - type: wip
+              release: false
+            - type: test
+              release: false
+            - type: refactor
+              release: false
+            - type: chore
+              release: false
+    - "@semantic-release/npm"
+    # TODO: Need to update URL & description for release
+    # - - semantic-release-slack-bot
+    #   - slackWebhook: https://hooks.slack.com/services/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
+    #     notifyOnSuccess: true
+    #     notifyOnFail: false
+    #     onSuccessTemplate:
+    #         channel: "#ci-startree-ui-projects"
+    #         username: thirdeye-ui
+    #         icon_emoji: ":white_circle:"
+    #         text: |
+    #             <!channel> Successfully published `$package_name $npm_package_version`
+    #             https://repo.startreedata.io/ui/repos/tree/General/startree-ui/$package_name/-/$package_name-$npm_package_version.tgz
+    - - semantic-release-plugin-update-version-in-files
+      # Replace placeholder in released source with the version number being released
+      - files:
+            - "dist/thirdeye-ui.js"
+        placeholder: "0.0.0-development-thirdeye-ui"
+
+# GitHub tag for the release
+tagFormat: thirdeye-ui-${version}

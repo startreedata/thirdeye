@@ -165,7 +165,10 @@
         "anomaly-period": "Anomaly Period",
         "non-filtered": "Non Filtered",
         "filtered": "Filtered",
-        "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis"
+        "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
+
+        "about": "About",
+        "thirdeye-website-url": "https://www.startree.ai"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

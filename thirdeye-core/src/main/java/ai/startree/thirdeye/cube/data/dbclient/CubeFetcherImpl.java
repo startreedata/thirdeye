@@ -7,14 +7,12 @@ package ai.startree.thirdeye.cube.data.dbclient;
 
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
-import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -81,8 +79,6 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
     for (CubeSpec cubeSpec : cubeSpecs) {
       // Set dataset and metric
       MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
-      // todo cyril add DefaultAggFunction to custom rcaInfoFetcher to allow custom aggregationfunction
-      MetricExpression metricExpression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
       MetricFunction  metricFunction = new MetricFunction(metricConfigDTO, datasetConfigDTO);
 
       ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
@@ -99,8 +95,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
       builder.setFilterSet(filterSets);
 
       requests.put(cubeSpec.getTag(),
-          new ThirdEyeRequestMetricExpressions(builder.build(cubeSpec.getTag().toString()),
-              List.of(metricExpression)));
+          new ThirdEyeRequestMetricExpressions(builder.build(cubeSpec.getTag().toString())));
     }
 
     return requests;

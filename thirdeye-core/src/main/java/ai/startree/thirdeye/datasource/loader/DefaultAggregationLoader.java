@@ -96,10 +96,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
       throws Exception {
     LOG.info("Aggregating '{}'", slice);
-    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice,
-        new ArrayList<>(dimensions),
-        limit,
-        "ref");
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeAggregateRequest(slice, new ArrayList<>(dimensions), limit, "ref");
     ThirdEyeResponse res = dataSourceCache.getQueryResult(thirdEyeRequest);
     if (res.getNumRows() == 0) {
       return emptyDataframe(dimensions);

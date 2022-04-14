@@ -114,6 +114,7 @@ public class RootCauseAnalysisInfoFetcher {
   }
 
   private void addCustomFields(final MetricConfigDTO metricConfigDTO, final MetricConfigDTO metadataMetricDTO) {
+    // todo cyril add DefaultAggFunction to custom rcaInfoFetcher to allow custom aggregationfunction
     // fields that can be configured at the alert level can be added here
     Optional.ofNullable(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
   }

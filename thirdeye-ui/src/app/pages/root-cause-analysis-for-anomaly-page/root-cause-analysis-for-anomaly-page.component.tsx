@@ -1,11 +1,17 @@
-import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
+import {
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    Paper,
+    Tooltip,
+} from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
-import { HelpIconWithTooltip } from "../../components/help-icon-with-tooltip/help-icon-with-tooltip.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
@@ -13,6 +19,7 @@ import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     AppLoadingIndicatorV1,
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
@@ -142,14 +149,21 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader showTimeRange title={pageTitle}>
-                <HelpIconWithTooltip
-                    href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
-                    tooltipTitle={
+                <Tooltip
+                    placement="top"
+                    title={
                         t(
                             "label.how-to-perform-root-cause-analysis-doc"
                         ) as string
                     }
-                />
+                >
+                    <HelpLinkIconV1
+                        displayInline
+                        enablePadding
+                        externalLink
+                        href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                    />
+                </Tooltip>
             </PageHeader>
             <PageContentsGridV1>
                 {/* Anomaly Summary */}

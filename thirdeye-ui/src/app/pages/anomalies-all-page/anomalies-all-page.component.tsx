@@ -1,4 +1,4 @@
-import { Grid } from "@material-ui/core";
+import { Grid, Tooltip } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,10 +6,10 @@ import { useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { HelpIconWithTooltip } from "../../components/help-icon-with-tooltip/help-icon-with-tooltip.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
@@ -136,14 +136,21 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 showTimeRange
                 title={t("label.anomalies")}
             >
-                <HelpIconWithTooltip
-                    href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
-                    tooltipTitle={
+                <Tooltip
+                    placement="top"
+                    title={
                         t(
                             "label.how-to-perform-root-cause-analysis-doc"
                         ) as string
                     }
-                />
+                >
+                    <HelpLinkIconV1
+                        displayInline
+                        enablePadding
+                        externalLink
+                        href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                    />
+                </Tooltip>
             </PageHeader>
 
             <PageContentsGridV1 fullHeight>

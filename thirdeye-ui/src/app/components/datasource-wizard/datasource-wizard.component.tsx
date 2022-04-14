@@ -1,9 +1,10 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Tooltip, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    HelpLinkIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
@@ -13,7 +14,6 @@ import { createDefaultDatasource } from "../../utils/datasources/datasources.uti
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { validateJSON } from "../../utils/validation/validation.util";
-import { HelpIconWithTooltip } from "../help-icon-with-tooltip/help-icon-with-tooltip.component";
 import {
     DatasourceWizardProps,
     DatasourceWizardStep,
@@ -165,14 +165,21 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
                             {currentWizardStep ===
                                 DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
-                                <HelpIconWithTooltip
-                                    href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
-                                    tooltipTitle={
+                                <Tooltip
+                                    placement="top"
+                                    title={
                                         t(
                                             "label.view-configuration-docs"
                                         ) as string
                                     }
-                                />
+                                >
+                                    <HelpLinkIconV1
+                                        displayInline
+                                        enablePadding
+                                        externalLink
+                                        href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                    />
+                                </Tooltip>
                             )}
                         </Typography>
                     </Grid>

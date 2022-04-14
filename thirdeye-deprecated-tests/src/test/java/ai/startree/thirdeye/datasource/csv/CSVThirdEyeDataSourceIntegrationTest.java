@@ -89,8 +89,8 @@ public class CSVThirdEyeDataSourceIntegrationTest {
         "ref");
     ThirdEyeResponse response = dataSourceCache
         .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        thirdEyeCacheRegistry);
+    DataFrame df = DataFrameUtils.evaluateResponse(response,
+        requestContainer.getRequest().getMetricFunctions().get(0));
 
     Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
         Collections.singletonList(1503d));
@@ -99,6 +99,11 @@ public class CSVThirdEyeDataSourceIntegrationTest {
   private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
       int limit, String reference)
       throws Exception {
-    return DataFrameUtils.makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO);
+    return DataFrameUtils.makeAggregateRequest(slice,
+        dimensions,
+        limit,
+        reference,
+        metricConfigDAO,
+        datasetConfigDAO);
   }
 }

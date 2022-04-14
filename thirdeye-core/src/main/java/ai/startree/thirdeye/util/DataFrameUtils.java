@@ -146,14 +146,13 @@ public class DataFrameUtils {
    * metrics.
    *
    * @param response thirdeye client response
-   * @param rc RequestContainer
+   * @param metricFunction metricFunction
    * @return response as dataframe
    */
-  public static DataFrame evaluateResponse(ThirdEyeResponse response, RequestContainer rc,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
-    return evaluateExpression(parseResponse(response), rc.getExpression(),
-        thirdEyeCacheRegistry);
+  public static DataFrame evaluateResponse(ThirdEyeResponse response, MetricFunction metricFunction) {
+    // only the name is used to rename the result column --> inline this?
+    DataFrame res = parseResponse(response);
+    return res.renameSeries(metricFunction.getMetricName(),DataFrame.COL_VALUE);
   }
 
   /**

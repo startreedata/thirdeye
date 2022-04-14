@@ -81,7 +81,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
       RequestContainer rc = requests.get(dimension);
       ThirdEyeResponse res = responses.get(dimension)
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
-      DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+      DataFrame dfRaw = DataFrameUtils.evaluateResponse(res, rc.getRequest().getMetricFunctions().get(0));
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))
           .addSeries(COL_DIMENSION_VALUE, dfRaw.get(dimension))
@@ -112,7 +112,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
         limit,
         "ref");
     ThirdEyeResponse res = dataSourceCache.getQueryResult(rc.getRequest());
-    final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc, thirdEyeCacheRegistry);
+    final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc.getRequest().getMetricFunctions().get(0));
 
     // fill in timestamps
     return aggregate

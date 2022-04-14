@@ -189,7 +189,7 @@ public class DataFrameUtils {
       throws Exception {
     return makeTimestamps(evaluateExpression(parseResponse(response), rc.getExpression(),
             thirdEyeCacheRegistry),
-        rc.start, rc.getInterval());
+        rc.start, rc.getGranularity());
   }
 
   /**
@@ -209,19 +209,17 @@ public class DataFrameUtils {
       throws Exception {
     MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
 
-    DatasetConfigDTO dataset = datasetDAO.findByDataset(metricConfigDTO.getDataset());
-    if (dataset == null) {
+    DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(metricConfigDTO.getDataset());
+    if (datasetConfigDTO == null) {
       throw new IllegalArgumentException(String
           .format("Could not resolve dataset '%s' for metric id '%d'", metricConfigDTO.getDataset(),
               metricConfigDTO.getId()));
     }
 
-    List<MetricExpression> expressions = Utils.convertToMetricExpressions(metricConfigDTO.getName(),
-        metricConfigDTO.getDefaultAggFunction(), metricConfigDTO.getDataset(),
-        thirdEyeCacheRegistry);
+    MetricExpression expression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
 
     TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
-        .orElse(dataset.bucketTimeGranularity());
+        .orElse(datasetConfigDTO.bucketTimeGranularity());
 
     Period period = granularity.toPeriod();
 
@@ -235,13 +233,13 @@ public class DataFrameUtils {
             slice.getFilters(),
             slice.getGranularity());
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(alignedSlice, dataset, expressions,
+    ThirdEyeRequest request = makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, expression,
         thirdEyeCacheRegistry
     )
         .setGroupByTimeGranularity(granularity)
         .build(reference);
 
-    return new TimeSeriesRequestContainer(request, expressions, start, end, granularity.toPeriod());
+    return new TimeSeriesRequestContainer(request, expression, start, end, granularity.toPeriod());
   }
 
   /**
@@ -309,30 +307,27 @@ public class DataFrameUtils {
    *
    * @param slice metric data slice
    * @param dataset dataset dto
-   * @param expressions metric expressions
+   * @param expression metric expression
    * @return ThirdeyeRequestBuilder
    */
   @Deprecated
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
       DatasetConfigDTO dataset,
-      List<MetricExpression> expressions,
+      MetricExpression expression,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
     datasetConfigDTO.setDataSource(dataset.getDataSource());
 
     return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO),
-        expressions, thirdEyeCacheRegistry);
+        expression, thirdEyeCacheRegistry);
   }
 
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
-      List<MetricExpression> expressions,
+      MetricExpression expression,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    List<MetricFunction> functions = new ArrayList<>();
-    for (MetricExpression exp : expressions) {
-      functions.addAll(exp.computeMetricFunctions(thirdEyeCacheRegistry));
-    }
+    List<MetricFunction> functions = expression.computeMetricFunctions(thirdEyeCacheRegistry);
 
     return ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(slice.getStart())

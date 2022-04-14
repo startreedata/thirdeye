@@ -7,7 +7,6 @@ package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -15,15 +14,15 @@ public class TimeSeriesRequestContainer extends RequestContainer {
 
   final DateTime start;
   final DateTime end;
-  final Period interval;
+  final Period granularity;
 
-  public TimeSeriesRequestContainer(ThirdEyeRequest request, List<MetricExpression> expressions,
+  public TimeSeriesRequestContainer(ThirdEyeRequest request, MetricExpression expression,
       DateTime start,
-      DateTime end, Period interval) {
-    super(request, expressions);
+      DateTime end, Period granularity) {
+    super(request, expression);
     this.start = start;
     this.end = end;
-    this.interval = interval;
+    this.granularity = granularity;
   }
 
   public DateTime getStart() {
@@ -34,7 +33,7 @@ public class TimeSeriesRequestContainer extends RequestContainer {
     return end;
   }
 
-  public Period getInterval() {
-    return interval;
+  public Period getGranularity() {
+    return granularity;
   }
 }

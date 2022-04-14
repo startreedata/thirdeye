@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.util;
 
-import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 
 /**
@@ -14,18 +13,12 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 public class RequestContainer {
 
   final ThirdEyeRequest request;
-  final MetricExpression expression;
 
-  RequestContainer(ThirdEyeRequest request, MetricExpression expression) {
+  RequestContainer(ThirdEyeRequest request) {
     this.request = request;
-    this.expression = expression;
   }
 
   public ThirdEyeRequest getRequest() {
     return request;
-  }
-
-  public MetricExpression getExpression() {
-    return expression;
   }
 }

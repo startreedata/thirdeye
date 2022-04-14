@@ -168,8 +168,7 @@ public class DataFrameUtils {
    */
   public static RequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
       String reference, DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
+      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
 
     DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(metricConfigDTO.getDataset());
@@ -202,7 +201,7 @@ public class DataFrameUtils {
         .setGroupByTimeGranularity(granularity)
         .build(reference);
 
-    return new RequestContainer(request, expression);
+    return new RequestContainer(request);
   }
 
   /**
@@ -221,8 +220,6 @@ public class DataFrameUtils {
       List<String> dimensions,
       int limit,
       String reference) {
-    // todo cyril - after refactoring: both contain the same info : proof it's not relevant to have both - remove --> maybe at the end remove both - it seems slice is MetricSlice is enough
-    MetricExpression expression = new MetricExpression(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
     MetricFunction function = new MetricFunction(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(slice.getStart())
@@ -234,7 +231,7 @@ public class DataFrameUtils {
         .setLimit(limit)
         .build(reference);
 
-    return new RequestContainer(request, expression);
+    return new RequestContainer(request);
   }
 
   @Deprecated

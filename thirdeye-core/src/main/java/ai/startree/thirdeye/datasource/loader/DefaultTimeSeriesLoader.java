@@ -12,7 +12,6 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.datasource.loader.TimeSeriesLoader;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
 import com.google.inject.Inject;

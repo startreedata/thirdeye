@@ -7,7 +7,6 @@ package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.datasource.MetricExpression;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import java.util.List;
 
 /**
  * Wrapper for ThirdEye request with derived metric expressions
@@ -15,18 +14,18 @@ import java.util.List;
 public class RequestContainer {
 
   final ThirdEyeRequest request;
-  final List<MetricExpression> expressions;
+  final MetricExpression expression;
 
-  RequestContainer(ThirdEyeRequest request, List<MetricExpression> expressions) {
+  RequestContainer(ThirdEyeRequest request, MetricExpression expression) {
     this.request = request;
-    this.expressions = expressions;
+    this.expression = expression;
   }
 
   public ThirdEyeRequest getRequest() {
     return request;
   }
 
-  public List<MetricExpression> getExpressions() {
-    return expressions;
+  public MetricExpression getExpression() {
+    return expression;
   }
 }

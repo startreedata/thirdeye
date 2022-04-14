@@ -110,19 +110,15 @@ public class DataFrameUtils {
    * <br/><b>NOTE:</b> only supports computation of a single MetricExpression.
    *
    * @param df thirdeye response dataframe
-   * @param expressions collection of metric expressions
+   * @param expression the expression to evaluate
    * @return augmented dataframe
    * @throws Exception if the metric expression cannot be computed
    */
-  public static DataFrame evaluateExpressions(DataFrame df,
-      Collection<MetricExpression> expressions,
+  public static DataFrame evaluateExpression(DataFrame df,
+      final MetricExpression expression,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) throws Exception {
-    if (expressions.size() != 1) {
-      throw new IllegalArgumentException("Requires exactly one expression");
-    }
 
-    MetricExpression me = expressions.iterator().next();
-    Collection<MetricFunction> functions = me.computeMetricFunctions(thirdEyeCacheRegistry);
+    Collection<MetricFunction> functions = expression.computeMetricFunctions(thirdEyeCacheRegistry);
 
     Map<String, Double> context = new HashMap<>();
     double[] values = new double[df.size()];
@@ -132,7 +128,7 @@ public class DataFrameUtils {
         // TODO check inconsistency between getMetricName() and toString()
         context.put(f.getMetricName(), df.getDouble(f.toString(), i));
       }
-      values[i] = MetricExpression.evaluateExpression(me, context);
+      values[i] = MetricExpression.evaluateExpression(expression, context);
     }
 
     // drop intermediate columns
@@ -174,7 +170,7 @@ public class DataFrameUtils {
   public static DataFrame evaluateResponse(ThirdEyeResponse response, RequestContainer rc,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    return evaluateExpressions(parseResponse(response), rc.getExpressions(),
+    return evaluateExpression(parseResponse(response), rc.getExpression(),
         thirdEyeCacheRegistry);
   }
 
@@ -191,7 +187,7 @@ public class DataFrameUtils {
   public static DataFrame evaluateResponse(ThirdEyeResponse response, TimeSeriesRequestContainer rc,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
-    return makeTimestamps(evaluateExpressions(parseResponse(response), rc.getExpressions(),
+    return makeTimestamps(evaluateExpression(parseResponse(response), rc.getExpression(),
             thirdEyeCacheRegistry),
         rc.start, rc.getInterval());
   }
@@ -277,7 +273,7 @@ public class DataFrameUtils {
         .setLimit(limit)
         .build(reference);
 
-    return new RequestContainer(request, List.of(expression));
+    return new RequestContainer(request, expression);
   }
 
   @Deprecated

@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.Pipeline;
@@ -19,8 +18,6 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -72,18 +69,12 @@ public class MetricAnalysisPipeline extends Pipeline {
   private static final String COL_BASELINE = "baseline";
 
   private DataSourceCache cache;
-  private MetricConfigManager metricDAO;
-  private DatasetConfigManager datasetDAO;
   private ScoringStrategyFactory strategyFactory;
   private TimeGranularity granularity;
-  private ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   public void init(final PipelineInitContext context) {
     super.init(context);
     Map<String, Object> properties = context.getProperties();
-    this.metricDAO = context.getMetricConfigManager();
-    this.datasetDAO = context.getDatasetConfigManager();
-    this.thirdEyeCacheRegistry = context.getThirdEyeCacheRegistry();
     this.cache = context.getDataSourceCache();
     this.strategyFactory = parseStrategyFactory(
         MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
@@ -160,8 +151,7 @@ public class MetricAnalysisPipeline extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response,
-            requests.get(id).getMetricFunction());
+        df = DataFrameUtils.evaluateResponse(response);
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
         continue;
@@ -193,12 +183,6 @@ public class MetricAnalysisPipeline extends Pipeline {
             trainingCurrentEnd);
         DataFrame testBaseline = extractTimeRange(timeseries, testBaselineStart, testBaselineEnd);
         DataFrame testCurrent = extractTimeRange(timeseries, testCurrentStart, testCurrentEnd);
-
-//        LOG.info("timeseries ({} rows): {}", timeseries.size(), timeseries.head(20));
-//        LOG.info("trainingBaseline ({} rows): from {} to {}", trainingBaseline.size(), trainingBaselineStart, trainingBaselineEnd);
-//        LOG.info("trainingCurrent ({} rows): from {} to {}", trainingCurrent.size(), trainingCurrentStart, trainingCurrentEnd);
-//        LOG.info("testBaseline ({} rows): from {} to {}", testBaseline.size(), testBaselineStart, testBaselineEnd);
-//        LOG.info("testCurrent ({} rows): from {} to {}", testCurrent.size(), testCurrentStart, testCurrentEnd);
 
         DataFrame trainingDiff = diffTimeseries(trainingCurrent, trainingBaseline);
         DataFrame testDiff = diffTimeseries(testCurrent, testBaseline);

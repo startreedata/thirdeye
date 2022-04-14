@@ -187,10 +187,10 @@ public class CallGraphPipeline extends Pipeline {
           .getQueryResultAsync(rcBaseLatency);
 
       // fetch responses
-      DataFrame dfCurrCount = getResponse(resCurrCount, rcCurrCount, explore);
-      DataFrame dfCurrLatency = getResponse(resCurrLatency, rcCurrLatency, explore);
-      DataFrame dfBaseCount = getResponse(resBaseCount, rcBaseCount, explore);
-      DataFrame dfBaseLatency = getResponse(resBaseLatency, rcBaseLatency, explore);
+      DataFrame dfCurrCount = getResponse(resCurrCount, explore);
+      DataFrame dfCurrLatency = getResponse(resCurrLatency, explore);
+      DataFrame dfBaseCount = getResponse(resBaseCount, explore);
+      DataFrame dfBaseLatency = getResponse(resBaseLatency, explore);
 
       // prepare data
       DataFrame dfCurr = alignResults(dfCurrCount, dfCurrLatency).sortedBy(COL_COUNT);
@@ -362,15 +362,11 @@ public class CallGraphPipeline extends Pipeline {
    * Retrieves and processes a raw aggregation response. drops time column and sets index.
    *
    * @param response thirdeye response
-   * @param thirdEyeRequest request
    * @param dimensions dimensions to serve as index
    * @return response as formatted dataframe
    */
-  private DataFrame getResponse(Future<ThirdEyeResponse> response,
-      ThirdEyeRequest thirdEyeRequest,
-      List<String> dimensions) throws Exception {
-    return DataFrameUtils.evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS),
-            thirdEyeRequest.getMetricFunction())
+  private DataFrame getResponse(Future<ThirdEyeResponse> response, List<String> dimensions) throws Exception {
+    return DataFrameUtils.evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS))
         .dropSeries(COL_TIME)
         .setIndex(dimensions);
   }

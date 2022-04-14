@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.rootcause.Entity;
@@ -63,14 +62,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
   private static final long TRAINING_WINDOW = TimeUnit.DAYS.toMillis(7);
 
-  private static final String STRATEGY_THRESHOLD = "threshold";
-
-  private static final String PROP_STRATEGY = "strategy";
-  private static final String PROP_STRATEGY_DEFAULT = STRATEGY_THRESHOLD;
-
-  private static final String PROP_GRANULARITY = "granularity";
-  private static final String PROP_GRANULARITY_DEFAULT = "15_MINUTES";
-
   private static final String COL_TIME = DataFrame.COL_TIME;
   private static final String COL_VALUE = DataFrame.COL_VALUE;
   private static final String COL_CURRENT = "current";
@@ -81,34 +72,27 @@ public class MetricAnalysisPipeline2 extends Pipeline {
   private final DatasetConfigManager datasetDAO;
   private final ScoringStrategyFactory strategyFactory;
   private final TimeGranularity granularity;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
 
   /**
    * Constructor for dependency injection
    *
-   * @param outputName pipeline output name
-   * @param inputNames input pipeline names
    * @param strategyFactory scoring strategy for differences
    * @param granularity time series target granularity
    * @param cache query cache
    * @param metricDAO metric config DAO
    * @param datasetDAO datset config DAO
    */
-  public MetricAnalysisPipeline2(String outputName,
-      Set<String> inputNames,
-      ScoringStrategyFactory strategyFactory,
+  public MetricAnalysisPipeline2(ScoringStrategyFactory strategyFactory,
       TimeGranularity granularity,
       DataSourceCache cache,
       MetricConfigManager metricDAO,
-      DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      DatasetConfigManager datasetDAO) {
     super();
     this.cache = cache;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
     this.strategyFactory = strategyFactory;
     this.granularity = granularity;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
   }
 
   @Override
@@ -334,22 +318,12 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     List<ThirdEyeRequest> requests = new ArrayList<>();
     for (MetricSlice slice : slices) {
       try {
-        requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.datasetDAO));
+        requests.add(DataFrameUtils.makeTimeSeriesRequestAligned(slice, makeIdentifier(slice)));
       } catch (Exception ex) {
         LOG.warn("Could not make request. Skipping. ", ex);
       }
     }
     return requests;
-  }
-
-  private static ScoringStrategyFactory parseStrategyFactory(String strategy) {
-    switch (strategy) {
-      case STRATEGY_THRESHOLD:
-        return new ThresholdStrategyFactory(0.90, 0.95, 0.975, 0.99, 1.00);
-      default:
-        throw new IllegalArgumentException(String.format("Unknown strategy '%s'", strategy));
-    }
   }
 
   private static String makeIdentifier(MetricSlice slice) {

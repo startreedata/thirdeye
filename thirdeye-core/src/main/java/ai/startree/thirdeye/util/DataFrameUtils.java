@@ -121,20 +121,11 @@ public class DataFrameUtils {
    *
    * @param slice metric data slice
    * @param reference unique identifier for request
-   * @param datasetDAO dataset config DAO
    * @return ThirdEyeRequest
    */
-  public static ThirdEyeRequest makeTimeSeriesRequestAligned(MetricSlice slice,
-      String reference, DatasetConfigManager datasetDAO) {
+  public static ThirdEyeRequest makeTimeSeriesRequestAligned(MetricSlice slice, String reference) {
     MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
-
-    DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(metricConfigDTO.getDataset());
-    if (datasetConfigDTO == null) {
-      throw new IllegalArgumentException(String
-          .format("Could not resolve dataset '%s' for metric id '%d'", metricConfigDTO.getDataset(),
-              metricConfigDTO.getId()));
-    }
-
+    DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
     MetricFunction function = new MetricFunction(metricConfigDTO, datasetConfigDTO);
 
     TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())

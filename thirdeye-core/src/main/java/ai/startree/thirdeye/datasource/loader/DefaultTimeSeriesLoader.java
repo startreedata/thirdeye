@@ -24,7 +24,6 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultTimeSeriesLoader.class);
 
-  private final DatasetConfigManager datasetDAO;
   private final CacheConfig cacheConfig;
   private final TimeSeriesCache timeSeriesCache;
   private final DataSourceCache dataSourceCache;
@@ -34,7 +33,6 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
       final CacheConfig cacheConfig,
       final TimeSeriesCache timeSeriesCache,
       final DataSourceCache dataSourceCache) {
-    this.datasetDAO = datasetDAO;
     this.cacheConfig = cacheConfig;
     this.timeSeriesCache = timeSeriesCache;
     this.dataSourceCache = dataSourceCache;
@@ -50,8 +48,7 @@ public class DefaultTimeSeriesLoader implements TimeSeriesLoader {
   public DataFrame load(MetricSlice slice) throws Exception {
     LOG.info("Loading time series for '{}'", slice);
 
-    ThirdEyeRequest thirdEyeRequest = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO);
+    ThirdEyeRequest thirdEyeRequest = DataFrameUtils.makeTimeSeriesRequestAligned(slice, "ref");
     ThirdEyeResponse response;
     if (cacheConfig.useCentralizedCache()) {
       response = timeSeriesCache.fetchTimeSeries(thirdEyeRequest);

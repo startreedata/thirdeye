@@ -275,12 +275,10 @@ public class MetricAnalysisPipeline extends Pipeline {
       jointFilters.putAll(filters);
       jointFilters.putAll(me.getFilters());
 
+      // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
       MetricSlice slice = MetricSlice.from(me.getId(), start, end, jointFilters, this.granularity);
       try {
-        requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice,
-                me.getUrn(),
-                this.datasetDAO));
+        requests.add(DataFrameUtils.makeTimeSeriesRequestAligned(slice, me.getUrn()));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }

@@ -164,9 +164,9 @@ public class DataFrameUtils {
    * @param slice metric data slice
    * @param reference unique identifier for request
    * @param datasetDAO dataset config DAO
-   * @return TimeSeriesRequestContainer
+   * @return ThirdEyeRequest
    */
-  public static RequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
+  public static ThirdEyeRequest makeTimeSeriesRequestAligned(MetricSlice slice,
       String reference, DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
     MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
@@ -195,13 +195,9 @@ public class DataFrameUtils {
             slice.getFilters(),
             slice.getGranularity());
 
-    ThirdEyeRequest request = makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, expression,
-        thirdEyeCacheRegistry
-    )
+    return makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, expression, thirdEyeCacheRegistry)
         .setGroupByTimeGranularity(granularity)
         .build(reference);
-
-    return new RequestContainer(request);
   }
 
   /**
@@ -214,7 +210,7 @@ public class DataFrameUtils {
    * @param dimensions dimensions to group by
    * @param limit top k element limit ({@code -1} for default)
    * @param reference unique identifier for request
-   * @return RequestContainer
+   * @return ThirdEyeRequest
    */
   public static ThirdEyeRequest makeAggregateRequest(MetricSlice slice,
       List<String> dimensions,

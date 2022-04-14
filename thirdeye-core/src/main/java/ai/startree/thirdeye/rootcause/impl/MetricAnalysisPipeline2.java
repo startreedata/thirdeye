@@ -27,7 +27,6 @@ import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -153,7 +152,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
     printSlices(slicesRaw);
 
-    List<RequestContainer> requestList = makeRequests(slicesRaw);
+    List<ThirdEyeRequest> requestList = makeRequests(slicesRaw);
 
 //    // NOTE: baseline lookback only affects amount of training data, training is always WoW
 //    // NOTE: data window is aligned to metric time granularity
@@ -172,16 +171,15 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 //    LOG.info("Processing {} metrics", metrics.size());
 //
 //    // generate requests
-//    List<TimeSeriesRequestContainer> requestList = new ArrayList<>();
+//    List<ThirdEyeRequest> requestList = new ArrayList<>();
 //    requestList.addAll(makeRequests(metrics, trainingBaselineStart, testCurrentEnd, filters));
 
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
-    Map<String, RequestContainer> requests = new HashMap<>();
-    for (RequestContainer rc : requestList) {
-      final ThirdEyeRequest req = rc.getRequest();
-      requests.put(req.getRequestReference(), rc);
-      thirdeyeRequests.add(req);
+    Map<String, ThirdEyeRequest> requests = new HashMap<>();
+    for (ThirdEyeRequest thirdEyeRequest : requestList) {
+      requests.put(thirdEyeRequest.getRequestReference(), thirdEyeRequest);
+      thirdeyeRequests.add(thirdEyeRequest);
     }
 
     Collection<Future<ThirdEyeResponse>> futures = submitRequests(thirdeyeRequests);
@@ -197,7 +195,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
         throw new RuntimeException(e);
       } catch (Exception e) {
         LOG.warn("Error executing request '{}'. Skipping.",
-            requestList.get(i).getRequest().getRequestReference(), e);
+            requestList.get(i).getRequestReference(), e);
         continue;
       } finally {
         i++;
@@ -207,7 +205,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
       String id = response.getRequest().getRequestReference();
       DataFrame df;
       try {
-        df = DataFrameUtils.evaluateResponse(response, requests.get(id).getRequest().getMetricFunctions()
+        df = DataFrameUtils.evaluateResponse(response, requests.get(id).getMetricFunctions()
             .get(0));
       } catch (Exception e) {
         LOG.warn("Could not parse response for '{}'. Skipping.", id, e);
@@ -333,8 +331,8 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     }
   }
 
-  private List<RequestContainer> makeRequests(Collection<MetricSlice> slices) {
-    List<RequestContainer> requests = new ArrayList<>();
+  private List<ThirdEyeRequest> makeRequests(Collection<MetricSlice> slices) {
+    List<ThirdEyeRequest> requests = new ArrayList<>();
     for (MetricSlice slice : slices) {
       try {
         requests.add(DataFrameUtils

@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.datasource.loader;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -21,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -38,13 +36,10 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private static final long TIMEOUT = 600000;
   private static final String ROLLUP_NAME = "OTHER";
 
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final DataSourceCache dataSourceCache;
 
   @Inject
-  public DefaultAggregationLoader(final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
-      final DataSourceCache dataSourceCache) {
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
+  public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
   }
 
@@ -101,17 +96,14 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
       throws Exception {
     LOG.info("Aggregating '{}'", slice);
-    final long maxTime = thirdEyeCacheRegistry.getDatasetMaxDataTimeCache()
-        .get(Objects.requireNonNull(slice.getDatasetName()));
-
-    if (slice.getStartMillis() > maxTime) {
-      return emptyDataframe(dimensions);
-    }
     RequestContainer rc = DataFrameUtils.makeAggregateRequest(slice,
         new ArrayList<>(dimensions),
         limit,
         "ref");
     ThirdEyeResponse res = dataSourceCache.getQueryResult(rc.getRequest());
+    if (res.getNumRows() == 0) {
+      return emptyDataframe(dimensions);
+    }
     final DataFrame aggregate = DataFrameUtils.evaluateResponse(res, rc.getRequest().getMetricFunctions().get(0));
 
     // fill in timestamps

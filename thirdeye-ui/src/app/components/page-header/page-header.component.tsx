@@ -56,7 +56,10 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = (
 
     return (
         <PageHeaderV1>
-            <PageHeaderTextV1>{props.title}</PageHeaderTextV1>
+            <PageHeaderTextV1>
+                {props.title}
+                {props.children}
+            </PageHeaderTextV1>
 
             <PageHeaderActionsV1>
                 {/* Time range selector */}

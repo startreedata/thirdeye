@@ -1,9 +1,10 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Tooltip, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    HelpLinkIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
@@ -160,6 +161,25 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                 `label.${kebabCase(
                                     DatasourceWizardStep[currentWizardStep]
                                 )}`
+                            )}
+
+                            {currentWizardStep ===
+                                DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
+                                <Tooltip
+                                    placement="top"
+                                    title={
+                                        t(
+                                            "label.view-configuration-docs"
+                                        ) as string
+                                    }
+                                >
+                                    <HelpLinkIconV1
+                                        displayInline
+                                        enablePadding
+                                        externalLink
+                                        href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                    />
+                                </Tooltip>
                             )}
                         </Typography>
                     </Grid>

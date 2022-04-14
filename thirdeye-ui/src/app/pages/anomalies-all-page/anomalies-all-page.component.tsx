@@ -1,4 +1,4 @@
-import { Grid } from "@material-ui/core";
+import { Grid, Tooltip } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,7 @@ import { DialogType } from "../../components/dialogs/dialog-provider/dialog-prov
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
@@ -134,7 +135,23 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 showCreateButton
                 showTimeRange
                 title={t("label.anomalies")}
-            />
+            >
+                <Tooltip
+                    placement="top"
+                    title={
+                        t(
+                            "label.how-to-perform-root-cause-analysis-doc"
+                        ) as string
+                    }
+                >
+                    <HelpLinkIconV1
+                        displayInline
+                        enablePadding
+                        externalLink
+                        href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                    />
+                </Tooltip>
+            </PageHeader>
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>

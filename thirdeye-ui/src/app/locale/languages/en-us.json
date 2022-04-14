@@ -19,6 +19,7 @@
         "datasource": "Datasource",
         "datasources": "Datasources",
         "description": "Description",
+        "documentation": "Documentation",
         "login": "Login",
         "logout": "Logout",
         "document-title": "{{page}} - {{app}}",
@@ -156,13 +157,15 @@
         "chart-data": "Chart Data",
         "alert-template-configuration": "Alert Template Configuration",
         "anomaly-feedback": "Anomaly Feedback",
+        "view-configuration-docs": "View configuration documentation",
         "comment": "Comment",
         "baseline-week-offset": "Baseline Week Offset",
         "dimension-analysis-data": "Dimension Analysis Data",
         "dimension-analysis-row-chart-data": "Dimension Analysis Row Chart Data",
         "anomaly-period": "Anomaly Period",
         "non-filtered": "Non Filtered",
-        "filtered": "Filtered"
+        "filtered": "Filtered",
+        "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

@@ -1,4 +1,11 @@
-import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
+import {
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    Paper,
+    Tooltip,
+} from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +20,7 @@ import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.c
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
@@ -169,7 +177,23 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 showCreateButton
                 showTimeRange
                 title={uiAnomaly ? uiAnomaly.name : ""}
-            />
+            >
+                <Tooltip
+                    placement="top"
+                    title={
+                        t(
+                            "label.how-to-perform-root-cause-analysis-doc"
+                        ) as string
+                    }
+                >
+                    <HelpLinkIconV1
+                        displayInline
+                        enablePadding
+                        externalLink
+                        href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                    />
+                </Tooltip>
+            </PageHeader>
             <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid

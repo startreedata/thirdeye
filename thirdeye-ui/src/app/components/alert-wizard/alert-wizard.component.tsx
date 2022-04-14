@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Tooltip, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
+    HelpLinkIconV1,
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsCardV1,
@@ -341,6 +342,24 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                         `label.${kebabCase(
                                             AlertWizardStep[currentWizardStep]
                                         )}`
+                                    )}
+                                    {currentWizardStep ===
+                                        AlertWizardStep.DETECTION_CONFIGURATION && (
+                                        <Tooltip
+                                            placement="top"
+                                            title={
+                                                t(
+                                                    "label.view-configuration-docs"
+                                                ) as string
+                                            }
+                                        >
+                                            <HelpLinkIconV1
+                                                displayInline
+                                                enablePadding
+                                                externalLink
+                                                href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                            />
+                                        </Tooltip>
                                     )}
                                 </Typography>
                             </Grid>

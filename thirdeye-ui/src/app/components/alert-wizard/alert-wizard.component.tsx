@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tooltip, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
@@ -11,6 +11,7 @@ import {
     NotificationTypeV1,
     PageContentsCardV1,
     StepperV1,
+    TooltipV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import {
@@ -345,7 +346,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     )}
                                     {currentWizardStep ===
                                         AlertWizardStep.DETECTION_CONFIGURATION && (
-                                        <Tooltip
+                                        <TooltipV1
                                             placement="top"
                                             title={
                                                 t(
@@ -353,13 +354,15 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                                 ) as string
                                             }
                                         >
-                                            <HelpLinkIconV1
-                                                displayInline
-                                                enablePadding
-                                                externalLink
-                                                href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
-                                            />
-                                        </Tooltip>
+                                            <span>
+                                                <HelpLinkIconV1
+                                                    displayInline
+                                                    enablePadding
+                                                    externalLink
+                                                    href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                                />
+                                            </span>
+                                        </TooltipV1>
                                     )}
                                 </Typography>
                             </Grid>

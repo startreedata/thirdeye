@@ -281,8 +281,7 @@ public class MetricAnalysisPipeline extends Pipeline {
         requests.add(DataFrameUtils
             .makeTimeSeriesRequestAligned(slice,
                 me.getUrn(),
-                this.datasetDAO,
-                thirdEyeCacheRegistry));
+                this.datasetDAO));
       } catch (Exception ex) {
         LOG.warn(String.format("Could not make request for '%s'. Skipping.", me.getUrn()), ex);
       }

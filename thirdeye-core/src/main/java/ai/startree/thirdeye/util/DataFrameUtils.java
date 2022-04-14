@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.util;
 
-import ai.startree.thirdeye.datasource.MetricExpression;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -24,10 +22,7 @@ import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -103,43 +98,6 @@ public class DataFrameUtils {
   }
 
   /**
-   * Returns the DataFrame augmented with a {@code COL_VALUE} column that contains the
-   * evaluation results from computing derived metric expressions. The method performs the
-   * augmentation in-place.
-   *
-   * <br/><b>NOTE:</b> only supports computation of a single MetricExpression.
-   *
-   * @param df thirdeye response dataframe
-   * @param expression the expression to evaluate
-   * @return augmented dataframe
-   * @throws Exception if the metric expression cannot be computed
-   */
-  public static DataFrame evaluateExpression(DataFrame df,
-      final MetricExpression expression,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) throws Exception {
-
-    Collection<MetricFunction> functions = expression.computeMetricFunctions(thirdEyeCacheRegistry);
-
-    Map<String, Double> context = new HashMap<>();
-    double[] values = new double[df.size()];
-
-    for (int i = 0; i < df.size(); i++) {
-      for (MetricFunction f : functions) {
-        // TODO check inconsistency between getMetricName() and toString()
-        context.put(f.getMetricName(), df.getDouble(f.toString(), i));
-      }
-      values[i] = MetricExpression.evaluateExpression(expression, context);
-    }
-
-    // drop intermediate columns
-    for (MetricFunction f : functions) {
-      df.dropSeries(f.toString());
-    }
-
-    return df.addSeries(DataFrame.COL_VALUE, values);
-  }
-
-  /**
    * Returns a Thirdeye response parsed as a DataFrame. The method stores the time values in
    * {@code COL_TIME} by default, and creates columns for each groupBy attribute and for each
    * MetricFunction specified in the request. It further evaluates expressions for derived
@@ -167,8 +125,7 @@ public class DataFrameUtils {
    * @return ThirdEyeRequest
    */
   public static ThirdEyeRequest makeTimeSeriesRequestAligned(MetricSlice slice,
-      String reference, DatasetConfigManager datasetDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      String reference, DatasetConfigManager datasetDAO) {
     MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
 
     DatasetConfigDTO datasetConfigDTO = datasetDAO.findByDataset(metricConfigDTO.getDataset());
@@ -178,7 +135,7 @@ public class DataFrameUtils {
               metricConfigDTO.getId()));
     }
 
-    MetricExpression expression = new MetricExpression(metricConfigDTO, datasetConfigDTO);
+    MetricFunction function = new MetricFunction(metricConfigDTO, datasetConfigDTO);
 
     TimeGranularity granularity = Optional.ofNullable(slice.getGranularity())
         .orElse(datasetConfigDTO.bucketTimeGranularity());
@@ -195,7 +152,7 @@ public class DataFrameUtils {
             slice.getFilters(),
             slice.getGranularity());
 
-    return makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, expression, thirdEyeCacheRegistry)
+    return makeThirdEyeRequestBuilder(alignedSlice, datasetConfigDTO, List.of(function))
         .setGroupByTimeGranularity(granularity)
         .build(reference);
   }
@@ -261,27 +218,24 @@ public class DataFrameUtils {
    *
    * @param slice metric data slice
    * @param dataset dataset dto
-   * @param expression metric expression
+   * @param functions metric functions
    * @return ThirdeyeRequestBuilder
    */
   @Deprecated
+  // todo cyril this can be removed
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
       DatasetConfigDTO dataset,
-      MetricExpression expression,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      List<MetricFunction> functions) {
     DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
     datasetConfigDTO.setDataSource(dataset.getDataSource());
 
-    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO),
-        expression, thirdEyeCacheRegistry);
+    return makeThirdEyeRequestBuilder(slice.withDatasetConfigDto(datasetConfigDTO), functions);
   }
 
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
-      MetricExpression expression,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    List<MetricFunction> functions = expression.computeMetricFunctions(thirdEyeCacheRegistry);
+      List<MetricFunction> functions) {
 
     return ThirdEyeRequest.newBuilder()
         .setStartTimeInclusive(slice.getStart())

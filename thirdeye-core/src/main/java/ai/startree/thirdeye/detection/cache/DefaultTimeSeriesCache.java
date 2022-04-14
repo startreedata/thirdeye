@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.detection.cache;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
@@ -47,20 +46,17 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
   private final DataSourceCache dataSourceCache;
   private final CacheDAO cacheDAO;
   private final ExecutorService executor;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final CacheConfig cacheConfig;
 
   @Inject
   public DefaultTimeSeriesCache(final DatasetConfigManager datasetDAO,
       @Nullable final CacheDAO cacheDAO,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final CacheConfig cacheConfig,
       final DataSourceCache dataSourceCache) {
     this.cacheConfig = cacheConfig;
     this.datasetDAO = datasetDAO;
     this.dataSourceCache = dataSourceCache;
     this.cacheDAO = cacheDAO;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
 
     int maxParallelInserts = cacheConfig.getCentralizedCacheConfig().getMaxParallelInserts();
     this.executor = Executors.newFixedThreadPool(maxParallelInserts);
@@ -148,7 +144,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
     ThirdEyeRequest thirdEyeRequest = DataFrameUtils
-        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
+        .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO);
     return this.dataSourceCache.getQueryResult(thirdEyeRequest);
   }
 

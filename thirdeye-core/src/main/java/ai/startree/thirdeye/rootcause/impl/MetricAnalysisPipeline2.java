@@ -336,9 +336,9 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     for (MetricSlice slice : slices) {
       try {
         requests.add(DataFrameUtils
-            .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.datasetDAO, thirdEyeCacheRegistry));
+            .makeTimeSeriesRequestAligned(slice, makeIdentifier(slice), this.datasetDAO));
       } catch (Exception ex) {
-        LOG.warn(String.format("Could not make request. Skipping."), ex);
+        LOG.warn("Could not make request. Skipping. ", ex);
       }
     }
     return requests;

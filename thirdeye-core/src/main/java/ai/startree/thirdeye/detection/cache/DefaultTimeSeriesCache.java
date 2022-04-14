@@ -19,8 +19,8 @@ import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.DataFrameUtils;
+import ai.startree.thirdeye.util.RequestContainer;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -148,7 +148,7 @@ public class DefaultTimeSeriesCache implements TimeSeriesCache {
    * @throws Exception if fetching from data source had an exception somewhere
    */
   private ThirdEyeResponse fetchSliceFromSource(MetricSlice slice) throws Exception {
-    TimeSeriesRequestContainer rc = DataFrameUtils
+    RequestContainer rc = DataFrameUtils
         .makeTimeSeriesRequestAligned(slice, "ref", this.datasetDAO, thirdEyeCacheRegistry);
     return this.dataSourceCache.getQueryResult(rc.getRequest());
   }

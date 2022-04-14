@@ -26,7 +26,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
+import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -124,13 +124,13 @@ public class MetricAnalysisPipeline extends Pipeline {
     LOG.info("Processing {} metrics", metrics.size());
 
     // generate requests
-    List<TimeSeriesRequestContainer> requestList = new ArrayList<>();
+    List<RequestContainer> requestList = new ArrayList<>();
     requestList.addAll(makeRequests(metrics, trainingBaselineStart, testCurrentEnd, filters));
 
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
-    Map<String, TimeSeriesRequestContainer> requests = new HashMap<>();
-    for (TimeSeriesRequestContainer rc : requestList) {
+    Map<String, RequestContainer> requests = new HashMap<>();
+    for (RequestContainer rc : requestList) {
       final ThirdEyeRequest req = rc.getRequest();
       requests.put(req.getRequestReference(), rc);
       thirdeyeRequests.add(req);
@@ -265,9 +265,9 @@ public class MetricAnalysisPipeline extends Pipeline {
     }
   }
 
-  private List<TimeSeriesRequestContainer> makeRequests(Collection<MetricEntity> metrics,
+  private List<RequestContainer> makeRequests(Collection<MetricEntity> metrics,
       long start, long end, Multimap<String, String> filters) {
-    List<TimeSeriesRequestContainer> requests = new ArrayList<>();
+    List<RequestContainer> requests = new ArrayList<>();
     for (MetricEntity me : metrics) {
       Multimap<String, String> jointFilters = ArrayListMultimap.create();
       jointFilters.putAll(filters);

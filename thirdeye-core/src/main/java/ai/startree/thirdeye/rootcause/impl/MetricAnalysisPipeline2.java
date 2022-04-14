@@ -27,7 +27,7 @@ import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.TimeSeriesRequestContainer;
+import ai.startree.thirdeye.util.RequestContainer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -153,7 +153,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
     printSlices(slicesRaw);
 
-    List<TimeSeriesRequestContainer> requestList = makeRequests(slicesRaw);
+    List<RequestContainer> requestList = makeRequests(slicesRaw);
 
 //    // NOTE: baseline lookback only affects amount of training data, training is always WoW
 //    // NOTE: data window is aligned to metric time granularity
@@ -177,8 +177,8 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
-    Map<String, TimeSeriesRequestContainer> requests = new HashMap<>();
-    for (TimeSeriesRequestContainer rc : requestList) {
+    Map<String, RequestContainer> requests = new HashMap<>();
+    for (RequestContainer rc : requestList) {
       final ThirdEyeRequest req = rc.getRequest();
       requests.put(req.getRequestReference(), rc);
       thirdeyeRequests.add(req);
@@ -332,8 +332,8 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     }
   }
 
-  private List<TimeSeriesRequestContainer> makeRequests(Collection<MetricSlice> slices) {
-    List<TimeSeriesRequestContainer> requests = new ArrayList<>();
+  private List<RequestContainer> makeRequests(Collection<MetricSlice> slices) {
+    List<RequestContainer> requests = new ArrayList<>();
     for (MetricSlice slice : slices) {
       try {
         requests.add(DataFrameUtils

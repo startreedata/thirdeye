@@ -140,24 +140,6 @@ public class DataFrameUtils {
   }
 
   /**
-   * Returns the DataFrame with timestamps aligned to a start offset and an interval.
-   *
-   * @param df thirdeye response dataframe
-   * @param origin start offset
-   * @param interval timestep multiple
-   * @return dataframe with modified timestamps
-   */
-  public static DataFrame makeTimestamps(DataFrame df, final DateTime origin,
-      final Period interval) {
-    return new DataFrame(df).mapInPlace(new Series.LongFunction() {
-      @Override
-      public long apply(long... values) {
-        return origin.plus(interval.multipliedBy((int) values[0])).getMillis();
-      }
-    }, DataFrame.COL_TIME);
-  }
-
-  /**
    * Returns a Thirdeye response parsed as a DataFrame. The method stores the time values in
    * {@code COL_TIME} by default, and creates columns for each groupBy attribute and for each
    * MetricFunction specified in the request. It further evaluates expressions for derived
@@ -175,24 +157,6 @@ public class DataFrameUtils {
   }
 
   /**
-   * Returns a Thirdeye response parsed as a DataFrame. The method stores the time values in
-   * {@code COL_TIME} by default, and creates columns for each groupBy attribute and for each
-   * MetricFunction specified in the request. It evaluates expressions for derived
-   * metrics and offsets timestamp based on the original timeseries request.
-   *
-   * @param response thirdeye client response
-   * @param rc TimeSeriesRequestContainer
-   * @return response as dataframe
-   */
-  public static DataFrame evaluateResponse(ThirdEyeResponse response, TimeSeriesRequestContainer rc,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
-    return makeTimestamps(evaluateExpression(parseResponse(response), rc.getExpression(),
-            thirdEyeCacheRegistry),
-        rc.getRequest().getStartTimeInclusive(), rc.getGranularity());
-  }
-
-  /**
    * Constructs and wraps a request for a metric with derived expressions. Resolves all
    * required dependencies from the Thirdeye database. Also aligns start and end timestamps by
    * rounding them down (start) and up (end) to align with metric time granularity boundaries.
@@ -203,7 +167,7 @@ public class DataFrameUtils {
    * @param datasetDAO dataset config DAO
    * @return TimeSeriesRequestContainer
    */
-  public static TimeSeriesRequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
+  public static RequestContainer makeTimeSeriesRequestAligned(MetricSlice slice,
       String reference, DatasetConfigManager datasetDAO,
       final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
       throws Exception {
@@ -239,7 +203,7 @@ public class DataFrameUtils {
         .setGroupByTimeGranularity(granularity)
         .build(reference);
 
-    return new TimeSeriesRequestContainer(request, expression, granularity.toPeriod());
+    return new RequestContainer(request, expression);
   }
 
   /**
@@ -334,6 +298,7 @@ public class DataFrameUtils {
         .setEndTimeExclusive(slice.getEnd())
         .setFilterSet(slice.getFilters())
         .setMetricFunctions(functions)
+        .setGroupByTimeGranularity(slice.getGranularity())
         .setDataSource(slice.getDatasetConfigDTO().getDataSource());
   }
 }

@@ -136,27 +136,8 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
     printSlices(slicesRaw);
 
+    // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
     List<ThirdEyeRequest> requestList = makeRequests(slicesRaw);
-
-//    // NOTE: baseline lookback only affects amount of training data, training is always WoW
-//    // NOTE: data window is aligned to metric time granularity
-//    final long trainingBaselineStart = baselineRange.getStart() - TRAINING_OFFSET;
-//    final long trainingBaselineEnd = anomalyRange.getStart() - TRAINING_OFFSET;
-//    final long trainingCurrentStart = baselineRange.getStart();
-//    final long trainingCurrentEnd = anomalyRange.getStart();
-//
-//    final long testBaselineStart = baselineRange.getStart();
-//    final long testBaselineEnd = baselineRange.getEnd();
-//    final long testCurrentStart = anomalyRange.getStart();
-//    final long testCurrentEnd = anomalyRange.getEnd();
-//
-//    Multimap<String, String> filters = DimensionEntity.makeFilterSet(context);
-//
-//    LOG.info("Processing {} metrics", metrics.size());
-//
-//    // generate requests
-//    List<ThirdEyeRequest> requestList = new ArrayList<>();
-//    requestList.addAll(makeRequests(metrics, trainingBaselineStart, testCurrentEnd, filters));
 
     LOG.info("Requesting {} time series", requestList.size());
     List<ThirdEyeRequest> thirdeyeRequests = new ArrayList<>();
@@ -229,18 +210,6 @@ public class MetricAnalysisPipeline2 extends Pipeline {
         DataFrame testBaseline = rangeBaseline.gather(sliceTest, data);
         DataFrame trainingCurrent = rangeCurrent.gather(sliceTrain, data);
         DataFrame trainingBaseline = rangeBaseline.gather(sliceTrain, data);
-
-//        LOG.info("Preparing training and test data for metric '{}'", me.getUrn());
-//        DataFrame trainingBaseline = extractTimeRange(timeseries, trainingBaselineStart, trainingBaselineEnd);
-//        DataFrame trainingCurrent = extractTimeRange(timeseries, trainingCurrentStart, trainingCurrentEnd);
-//        DataFrame testBaseline = extractTimeRange(timeseries, testBaselineStart, testBaselineEnd);
-//        DataFrame testCurrent = extractTimeRange(timeseries, testCurrentStart, testCurrentEnd);
-
-//        LOG.info("timeseries ({} rows): {}", timeseries.size(), timeseries.head(20));
-//        LOG.info("trainingBaseline ({} rows): from {} to {}", trainingBaseline.size(), trainingBaselineStart, trainingBaselineEnd);
-//        LOG.info("trainingCurrent ({} rows): from {} to {}", trainingCurrent.size(), trainingCurrentStart, trainingCurrentEnd);
-//        LOG.info("testBaseline ({} rows): from {} to {}", testBaseline.size(), testBaselineStart, testBaselineEnd);
-//        LOG.info("testCurrent ({} rows): from {} to {}", testCurrent.size(), testCurrentStart, testCurrentEnd);
 
         DataFrame trainingDiff = diffTimeseries(trainingCurrent, trainingBaseline);
         DataFrame testDiff = diffTimeseries(testCurrent, testBaseline);
@@ -318,6 +287,7 @@ public class MetricAnalysisPipeline2 extends Pipeline {
     List<ThirdEyeRequest> requests = new ArrayList<>();
     for (MetricSlice slice : slices) {
       try {
+        // cyril - after refactoring - will not work - use a non deprecated metricSlice.from
         requests.add(DataFrameUtils.makeTimeSeriesRequestAligned(slice, makeIdentifier(slice)));
       } catch (Exception ex) {
         LOG.warn("Could not make request. Skipping. ", ex);

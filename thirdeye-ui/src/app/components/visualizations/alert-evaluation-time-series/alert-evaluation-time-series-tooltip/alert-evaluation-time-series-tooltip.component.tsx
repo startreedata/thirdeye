@@ -54,7 +54,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     </Grid>
 
                     {/* Current */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.current
                     ) && (
                         <Grid
@@ -89,7 +89,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     )}
 
                     {/* Baseline */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.expected
                     ) && (
                         <Grid
@@ -124,7 +124,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     )}
 
                     {/* Upper bound */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.upperBound
                     ) && (
                         <Grid
@@ -159,7 +159,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     )}
 
                     {/* Lower bound */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.lowerBound
                     ) && (
                         <Grid

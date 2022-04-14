@@ -152,7 +152,7 @@ public class DataFrameUtils {
   public static DataFrame evaluateResponse(ThirdEyeResponse response, MetricFunction metricFunction) {
     // only the name is used to rename the result column --> inline this?
     DataFrame res = parseResponse(response);
-    return res.renameSeries(metricFunction.getMetricName(),DataFrame.COL_VALUE);
+    return res.renameSeries(metricFunction.toString(),DataFrame.COL_VALUE);
   }
 
   /**

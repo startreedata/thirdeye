@@ -222,6 +222,7 @@ public class DataFrameUtils {
    * @return ThirdeyeRequestBuilder
    */
   @Deprecated
+  // todo cyril refactor this
   private static ThirdEyeRequest.ThirdEyeRequestBuilder makeThirdEyeRequestBuilder(
       MetricSlice slice,
       DatasetConfigDTO dataset,

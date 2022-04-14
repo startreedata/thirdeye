@@ -9,8 +9,6 @@ import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COM
 import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 
 import ai.startree.thirdeye.CoreConstants;
-import ai.startree.thirdeye.datasource.MetricExpression;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -18,7 +16,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -28,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -61,39 +57,16 @@ public abstract class ThirdEyeUtils {
         new TimeGranularity(datasetConfig.bucketTimeGranularity()), timeFormat);
   }
 
-  public static DatasetConfigDTO getDatasetConfigFromName(String dataset,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
-    DatasetConfigDTO datasetConfig = null;
-    try {
-      datasetConfig = thirdEyeCacheRegistry
-          .getDatasetConfigCache().get(dataset);
-    } catch (ExecutionException e) {
-      LOG.error("Exception in getting dataset config {} from cache", dataset, e);
-    }
-    return datasetConfig;
-  }
-
   @Deprecated
   public static List<DatasetConfigDTO> getDatasetConfigsFromMetricUrn(String metricUrn,
       final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry) {
+      final MetricConfigManager metricConfigManager) {
     MetricEntity me = MetricEntity.fromURN(metricUrn);
     MetricConfigDTO metricConfig = metricConfigManager.findById(me.getId());
     if (metricConfig == null) {
       return new ArrayList<>();
     }
-    if (metricConfig.getDerivedMetricExpression() == null) {
-      return Collections.singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
-    } else {
-      MetricExpression metricExpression = new MetricExpression(metricConfig.getName(),
-          metricConfig.getDerivedMetricExpression(),
-          metricConfig.getDefaultAggFunction(),
-          metricConfig.getDataset());
-      List<MetricFunction> functions = metricExpression.computeMetricFunctions(thirdEyeCacheRegistry);
-      return functions.stream().map(
-          f -> datasetConfigManager.findByDataset(f.getDataset())).collect(Collectors.toList());
-    }
+    return Collections.singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
   }
 
   /**

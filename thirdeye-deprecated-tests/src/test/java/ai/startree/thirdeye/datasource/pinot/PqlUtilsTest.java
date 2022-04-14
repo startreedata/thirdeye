@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
@@ -180,7 +179,7 @@ public class PqlUtilsTest {
 
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setMetricFunction(Collections.singletonList(metricFunction))
+        .setMetricFunction(metricFunction)
         .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
         .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")
@@ -214,7 +213,7 @@ public class PqlUtilsTest {
             TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setMetricFunction(Collections.singletonList(metricFunction))
+        .setMetricFunction(metricFunction)
         .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
         .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")

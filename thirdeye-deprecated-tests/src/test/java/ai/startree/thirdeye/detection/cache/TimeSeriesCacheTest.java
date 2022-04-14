@@ -29,7 +29,6 @@ import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class TimeSeriesCacheTest {
       null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-      .setMetricFunction(Collections.singletonList(metricFunction))
+      .setMetricFunction(metricFunction)
       .setStartTimeInclusive(new DateTime(0, DateTimeZone.UTC))
       .setEndTimeExclusive(new DateTime(10000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))

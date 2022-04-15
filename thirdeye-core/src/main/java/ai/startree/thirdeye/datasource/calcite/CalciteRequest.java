@@ -12,7 +12,6 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +36,9 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * Multiple metrics, single table.
  **/
-// fixme need to implement more operator compatibility in filters engine only = and != implemented
 // fixme cyril need to decide when a metric is numeric and when it's not --> it's implemented in the SQLUtils
 // understand this considers the filters are parsed as IN correctly: not sure if it's the case for both heatmap and dim analysis
 public class CalciteRequest {
-
-  // todo cyril remove that
-  private static final String PERCENTILE_TDIGEST_PREFIX = "percentileTDigest";
 
   public static final String TIME_AGGREGATION_ALIAS = "teTimeGroup";
 
@@ -142,7 +137,8 @@ public class CalciteRequest {
   private SqlNodeList getSelectList(final SqlParser.Config sqlParserConfig,
       final SqlExpressionBuilder expressionBuilder)
       throws SqlParseException {
-    List<SqlNode> nodes = new ArrayList<>(); //Arrays.stream(rhsValues).map(FiltersEngine::sqlStringLiteralOf).collect(Collectors.toList());
+    List<SqlNode> nodes = new ArrayList<>();
+    // add group by columns
     groupByColumns.forEach(c -> nodes.add(new SqlIdentifier(List.of(c), SqlParserPos.ZERO)));
     if (timeAggregationColumn != null) {
       String timeGroupExpression = expressionBuilder.getTimeGroupExpression(
@@ -156,7 +152,11 @@ public class CalciteRequest {
           SqlParserPos.ZERO);
       nodes.add(timeGroupWithAlias);
     }
-    queryProjections.forEach(p -> nodes.add(p.toSqlNode()));
+    // add structured projection columns - most of the time metrics
+    for (QueryProjection projection: queryProjections) {
+     nodes.add(projection.toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
+    }
+    // add freeText projections: can be anything complex
     for (String freeText : freeTextProjections) {
       if (StringUtils.isNotBlank(freeText)) {
         nodes.add(expressionToNode(freeText, sqlParserConfig));
@@ -318,20 +318,5 @@ public class CalciteRequest {
       }
     }
     return String.format("%s%s%s", quoteChar, value, quoteChar);
-  }
-
-  /**
-   * Convert the name of the MetricAggFunction to the name expected by Pinot. See PQL Documentation
-   * for details.
-   *
-   * @param aggFunction function enum to convert
-   * @return a valid pinot function name
-   */
-  public static String convertAggFunction(MetricAggFunction aggFunction) {
-    if (aggFunction.isPercentile()) {
-      return aggFunction.name()
-          .replaceFirst(MetricAggFunction.PERCENTILE_PREFIX, PERCENTILE_TDIGEST_PREFIX);
-    }
-    return aggFunction.name();
   }
 }

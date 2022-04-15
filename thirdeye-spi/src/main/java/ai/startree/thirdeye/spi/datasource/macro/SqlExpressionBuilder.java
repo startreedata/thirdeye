@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.spi.datasource.macro;
 
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import java.util.List;
 import org.joda.time.Period;
 
 /**
@@ -40,6 +42,23 @@ public interface SqlExpressionBuilder {
    */
   default String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
       Period granularity) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns whether a MetricAggFunction requires a custom SQL statement or
+   * can be safely generated with ANSI SQL.
+   * */
+  default boolean needsCustomDialect(MetricAggFunction metricAggFunction) {
+    switch (metricAggFunction) {
+      case PCT50: case PCT90: case PCT95: case PCT99:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  default String getCustomDialectSql(MetricAggFunction metricAggFunction, List<String> operands, String quantifier) {
     throw new UnsupportedOperationException();
   }
 }

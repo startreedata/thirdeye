@@ -89,6 +89,15 @@ public class CalciteRequestTest {
     String lol = "";
   }
 
+
+  // TODO cyril - should be easy to express:
+  //  a timeseries
+  //  a breakdown on a time interval, with the standard format of the time column (no datetimeconvert)
+  //  a percentileFunction
+  // layer that makes the following decision: which dimension is STRING/NUMERIC/BOOLEAN
+  // layer that converts MetricAggFunction to a proper format STRING: is this even possible? --> no because arguments are need
+  // query projection can have two types: MetricAggFunction or String??
+
   private static class PinotSqlLanguage implements SqlLanguage {
 
     private static final ThirdEyeSqlParserConfig SQL_PARSER_CONFIG = new ThirdEyeSqlParserConfig.Builder()

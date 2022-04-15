@@ -1,7 +1,9 @@
 package ai.startree.thirdeye.datasource.calcite;
 
 import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
+import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
@@ -9,7 +11,6 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -56,6 +57,7 @@ public class CalciteRequestTest {
         List.of(),
         // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
         List.of(),
+        List.of(),
         // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
         null);
 
@@ -64,7 +66,7 @@ public class CalciteRequestTest {
     CalciteRequest complexRequest = new CalciteRequest(
         List.of(
             QueryProjection.of("SUM", List.of("\"jmt\"")),
-            QueryProjection.of(MetricAggFunction.PERCENTILE_PREFIX, List.of("fmt", "90")),
+            QueryProjection.of(MetricAggFunction.PCT95.name(), List.of("fmt")),
             QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("*"), "DISTINCT"),
             QueryProjection.of("browser")
         ),
@@ -80,7 +82,8 @@ public class CalciteRequestTest {
             DimensionType.STRING,
             null)),
         "and country!='US'",
-        List.of("time_epoch", "country"),
+        List.of(QueryProjection.of("time_epoch"), QueryProjection.of("country")),
+        List.of(),
         List.of("time_epoch"),
         100L
     );
@@ -186,6 +189,32 @@ public class CalciteRequestTest {
       }
       throw new RuntimeException(String.format("Could not translate Period to Pinot granularity: %s",
           period));
+    }
+
+    @Override
+    public String getCustomDialectSql(final MetricAggFunction metricAggFunction,
+        final List<String> operands,
+        final String quantifier) {
+      switch (metricAggFunction) {
+        case PCT50:
+        case PCT90:
+        case PCT95:
+        case PCT99:
+          String aggFunctionString = metricAggFunction.name();
+          int percentile = Integer.parseInt(aggFunctionString.substring(3));
+          checkArgument(operands.size() == 1,
+              "Incorrect number of operands for percentile sql generation. Expected: 1. Got: %s",
+              operands.size());
+          return new StringBuilder().append("PERCENTILE_TDIGEST")
+              .append("(")
+              .append(operands.get(0))
+              .append(",")
+              .append(percentile)
+              .append(")")
+              .toString();
+        default:
+          throw new UnsupportedOperationException();
+      }
     }
   }
 }

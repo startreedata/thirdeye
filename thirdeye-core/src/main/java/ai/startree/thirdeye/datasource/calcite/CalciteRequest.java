@@ -36,8 +36,9 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * Multiple metrics, single table.
  **/
-// fixme cyril need to decide when a metric is numeric and when it's not --> it's implemented in the SQLUtils
-// understand this considers the filters are parsed as IN correctly: not sure if it's the case for both heatmap and dim analysis
+// fixme cyril need to decide when a metric/dimension is numeric and when it's not --> it's a rule of thumb logic in the legacy SQLUtils
+
+// todo check - this considers the filters are parsed as IN correctly: not sure if it's the case for both heatmap and dim analysis
 public class CalciteRequest {
 
   public static final String TIME_AGGREGATION_ALIAS = "teTimeGroup";
@@ -45,8 +46,8 @@ public class CalciteRequest {
   private static final Long DEFAULT_LIMIT = 100000L;
 
   // SELECT clause
-  final private List<QueryProjection> queryProjections;
-  final private List<String> freeTextProjections;
+  final private List<QueryProjection> selectProjections;
+  final private List<String> freeTextSelectProjections;
 
   // Used in SELECT, GROUP BY, ORDER BY?
   final private Period timeAggregationGranularity;
@@ -66,7 +67,8 @@ public class CalciteRequest {
 
   // GROUP BY clause
   // todo cyril use QueryProjection - function could be used
-  final private List<String> groupByColumns;
+  final private List<QueryProjection> groupByProjections;
+  final private List<String> freeTextGroupByProjections;
 
   // ORDER BY clause
   final private List<String> orderByColumns;
@@ -80,17 +82,17 @@ public class CalciteRequest {
   //private TimeSpec dataTimeSpec;
 
   public CalciteRequest(
-      final List<QueryProjection> queryProjections,
-      final List<String> freeTextProjections, final Period timeAggregationGranularity,
+      final List<QueryProjection> selectProjections,
+      final List<String> freeTextSelectProjections, final Period timeAggregationGranularity,
       final String timeAggregationColumnFormat, final String timeAggregationColumn,
       final String database, final String table, final Interval timeFilterInterval,
       final String timeFilterColumn,
       final List<QueryPredicate> structuredPredicates, final String freeTextPredicates,
-      final List<String> groupByColumns, final List<String> orderByColumns,
-      final Long limit) {
+      final List<QueryProjection> groupByProjections, final List<String> freeTextGroupByProjections,
+      final List<String> orderByColumns, final Long limit) {
 
-    this.queryProjections = queryProjections;
-    this.freeTextProjections = freeTextProjections;
+    this.selectProjections = selectProjections;
+    this.freeTextSelectProjections = freeTextSelectProjections;
     this.timeAggregationGranularity = timeAggregationGranularity;
     this.timeAggregationColumnFormat = timeAggregationColumnFormat;
     this.timeAggregationColumn = timeAggregationColumn;
@@ -100,7 +102,8 @@ public class CalciteRequest {
     this.timeFilterColumn = timeFilterColumn;
     this.structuredPredicates = structuredPredicates;
     this.freeTextPredicates = freeTextPredicates;
-    this.groupByColumns = groupByColumns;
+    this.groupByProjections = groupByProjections;
+    this.freeTextGroupByProjections = freeTextGroupByProjections;
     this.orderByColumns = orderByColumns;
     this.limit = limit;
   }
@@ -124,7 +127,7 @@ public class CalciteRequest {
         getSelectList(sqlParserConfig, expressionBuilder),
         getFrom(),
         getWhere(sqlParserConfig, expressionBuilder),
-        getGroupBy(),
+        getGroupBy(sqlParserConfig, expressionBuilder),
         null,
         null,
         getOrderBy(),
@@ -138,8 +141,7 @@ public class CalciteRequest {
       final SqlExpressionBuilder expressionBuilder)
       throws SqlParseException {
     List<SqlNode> nodes = new ArrayList<>();
-    // add group by columns
-    groupByColumns.forEach(c -> nodes.add(new SqlIdentifier(List.of(c), SqlParserPos.ZERO)));
+    // add time aggregation projection
     if (timeAggregationColumn != null) {
       String timeGroupExpression = expressionBuilder.getTimeGroupExpression(
           timeAggregationColumn,
@@ -153,15 +155,26 @@ public class CalciteRequest {
       nodes.add(timeGroupWithAlias);
     }
     // add structured projection columns - most of the time metrics
-    for (QueryProjection projection: queryProjections) {
-     nodes.add(projection.toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
+    for (QueryProjection selectProjection : selectProjections) {
+      nodes.add(selectProjection.toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
     }
     // add freeText projections: can be anything complex
-    for (String freeText : freeTextProjections) {
-      if (StringUtils.isNotBlank(freeText)) {
-        nodes.add(expressionToNode(freeText, sqlParserConfig));
+    for (String freeTextSelect : freeTextSelectProjections) {
+      if (StringUtils.isNotBlank(freeTextSelect)) {
+        nodes.add(expressionToNode(freeTextSelect, sqlParserConfig));
       }
     }
+    // add structured group by columns - most of the time dimensions
+    for (QueryProjection groupByProjection : groupByProjections) {
+      nodes.add(groupByProjection.toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
+    }
+    // add free text group by columns
+    for (String freeTextGroupBy : freeTextGroupByProjections) {
+      if (StringUtils.isNotBlank(freeTextGroupBy)) {
+        nodes.add(expressionToNode(freeTextGroupBy, sqlParserConfig));
+      }
+    }
+
     return SqlNodeList.of(SqlParserPos.ZERO, nodes);
   }
 
@@ -170,7 +183,7 @@ public class CalciteRequest {
     return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
   }
 
-  private SqlNode getWhere(SqlParser.Config sqlParserConfig,
+  private SqlNode getWhere(final SqlParser.Config sqlParserConfig,
       final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
     List<SqlNode> predicates = new ArrayList<>();
     if (timeFilterInterval != null) {
@@ -198,14 +211,24 @@ public class CalciteRequest {
     return combinePredicates(predicates);
   }
 
-  private SqlNodeList getGroupBy() {
+  private SqlNodeList getGroupBy(final SqlParser.Config sqlParserConfig,
+      final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
     List<SqlNode> groupIdentifiers = new ArrayList<>();
     if (timeAggregationGranularity != null) {
       groupIdentifiers.add(identifierOf(TIME_AGGREGATION_ALIAS));
     }
-    groupByColumns.stream()
-        .filter(g -> !g.equals(timeAggregationColumn))
-        .forEach(g -> groupIdentifiers.add(identifierOf(g)));
+
+    // add structured group by columns - most of the time dimensions
+    for (QueryProjection groupByProjection : groupByProjections) {
+      groupIdentifiers.add(groupByProjection.toDialectSpecificSqlNode(sqlParserConfig,
+          expressionBuilder));
+    }
+    // add free text group by columns
+    for (String freeTextGroupBy : freeTextGroupByProjections) {
+      if (StringUtils.isNotBlank(freeTextGroupBy)) {
+        groupIdentifiers.add(expressionToNode(freeTextGroupBy, sqlParserConfig));
+      }
+    }
 
     return groupIdentifiers.isEmpty() ? null : SqlNodeList.of(SqlParserPos.ZERO, groupIdentifiers);
   }
@@ -295,28 +318,5 @@ public class CalciteRequest {
   public static String getDataTimeRangeSql(String dataset, String timeColumnName) {
     return String.format("select min(%s), max(%s) from %s", timeColumnName, timeColumnName,
         dataset);
-  }
-
-  /**
-   * Surrounds a value with appropriate quote characters.
-   *
-   * @param value value to be quoted
-   * @return quoted value
-   * @throws IllegalArgumentException if no unused quote char can be found
-   */
-  // todo cyril this is where the numeric vs other type of filter is applied --> should be outside the sql imo
-  public static String quote(String value) {
-    String quoteChar = "";
-    if (!StringUtils.isNumeric(value)) {
-      quoteChar = "\"";
-      if (value.contains(quoteChar)) {
-        quoteChar = "'";
-      }
-      if (value.contains(quoteChar)) {
-        throw new IllegalArgumentException(
-            String.format("Could not find quote char for expression: %s", value));
-      }
-    }
-    return String.format("%s%s%s", quoteChar, value, quoteChar);
   }
 }

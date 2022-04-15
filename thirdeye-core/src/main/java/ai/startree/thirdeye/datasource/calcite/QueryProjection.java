@@ -24,8 +24,6 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 // todo cyril rename this to predicate
 public class QueryProjection {
 
-  private static final String PERCENTILE_TDIGEST_PREFIX = "percentileTDigest";
-
   final private String operator;
   final private List<String> operands;
   final private String quantifier;
@@ -81,20 +79,26 @@ public class QueryProjection {
     }
   }
 
-  public SqlNode toDialectSpecificSqlNode(final Config sqlParserConfig, final SqlExpressionBuilder expressionBuilder)
+  public SqlNode toDialectSpecificSqlNode(final Config sqlParserConfig,
+      final SqlExpressionBuilder expressionBuilder)
       throws SqlParseException {
-    final String operatorUpper = operator.toUpperCase(Locale.ENGLISH);
-    // 1. a datasource can customize any metricAggFunction based SQL - metricAggFunction acts like a macro
-    if (AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES.contains(operatorUpper)) {
-      final MetricAggFunction metricAggFunction = MetricAggFunction.valueOf(operatorUpper);
-      if (expressionBuilder.needsCustomDialect(metricAggFunction)) {
-        String customDialectSql = expressionBuilder.getCustomDialectSql(metricAggFunction, operands, quantifier);
-        return expressionToNode(customDialectSql, sqlParserConfig);
+    if (operator != null) {
+      final String operatorUpper = operator.toUpperCase(Locale.ENGLISH);
+      // 1. a datasource can customize any metricAggFunction based SQL - metricAggFunction acts like a macro
+      if (AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES.contains(operatorUpper)) {
+        final MetricAggFunction metricAggFunction = MetricAggFunction.valueOf(operatorUpper);
+        if (expressionBuilder.needsCustomDialect(metricAggFunction)) {
+          String customDialectSql = expressionBuilder.getCustomDialectSql(metricAggFunction,
+              operands,
+              quantifier);
+          return expressionToNode(customDialectSql, sqlParserConfig);
+        }
       }
-    }
-    // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...) --- acts like to a macro
-    if (MetricAggFunction.COUNT_DISTINCT.name().equals(operator)) {
-      return QueryProjection.of("COUNT", operands, "DISTINCT").toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder);
+      // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...) --- acts like to a macro
+      if (MetricAggFunction.COUNT_DISTINCT.name().equals(operator)) {
+        return QueryProjection.of("COUNT", operands, "DISTINCT")
+            .toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder);
+      }
     }
     // 3. default transformation - manages any well-formed projection
     return toSqlNode();

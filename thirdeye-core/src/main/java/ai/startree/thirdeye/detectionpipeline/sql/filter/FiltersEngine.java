@@ -10,16 +10,13 @@ import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
-import ai.startree.thirdeye.util.CalciteUtils;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlNode;
@@ -63,11 +60,11 @@ public class FiltersEngine {
     return preparedQuery;
   }
 
-  private List<SqlBasicCall> getCalcitePredicates() {
+  private List<SqlNode> getCalcitePredicates() {
     return filters.stream()
         .peek(f -> checkArgument(SUPPORTED_FILTER_OPERATIONS.contains(f.getPredicate().getOper()),
             "Unsupported filter operation for filter injection: %s ", f.getPredicate().getOper()))
-        .map(CalciteUtils::toCalcitePredicate).collect(Collectors.toList());
+        .map(QueryPredicate::toSqlNode).collect(Collectors.toList());
   }
 
   private class FilterVisitor extends SqlShuttle {
@@ -111,8 +108,8 @@ public class FiltersEngine {
       }
 
       SqlNode whereNode = Objects.requireNonNull(selectNode.getWhere());
-      List<SqlBasicCall> newPredicates = getCalcitePredicates();
-      SqlNode whereNodeWithPredicates = addPredicates(whereNode, new ArrayList<>(newPredicates));
+      List<SqlNode> newPredicates = getCalcitePredicates();
+      SqlNode whereNodeWithPredicates = addPredicates(whereNode, newPredicates);
       selectNode.setWhere(whereNodeWithPredicates);
 
       return call;

@@ -21,13 +21,25 @@ public class QueryProjection {
   final private List<String> operands;
   final private String quantifier;
 
-  public QueryProjection(String operator, List<String> operands, String quantifier) {
+  private QueryProjection(String operator, List<String> operands, String quantifier) {
     this.operator = operator;
     this.operands = operands;
     this.quantifier = quantifier;
   }
 
-  public SqlNode toSql() {
+  public static QueryProjection of(String operator, List<String> operands, String quantifier) {
+    return new QueryProjection(operator, operands, quantifier);
+  }
+
+  public static QueryProjection of(String operator, List<String> operands) {
+    return new QueryProjection(operator, operands, null);
+  }
+
+  public static QueryProjection of(String column) {
+    return new QueryProjection(null, List.of(column), null);
+  }
+
+  public SqlNode toSqlNode() {
     if (operator != null) {
       return new SqlBasicCall(
           new SqlUnresolvedFunction(identifierOf(operator),

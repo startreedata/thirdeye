@@ -5,7 +5,6 @@ import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
-import static ai.startree.thirdeye.util.CalciteUtils.toCalcitePredicate;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -157,7 +156,7 @@ public class CalciteRequest {
           SqlParserPos.ZERO);
       nodes.add(timeGroupWithAlias);
     }
-    queryProjections.forEach(p -> nodes.add(p.toSql()));
+    queryProjections.forEach(p -> nodes.add(p.toSqlNode()));
     for (String freeText : freeTextProjections) {
       if (StringUtils.isNotBlank(freeText)) {
         nodes.add(expressionToNode(freeText, sqlParserConfig));
@@ -190,7 +189,7 @@ public class CalciteRequest {
       SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
-    structuredPredicates.forEach(p -> predicates.add(toCalcitePredicate(p)));
+    structuredPredicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
     if (StringUtils.isNotBlank(freeTextPredicates)) {
       String cleanedFreePredicate = freeTextPredicates.replaceFirst("^ *[aA][nN][dD] +", "");
       predicates.add(expressionToNode(cleanedFreePredicate, sqlParserConfig));

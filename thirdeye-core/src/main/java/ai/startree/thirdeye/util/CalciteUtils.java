@@ -1,13 +1,8 @@
 package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlBinaryOperator;
 import org.apache.calcite.sql.SqlCharStringLiteral;
@@ -16,7 +11,6 @@ import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -146,17 +140,6 @@ public class CalciteUtils {
     return new SqlIdentifier(name, SqlParserPos.ZERO);
   }
 
-  public static SqlBasicCall toCalcitePredicate(final QueryPredicate filter) {
-    SqlIdentifier leftOperand = prepareLeftOperand(filter);
-    SqlNode rightOperand = prepareRightOperand(filter);
-    SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
-
-    SqlOperator operator = Optional.ofNullable(FILTER_PREDICATE_OPER_TO_CALCITE.get(filter.getPredicate()
-        .getOper())).orElseThrow();
-
-    return new SqlBasicCall(operator, operands, SqlParserPos.ZERO);
-  }
-
   /**
    * Combine a list of predicates with the AND operator.
    */
@@ -181,62 +164,5 @@ public class CalciteUtils {
       whereNodeWithPredicates = new SqlBasicCall(AND_OPERATOR, whereOperands, SqlParserPos.ZERO);
     }
     return whereNodeWithPredicates;
-  }
-
-  private static SqlNode prepareRightOperand(final QueryPredicate filter) {
-    switch (filter.getPredicate().getOper()) {
-      case IN:
-        return getRightOperandForListPredicate(filter);
-      case EQ:
-      case NEQ:
-      case GE:
-      case GT:
-      case LE:
-      case LT:
-        return getRightOperandForSimpleBinaryPredicate(filter);
-      default:
-        throw new UnsupportedOperationException(String.format(
-            "Operator to Calcite not implemented for operator: %s",
-            filter.getPredicate().getOper()));
-    }
-  }
-
-  private static SqlNode getRightOperandForListPredicate(final QueryPredicate filter) {
-    switch (filter.getMetricType()) {
-      case STRING:
-        String[] rhsValues = (String[]) filter.getPredicate().getRhs();
-        List<SqlNode> nodes = Arrays.stream(rhsValues)
-            .map(CalciteUtils::stringLiteralOf)
-            .collect(Collectors.toList());
-        return SqlNodeList.of(SqlParserPos.ZERO, nodes);
-      default:
-        throw new UnsupportedOperationException(String.format("Unsupported DimensionType: %s",
-            filter.getMetricType()));
-    }
-  }
-
-  @NonNull
-  private static SqlNode getRightOperandForSimpleBinaryPredicate(final QueryPredicate filter) {
-    final Object rhs = filter.getPredicate().getRhs();
-    switch (filter.getMetricType()) {
-      case STRING:
-        return stringLiteralOf((String) rhs);
-      case NUMERIC:
-        return numericLiteralOf((String) rhs);
-      case BOOLEAN:
-        return booleanLiteralOf((String) rhs);
-      // time not implemented
-      default:
-        throw new UnsupportedOperationException(String.format("Unsupported DimensionType: %s",
-            filter.getMetricType()));
-    }
-  }
-
-  @NonNull
-  private static SqlIdentifier prepareLeftOperand(final QueryPredicate filter) {
-    List<String> identifiers = new ArrayList<>();
-    Optional.ofNullable(filter.getDataset()).ifPresent(identifiers::add);
-    identifiers.add(filter.getPredicate().getLhs());
-    return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
   }
 }

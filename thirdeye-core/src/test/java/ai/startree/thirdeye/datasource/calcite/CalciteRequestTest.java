@@ -37,7 +37,7 @@ public class CalciteRequestTest {
         sqlParserConfig);
 
     CalciteRequest simpleRequest = new CalciteRequest(
-        List.of(new QueryProjection("SUM", List.of("jmt"), null)),
+        List.of(QueryProjection.of("SUM", List.of("jmt"))),
         // todo cyril in builder pattern - make sure it is not null at build
         List.of(),
         // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
@@ -63,11 +63,10 @@ public class CalciteRequestTest {
 
     CalciteRequest complexRequest = new CalciteRequest(
         List.of(
-            new QueryProjection("SUM", List.of("\"jmt\""), null),
-            new QueryProjection(MetricAggFunction.PERCENTILE_PREFIX,
-                List.of("fmt", "90"),
-                null),
-            new QueryProjection(MetricAggFunction.COUNT.name(), List.of("*"), null)
+            QueryProjection.of("SUM", List.of("\"jmt\"")),
+            QueryProjection.of(MetricAggFunction.PERCENTILE_PREFIX, List.of("fmt", "90")),
+            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("*"), "DISTINCT"),
+            QueryProjection.of("browser")
         ),
         List.of("unix_millis(datetimeColumn)"),
         Period.days(1),

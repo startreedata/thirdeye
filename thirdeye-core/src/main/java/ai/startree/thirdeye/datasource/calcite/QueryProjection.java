@@ -4,7 +4,7 @@ import static ai.startree.thirdeye.spi.metric.MetricAggFunction.AVAILABLE_METRIC
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
-import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
+import static ai.startree.thirdeye.util.CalciteUtils.symbolLiteralOf;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -69,7 +69,7 @@ public class QueryProjection {
               SqlFunctionCategory.NUMERIC),
           operands.stream().map(CalciteUtils::identifierOf).toArray(SqlNode[]::new),
           SqlParserPos.ZERO,
-          quantifier != null ? stringLiteralOf(quantifier) : null);
+          quantifier != null ? symbolLiteralOf(quantifier) : null);
     } else if (operands.size() == 1 && quantifier == null) {
       return identifierOf(operands.get(0));
     } else {

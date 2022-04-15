@@ -68,6 +68,8 @@ public class CalciteRequestTest {
             QueryProjection.of("SUM", List.of("\"jmt\"")),
             QueryProjection.of(MetricAggFunction.PCT95.name(), List.of("fmt")),
             QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("*"), "DISTINCT"),
+            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("col1"), "DISTINCT"),
+            QueryProjection.of(MetricAggFunction.COUNT_DISTINCT.name(), List.of("browser")),
             QueryProjection.of("browser")
         ),
         List.of("unix_millis(datetimeColumn)"),
@@ -112,6 +114,7 @@ public class CalciteRequestTest {
     private static final ThirdeyeSqlDialect SQL_DIALECT = new ThirdeyeSqlDialect.Builder()
         .withBaseDialect("AnsiSqlDialect")
         .withIdentifierQuoteString("\"")
+        .withIdentifierEscapedQuoteString("")
         .build();
 
     @Override

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlBinaryOperator;
-import org.apache.calcite.sql.SqlCharStringLiteral;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
@@ -15,6 +14,7 @@ import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.type.SqlTypeName;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CalciteUtils {
@@ -111,27 +111,37 @@ public class CalciteUtils {
   }
 
   @NonNull
-  public static SqlCharStringLiteral stringLiteralOf(final String name) {
+  public static SqlNode stringLiteralOf(final String name) {
     return SqlLiteral.createCharString(name, SqlParserPos.ZERO);
   }
 
   @NonNull
-  public static SqlNode numericLiteralOf(final String numeric) {
+  public static SqlLiteral symbolLiteralOf(final SqlTypeName name) {
+    return SqlLiteral.createSymbol(name, SqlParserPos.ZERO);
+  }
+
+  @NonNull
+  public static SqlLiteral symbolLiteralOf(final String name) {
+    return symbolLiteralOf(SqlTypeName.get(name));
+  }
+
+  @NonNull
+  public static SqlLiteral numericLiteralOf(final String numeric) {
     return SqlLiteral.createExactNumeric(numeric, SqlParserPos.ZERO);
   }
 
   @NonNull
-  public static SqlNode numericLiteralOf(final Number numeric) {
+  public static SqlLiteral numericLiteralOf(final Number numeric) {
     return numericLiteralOf(String.valueOf(numeric));
   }
 
   @NonNull
-  public static SqlNode booleanLiteralOf(final boolean bool) {
+  public static SqlLiteral booleanLiteralOf(final boolean bool) {
     return SqlLiteral.createBoolean(bool, SqlParserPos.ZERO);
   }
 
   @NonNull
-  public static SqlNode booleanLiteralOf(final String bool) {
+  public static SqlLiteral booleanLiteralOf(final String bool) {
     return booleanLiteralOf(Boolean.parseBoolean(bool));
   }
 

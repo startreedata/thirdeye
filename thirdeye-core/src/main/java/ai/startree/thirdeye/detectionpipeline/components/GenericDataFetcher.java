@@ -17,7 +17,7 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -34,7 +34,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
    */
   private String tableName;
   private ThirdEyeDataSource thirdEyeDataSource;
-  private List<TimeseriesFilter> timeseriesFilters;
+  private List<QueryPredicate> queryPredicates;
 
   public String getQuery() {
     return query;
@@ -65,7 +65,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           .getDataSourceCache()
           .getDataSource(dataSource), "data source is unavailable");
     }
-    this.timeseriesFilters = dataFetcherSpec.getTimeseriesFilters();
+    this.queryPredicates = dataFetcherSpec.getTimeseriesFilters();
   }
 
   @Override
@@ -78,7 +78,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   }
 
   private String injectFilters(final String query) throws SqlParseException {
-    if (timeseriesFilters.isEmpty()) {
+    if (queryPredicates.isEmpty()) {
       return query;
     }
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
@@ -86,7 +86,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
         String.format(
             "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
             thirdEyeDataSource.getName()));
-    return new FiltersEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
+    return new FiltersEngine(sqlLanguage, query, queryPredicates).prepareQuery();
   }
 
   private ThirdEyeRequestV2 applyMacros(final Interval detectionInterval,

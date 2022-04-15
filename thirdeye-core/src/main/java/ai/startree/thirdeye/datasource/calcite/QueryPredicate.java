@@ -3,26 +3,26 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.spi.detection.v2;
+package ai.startree.thirdeye.datasource.calcite;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 
 // todo rename - this is not Timeseries specific
-public class TimeseriesFilter {
+public class QueryPredicate {
 
   private final Predicate predicate;
   private final DimensionType metricType;
   private final String dataset;
 
-  private TimeseriesFilter(final Predicate predicate,
+  private QueryPredicate(final Predicate predicate,
       final DimensionType metricType, final String dataset) {
     this.predicate = predicate;
     this.metricType = metricType;
     this.dataset = dataset;
   }
 
-  public static TimeseriesFilter of(final Predicate predicate, final DimensionType metricType, final String dataset) {
-    return new TimeseriesFilter(predicate, metricType, dataset);
+  public static QueryPredicate of(final Predicate predicate, final DimensionType metricType, final String dataset) {
+    return new QueryPredicate(predicate, metricType, dataset);
   }
 
   public Predicate getPredicate() {
@@ -37,7 +37,7 @@ public class TimeseriesFilter {
     return dataset;
   }
 
-  // fixme cyril - first version only manages STRING dimensions - move this later
+  // fixme cyril - alert evaluator getDimensionType is hardcoed to STRING - dimension type is not implemented correctly in onboarder
   public enum DimensionType {
     STRING,
     NUMERIC,

@@ -30,8 +30,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -186,11 +186,11 @@ public class AlertEvaluator {
     final DatasetConfigDTO datasetConfigDTO = ensureExists(alertMetadataDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset");
     final String dataset = ensureExists(datasetConfigDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset$name");
 
-    final List<TimeseriesFilter> timeseriesFilters = parseAndCombinePredicates(filters).stream()
-        .map(p -> TimeseriesFilter.of(p, getDimensionType(p.getLhs(), dataset), dataset))
+    final List<QueryPredicate> queryPredicates = parseAndCombinePredicates(filters).stream()
+        .map(p -> QueryPredicate.of(p, getDimensionType(p.getLhs(), dataset), dataset))
         .collect(Collectors.toList());
 
-    templateWithProperties.getNodes().forEach(n -> addFilters(n, timeseriesFilters));
+    templateWithProperties.getNodes().forEach(n -> addFilters(n, queryPredicates));
   }
 
   // fixme datatype from metricDTO is always double + abstraction metric/dimension needs refactoring
@@ -200,7 +200,7 @@ public class AlertEvaluator {
     return DimensionType.STRING;
   }
 
-  private void addFilters(PlanNodeBean planNodeBean, List<TimeseriesFilter> filters) {
+  private void addFilters(PlanNodeBean planNodeBean, List<QueryPredicate> filters) {
     if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
       if (planNodeBean.getParams() == null) {
         planNodeBean.setParams(new HashMap<>());

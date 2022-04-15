@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +51,9 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
-    @SuppressWarnings("unchecked") final List<TimeseriesFilter> timeseriesFilters =
-        (List<TimeseriesFilter>) params.getOrDefault(AlertEvaluator.EVALUATION_FILTERS_KEY, List.of());
-    spec.setTimeseriesFilters(timeseriesFilters);
+    @SuppressWarnings("unchecked") final List<QueryPredicate> queryPredicates =
+        (List<QueryPredicate>) params.getOrDefault(AlertEvaluator.EVALUATION_FILTERS_KEY, List.of());
+    spec.setTimeseriesFilters(queryPredicates);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();
     genericDataFetcher.init(spec);

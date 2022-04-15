@@ -12,8 +12,8 @@ import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.junit.Test;
@@ -22,19 +22,19 @@ public class FilterEngineTest {
 
   private static final String IDENTIFIER_QUOTE_STRING = "\"";
 
-  private static final TimeseriesFilter STRING_FILTER_EQUAL = TimeseriesFilter.of(
+  private static final QueryPredicate STRING_FILTER_EQUAL = QueryPredicate.of(
       new Predicate("browser", OPER.EQ, "chrome"),
       DimensionType.STRING,
       "tableName");
   private static final String STRING_FILTER_EQUAL_TO_STRING = " AND (tableName.browser = 'chrome')";
 
-  private static final TimeseriesFilter STRING_FILTER_NOT_EQUAL = TimeseriesFilter.of(
+  private static final QueryPredicate STRING_FILTER_NOT_EQUAL = QueryPredicate.of(
       new Predicate("country", OPER.NEQ, "US"),
       DimensionType.STRING,
       "tableName");
   private static final String STRING_FILTER_NOT_EQUAL_TO_STRING = " AND (tableName.country <> 'US')";
 
-  private static final TimeseriesFilter STRING_FILTER_IN = TimeseriesFilter.of(
+  private static final QueryPredicate STRING_FILTER_IN = QueryPredicate.of(
       new Predicate("browser", OPER.IN, new String[]{"chrome", "safari"}),
           DimensionType.STRING,
           "tableName"
@@ -107,7 +107,7 @@ public class FilterEngineTest {
   public void testSingleFilterAndEscapedFunction() throws SqlParseException {
     // "date" is a function that is escaped - here it's a column identifier
     final String query = "SELECT __timeGroup(\"date\", yyyyMMdd, P5D) AS ts, metric AS met FROM tableName WHERE __timeFilter(ts)";
-    final TimeseriesFilter stringFilter = TimeseriesFilter.of(
+    final QueryPredicate stringFilter = QueryPredicate.of(
         new Predicate("browser", OPER.EQ, "chrome"),
         DimensionType.STRING,
         "tableName");

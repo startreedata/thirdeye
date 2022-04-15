@@ -1,7 +1,7 @@
 package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -146,7 +146,7 @@ public class CalciteUtils {
     return new SqlIdentifier(name, SqlParserPos.ZERO);
   }
 
-  public static SqlBasicCall toCalcitePredicate(final TimeseriesFilter filter) {
+  public static SqlBasicCall toCalcitePredicate(final QueryPredicate filter) {
     SqlIdentifier leftOperand = prepareLeftOperand(filter);
     SqlNode rightOperand = prepareRightOperand(filter);
     SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
@@ -183,7 +183,7 @@ public class CalciteUtils {
     return whereNodeWithPredicates;
   }
 
-  private static SqlNode prepareRightOperand(final TimeseriesFilter filter) {
+  private static SqlNode prepareRightOperand(final QueryPredicate filter) {
     switch (filter.getPredicate().getOper()) {
       case IN:
         return getRightOperandForListPredicate(filter);
@@ -201,7 +201,7 @@ public class CalciteUtils {
     }
   }
 
-  private static SqlNode getRightOperandForListPredicate(final TimeseriesFilter filter) {
+  private static SqlNode getRightOperandForListPredicate(final QueryPredicate filter) {
     switch (filter.getMetricType()) {
       case STRING:
         String[] rhsValues = (String[]) filter.getPredicate().getRhs();
@@ -216,7 +216,7 @@ public class CalciteUtils {
   }
 
   @NonNull
-  private static SqlNode getRightOperandForSimpleBinaryPredicate(final TimeseriesFilter filter) {
+  private static SqlNode getRightOperandForSimpleBinaryPredicate(final QueryPredicate filter) {
     final Object rhs = filter.getPredicate().getRhs();
     switch (filter.getMetricType()) {
       case STRING:
@@ -233,7 +233,7 @@ public class CalciteUtils {
   }
 
   @NonNull
-  private static SqlIdentifier prepareLeftOperand(final TimeseriesFilter filter) {
+  private static SqlIdentifier prepareLeftOperand(final QueryPredicate filter) {
     List<String> identifiers = new ArrayList<>();
     Optional.ofNullable(filter.getDataset()).ifPresent(identifiers::add);
     identifiers.add(filter.getPredicate().getLhs());

@@ -2,7 +2,6 @@ package ai.startree.thirdeye.datasource.calcite;
 
 import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest.StructuredSqlStatement;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
@@ -10,8 +9,7 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -39,7 +37,7 @@ public class CalciteRequestTest {
         sqlParserConfig);
 
     CalciteRequest simpleRequest = new CalciteRequest(
-        List.of(new StructuredSqlStatement("SUM", List.of("jmt"), null)),
+        List.of(new QueryProjection("SUM", List.of("jmt"), null)),
         // todo cyril in builder pattern - make sure it is not null at build
         List.of(),
         // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
@@ -65,11 +63,11 @@ public class CalciteRequestTest {
 
     CalciteRequest complexRequest = new CalciteRequest(
         List.of(
-            new StructuredSqlStatement("SUM", List.of("\"jmt\""), null),
-            new StructuredSqlStatement(MetricAggFunction.PERCENTILE_PREFIX,
+            new QueryProjection("SUM", List.of("\"jmt\""), null),
+            new QueryProjection(MetricAggFunction.PERCENTILE_PREFIX,
                 List.of("fmt", "90"),
                 null),
-            new StructuredSqlStatement(MetricAggFunction.COUNT.name(), List.of("*"), null)
+            new QueryProjection(MetricAggFunction.COUNT.name(), List.of("*"), null)
         ),
         List.of("unix_millis(datetimeColumn)"),
         Period.days(1),
@@ -79,7 +77,7 @@ public class CalciteRequestTest {
         "mytable",
         new Interval(DateTime.now(), DateTime.now().plus(Period.days(10))),
         "time_epoch",
-        List.of(TimeseriesFilter.of(new Predicate("browser", OPER.EQ, "chrome"),
+        List.of(QueryPredicate.of(new Predicate("browser", OPER.EQ, "chrome"),
             DimensionType.STRING,
             null)),
         "and country!='US'",

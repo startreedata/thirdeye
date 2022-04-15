@@ -1,37 +1,30 @@
 package ai.startree.thirdeye.datasource.calcite;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.combinePredicates;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
-import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
 import static ai.startree.thirdeye.util.CalciteUtils.toCalcitePredicate;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.util.SpiUtils;
-import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
-import org.apache.calcite.sql.SqlUnresolvedFunction;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -58,7 +51,7 @@ public class CalciteRequest {
   private static final Long DEFAULT_LIMIT = 100000L;
 
   // SELECT clause
-  final private List<StructuredSqlStatement> structuredSqlProjections;
+  final private List<QueryProjection> queryProjections;
   final private List<String> freeTextProjections;
 
   // Used in SELECT, GROUP BY, ORDER BY?
@@ -74,11 +67,11 @@ public class CalciteRequest {
   final private Interval timeFilterInterval;
   final private String timeFilterColumn;
   // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - important in Presto/BQ
-  final private List<TimeseriesFilter> structuredPredicates;
+  final private List<QueryPredicate> structuredPredicates;
   final private String freeTextPredicates;
 
   // GROUP BY clause
-  // todo cyril use StructuredSqlStatement - function could be used
+  // todo cyril use QueryProjection - function could be used
   final private List<String> groupByColumns;
 
   // ORDER BY clause
@@ -93,16 +86,16 @@ public class CalciteRequest {
   //private TimeSpec dataTimeSpec;
 
   public CalciteRequest(
-      final List<StructuredSqlStatement> structuredSqlProjections,
+      final List<QueryProjection> queryProjections,
       final List<String> freeTextProjections, final Period timeAggregationGranularity,
       final String timeAggregationColumnFormat, final String timeAggregationColumn,
       final String database, final String table, final Interval timeFilterInterval,
       final String timeFilterColumn,
-      final List<TimeseriesFilter> structuredPredicates, final String freeTextPredicates,
+      final List<QueryPredicate> structuredPredicates, final String freeTextPredicates,
       final List<String> groupByColumns, final List<String> orderByColumns,
       final Long limit) {
 
-    this.structuredSqlProjections = structuredSqlProjections;
+    this.queryProjections = queryProjections;
     this.freeTextProjections = freeTextProjections;
     this.timeAggregationGranularity = timeAggregationGranularity;
     this.timeAggregationColumnFormat = timeAggregationColumnFormat;
@@ -164,7 +157,7 @@ public class CalciteRequest {
           SqlParserPos.ZERO);
       nodes.add(timeGroupWithAlias);
     }
-    structuredSqlProjections.forEach(p -> nodes.add(p.toSql()));
+    queryProjections.forEach(p -> nodes.add(p.toSql()));
     for (String freeText : freeTextProjections) {
       if (StringUtils.isNotBlank(freeText)) {
         nodes.add(expressionToNode(freeText, sqlParserConfig));
@@ -341,60 +334,5 @@ public class CalciteRequest {
           .replaceFirst(MetricAggFunction.PERCENTILE_PREFIX, PERCENTILE_TDIGEST_PREFIX);
     }
     return aggFunction.name();
-  }
-
-  // todo cyril rename this to predicate
-  public static class StructuredSqlStatement {
-
-    final private String operator;
-    final private List<String> operands;
-    final private String quantifier;
-
-    public StructuredSqlStatement(String operator, List<String> operands, String quantifier) {
-      this.operator = operator;
-      this.operands = operands;
-      this.quantifier = quantifier;
-    }
-
-    private SqlNode toSql() {
-      if (operator != null) {
-        return new SqlBasicCall(
-            new SqlUnresolvedFunction(identifierOf(operator),
-                null,
-                null,
-                null,
-                null,
-                SqlFunctionCategory.NUMERIC),
-            operands.stream().map(CalciteUtils::identifierOf).toArray(SqlNode[]::new),
-            SqlParserPos.ZERO,
-            quantifier != null ? stringLiteralOf(quantifier) : null);
-      } else if (operands.size() == 1 && quantifier == null) {
-        return identifierOf(operands.get(0));
-      } else {
-        throw new UnsupportedOperationException(String.format(
-            "Unsupported combination for StructuredSqlStatement: %s",
-            this));
-      }
-    }
-
-    public static StructuredSqlStatement fromMetricConfig(MetricConfigDTO metricConfigDTO) {
-      String operator;
-      List<String> operands;
-      String quantifier = null;
-      if (metricConfigDTO.getName().equals("*")) {
-        operands = List.of("*");
-      } else {
-        operands = List.of(optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName()));
-      }
-      if (metricConfigDTO.getDefaultAggFunction() == MetricAggFunction.COUNT_DISTINCT) {
-        operator = MetricAggFunction.COUNT.name();
-        quantifier = "DISTINCT";
-      } else {
-        // fixme cyril this function should depend on the datasource
-        operator = convertAggFunction(metricConfigDTO.getDefaultAggFunction());
-      }
-
-      return new StructuredSqlStatement(operator, operands, quantifier);
-    }
   }
 }

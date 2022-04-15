@@ -13,7 +13,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +45,10 @@ public class FiltersEngine {
   private final SqlParser.Config sqlParserConfig;
   private final SqlDialect sqlDialect;
   private final String query;
-  private final List<TimeseriesFilter> filters;
+  private final List<QueryPredicate> filters;
 
   public FiltersEngine(final SqlLanguage sqlLanguage, final String query,
-      List<TimeseriesFilter> filters) {
+      List<QueryPredicate> filters) {
     this.sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     this.sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
     this.query = query;

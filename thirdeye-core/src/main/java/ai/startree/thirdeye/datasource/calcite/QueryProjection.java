@@ -46,18 +46,6 @@ public class QueryProjection {
     return new QueryProjection(null, List.of(column), null);
   }
 
-  public String getOperator() {
-    return operator;
-  }
-
-  public List<String> getOperands() {
-    return operands;
-  }
-
-  public String getQuantifier() {
-    return quantifier;
-  }
-
   public SqlNode toSqlNode() {
     if (operator != null) {
       return new SqlBasicCall(

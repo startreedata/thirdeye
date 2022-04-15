@@ -96,9 +96,13 @@ public class CalciteRequestTest {
 
 
   // TODO cyril - should be easy to express:
-  //  a timeseries
+  //  a timeseries --> with timegrouping
   //  a breakdown on a time interval, with the standard format of the time column (no datetimeconvert)
-  //  a percentileFunction
+  //  a percentileFunction --> DONE
+  // and also: a distinct operator, a custom limit, a order by, a group by
+  // a custom select string
+  // a custom where string
+  // a custom group by string
   // layer that makes the following decision: which dimension is STRING/NUMERIC/BOOLEAN
   // layer that converts MetricAggFunction to a proper format STRING: is this even possible? --> no because arguments are need
   // query projection can have two types: MetricAggFunction or String??

@@ -9,6 +9,7 @@ import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class FiltersEngine {
 
-  private static final SqlOperator AND_OPERATOR = new SqlBinaryOperator(SqlKind.AND.sql,
+  public static final SqlOperator AND_OPERATOR = new SqlBinaryOperator(SqlKind.AND.sql,
       SqlKind.AND,
       0,
       true,
@@ -76,6 +77,7 @@ public class FiltersEngine {
       null,
       null);
 
+  // fixme cyril implement more here
   public static final Map<OPER, SqlOperator> PREDICATE_OPER_TO_CALCITE_OPER = Map.of(
       OPER.EQ, EQUALS_OPERATOR,
       OPER.NEQ, NOT_EQUALS_OPERATOR,
@@ -121,7 +123,8 @@ public class FiltersEngine {
         Collectors.toList());
   }
 
-  private static SqlBasicCall timeseriesFilterToCalcitePredicate(final TimeseriesFilter filter) {
+  // todo cyril move the static things
+  public static SqlBasicCall timeseriesFilterToCalcitePredicate(final TimeseriesFilter filter) {
     SqlIdentifier leftOperand = prepareLeftOperand(filter);
     SqlNode rightOperand = prepareRightOperand(filter);
     SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
@@ -177,7 +180,9 @@ public class FiltersEngine {
 
   @NotNull
   private static SqlIdentifier prepareLeftOperand(final TimeseriesFilter filter) {
-    List<String> identifiers = List.of(filter.getDataset(), filter.getPredicate().getLhs());
+    List<String> identifiers = new ArrayList<>();
+    Optional.ofNullable(filter.getDataset()).ifPresent(identifiers::add);
+    identifiers.add(filter.getPredicate().getLhs());
     return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
   }
 

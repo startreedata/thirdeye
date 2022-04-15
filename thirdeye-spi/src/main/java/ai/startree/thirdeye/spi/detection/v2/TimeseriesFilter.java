@@ -7,6 +7,7 @@ package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 
+// todo rename - this is not Timeseries specific
 public class TimeseriesFilter {
 
   private final Predicate predicate;

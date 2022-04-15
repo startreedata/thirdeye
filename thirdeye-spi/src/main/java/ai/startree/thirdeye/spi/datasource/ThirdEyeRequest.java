@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
  * Request object containing all information for a {@link ThirdEyeDataSource} to retrieve data.
  * Request
  * objects can be constructed via {@link ThirdEyeRequestBuilder}.
+ *
+ * todo remove this from the spi once calcite-based sql generation is implemented + rename
  */
 public class ThirdEyeRequest {
 

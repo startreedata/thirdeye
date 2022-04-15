@@ -5,6 +5,10 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
+import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
+import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
+
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeFilterFunction;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupFunction;
@@ -60,43 +64,26 @@ public class MacroEngine {
         .setLiteralUnquoter(this.sqlDialect::unquoteStringLiteral)
         .setProperties(this.properties);
     // possible to put datasource-specific macros here in the future
-    for (MacroFunction function: CORE_MACROS )
+    for (MacroFunction function : CORE_MACROS) {
       this.availableMacros.put(function.name(), function);
+    }
   }
 
   public ThirdEyeRequestV2 prepareRequest() throws SqlParseException {
-    SqlNode rootNode = queryToNode(query);
+    SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode appliedMacrosNode = applyMacros(rootNode);
-    String preparedQuery = nodeToQuery(appliedMacrosNode);
+    String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect);
 
     return new ThirdEyeRequestV2(tableName, preparedQuery, properties);
-  }
-
-  private SqlNode queryToNode(final String sql) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sql, sqlParserConfig);
-    return sqlParser.parseQuery();
-  }
-
-  private SqlNode expressionToNode(final String sqlExpression) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sqlExpression,
-        sqlParserConfig);
-    return sqlParser.parseExpression();
   }
 
   private SqlNode applyMacros(SqlNode rootNode) {
     return rootNode.accept(new MacroVisitor());
   }
 
-  private String nodeToQuery(final SqlNode node) {
-    return node.toSqlString(
-        c -> c.withDialect(sqlDialect)
-            .withQuoteAllIdentifiers(false)
-    ).getSql();
-  }
-
   private List<String> paramsFromCall(final SqlCall call) {
     return call.getOperandList().stream()
-        .map(this::nodeToQuery)
+        .map(n -> nodeToQuery(n, sqlDialect))
         .collect(Collectors.toList());
   }
 
@@ -122,7 +109,7 @@ public class MacroEngine {
         List<String> macroParams = paramsFromCall(call);
         String expandedMacro = macroFunction.expandMacro(macroParams, macroFunctionContext);
         try {
-          return expressionToNode(expandedMacro);
+          return expressionToNode(expandedMacro, sqlParserConfig);
         } catch (SqlParseException e) {
           LOG.error(String.format("Failed parsing expanded macro into a SQL node: %s. %s",
               expandedMacro,

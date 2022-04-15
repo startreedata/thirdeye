@@ -1,8 +1,13 @@
 package ai.startree.thirdeye.datasource.calcite;
 
-import static ai.startree.thirdeye.detectionpipeline.sql.filter.FiltersEngine.AND_OPERATOR;
-import static ai.startree.thirdeye.detectionpipeline.sql.filter.FiltersEngine.timeseriesFilterToCalcitePredicate;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.combinePredicates;
+import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
+import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
+import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
+import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
+import static ai.startree.thirdeye.util.CalciteUtils.toCalcitePredicate;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -14,6 +19,7 @@ import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.util.SpiUtils;
+import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +28,6 @@ import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlIdentifier;
-import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
@@ -113,25 +118,6 @@ public class CalciteRequest {
     this.limit = limit;
   }
 
-  // todo move this to utils
-  private static SqlNode queryToNode(final String sql, final SqlParser.Config sqlParserConfig)
-      throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sql, sqlParserConfig);
-    return sqlParser.parseQuery();
-  }
-
-  private static SqlNode expressionToNode(final String sqlExpression,
-      final SqlParser.Config sqlParserConfig) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sqlExpression, sqlParserConfig);
-    return sqlParser.parseExpression();
-  }
-
-  private static String nodeToQuery(final SqlNode node, final SqlDialect sqlDialect) {
-    return node.toSqlString(
-        c -> c.withDialect(sqlDialect).withQuoteAllIdentifiers(false)
-    ).getSql();
-  }
-
   public String getSql(final SqlLanguage sqlLanguage, final SqlExpressionBuilder expressionBuilder)
       throws SqlParseException {
     SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
@@ -141,7 +127,8 @@ public class CalciteRequest {
     return nodeToQuery(sqlNode, sqlDialect);
   }
 
-  protected SqlNode getSqlNode(SqlParser.Config sqlParserConfig, SqlExpressionBuilder expressionBuilder)
+  protected SqlNode getSqlNode(SqlParser.Config sqlParserConfig,
+      SqlExpressionBuilder expressionBuilder)
       throws SqlParseException {
 
     return new SqlSelect(
@@ -171,8 +158,10 @@ public class CalciteRequest {
           Objects.requireNonNull(timeAggregationColumnFormat),
           Objects.requireNonNull(timeAggregationGranularity));
       SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
-      List<SqlNode> aliasOperands = List.of(timeGroupNode, simpleIdentifier(TIME_AGGREGATION_ALIAS));
-      SqlNode timeGroupWithAlias = new SqlBasicCall(new SqlAsOperator(), aliasOperands.toArray(new SqlNode[0]), SqlParserPos.ZERO);
+      List<SqlNode> aliasOperands = List.of(timeGroupNode, identifierOf(TIME_AGGREGATION_ALIAS));
+      SqlNode timeGroupWithAlias = new SqlBasicCall(new SqlAsOperator(),
+          aliasOperands.toArray(new SqlNode[0]),
+          SqlParserPos.ZERO);
       nodes.add(timeGroupWithAlias);
     }
     structuredSqlProjections.forEach(p -> nodes.add(p.toSql()));
@@ -196,7 +185,8 @@ public class CalciteRequest {
       // fixme cyril implement better time format management - datetimeconvert may have bad performance
       String timeColumnConstraint = timeFilterColumn; // assumes time column is in epoch millis
       if (timeAggregationGranularity != null) {
-        if (timeAggregationColumn.equals(timeFilterColumn)) {}
+        if (timeAggregationColumn.equals(timeFilterColumn)) {
+        }
         // use the alias of the aggregated time column - in this case it's sure time is in epoch millis
         timeColumnConstraint = TIME_AGGREGATION_ALIAS;
       }
@@ -207,47 +197,34 @@ public class CalciteRequest {
       SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
-    structuredPredicates.forEach(p -> predicates.add(timeseriesFilterToCalcitePredicate(p)));
-    if  (StringUtils.isNotBlank(freeTextPredicates)) {
+    structuredPredicates.forEach(p -> predicates.add(toCalcitePredicate(p)));
+    if (StringUtils.isNotBlank(freeTextPredicates)) {
       String cleanedFreePredicate = freeTextPredicates.replaceFirst("^ *[aA][nN][dD] +", "");
       predicates.add(expressionToNode(cleanedFreePredicate, sqlParserConfig));
     }
 
-    if (predicates.size() == 0) {
-      return null;
-    }
-    // combine predicates
-    SqlNode whereNode = predicates.get(0);
-    for (int i = 1; i < predicates.size(); i++) {
-      SqlNode[] whereOperands = List.of(whereNode, predicates.get(i)).toArray(new SqlNode[0]);
-      whereNode = new SqlBasicCall(AND_OPERATOR, whereOperands, SqlParserPos.ZERO);
-    }
-    return whereNode;
+    return combinePredicates(predicates);
   }
 
   private SqlNodeList getGroupBy() {
     List<SqlNode> groupIdentifiers = new ArrayList<>();
     if (timeAggregationGranularity != null) {
-      groupIdentifiers.add(simpleIdentifier(TIME_AGGREGATION_ALIAS));
+      groupIdentifiers.add(identifierOf(TIME_AGGREGATION_ALIAS));
     }
-    for (String orderByColumn: groupByColumns) {
-      // skip the timeAggregationColumn
-      if (!orderByColumn.equals(timeAggregationColumn)) {
-        groupIdentifiers.add(simpleIdentifier(orderByColumn));
-      }
-    }
-    groupByColumns.forEach(p -> groupIdentifiers.add(simpleIdentifier(p)));
+    groupByColumns.stream()
+        .filter(g -> !g.equals(timeAggregationColumn))
+        .forEach(g -> groupIdentifiers.add(identifierOf(g)));
 
     return groupIdentifiers.isEmpty() ? null : SqlNodeList.of(SqlParserPos.ZERO, groupIdentifiers);
   }
 
   private SqlNodeList getOrderBy() {
     List<SqlNode> orderIdentifiers = new ArrayList<>();
-    for (String orderByColumn: orderByColumns) {
+    for (String orderByColumn : orderByColumns) {
       if (orderByColumn.equals(timeAggregationColumn)) {
-        orderIdentifiers.add(simpleIdentifier(TIME_AGGREGATION_ALIAS));
+        orderIdentifiers.add(identifierOf(TIME_AGGREGATION_ALIAS));
       } else {
-        orderIdentifiers.add(simpleIdentifier(orderByColumn));
+        orderIdentifiers.add(identifierOf(orderByColumn));
       }
     }
     return orderIdentifiers.isEmpty() ? null : SqlNodeList.of(SqlParserPos.ZERO, orderIdentifiers);
@@ -255,10 +232,8 @@ public class CalciteRequest {
 
   // todo cyril see duplication with filter engine
   private SqlNode getFetch() {
-    return SqlLiteral.createExactNumeric(
-        limit != null ? limit.toString() : DEFAULT_LIMIT.toString(), SqlParserPos.ZERO);
+    return numericLiteralOf(limit != null ? limit.toString() : DEFAULT_LIMIT.toString());
   }
-
 
   public static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
       final DatasetConfigDTO datasetConfig) {
@@ -368,10 +343,6 @@ public class CalciteRequest {
     return aggFunction.name();
   }
 
-  private static SqlIdentifier simpleIdentifier(String name) {
-    return new SqlIdentifier(name, SqlParserPos.ZERO);
-  }
-
   // todo cyril rename this to predicate
   public static class StructuredSqlStatement {
 
@@ -388,17 +359,17 @@ public class CalciteRequest {
     private SqlNode toSql() {
       if (operator != null) {
         return new SqlBasicCall(
-            new SqlUnresolvedFunction(simpleIdentifier(operator),
+            new SqlUnresolvedFunction(identifierOf(operator),
                 null,
                 null,
                 null,
                 null,
                 SqlFunctionCategory.NUMERIC),
-            operands.stream().map(CalciteRequest::simpleIdentifier).toArray(SqlNode[]::new),
+            operands.stream().map(CalciteUtils::identifierOf).toArray(SqlNode[]::new),
             SqlParserPos.ZERO,
-            quantifier != null ? SqlLiteral.createCharString(quantifier, SqlParserPos.ZERO) : null);
+            quantifier != null ? stringLiteralOf(quantifier) : null);
       } else if (operands.size() == 1 && quantifier == null) {
-        return simpleIdentifier(operands.get(0));
+        return identifierOf(operands.get(0));
       } else {
         throw new UnsupportedOperationException(String.format(
             "Unsupported combination for StructuredSqlStatement: %s",

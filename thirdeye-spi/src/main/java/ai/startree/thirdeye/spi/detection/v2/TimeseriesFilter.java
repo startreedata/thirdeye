@@ -39,6 +39,8 @@ public class TimeseriesFilter {
 
   // fixme cyril - first version only manages STRING dimensions - move this later
   public enum DimensionType {
-    STRING
+    STRING,
+    NUMERIC,
+    BOOLEAN
   }
 }

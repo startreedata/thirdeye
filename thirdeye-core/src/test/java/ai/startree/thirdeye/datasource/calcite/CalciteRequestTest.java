@@ -1,5 +1,7 @@
 package ai.startree.thirdeye.datasource.calcite;
 
+import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
+
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest.StructuredSqlStatement;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -30,30 +32,43 @@ public class CalciteRequestTest {
 
   @Test
   public void test() throws SqlParseException {
-    SqlNode node = queryToNode("SELECT COUNT(*), COUNT(DISTINCT ol) as ra, AVG(jmt) as lol, ts FROM t.loldata WHERE ts > 123345 and lol='str' group by ra, lol Order by ts LIMIT 1000");
+    List<Integer> lol2 = List.of(1, 2);
+    List<Integer> subList = lol2.subList(1, lol2.size() - 1);
+    SqlNode node = queryToNode(
+        "SELECT COUNT(*), COUNT(DISTINCT ol) as ra, AVG(jmt) as lol, ts FROM t.loldata WHERE ts > 123345 and lol='str' group by ra, lol Order by ts LIMIT 1000",
+        sqlParserConfig);
 
     CalciteRequest simpleRequest = new CalciteRequest(
-        List.of(new StructuredSqlStatement("SUM", List.of("jmt"), null)), // todo cyril in builder pattern - make sure it is not null at build
-        List.of(),  // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
+        List.of(new StructuredSqlStatement("SUM", List.of("jmt"), null)),
+        // todo cyril in builder pattern - make sure it is not null at build
+        List.of(),
+        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
         null,
         null,
         null,
-        "lol",  // todo mark non nullable - check at build
-        "raah",           // todo  mark non nullable - check at build
+        "lol",
+        // todo mark non nullable - check at build
+        "raah",
+        // todo  mark non nullable - check at build
         null,
         null,
-        List.of(),    // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
+        List.of(),
+        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
         null,
-        List.of(),   // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-        List.of(),  // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
+        List.of(),
+        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
+        List.of(),
+        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
         null);
 
     String query = simpleRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
 
     CalciteRequest complexRequest = new CalciteRequest(
         List.of(
-            new StructuredSqlStatement("SUM", List.of("jmt"), null),
-            new StructuredSqlStatement(MetricAggFunction.PERCENTILE_PREFIX, List.of("fmt", "90"), null),
+            new StructuredSqlStatement("SUM", List.of("\"jmt\""), null),
+            new StructuredSqlStatement(MetricAggFunction.PERCENTILE_PREFIX,
+                List.of("fmt", "90"),
+                null),
             new StructuredSqlStatement(MetricAggFunction.COUNT.name(), List.of("*"), null)
         ),
         List.of("unix_millis(datetimeColumn)"),
@@ -64,7 +79,9 @@ public class CalciteRequestTest {
         "mytable",
         new Interval(DateTime.now(), DateTime.now().plus(Period.days(10))),
         "time_epoch",
-        List.of(TimeseriesFilter.of(new Predicate("browser", OPER.EQ, "chrome"), DimensionType.STRING, null)),
+        List.of(TimeseriesFilter.of(new Predicate("browser", OPER.EQ, "chrome"),
+            DimensionType.STRING,
+            null)),
         "and country!='US'",
         List.of("time_epoch", "country"),
         List.of("time_epoch"),
@@ -73,32 +90,7 @@ public class CalciteRequestTest {
     String query2 = complexRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
 
     String lol = "";
-
-
   }
-
-    private SqlNode expressionToNode(final String sqlExpression ) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sqlExpression, sqlParserConfig);
-    return sqlParser.parseExpression();
-  }
-
-
-
-  private SqlNode queryToNode(final String sql) throws SqlParseException {
-    SqlParser sqlParser = SqlParser.create(sql, sqlParserConfig);
-    return sqlParser.parseQuery();
-  }
-
-  private String nodeToQuery(final SqlNode node) {
-    return node.toSqlString(
-        c -> c.withDialect(sqlDialect)
-            .withQuoteAllIdentifiers(false)
-    ).getSql();
-  }
-
-
-
-
 
   private static class PinotSqlLanguage implements SqlLanguage {
 
@@ -124,9 +116,6 @@ public class CalciteRequestTest {
     }
   }
 
-
-
-
   private static class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
     public String getTimeFilterExpression(String column, long minTimeMillisIncluded,
@@ -139,7 +128,8 @@ public class CalciteRequestTest {
     }
 
     @Override
-    public String getTimeGroupExpression(String timeColumn, String timeColumnFormat, Period granularity) {
+    public String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
+        Period granularity) {
       return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
           timeColumnFormatToPinotFormat(timeColumnFormat),
@@ -149,11 +139,14 @@ public class CalciteRequestTest {
 
     private String timeColumnFormatToPinotFormat(String timeColumnFormat) {
       switch (timeColumnFormat) {
-        case "EPOCH_MILLIS": case "1:MILLISECONDS:EPOCH":
+        case "EPOCH_MILLIS":
+        case "1:MILLISECONDS:EPOCH":
           return "1:MILLISECONDS:EPOCH";
-        case "EPOCH": case "1:SECONDS:EPOCH":
+        case "EPOCH":
+        case "1:SECONDS:EPOCH":
           return "1:SECONDS:EPOCH";
-        case "EPOCH_HOURS": case "1:HOURS:EPOCH":
+        case "EPOCH_HOURS":
+        case "1:HOURS:EPOCH":
           return "1:HOURS:EPOCH";
         default:
           new SimpleDateFormat(timeColumnFormat);
@@ -163,11 +156,17 @@ public class CalciteRequestTest {
 
     private String periodToPinotFormat(final Period period) {
       if (period.getYears() > 0) {
-        throw new RuntimeException(String.format("Pinot datasource cannot round to yearly granularity: %s", period));
+        throw new RuntimeException(String.format(
+            "Pinot datasource cannot round to yearly granularity: %s",
+            period));
       } else if (period.getMonths() > 0) {
-        throw new RuntimeException(String.format("Pinot datasource cannot round to monthly granularity: %s", period));
+        throw new RuntimeException(String.format(
+            "Pinot datasource cannot round to monthly granularity: %s",
+            period));
       } else if (period.getWeeks() > 0) {
-        throw new RuntimeException(String.format("Pinot datasource cannot round to weekly granularity: %s", period));
+        throw new RuntimeException(String.format(
+            "Pinot datasource cannot round to weekly granularity: %s",
+            period));
       } else if (period.getDays() > 0) {
         return String.format("%s:DAYS", period.getDays());
       } else if (period.getHours() > 0) {
@@ -179,7 +178,8 @@ public class CalciteRequestTest {
       } else if (period.getMillis() > 0) {
         return String.format("%s:MILLISECONDS", period.getMillis());
       }
-      throw new RuntimeException(String.format("Could not translate Period to Pinot granularity: %s", period));
+      throw new RuntimeException(String.format("Could not translate Period to Pinot granularity: %s",
+          period));
     }
   }
 }

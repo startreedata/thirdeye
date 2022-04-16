@@ -35,17 +35,17 @@ public class MacroEngineTest {
   private static final SqlExpressionBuilder MOCK_SQL_EXPRESSION_BUILDER = new TestSqlExpressionBuilder();
   private static final long INPUT_START_TIME = 11111111L;
   private static final long INPUT_END_TIME = 22222222L;
-  private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME, INPUT_END_TIME, DateTimeZone.UTC);
+  private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME,
+      INPUT_END_TIME,
+      DateTimeZone.UTC);
   private static final String IDENTIFIER_QUOTE_STRING = "\"";
   private static final String LITERAL_QUOTE_STRING = "'";
 
   private String clean(String sql) {
-    return sql
-        .toLowerCase(Locale.ENGLISH)
+    return sql.toLowerCase(Locale.ENGLISH)
         .trim()
         .replaceAll("[\\n\\t\\r]+", " ")
-        .replaceAll(" +", " ")
-        ;
+        .replaceAll(" +", " ");
   }
 
   private void prepareRequestAndAssert(String inputQuery, String expectedQuery,
@@ -75,12 +75,14 @@ public class MacroEngineTest {
     String expectedQuery = String.format("select * from tableName where %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
-            INPUT_END_TIME));
-    Map<String, String> expectedProperties = ImmutableMap.of(
-        MacroMetadataKeys.TIME_COLUMN.toString(), macroArgument,
-        MacroMetadataKeys.MIN_TIME_MILLIS.toString(), String.valueOf(INPUT_START_TIME),
-        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), String.valueOf(INPUT_END_TIME)
-    );
+            INPUT_END_TIME,
+            null));
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
+        macroArgument,
+        MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_START_TIME),
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_END_TIME));
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
@@ -96,12 +98,14 @@ public class MacroEngineTest {
     String expectedQuery = String.format("select * from tableName where %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
-            INPUT_END_TIME));
-    Map<String, String> expectedProperties = ImmutableMap.of(
-        MacroMetadataKeys.TIME_COLUMN.toString(), macroArgument,
-        MacroMetadataKeys.MIN_TIME_MILLIS.toString(), String.valueOf(INPUT_START_TIME),
-        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), String.valueOf(INPUT_END_TIME)
-    );
+            INPUT_END_TIME,
+            null));
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
+        macroArgument,
+        MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_START_TIME),
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_END_TIME));
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
@@ -123,9 +127,8 @@ public class MacroEngineTest {
             timeColumnFormatMacroArg,
             granularityMacroArg));
 
-    Map<String, String> expectedProperties = ImmutableMap.of(
-        MacroMetadataKeys.GRANULARITY.toString(), Period.ZERO.toString()
-    );
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+        Period.ZERO.toString());
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
@@ -138,8 +141,7 @@ public class MacroEngineTest {
     String timeColumnFormatMacroArgQuoted =
         LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
     Period granularityMacroArg = Period.ZERO;
-    String granularityMacroArgQuoted =
-        LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
+    String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
 
     String inputQuery = String.format("select __timeGroup(%s,%s,%s) from tableName",
         timeColumnMacroArg,
@@ -151,9 +153,8 @@ public class MacroEngineTest {
             timeColumnFormatMacroArg,
             granularityMacroArg));
 
-    Map<String, String> expectedProperties = ImmutableMap.of(
-        MacroMetadataKeys.GRANULARITY.toString(), Period.ZERO.toString()
-    );
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+        Period.ZERO.toString());
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
@@ -178,13 +179,16 @@ public class MacroEngineTest {
     String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
         expectedTimeGroupMacro,
         INPUT_START_TIME,
-        INPUT_END_TIME);
-    Map<String, String> expectedProperties = ImmutableMap.of(
-        MacroMetadataKeys.TIME_COLUMN.toString(), expectedTimeGroupMacro,
-        MacroMetadataKeys.MIN_TIME_MILLIS.toString(), String.valueOf(INPUT_START_TIME),
-        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), String.valueOf(INPUT_END_TIME),
-        MacroMetadataKeys.GRANULARITY.toString(), Period.ZERO.toString()
-    );
+        INPUT_END_TIME,
+        null);
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
+        expectedTimeGroupMacro,
+        MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_START_TIME),
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_END_TIME),
+        MacroMetadataKeys.GRANULARITY.toString(),
+        Period.ZERO.toString());
 
     String expectedQuery = String.format("select * from tableName where %s", expectedNestedMacro);
 
@@ -201,12 +205,14 @@ public class MacroEngineTest {
     String expectedQuery = String.format("select * from tableName where %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
-            INPUT_END_TIME));
-    Map<String, String> expectedProperties = ImmutableMap.of(
-        MacroMetadataKeys.TIME_COLUMN.toString(), macroArgument,
-        MacroMetadataKeys.MIN_TIME_MILLIS.toString(), String.valueOf(INPUT_START_TIME),
-        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), String.valueOf(INPUT_END_TIME)
-    );
+            INPUT_END_TIME,
+            null));
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
+        macroArgument,
+        MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_START_TIME),
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_END_TIME));
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
@@ -215,8 +221,7 @@ public class MacroEngineTest {
 
     @Override
     public ThirdEyeSqlParserConfig getSqlParserConfig() {
-      return new ThirdEyeSqlParserConfig.Builder()
-          .withLex("MYSQL_ANSI")
+      return new ThirdEyeSqlParserConfig.Builder().withLex("MYSQL_ANSI")
           .withConformance("DEFAULT")
           .withParserFactory("SqlParserImpl")
           .build();
@@ -224,8 +229,7 @@ public class MacroEngineTest {
 
     @Override
     public ThirdeyeSqlDialect getSqlDialect() {
-      return new ThirdeyeSqlDialect.Builder()
-          .withBaseDialect("AnsiSqlDialect")
+      return new ThirdeyeSqlDialect.Builder().withBaseDialect("AnsiSqlDialect")
           .withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING)
           .withLiteralQuoteString(LITERAL_QUOTE_STRING)
           .build();
@@ -239,7 +243,7 @@ public class MacroEngineTest {
 
     @Override
     public String getTimeFilterExpression(final String column, final long minTimeMillisIncluded,
-        final long maxTimeMillisExcluded) {
+        final long maxTimeMillisExcluded, String timeFormat) {
       return String.format("%s(%s, %s, %s)",
           TIME_FILTER_MOCK,
           column,

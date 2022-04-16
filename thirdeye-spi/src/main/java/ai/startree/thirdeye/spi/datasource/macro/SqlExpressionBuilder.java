@@ -7,6 +7,7 @@ package ai.startree.thirdeye.spi.datasource.macro;
 
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Period;
 
 /**
@@ -16,17 +17,28 @@ import org.joda.time.Period;
 public interface SqlExpressionBuilder {
 
   /**
-   * Generates a SQL expression that test if a time column in milliseconds is between bounds.
+   * Generates a SQL expression that test if a time column is between bounds.
    * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
-   * For example: {@code getTimeFilterExpression(myTimeEpoch, 42, 84)} returns "myTimeEpoch >= 42
-   * AND myTimeEpoch < 84"
+   * For example: {@code getTimeFilterExpression(myTimeEpoch, 42, 84, null)} returns
+   * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
-   * @param column epoch milliseconds column name
+   * Used by macro __timeFilter()
+   *
+   * timeFormat comes from Timespec, so it can be anything. It is specific to the datasource.
+   * The function should be able to parse the timeFormat used by the datasource.
+   * If it's null, the function must assume the format is epoch milliseconds.
+   *
+   * This method can either generate the datetime in the given format directly,
+   * or generate a SQL that transforms the colum or the milliseconds in the correct format at
+   * runtime.
+   *
+   * @param timeColumn time column name
    * @param minTimeMillisIncluded minimum epoch milliseconds - included
-   * @param maxTimeMillisExcluded maximum epoch milliseconds - included
+   * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
+   * @param timeFormat any string, the datasource is free to put any format in TimeSpec$format.
    */
-  default String getTimeFilterExpression(String column, long minTimeMillisIncluded,
-      long maxTimeMillisExcluded) {
+  default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
+      final long maxTimeMillisExcluded, final @Nullable String timeFormat) {
     throw new UnsupportedOperationException();
   }
 
@@ -36,29 +48,35 @@ public interface SqlExpressionBuilder {
    * For example: for a MySQL implementation, {@code getTimeGroupExpression(dateTimeColumn,
    * DATETIME, P1D)} returns "UNIX_TIMESTAMP(DATE(dateTimeColumn))*1000"
    *
+   * Used by macro __timeGroup()
+   *
    * @param timeColumn time column name
    * @param timeColumnFormat time column time format. Managed formats depend on the datasource
    * @param granularity granularity of the output epoch milliseconds (minutes, days, etc...)
    */
-  default String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
-      Period granularity) {
+  default String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
+      final Period granularity) {
     throw new UnsupportedOperationException();
   }
 
   /**
    * Returns whether a MetricAggFunction requires a custom SQL statement or
    * can be safely generated with ANSI SQL.
-   * */
-  default boolean needsCustomDialect(MetricAggFunction metricAggFunction) {
+   */
+  default boolean needsCustomDialect(final MetricAggFunction metricAggFunction) {
     switch (metricAggFunction) {
-      case PCT50: case PCT90: case PCT95: case PCT99:
+      case PCT50:
+      case PCT90:
+      case PCT95:
+      case PCT99:
         return true;
       default:
         return false;
     }
   }
 
-  default String getCustomDialectSql(MetricAggFunction metricAggFunction, List<String> operands, String quantifier) {
+  default String getCustomDialectSql(final MetricAggFunction metricAggFunction, final List<String> operands,
+      String quantifier) {
     throw new UnsupportedOperationException();
   }
 }

@@ -11,19 +11,35 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   private static final String PERCENTILE_TDIGEST_PREFIX = "PERCENTILETDigest";
 
-  public String getTimeFilterExpression(String column, long minTimeMillisIncluded,
-      long maxTimeMillisExcluded) {
-    return String.format("%s >= %s AND %s < %s",
-        column,
-        minTimeMillisIncluded,
-        column,
-        maxTimeMillisExcluded);
+  @Override
+  public String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
+      long maxTimeMillisExcluded,
+      @Nullable final String timeFormat) {
+    if (timeFormat == null || "EPOCH".equals(timeFormat)) {
+      return String.format(
+          "%s >= %s AND %s < %s",
+          timeColumn,
+          minTimeMillisIncluded,
+          timeColumn,
+          maxTimeMillisExcluded);
+    } else if ("SIMPLE_DATE_FORMAT".equals(timeFormat)) {
+      final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat);
+      final String startUnits = inputDataDateTimeFormatter.print(minTimeMillisIncluded);
+      final String endUnits = inputDataDateTimeFormatter.print(maxTimeMillisExcluded);
+      return String.format(" %s >= %s AND %s < %s", timeColumn, startUnits, timeColumn, endUnits);
+    } else {
+      throw new UnsupportedOperationException(
+          String.format("Unknown timeFormat for Pinot datasource: %s ", timeFormat));
+    }
   }
 
   @Override

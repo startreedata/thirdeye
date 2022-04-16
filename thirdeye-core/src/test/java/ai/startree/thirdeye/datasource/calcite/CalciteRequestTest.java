@@ -18,9 +18,12 @@ import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.testng.annotations.Test;
 
 public class CalciteRequestTest {
@@ -31,6 +34,7 @@ public class CalciteRequestTest {
 
   @Test
   public void test() throws SqlParseException {
+    Interval test = new Interval(0,0);
     List<Integer> lol2 = List.of(1, 2);
     List<Integer> subList = lol2.subList(1, lol2.size() - 1);
     SqlNode node = queryToNode(
@@ -51,14 +55,12 @@ public class CalciteRequestTest {
         // todo  mark non nullable - check at build
         null,
         null,
-        List.of(),
-        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
         null,
+        List.of(),// todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
+        null,
+        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
         List.of(),
-        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-        List.of(),
-        List.of(),
-        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
+        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
         null);
 
     String query = simpleRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
@@ -80,6 +82,7 @@ public class CalciteRequestTest {
         "mytable",
         new Interval(DateTime.now(), DateTime.now().plus(Period.days(10))),
         "time_epoch",
+        "EPOCH",
         List.of(QueryPredicate.of(new Predicate("browser", OPER.EQ, "chrome"),
             DimensionType.STRING,
             null)),
@@ -134,13 +137,26 @@ public class CalciteRequestTest {
 
   private static class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
-    public String getTimeFilterExpression(String column, long minTimeMillisIncluded,
-        long maxTimeMillisExcluded) {
-      return String.format("%s >= %s AND %s < %s",
-          column,
-          minTimeMillisIncluded,
-          column,
-          maxTimeMillisExcluded);
+    @Override
+    public String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
+        long maxTimeMillisExcluded,
+        @Nullable final String timeFormat) {
+      if (timeFormat == null || "EPOCH".equals(timeFormat)) {
+        return String.format(
+            "%s >= %s AND %s < %s",
+            timeColumn,
+            minTimeMillisIncluded,
+            timeColumn,
+            maxTimeMillisExcluded);
+      } else if ("SIMPLE_DATE_FORMAT".equals(timeFormat)) {
+        final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat);
+        final String startUnits = inputDataDateTimeFormatter.print(minTimeMillisIncluded);
+        final String endUnits = inputDataDateTimeFormatter.print(maxTimeMillisExcluded);
+        return String.format(" %s >= %s AND %s < %s", timeColumn, startUnits, timeColumn, endUnits);
+      } else {
+        throw new UnsupportedOperationException(
+            String.format("Unknown timeFormat for Pinot datasource: %s ", timeFormat));
+      }
     }
 
     @Override

@@ -61,12 +61,12 @@ public class CalciteRequest {
   // WHERE clause
   final private Interval timeFilterInterval;
   final private String timeFilterColumn;
+  final private String timeFilterColumnFormat;
   // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - important in Presto/BQ
   final private List<QueryPredicate> structuredPredicates;
   final private String freeTextPredicates;
 
   // GROUP BY clause
-  // todo cyril use QueryProjection - function could be used
   final private List<QueryProjection> groupByProjections;
   final private List<String> freeTextGroupByProjections;
 
@@ -86,7 +86,7 @@ public class CalciteRequest {
       final List<String> freeTextSelectProjections, final Period timeAggregationGranularity,
       final String timeAggregationColumnFormat, final String timeAggregationColumn,
       final String database, final String table, final Interval timeFilterInterval,
-      final String timeFilterColumn,
+      final String timeFilterColumn, final String timeFilterColumnFormat,
       final List<QueryPredicate> structuredPredicates, final String freeTextPredicates,
       final List<QueryProjection> groupByProjections, final List<String> freeTextGroupByProjections,
       final List<String> orderByColumns, final Long limit) {
@@ -100,6 +100,7 @@ public class CalciteRequest {
     this.table = table;
     this.timeFilterInterval = timeFilterInterval;
     this.timeFilterColumn = timeFilterColumn;
+    this.timeFilterColumnFormat = timeFilterColumnFormat;
     this.structuredPredicates = structuredPredicates;
     this.freeTextPredicates = freeTextPredicates;
     this.groupByProjections = groupByProjections;
@@ -142,11 +143,11 @@ public class CalciteRequest {
       throws SqlParseException {
     List<SqlNode> nodes = new ArrayList<>();
     // add time aggregation projection
-    if (timeAggregationColumn != null) {
+    if (timeAggregationGranularity != null) {
       String timeGroupExpression = expressionBuilder.getTimeGroupExpression(
-          timeAggregationColumn,
+          Objects.requireNonNull(timeAggregationColumn),
           Objects.requireNonNull(timeAggregationColumnFormat),
-          Objects.requireNonNull(timeAggregationGranularity));
+          timeAggregationGranularity);
       SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
       List<SqlNode> aliasOperands = List.of(timeGroupNode, identifierOf(TIME_AGGREGATION_ALIAS));
       SqlNode timeGroupWithAlias = new SqlBasicCall(new SqlAsOperator(),
@@ -187,18 +188,16 @@ public class CalciteRequest {
       final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
     List<SqlNode> predicates = new ArrayList<>();
     if (timeFilterInterval != null) {
-      // fixme cyril implement better time format management - datetimeconvert may have bad performance
-      String timeColumnConstraint = timeFilterColumn; // assumes time column is in epoch millis
-      if (timeAggregationGranularity != null) {
-        if (timeAggregationColumn.equals(timeFilterColumn)) {
-        }
-        // use the alias of the aggregated time column - in this case it's sure time is in epoch millis
-        timeColumnConstraint = TIME_AGGREGATION_ALIAS;
-      }
+      Objects.requireNonNull(timeFilterColumn); // todo cyril ensure this at builder time
+      // use the alias of the aggregated time column - in this case it's sure time is in epoch millis
+      boolean isAggregatedTimeColumn =
+          timeAggregationGranularity != null && timeAggregationColumn.equals(timeFilterColumn);
+      // todo cyril remove the objects.requireNonNull with builder pattern
       String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
-          timeColumnConstraint,
+          isAggregatedTimeColumn ? TIME_AGGREGATION_ALIAS : Objects.requireNonNull(timeFilterColumn),
           timeFilterInterval.getStartMillis(),
-          timeFilterInterval.getEndMillis());
+          timeFilterInterval.getEndMillis(),
+          isAggregatedTimeColumn ? null : Objects.requireNonNull(timeFilterColumnFormat));
       SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
@@ -245,14 +244,14 @@ public class CalciteRequest {
     return orderIdentifiers.isEmpty() ? null : SqlNodeList.of(SqlParserPos.ZERO, orderIdentifiers);
   }
 
-  // todo cyril see duplication with filter engine
   private SqlNode getFetch() {
     return numericLiteralOf(limit != null ? limit.toString() : DEFAULT_LIMIT.toString());
   }
 
+  // todo cyril remvoe this
   public static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
       final DatasetConfigDTO datasetConfig) {
-    // todo cyril good resource  for between clause and time maangement ?
+
     TimeGranularity dataGranularity = timeSpec.getDataGranularity();
     long dataGranularityMillis = dataGranularity.toMillis();
 
@@ -289,6 +288,7 @@ public class CalciteRequest {
     return String.format(" %s >= %s AND %s < %s", timeField, startUnits, timeField, endUnits);
   }
 
+  // todo cyril remvoe this
   private static String convertEpochToMinuteAggGranularity(String timeColumnName,
       TimeSpec timeSpec) {
     String groupByTimeColumnName = String

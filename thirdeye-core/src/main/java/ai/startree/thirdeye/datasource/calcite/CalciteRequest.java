@@ -5,14 +5,11 @@ import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,18 +24,12 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Multiple metrics, single table.
  **/
-// fixme cyril need to decide when a metric/dimension is numeric and when it's not --> it's a rule of thumb logic in the legacy SQLUtils
-
-// todo check - this considers the filters are parsed as IN correctly: not sure if it's the case for both heatmap and dim analysis
 public class CalciteRequest {
 
   public static final String TIME_AGGREGATION_ALIAS = "teTimeGroup";
@@ -53,6 +44,10 @@ public class CalciteRequest {
   final private Period timeAggregationGranularity;
   final private String timeAggregationColumnFormat;
   final private String timeAggregationColumn;
+  /**
+   * If set, is the timeAggregation will be the first order by column.
+   */
+  final private boolean timeAggregationOrderBy;
 
   // FROM clause
   final private String database;
@@ -62,8 +57,8 @@ public class CalciteRequest {
   final private Interval timeFilterInterval;
   final private String timeFilterColumn;
   final private String timeFilterColumnFormat;
-  // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - important in Presto/BQ
-  final private List<QueryPredicate> structuredPredicates;
+  // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - to be used by Presto/BQ
+  final private List<QueryPredicate> predicates;
   final private String freeTextPredicates;
 
   // GROUP BY clause
@@ -71,42 +66,39 @@ public class CalciteRequest {
   final private List<String> freeTextGroupByProjections;
 
   // ORDER BY clause
-  final private List<String> orderByColumns;
+  final private List<QueryProjection> orderByProjections;
+  final private List<String> freeTextOrderByProjections;
 
   // LIMIT clause
   final private Long limit;
 
-  // partitioning column for optimization: get from datasetConfigDTO
-  // todo add aggregationFunction to string in expressionBuilder --> for percentileTdigest for instance
-  // todo cyril work on this - put timespec to time formatters in the SqlExpressionBuilder interface
-  //private TimeSpec dataTimeSpec;
+  private CalciteRequest(Builder builder) {
+    checkArgument(
+        builder.selectProjections.size() > 0 || builder.freeTextSelectProjections.size() > 0,
+        "Projection (selection) lists are empty. Invalid SQL request.");
+    this.selectProjections = builder.selectProjections;
+    this.freeTextSelectProjections = List.copyOf(builder.freeTextSelectProjections);
+    this.timeAggregationGranularity = builder.timeAggregationGranularity;
+    this.timeAggregationColumnFormat = builder.timeAggregationColumnFormat;
+    this.timeAggregationColumn = builder.timeAggregationColumn;
+    this.timeAggregationOrderBy = builder.timeAggregationOrderBy;
+    this.database = builder.database;
+    this.table = builder.table;
 
-  public CalciteRequest(
-      final List<QueryProjection> selectProjections,
-      final List<String> freeTextSelectProjections, final Period timeAggregationGranularity,
-      final String timeAggregationColumnFormat, final String timeAggregationColumn,
-      final String database, final String table, final Interval timeFilterInterval,
-      final String timeFilterColumn, final String timeFilterColumnFormat,
-      final List<QueryPredicate> structuredPredicates, final String freeTextPredicates,
-      final List<QueryProjection> groupByProjections, final List<String> freeTextGroupByProjections,
-      final List<String> orderByColumns, final Long limit) {
+    this.timeFilterInterval = builder.timeFilterInterval;
+    this.timeFilterColumn = builder.timeFilterColumn;
+    this.timeFilterColumnFormat = builder.timeFilterColumnFormat;
 
-    this.selectProjections = selectProjections;
-    this.freeTextSelectProjections = freeTextSelectProjections;
-    this.timeAggregationGranularity = timeAggregationGranularity;
-    this.timeAggregationColumnFormat = timeAggregationColumnFormat;
-    this.timeAggregationColumn = timeAggregationColumn;
-    this.database = database;
-    this.table = table;
-    this.timeFilterInterval = timeFilterInterval;
-    this.timeFilterColumn = timeFilterColumn;
-    this.timeFilterColumnFormat = timeFilterColumnFormat;
-    this.structuredPredicates = structuredPredicates;
-    this.freeTextPredicates = freeTextPredicates;
-    this.groupByProjections = groupByProjections;
-    this.freeTextGroupByProjections = freeTextGroupByProjections;
-    this.orderByColumns = orderByColumns;
-    this.limit = limit;
+    this.predicates = builder.predicates;
+    this.freeTextPredicates = builder.freeTextPredicates;
+
+    this.groupByProjections = builder.groupByProjections;
+    this.freeTextGroupByProjections = builder.freeTextGroupByProjection;
+
+    this.orderByProjections = builder.orderByProjections;
+    this.freeTextOrderByProjections = builder.freeTextOrderByProjections;
+
+    this.limit = builder.limit;
   }
 
   public String getSql(final SqlLanguage sqlLanguage, final SqlExpressionBuilder expressionBuilder)
@@ -131,7 +123,7 @@ public class CalciteRequest {
         getGroupBy(sqlParserConfig, expressionBuilder),
         null,
         null,
-        getOrderBy(),
+        getOrderBy(sqlParserConfig, expressionBuilder),
         null,
         getFetch(),
         null
@@ -194,14 +186,15 @@ public class CalciteRequest {
           timeAggregationGranularity != null && timeAggregationColumn.equals(timeFilterColumn);
       // todo cyril remove the objects.requireNonNull with builder pattern
       String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
-          isAggregatedTimeColumn ? TIME_AGGREGATION_ALIAS : Objects.requireNonNull(timeFilterColumn),
+          isAggregatedTimeColumn ? TIME_AGGREGATION_ALIAS
+              : Objects.requireNonNull(timeFilterColumn),
           timeFilterInterval.getStartMillis(),
           timeFilterInterval.getEndMillis(),
           isAggregatedTimeColumn ? null : Objects.requireNonNull(timeFilterColumnFormat));
       SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
-    structuredPredicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
+    this.predicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
     if (StringUtils.isNotBlank(freeTextPredicates)) {
       String cleanedFreePredicate = freeTextPredicates.replaceFirst("^ *[aA][nN][dD] +", "");
       predicates.add(expressionToNode(cleanedFreePredicate, sqlParserConfig));
@@ -232,91 +225,132 @@ public class CalciteRequest {
     return groupIdentifiers.isEmpty() ? null : SqlNodeList.of(SqlParserPos.ZERO, groupIdentifiers);
   }
 
-  private SqlNodeList getOrderBy() {
+  private SqlNodeList getOrderBy(final SqlParser.Config sqlParserConfig,
+      final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
     List<SqlNode> orderIdentifiers = new ArrayList<>();
-    for (String orderByColumn : orderByColumns) {
-      if (orderByColumn.equals(timeAggregationColumn)) {
-        orderIdentifiers.add(identifierOf(TIME_AGGREGATION_ALIAS));
-      } else {
-        orderIdentifiers.add(identifierOf(orderByColumn));
+    // add the alias of the timeAggregation if needed
+    if (timeAggregationOrderBy) {
+      orderIdentifiers.add(identifierOf(TIME_AGGREGATION_ALIAS));
+    }
+    // add structured order by columns
+    for (QueryProjection orderByProjection : orderByProjections) {
+      orderIdentifiers.add(orderByProjection.toDialectSpecificSqlNode(sqlParserConfig,
+          expressionBuilder));
+    }
+    // add free text order by columns
+    for (String freeTextOrderBy : freeTextOrderByProjections) {
+      if (StringUtils.isNotBlank(freeTextOrderBy)) {
+        orderIdentifiers.add(expressionToNode(freeTextOrderBy, sqlParserConfig));
       }
     }
     return orderIdentifiers.isEmpty() ? null : SqlNodeList.of(SqlParserPos.ZERO, orderIdentifiers);
   }
 
   private SqlNode getFetch() {
-    return numericLiteralOf(limit != null ? limit.toString() : DEFAULT_LIMIT.toString());
+    return limit == null ? null : numericLiteralOf(limit.toString());
   }
 
-  // todo cyril remvoe this
-  public static String getBetweenClause(DateTime start, DateTime endExclusive, TimeSpec timeSpec,
-      final DatasetConfigDTO datasetConfig) {
+  public static class Builder {
 
-    TimeGranularity dataGranularity = timeSpec.getDataGranularity();
-    long dataGranularityMillis = dataGranularity.toMillis();
+    final private List<QueryProjection> selectProjections = new ArrayList<>();
+    final private List<String> freeTextSelectProjections = new ArrayList<>();
 
-    String timeField = timeSpec.getColumnName();
-    String timeFormat = timeSpec.getFormat();
+    private String database;
+    private String table;
 
-    // epoch case
-    if (timeFormat == null || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
-      long startUnits = (long) Math.ceil(start.getMillis() / (double) dataGranularityMillis);
-      long endUnits = (long) Math.ceil(endExclusive.getMillis() / (double) dataGranularityMillis);
+    private Period timeAggregationGranularity = null;
+    private String timeAggregationColumnFormat = null;
+    private String timeAggregationColumn = null;
+    private boolean timeAggregationOrderBy = false;
 
-      // point query
-      if (startUnits == endUnits) {
-        return String.format(" %s = %d", timeField, startUnits);
-      }
+    private Interval timeFilterInterval = null;
+    private String timeFilterColumn = null;
+    private String timeFilterColumnFormat = null;
 
-      return String.format(" %s >= %d AND %s < %d", timeField, startUnits, timeField, endUnits);
+    final private List<QueryPredicate> predicates = new ArrayList<>();
+    private String freeTextPredicates;
+
+    final private List<QueryProjection> groupByProjections = new ArrayList<>();
+    final private List<String> freeTextGroupByProjection = new ArrayList<>();
+
+    final private List<QueryProjection> orderByProjections = new ArrayList();
+    final private List<String> freeTextOrderByProjections = new ArrayList();
+
+    private Long limit;
+
+    public Builder(final String database, final String table) {
+      this.database = Objects.requireNonNull(database);
+      this.table = Objects.requireNonNull(table);
     }
 
-    // NOTE:
-    // this is crazy. epoch rounds up, but timeFormat down
-    // we maintain this behavior for backward compatibility.
-
-    DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(timeFormat)
-        .withZone(SpiUtils.getDateTimeZone(datasetConfig));
-    String startUnits = inputDataDateTimeFormatter.print(start);
-    String endUnits = inputDataDateTimeFormatter.print(endExclusive);
-
-    // point query
-    if (Objects.equals(startUnits, endUnits)) {
-      return String.format(" %s = %s", timeField, startUnits);
+    public Builder withTimeAggregation(final Period timeAggregationGranularity,
+        final String timeAggregationColumn,
+        final String timeAggregationColumnFormat,
+        final boolean timeAggregationOrderBy) {
+      this.timeAggregationGranularity = Objects.requireNonNull(timeAggregationGranularity);
+      this.timeAggregationColumn = Objects.requireNonNull(timeAggregationColumn);
+      this.timeAggregationColumnFormat = Objects.requireNonNull(timeAggregationColumnFormat);
+      this.timeAggregationOrderBy = timeAggregationOrderBy;
+      return this;
     }
 
-    return String.format(" %s >= %s AND %s < %s", timeField, startUnits, timeField, endUnits);
-  }
+    public Builder withTimeFilter(final Interval timeFilterInterval, final String timeFilterColumn,
+        final String timeFilterColumnFormat) {
+      this.timeFilterInterval = Objects.requireNonNull(timeFilterInterval);
+      this.timeFilterColumn = Objects.requireNonNull(timeFilterColumn);
+      this.timeFilterColumnFormat = Objects.requireNonNull(timeFilterColumnFormat);
 
-  // todo cyril remvoe this
-  private static String convertEpochToMinuteAggGranularity(String timeColumnName,
-      TimeSpec timeSpec) {
-    String groupByTimeColumnName = String
-        .format("dateTimeConvert(%s,'%d:%s:%s','%d:%s:%s','1:MINUTES')", timeColumnName,
-            timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(),
-            timeSpec.getFormat(),
-            timeSpec.getDataGranularity().getSize(), timeSpec.getDataGranularity().getUnit(),
-            timeSpec.getFormat());
-    return groupByTimeColumnName;
-  }
-
-  // todo cyril good reference to manage time in Pinot
-  private static String getTimeColumnQueryName(TimeGranularity aggregationGranularity,
-      TimeSpec timeSpec) {
-    String timeColumnName = timeSpec.getColumnName();
-    if (aggregationGranularity != null) {
-      // Convert the time column to 1 minute granularity if it is epoch.
-      // E.g., dateTimeConvert(timestampInEpoch,'1:MILLISECONDS:EPOCH','1:MILLISECONDS:EPOCH','1:MINUTES')
-      //if (timeSpec.getFormat().equals(DateTimeFieldSpec.TimeFormat.EPOCH.toString())
-      //    && !timeSpec.getDataGranularity().equals(aggregationGranularity)) {
-      //  return convertEpochToMinuteAggGranularity(timeColumnName, timeSpec);
-      //}
+      return this;
     }
-    return timeColumnName;
-  }
 
-  public static String getDataTimeRangeSql(String dataset, String timeColumnName) {
-    return String.format("select min(%s), max(%s) from %s", timeColumnName, timeColumnName,
-        dataset);
+    public Builder addSelectProjection(final QueryProjection projection) {
+      this.selectProjections.add(Objects.requireNonNull(projection));
+      return this;
+    }
+
+    public Builder addFreeTextSelectProjection(final String freeTextProjection) {
+      this.freeTextSelectProjections.add(Objects.requireNonNull(freeTextProjection));
+      return this;
+    }
+
+    public Builder addPredicate(final QueryPredicate predicate) {
+      this.predicates.add(Objects.requireNonNull(predicate));
+      return this;
+    }
+
+    public Builder withFreeTextPredicates(final String predicates) {
+      this.freeTextPredicates = Objects.requireNonNull(predicates);
+      return this;
+    }
+
+    public Builder addGroupByProjection(final QueryProjection projection) {
+      this.groupByProjections.add(Objects.requireNonNull(projection));
+      return this;
+    }
+
+    public Builder addFreeTextGroupByProjection(final String projection) {
+      this.freeTextGroupByProjection.add(projection);
+      return this;
+    }
+
+    public Builder addOrderByProjection(final QueryProjection projection) {
+      this.orderByProjections.add(Objects.requireNonNull(projection));
+      return this;
+    }
+
+    public Builder addFreeTextOrderByProjection(final String projection) {
+      this.freeTextGroupByProjection.add(projection);
+      return this;
+    }
+
+    public Builder withLimit(final long limit) {
+      checkArgument(limit > 0);
+      this.limit = limit;
+      return this;
+    }
+
+    public CalciteRequest build() {
+      return new CalciteRequest(this);
+    }
   }
 }

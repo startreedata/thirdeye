@@ -1,12 +1,8 @@
 package ai.startree.thirdeye.datasource.calcite;
 
-import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
+import static ai.startree.thirdeye.detectionpipeline.sql.filter.FilterEngineTest.assertThatQueriesAreTheSame;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
-import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
@@ -14,13 +10,8 @@ import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.apache.calcite.sql.parser.SqlParser;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -28,75 +19,157 @@ import org.testng.annotations.Test;
 
 public class CalciteRequestTest {
 
-  SqlLanguage sqlLanguage = new PinotSqlLanguage();
-  SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
-  SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
+  private static final String DATABASE = "db1";
+  private static final String TABLE = "table1";
+  private static final String COLUMN_NAME_1 = "col1";
+  public static final QueryProjection COUNT_DISTINCT_AGGREGATION_PROJECTION = QueryProjection.of(
+      MetricAggFunction.COUNT_DISTINCT.name(),
+      List.of(COLUMN_NAME_1));
+  public static final QueryProjection STANDARD_AGGREGATION_PROJECTION = QueryProjection.of(
+      MetricAggFunction.SUM.name(),
+      List.of(COLUMN_NAME_1));
+  public static final QueryProjection SIMPLE_PROJECTION = QueryProjection.of(
+      COLUMN_NAME_1);
+
+  private static final SqlLanguage SQL_LANGUAGE = new PinotSqlLanguage();
+  SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new PinotSqlExpressionBuilder();
+
+  // todo cyril add a few tests for builder pre conditions
 
   @Test
-  public void test() throws SqlParseException {
-    Interval test = new Interval(0,0);
-    List<Integer> lol2 = List.of(1, 2);
-    List<Integer> subList = lol2.subList(1, lol2.size() - 1);
-    SqlNode node = queryToNode(
-        "SELECT COUNT(*), COUNT(DISTINCT ol) as ra, AVG(jmt) as lol, ts FROM t.loldata WHERE ts > 123345 and lol='str' group by ra, lol Order by ts LIMIT 1000",
-        sqlParserConfig);
+  public void testGetSqlWithSimpleProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(SIMPLE_PROJECTION);
 
-    CalciteRequest simpleRequest = new CalciteRequest(
-        List.of(QueryProjection.of("SUM", List.of("jmt"))),
-        // todo cyril in builder pattern - make sure it is not null at build
-        List.of(),
-        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-        null,
-        null,
-        null,
-        "lol",
-        // todo mark non nullable - check at build
-        "raah",
-        // todo  mark non nullable - check at build
-        null,
-        null,
-        null,
-        List.of(),// todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
-        null,
-        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-        List.of(),
-        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-        null);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String query = simpleRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
+    String expected = String.format("SELECT %s FROM %s.%s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
 
-    CalciteRequest complexRequest = new CalciteRequest(
-        List.of(
-            QueryProjection.of("SUM", List.of("\"jmt\"")),
-            QueryProjection.of(MetricAggFunction.PCT95.name(), List.of("fmt")),
-            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("*"), "DISTINCT"),
-            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("col1"), "DISTINCT"),
-            QueryProjection.of(MetricAggFunction.COUNT_DISTINCT.name(), List.of("browser")),
-            QueryProjection.of("browser")
-        ),
-        List.of("unix_millis(datetimeColumn)"),
-        Period.days(1),
-        "EPOCH",
-        "time_epoch",
-        "mydb",
-        "mytable",
-        new Interval(DateTime.now(), DateTime.now().plus(Period.days(10))),
-        "time_epoch",
-        "EPOCH",
-        List.of(QueryPredicate.of(new Predicate("browser", OPER.EQ, "chrome"),
-            DimensionType.STRING,
-            null)),
-        "and country!='US'",
-        List.of(QueryProjection.of("time_epoch"), QueryProjection.of("country")),
-        List.of(),
-        List.of("time_epoch"),
-        100L
-    );
-    String query2 = complexRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
-
-    String lol = "";
+    assertThatQueriesAreTheSame(output, expected);
   }
 
+  @Test
+  public void testGetSqlWithStandardAggregationProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(STANDARD_AGGREGATION_PROJECTION);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format("SELECT %s(%s) FROM %s.%s",
+        MetricAggFunction.SUM.name(),
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithCountDistinctProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format("SELECT COUNT(DISTINCT %s) FROM %s.%s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithDialectSpecificAggregationProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(QueryProjection.of(MetricAggFunction.COUNT_DISTINCT.name(),
+        List.of(COLUMN_NAME_1)));
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format("SELECT COUNT(DISTINCT %s) FROM %s.%s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+
+  }
+
+  @Test
+  public void testGetSqlWithMultipleOperandsProjection() throws SqlParseException {
+
+  }
+
+  // test freeSqlText injection
+
+//  @Test
+//  public void test() throws SqlParseException {
+//    Interval test = new Interval(0,0);
+//    List<Integer> lol2 = List.of(1, 2);
+//    List<Integer> subList = lol2.subList(1, lol2.size() - 1);
+//    SqlNode node = queryToNode(
+//        "SELECT COUNT(*), COUNT(DISTINCT ol) as ra, AVG(jmt) as lol, ts FROM t.loldata WHERE ts > 123345 and lol='str' group by ra, lol Order by ts LIMIT 1000",
+//        sqlParserConfig);
+//
+//    CalciteRequest simpleRequest = new CalciteRequest(
+//        List.of(QueryProjection.of("SUM", List.of("jmt"))), // todo cyril in builder pattern - make sure one of it is not null at build
+//        List.of(),
+//        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
+//        null,
+//        null,
+//        null,
+//        "lol",
+//        // todo mark non nullable - check at build
+//        "raah",
+//        // todo  mark non nullable - check at build
+//        null,
+//        null,
+//        null,
+//        List.of(),// todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
+//        null,
+//        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
+//        List.of(),
+//        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
+//        null);
+//
+//    String query = simpleRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
+//
+//    CalciteRequest complexRequest = new CalciteRequest(
+//        List.of(
+//            QueryProjection.of("SUM", List.of("\"jmt\"")),
+//            QueryProjection.of(MetricAggFunction.PCT95.name(), List.of("fmt")),
+//            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("*"), "DISTINCT"),
+//            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("col1"), "DISTINCT"),
+//            QueryProjection.of(MetricAggFunction.COUNT_DISTINCT.name(), List.of("browser")),
+//            QueryProjection.of("browser")
+//        ),
+//        List.of("unix_millis(datetimeColumn)"),
+//        Period.days(1),
+//        "EPOCH",
+//        "time_epoch",
+//        "mydb",
+//        "mytable",
+//        new Interval(DateTime.now(), DateTime.now().plus(Period.days(10))),
+//        "time_epoch",
+//        "EPOCH",
+//        List.of(QueryPredicate.of(new Predicate("browser", OPER.EQ, "chrome"),
+//            DimensionType.STRING,
+//            null)),
+//        "and country!='US'",
+//        List.of(QueryProjection.of("time_epoch"), QueryProjection.of("country")),
+//        List.of(),
+//        List.of("time_epoch"),
+//        100L
+//    );
+//    String query2 = complexRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
+//
+//    String lol = "";
+//  }
 
   // TODO cyril - should be easy to express:
   //  a timeseries --> with timegrouping

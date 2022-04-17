@@ -235,7 +235,8 @@ public class FilterEngineTest {
     assertThatQueriesAreTheSame(output, expected);
   }
 
-  private void assertThatQueriesAreTheSame(final String output, final String expected) {
+  // todo cyril move this in test utils - used in MacroEngine, FilterEngine, and CalciteRequest tests
+  public static void assertThatQueriesAreTheSame(final String output, final String expected) {
     assertThat(output
         .replaceAll("\\n", " ")
         .replaceAll("  +", " ")

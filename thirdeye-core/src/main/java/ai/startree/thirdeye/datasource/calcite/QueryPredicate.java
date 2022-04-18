@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -26,6 +27,7 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 // todo rename - this is not Timeseries specific
+// fixme cyril add tests for "toSqlNode"
 public class QueryPredicate {
 
   private final Predicate predicate;
@@ -39,7 +41,8 @@ public class QueryPredicate {
     this.dataset = dataset;
   }
 
-  public static QueryPredicate of(final Predicate predicate, final DimensionType metricType, final String dataset) {
+  public static QueryPredicate of(final Predicate predicate, final DimensionType metricType,
+      final String dataset) {
     return new QueryPredicate(predicate, metricType, dataset);
   }
 
@@ -59,13 +62,13 @@ public class QueryPredicate {
     return dataset;
   }
 
-
   public SqlNode toSqlNode() {
     SqlIdentifier leftOperand = prepareLeftOperand();
     SqlNode rightOperand = prepareRightOperand();
     SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
 
-    SqlOperator operator = Optional.ofNullable(FILTER_PREDICATE_OPER_TO_CALCITE.get(predicate.getOper())).orElseThrow();
+    SqlOperator operator = Optional.ofNullable(FILTER_PREDICATE_OPER_TO_CALCITE.get(predicate.getOper()))
+        .orElseThrow();
 
     return new SqlBasicCall(operator, operands, SqlParserPos.ZERO);
   }
@@ -114,17 +117,20 @@ public class QueryPredicate {
   }
 
   private SqlNode getRightOperandForListPredicate() {
-    switch (metricType) {
-      case STRING:
-        String[] rhsValues = (String[]) predicate.getRhs();
-        List<SqlNode> nodes = Arrays.stream(rhsValues)
-            .map(CalciteUtils::stringLiteralOf)
-            .collect(Collectors.toList());
-        return SqlNodeList.of(SqlParserPos.ZERO, nodes);
-      default:
-        throw new UnsupportedOperationException(String.format("Unsupported DimensionType: %s",
-            metricType));
+    Function<String, SqlNode> literalOf;
+    if (metricType == DimensionType.STRING) {
+      literalOf = CalciteUtils::stringLiteralOf;
+    } else if (metricType == DimensionType.NUMERIC) {
+      literalOf = CalciteUtils::numericLiteralOf;
+    } else {
+      throw new UnsupportedOperationException(String.format(
+          "Unsupported DimensionType for list rhs predicate: %s", metricType));
     }
+    String[] rhsStrings = (String[]) predicate.getRhs();
+    List<SqlNode> stringNodes = Arrays.stream(rhsStrings)
+        .map(literalOf)
+        .collect(Collectors.toList());
+    return SqlNodeList.of(SqlParserPos.ZERO, stringNodes);
   }
 
   // fixme cyril - alert evaluator getDimensionType is hardcoed to STRING - dimension type is not implemented correctly in onboarder

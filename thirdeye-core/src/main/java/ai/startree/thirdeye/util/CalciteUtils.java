@@ -154,8 +154,10 @@ public class CalciteUtils {
    * Combine a list of predicates with the AND operator.
    */
   public static SqlNode combinePredicates(final List<SqlNode> predicates) {
-    if (predicates.size() == 0) {
+    if (predicates.isEmpty()) {
       return null;
+    } else if (predicates.size() == 1) {
+      return predicates.get(0);
     }
     return addPredicates(predicates.get(0), predicates.subList(1, predicates.size() - 1));
   }

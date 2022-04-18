@@ -3,6 +3,9 @@ package ai.startree.thirdeye.datasource.calcite;
 import static ai.startree.thirdeye.detectionpipeline.sql.filter.FilterEngineTest.assertThatQueriesAreTheSame;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
@@ -45,13 +48,13 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithSimpleProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(SIMPLE_PROJECTION);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION);
 
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT %s FROM %s.%s",
+    final String expected = String.format("SELECT %s FROM %s.%s",
         COLUMN_NAME_1,
         DATABASE,
         TABLE);
@@ -61,12 +64,12 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithStandardAggregationProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(STANDARD_AGGREGATION_PROJECTION);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(STANDARD_AGGREGATION_PROJECTION);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT %s(%s) FROM %s.%s",
+    final String expected = String.format("SELECT %s(%s) FROM %s.%s",
         MetricAggFunction.SUM.name(),
         COLUMN_NAME_1,
         DATABASE,
@@ -77,12 +80,12 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithCountDistinctProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT COUNT(DISTINCT %s) FROM %s.%s",
+    final String expected = String.format("SELECT COUNT(DISTINCT %s) FROM %s.%s",
         COLUMN_NAME_1,
         DATABASE,
         TABLE);
@@ -92,12 +95,12 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithDialectSpecificAggregationProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT %s(%s, 90) FROM %s.%s",
+    final String expected = String.format("SELECT %s(%s, 90) FROM %s.%s",
         PinotSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
         COLUMN_NAME_1,
         DATABASE,
@@ -108,12 +111,12 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithUnknownFunction() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT UNKNOWN_MOD(%s, %s) FROM %s.%s",
+    final String expected = String.format("SELECT UNKNOWN_MOD(%s, %s) FROM %s.%s",
         COLUMN_NAME_1,
         COLUMN_NAME_2,
         DATABASE,
@@ -124,16 +127,16 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithMultipleOperandsProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(SIMPLE_PROJECTION);
-    builder.addSelectProjection(STANDARD_AGGREGATION_PROJECTION);
-    builder.addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION);
-    builder.addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION);
-    builder.addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
+        .addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION)
+        .addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION)
+        .addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format(
+    final String expected = String.format(
         "SELECT %s, SUM(%s), COUNT(DISTINCT %s), %s(%s, 90), UNKNOWN_MOD(%s, %s) FROM %s.%s",
         COLUMN_NAME_1,
         COLUMN_NAME_1,
@@ -150,12 +153,11 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithFreeTextProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
-
-    String expected = String.format("SELECT %s FROM %s.%s",
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final String expected = String.format("SELECT %s FROM %s.%s",
         COMPLEX_SQL_PROJECTION_TEXT,
         DATABASE,
         TABLE);
@@ -165,22 +167,174 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithStructuredAndFreeTextProjection() throws SqlParseException {
-    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(SIMPLE_PROJECTION);
-    builder.addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
-    CalciteRequest request = builder.build();
-    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT %s, %s FROM %s.%s",
+    final String expected = String.format("SELECT %s, %s FROM %s.%s",
         COLUMN_NAME_1,
         COMPLEX_SQL_PROJECTION_TEXT,
         DATABASE,
         TABLE);
 
     assertThatQueriesAreTheSame(output, expected);
-
   }
 
+  @Test
+  public void testGetSqlWithNumericPredicate() throws SqlParseException {
+    final List<OPER> binaryOpers = List.of(OPER.EQ, OPER.NEQ, OPER.GE, OPER.GT, OPER.LE, OPER.LT);
+    for (OPER oper : binaryOpers) {
+      final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+          .addSelectProjection(SIMPLE_PROJECTION)
+          .addPredicate(QueryPredicate.of(
+              new Predicate(COLUMN_NAME_2, oper, "3"),
+              DimensionType.NUMERIC,
+              TABLE
+          ));
+      final CalciteRequest request = builder.build();
+      final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+      // convert != in other standard format <>
+      final String sqlOperator = oper.toString().equals("!=") ? "<>" : oper.toString();
+      final String expected = String.format("SELECT %s FROM %s.%s WHERE (%s.%s %s %s)",
+          COLUMN_NAME_1,
+          DATABASE,
+          TABLE,
+          TABLE,
+          COLUMN_NAME_2,
+          sqlOperator,
+          3);
+
+      assertThatQueriesAreTheSame(output, expected);
+    }
+  }
+
+  @Test
+  public void testGetSqlWithStringPredicate() throws SqlParseException {
+    List<OPER> binaryOpers = List.of(OPER.EQ, OPER.NEQ);
+    for (OPER oper : binaryOpers) {
+      final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+          .addSelectProjection(SIMPLE_PROJECTION)
+          .addPredicate(QueryPredicate.of(
+              new Predicate(COLUMN_NAME_2, oper, "myText"),
+              DimensionType.STRING,
+              TABLE
+          ));
+      final CalciteRequest request = builder.build();
+      final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+      // convert != in other standard format <>
+      final String sqlOperator = oper.toString().equals("!=") ? "<>" : oper.toString();
+      final String expected = String.format("SELECT %s FROM %s.%s WHERE (%s.%s %s %s)",
+          COLUMN_NAME_1,
+          DATABASE,
+          TABLE,
+          TABLE,
+          COLUMN_NAME_2,
+          sqlOperator,
+          "'myText'");
+
+      assertThatQueriesAreTheSame(output, expected);
+    }
+  }
+
+  @Test
+  public void testGetSqlWithBooleanPredicate() throws SqlParseException {
+    List<OPER> binaryOpers = List.of(OPER.EQ, OPER.NEQ);
+    for (OPER oper : binaryOpers) {
+      final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+          .addSelectProjection(SIMPLE_PROJECTION)
+          .addPredicate(QueryPredicate.of(
+              new Predicate(COLUMN_NAME_2, oper, "true"),
+              DimensionType.BOOLEAN,
+              TABLE
+          ));
+      final CalciteRequest request = builder.build();
+      final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+      // convert != in other standard format <>
+      final String sqlOperator = oper.toString().equals("!=") ? "<>" : oper.toString();
+      final String expected = String.format("SELECT %s FROM %s.%s WHERE (%s.%s %s %s)",
+          COLUMN_NAME_1,
+          DATABASE,
+          TABLE,
+          TABLE,
+          COLUMN_NAME_2,
+          sqlOperator,
+          "TRUE");
+
+      assertThatQueriesAreTheSame(output, expected);
+    }
+  }
+
+  @Test
+  public void testGetSqlWithInPredicates() throws SqlParseException {
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .addPredicate(QueryPredicate.of(
+            new Predicate(COLUMN_NAME_2, OPER.IN, new String[]{"val1", "val2"}),
+            DimensionType.STRING,
+            TABLE
+        ));
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final String expected = String.format("SELECT %s FROM %s.%s WHERE (%s.%s IN (%s, %s))",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE,
+        TABLE,
+        COLUMN_NAME_2,
+        "'val1'",
+        "'val2'");
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithFreeTextPredicate() throws SqlParseException {
+    String complexWhere = "complexFunction(col2, col3, 10) >= 27";
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .withFreeTextPredicates(complexWhere);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final String expected = String.format("SELECT %s FROM %s.%s WHERE %s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE,
+        complexWhere);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithFreeTextPredicateRemovingStartingAnd() throws SqlParseException {
+    String complexWhere = "complexFunction(col2, col3, 10) >= 27 OR colX = TRUE";
+    String complexWhereWithStartingAnd = "AND " + complexWhere;
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .withFreeTextPredicates(complexWhereWithStartingAnd);
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final String expected = String.format("SELECT %s FROM %s.%s WHERE %s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE,
+        complexWhere);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  // test multi predicates
+  @Test
+  public void testGetSqlWithMultiplePredicates() throws SqlParseException {
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION);
+        //.add
+  }
+
+  // with Predicate =
+  // with !=
+  // free
 
   // test datetime aggregation
   // test datetime filter edge case

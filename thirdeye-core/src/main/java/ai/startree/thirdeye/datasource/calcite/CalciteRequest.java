@@ -59,6 +59,7 @@ public class CalciteRequest {
   final private String timeFilterColumnFormat;
   // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - to be used by Presto/BQ
   final private List<QueryPredicate> predicates;
+  // fixme todo cyril make this a list
   final private String freeTextPredicates;
 
   // GROUP BY clause
@@ -196,6 +197,7 @@ public class CalciteRequest {
     }
     this.predicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
     if (StringUtils.isNotBlank(freeTextPredicates)) {
+      // this too make it easy to use the same default templatesProperty for dataFetcher and custom rca where clause
       String cleanedFreePredicate = freeTextPredicates.replaceFirst("^ *[aA][nN][dD] +", "");
       predicates.add(expressionToNode(cleanedFreePredicate, sqlParserConfig));
     }

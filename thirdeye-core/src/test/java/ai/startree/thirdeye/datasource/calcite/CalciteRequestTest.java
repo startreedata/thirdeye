@@ -22,6 +22,12 @@ public class CalciteRequestTest {
   private static final String DATABASE = "db1";
   private static final String TABLE = "table1";
   private static final String COLUMN_NAME_1 = "col1";
+  public static final QueryProjection DIALECT_SPECIFIC_AGGREGATION_PROJECTION = QueryProjection.of(
+      MetricAggFunction.PCT90.name(),
+      List.of(COLUMN_NAME_1));
+  private static final String COLUMN_NAME_2 = "col2";
+  public static final QueryProjection UNKNOWN_FUNCTION_PROJECTION = QueryProjection.of("UNKNOWN_MOD",
+      List.of(COLUMN_NAME_1, COLUMN_NAME_2));
   public static final QueryProjection COUNT_DISTINCT_AGGREGATION_PROJECTION = QueryProjection.of(
       MetricAggFunction.COUNT_DISTINCT.name(),
       List.of(COLUMN_NAME_1));
@@ -32,6 +38,7 @@ public class CalciteRequestTest {
       COLUMN_NAME_1);
 
   private static final SqlLanguage SQL_LANGUAGE = new PinotSqlLanguage();
+  public static final String COMPLEX_SQL_PROJECTION_TEXT = "DATETIME(COMPLEX(UN_FN(col1, 3)))";
   SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new PinotSqlExpressionBuilder();
 
   // todo cyril add a few tests for builder pre conditions
@@ -86,13 +93,87 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithDialectSpecificAggregationProjection() throws SqlParseException {
     CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
-    builder.addSelectProjection(QueryProjection.of(MetricAggFunction.COUNT_DISTINCT.name(),
-        List.of(COLUMN_NAME_1)));
+    builder.addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION);
     CalciteRequest request = builder.build();
     String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    String expected = String.format("SELECT COUNT(DISTINCT %s) FROM %s.%s",
+    String expected = String.format("SELECT %s(%s, 90) FROM %s.%s",
+        PinotSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
         COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithUnknownFunction() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format("SELECT UNKNOWN_MOD(%s, %s) FROM %s.%s",
+        COLUMN_NAME_1,
+        COLUMN_NAME_2,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithMultipleOperandsProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(SIMPLE_PROJECTION);
+    builder.addSelectProjection(STANDARD_AGGREGATION_PROJECTION);
+    builder.addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION);
+    builder.addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION);
+    builder.addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format(
+        "SELECT %s, SUM(%s), COUNT(DISTINCT %s), %s(%s, 90), UNKNOWN_MOD(%s, %s) FROM %s.%s",
+        COLUMN_NAME_1,
+        COLUMN_NAME_1,
+        COLUMN_NAME_1,
+        PinotSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
+        COLUMN_NAME_1,
+        COLUMN_NAME_1,
+        COLUMN_NAME_2,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithFreeTextProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format("SELECT %s FROM %s.%s",
+        COMPLEX_SQL_PROJECTION_TEXT,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithStructuredAndFreeTextProjection() throws SqlParseException {
+    CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE);
+    builder.addSelectProjection(SIMPLE_PROJECTION);
+    builder.addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
+    CalciteRequest request = builder.build();
+    String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    String expected = String.format("SELECT %s, %s FROM %s.%s",
+        COLUMN_NAME_1,
+        COMPLEX_SQL_PROJECTION_TEXT,
         DATABASE,
         TABLE);
 
@@ -100,10 +181,12 @@ public class CalciteRequestTest {
 
   }
 
-  @Test
-  public void testGetSqlWithMultipleOperandsProjection() throws SqlParseException {
 
-  }
+  // test datetime aggregation
+  // test datetime filter edge case
+  // test gtoup by
+  // test prder by
+  // test limit
 
   // test freeSqlText injection
 
@@ -210,6 +293,8 @@ public class CalciteRequestTest {
 
   private static class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
+    public static final String DIALECT_SPECIFIC_PERCENTILE_FN_NAME = "PERCENTILE_TDIGEST";
+
     @Override
     public String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
         long maxTimeMillisExcluded,
@@ -301,7 +386,7 @@ public class CalciteRequestTest {
           checkArgument(operands.size() == 1,
               "Incorrect number of operands for percentile sql generation. Expected: 1. Got: %s",
               operands.size());
-          return new StringBuilder().append("PERCENTILE_TDIGEST")
+          return new StringBuilder().append(DIALECT_SPECIFIC_PERCENTILE_FN_NAME)
               .append("(")
               .append(operands.get(0))
               .append(",")

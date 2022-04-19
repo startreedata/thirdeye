@@ -344,69 +344,6 @@ public class CalciteRequestTest {
 
   // test freeSqlText injection
 
-//  @Test
-//  public void test() throws SqlParseException {
-//    Interval test = new Interval(0,0);
-//    List<Integer> lol2 = List.of(1, 2);
-//    List<Integer> subList = lol2.subList(1, lol2.size() - 1);
-//    SqlNode node = queryToNode(
-//        "SELECT COUNT(*), COUNT(DISTINCT ol) as ra, AVG(jmt) as lol, ts FROM t.loldata WHERE ts > 123345 and lol='str' group by ra, lol Order by ts LIMIT 1000",
-//        sqlParserConfig);
-//
-//    CalciteRequest simpleRequest = new CalciteRequest(
-//        List.of(QueryProjection.of("SUM", List.of("jmt"))), // todo cyril in builder pattern - make sure one of it is not null at build
-//        List.of(),
-//        // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
-//        null,
-//        null,
-//        null,
-//        "lol",
-//        // todo mark non nullable - check at build
-//        "raah",
-//        // todo  mark non nullable - check at build
-//        null,
-//        null,
-//        null,
-//        List.of(),// todo cyril use builder pattern - if not set, default to empty list - make non nullable in main object
-//        null,
-//        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-//        List.of(),
-//        List.of(), // todo cyril use builder pattern - if not set, default to empty list - make non nullable in main objct
-//        null);
-//
-//    String query = simpleRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
-//
-//    CalciteRequest complexRequest = new CalciteRequest(
-//        List.of(
-//            QueryProjection.of("SUM", List.of("\"jmt\"")),
-//            QueryProjection.of(MetricAggFunction.PCT95.name(), List.of("fmt")),
-//            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("*"), "DISTINCT"),
-//            QueryProjection.of(MetricAggFunction.COUNT.name(), List.of("col1"), "DISTINCT"),
-//            QueryProjection.of(MetricAggFunction.COUNT_DISTINCT.name(), List.of("browser")),
-//            QueryProjection.of("browser")
-//        ),
-//        List.of("unix_millis(datetimeColumn)"),
-//        Period.days(1),
-//        "EPOCH",
-//        "time_epoch",
-//        "mydb",
-//        "mytable",
-//        new Interval(DateTime.now(), DateTime.now().plus(Period.days(10))),
-//        "time_epoch",
-//        "EPOCH",
-//        List.of(QueryPredicate.of(new Predicate("browser", OPER.EQ, "chrome"),
-//            DimensionType.STRING,
-//            null)),
-//        "and country!='US'",
-//        List.of(QueryProjection.of("time_epoch"), QueryProjection.of("country")),
-//        List.of(),
-//        List.of("time_epoch"),
-//        100L
-//    );
-//    String query2 = complexRequest.getSql(sqlLanguage, new PinotSqlExpressionBuilder());
-//
-//    String lol = "";
-//  }
 
   // TODO cyril - should be easy to express:
   //  a timeseries --> with timegrouping
@@ -420,6 +357,8 @@ public class CalciteRequestTest {
   // layer that converts MetricAggFunction to a proper format STRING: is this even possible? --> no because arguments are need
   // query projection can have two types: MetricAggFunction or String??
 
+  // TODO cyril use a test language rather than the pinot language
+  // todo use the same testLanguage everywhere -->
   private static class PinotSqlLanguage implements SqlLanguage {
 
     private static final ThirdEyeSqlParserConfig SQL_PARSER_CONFIG = new ThirdEyeSqlParserConfig.Builder()

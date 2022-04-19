@@ -69,7 +69,7 @@ data:
     # Start the Task Driver. This module runs the detection and notification tasks
     taskDriver:
       enabled: false
-      id: 0 # must be a non-negative integer unique per instance/worker
+      id: 0 
     
     time:
       timezone: {{ .Values.time.timezone }}

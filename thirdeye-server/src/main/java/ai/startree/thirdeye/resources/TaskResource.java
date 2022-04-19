@@ -11,7 +11,6 @@ import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.task.TaskStatus;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
@@ -31,7 +30,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -53,7 +51,6 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       .put("status", "status")
       .put("created", "createTime")
       .put("updated", "updateTime")
-      .put("startTime", "startTime")
       .build();
 
   @Inject
@@ -109,27 +106,6 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     dtoManager
         .filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(map))
         .forEach(this::deleteDto);
-    return Response.ok().build();
-  }
-
-  @PUT
-  @Path("/handle-orphan")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response handleOrphan(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
-      @FormParam("startedBeforeSeconds") final Long olderThanSeconds) {
-    final MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
-    final long olderThan = System.currentTimeMillis() - olderThanSeconds*1000;
-    map.add("startTime", "[lt]" + olderThan);
-    map.add("status", TaskStatus.RUNNING.toString());
-
-    dtoManager
-        .filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(map))
-        .forEach(task -> ((TaskManager)dtoManager).updateStatusAndTaskEndTime(task.getId(),
-            TaskStatus.RUNNING,
-            TaskStatus.FAILED,
-            System.currentTimeMillis(),
-            "Orphan task handled by updating status to FAILED"));
     return Response.ok().build();
   }
 }

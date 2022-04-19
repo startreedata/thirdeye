@@ -154,7 +154,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithFreeTextProjection() throws SqlParseException {
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
-        .addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
+        .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format("SELECT %s FROM %s.%s",
@@ -169,7 +169,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithStructuredAndFreeTextProjection() throws SqlParseException {
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .addFreeTextSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
+        .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -294,7 +294,7 @@ public class CalciteRequestTest {
     String complexWhere = "complexFunction(col2, col3, 10) >= 27";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .withFreeTextPredicates(complexWhere);
+        .addPredicate(complexWhere);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format("SELECT %s FROM %s.%s WHERE %s",
@@ -312,7 +312,7 @@ public class CalciteRequestTest {
     String complexWhereWithStartingAnd = "AND " + complexWhere;
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .withFreeTextPredicates(complexWhereWithStartingAnd);
+        .addPredicate(complexWhereWithStartingAnd);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format("SELECT %s FROM %s.%s WHERE %s",

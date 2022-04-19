@@ -5,25 +5,25 @@
 
 package ai.startree.thirdeye.spi.datalayer.bao;
 
-import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
 import java.util.List;
 import java.util.Set;
 
-public interface RootcauseSessionManager extends AbstractManager<RootcauseSessionDTO> {
+public interface RootcauseSessionManager extends AbstractManager<RootCauseSessionDTO> {
 
-  List<RootcauseSessionDTO> findByName(String name);
+  List<RootCauseSessionDTO> findByName(String name);
 
-  List<RootcauseSessionDTO> findByNameLike(Set<String> nameFragments);
+  List<RootCauseSessionDTO> findByNameLike(Set<String> nameFragments);
 
-  List<RootcauseSessionDTO> findByOwner(String owner);
+  List<RootCauseSessionDTO> findByOwner(String owner);
 
-  List<RootcauseSessionDTO> findByAnomalyRange(long start, long end);
+  List<RootCauseSessionDTO> findByAnomalyRange(long start, long end);
 
-  List<RootcauseSessionDTO> findByCreatedRange(long start, long end);
+  List<RootCauseSessionDTO> findByCreatedRange(long start, long end);
 
-  List<RootcauseSessionDTO> findByUpdatedRange(long start, long end);
+  List<RootCauseSessionDTO> findByUpdatedRange(long start, long end);
 
-  List<RootcauseSessionDTO> findByPreviousId(long id);
+  List<RootCauseSessionDTO> findByPreviousId(long id);
 
-  List<RootcauseSessionDTO> findByAnomalyId(long id);
+  List<RootCauseSessionDTO> findByAnomalyId(long id);
 }

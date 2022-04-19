@@ -16,7 +16,7 @@ import java.util.Set;
  * versions.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RootcauseSessionDTO extends AbstractDTO {
+public class RootCauseSessionDTO extends AbstractDTO {
 
   public enum PermissionType {
     READ,
@@ -203,7 +203,7 @@ public class RootcauseSessionDTO extends AbstractDTO {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RootcauseSessionDTO that = (RootcauseSessionDTO) o;
+    RootCauseSessionDTO that = (RootCauseSessionDTO) o;
     return Objects.equals(name, that.name) && Objects.equals(text, that.text) && Objects
         .equals(owner, that.owner)
         && Objects.equals(compareMode, that.compareMode) && Objects

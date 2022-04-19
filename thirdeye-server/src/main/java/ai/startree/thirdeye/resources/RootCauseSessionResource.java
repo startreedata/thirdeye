@@ -9,7 +9,7 @@ import ai.startree.thirdeye.rootcause.entity.AnomalyEventEntity;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
-import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -57,14 +57,14 @@ public class RootCauseSessionResource {
   @GET
   @Path("/{sessionId}")
   @ApiOperation(value = "Get RootCauseSession by sessionId")
-  public RootcauseSessionDTO get(
+  public RootCauseSessionDTO get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("sessionId") Long sessionId) {
     if (sessionId == null) {
       throw new IllegalArgumentException("Must provide sessionId");
     }
 
-    RootcauseSessionDTO session = this.sessionDAO.findById(sessionId);
+    RootCauseSessionDTO session = this.sessionDAO.findById(sessionId);
 
     if (session == null) {
       throw new IllegalArgumentException(String.format("Could not resolve session id %d",
@@ -79,8 +79,8 @@ public class RootCauseSessionResource {
   @ApiOperation(value = "Post a session")
   public Long post(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal, String jsonString)
       throws Exception {
-    RootcauseSessionDTO session = this.mapper.readValue(jsonString,
-        new TypeReference<RootcauseSessionDTO>() {});
+    RootCauseSessionDTO session = this.mapper.readValue(jsonString,
+        new TypeReference<RootCauseSessionDTO>() {});
 
     final long timestamp = DateTime.now().getMillis();
     final String username = principal.getName();
@@ -92,14 +92,14 @@ public class RootCauseSessionResource {
       session.setOwner(username);
       session.setAnomalyId(extractAnomalyId(session.getAnomalyUrns()));
     } else {
-      RootcauseSessionDTO existing = this.sessionDAO.findById(session.getId());
+      RootCauseSessionDTO existing = this.sessionDAO.findById(session.getId());
       if (existing == null) {
         throw new IllegalArgumentException(String.format("Could not resolve session id %d",
             session.getId()));
       }
 
       if (Objects.equals(existing.getPermissions(),
-          RootcauseSessionDTO.PermissionType.READ.toString()) &&
+          RootCauseSessionDTO.PermissionType.READ.toString()) &&
           !Objects.equals(existing.getOwner(), username)) {
         throw new IllegalAccessException(String.format(
             "No write permissions for '%s' on session id %d",
@@ -116,7 +116,7 @@ public class RootCauseSessionResource {
   @GET
   @Path("/query")
   @ApiOperation(value = "Query")
-  public List<RootcauseSessionDTO> query(
+  public List<RootCauseSessionDTO> query(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("id") String idsString,
       @QueryParam("name") String namesString,
@@ -208,7 +208,7 @@ public class RootCauseSessionResource {
    * @param other updated rootcause session
    * @return modified, existing session
    */
-  private static RootcauseSessionDTO merge(RootcauseSessionDTO session, RootcauseSessionDTO other) {
+  private static RootCauseSessionDTO merge(RootCauseSessionDTO session, RootCauseSessionDTO other) {
     if (other.getName() != null) {
       session.setName(other.getName());
     }

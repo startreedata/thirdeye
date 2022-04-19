@@ -16,7 +16,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -119,11 +119,11 @@ public class DatalayerTestUtils {
     return overrideConfigDTO;
   }
 
-  public static RootcauseSessionDTO getTestRootcauseSessionResult(long start, long end,
+  public static RootCauseSessionDTO getTestRootcauseSessionResult(long start, long end,
       long created, long updated,
       String name, String owner, String text, String granularity, String compareMode,
       Long previousId, Long anomalyId) {
-    RootcauseSessionDTO session = new RootcauseSessionDTO();
+    RootCauseSessionDTO session = new RootCauseSessionDTO();
     session.setAnomalyRangeStart(start);
     session.setAnomalyRangeEnd(end);
     session.setAnalysisRangeStart(start - 100);

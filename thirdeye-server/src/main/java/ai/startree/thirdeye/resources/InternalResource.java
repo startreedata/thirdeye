@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
+import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.task.runner.NotificationTaskRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -63,6 +64,7 @@ public class InternalResource {
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final NotificationSchemeFactory notificationSchemeFactory;
+  private final TaskDriverConfiguration taskDriverConfiguration;
 
   @Inject
   public InternalResource(
@@ -72,7 +74,8 @@ public class InternalResource {
       final NotificationTaskRunner notificationTaskRunner,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final NotificationSchemeFactory notificationSchemeFactory) {
+      final NotificationSchemeFactory notificationSchemeFactory,
+      final TaskDriverConfiguration taskDriverConfiguration) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
@@ -80,6 +83,7 @@ public class InternalResource {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationSchemeFactory = notificationSchemeFactory;
+    this.taskDriverConfiguration = taskDriverConfiguration;
   }
 
   @Path("http-detector")
@@ -189,5 +193,15 @@ public class InternalResource {
     log.info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
     log.info("========================================================================");
     return Response.ok().build();
+  }
+
+  @GET
+  @Path("worker/id")
+  public Response workerId(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+    if(taskDriverConfiguration.isEnabled()) {
+      return Response.ok(taskDriverConfiguration.getId()).build();
+    } else {
+      return Response.ok(-1).build();
+    }
   }
 }

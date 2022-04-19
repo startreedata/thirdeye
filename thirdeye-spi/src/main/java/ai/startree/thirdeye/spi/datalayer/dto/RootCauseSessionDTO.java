@@ -6,16 +6,18 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * RootcauseSessionBean holds information for stored rootcause investigation reports. Supports
- * backpointers to previous
- * versions.
+ * RootCauseSessionBean holds information for stored rootCause investigation reports.
+ * Supports backpointers to previous versions.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_NULL)
 public class RootCauseSessionDTO extends AbstractDTO {
 
   public enum PermissionType {
@@ -25,6 +27,10 @@ public class RootCauseSessionDTO extends AbstractDTO {
 
   private String name;
   private String text;
+  private String uiMetadata;
+  private Long anomalyId;
+
+  // below is legacy - may be used in the future
   private String owner;
   private String compareMode;
   private String granularity;
@@ -38,7 +44,6 @@ public class RootCauseSessionDTO extends AbstractDTO {
   private Set<String> contextUrns;
   private Set<String> anomalyUrns;
   private Set<String> selectedUrns;
-  private Long anomalyId;
   private String permissions = PermissionType.READ_WRITE.toString();
   private Map<String, Object> customTableSettings;
   private Boolean isUserCustomizingRequest;
@@ -47,16 +52,36 @@ public class RootCauseSessionDTO extends AbstractDTO {
     return name;
   }
 
-  public void setName(String name) {
+  public RootCauseSessionDTO setName(final String name) {
     this.name = name;
+    return this;
   }
 
   public String getText() {
     return text;
   }
 
-  public void setText(String text) {
+  public RootCauseSessionDTO setText(final String text) {
     this.text = text;
+    return this;
+  }
+
+  public Long getAnomalyId() {
+    return anomalyId;
+  }
+
+  public RootCauseSessionDTO setAnomalyId(final Long anomalyId) {
+    this.anomalyId = anomalyId;
+    return this;
+  }
+
+  public String getUiMetadata() {
+    return uiMetadata;
+  }
+
+  public RootCauseSessionDTO setUiMetadata(final String uiMetadata) {
+    this.uiMetadata = uiMetadata;
+    return this;
   }
 
   public String getOwner() {
@@ -163,14 +188,6 @@ public class RootCauseSessionDTO extends AbstractDTO {
     this.selectedUrns = selectedUrns;
   }
 
-  public Long getAnomalyId() {
-    return anomalyId;
-  }
-
-  public void setAnomalyId(Long anomalyId) {
-    this.anomalyId = anomalyId;
-  }
-
   public String getPermissions() {
     return permissions;
   }
@@ -204,32 +221,49 @@ public class RootCauseSessionDTO extends AbstractDTO {
       return false;
     }
     RootCauseSessionDTO that = (RootCauseSessionDTO) o;
-    return Objects.equals(name, that.name) && Objects.equals(text, that.text) && Objects
-        .equals(owner, that.owner)
-        && Objects.equals(compareMode, that.compareMode) && Objects
-        .equals(granularity, that.granularity)
-        && Objects.equals(previousId, that.previousId) && Objects
-        .equals(anomalyRangeStart, that.anomalyRangeStart)
-        && Objects.equals(anomalyRangeEnd, that.anomalyRangeEnd) && Objects
-        .equals(analysisRangeStart,
-            that.analysisRangeStart) && Objects.equals(analysisRangeEnd, that.analysisRangeEnd)
-        && Objects.equals(created,
-        that.created) && Objects.equals(updated, that.updated) && Objects
-        .equals(contextUrns, that.contextUrns)
-        && Objects.equals(anomalyUrns, that.anomalyUrns) && Objects
-        .equals(selectedUrns, that.selectedUrns)
-        && Objects.equals(anomalyId, that.anomalyId) && Objects
-        .equals(permissions, that.permissions)
-        && Objects.equals(customTableSettings, that.customTableSettings)
-        && Objects.equals(isUserCustomizingRequest, that.isUserCustomizingRequest);
+    return Objects.equals(name, that.name) &&
+        Objects.equals(text, that.text) &&
+        Objects.equals(anomalyId, that.anomalyId) &&
+        Objects.equals(uiMetadata, that.uiMetadata) &&
+        Objects.equals(owner, that.owner) &&
+        Objects.equals(compareMode, that.compareMode) &&
+        Objects.equals(granularity, that.granularity) &&
+        Objects.equals(previousId, that.previousId) &&
+        Objects.equals(anomalyRangeStart, that.anomalyRangeStart) &&
+        Objects.equals(anomalyRangeEnd, that.anomalyRangeEnd) &&
+        Objects.equals(analysisRangeStart, that.analysisRangeStart) &&
+        Objects.equals(analysisRangeEnd, that.analysisRangeEnd) &&
+        Objects.equals(created, that.created) &&
+        Objects.equals(updated, that.updated) &&
+        Objects.equals(contextUrns, that.contextUrns) &&
+        Objects.equals(anomalyUrns, that.anomalyUrns) &&
+        Objects.equals(selectedUrns, that.selectedUrns) &&
+        Objects.equals(permissions, that.permissions) &&
+        Objects.equals(customTableSettings, that.customTableSettings) &&
+        Objects.equals(isUserCustomizingRequest, that.isUserCustomizingRequest);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, text, owner, compareMode, granularity, previousId, anomalyRangeStart,
+    return Objects.hash(name,
+        text,
+        anomalyId,
+        uiMetadata,
+        owner,
+        compareMode,
+        granularity,
+        previousId,
+        anomalyRangeStart,
         anomalyRangeEnd,
-        analysisRangeStart, analysisRangeEnd, created, updated, contextUrns, anomalyUrns,
-        selectedUrns, anomalyId,
-        permissions, customTableSettings, isUserCustomizingRequest);
+        analysisRangeStart,
+        analysisRangeEnd,
+        created,
+        updated,
+        contextUrns,
+        anomalyUrns,
+        selectedUrns,
+        permissions,
+        customTableSettings,
+        isUserCustomizingRequest);
   }
 }

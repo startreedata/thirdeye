@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
+import ai.startree.thirdeye.spi.api.RootCauseSessionApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
@@ -35,6 +36,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -287,12 +289,20 @@ public abstract class ApiBeanMapper {
   public static TaskApi toApi(TaskDTO dto) {
     return TaskMapper.INSTANCE.toApi(dto);
   }
-
+  {}
   public static EventApi toApi(final EventDTO dto) {
     return EventMapper.INSTANCE.toApi(dto);
   }
 
   public static EventDTO toEventDto(final EventApi api) {
     return EventMapper.INSTANCE.toDto(api);
+  }
+
+  public static RootCauseSessionApi toApi(final RootCauseSessionDTO dto) {
+    return RootCauseSessionMapper.INSTANCE.toApi(dto);
+  }
+
+  public static RootCauseSessionDTO toDto(final RootCauseSessionApi api) {
+    return RootCauseSessionMapper.INSTANCE.toDto(api);
   }
 }

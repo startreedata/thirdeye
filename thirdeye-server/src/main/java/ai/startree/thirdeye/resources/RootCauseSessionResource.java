@@ -5,11 +5,15 @@
 
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.rootcause.entity.AnomalyEventEntity;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+
+import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.api.RootCauseSessionApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -25,97 +29,57 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.joda.time.DateTime;
 
-@Api(authorizations = {@Authorization(value = "oauth")})
+@Api(tags = "Root Cause Analysis Session", authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RootCauseSessionResource {
+public class RootCauseSessionResource extends CrudResource<RootCauseSessionApi, RootCauseSessionDTO> {
 
-  private final RootcauseSessionManager sessionDAO;
-  private final ObjectMapper mapper;
+  public static final ImmutableMap<String, String> API_TO_BEAN_FILTER_MAP = ImmutableMap.<String, String>builder()
+      .put("anomalyId", "anomalyId")
+      .build();
 
   @Inject
-  public RootCauseSessionResource(RootcauseSessionManager sessionDAO, ObjectMapper mapper) {
-    this.sessionDAO = sessionDAO;
-    this.mapper = mapper;
+  public RootCauseSessionResource(final RootcauseSessionManager rootCauseSessionDAO) {
+    super(rootCauseSessionDAO, API_TO_BEAN_FILTER_MAP);
   }
 
-  @GET
-  @Path("/{sessionId}")
-  @ApiOperation(value = "Get RootCauseSession by sessionId")
-  public RootCauseSessionDTO get(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("sessionId") Long sessionId) {
-    if (sessionId == null) {
-      throw new IllegalArgumentException("Must provide sessionId");
-    }
-
-    RootCauseSessionDTO session = this.sessionDAO.findById(sessionId);
-
-    if (session == null) {
-      throw new IllegalArgumentException(String.format("Could not resolve session id %d",
-          sessionId));
-    }
-
-    return session;
+  @Override
+  protected RootCauseSessionDTO createDto(final ThirdEyePrincipal principal,
+      final RootCauseSessionApi api) {
+    final RootCauseSessionDTO rootCauseSessionDTO = ApiBeanMapper.toDto(api);
+    rootCauseSessionDTO.setCreatedBy(principal.getName());
+    return rootCauseSessionDTO;
   }
 
-  @POST
-  @Path("/")
-  @ApiOperation(value = "Post a session")
-  public Long post(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal, String jsonString)
-      throws Exception {
-    RootCauseSessionDTO session = this.mapper.readValue(jsonString,
-        new TypeReference<RootCauseSessionDTO>() {});
+  @Override
+  protected RootCauseSessionDTO toDto(final RootCauseSessionApi api) {
+    return ApiBeanMapper.toDto(api);
+  }
 
-    final long timestamp = DateTime.now().getMillis();
-    final String username = principal.getName();
+  @Override
+  protected RootCauseSessionApi toApi(final RootCauseSessionDTO dto) {
+    return ApiBeanMapper.toApi(dto);
+  }
 
-    session.setUpdated(timestamp);
-
-    if (session.getId() == null) {
-      session.setCreated(timestamp);
-      session.setOwner(username);
-      session.setAnomalyId(extractAnomalyId(session.getAnomalyUrns()));
-    } else {
-      RootCauseSessionDTO existing = this.sessionDAO.findById(session.getId());
-      if (existing == null) {
-        throw new IllegalArgumentException(String.format("Could not resolve session id %d",
-            session.getId()));
-      }
-
-      if (Objects.equals(existing.getPermissions(),
-          RootCauseSessionDTO.PermissionType.READ.toString()) &&
-          !Objects.equals(existing.getOwner(), username)) {
-        throw new IllegalAccessException(String.format(
-            "No write permissions for '%s' on session id %d",
-            username,
-            existing.getId()));
-      }
-
-      session = merge(existing, session);
-    }
-
-    return this.sessionDAO.save(session);
+  @Override
+  protected void validate(final RootCauseSessionApi api, final RootCauseSessionDTO existing) {
+    super.validate(api, existing);
+    ensureExists(api.getAnomalyId(), "AnomalyId must be present");
   }
 
   @GET
   @Path("/query")
   @ApiOperation(value = "Query")
+  @Deprecated
   public List<RootCauseSessionDTO> query(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("id") String idsString,
@@ -180,7 +144,7 @@ public class RootCauseSessionResource {
       throw new IllegalArgumentException("Must provide at least one property");
     }
 
-    return this.sessionDAO.findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates
+    return this.dtoManager.findByPredicate(Predicate.AND(predicates.toArray(new Predicate[predicates
         .size()])));
   }
 
@@ -199,87 +163,5 @@ public class RootCauseSessionResource {
       }
     }
     return args.toArray(new String[args.size()]);
-  }
-
-  /**
-   * Merges attributes of an existing session with incoming updates. Does NOT update all values.
-   *
-   * @param session existing rootcause session
-   * @param other updated rootcause session
-   * @return modified, existing session
-   */
-  private static RootCauseSessionDTO merge(RootCauseSessionDTO session, RootCauseSessionDTO other) {
-    if (other.getName() != null) {
-      session.setName(other.getName());
-    }
-
-    if (other.getText() != null) {
-      session.setText(other.getText());
-    }
-
-    if (other.getCompareMode() != null) {
-      session.setCompareMode(other.getCompareMode());
-    }
-
-    if (other.getGranularity() != null) {
-      session.setGranularity(other.getGranularity());
-    }
-
-    if (other.getAnalysisRangeStart() != null) {
-      session.setAnalysisRangeStart(other.getAnalysisRangeStart());
-    }
-
-    if (other.getAnalysisRangeEnd() != null) {
-      session.setAnalysisRangeEnd(other.getAnalysisRangeEnd());
-    }
-
-    if (other.getAnomalyRangeStart() != null) {
-      session.setAnomalyRangeStart(other.getAnomalyRangeStart());
-    }
-
-    if (other.getAnomalyRangeEnd() != null) {
-      session.setAnomalyRangeEnd(other.getAnomalyRangeEnd());
-    }
-
-    if (other.getContextUrns() != null) {
-      session.setContextUrns(other.getContextUrns());
-    }
-
-    if (other.getSelectedUrns() != null) {
-      session.setSelectedUrns(other.getSelectedUrns());
-    }
-
-    if (other.getUpdated() != null) {
-      session.setUpdated(other.getUpdated());
-    }
-
-    if (other.getPermissions() != null) {
-      session.setPermissions(other.getPermissions());
-    }
-
-    if (other.getIsUserCustomizingRequest() != null) {
-      session.setIsUserCustomizingRequest(other.getIsUserCustomizingRequest());
-    }
-
-    if (other.getCustomTableSettings() != null) {
-      session.setCustomTableSettings(other.getCustomTableSettings());
-    }
-
-    return session;
-  }
-
-  /**
-   * Returns the first anomaly entity id from a set of URNs, or {@code null} if none can be found.
-   *
-   * @param urns urns to scan
-   * @return first anomaly entity id, or null
-   */
-  private static Long extractAnomalyId(Iterable<String> urns) {
-    for (String urn : urns) {
-      if (AnomalyEventEntity.TYPE.isType(urn)) {
-        return AnomalyEventEntity.fromURN(urn, 1.0).getId();
-      }
-    }
-    return null;
   }
 }

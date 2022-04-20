@@ -180,7 +180,7 @@ Skip the `-DdryRun=true` to cut a release.
 ## Context
 ThirdEye's open-source solution has been proven to be very useful for anomaly detection and root cause analysis across different companies (eg: LinkedIn, Confluent). As part of the community, we have seen more and more users have shown interest in using ThirdEye and looking for dedicated support. Currently, this is a sub-project** under Apache Pinot with no strong leadership. Hence, StarTree decided to take responsibility for  ThirdEye and make its source available under the StarTree Community License, with the goal to build a thriving community around ThirdEye within the StarTree and Apache Pinot communities.
 
-Note: The current open-source ThirdEye re-uses the license used for Pinot and is tightly coupled with Pinot. Developers need to fork both PInot and ThirdEye to make it work. Hence for these reasons, it is called a sub-project even though in GitHub it is an independent project.
+**Note: The old open-source ThirdEye (Github: https://github.com/project-thirdeye/thirdeye) re-uses the license used for Pinot and is tightly coupled with Pinot. Developers need to fork both PInot and ThirdEye to make it work. Hence for these reasons, it is called a sub-project even though in GitHub it is an independent project.
 
 ## Problem: What problem is this solving?
 As we consider taking over leadership of this project we will need to:
@@ -189,7 +189,7 @@ Increase community awareness
 Increase community adoption
 
 ## Scope
-ThirdEye will be “source available” under the [StarTree Community License](https://docs.google.com/document/d/1RiUoTfweHsmheZrNxMee_GeKmJZKbzVV). This means external partners will be able to view, change, and share the code. However, the license will have a limitation designed to sustain our stewardship of the project, which will prevent anyone from offering this as a cloud service or SaaS solution or as software).
+ThirdEye will be “source available” under the StarTree Community License. This means external partners will be able to view, change, and share the code. However, the license will have a limitation designed to sustain our stewardship of the project, which will prevent anyone from offering this as a cloud service or SaaS solution or as software).
 
 ## How will the StarTree IP be protected?
 Leverage a plugin mechanism to ensure our critical algorithms are still proprietary and confidential.
@@ -245,7 +245,7 @@ Yes. Our new license release does not affect your rights to keep using the softw
 That said, we may not be releasing updates to the old ThirdEye Open Source code under Apache Pinot, and it may become outdated or insecure. We don’t recommend being left behind, and we encourage you to migrate to the latest version of StarTree ThirdEye Platform (link to StarTree Developer Hub).
 
 ### My company has a policy against using code with a non-commercial restriction. What should I do?
-The StarTree ThirdEye Community License is not a “non-commercial” license restriction. It only prevents one narrow kind of excluded purpose, which is using our software in a competing SaaS offering. If your company lawyers have concerns about our license, we would be happy to discuss it. Just contact us at _____________________.
+The StarTree ThirdEye Community License is not a “non-commercial” license restriction. It only prevents one narrow kind of excluded purpose, which is using our software in a competing SaaS offering. If your company lawyers have concerns about our license, we would be happy to discuss it. Just [contact us here](https://www.startree.ai/contact-us).
 
 ### I’d like to customize some of the StarTree ThirdEye Community software. Can I?
 Yes. The Excluded Purpose does not restrict the creation of modifications.

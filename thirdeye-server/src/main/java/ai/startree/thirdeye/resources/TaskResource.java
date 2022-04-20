@@ -112,7 +112,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     return Response.ok().build();
   }
 
-  @PUT
+  @POST
   @Path("/handle-orphan")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)

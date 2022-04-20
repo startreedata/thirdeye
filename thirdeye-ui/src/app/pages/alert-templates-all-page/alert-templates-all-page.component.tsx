@@ -4,14 +4,14 @@ import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTemplateListV1 } from "../../components/alert-template-list-v1/alert-template-list-v1.component";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import {
@@ -22,7 +22,7 @@ import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const AlertTemplatesAllPage: FunctionComponent = () => {
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const {
@@ -59,10 +59,11 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
     const handleAlertTemplateDelete = (alertTemplate: AlertTemplate): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
+            contents: t("message.delete-confirmation", {
                 name: alertTemplate.name,
             }),
-            okButtonLabel: t("label.delete"),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAlertTemplateDeleteOk(alertTemplate),
         });
     };

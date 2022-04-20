@@ -4,8 +4,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -18,8 +16,10 @@ import {
     PageContentsGridV1,
     PageV1,
     TooltipV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
@@ -53,7 +53,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
     const [searchParams] = useSearchParams();
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -132,8 +132,11 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiAnomaly.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
     };

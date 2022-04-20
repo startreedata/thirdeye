@@ -4,13 +4,13 @@ import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./app";
-import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
 import "./platform/assets/styles/fonts.scss";
 import "./platform/assets/styles/layout.scss";
 import {
     AuthProviderV1,
     AuthRedirectMethodV1,
+    DialogProviderV1,
     NotificationProviderV1,
 } from "./platform/components";
 import { lightV1 } from "./platform/utils";
@@ -45,9 +45,9 @@ ReactDOM.render(
                         ]}
                     >
                         <TimeRangeProvider>
-                            <DialogProvider>
+                            <DialogProviderV1>
                                 <App />
-                            </DialogProvider>
+                            </DialogProviderV1>
                         </TimeRangeProvider>
                     </AuthProviderV1>
                 </NotificationProviderV1>

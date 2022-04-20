@@ -5,6 +5,7 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
+    DialogContentText,
     DialogTitle,
 } from "@material-ui/core";
 import classNames from "classnames";
@@ -15,6 +16,7 @@ import {
     DialogDataV1,
     DialogProviderV1ContextProps,
     DialogProviderV1Props,
+    DialogType,
 } from "./dialog-provider-v1.interfaces";
 
 export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
@@ -105,13 +107,19 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
                         <>
                             {/* Custom contents */}
                             {dialogData.customContents && (
-                                <>{dialogData.contents}</>
+                                <>{dialogData.customContents}</>
                             )}
 
                             {/* Default contents */}
                             {!dialogData.customContents && (
-                                <DialogContent className="dialog-provider-v1-contents">
-                                    {dialogData.contents}
+                                <DialogContent>
+                                    {dialogData.type === DialogType.ALERT ? (
+                                        <DialogContentText>
+                                            {dialogData.contents}
+                                        </DialogContentText>
+                                    ) : (
+                                        dialogData.contents
+                                    )}
                                 </DialogContent>
                             )}
                         </>

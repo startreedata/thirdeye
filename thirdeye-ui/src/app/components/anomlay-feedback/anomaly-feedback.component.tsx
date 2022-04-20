@@ -13,13 +13,13 @@ import React, { FunctionComponent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { useDialog } from "../dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyFeedbackProps } from "./anomaly-feedback.interfaces";
 
 const OPTION_TO_DESCRIPTIONS = {
@@ -43,7 +43,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         anomalyFeedback.comment
     );
     const [updateHasError, setUpdateHasError] = useState(false);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     /*
@@ -64,10 +64,11 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         ) {
             showDialog({
                 type: DialogType.ALERT,
-                text: t("message.change-confirmation-to", {
+                contents: t("message.change-confirmation-to", {
                     value: `"${OPTION_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
                 }),
-                okButtonLabel: t("label.change"),
+                okButtonText: t("label.change"),
+                cancelButtonText: t("label.cancel"),
                 onOk: () =>
                     handleFeedbackChangeOk(
                         newSelectedFeedbackType,
@@ -80,8 +81,11 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     const handleCommentUpdateClick = (): void => {
         showDialog({
             type: DialogType.CUSTOM,
-            title: t("label.update-entity", { entity: t("label.comment") }),
-            children: (
+            headerText: t("label.update-entity", {
+                entity: t("label.comment"),
+            }),
+            cancelButtonText: t("label.cancel"),
+            contents: (
                 <>
                     {updateHasError && (
                         <Box
@@ -102,7 +106,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     />
                 </>
             ),
-            okButtonLabel: t("label.change"),
+            okButtonText: t("label.change"),
             onOk: () =>
                 handleFeedbackChangeOk(
                     currentlySelected,

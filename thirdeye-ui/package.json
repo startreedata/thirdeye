@@ -1,6 +1,6 @@
 {
     "name": "@startree-ui/thirdeye-ui",
-    "version": "1.0.0",
+    "version": "0.0.0-developement",
     "description": "UI project for StarTree ThirdEye",
     "keywords": [
         "startree",
@@ -148,5 +148,6 @@
         "webpack-cli": "^4.3.1",
         "webpack-dev-server": "^3.11.1",
         "webpackbar": "^5.0.0-3"
-    }
+    },
+    "peerDependencies": {}
 }

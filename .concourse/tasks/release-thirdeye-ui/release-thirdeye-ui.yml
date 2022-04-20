@@ -1,0 +1,25 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: node
+    tag: 14
+
+caches:
+  - path: src/thirdeye-ui/node
+  - path: src/thirdeye-ui/node_modules
+
+inputs:
+  - name: ci-src
+  - name: src
+
+outputs:
+  - name: src
+
+params:
+  NPM_CONFIG__AUTH: ((artifactory-auth-token))
+
+run:
+  path: ci-src/.concourse/tasks/release-thirdeye-ui/release-thirdeye-ui.sh

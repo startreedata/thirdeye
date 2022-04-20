@@ -113,6 +113,12 @@ jobs:
       src: ui-src
     output_mapping:
       src: ui-src
+  - task: release-thirdeye-ui
+    file: ci-src/.concourse/tasks/release-thirdeye-ui/release-thirdeye-ui.yml
+    input_mapping:
+      src: ui-src
+    output_mapping:
+      src: ui-src
   - put: thirdeye-ui-docker-image
     params:
       build: ui-src/thirdeye-ui

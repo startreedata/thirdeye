@@ -49,7 +49,7 @@ import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.RootcauseSessionIndex;
+import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.TaskIndex;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
@@ -108,7 +108,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       OnboardDatasetMetricIndex.class,
       OnlineDetectionDataIndex.class,
       OverrideConfigIndex.class,
-      RootcauseSessionIndex.class,
+      RcaInvestigationIndex.class,
       RootcauseTemplateIndex.class,
       TaskIndex.class
   );

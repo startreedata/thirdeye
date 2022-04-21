@@ -9,7 +9,7 @@ import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.TestDatabase;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
-import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +21,7 @@ public class TestRootcauseSessionManager {
 
   private RootcauseSessionManager sessionDAO;
 
-  private static RootCauseSessionDTO makeDefault() {
+  private static RcaInvestigationDTO makeDefault() {
     return DatalayerTestUtils.getTestRootcauseSessionResult(1000,
         1100,
         1500,
@@ -35,45 +35,45 @@ public class TestRootcauseSessionManager {
         1234L);
   }
 
-  private static RootCauseSessionDTO makeName(String name) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makeName(String name) {
+    RcaInvestigationDTO session = makeDefault();
     session.setName(name);
     return session;
   }
 
-  private static RootCauseSessionDTO makeOwner(String owner) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makeOwner(String owner) {
+    RcaInvestigationDTO session = makeDefault();
     session.setOwner(owner);
     return session;
   }
 
-  private static RootCauseSessionDTO makeCreated(long created) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makeCreated(long created) {
+    RcaInvestigationDTO session = makeDefault();
     session.setCreated(created);
     return session;
   }
 
-  private static RootCauseSessionDTO makeUpdated(long updated) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makeUpdated(long updated) {
+    RcaInvestigationDTO session = makeDefault();
     session.setUpdated(updated);
     return session;
   }
 
-  private static RootCauseSessionDTO makeAnomaly(long anomalyId) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makeAnomaly(long anomalyId) {
+    RcaInvestigationDTO session = makeDefault();
     session.setAnomaly(new AnomalyApi().setId(anomalyId));
     return session;
   }
 
-  private static RootCauseSessionDTO makeAnomalyRange(long start, long end) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makeAnomalyRange(long start, long end) {
+    RcaInvestigationDTO session = makeDefault();
     session.setAnomalyRangeStart(start);
     session.setAnomalyRangeEnd(end);
     return session;
   }
 
-  private static RootCauseSessionDTO makePrevious(long previousId) {
-    RootCauseSessionDTO session = makeDefault();
+  private static RcaInvestigationDTO makePrevious(long previousId) {
+    RcaInvestigationDTO session = makeDefault();
     session.setPreviousId(previousId);
     return session;
   }
@@ -90,13 +90,13 @@ public class TestRootcauseSessionManager {
 
   @Test
   public void testUpdateSession() throws Exception {
-    RootCauseSessionDTO session = makeDefault();
+    RcaInvestigationDTO session = makeDefault();
     this.sessionDAO.save(session);
 
     session.setName("mynewname");
     this.sessionDAO.save(session);
 
-    RootCauseSessionDTO read = this.sessionDAO.findById(session.getId());
+    RcaInvestigationDTO read = this.sessionDAO.findById(session.getId());
 
     Assert.assertEquals(read.getName(), "mynewname");
   }
@@ -105,7 +105,7 @@ public class TestRootcauseSessionManager {
   public void testFindSessionById() {
     Long id = this.sessionDAO.save(makeDefault());
 
-    RootCauseSessionDTO session = this.sessionDAO.findById(id);
+    RcaInvestigationDTO session = this.sessionDAO.findById(id);
     Assert.assertEquals(session.getAnomalyRangeStart(), (Long) 1000L);
     Assert.assertEquals(session.getAnomalyRangeEnd(), (Long) 1100L);
     Assert.assertEquals(session.getAnalysisRangeStart(), (Long) 900L);
@@ -125,9 +125,9 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeName("B"));
     this.sessionDAO.save(makeName("A"));
 
-    List<RootCauseSessionDTO> sessionsA = this.sessionDAO.findByName("A");
-    List<RootCauseSessionDTO> sessionsB = this.sessionDAO.findByName("B");
-    List<RootCauseSessionDTO> sessionsC = this.sessionDAO.findByName("C");
+    List<RcaInvestigationDTO> sessionsA = this.sessionDAO.findByName("A");
+    List<RcaInvestigationDTO> sessionsB = this.sessionDAO.findByName("B");
+    List<RcaInvestigationDTO> sessionsC = this.sessionDAO.findByName("C");
 
     Assert.assertEquals(sessionsA.size(), 2);
     Assert.assertEquals(sessionsB.size(), 1);
@@ -140,13 +140,13 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeName("BDC"));
     this.sessionDAO.save(makeName("CB"));
 
-    List<RootCauseSessionDTO> sessionsAB = this.sessionDAO
+    List<RcaInvestigationDTO> sessionsAB = this.sessionDAO
         .findByNameLike(new HashSet<>(Arrays.asList("A", "B")));
-    List<RootCauseSessionDTO> sessionsBC = this.sessionDAO
+    List<RcaInvestigationDTO> sessionsBC = this.sessionDAO
         .findByNameLike(new HashSet<>(Arrays.asList("B", "C")));
-    List<RootCauseSessionDTO> sessionsCD = this.sessionDAO
+    List<RcaInvestigationDTO> sessionsCD = this.sessionDAO
         .findByNameLike(new HashSet<>(Arrays.asList("C", "D")));
-    List<RootCauseSessionDTO> sessionsABCD = this.sessionDAO
+    List<RcaInvestigationDTO> sessionsABCD = this.sessionDAO
         .findByNameLike(new HashSet<>(Arrays.asList("A", "B", "C", "D")));
 
     Assert.assertEquals(sessionsAB.size(), 1);
@@ -161,9 +161,9 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeOwner("Y"));
     this.sessionDAO.save(makeOwner("Y"));
 
-    List<RootCauseSessionDTO> sessionsX = this.sessionDAO.findByOwner("X");
-    List<RootCauseSessionDTO> sessionsY = this.sessionDAO.findByOwner("Y");
-    List<RootCauseSessionDTO> sessionsZ = this.sessionDAO.findByOwner("Z");
+    List<RcaInvestigationDTO> sessionsX = this.sessionDAO.findByOwner("X");
+    List<RcaInvestigationDTO> sessionsY = this.sessionDAO.findByOwner("Y");
+    List<RcaInvestigationDTO> sessionsZ = this.sessionDAO.findByOwner("Z");
 
     Assert.assertEquals(sessionsX.size(), 1);
     Assert.assertEquals(sessionsY.size(), 2);
@@ -176,9 +176,9 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeCreated(900));
     this.sessionDAO.save(makeCreated(1000));
 
-    List<RootCauseSessionDTO> sessionsBefore = this.sessionDAO.findByCreatedRange(700, 800);
-    List<RootCauseSessionDTO> sessionsMid = this.sessionDAO.findByCreatedRange(800, 1000);
-    List<RootCauseSessionDTO> sessionsEnd = this.sessionDAO.findByCreatedRange(1000, 1500);
+    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByCreatedRange(700, 800);
+    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByCreatedRange(800, 1000);
+    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByCreatedRange(1000, 1500);
 
     Assert.assertEquals(sessionsBefore.size(), 0);
     Assert.assertEquals(sessionsMid.size(), 2);
@@ -191,9 +191,9 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeUpdated(900));
     this.sessionDAO.save(makeUpdated(1000));
 
-    List<RootCauseSessionDTO> sessionsBefore = this.sessionDAO.findByUpdatedRange(700, 800);
-    List<RootCauseSessionDTO> sessionsMid = this.sessionDAO.findByUpdatedRange(800, 1000);
-    List<RootCauseSessionDTO> sessionsEnd = this.sessionDAO.findByUpdatedRange(1000, 1500);
+    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByUpdatedRange(700, 800);
+    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByUpdatedRange(800, 1000);
+    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByUpdatedRange(1000, 1500);
 
     Assert.assertEquals(sessionsBefore.size(), 0);
     Assert.assertEquals(sessionsMid.size(), 2);
@@ -206,9 +206,9 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeAnomalyRange(1100, 1150));
     this.sessionDAO.save(makeAnomalyRange(1150, 1300));
 
-    List<RootCauseSessionDTO> sessionsBefore = this.sessionDAO.findByAnomalyRange(0, 1000);
-    List<RootCauseSessionDTO> sessionsMid = this.sessionDAO.findByAnomalyRange(1000, 1100);
-    List<RootCauseSessionDTO> sessionsEnd = this.sessionDAO.findByAnomalyRange(1100, 1175);
+    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByAnomalyRange(0, 1000);
+    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByAnomalyRange(1000, 1100);
+    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByAnomalyRange(1100, 1175);
 
     Assert.assertEquals(sessionsBefore.size(), 0);
     Assert.assertEquals(sessionsMid.size(), 1);
@@ -222,10 +222,10 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makePrevious(1));
     this.sessionDAO.save(makePrevious(2));
 
-    List<RootCauseSessionDTO> sessions0 = this.sessionDAO.findByPreviousId(0);
-    List<RootCauseSessionDTO> sessions1 = this.sessionDAO.findByPreviousId(1);
-    List<RootCauseSessionDTO> sessions2 = this.sessionDAO.findByPreviousId(2);
-    List<RootCauseSessionDTO> sessions3 = this.sessionDAO.findByPreviousId(3);
+    List<RcaInvestigationDTO> sessions0 = this.sessionDAO.findByPreviousId(0);
+    List<RcaInvestigationDTO> sessions1 = this.sessionDAO.findByPreviousId(1);
+    List<RcaInvestigationDTO> sessions2 = this.sessionDAO.findByPreviousId(2);
+    List<RcaInvestigationDTO> sessions3 = this.sessionDAO.findByPreviousId(3);
 
     Assert.assertEquals(sessions0.size(), 1);
     Assert.assertEquals(sessions1.size(), 2);
@@ -240,10 +240,10 @@ public class TestRootcauseSessionManager {
     this.sessionDAO.save(makeAnomaly(1));
     this.sessionDAO.save(makeAnomaly(2));
 
-    List<RootCauseSessionDTO> sessions0 = this.sessionDAO.findByAnomalyId(0);
-    List<RootCauseSessionDTO> sessions1 = this.sessionDAO.findByAnomalyId(1);
-    List<RootCauseSessionDTO> sessions2 = this.sessionDAO.findByAnomalyId(2);
-    List<RootCauseSessionDTO> sessions3 = this.sessionDAO.findByAnomalyId(3);
+    List<RcaInvestigationDTO> sessions0 = this.sessionDAO.findByAnomalyId(0);
+    List<RcaInvestigationDTO> sessions1 = this.sessionDAO.findByAnomalyId(1);
+    List<RcaInvestigationDTO> sessions2 = this.sessionDAO.findByAnomalyId(2);
+    List<RcaInvestigationDTO> sessions3 = this.sessionDAO.findByAnomalyId(3);
 
     Assert.assertEquals(sessions0.size(), 1);
     Assert.assertEquals(sessions1.size(), 2);

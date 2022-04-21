@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
-public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi> {
+public class RcaInvestigationApi implements ThirdEyeCrudApi<RcaInvestigationApi> {
 
   private Long id;
   private String name;
@@ -19,7 +19,7 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
   }
 
   @Override
-  public RootCauseSessionApi setId(final Long id) {
+  public RcaInvestigationApi setId(final Long id) {
     this.id = id;
     return this;
   }
@@ -28,7 +28,7 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
     return name;
   }
 
-  public RootCauseSessionApi setName(final String name) {
+  public RcaInvestigationApi setName(final String name) {
     this.name = name;
     return this;
   }
@@ -37,7 +37,7 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
     return text;
   }
 
-  public RootCauseSessionApi setText(final String text) {
+  public RcaInvestigationApi setText(final String text) {
     this.text = text;
     return this;
   }
@@ -46,7 +46,7 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
     return uiMetadata;
   }
 
-  public RootCauseSessionApi setUiMetadata(final Map<String, Object> uiMetadata) {
+  public RcaInvestigationApi setUiMetadata(final Map<String, Object> uiMetadata) {
     this.uiMetadata = uiMetadata;
     return this;
   }
@@ -55,7 +55,7 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
     return anomaly;
   }
 
-  public RootCauseSessionApi setAnomaly(final AnomalyApi anomaly) {
+  public RcaInvestigationApi setAnomaly(final AnomalyApi anomaly) {
     this.anomaly = anomaly;
     return this;
   }

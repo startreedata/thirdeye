@@ -5,25 +5,25 @@
 
 package ai.startree.thirdeye.spi.datalayer.bao;
 
-import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.util.List;
 import java.util.Set;
 
-public interface RootcauseSessionManager extends AbstractManager<RootCauseSessionDTO> {
+public interface RootcauseSessionManager extends AbstractManager<RcaInvestigationDTO> {
 
-  List<RootCauseSessionDTO> findByName(String name);
+  List<RcaInvestigationDTO> findByName(String name);
 
-  List<RootCauseSessionDTO> findByNameLike(Set<String> nameFragments);
+  List<RcaInvestigationDTO> findByNameLike(Set<String> nameFragments);
 
-  List<RootCauseSessionDTO> findByOwner(String owner);
+  List<RcaInvestigationDTO> findByOwner(String owner);
 
-  List<RootCauseSessionDTO> findByAnomalyRange(long start, long end);
+  List<RcaInvestigationDTO> findByAnomalyRange(long start, long end);
 
-  List<RootCauseSessionDTO> findByCreatedRange(long start, long end);
+  List<RcaInvestigationDTO> findByCreatedRange(long start, long end);
 
-  List<RootCauseSessionDTO> findByUpdatedRange(long start, long end);
+  List<RcaInvestigationDTO> findByUpdatedRange(long start, long end);
 
-  List<RootCauseSessionDTO> findByPreviousId(long id);
+  List<RcaInvestigationDTO> findByPreviousId(long id);
 
-  List<RootCauseSessionDTO> findByAnomalyId(long id);
+  List<RcaInvestigationDTO> findByAnomalyId(long id);
 }

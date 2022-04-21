@@ -7,10 +7,10 @@ package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.api.RootCauseSessionApi;
+import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
-import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RcaInvestigationResource extends CrudResource<RootCauseSessionApi, RootCauseSessionDTO> {
+public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, RcaInvestigationDTO> {
 
   public static final ImmutableMap<String, String> API_TO_BEAN_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("anomaly.id", "anomalyId")
@@ -51,20 +51,20 @@ public class RcaInvestigationResource extends CrudResource<RootCauseSessionApi, 
   }
 
   @Override
-  protected RootCauseSessionDTO createDto(final ThirdEyePrincipal principal,
-      final RootCauseSessionApi api) {
-    final RootCauseSessionDTO rootCauseSessionDTO = ApiBeanMapper.toDto(api);
-    rootCauseSessionDTO.setCreatedBy(principal.getName());
-    return rootCauseSessionDTO;
+  protected RcaInvestigationDTO createDto(final ThirdEyePrincipal principal,
+      final RcaInvestigationApi api) {
+    final RcaInvestigationDTO rcaInvestigationDTO = ApiBeanMapper.toDto(api);
+    rcaInvestigationDTO.setCreatedBy(principal.getName());
+    return rcaInvestigationDTO;
   }
 
   @Override
-  protected RootCauseSessionDTO toDto(final RootCauseSessionApi api) {
+  protected RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
     return ApiBeanMapper.toDto(api);
   }
 
   @Override
-  protected RootCauseSessionApi toApi(final RootCauseSessionDTO dto) {
+  protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }
 
@@ -72,7 +72,7 @@ public class RcaInvestigationResource extends CrudResource<RootCauseSessionApi, 
   @Path("/query")
   @ApiOperation(value = "Query")
   @Deprecated
-  public List<RootCauseSessionDTO> query(
+  public List<RcaInvestigationDTO> query(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("id") String idsString,
       @QueryParam("name") String namesString,

@@ -19,7 +19,7 @@ import java.util.Set;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class RootCauseSessionDTO extends AbstractDTO {
+public class RcaInvestigationDTO extends AbstractDTO {
 
   public enum PermissionType {
     READ,
@@ -53,7 +53,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
     return name;
   }
 
-  public RootCauseSessionDTO setName(final String name) {
+  public RcaInvestigationDTO setName(final String name) {
     this.name = name;
     return this;
   }
@@ -62,7 +62,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
     return text;
   }
 
-  public RootCauseSessionDTO setText(final String text) {
+  public RcaInvestigationDTO setText(final String text) {
     this.text = text;
     return this;
   }
@@ -71,7 +71,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
     return anomaly;
   }
 
-  public RootCauseSessionDTO setAnomaly(final AnomalyApi anomaly) {
+  public RcaInvestigationDTO setAnomaly(final AnomalyApi anomaly) {
     this.anomaly = anomaly;
     return this;
   }
@@ -80,7 +80,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
     return uiMetadata;
   }
 
-  public RootCauseSessionDTO setUiMetadata(final Map<String, Object> uiMetadata) {
+  public RcaInvestigationDTO setUiMetadata(final Map<String, Object> uiMetadata) {
     this.uiMetadata = uiMetadata;
     return this;
   }
@@ -221,7 +221,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RootCauseSessionDTO that = (RootCauseSessionDTO) o;
+    RcaInvestigationDTO that = (RcaInvestigationDTO) o;
     return Objects.equals(name, that.name) &&
         Objects.equals(text, that.text) &&
         Objects.equals(anomaly, that.anomaly) &&

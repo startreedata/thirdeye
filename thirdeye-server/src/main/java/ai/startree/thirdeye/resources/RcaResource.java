@@ -62,7 +62,7 @@ public class RcaResource {
   private final List<RootCauseEntityFormatter> formatters;
   private final Map<String, RCAFramework> frameworks;
   private final RootCauseTemplateResource rootCauseTemplateResource;
-  private final RootCauseSessionResource rootCauseSessionResource;
+  private final RcaInvestigationResource rcaInvestigationResource;
   private final RootCauseMetricResource rootCauseMetricResource;
   private final DimensionAnalysisResource dimensionAnalysisResource;
 
@@ -70,13 +70,13 @@ public class RcaResource {
   public RcaResource(
       final RootCauseAnalysisService rootCauseAnalysisService,
       final RootCauseTemplateResource rootCauseTemplateResource,
-      final RootCauseSessionResource rootCauseSessionResource,
+      final RcaInvestigationResource rcaInvestigationResource,
       final RootCauseMetricResource rootCauseMetricResource,
       final DimensionAnalysisResource dimensionAnalysisResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.rootCauseTemplateResource = rootCauseTemplateResource;
-    this.rootCauseSessionResource = rootCauseSessionResource;
+    this.rcaInvestigationResource = rcaInvestigationResource;
     this.rootCauseMetricResource = rootCauseMetricResource;
     this.dimensionAnalysisResource = dimensionAnalysisResource;
   }
@@ -92,8 +92,8 @@ public class RcaResource {
   }
 
   @Path(value = "/sessions")
-  public RootCauseSessionResource getRootCauseSessionResource() {
-    return rootCauseSessionResource;
+  public RcaInvestigationResource getRootCauseSessionResource() {
+    return rcaInvestigationResource;
   }
 
   @Path(value = "/metrics")

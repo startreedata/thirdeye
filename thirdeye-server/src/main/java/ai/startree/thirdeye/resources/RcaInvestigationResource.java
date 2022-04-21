@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
-
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseSessionApi;
@@ -37,18 +35,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 
-@Api(tags = "Root Cause Analysis Session", authorizations = {@Authorization(value = "oauth")})
+@Api(tags = "RCA Investigation", authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RootCauseSessionResource extends CrudResource<RootCauseSessionApi, RootCauseSessionDTO> {
+public class RcaInvestigationResource extends CrudResource<RootCauseSessionApi, RootCauseSessionDTO> {
 
   public static final ImmutableMap<String, String> API_TO_BEAN_FILTER_MAP = ImmutableMap.<String, String>builder()
-      .put("anomalyId", "anomalyId")
+      .put("anomaly.id", "anomalyId")
       .build();
 
   @Inject
-  public RootCauseSessionResource(final RootcauseSessionManager rootCauseSessionDAO) {
+  public RcaInvestigationResource(final RootcauseSessionManager rootCauseSessionDAO) {
     super(rootCauseSessionDAO, API_TO_BEAN_FILTER_MAP);
   }
 
@@ -68,12 +66,6 @@ public class RootCauseSessionResource extends CrudResource<RootCauseSessionApi, 
   @Override
   protected RootCauseSessionApi toApi(final RootCauseSessionDTO dto) {
     return ApiBeanMapper.toApi(dto);
-  }
-
-  @Override
-  protected void validate(final RootCauseSessionApi api, final RootCauseSessionDTO existing) {
-    super.validate(api, existing);
-    ensureExists(api.getAnomalyId(), "AnomalyId must be present");
   }
 
   @GET

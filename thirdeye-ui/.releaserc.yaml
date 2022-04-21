@@ -1,7 +1,7 @@
 ---
 # Release branches
 branches:
-    - name: master
+    - name: TE-520
 
 # Concourse is not recognized as a CI provider
 ci: false

@@ -7,6 +7,7 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RootCauseSessionDTO;
 import java.util.Arrays;
@@ -60,7 +61,7 @@ public class TestRootcauseSessionManager {
 
   private static RootCauseSessionDTO makeAnomaly(long anomalyId) {
     RootCauseSessionDTO session = makeDefault();
-    session.setAnomalyId(anomalyId);
+    session.setAnomaly(new AnomalyApi().setId(anomalyId));
     return session;
   }
 

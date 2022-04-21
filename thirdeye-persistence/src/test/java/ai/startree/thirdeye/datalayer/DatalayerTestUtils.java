@@ -8,6 +8,7 @@ package ai.startree.thirdeye.datalayer;
 import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -132,7 +133,7 @@ public class DatalayerTestUtils {
     session.setOwner(owner);
     session.setText(text);
     session.setPreviousId(previousId);
-    session.setAnomalyId(anomalyId);
+    session.setAnomaly(new AnomalyApi().setId(anomalyId));
     session.setCreated(created);
     session.setUpdated(updated);
     session.setGranularity(granularity);

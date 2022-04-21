@@ -2,6 +2,7 @@ package ai.startree.thirdeye.spi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
 public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi> {
@@ -9,8 +10,8 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
   private Long id;
   private String name;
   private String text;
-  private String uiMetadata;
-  private Long anomalyId;
+  private Map<String, Object> uiMetadata;
+  private AnomalyApi anomaly;
 
   @Override
   public Long getId() {
@@ -41,21 +42,21 @@ public class RootCauseSessionApi implements ThirdEyeCrudApi<RootCauseSessionApi>
     return this;
   }
 
-  public String getUiMetadata() {
+  public Map<String, Object> getUiMetadata() {
     return uiMetadata;
   }
 
-  public RootCauseSessionApi setUiMetadata(final String uiMetadata) {
+  public RootCauseSessionApi setUiMetadata(final Map<String, Object> uiMetadata) {
     this.uiMetadata = uiMetadata;
     return this;
   }
 
-  public Long getAnomalyId() {
-    return anomalyId;
+  public AnomalyApi getAnomaly() {
+    return anomaly;
   }
 
-  public RootCauseSessionApi setAnomalyId(final Long anomalyId) {
-    this.anomalyId = anomalyId;
+  public RootCauseSessionApi setAnomaly(final AnomalyApi anomaly) {
+    this.anomaly = anomaly;
     return this;
   }
 }

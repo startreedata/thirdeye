@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -27,8 +28,8 @@ public class RootCauseSessionDTO extends AbstractDTO {
 
   private String name;
   private String text;
-  private String uiMetadata;
-  private Long anomalyId;
+  private Map<String, Object> uiMetadata;
+  private AnomalyApi anomaly;
 
   // below is legacy - may be used in the future
   private String owner;
@@ -66,20 +67,20 @@ public class RootCauseSessionDTO extends AbstractDTO {
     return this;
   }
 
-  public Long getAnomalyId() {
-    return anomalyId;
+  public AnomalyApi getAnomaly() {
+    return anomaly;
   }
 
-  public RootCauseSessionDTO setAnomalyId(final Long anomalyId) {
-    this.anomalyId = anomalyId;
+  public RootCauseSessionDTO setAnomaly(final AnomalyApi anomaly) {
+    this.anomaly = anomaly;
     return this;
   }
 
-  public String getUiMetadata() {
+  public Map<String, Object> getUiMetadata() {
     return uiMetadata;
   }
 
-  public RootCauseSessionDTO setUiMetadata(final String uiMetadata) {
+  public RootCauseSessionDTO setUiMetadata(final Map<String, Object> uiMetadata) {
     this.uiMetadata = uiMetadata;
     return this;
   }
@@ -223,7 +224,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
     RootCauseSessionDTO that = (RootCauseSessionDTO) o;
     return Objects.equals(name, that.name) &&
         Objects.equals(text, that.text) &&
-        Objects.equals(anomalyId, that.anomalyId) &&
+        Objects.equals(anomaly, that.anomaly) &&
         Objects.equals(uiMetadata, that.uiMetadata) &&
         Objects.equals(owner, that.owner) &&
         Objects.equals(compareMode, that.compareMode) &&
@@ -247,7 +248,7 @@ public class RootCauseSessionDTO extends AbstractDTO {
   public int hashCode() {
     return Objects.hash(name,
         text,
-        anomalyId,
+        anomaly,
         uiMetadata,
         owner,
         compareMode,

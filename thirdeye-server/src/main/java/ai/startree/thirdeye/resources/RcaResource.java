@@ -91,7 +91,7 @@ public class RcaResource {
     return rootCauseTemplateResource;
   }
 
-  @Path(value = "/sessions")
+  @Path(value = "/investigations")
   public RcaInvestigationResource getRootCauseSessionResource() {
     return rcaInvestigationResource;
   }

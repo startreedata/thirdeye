@@ -110,7 +110,7 @@ public class SubEntities {
         .put(OnboardDatasetMetricDTO.class, SubEntityType.ONBOARD_DATASET_METRIC)
         .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)
         .put(OverrideConfigDTO.class, SubEntityType.OVERRIDE_CONFIG)
-        .put(RcaInvestigationDTO.class, SubEntityType.ROOT_CAUSE_SESSION)
+        .put(RcaInvestigationDTO.class, SubEntityType.RCA_INVESTIGATION)
         .put(RootcauseTemplateDTO.class, SubEntityType.ROOT_CAUSE_TEMPLATE)
         .put(SubscriptionGroupDTO.class, SubEntityType.SUBSCRIPTION_GROUP)
         .put(TaskDTO.class, SubEntityType.TASK)

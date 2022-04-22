@@ -20,7 +20,7 @@ outputs:
 
 # GitHub/npm authentication
 params:
-  NPM_CONFIG__AUTH: ((artifactory-auth-token))
+  NPM_TOKEN: ((artifactory-auth-token))
   GH_TOKEN: ((github-token))
 
 run:

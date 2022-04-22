@@ -25,7 +25,7 @@ export const AboutDialogNavBarButton: FunctionComponent = () => {
             title: t("label.thirdeye"),
             children: (
                 <Grid container alignItems="center">
-                    {/* App logos */}
+                    {/* App logo */}
                     <Grid
                         container
                         item

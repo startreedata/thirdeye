@@ -21,6 +21,8 @@ outputs:
 # GitHub/npm authentication
 params:
   GH_TOKEN: ((github-token))
+  ARTIFACTORY_USERNAME: ((artifactory-username))
+  ARTIFACTORY_PASSWORD: ((artifactory-password))
 
 run:
   path: ci-src/.concourse/tasks/release-thirdeye-ui/release-thirdeye-ui.sh

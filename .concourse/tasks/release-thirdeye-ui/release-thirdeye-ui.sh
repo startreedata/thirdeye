@@ -8,9 +8,8 @@
 cat > ~/.npmrc <<EOF
 ; this will be our temp .npmrc credentials for Artifactory
 @startree-ui:registry=https://repo.startreedata.io/artifactory/api/npm/startree-ui/
-//repo.startreedata.io/artifactory/api/npm/startree-ui/:_password=QVA3cHphSlFzYnlMdUhXSmlOcGFtVEtub1ZmMzFVMkd3TDFpZkc=
-//repo.startreedata.io/artifactory/api/npm/startree-ui/:username=chirag.m@deuexsolutions.com
-//repo.startreedata.io/artifactory/api/npm/startree-ui/:email=chirag.m@deuexsolutions.com
+//repo.startreedata.io/artifactory/api/npm/startree-ui/:_auth=$(echo -n ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}|base64)
+//repo.startreedata.io/artifactory/api/npm/startree-ui/:email=${ARTIFACTORY_EMAIL}
 //repo.startreedata.io/artifactory/api/npm/startree-ui/:always-auth=true
 EOF
 

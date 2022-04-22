@@ -24,6 +24,7 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
@@ -31,9 +32,8 @@ import org.joda.time.Period;
  * Multiple metrics, single table.
  *
  * todo add doc - predicates are combined with the AND operator
- * todo add a sqlNode list for evrytype --> to make it easy to inject sqlNodes directly
  *
- * todo cyril later - implement having clause
+ * todo cyril - later implement having clause
  **/
 public class CalciteRequest {
 
@@ -47,6 +47,7 @@ public class CalciteRequest {
   // aggregation - in SELECT, GROUP BY, ORDER BY?
   final private Period timeAggregationGranularity;
   final private String timeAggregationColumnFormat;
+  final private String timeAggregationColumnUnit;
   final private String timeAggregationColumn;
   /**
    * If set, is the timeAggregation will be the first order by column.
@@ -61,6 +62,7 @@ public class CalciteRequest {
   final private Interval timeFilterInterval;
   final private String timeFilterColumn;
   final private String timeFilterColumnFormat;
+  final private String timeFilterColumnUnit;
   // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - to be used by Presto/BQ
 
   // WHERE clause
@@ -92,6 +94,7 @@ public class CalciteRequest {
     this.sqlNodeSelectProjections = List.copyOf(builder.slqNodeSelectProjections);
     this.timeAggregationGranularity = builder.timeAggregationGranularity;
     this.timeAggregationColumnFormat = builder.timeAggregationColumnFormat;
+    this.timeAggregationColumnUnit = builder.timeAggregationColumnUnit;
     this.timeAggregationColumn = builder.timeAggregationColumn;
     this.timeAggregationOrderBy = builder.timeAggregationOrderBy;
     this.database = builder.database;
@@ -100,6 +103,7 @@ public class CalciteRequest {
     this.timeFilterInterval = builder.timeFilterInterval;
     this.timeFilterColumn = builder.timeFilterColumn;
     this.timeFilterColumnFormat = builder.timeFilterColumnFormat;
+    this.timeFilterColumnUnit = builder.timeFilterColumnUnit;
 
     this.predicates = List.copyOf(builder.predicates);
     this.freeTextPredicates = List.copyOf(builder.freeTextPredicates);
@@ -160,7 +164,8 @@ public class CalciteRequest {
       String timeGroupExpression = expressionBuilder.getTimeGroupExpression(
           timeAggregationColumn,
           timeAggregationColumnFormat,
-          timeAggregationGranularity);
+          timeAggregationGranularity,
+          timeAggregationColumnUnit);
       SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
       List<SqlNode> aliasOperands = List.of(timeGroupNode, identifierOf(TIME_AGGREGATION_ALIAS));
       SqlNode timeGroupWithAlias = new SqlBasicCall(new SqlAsOperator(),
@@ -189,7 +194,8 @@ public class CalciteRequest {
           isAggregatedTimeColumn ? TIME_AGGREGATION_ALIAS : timeFilterColumn,
           timeFilterInterval.getStartMillis(),
           timeFilterInterval.getEndMillis(),
-          isAggregatedTimeColumn ? null : timeFilterColumnFormat);
+          isAggregatedTimeColumn ? null : timeFilterColumnFormat,
+          isAggregatedTimeColumn ? null : timeFilterColumnUnit);
       SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
@@ -261,11 +267,13 @@ public class CalciteRequest {
     private Period timeAggregationGranularity = null;
     private String timeAggregationColumnFormat = null;
     private String timeAggregationColumn = null;
+    private String timeAggregationColumnUnit = null;
     private boolean timeAggregationOrderBy = false;
 
     private Interval timeFilterInterval = null;
     private String timeFilterColumn = null;
     private String timeFilterColumnFormat = null;
+    private String timeFilterColumnUnit;
 
     final private List<QueryPredicate> predicates = new ArrayList<>();
     final private List<String> freeTextPredicates = new ArrayList<>();
@@ -286,22 +294,35 @@ public class CalciteRequest {
       this.table = Objects.requireNonNull(table);
     }
 
+    /**
+     * Add a timeAggregation.
+     *
+     * Add a projection on a time column with bucketing of the given period.
+     * Add group by on the buckets.
+     * The alias of the time bucket projection is {@value TIME_AGGREGATION_ALIAS}.
+     *
+     * At SQL generation time, the bucketing sql expression is provided by the Datasource {@link
+     * SqlExpressionBuilder}.
+     */
     public Builder withTimeAggregation(final Period timeAggregationGranularity,
         final String timeAggregationColumn,
         final String timeAggregationColumnFormat,
+        @Nullable final String timeAggregationColumnUnit,
         final boolean timeAggregationOrderBy) {
       this.timeAggregationGranularity = Objects.requireNonNull(timeAggregationGranularity);
       this.timeAggregationColumn = Objects.requireNonNull(timeAggregationColumn);
       this.timeAggregationColumnFormat = Objects.requireNonNull(timeAggregationColumnFormat);
+      this.timeAggregationColumnUnit = timeAggregationColumnUnit;
       this.timeAggregationOrderBy = timeAggregationOrderBy;
       return this;
     }
 
     public Builder withTimeFilter(final Interval timeFilterInterval, final String timeFilterColumn,
-        final String timeFilterColumnFormat) {
+        final String timeFilterColumnFormat, @Nullable final String timeFilterColumnUnit) {
       this.timeFilterInterval = Objects.requireNonNull(timeFilterInterval);
       this.timeFilterColumn = Objects.requireNonNull(timeFilterColumn);
       this.timeFilterColumnFormat = Objects.requireNonNull(timeFilterColumnFormat);
+      this.timeFilterColumnUnit = timeFilterColumnUnit;
 
       return this;
     }

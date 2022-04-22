@@ -75,8 +75,7 @@ public class MacroEngineTest {
     String expectedQuery = String.format("select * from tableName where %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
-            INPUT_END_TIME,
-            null));
+            INPUT_END_TIME));
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         macroArgument,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -98,8 +97,7 @@ public class MacroEngineTest {
     String expectedQuery = String.format("select * from tableName where %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
-            INPUT_END_TIME,
-            null));
+            INPUT_END_TIME));
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         macroArgument,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -179,8 +177,7 @@ public class MacroEngineTest {
     String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
         expectedTimeGroupMacro,
         INPUT_START_TIME,
-        INPUT_END_TIME,
-        null);
+        INPUT_END_TIME);
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         expectedTimeGroupMacro,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -205,8 +202,7 @@ public class MacroEngineTest {
     String expectedQuery = String.format("select * from tableName where %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
-            INPUT_END_TIME,
-            null));
+            INPUT_END_TIME));
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         macroArgument,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -243,7 +239,7 @@ public class MacroEngineTest {
 
     @Override
     public String getTimeFilterExpression(final String column, final long minTimeMillisIncluded,
-        final long maxTimeMillisExcluded, String timeFormat) {
+        final long maxTimeMillisExcluded) {
       return String.format("%s(%s, %s, %s)",
           TIME_FILTER_MOCK,
           column,

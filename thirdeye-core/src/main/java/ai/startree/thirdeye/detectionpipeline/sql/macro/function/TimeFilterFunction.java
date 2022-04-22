@@ -60,6 +60,6 @@ public class TimeFilterFunction implements MacroFunction {
 
     // generate SQL expression
     return context.getSqlExpressionBuilder()
-        .getTimeFilterExpression(timeColumn, minTimeMillis, maxTimeMillis, null);
+        .getTimeFilterExpression(timeColumn, minTimeMillis, maxTimeMillis);
   }
 }

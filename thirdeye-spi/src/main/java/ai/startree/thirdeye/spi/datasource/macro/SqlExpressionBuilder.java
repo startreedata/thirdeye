@@ -22,11 +22,26 @@ public interface SqlExpressionBuilder {
    * For example: {@code getTimeFilterExpression(myTimeEpoch, 42, 84, null)} returns
    * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
-   * Used by macro __timeFilter()
+   * Used by the macro __timeFilter().
+   * Expects the column to be in epoch milliseconds.
    *
-   * timeFormat comes from Timespec, so it can be anything. It is specific to the datasource.
+   * @param timeColumn time column name
+   * @param minTimeMillisIncluded minimum epoch milliseconds - included
+   * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
+   */
+  default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
+      final long maxTimeMillisExcluded) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Generates a SQL expression that test if a time column is between bounds.
+   *
+   * Used internally to generate queries. For RCA for instance.
+   *
+   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the datasource.
    * The function should be able to parse the timeFormat used by the datasource.
-   * If it's null, the function must assume the format is epoch milliseconds.
+   * If it's null, the function should assume the format is epoch milliseconds.
    *
    * This method can either generate the datetime in the given format directly,
    * or generate a SQL that transforms the colum or the milliseconds in the correct format at
@@ -35,10 +50,12 @@ public interface SqlExpressionBuilder {
    * @param timeColumn time column name
    * @param minTimeMillisIncluded minimum epoch milliseconds - included
    * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
-   * @param timeFormat any string, the datasource is free to put any format in TimeSpec$format.
+   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free to put any format in DatasetConfigDTO$format.
+   * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
   default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-      final long maxTimeMillisExcluded, final @Nullable String timeFormat) {
+      final long maxTimeMillisExcluded, final @Nullable String timeFormat,
+      @Nullable final String timeUnit) {
     throw new UnsupportedOperationException();
   }
 
@@ -60,6 +77,23 @@ public interface SqlExpressionBuilder {
   }
 
   /**
+   * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
+   *
+   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the datasource.
+   * The function should be able to parse the timeFormat used by the datasource.
+   * If it's null, the function should assume the input format is epoch milliseconds.
+   *
+   * Used internally to generate queries. For RCA for instance.
+   *
+   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free to put any format in DatasetConfigDTO$format.
+   * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
+   * */
+  default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
+      final Period granularity, @Nullable final String timeUnit) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Returns whether a MetricAggFunction requires a custom SQL statement or
    * can be safely generated with ANSI SQL.
    */
@@ -75,7 +109,8 @@ public interface SqlExpressionBuilder {
     }
   }
 
-  default String getCustomDialectSql(final MetricAggFunction metricAggFunction, final List<String> operands,
+  default String getCustomDialectSql(final MetricAggFunction metricAggFunction,
+      final List<String> operands,
       String quantifier) {
     throw new UnsupportedOperationException();
   }

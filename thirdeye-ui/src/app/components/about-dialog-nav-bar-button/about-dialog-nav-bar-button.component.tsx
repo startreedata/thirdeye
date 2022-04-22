@@ -19,13 +19,15 @@ export const AboutDialogNavBarButton: FunctionComponent = () => {
     const { t } = useTranslation();
     const { hideDialog, visible, showDialog } = useDialog();
 
+
+
     const handleButtonClick = (): void => {
         showDialog({
             type: DialogType.CUSTOM,
             title: t("label.thirdeye"),
             children: (
                 <Grid container alignItems="center">
-                    {/* App logo */}
+                    {/* App logos */}
                     <Grid
                         container
                         item

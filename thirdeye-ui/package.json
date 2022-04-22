@@ -18,7 +18,7 @@
         "url": "https://www.startree.ai"
     },
     "license": "UNLICENSED",
-    "private": true,
+    "private": false,
     "repository": {
         "type": "git",
         "url": "https://github.com/startreedata/thirdeye.git",

@@ -70,6 +70,6 @@ plugins:
       - files:
             - "dist/thirdeye-ui.js"
         placeholder: "0.0.0-development-thirdeye-ui"
-
 # GitHub tag for the release
-tagFormat: thirdeye-ui-${version}
+# TODO: uncomment tag once pipeline is running
+# tagFormat: thirdeye-ui-${version}

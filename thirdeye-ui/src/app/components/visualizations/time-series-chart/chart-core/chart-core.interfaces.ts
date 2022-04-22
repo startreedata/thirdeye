@@ -2,13 +2,12 @@ import { AxisScale } from "@visx/axis";
 import { UseTooltipParams } from "@visx/tooltip/lib/hooks/useTooltip";
 import React from "react";
 import {
-    DataPoint,
-    Series,
+    NormalizedSeries,
     XAxisOptions,
 } from "../time-series-chart.interfaces";
 
 export interface ChartCoreProps {
-    series: Series[];
+    series: NormalizedSeries[];
     xScale?: AxisScale<number>;
     yScale?: AxisScale<number>;
     width: number;
@@ -25,7 +24,5 @@ export interface ChartCoreProps {
         xScale: AxisScale<number>,
         yScale: AxisScale<number>
     ) => React.ReactElement | undefined;
-    yAccessor?: (d: DataPoint) => number;
-    xAccessor?: (d: DataPoint) => Date;
     colorScale: (name: string) => string;
 }

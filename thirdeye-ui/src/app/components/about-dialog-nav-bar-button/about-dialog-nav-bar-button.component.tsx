@@ -19,8 +19,6 @@ export const AboutDialogNavBarButton: FunctionComponent = () => {
     const { t } = useTranslation();
     const { hideDialog, visible, showDialog } = useDialog();
 
-
-
     const handleButtonClick = (): void => {
         showDialog({
             type: DialogType.CUSTOM,

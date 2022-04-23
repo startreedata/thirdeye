@@ -2,6 +2,7 @@ package ai.startree.thirdeye.datasource.calcite;
 
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.symbolLiteralOf;
@@ -27,28 +28,43 @@ public class QueryProjection {
   final private String operator;
   final private List<String> operands;
   final private String quantifier;
+  final private String alias;
 
-  private QueryProjection(String operator, List<String> operands, String quantifier) {
+  private QueryProjection(final String operator, final List<String> operands, final String quantifier, final String alias) {
     this.operator = operator;
     this.operands = List.copyOf(operands);
     this.quantifier = quantifier;
+    this.alias = alias;
   }
 
   public static QueryProjection of(String operator, List<String> operands, String quantifier) {
-    return new QueryProjection(operator, operands, quantifier);
+    return new QueryProjection(operator, operands, quantifier, null);
   }
 
   public static QueryProjection of(String operator, List<String> operands) {
-    return new QueryProjection(operator, operands, null);
+    return new QueryProjection(operator, operands, null, null);
   }
 
   public static QueryProjection of(String column) {
-    return new QueryProjection(null, List.of(column), null);
+    return new QueryProjection(null, List.of(column), null, null);
+  }
+
+  public static QueryProjection withAlias(String operator, List<String> operands, String quantifier, final String alias) {
+    return new QueryProjection(operator, operands, quantifier, alias);
+  }
+
+  public static QueryProjection withAlias(String operator, List<String> operands, final String alias) {
+    return new QueryProjection(operator, operands, null, alias);
+  }
+
+  public static QueryProjection withAlias(String column, final String alias) {
+    return new QueryProjection(null, List.of(column), null, alias);
   }
 
   public SqlNode toSqlNode() {
+    SqlNode node;
     if (operator != null) {
-      return new SqlBasicCall(
+      return applyAlias(new SqlBasicCall(
           new SqlUnresolvedFunction(identifierOf(operator),
               null,
               null,
@@ -57,9 +73,9 @@ public class QueryProjection {
               SqlFunctionCategory.NUMERIC),
           operands.stream().map(CalciteUtils::identifierOf).toArray(SqlNode[]::new),
           SqlParserPos.ZERO,
-          quantifier != null ? symbolLiteralOf(quantifier) : null);
+          quantifier != null ? symbolLiteralOf(quantifier) : null));
     } else if (operands.size() == 1 && quantifier == null) {
-      return identifierOf(operands.get(0));
+      return applyAlias(identifierOf(operands.get(0)));
     } else {
       throw new UnsupportedOperationException(String.format(
           "Unsupported combination for QueryProjection: %s",
@@ -79,17 +95,24 @@ public class QueryProjection {
           String customDialectSql = expressionBuilder.getCustomDialectSql(metricAggFunction,
               operands,
               quantifier);
-          return expressionToNode(customDialectSql, sqlParserConfig);
+          return applyAlias(expressionToNode(customDialectSql, sqlParserConfig));
         }
       }
       // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...) --- acts like to a macro
       if (MetricAggFunction.COUNT_DISTINCT.name().equals(operator)) {
-        return QueryProjection.of("COUNT", operands, "DISTINCT")
-            .toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder);
+        return applyAlias(QueryProjection.of("COUNT", operands, "DISTINCT")
+            .toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
       }
     }
     // 3. default transformation - manages any well-formed projection
     return toSqlNode();
+  }
+
+  private SqlNode applyAlias(final SqlNode node) {
+    if (alias == null) {
+      return node;
+    }
+    return addAlias(node, alias);
   }
 
   public static QueryProjection fromMetricConfig(MetricConfigDTO metricConfigDTO) {

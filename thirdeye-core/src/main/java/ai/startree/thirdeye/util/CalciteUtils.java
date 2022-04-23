@@ -3,6 +3,7 @@ package ai.startree.thirdeye.util;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import java.util.List;
 import java.util.Map;
+import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlBinaryOperator;
 import org.apache.calcite.sql.SqlDialect;
@@ -148,6 +149,14 @@ public class CalciteUtils {
   @NonNull
   public static SqlIdentifier identifierOf(String name) {
     return new SqlIdentifier(name, SqlParserPos.ZERO);
+  }
+
+  @NonNull
+  public static SqlNode addAlias(final SqlNode node, @NonNull final String alias) {
+    List<SqlNode> aliasOperands = List.of(node, identifierOf(alias));
+    return new SqlBasicCall(new SqlAsOperator(),
+        aliasOperands.toArray(new SqlNode[0]),
+        SqlParserPos.ZERO);
   }
 
   /**

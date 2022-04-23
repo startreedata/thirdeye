@@ -1,5 +1,6 @@
 package ai.startree.thirdeye.datasource.calcite;
 
+import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
 import static ai.startree.thirdeye.util.CalciteUtils.combinePredicates;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
@@ -12,8 +13,10 @@ import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
@@ -23,6 +26,7 @@ import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
@@ -248,11 +252,29 @@ public class CalciteRequest {
     }
     // add free text group by columns
     for (String freeTextProjection : freeTextProjections) {
-      nodes.add(expressionToNode(freeTextProjection, sqlParserConfig));
+      SqlNode nodeWithAlias = prepareWithAlias(sqlParserConfig, freeTextProjection);
+      nodes.add(nodeWithAlias);
     }
     nodes.addAll(sqlNodeProjections);
 
     return nodes;
+  }
+
+  private static SqlNode prepareWithAlias(final Config sqlParserConfig,
+      final String freeTextProjection)
+      throws SqlParseException {
+    String[] expressionAndAlias = freeTextProjection.split(" [aA][sS] ");
+    if (expressionAndAlias.length == 1) {
+      // no alias
+      return expressionToNode(freeTextProjection, sqlParserConfig);
+    }
+    // manage the case in which there is multiple AS - only the last AS is used as alias
+    String expressionWithoutLastAlias = Arrays.stream(expressionAndAlias)
+        .limit(expressionAndAlias.length - 1)
+        .collect(Collectors.joining(" AS "));
+    SqlNode expressionNode = expressionToNode(expressionWithoutLastAlias, sqlParserConfig);
+    String alias = expressionAndAlias[expressionAndAlias.length - 1];
+    return addAlias(expressionNode, alias);
   }
 
   public static class Builder {

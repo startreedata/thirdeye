@@ -57,6 +57,8 @@ public class CalciteRequestTest {
   private static final SqlLanguage SQL_LANGUAGE = new PinotSqlLanguage();
   SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new PinotSqlExpressionBuilder();
 
+  // todo cyril add tests with alias
+
   @Test
   public void testGetSqlWithSimpleProjection() throws SqlParseException {
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
@@ -424,7 +426,11 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_sdf";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .withTimeAggregation(Period.days(7), timeAggregationColumn, "SIMPLE_DATE_FORMAT:yyyyMMdd", null, false);
+        .withTimeAggregation(Period.days(7),
+            timeAggregationColumn,
+            "SIMPLE_DATE_FORMAT:yyyyMMdd",
+            null,
+            false);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -530,7 +536,7 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format(
-        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY teTimeGroup ORDER BY teTimeGroup",
+        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY %s ORDER BY %s",
         COLUMN_NAME_1,
         timeAggregationColumn,
         "1:DAYS",
@@ -540,18 +546,55 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS,
         timeFilterInterval.getStartMillis(),
         TIME_AGGREGATION_ALIAS,
-        timeFilterInterval.getEndMillis()
+        timeFilterInterval.getEndMillis(),
+        TIME_AGGREGATION_ALIAS,
+        TIME_AGGREGATION_ALIAS
     );
-
-
 
     assertThatQueriesAreTheSame(output, expected);
   }
 
-  // will need to do: withTImeFilter and timeAggregation
+  @Test
+  public void testGetSqlWithStructuredAndFreeTextAndCalcitePredicateAndTimeAggregation()
+      throws SqlParseException {
+    // only one test for group by - test everything at once
+    final String timeAggregationColumn = "date_epoch";
+    final String timeColumnFormat = "yyyyMMdd";
+    final String freeTextProjection = "MOD("+COLUMN_NAME_1+", " + COLUMN_NAME_2 + ") AS mod1";
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
+        .addSelectProjection(QueryProjection.of(COLUMN_NAME_2))
+        .addSelectProjection(freeTextProjection)
+        .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
+        // missing projection on col3 : because group by col3 but don't select it for test purpose
+        .addGroupByProjection(QueryProjection.of(COLUMN_NAME_2))
+        .addGroupByProjection(freeTextProjection)
+        .addGroupByProjection(identifierOf(COLUMN_NAME_3));
+        // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-  // test datetime aggregation
-  // test datetime filter edge case
+    final String expected = String.format(
+        "SELECT SUM(%s), %s, %s, DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s GROUP BY %s, %s, %s, %s ORDER BY %s",
+        COLUMN_NAME_1,
+        COLUMN_NAME_2,
+        freeTextProjection,
+        timeAggregationColumn,
+        "1:DAYS",
+        TIME_AGGREGATION_ALIAS,
+        DATABASE,
+        TABLE,
+        COLUMN_NAME_2,
+        freeTextProjection,
+        COLUMN_NAME_3,
+        TIME_AGGREGATION_ALIAS,
+        TIME_AGGREGATION_ALIAS
+    );
+
+    assertThatQueriesAreTheSame(output, expected);
+
+
+  }
 
   @Test
   public void testGetSqlWithLimit() throws SqlParseException {
@@ -686,10 +729,10 @@ public class CalciteRequestTest {
     public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
         final Period granularity, final @Nullable String timeUnit) {
       if (timeFormat == null) {
-        return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS",granularity);
+        return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity);
       }
       if ("EPOCH".equals(timeFormat)) {
-        return getTimeGroupExpression(timeColumn, "1:" + timeUnit +":EPOCH",granularity);
+        return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity);
       }
       // case simple date format
       return getTimeGroupExpression(timeColumn, timeFormat, granularity);

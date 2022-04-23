@@ -65,14 +65,14 @@ export const syncEnabledDisabled = (seriesData: Series): boolean => {
     return seriesData.enabled === undefined ? true : seriesData.enabled;
 };
 
-const defaultXAccessor = (d: DataPoint | ThresholdDataPoint): Date => {
+export const defaultXAccessor = (d: DataPoint | ThresholdDataPoint): Date => {
     return new Date(d.x);
 };
 
-const defaultYAccessor = (d: DataPoint | ThresholdDataPoint): number => {
+export const defaultYAccessor = (d: DataPoint | ThresholdDataPoint): number => {
     return d.y;
 };
 
-const defaultY1Accessor = (d: ThresholdDataPoint): number => {
+export const defaultY1Accessor = (d: ThresholdDataPoint): number => {
     return d.y1;
 };

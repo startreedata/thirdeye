@@ -22,7 +22,6 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
-// todo cyril rename this to predicate
 public class QueryProjection {
 
   final private String operator;
@@ -30,7 +29,8 @@ public class QueryProjection {
   final private String quantifier;
   final private String alias;
 
-  private QueryProjection(final String operator, final List<String> operands, final String quantifier, final String alias) {
+  private QueryProjection(final String operator, final List<String> operands,
+      final String quantifier, final String alias) {
     this.operator = operator;
     this.operands = List.copyOf(operands);
     this.quantifier = quantifier;
@@ -49,16 +49,8 @@ public class QueryProjection {
     return new QueryProjection(null, List.of(column), null, null);
   }
 
-  public static QueryProjection withAlias(String operator, List<String> operands, String quantifier, final String alias) {
-    return new QueryProjection(operator, operands, quantifier, alias);
-  }
-
-  public static QueryProjection withAlias(String operator, List<String> operands, final String alias) {
-    return new QueryProjection(operator, operands, null, alias);
-  }
-
-  public static QueryProjection withAlias(String column, final String alias) {
-    return new QueryProjection(null, List.of(column), null, alias);
+  public QueryProjection withAlias(String alias) {
+    return new QueryProjection(this.operator, this.operands, this.quantifier, alias);
   }
 
   public SqlNode toSqlNode() {

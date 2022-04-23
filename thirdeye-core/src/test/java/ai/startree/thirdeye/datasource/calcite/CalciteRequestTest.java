@@ -353,26 +353,33 @@ public class CalciteRequestTest {
     assertThatQueriesAreTheSame(output, expected);
   }
 
-  // test multi predicates
   @Test
-  public void testGetSqlWithStructuredAndFreeTextAndCalcitePredicate() throws SqlParseException {
+  public void testGetSqlWithStructuredAndFreeTextAndCalcitePredicateAndTimeFilter()
+      throws SqlParseException {
     final String textPredicate = "col2 = 'test2'";
     final SqlNode sqlNodePredicate = new SqlBasicCall(EQUALS_OPERATOR,
         new SqlNode[]{identifierOf("col3"), stringLiteralOf("test3")},
         SqlParserPos.ZERO);
+    final Interval timeFilterInterval = new Interval(100L, 100000L);
+    final String epoch_date = "epoch_date";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addPredicate(QueryPredicate.of(new Predicate(COLUMN_NAME_1, OPER.EQ, "test1"),
             DimensionType.STRING))
         .addPredicate(textPredicate)
-        .addPredicate(sqlNodePredicate);
+        .addPredicate(sqlNodePredicate)
+        .withTimeFilter(timeFilterInterval, epoch_date, "EPOCH", "MILLISECONDS");
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format(
-        "SELECT %s FROM %s.%s WHERE (col1 = 'test1') AND col2 = 'test2' AND (col3 = 'test3')",
+        "SELECT %s FROM %s.%s WHERE %s >= %s AND %s < %s AND (col1 = 'test1') AND col2 = 'test2' AND (col3 = 'test3')",
         COLUMN_NAME_1,
         DATABASE,
-        TABLE);
+        TABLE,
+        epoch_date,
+        timeFilterInterval.getStartMillis(),
+        epoch_date,
+        timeFilterInterval.getEndMillis());
 
     assertThatQueriesAreTheSame(output, expected);
   }
@@ -555,12 +562,12 @@ public class CalciteRequestTest {
   }
 
   @Test
-  public void testGetSqlWithStructuredAndFreeTextAndCalcitePredicateAndTimeAggregation()
+  public void testGetSqlWithStructuredAndFreeTextAndCalciteGroupByAndTimeAggregation()
       throws SqlParseException {
     // only one test for group by - test everything at once
     final String timeAggregationColumn = "date_epoch";
     final String timeColumnFormat = "yyyyMMdd";
-    final String freeTextProjection = "MOD("+COLUMN_NAME_1+", " + COLUMN_NAME_2 + ") AS mod1";
+    final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ") AS mod1";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .addSelectProjection(QueryProjection.of(COLUMN_NAME_2))
@@ -570,7 +577,7 @@ public class CalciteRequestTest {
         .addGroupByProjection(QueryProjection.of(COLUMN_NAME_2))
         .addGroupByProjection(freeTextProjection)
         .addGroupByProjection(identifierOf(COLUMN_NAME_3));
-        // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
+    // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -592,8 +599,42 @@ public class CalciteRequestTest {
     );
 
     assertThatQueriesAreTheSame(output, expected);
+  }
 
+  @Test
+  public void testGetSqlWithStructuredAndFreeTextAndCalciteOrderByAndTimeAggregationOrderBy()
+      throws SqlParseException {
+    // only one test for group by - test everything at once
+    final String timeAggregationColumn = "date_epoch";
+    final String timeColumnFormat = "yyyyMMdd";
+    final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ")";
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
+        .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
+        // missing projection on col3 : because group by col3 but don't select it for test purpose
+        .addOrderByProjection(QueryProjection.of(COLUMN_NAME_2))
+        .addOrderByProjection(freeTextProjection)
+        .addOrderByProjection(identifierOf(COLUMN_NAME_3));
+    // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
+    final String expected = String.format(
+        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s GROUP BY %s ORDER BY %s, %s, %s, %s",
+        COLUMN_NAME_1,
+        timeAggregationColumn,
+        "1:DAYS",
+        TIME_AGGREGATION_ALIAS,
+        DATABASE,
+        TABLE,
+        TIME_AGGREGATION_ALIAS,
+        COLUMN_NAME_2,
+        freeTextProjection,
+        COLUMN_NAME_3,
+        TIME_AGGREGATION_ALIAS
+    );
+
+    assertThatQueriesAreTheSame(output, expected);
   }
 
   @Test
@@ -613,11 +654,6 @@ public class CalciteRequestTest {
 
     assertThatQueriesAreTheSame(output, expected);
   }
-  // test gtoup by
-  // test prder by
-  // test limit
-
-  // test freeSqlText injection
 
   // TODO cyril - should be easy to express:
   //  a timeseries --> with timegrouping

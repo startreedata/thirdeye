@@ -404,7 +404,7 @@ public class CalciteRequest {
 
     public Builder addOrderByProjection(final String projection) {
       checkArgument(isNotBlank(projection));
-      this.freeTextGroupByProjections.add(Objects.requireNonNull(projection));
+      this.freeTextOrderByProjections.add(Objects.requireNonNull(projection));
       return this;
     }
 

@@ -54,7 +54,6 @@ public class QueryProjection {
   }
 
   public SqlNode toSqlNode() {
-    SqlNode node;
     if (operator != null) {
       return applyAlias(new SqlBasicCall(
           new SqlUnresolvedFunction(identifierOf(operator),

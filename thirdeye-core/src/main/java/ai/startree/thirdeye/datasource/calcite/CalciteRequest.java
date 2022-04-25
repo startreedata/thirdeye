@@ -33,9 +33,9 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 
 /**
- * Multiple metrics, single table.
+ * Class that helps build and generate SQL queries.
  *
- * todo add doc - predicates are combined with the AND operator
+ * Use the builder {@link #newBuilder}.
  *
  * todo cyril - later implement having clause
  **/
@@ -339,6 +339,16 @@ public class CalciteRequest {
       return this;
     }
 
+    /**
+     * Add a timeFilter
+     *
+     * Add a predicate on a time column.
+     * If {@link #withTimeAggregation}, and the time column is the same, then the filter
+     * will be applied to the bucketed time.
+     *
+     * At SQL generation time, the filtering sql expression is provided by the Datasource {@link
+     * SqlExpressionBuilder}.
+     */
     public Builder withTimeFilter(final Interval timeFilterInterval, final String timeFilterColumn,
         final String timeFilterColumnFormat, @Nullable final String timeFilterColumnUnit) {
       this.timeFilterInterval = Objects.requireNonNull(timeFilterInterval);
@@ -365,33 +375,56 @@ public class CalciteRequest {
       return this;
     }
 
+    /**
+     * Add a predicate. Predicates are combined with the AND operator.
+     */
     public Builder addPredicate(final QueryPredicate predicate) {
       this.predicates.add(Objects.requireNonNull(predicate));
       return this;
     }
 
+    /**
+     * Add a free text predicate. Prefix AND or OR will be removed.
+     * Predicates are combined with the AND operator.
+     */
     public Builder addPredicate(final String predicates) {
       checkArgument(isNotBlank(predicates));
       this.freeTextPredicates.add(Objects.requireNonNull(predicates));
       return this;
     }
 
+    /**
+     * Add a SqlNode predicate.
+     * Predicates are combined with the AND operator.
+     */
     public Builder addPredicate(final SqlNode sqlPredicate) {
       this.sqlNodePredicates.add(Objects.requireNonNull(sqlPredicate));
       return this;
     }
 
+    /**
+     * Add a group by projection.
+     * GroupBy projections are NOT automatically added to the select projections.
+     */
     public Builder addGroupByProjection(final QueryProjection projection) {
       this.groupByProjections.add(Objects.requireNonNull(projection));
       return this;
     }
 
+    /**
+     * Add a free text group by projection.
+     * GroupBy projections are NOT automatically added to the select projections.
+     */
     public Builder addGroupByProjection(final String projection) {
       checkArgument(isNotBlank(projection));
       this.freeTextGroupByProjections.add(Objects.requireNonNull(projection));
       return this;
     }
 
+    /**
+     * Add a SqlNode group by projection.
+     * GroupBy projections are NOT automatically added to the select projections.
+     */
     public Builder addGroupByProjection(final SqlNode projection) {
       this.sqlNodeGroupByProjections.add(Objects.requireNonNull(projection));
       return this;

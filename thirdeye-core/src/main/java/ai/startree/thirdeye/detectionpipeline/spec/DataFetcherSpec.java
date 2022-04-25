@@ -73,8 +73,8 @@ public class DataFetcherSpec extends AbstractSpec {
   }
 
   public DataFetcherSpec setTimeseriesFilters(
-      final List<QueryPredicate> queryPredicates) {
-    this.timeseriesFilters = queryPredicates;
+      final List<QueryPredicate> timeseriesFilters) {
+    this.timeseriesFilters = timeseriesFilters;
     return this;
   }
 }

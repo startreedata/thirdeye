@@ -12,11 +12,13 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
@@ -67,14 +69,14 @@ public class DataSourceCache {
     final Optional<DataSourceDTO> dataSource = findByName(name);
 
     // datasource absent in DB
-    if(dataSource.isEmpty()) {
+    if (dataSource.isEmpty()) {
       // remove redundant cache if datasource was recently deleted
       removeDataSource(name);
       throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
     }
     final DataSourceWrapper cachedEntry = cache.get(name);
     if (cachedEntry != null) {
-      if(cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
+      if (cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
         // cache hit
         return cachedEntry.getDataSource();
       }
@@ -112,6 +114,21 @@ public class DataSourceCache {
     return thirdEyeDataSource;
   }
 
+  public DataFrame getQueryResult(final ThirdEyeRequestV2 requestV2, final String dataSource)
+      throws Exception {
+    datasourceCallCounter.inc();
+    final long tStart = System.nanoTime();
+    try {
+      return getDataSource(dataSource).fetchDataTable(requestV2).getDataFrame();
+    } catch (final Exception e) {
+      datasourceExceptionCounter.inc();
+      throw e;
+    } finally {
+      datasourceCallDuration.update(System.nanoTime() - tStart);
+    }
+  }
+
+  @Deprecated
   public ThirdEyeResponse getQueryResult(final ThirdEyeRequest request) throws Exception {
     datasourceCallCounter.inc();
     final long tStart = System.nanoTime();
@@ -127,10 +144,26 @@ public class DataSourceCache {
     }
   }
 
+  public Future<DataFrame> getQueryResultAsync(final ThirdEyeRequestV2 requestV2,
+      final String dataSource) {
+    return executorService.submit(() -> getQueryResult(requestV2, dataSource));
+  }
+
+  @Deprecated
   public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request) {
     return executorService.submit(() -> getQueryResult(request));
   }
 
+  public Map<ThirdEyeRequestV2, Future<DataFrame>> getQueryResultsAsync(
+      final List<ThirdEyeRequestV2> requests, final String dataSource) {
+    final Map<ThirdEyeRequestV2, Future<DataFrame>> responseFuturesMap = new LinkedHashMap<>();
+    for (final ThirdEyeRequestV2 request : requests) {
+      responseFuturesMap.put(request, getQueryResultAsync(request, dataSource));
+    }
+    return responseFuturesMap;
+  }
+
+  @Deprecated
   public Map<ThirdEyeRequest, Future<ThirdEyeResponse>> getQueryResultsAsync(
       final List<ThirdEyeRequest> requests) {
     final Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();

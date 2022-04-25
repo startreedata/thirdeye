@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
-import static ai.startree.thirdeye.testutils.SqlUtils.assertThatQueriesAreTheSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
@@ -13,10 +13,11 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
+import ai.startree.thirdeye.testutils.SqlUtils;
 import com.google.common.collect.ImmutableMap;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.calcite.sql.parser.SqlParseException;
+import org.assertj.core.api.Assertions;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -43,13 +44,6 @@ public class MacroEngineTest {
   private static final String IDENTIFIER_QUOTE_STRING = "\"";
   private static final String LITERAL_QUOTE_STRING = "'";
 
-  private String clean(String sql) {
-    return sql.toLowerCase(Locale.ENGLISH)
-        .trim()
-        .replaceAll("[\\n\\t\\r]+", " ")
-        .replaceAll(" +", " ");
-  }
-
   private void prepareRequestAndAssert(String inputQuery, String expectedQuery,
       Map<String, String> expectedProperties) {
     MacroEngine macroEngine = new MacroEngine(MOCK_SQL_LANGUAGE,
@@ -60,7 +54,8 @@ public class MacroEngineTest {
     try {
       ThirdEyeRequestV2 output = macroEngine.prepareRequest();
       Assert.assertEquals(TABLE_NAME, output.getTable());
-      assertThatQueriesAreTheSame(expectedQuery, output.getQuery());
+      Assertions.assertThat(SqlUtils.cleanSql(output.getQuery())).isEqualTo(SqlUtils.cleanSql(
+          expectedQuery));
       Assert.assertEquals(expectedProperties, output.getProperties());
     } catch (SqlParseException e) {
       Assert.fail("SQL query parsing failed: " + e);
@@ -74,7 +69,7 @@ public class MacroEngineTest {
     String inputQuery = String.format("select * from tableName where __timeFilter(%s)",
         macroArgument);
 
-    String expectedQuery = String.format("select * from tableName where %s",
+    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
             INPUT_END_TIME));
@@ -96,7 +91,7 @@ public class MacroEngineTest {
     String inputQuery = String.format("select * from tableName where __timeFilter(%s)",
         macroArgument);
 
-    String expectedQuery = String.format("select * from tableName where %s",
+    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
             INPUT_END_TIME));
@@ -122,7 +117,7 @@ public class MacroEngineTest {
         timeColumnFormatMacroArg,
         granularityMacroArg);
 
-    String expectedQuery = String.format("select %s from tableName",
+    String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
             granularityMacroArg));
@@ -143,12 +138,12 @@ public class MacroEngineTest {
     Period granularityMacroArg = Period.ZERO;
     String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
 
-    String inputQuery = String.format("select __timeGroup(%s,%s,%s) from tableName",
+    String inputQuery = String.format("select __timeGroup(%s,%s,%s) FROM tableName",
         timeColumnMacroArg,
         timeColumnFormatMacroArgQuoted,
         granularityMacroArgQuoted);
 
-    String expectedQuery = String.format("select %s from tableName",
+    String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
             granularityMacroArg));
@@ -189,7 +184,7 @@ public class MacroEngineTest {
         MacroMetadataKeys.GRANULARITY.toString(),
         Period.ZERO.toString());
 
-    String expectedQuery = String.format("select * from tableName where %s", expectedNestedMacro);
+    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s", expectedNestedMacro);
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
@@ -201,7 +196,7 @@ public class MacroEngineTest {
     String inputQuery = String.format("select * from tableName where __timeFilter(%s)",
         macroArgument);
 
-    String expectedQuery = String.format("select * from tableName where %s",
+    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_START_TIME,
             INPUT_END_TIME));

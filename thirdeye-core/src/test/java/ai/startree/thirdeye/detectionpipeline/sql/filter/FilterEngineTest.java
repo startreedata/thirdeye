@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
-import static ai.startree.thirdeye.testutils.SqlUtils.assertThatQueriesAreTheSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -14,8 +14,10 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.spi.metric.DimensionType;
+import ai.startree.thirdeye.testutils.SqlUtils;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class FilterEngineTest {
@@ -48,7 +50,7 @@ public class FilterEngineTest {
     final String output = filtersEngine.prepareQuery();
     final String expected = query;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -61,7 +63,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -74,7 +76,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -87,7 +89,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_IN_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -100,7 +102,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -118,7 +120,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -131,7 +133,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -147,7 +149,7 @@ public class FilterEngineTest {
     final String expected = baseQuery + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING
         + orderByStatement;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -163,7 +165,7 @@ public class FilterEngineTest {
     final String expected = baseQuery + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING
         + groupByStatement;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -179,7 +181,7 @@ public class FilterEngineTest {
     final String expected = baseQuery + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING
         + groupByHavingStatement;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -192,7 +194,7 @@ public class FilterEngineTest {
 
     final String expected = query + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -206,7 +208,7 @@ public class FilterEngineTest {
 
     final String expected = query.substring(0, query.length()-1) + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING + ")";
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -219,7 +221,7 @@ public class FilterEngineTest {
 
     String expected = query + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -232,7 +234,7 @@ public class FilterEngineTest {
 
     String expected = query + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   private static class TestSqlLanguage implements SqlLanguage {

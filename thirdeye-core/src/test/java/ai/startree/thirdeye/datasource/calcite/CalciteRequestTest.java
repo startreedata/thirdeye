@@ -1,11 +1,11 @@
 package ai.startree.thirdeye.datasource.calcite;
 
 import static ai.startree.thirdeye.datasource.calcite.CalciteRequest.TIME_AGGREGATION_ALIAS;
-import static ai.startree.thirdeye.testutils.SqlUtils.assertThatQueriesAreTheSame;
 import static ai.startree.thirdeye.util.CalciteUtils.EQUALS_OPERATOR;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
@@ -15,6 +15,7 @@ import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.testutils.SqlUtils;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +23,7 @@ import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
@@ -70,7 +72,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -88,7 +90,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -104,7 +106,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -119,7 +121,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -135,7 +137,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -151,7 +153,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -177,7 +179,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -191,7 +193,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -207,7 +209,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -221,7 +223,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -240,7 +242,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -267,7 +269,7 @@ public class CalciteRequestTest {
           sqlOperator,
           3);
 
-      assertThatQueriesAreTheSame(output, expected);
+      Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
     }
   }
 
@@ -295,7 +297,7 @@ public class CalciteRequestTest {
           sqlOperator,
           "'myText'");
 
-      assertThatQueriesAreTheSame(output, expected);
+      Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
     }
   }
 
@@ -323,7 +325,7 @@ public class CalciteRequestTest {
           sqlOperator,
           "TRUE");
 
-      assertThatQueriesAreTheSame(output, expected);
+      Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
     }
   }
 
@@ -347,7 +349,7 @@ public class CalciteRequestTest {
         "'val1'",
         "'val2'");
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -364,7 +366,7 @@ public class CalciteRequestTest {
         TABLE,
         complexWhere);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -382,7 +384,7 @@ public class CalciteRequestTest {
         TABLE,
         complexWhere);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -413,7 +415,7 @@ public class CalciteRequestTest {
         epoch_date,
         timeFilterInterval.getEndMillis());
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -435,7 +437,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -457,7 +459,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -483,7 +485,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -507,7 +509,7 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS,
         TIME_AGGREGATION_ALIAS);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -531,7 +533,7 @@ public class CalciteRequestTest {
         timeFilterInterval.getEndMillis()
     );
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -557,7 +559,7 @@ public class CalciteRequestTest {
         "20211010"
     );
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -590,7 +592,7 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS
     );
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -630,7 +632,7 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS
     );
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -666,7 +668,7 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS
     );
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   @Test
@@ -684,7 +686,7 @@ public class CalciteRequestTest {
         TABLE,
         limit);
 
-    assertThatQueriesAreTheSame(output, expected);
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
 
   // TODO cyril - should be easy to express:

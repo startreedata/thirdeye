@@ -209,16 +209,6 @@ public final class MetricSlice {
     return new MetricSlice(metricConfigDTO, interval, predicates, filters, datasetConfigDto);
   }
 
-  /**
-   * check if current metric slice contains another metric slice
-   */
-  public boolean containSlice(MetricSlice slice) {
-    return Objects.equals(slice.metricConfigDTO, this.metricConfigDTO) &&
-        slice.getFilters().equals(this.getFilters()) &&
-        Objects.equals(slice.datasetConfigDTO, this.datasetConfigDTO) &&
-        this.interval.contains(slice.interval);
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

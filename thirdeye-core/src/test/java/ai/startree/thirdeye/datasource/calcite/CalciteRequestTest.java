@@ -1,7 +1,7 @@
 package ai.startree.thirdeye.datasource.calcite;
 
 import static ai.startree.thirdeye.datasource.calcite.CalciteRequest.TIME_AGGREGATION_ALIAS;
-import static ai.startree.thirdeye.detectionpipeline.sql.filter.FilterEngineTest.assertThatQueriesAreTheSame;
+import static ai.startree.thirdeye.testutils.SqlUtils.assertThatQueriesAreTheSame;
 import static ai.startree.thirdeye.util.CalciteUtils.EQUALS_OPERATOR;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;

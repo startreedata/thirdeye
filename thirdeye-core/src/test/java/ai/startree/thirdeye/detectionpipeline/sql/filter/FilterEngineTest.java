@@ -5,14 +5,14 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static ai.startree.thirdeye.testutils.SqlUtils.assertThatQueriesAreTheSame;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -233,14 +233,6 @@ public class FilterEngineTest {
     String expected = query + STRING_FILTER_EQUAL_TO_STRING + STRING_FILTER_NOT_EQUAL_TO_STRING;
 
     assertThatQueriesAreTheSame(output, expected);
-  }
-
-  // todo cyril move this in test utils - used in MacroEngine, FilterEngine, and CalciteRequest tests
-  public static void assertThatQueriesAreTheSame(final String output, final String expected) {
-    assertThat(output
-        .replaceAll("\\n", " ")
-        .replaceAll("  +", " ")
-    ).isEqualTo(expected);
   }
 
   private static class TestSqlLanguage implements SqlLanguage {

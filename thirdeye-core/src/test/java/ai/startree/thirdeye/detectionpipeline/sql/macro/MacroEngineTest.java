@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static ai.startree.thirdeye.testutils.SqlUtils.assertThatQueriesAreTheSame;
+
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -58,7 +60,7 @@ public class MacroEngineTest {
     try {
       ThirdEyeRequestV2 output = macroEngine.prepareRequest();
       Assert.assertEquals(TABLE_NAME, output.getTable());
-      Assert.assertEquals(clean(expectedQuery), clean(output.getQuery()));
+      assertThatQueriesAreTheSame(expectedQuery, output.getQuery());
       Assert.assertEquals(expectedProperties, output.getProperties());
     } catch (SqlParseException e) {
       Assert.fail("SQL query parsing failed: " + e);

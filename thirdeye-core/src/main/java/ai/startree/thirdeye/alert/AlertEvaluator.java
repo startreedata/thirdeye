@@ -13,6 +13,7 @@ import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredic
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -30,7 +31,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;

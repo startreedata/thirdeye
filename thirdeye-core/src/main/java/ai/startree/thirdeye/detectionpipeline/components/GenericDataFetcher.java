@@ -8,6 +8,7 @@ package ai.startree.thirdeye.detectionpipeline.components;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.detectionpipeline.sql.filter.FiltersEngine;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.MacroEngine;
@@ -17,7 +18,6 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;

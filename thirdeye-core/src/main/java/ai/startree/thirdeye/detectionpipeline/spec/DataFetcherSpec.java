@@ -6,8 +6,8 @@
 package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import java.util.List;
 
 public class DataFetcherSpec extends AbstractSpec {

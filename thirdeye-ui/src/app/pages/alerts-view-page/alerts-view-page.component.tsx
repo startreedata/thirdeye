@@ -4,8 +4,6 @@ import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -17,8 +15,10 @@ import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
@@ -65,7 +65,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
     const [searchParams] = useSearchParams();
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -219,8 +219,11 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAlert.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiAlert.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAlertDeleteOk(uiAlert),
         });
     };

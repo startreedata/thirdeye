@@ -4,8 +4,6 @@ import { cloneDeep, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
@@ -14,8 +12,10 @@ import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
@@ -39,7 +39,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -128,10 +128,11 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     ): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
+            contents: t("message.delete-confirmation", {
                 name: uiSubscriptionGroup.name,
             }),
-            okButtonLabel: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
+            okButtonText: t("label.delete"),
             onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
         });
     };

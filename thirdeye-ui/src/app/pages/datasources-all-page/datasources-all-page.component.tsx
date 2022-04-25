@@ -4,14 +4,14 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import {
     deleteDatasource,
     getAllDatasources,
@@ -25,7 +25,7 @@ export const DatasourcesAllPage: FunctionComponent = () => {
     const [uiDatasources, setUiDatasources] = useState<UiDatasource[] | null>(
         null
     );
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -64,8 +64,11 @@ export const DatasourcesAllPage: FunctionComponent = () => {
     const handleDatasourceDelete = (uiDatasource: UiDatasource): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiDatasource.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiDatasource.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasourceDeleteOk(uiDatasource),
         });
     };

@@ -55,31 +55,13 @@ public class CalciteRequestTest {
   public static final String COMPLEX_SQL_PROJECTION_TEXT = "DATETIME(COMPLEX(UN_FN(col1, 3)))";
   public static final SqlNode SIMPLE_SQL_NODE_PROJECTION = identifierOf(COLUMN_NAME_3);
 
-  private static final SqlLanguage SQL_LANGUAGE = new PinotSqlLanguage();
-  SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new PinotSqlExpressionBuilder();
+  private static final SqlLanguage SQL_LANGUAGE = new TestPinotLikeSqlLanguage();
+  SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new TestPinotLikeSqlExpressionBuilder();
 
   @Test
   public void testGetSqlWithSimpleProjection() throws SqlParseException {
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION);
-
-    final CalciteRequest request = builder.build();
-    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
-
-    final String expected = String.format("SELECT %s FROM %s.%s",
-        COLUMN_NAME_1,
-        DATABASE,
-        TABLE);
-
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
-  }
-
-  @Test
-  public void testGetSqlWithSimpleProjectionWithReservedKeyword() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
-        .addSelectProjection(SIMPLE_PROJECTION)
-        .addPredicate(QueryPredicate.of(new Predicate("date", OPER.EQ, "20211010"),
-            DimensionType.STRING, "pageviews"));
 
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -149,7 +131,7 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format("SELECT %s(%s, 90) FROM %s.%s",
-        PinotSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
+        TestPinotLikeSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
         COLUMN_NAME_1,
         DATABASE,
         TABLE);
@@ -189,7 +171,7 @@ public class CalciteRequestTest {
         COLUMN_NAME_1,
         COLUMN_NAME_1,
         COLUMN_NAME_1,
-        PinotSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
+        TestPinotLikeSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
         COLUMN_NAME_1,
         COLUMN_NAME_1,
         COLUMN_NAME_2,
@@ -554,6 +536,31 @@ public class CalciteRequestTest {
   }
 
   @Test
+  public void testGetSqlWithTimeFilterWithReservedKeyword() throws SqlParseException {
+    final String reservedKeywordTimeAggregationColumn = "date";
+    final String quotedTimeAggregationColumn = TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING + reservedKeywordTimeAggregationColumn + TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING;
+    final Interval timeFilterInterval = new Interval(100L, 100000000L);
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .withTimeFilter(timeFilterInterval, reservedKeywordTimeAggregationColumn, "EPOCH", "MILLISECONDS");
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    final String expected = String.format(
+        "SELECT %s FROM %s.%s WHERE %s >= %s AND %s < %s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE,
+        quotedTimeAggregationColumn,
+        timeFilterInterval.getStartMillis(),
+        quotedTimeAggregationColumn,
+        timeFilterInterval.getEndMillis()
+    );
+
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+  }
+
+  @Test
   public void testGetSqlWithTimeFilterInSimpleDateFormat() throws SqlParseException {
     final String timeAggregationColumn = "date_sdf";
     final Interval timeFilterInterval = new Interval(new DateTime(2020, 1, 1, 0, 0),
@@ -720,7 +727,9 @@ public class CalciteRequestTest {
 
   // TODO cyril use a test language rather than the pinot language
   // todo use the same testLanguage everywhere -->
-  private static class PinotSqlLanguage implements SqlLanguage {
+  private static class TestPinotLikeSqlLanguage implements SqlLanguage {
+
+    public static final String IDENTIFIER_QUOTE_STRING = "\"";
 
     private static final ThirdEyeSqlParserConfig SQL_PARSER_CONFIG = new ThirdEyeSqlParserConfig.Builder()
         .withLex("MYSQL_ANSI")
@@ -730,7 +739,7 @@ public class CalciteRequestTest {
 
     private static final ThirdeyeSqlDialect SQL_DIALECT = new ThirdeyeSqlDialect.Builder()
         .withBaseDialect("AnsiSqlDialect")
-        .withIdentifierQuoteString("\"")
+        .withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING)
         .withIdentifierEscapedQuoteString("")
         .build();
 
@@ -745,7 +754,7 @@ public class CalciteRequestTest {
     }
   }
 
-  private static class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
+  private static class TestPinotLikeSqlExpressionBuilder implements SqlExpressionBuilder {
 
     public static final String DIALECT_SPECIFIC_PERCENTILE_FN_NAME = "PERCENTILE_TDIGEST";
     public static final long SECOND_SCALE = 1000; // number of second in milliseconds

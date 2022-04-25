@@ -75,7 +75,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGeSqlWithSimpleProjectionWithAlias() throws SqlParseException {
-    String alias = "alias1";
+    final String alias = "alias1";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
         .addSelectProjection(SIMPLE_PROJECTION.withAlias(alias));
 
@@ -188,6 +188,22 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format("SELECT %s FROM %s.%s",
         COMPLEX_SQL_PROJECTION_TEXT,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithFreeTextProjectionWithAlias() throws SqlParseException {
+    final String alias = "alias1";
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT + " as " + alias) ;
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    final String expected = String.format("SELECT %s AS %s FROM %s.%s",
+        COMPLEX_SQL_PROJECTION_TEXT,
+        alias,
         DATABASE,
         TABLE);
 

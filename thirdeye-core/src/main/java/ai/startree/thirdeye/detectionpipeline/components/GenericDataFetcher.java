@@ -34,7 +34,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
    */
   private String tableName;
   private ThirdEyeDataSource thirdEyeDataSource;
-  private List<QueryPredicate> queryPredicates;
+  private List<QueryPredicate> timeseriesFilters;
 
   public String getQuery() {
     return query;
@@ -65,7 +65,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           .getDataSourceCache()
           .getDataSource(dataSource), "data source is unavailable");
     }
-    this.queryPredicates = dataFetcherSpec.getTimeseriesFilters();
+    this.timeseriesFilters = dataFetcherSpec.getTimeseriesFilters();
   }
 
   @Override
@@ -78,7 +78,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   }
 
   private String injectFilters(final String query) throws SqlParseException {
-    if (queryPredicates.isEmpty()) {
+    if (timeseriesFilters.isEmpty()) {
       return query;
     }
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
@@ -86,7 +86,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
         String.format(
             "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
             thirdEyeDataSource.getName()));
-    return new FiltersEngine(sqlLanguage, query, queryPredicates).prepareQuery();
+    return new FiltersEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
   }
 
   private ThirdEyeRequestV2 applyMacros(final Interval detectionInterval,

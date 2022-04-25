@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.util;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -72,8 +73,8 @@ public class DataFrameUtils {
     String timeColumn = response.getDataTimeSpec().getColumnName();
 
     DataFrame df = new DataFrame();
-    df.addSeries(DataFrame.COL_TIME, timeBuilder.build());
-    df.setIndex(DataFrame.COL_TIME);
+    df.addSeries(Constants.COL_TIME, timeBuilder.build());
+    df.setIndex(Constants.COL_TIME);
 
     int i = 0;
     for (String n : response.getGroupKeyColumns()) {
@@ -94,7 +95,7 @@ public class DataFrameUtils {
       }
     }
 
-    return df.sortedBy(DataFrame.COL_TIME);
+    return df.sortedBy(Constants.COL_TIME);
   }
 
   /**
@@ -109,7 +110,7 @@ public class DataFrameUtils {
   public static DataFrame evaluateResponse(ThirdEyeResponse response) {
     // only the name is used to rename the result column --> inline this?
     DataFrame res = parseResponse(response);
-    return res.renameSeries(response.getRequest().getMetricFunction().toString(),DataFrame.COL_VALUE);
+    return res.renameSeries(response.getRequest().getMetricFunction().toString(), Constants.COL_VALUE);
   }
 
   /**

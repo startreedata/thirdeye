@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.detection.components.filters;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
@@ -66,7 +67,7 @@ public class AbsoluteChangeRuleAnomalyFilter implements
 
     double currentValue = anomaly.getAvgCurrentVal();
     double baselineValue = baseline == null ? anomaly.getAvgBaselineVal()
-        : this.baseline.gather(currentSlice, aggregates).getDouble(DataFrame.COL_VALUE, 0);
+        : this.baseline.gather(currentSlice, aggregates).getDouble(Constants.COL_VALUE, 0);
     // if inconsistent with up/down, filter the anomaly
     if (!pattern.equals(Pattern.UP_OR_DOWN) && (currentValue < baselineValue && pattern.equals(
         Pattern.UP)) || (currentValue > baselineValue && pattern.equals(Pattern.DOWN))) {

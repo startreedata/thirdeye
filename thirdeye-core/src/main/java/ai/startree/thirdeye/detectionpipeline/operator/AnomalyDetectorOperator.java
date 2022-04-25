@@ -5,13 +5,14 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Collections.singletonList;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
@@ -142,10 +143,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     }
 
     final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
-    final LongSeries timeMillisSeries = df.getLongs(DataFrame.COL_TIME);
-    final BooleanSeries isAnomalySeries = df.getBooleans(DataFrame.COL_ANOMALY);
-    final DoubleSeries currentSeries = df.getDoubles(DataFrame.COL_CURRENT);
-    final DoubleSeries baselineSeries = df.getDoubles(DataFrame.COL_VALUE);
+    final LongSeries timeMillisSeries = df.getLongs(Constants.COL_TIME);
+    final BooleanSeries isAnomalySeries = df.getBooleans(Constants.COL_ANOMALY);
+    final DoubleSeries currentSeries = df.getDoubles(Constants.COL_CURRENT);
+    final DoubleSeries baselineSeries = df.getDoubles(Constants.COL_VALUE);
 
     long lastStartMillis = -1;
     AnomalyStatsAccumulator anomalyStatsAccumulator = new AnomalyStatsAccumulator();

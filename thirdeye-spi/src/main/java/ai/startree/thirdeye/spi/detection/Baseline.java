@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.detection;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.List;
@@ -25,8 +26,8 @@ import java.util.Map;
  */
 public interface Baseline {
 
-  String COL_TIME = DataFrame.COL_TIME;
-  String COL_VALUE = DataFrame.COL_VALUE;
+  String COL_TIME = Constants.COL_TIME;
+  String COL_VALUE = Constants.COL_VALUE;
 
   /**
    * Returns the set of raw data slices required to compute the synthetic baseline for the given

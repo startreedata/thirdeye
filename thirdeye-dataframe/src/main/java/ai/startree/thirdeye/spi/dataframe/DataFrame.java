@@ -36,22 +36,6 @@ public class DataFrame {
 
   public static final Pattern PATTERN_FORMULA_VARIABLE = Pattern.compile("\\$\\{([^}]*)}");
 
-  public static final String COL_TIME = "timestamp";
-  // baseline value
-  public static final String COL_VALUE = "value";
-  public static final String COL_CURRENT = "current";
-  public static final String COL_UPPER_BOUND = "upper_bound";
-  public static final String COL_LOWER_BOUND = "lower_bound";
-  public static final String COL_ANOMALY = "anomaly";
-  public static final String COL_PATTERN = "pattern";
-  public static final String COL_ERROR = "error";
-  public static final String COL_DIFF = "diff";
-  public static final String COL_DIFF_VIOLATION = "diff_violation";
-  public static final String COL_IN_WINDOW = "is_in_window";
-
-
-  public static final String COLUMN_JOIN_KEY = "join_key";
-
   public static final String COLUMN_INDEX_DEFAULT = "index";
   public static final String COLUMN_JOIN_LEFT = "_left";
   public static final String COLUMN_JOIN_RIGHT = "_right";

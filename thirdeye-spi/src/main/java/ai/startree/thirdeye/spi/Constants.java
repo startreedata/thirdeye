@@ -41,8 +41,22 @@ public interface Constants {
 
   String NOTIFICATIONS_DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
   String NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
-  String NOTIFICATIONS_RAW_VALUE_FORMAT = "%.0f";
   String NOTIFICATIONS_PERCENTAGE_FORMAT = "%.2f %%";
+
+  /*
+   * Dataframe related constants
+   */
+  String COL_TIME = "timestamp";
+  String COL_VALUE = "value"; // baseline value
+  String COL_CURRENT = "current";
+  String COL_UPPER_BOUND = "upper_bound";
+  String COL_LOWER_BOUND = "lower_bound";
+  String COL_ANOMALY = "anomaly";
+  String COL_PATTERN = "pattern";
+  String COL_ERROR = "error";
+  String COL_DIFF = "diff";
+  String COL_DIFF_VIOLATION = "diff_violation";
+  String COL_IN_WINDOW = "is_in_window";
 
   enum JobStatus {
     SCHEDULED,

@@ -14,6 +14,7 @@ import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
 import ai.startree.thirdeye.rootcause.entity.DimensionsEntity;
 import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -44,8 +45,8 @@ public class CallGraphPipeline extends Pipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(CallGraphPipeline.class);
 
-  private static final String COL_TIME = DataFrame.COL_TIME;
-  private static final String COL_VALUE = DataFrame.COL_VALUE;
+  private static final String COL_TIME = Constants.COL_TIME;
+  private static final String COL_VALUE = Constants.COL_VALUE;
   private static final String COL_COUNT = "count";
   private static final String COL_LATENCY = "latency";
   private static final String COL_AVERAGE = "average";

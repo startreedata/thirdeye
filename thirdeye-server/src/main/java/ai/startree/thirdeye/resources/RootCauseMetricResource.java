@@ -15,6 +15,7 @@ import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
@@ -389,7 +390,7 @@ public class RootCauseMetricResource {
     if (result.isEmpty()) {
       return Double.NaN;
     }
-    return result.getDouble(DataFrame.COL_VALUE, 0);
+    return result.getDouble(Constants.COL_VALUE, 0);
   }
 
   private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters,
@@ -417,8 +418,8 @@ public class RootCauseMetricResource {
       futures.put(slice, this.executor.submit(() -> {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
         if (df.isEmpty()) {
-          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStartMillis())
-              .addSeries(DataFrame.COL_VALUE, Double.NaN).setIndex(DataFrame.COL_TIME);
+          return new DataFrame().addSeries(Constants.COL_TIME, slice.getStartMillis())
+              .addSeries(Constants.COL_VALUE, Double.NaN).setIndex(Constants.COL_TIME);
         }
         return df;
       }));

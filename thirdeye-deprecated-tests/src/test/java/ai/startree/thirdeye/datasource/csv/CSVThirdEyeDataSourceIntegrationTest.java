@@ -11,6 +11,7 @@ import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -90,7 +91,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     ThirdEyeResponse response = dataSourceCache.getQueryResult(thirdEyeRequest);
     DataFrame df = DataFrameUtils.evaluateResponse(response);
 
-    Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
+    Assert.assertEquals(df.getDoubles(Constants.COL_VALUE).toList(),
         Collections.singletonList(1503d));
   }
 

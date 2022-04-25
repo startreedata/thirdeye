@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.datasource.loader;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
@@ -55,7 +56,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     DataFrame dfAll = DataFrame
         .builder(COL_DIMENSION_NAME + ":STRING", COL_DIMENSION_VALUE + ":STRING",
-            DataFrame.COL_VALUE + ":DOUBLE").build()
+            Constants.COL_VALUE + ":DOUBLE").build()
         .setIndex(COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
 
     Map<String, ThirdEyeRequest> requests = new HashMap<>();
@@ -79,16 +80,16 @@ public class DefaultAggregationLoader implements AggregationLoader {
       DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(dfRaw.size(), dimension))
           .addSeries(COL_DIMENSION_VALUE, dfRaw.get(dimension))
-          .addSeries(DataFrame.COL_VALUE, dfRaw.get(DataFrame.COL_VALUE));
+          .addSeries(Constants.COL_VALUE, dfRaw.get(Constants.COL_VALUE));
       results.add(dfResult);
     }
 
     final DataFrame breakdown = dfAll.append(results);
     // add time column containing start time of slice
     return breakdown
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             LongSeries.fillValues(breakdown.size(), slice.getStartMillis()))
-        .setIndex(DataFrame.COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
+        .setIndex(Constants.COL_TIME, COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
   }
 
   @Override
@@ -104,19 +105,19 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // fill in timestamps
     return aggregate
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             LongSeries.fillValues(aggregate.size(), slice.getStartMillis()))
-        .setIndex(DataFrame.COL_TIME);
+        .setIndex(Constants.COL_TIME);
   }
 
   private DataFrame emptyDataframe(final List<String> dimensions) {
     List<String> cols = new ArrayList<>();
-    cols.add(DataFrame.COL_TIME + ":LONG");
+    cols.add(Constants.COL_TIME + ":LONG");
     dimensions.forEach(dimName -> cols.add(dimName + ":STRING"));
-    cols.add(DataFrame.COL_VALUE + ":DOUBLE");
+    cols.add(Constants.COL_VALUE + ":DOUBLE");
 
     List<String> indexes = new ArrayList<>();
-    indexes.add(DataFrame.COL_TIME);
+    indexes.add(Constants.COL_TIME);
     indexes.addAll(dimensions);
     return DataFrame.builder(cols).build().setIndex(indexes);
   }
@@ -141,7 +142,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     for (int i = 0; i < dataBreakdown.size(); i++) {
       final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
       final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
-      final double value = dataBreakdown.getDouble(DataFrame.COL_VALUE, i);
+      final double value = dataBreakdown.getDouble(Constants.COL_VALUE, i);
 
       // cell
       if (!output.containsKey(dimName)) {
@@ -155,7 +156,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // add rollup column
     if (!dataAggregate.isEmpty()) {
-      double total = dataAggregate.getDouble(DataFrame.COL_VALUE, 0);
+      double total = dataAggregate.getDouble(Constants.COL_VALUE, 0);
       for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
         if (entry.getValue() < total) {
           output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());

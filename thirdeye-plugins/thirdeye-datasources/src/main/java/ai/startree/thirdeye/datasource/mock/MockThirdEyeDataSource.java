@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.datasource.mock;
 
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.csv.CSVThirdEyeDataSource;

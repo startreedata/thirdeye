@@ -6,7 +6,7 @@ import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
 import { Legend } from "./legend/legend.component";
 import {
-    Series,
+    NormalizedSeries,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
 } from "./time-series-chart.interfaces";
@@ -99,10 +99,12 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
 export const TimeSeriesChartInternal: FunctionComponent<
     TimeSeriesChartInternalProps
 > = ({ series, legend, brush, height, width, xAxis, yAxis, tooltip }) => {
-    const [processedMainChartSeries, setProcessedMainChartSeries] =
-        useState<Series[]>(series);
-    const [processedBrushChartSeries, setProcessedBrushChartSeries] =
-        useState<Series[]>(series);
+    const [processedMainChartSeries, setProcessedMainChartSeries] = useState<
+        NormalizedSeries[]
+    >(normalizeSeries(series));
+    const [processedBrushChartSeries, setProcessedBrushChartSeries] = useState<
+        NormalizedSeries[]
+    >(normalizeSeries(series));
     const [enabledDisabledMapping, setEnabledDisabledMapping] = useState<
         boolean[]
     >(series.map(syncEnabledDisabled));
@@ -203,7 +205,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
             return copied;
         });
-        setProcessedMainChartSeries(seriesDataCopy);
+        setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
     };
 
     const handleBrushClick = (): void => {
@@ -213,7 +215,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
             return copied;
         });
-        setProcessedMainChartSeries(seriesDataCopy);
+        setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
     };
 
     return (

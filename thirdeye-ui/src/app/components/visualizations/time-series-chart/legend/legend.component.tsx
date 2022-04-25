@@ -23,6 +23,16 @@ export const Legend: FunctionComponent<LegendProps> = ({
             {(labels) => (
                 <div style={LEGEND_CONTAINER_STYLE}>
                     {labels.map((label, idx) => {
+                        let color = label.value;
+
+                        if (series[idx].color !== undefined) {
+                            color = series[idx].color;
+                        }
+
+                        if (!series[idx].enabled) {
+                            color = "#EEE";
+                        }
+
                         return (
                             <LegendItem
                                 key={`legend-item-${idx}`}
@@ -33,11 +43,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
                                     width={RECT_HEIGHT_WIDTH}
                                 >
                                     <rect
-                                        fill={
-                                            series[idx].enabled
-                                                ? label.value
-                                                : "#EEE"
-                                        }
+                                        fill={color}
                                         height={RECT_HEIGHT_WIDTH}
                                         width={RECT_HEIGHT_WIDTH}
                                     />

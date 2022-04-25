@@ -51,9 +51,9 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
-    @SuppressWarnings("unchecked") final List<QueryPredicate> queryPredicates =
+    @SuppressWarnings("unchecked") final List<QueryPredicate> timeseriesFilters =
         (List<QueryPredicate>) params.getOrDefault(AlertEvaluator.EVALUATION_FILTERS_KEY, List.of());
-    spec.setTimeseriesFilters(queryPredicates);
+    spec.setTimeseriesFilters(timeseriesFilters);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();
     genericDataFetcher.init(spec);

@@ -24,8 +24,10 @@ import org.slf4j.LoggerFactory;
  * Request
  * objects can be constructed via {@link ThirdEyeRequestBuilder}.
  *
- * todo cyril remove this from the spi once calcite-based sql generation is implemented + rename
+ * todo cyril remove this from the spi once calcite-based sql generation is used everywhere
  */
+@Deprecated
+// use CalciteRequest to generate SQL, and ThirdEyeRequestV2
 public class ThirdEyeRequest {
 
   private final MetricFunction metricFunction;

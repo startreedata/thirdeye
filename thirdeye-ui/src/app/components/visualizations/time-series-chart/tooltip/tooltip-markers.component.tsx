@@ -1,6 +1,11 @@
 import { Line } from "@visx/shape";
 import React, { FunctionComponent } from "react";
-import { DataPoint, Series } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    NormalizedSeries,
+    SeriesType,
+    ThresholdDataPoint,
+} from "../time-series-chart.interfaces";
 import { TooltipMarkersProps } from "./tooltip.interfaces";
 import { getDataPointsInSeriesForXValue } from "./tooltip.utils";
 
@@ -14,7 +19,7 @@ export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
     xValue,
     colorScale,
 }) => {
-    const dataPointForXValue: [DataPoint, Series][] =
+    const dataPointForXValue: [DataPoint, NormalizedSeries][] =
         getDataPointsInSeriesForXValue(series, xValue);
 
     return (
@@ -33,6 +38,11 @@ export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
             />
 
             {dataPointForXValue.map(([dataPoint, seriesData]) => {
+                const color =
+                    seriesData.color === undefined
+                        ? colorScale(seriesData.name as string)
+                        : seriesData.color;
+
                 return (
                     <>
                         <circle
@@ -49,12 +59,42 @@ export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
                         <circle
                             cx={xScale(xValue)}
                             cy={yScale(dataPoint.y)}
-                            fill={colorScale(seriesData.name as string)}
+                            fill={color}
                             pointerEvents="none"
                             r={4}
                             stroke="white"
                             strokeWidth={2}
                         />
+                        {seriesData.type === SeriesType.AREA_CLOSED && (
+                            <>
+                                <circle
+                                    cx={xScale(xValue)}
+                                    cy={
+                                        (yScale(
+                                            (dataPoint as ThresholdDataPoint).y1
+                                        ) as number) + 1
+                                    }
+                                    fill="black"
+                                    fillOpacity={0.1}
+                                    pointerEvents="none"
+                                    r={4}
+                                    stroke="black"
+                                    strokeOpacity={0.1}
+                                    strokeWidth={2}
+                                />
+                                <circle
+                                    cx={xScale(xValue)}
+                                    cy={yScale(
+                                        (dataPoint as ThresholdDataPoint).y1
+                                    )}
+                                    fill={color}
+                                    pointerEvents="none"
+                                    r={4}
+                                    stroke="white"
+                                    strokeWidth={2}
+                                />
+                            </>
+                        )}
                     </>
                 );
             })}

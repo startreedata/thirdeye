@@ -1,5 +1,6 @@
 import { SeriesType } from "./time-series-chart.interfaces";
 import {
+    defaultTooltipValueFormatter,
     defaultXAccessor,
     defaultY1Accessor,
     defaultYAccessor,
@@ -85,6 +86,8 @@ describe("Time Series Chart Utils", () => {
             xAccessor: defaultXAccessor,
             yAccessor: defaultYAccessor,
             y1Accessor: defaultY1Accessor,
+            strokeWidth: 1,
+            tooltipValueFormatter: defaultTooltipValueFormatter,
         });
         expect(result[1]).toEqual({
             data: [],
@@ -94,6 +97,8 @@ describe("Time Series Chart Utils", () => {
             xAccessor: defaultXAccessor,
             yAccessor: defaultYAccessor,
             y1Accessor: defaultY1Accessor,
+            strokeWidth: 1,
+            tooltipValueFormatter: defaultTooltipValueFormatter,
         });
     });
 });

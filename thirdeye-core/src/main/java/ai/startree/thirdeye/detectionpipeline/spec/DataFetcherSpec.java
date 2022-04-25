@@ -32,7 +32,7 @@ public class DataFetcherSpec extends AbstractSpec {
   /**
    * Expected to be set during DataFetcherOperator init.
    */
-  private List<QueryPredicate> queryPredicates;
+  private List<QueryPredicate> timeseriesFilters;
 
   public String getDataSource() {
     return dataSource;
@@ -69,12 +69,12 @@ public class DataFetcherSpec extends AbstractSpec {
   }
 
   public List<QueryPredicate> getTimeseriesFilters() {
-    return queryPredicates;
+    return timeseriesFilters;
   }
 
   public DataFetcherSpec setTimeseriesFilters(
       final List<QueryPredicate> queryPredicates) {
-    this.queryPredicates = queryPredicates;
+    this.timeseriesFilters = queryPredicates;
     return this;
   }
 }

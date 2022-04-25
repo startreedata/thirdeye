@@ -27,7 +27,6 @@ import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-// fixme cyril add tests for "toSqlNode"
 public class QueryPredicate {
 
   private final Predicate predicate;

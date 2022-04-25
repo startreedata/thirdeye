@@ -106,6 +106,9 @@ public class QueryProjection {
     return addAlias(node, alias);
   }
 
+  /**
+   * Creates an aggregation projection based on a metricConfig.
+   */
   public static QueryProjection fromMetricConfig(MetricConfigDTO metricConfigDTO) {
     MetricAggFunction aggFunction = Objects.requireNonNull(metricConfigDTO.getDefaultAggFunction());
     List<String> operands;
@@ -113,9 +116,14 @@ public class QueryProjection {
     if (metricConfigDTO.getName().equals("*")) {
       operands = List.of("*");
     } else {
-      operands = List.of(optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName()));
+      operands = List.of(getFunctionName(metricConfigDTO));
     }
 
     return QueryProjection.of(aggFunction.name(), operands);
+  }
+
+  // todo cyril see if it's possible to deprecrate aggregation column
+  public static String getFunctionName(final MetricConfigDTO metricConfigDTO) {
+    return optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName());
   }
 }

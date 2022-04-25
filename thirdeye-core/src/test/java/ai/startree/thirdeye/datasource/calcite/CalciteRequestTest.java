@@ -5,7 +5,6 @@ import static ai.startree.thirdeye.util.CalciteUtils.EQUALS_OPERATOR;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
@@ -61,8 +60,26 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithSimpleProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION);
+
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    final String expected = String.format("SELECT %s FROM %s.%s",
+        COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
+
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+  }
+
+  @Test
+  public void testGetSqlWithSimpleProjectionWithReservedKeyword() throws SqlParseException {
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
+        .addSelectProjection(SIMPLE_PROJECTION)
+        .addPredicate(QueryPredicate.of(new Predicate("date", OPER.EQ, "20211010"),
+            DimensionType.STRING, "pageviews"));
 
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -78,7 +95,7 @@ public class CalciteRequestTest {
   @Test
   public void testGeSqlWithSimpleProjectionWithAlias() throws SqlParseException {
     final String alias = "alias1";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION.withAlias(alias));
 
     final CalciteRequest request = builder.build();
@@ -95,7 +112,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithStandardAggregationProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -111,7 +128,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithCountDistinctProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -126,7 +143,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithDialectSpecificAggregationProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(DIALECT_SPECIFIC_AGGREGATION_PROJECTION);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -142,7 +159,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithUnknownFunction() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(UNKNOWN_FUNCTION_PROJECTION);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -158,7 +175,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithMultipleOperandsProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .addSelectProjection(COUNT_DISTINCT_AGGREGATION_PROJECTION)
@@ -184,7 +201,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithFreeTextProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -199,7 +216,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithFreeTextProjectionWithAlias() throws SqlParseException {
     final String alias = "alias1";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT + " as " + alias) ;
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -214,7 +231,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithSqlNodeProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = CalciteRequest.newBuilder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = CalciteRequest.newBuilder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_SQL_NODE_PROJECTION);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
@@ -228,7 +245,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithStructuredAndFreeTextAndCalciteProjection() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT)
         .addSelectProjection(SIMPLE_SQL_NODE_PROJECTION);
@@ -249,7 +266,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithNumericPredicate() throws SqlParseException {
     final List<OPER> binaryOpers = List.of(OPER.EQ, OPER.NEQ, OPER.GE, OPER.GT, OPER.LE, OPER.LT);
     for (OPER oper : binaryOpers) {
-      final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+      final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
           .addSelectProjection(SIMPLE_PROJECTION)
           .addPredicate(QueryPredicate.of(
               new Predicate(COLUMN_NAME_2, oper, "3"),
@@ -277,7 +294,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithStringPredicate() throws SqlParseException {
     List<OPER> binaryOpers = List.of(OPER.EQ, OPER.NEQ);
     for (OPER oper : binaryOpers) {
-      final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+      final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
           .addSelectProjection(SIMPLE_PROJECTION)
           .addPredicate(QueryPredicate.of(
               new Predicate(COLUMN_NAME_2, oper, "myText"),
@@ -305,7 +322,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithBooleanPredicate() throws SqlParseException {
     List<OPER> binaryOpers = List.of(OPER.EQ, OPER.NEQ);
     for (OPER oper : binaryOpers) {
-      final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+      final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
           .addSelectProjection(SIMPLE_PROJECTION)
           .addPredicate(QueryPredicate.of(
               new Predicate(COLUMN_NAME_2, oper, "true"),
@@ -331,7 +348,7 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithInPredicates() throws SqlParseException {
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addPredicate(QueryPredicate.of(
             new Predicate(COLUMN_NAME_2, OPER.IN, new String[]{"val1", "val2"}),
@@ -355,7 +372,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithFreeTextPredicate() throws SqlParseException {
     String complexWhere = "complexFunction(col2, col3, 10) >= 27";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addPredicate(complexWhere);
     final CalciteRequest request = builder.build();
@@ -373,7 +390,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithFreeTextPredicateRemovingStartingAnd() throws SqlParseException {
     String complexWhere = "complexFunction(col2, col3, 10) >= 27 OR colX = TRUE";
     String complexWhereWithStartingAnd = "AND " + complexWhere;
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addPredicate(complexWhereWithStartingAnd);
     final CalciteRequest request = builder.build();
@@ -396,7 +413,7 @@ public class CalciteRequestTest {
         SqlParserPos.ZERO);
     final Interval timeFilterInterval = new Interval(100L, 100000L);
     final String epoch_date = "epoch_date";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .addPredicate(QueryPredicate.of(new Predicate(COLUMN_NAME_1, OPER.EQ, "test1"),
             DimensionType.STRING))
@@ -421,7 +438,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeAggregationOnEpochSeconds() throws SqlParseException {
     final String timeAggregationColumn = "date_epoch";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeAggregation(Period.days(7), timeAggregationColumn, "EPOCH", "SECONDS", false);
     final CalciteRequest request = builder.build();
@@ -443,7 +460,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeAggregationOnEpochMilliSeconds() throws SqlParseException {
     final String timeAggregationColumn = "date_epoch";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeAggregation(Period.days(7), timeAggregationColumn, "EPOCH", "MILLISECONDS", false);
     final CalciteRequest request = builder.build();
@@ -465,7 +482,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeAggregationOnSimpleDateFormat() throws SqlParseException {
     final String timeAggregationColumn = "date_sdf";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeAggregation(Period.days(7),
             timeAggregationColumn,
@@ -491,7 +508,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeAggregationWithOrderOnTimeAggregation() throws SqlParseException {
     final String timeAggregationColumn = "date_epoch";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         // null timeFormat defaults to milliseconds
         .withTimeAggregation(Period.days(7), timeAggregationColumn, "EPOCH", "MILLISECONDS", true);
@@ -516,7 +533,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithTimeFilter() throws SqlParseException {
     final String timeAggregationColumn = "date_epoch";
     final Interval timeFilterInterval = new Interval(100L, 100000000L);
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeFilter(timeFilterInterval, timeAggregationColumn, "EPOCH", "MILLISECONDS");
     final CalciteRequest request = builder.build();
@@ -542,7 +559,7 @@ public class CalciteRequestTest {
     final Interval timeFilterInterval = new Interval(new DateTime(2020, 1, 1, 0, 0),
         new DateTime(2021, 10, 10, 0, 0));
     final String simpleDateFormat = "yyyyMMdd";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeFilter(timeFilterInterval, timeAggregationColumn, simpleDateFormat, null);
     final CalciteRequest request = builder.build();
@@ -568,7 +585,7 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_sdf";
     final Interval timeFilterInterval = new Interval(100L, 100000000L);
     final String timeColumnFormat = "yyyyMMdd";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
         // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
@@ -602,7 +619,7 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final String timeColumnFormat = "yyyyMMdd";
     final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ") AS mod1";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .addSelectProjection(QueryProjection.of(COLUMN_NAME_2))
         .addSelectProjection(freeTextProjection)
@@ -642,7 +659,7 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final String timeColumnFormat = "yyyyMMdd";
     final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ")";
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
         // missing projection on col3 : because group by col3 but don't select it for test purpose
@@ -674,7 +691,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithLimit() throws SqlParseException {
     final int limit = 1000;
-    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withLimit(limit);
     final CalciteRequest request = builder.build();

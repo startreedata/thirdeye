@@ -6,19 +6,25 @@ import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
+import static ai.startree.thirdeye.util.CalciteUtils.quoteIdentifierIfReserved;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
+import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
+import ai.startree.thirdeye.spi.metric.DimensionType;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.calcite.sql.SqlAsOperator;
-import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
@@ -124,8 +130,30 @@ public class CalciteRequest {
     this.limit = builder.limit;
   }
 
-  public static Builder newBuilder(final String database, final String table) {
-    return new Builder(database, table);
+  public static Builder newBuilder(final String table) {
+    return new Builder(table);
+  }
+
+  /**
+   * Generates a query for a metric. The metric is aliased as {@link  Constants}.COL_VALUE.
+   */
+  public static Builder newBuilderFrom(final MetricSlice slice) {
+    DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
+    MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
+    final CalciteRequest.Builder builder = CalciteRequest
+        .newBuilder(datasetConfigDTO.getDataset())
+        .withTimeFilter(slice.getInterval(),
+            datasetConfigDTO.getTimeColumn(),
+            datasetConfigDTO.getTimeFormat(),
+            datasetConfigDTO.getTimeUnit().name())
+        .addSelectProjection(QueryProjection.fromMetricConfig(metricConfigDTO)
+            .withAlias(Constants.COL_VALUE));
+    Optional.ofNullable(metricConfigDTO.getWhere()).ifPresent(builder::addPredicate);
+    for (Predicate predicate : slice.getPredicates()) {
+      builder.addPredicate(QueryPredicate.of(predicate, DimensionType.STRING));
+    }
+
+    return builder;
   }
 
   public String getSql(final SqlLanguage sqlLanguage, final SqlExpressionBuilder expressionBuilder)
@@ -133,20 +161,20 @@ public class CalciteRequest {
     SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
 
-    SqlNode sqlNode = getSqlNode(sqlParserConfig, expressionBuilder);
+    SqlNode sqlNode = getSqlNode(sqlParserConfig, expressionBuilder, sqlDialect);
     return nodeToQuery(sqlNode, sqlDialect);
   }
 
-  protected SqlNode getSqlNode(SqlParser.Config sqlParserConfig,
-      SqlExpressionBuilder expressionBuilder)
+  protected SqlNode getSqlNode(final SqlParser.Config sqlParserConfig,
+      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect)
       throws SqlParseException {
 
     return new SqlSelect(
         SqlParserPos.ZERO,
         null,
-        getSelectList(sqlParserConfig, expressionBuilder),
+        getSelectList(sqlParserConfig, expressionBuilder, dialect),
         getFrom(),
-        getWhere(sqlParserConfig, expressionBuilder),
+        getWhere(sqlParserConfig, expressionBuilder, dialect),
         getGroupBy(sqlParserConfig, expressionBuilder),
         null,
         null,
@@ -158,7 +186,7 @@ public class CalciteRequest {
   }
 
   private SqlNodeList getSelectList(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder)
+      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect)
       throws SqlParseException {
     List<SqlNode> selectIdentifiers = mergeProjectionsLists(sqlParserConfig, expressionBuilder,
         selectProjections, freeTextSelectProjections, sqlNodeSelectProjections
@@ -166,15 +194,12 @@ public class CalciteRequest {
     // add time aggregation projection
     if (timeAggregationGranularity != null) {
       String timeGroupExpression = expressionBuilder.getTimeGroupExpression(
-          timeAggregationColumn,
+          quoteIdentifierIfReserved(timeAggregationColumn, sqlParserConfig, dialect),
           timeAggregationColumnFormat,
           timeAggregationGranularity,
           timeAggregationColumnUnit);
       SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
-      List<SqlNode> aliasOperands = List.of(timeGroupNode, identifierOf(TIME_AGGREGATION_ALIAS));
-      SqlNode timeGroupWithAlias = new SqlBasicCall(new SqlAsOperator(),
-          aliasOperands.toArray(new SqlNode[0]),
-          SqlParserPos.ZERO);
+      SqlNode timeGroupWithAlias = addAlias(timeGroupNode, TIME_AGGREGATION_ALIAS);
       selectIdentifiers.add(timeGroupWithAlias);
     }
 
@@ -182,25 +207,28 @@ public class CalciteRequest {
   }
 
   private SqlNode getFrom() {
-    List<String> identifiers = List.of(database, table);
+    List<String> identifiers = database != null ? List.of(database, table) : List.of(table);
     return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
   }
 
   private SqlNode getWhere(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect)
+      throws SqlParseException {
     List<SqlNode> predicates = new ArrayList<>();
     if (timeFilterInterval != null) {
       // use the alias of the aggregated time column - in this case it's sure time is in epoch millis
       boolean isAggregatedTimeColumn =
           timeAggregationGranularity != null && timeAggregationColumn.equals(timeFilterColumn);
-      // todo cyril remove the objects.requireNonNull with builder pattern
-      String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
-          isAggregatedTimeColumn ? TIME_AGGREGATION_ALIAS : timeFilterColumn,
+      final String preparedTimeColumn = isAggregatedTimeColumn ?
+          TIME_AGGREGATION_ALIAS :
+          quoteIdentifierIfReserved(timeFilterColumn, sqlParserConfig, dialect);
+      final String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
+          preparedTimeColumn,
           timeFilterInterval.getStartMillis(),
           timeFilterInterval.getEndMillis(),
           isAggregatedTimeColumn ? null : timeFilterColumnFormat,
           isAggregatedTimeColumn ? null : timeFilterColumnUnit);
-      SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
+      final SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
     this.predicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
@@ -375,7 +403,7 @@ public class CalciteRequest {
     final private List<String> freeTextSelectProjections = new ArrayList<>();
     final private List<SqlNode> slqNodeSelectProjections = new ArrayList<>();
 
-    private final String database;
+    private String database = null;
     private final String table;
 
     private Period timeAggregationGranularity = null;
@@ -403,9 +431,13 @@ public class CalciteRequest {
 
     private Long limit;
 
-    public Builder(final String database, final String table) {
-      this.database = Objects.requireNonNull(database);
+    public Builder(final String table) {
       this.table = Objects.requireNonNull(table);
+    }
+
+    public Builder withDatabase(final String database) {
+      this.database = database;
+      return this;
     }
 
     /**

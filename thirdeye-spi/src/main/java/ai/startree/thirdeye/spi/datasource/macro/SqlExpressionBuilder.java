@@ -18,7 +18,9 @@ public interface SqlExpressionBuilder {
 
   /**
    * Generates a SQL expression that test if a time column is between bounds.
-   * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
+   * Implementation should be careful with identifier quoting.
+   * Identifiers may be passed quoted or unquoted.
+   *
    * For example: {@code getTimeFilterExpression(myTimeEpoch, 42, 84, null)} returns
    * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
@@ -36,6 +38,7 @@ public interface SqlExpressionBuilder {
 
   /**
    * Generates a SQL expression that test if a time column is between bounds.
+   * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
    *
    * Used internally to generate queries. For RCA for instance.
    *
@@ -80,6 +83,7 @@ public interface SqlExpressionBuilder {
 
   /**
    * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
+   * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
    *
    * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
    * datasource.

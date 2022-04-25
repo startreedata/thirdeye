@@ -2,6 +2,7 @@ package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -12,6 +13,7 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.parser.SqlAbstractParserImpl.Metadata;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -109,6 +111,18 @@ public class CalciteUtils {
       final SqlParser.Config sqlParserConfig) throws SqlParseException {
     SqlParser sqlParser = SqlParser.create(sqlExpression, sqlParserConfig);
     return sqlParser.parseExpression();
+  }
+
+  public static String quoteIdentifierIfReserved(final String identifier,
+      final SqlParser.Config sqlParserConfig,
+      final SqlDialect dialect) {
+    Metadata metadata = SqlParser.create("", sqlParserConfig).getMetadata();
+    String upperIdentifier = identifier.toUpperCase(Locale.ENGLISH);
+    if (metadata.isReservedWord(upperIdentifier) || metadata.isSql92ReservedWord(upperIdentifier)
+        || metadata.isReservedFunctionName(upperIdentifier)){
+      return dialect.quoteIdentifier(identifier);
+    }
+    return identifier;
   }
 
   @NonNull

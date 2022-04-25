@@ -57,8 +57,6 @@ public class CalciteRequestTest {
   private static final SqlLanguage SQL_LANGUAGE = new PinotSqlLanguage();
   SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new PinotSqlExpressionBuilder();
 
-  // todo cyril add tests with alias
-
   @Test
   public void testGetSqlWithSimpleProjection() throws SqlParseException {
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
@@ -69,6 +67,24 @@ public class CalciteRequestTest {
 
     final String expected = String.format("SELECT %s FROM %s.%s",
         COLUMN_NAME_1,
+        DATABASE,
+        TABLE);
+
+    assertThatQueriesAreTheSame(output, expected);
+  }
+
+  @Test
+  public void testGeSqlWithSimpleProjectionWithAlias() throws SqlParseException {
+    String alias = "alias1";
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(DATABASE, TABLE)
+        .addSelectProjection(SIMPLE_PROJECTION.withAlias(alias));
+
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    final String expected = String.format("SELECT %s AS %s FROM %s.%s",
+        COLUMN_NAME_1,
+        alias,
         DATABASE,
         TABLE);
 

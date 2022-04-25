@@ -9,6 +9,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -122,7 +123,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   }
 
   @NonNull
-  private String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
+  @VisibleForTesting
+  protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
     // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
     return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
   }

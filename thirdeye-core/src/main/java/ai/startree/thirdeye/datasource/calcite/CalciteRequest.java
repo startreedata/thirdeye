@@ -277,6 +277,98 @@ public class CalciteRequest {
     return addAlias(expressionNode, alias);
   }
 
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final CalciteRequest that = (CalciteRequest) o;
+    return timeAggregationOrderBy == that.timeAggregationOrderBy && Objects.equals(
+        selectProjections,
+        that.selectProjections) && Objects.equals(freeTextSelectProjections,
+        that.freeTextSelectProjections) && Objects.equals(sqlNodeSelectProjections,
+        that.sqlNodeSelectProjections) && Objects.equals(timeAggregationGranularity,
+        that.timeAggregationGranularity) && Objects.equals(timeAggregationColumnFormat,
+        that.timeAggregationColumnFormat) && Objects.equals(timeAggregationColumnUnit,
+        that.timeAggregationColumnUnit) && Objects.equals(timeAggregationColumn,
+        that.timeAggregationColumn) && Objects.equals(database, that.database)
+        && Objects.equals(table, that.table) && Objects.equals(timeFilterInterval,
+        that.timeFilterInterval) && Objects.equals(timeFilterColumn, that.timeFilterColumn)
+        && Objects.equals(timeFilterColumnFormat, that.timeFilterColumnFormat)
+        && Objects.equals(timeFilterColumnUnit, that.timeFilterColumnUnit)
+        && Objects.equals(predicates, that.predicates) && Objects.equals(
+        freeTextPredicates,
+        that.freeTextPredicates) && Objects.equals(sqlNodePredicates,
+        that.sqlNodePredicates) && Objects.equals(groupByProjections,
+        that.groupByProjections) && Objects.equals(freeTextGroupByProjections,
+        that.freeTextGroupByProjections) && Objects.equals(sqlNodeGroupByProjections,
+        that.sqlNodeGroupByProjections) && Objects.equals(orderByProjections,
+        that.orderByProjections) && Objects.equals(freeTextOrderByProjections,
+        that.freeTextOrderByProjections) && Objects.equals(sqlNodeOrderByProjections,
+        that.sqlNodeOrderByProjections) && Objects.equals(limit, that.limit);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(selectProjections,
+        freeTextSelectProjections,
+        sqlNodeSelectProjections,
+        timeAggregationGranularity,
+        timeAggregationColumnFormat,
+        timeAggregationColumnUnit,
+        timeAggregationColumn,
+        timeAggregationOrderBy,
+        database,
+        table,
+        timeFilterInterval,
+        timeFilterColumn,
+        timeFilterColumnFormat,
+        timeFilterColumnUnit,
+        predicates,
+        freeTextPredicates,
+        sqlNodePredicates,
+        groupByProjections,
+        freeTextGroupByProjections,
+        sqlNodeGroupByProjections,
+        orderByProjections,
+        freeTextOrderByProjections,
+        sqlNodeOrderByProjections,
+        limit);
+  }
+
+  @Override
+  public String toString() {
+    return "CalciteRequest{" +
+        "selectProjections=" + selectProjections +
+        ", freeTextSelectProjections=" + freeTextSelectProjections +
+        ", sqlNodeSelectProjections=" + sqlNodeSelectProjections +
+        ", timeAggregationGranularity=" + timeAggregationGranularity +
+        ", timeAggregationColumnFormat='" + timeAggregationColumnFormat + '\'' +
+        ", timeAggregationColumnUnit='" + timeAggregationColumnUnit + '\'' +
+        ", timeAggregationColumn='" + timeAggregationColumn + '\'' +
+        ", timeAggregationOrderBy=" + timeAggregationOrderBy +
+        ", database='" + database + '\'' +
+        ", table='" + table + '\'' +
+        ", timeFilterInterval=" + timeFilterInterval +
+        ", timeFilterColumn='" + timeFilterColumn + '\'' +
+        ", timeFilterColumnFormat='" + timeFilterColumnFormat + '\'' +
+        ", timeFilterColumnUnit='" + timeFilterColumnUnit + '\'' +
+        ", predicates=" + predicates +
+        ", freeTextPredicates=" + freeTextPredicates +
+        ", sqlNodePredicates=" + sqlNodePredicates +
+        ", groupByProjections=" + groupByProjections +
+        ", freeTextGroupByProjections=" + freeTextGroupByProjections +
+        ", sqlNodeGroupByProjections=" + sqlNodeGroupByProjections +
+        ", orderByProjections=" + orderByProjections +
+        ", freeTextOrderByProjections=" + freeTextOrderByProjections +
+        ", sqlNodeOrderByProjections=" + sqlNodeOrderByProjections +
+        ", limit=" + limit +
+        '}';
+  }
+
   public static class Builder {
 
     final private List<QueryProjection> selectProjections = new ArrayList<>();

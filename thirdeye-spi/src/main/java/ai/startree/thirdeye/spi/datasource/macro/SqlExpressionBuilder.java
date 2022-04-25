@@ -39,7 +39,8 @@ public interface SqlExpressionBuilder {
    *
    * Used internally to generate queries. For RCA for instance.
    *
-   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the datasource.
+   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
+   * datasource.
    * The function should be able to parse the timeFormat used by the datasource.
    * If it's null, the function should assume the format is epoch milliseconds.
    *
@@ -50,7 +51,8 @@ public interface SqlExpressionBuilder {
    * @param timeColumn time column name
    * @param minTimeMillisIncluded minimum epoch milliseconds - included
    * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
-   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free to put any format in DatasetConfigDTO$format.
+   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
+   *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
   default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
@@ -79,15 +81,17 @@ public interface SqlExpressionBuilder {
   /**
    * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
    *
-   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the datasource.
+   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
+   * datasource.
    * The function should be able to parse the timeFormat used by the datasource.
    * If it's null, the function should assume the input format is epoch milliseconds.
    *
    * Used internally to generate queries. For RCA for instance.
    *
-   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free to put any format in DatasetConfigDTO$format.
+   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
+   *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
-   * */
+   */
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
       final Period granularity, @Nullable final String timeUnit) {
     throw new UnsupportedOperationException();
@@ -109,6 +113,9 @@ public interface SqlExpressionBuilder {
     }
   }
 
+  /**
+   * Generate a SQL expression for the given metric aggregation function, with the given operands.
+   */
   default String getCustomDialectSql(final MetricAggFunction metricAggFunction,
       final List<String> operands,
       String quantifier) {

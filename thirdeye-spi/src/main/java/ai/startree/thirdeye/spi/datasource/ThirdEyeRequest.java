@@ -24,12 +24,11 @@ import org.slf4j.LoggerFactory;
  * Request
  * objects can be constructed via {@link ThirdEyeRequestBuilder}.
  *
- * todo remove this from the spi once calcite-based sql generation is implemented + rename
+ * todo cyril remove this from the spi once calcite-based sql generation is implemented + rename
  */
 public class ThirdEyeRequest {
 
   private final MetricFunction metricFunction;
-  // todo Cyril prefer joda interval - like MetricSlice
   private final DateTime startTime;
   private final DateTime endTime;
   private final Multimap<String, String> filterSet;

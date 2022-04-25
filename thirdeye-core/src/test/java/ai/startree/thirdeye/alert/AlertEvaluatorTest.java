@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.HashMap;
 import java.util.List;
 import org.testng.annotations.Test;

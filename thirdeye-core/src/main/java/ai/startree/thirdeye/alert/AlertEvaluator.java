@@ -31,7 +31,7 @@ import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

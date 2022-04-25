@@ -7,13 +7,13 @@ import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.text.SimpleDateFormat;
 import java.util.List;

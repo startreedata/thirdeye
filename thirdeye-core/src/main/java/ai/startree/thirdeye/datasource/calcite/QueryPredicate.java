@@ -11,6 +11,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,6 @@ import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-// todo rename - this is not Timeseries specific
 // fixme cyril add tests for "toSqlNode"
 public class QueryPredicate {
 
@@ -131,13 +131,5 @@ public class QueryPredicate {
         .map(literalOf)
         .collect(Collectors.toList());
     return SqlNodeList.of(SqlParserPos.ZERO, stringNodes);
-  }
-
-  // fixme cyril - alert evaluator getDimensionType is hardcoed to STRING - dimension type is not implemented correctly in onboarder
-  // fixme cyril put this in the spi
-  public enum DimensionType {
-    STRING,
-    NUMERIC,
-    BOOLEAN
   }
 }

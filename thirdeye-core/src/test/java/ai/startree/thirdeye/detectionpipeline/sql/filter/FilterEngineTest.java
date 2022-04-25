@@ -13,7 +13,7 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate.DimensionType;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.junit.Test;

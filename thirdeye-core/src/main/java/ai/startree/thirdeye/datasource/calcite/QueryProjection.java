@@ -79,7 +79,7 @@ public class QueryProjection {
       throws SqlParseException {
     if (operator != null) {
       final String operatorUpper = operator.toUpperCase(Locale.ENGLISH);
-      // 1. a datasource can customize any metricAggFunction based SQL - metricAggFunction acts like a macro
+      // 1. a datasource can customize any metricAggFunction based SQL
       if (AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES.contains(operatorUpper)) {
         final MetricAggFunction metricAggFunction = MetricAggFunction.valueOf(operatorUpper);
         if (expressionBuilder.needsCustomDialect(metricAggFunction)) {
@@ -89,7 +89,7 @@ public class QueryProjection {
           return applyAlias(expressionToNode(customDialectSql, sqlParserConfig));
         }
       }
-      // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...) --- acts like to a macro
+      // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...)
       if (MetricAggFunction.COUNT_DISTINCT.name().equals(operator)) {
         return applyAlias(QueryProjection.of("COUNT", operands, "DISTINCT")
             .toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));

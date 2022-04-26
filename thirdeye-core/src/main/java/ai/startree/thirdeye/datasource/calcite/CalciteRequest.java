@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -148,7 +147,9 @@ public class CalciteRequest {
             datasetConfigDTO.getTimeUnit().name())
         .addSelectProjection(QueryProjection.fromMetricConfig(metricConfigDTO)
             .withAlias(Constants.COL_VALUE));
-    Optional.ofNullable(metricConfigDTO.getWhere()).ifPresent(builder::addPredicate);
+    if (isNotBlank(metricConfigDTO.getWhere())) {
+      builder.addPredicate(metricConfigDTO.getWhere());
+    }
     for (Predicate predicate : slice.getPredicates()) {
       builder.addPredicate(QueryPredicate.of(predicate, DimensionType.STRING));
     }

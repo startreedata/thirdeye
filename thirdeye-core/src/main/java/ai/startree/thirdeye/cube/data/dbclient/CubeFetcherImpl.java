@@ -53,6 +53,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   private static final Logger LOG = LoggerFactory.getLogger(CubeFetcherImpl.class);
   private final static int TIME_OUT_VALUE = 1200;
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
+  public static final int QUERY_LIMIT = 100;
 
   private final DataSourceCache dataSourceCache;
   private final CubeMetric<R> cubeMetric;
@@ -90,7 +91,11 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
               datasetConfigDTO.getTimeUnit().name())
           .addSelectProjection(QueryProjection.fromMetricConfig(metricConfigDTO)
               .withAlias(Constants.COL_VALUE))
-          .withLimit(100); // fixme cyril use constant
+          // fixme cyril - notice this limit has a significant impact on the algorithm
+          // with group by many dimensions, num of rows grows exponentially.
+          // Because there is no sorting, there is no insurance we will get the relevant rows, the ones with the biggest impact
+          // in any case sorting is not relevant with the nex steps of the algo. Returning more rows may be enough - but not sure of the
+          .withLimit(QUERY_LIMIT);
       if (isNotBlank(metricConfigDTO.getWhere())) {
         builder.addPredicate(metricConfigDTO.getWhere());
       }

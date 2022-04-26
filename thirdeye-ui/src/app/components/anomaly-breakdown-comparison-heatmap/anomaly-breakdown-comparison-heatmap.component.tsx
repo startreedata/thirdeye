@@ -1,5 +1,6 @@
 import {
     Box,
+    Button,
     CardContent,
     Chip,
     Divider,
@@ -39,7 +40,12 @@ import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-h
 
 export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     AnomalyBreakdownComparisonHeatmapProps
-> = ({ anomalyId, shouldTruncateText = true, comparisonOffset }) => {
+> = ({
+    anomalyId,
+    shouldTruncateText = true,
+    comparisonOffset,
+    onAddFilterSetClick,
+}) => {
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
     const {
@@ -228,7 +234,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                 </Typography>
                             </Box>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item md={10} sm={9} xs={12}>
                             <Autocomplete
                                 freeSolo
                                 multiple
@@ -280,6 +286,22 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                     )
                                 }
                             />
+                        </Grid>
+                        <Grid item md={2} sm={3} xs={12}>
+                            <Button
+                                fullWidth
+                                color="primary"
+                                disabled={anomalyFilters.length === 0}
+                                style={{ height: "100%" }}
+                                variant="contained"
+                                onClick={() =>
+                                    anomalyFilters.length > 0 &&
+                                    onAddFilterSetClick &&
+                                    onAddFilterSetClick(anomalyFilters)
+                                }
+                            >
+                                {t("label.add-to-chart")}
+                            </Button>
                         </Grid>
                     </Grid>
                 )}

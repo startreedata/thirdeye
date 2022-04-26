@@ -4,6 +4,7 @@ export interface AnomalyBreakdownComparisonHeatmapProps {
     anomalyId: number;
     shouldTruncateText?: boolean;
     comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    onAddFilterSetClick?: (filters: AnomalyFilterOption[]) => void;
 }
 
 export interface SummaryData {

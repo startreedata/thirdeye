@@ -7,7 +7,6 @@ import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedb
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -244,15 +243,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             alertEvaluationTimeSeriesHeight={500}
                             maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
                             onRefresh={fetchAlertEvaluation}
-                        />
-                    )}
-                </Grid>
-
-                <Grid item xs={12}>
-                    {anomaly && (
-                        <AnalysisTabs
-                            anomaly={anomaly}
-                            anomalyId={toNumber(anomalyId)}
                         />
                     )}
                 </Grid>

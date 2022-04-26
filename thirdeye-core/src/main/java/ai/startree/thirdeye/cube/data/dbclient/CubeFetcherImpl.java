@@ -117,8 +117,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
       builder.addGroupByProjection(groupByProjection);
     }
 
-    final CalciteRequest calciteRequest = builder.build();
-    return calciteRequest;
+    return builder.build();
   }
 
   /**
@@ -188,12 +187,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
       List<Map<CubeTag, CalciteRequest>> bulkRequests) throws Exception {
 
     List<CalciteRequest> allRequests = new ArrayList<>();
-    for (Map<CubeTag, CalciteRequest> bulkRequest : bulkRequests) {
-      for (Map.Entry<CubeTag, CalciteRequest> entry : bulkRequest.entrySet()) {
-        CalciteRequest calciteRequest = entry.getValue();
-        allRequests.add(calciteRequest);
-      }
-    }
+    bulkRequests.forEach(bulkRequest -> allRequests.addAll(bulkRequest.values()));
 
     Map<CalciteRequest, Future<DataFrame>> queryResponses = dataSourceCache.getQueryResultsAsync(
         allRequests,

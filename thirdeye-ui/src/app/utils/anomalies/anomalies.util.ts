@@ -43,6 +43,8 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         durationVal: 0,
         startTime: noDataMarker,
         endTime: noDataMarker,
+        endTimeVal: -1,
+        startTimeVal: -1,
     };
 };
 
@@ -102,9 +104,11 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     // Start and end time
     if (anomaly.startTime) {
         uiAnomaly.startTime = formatDateAndTimeV1(anomaly.startTime);
+        uiAnomaly.startTimeVal = anomaly.startTime;
     }
     if (anomaly.endTime) {
         uiAnomaly.endTime = formatDateAndTimeV1(anomaly.endTime);
+        uiAnomaly.endTimeVal = anomaly.endTime;
     }
 
     // Duration

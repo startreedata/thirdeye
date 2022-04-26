@@ -20,10 +20,8 @@ public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrin
   private LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
   @Inject
-  public ThirdEyeAuthenticator(final OAuthConfiguration oAuthConfig,
-    final OAuthManager oAuthManager) {
-    OidcUtils.generateOAuthConfig(oAuthManager, oAuthConfig);
-    this.bindingsCache = OidcUtils.makeDefaultCache(new OidcContext(oAuthConfig));
+  public ThirdEyeAuthenticator(final AuthManager authManager) {
+    this.bindingsCache = authManager.getDefaultCache();
   }
 
   @Override

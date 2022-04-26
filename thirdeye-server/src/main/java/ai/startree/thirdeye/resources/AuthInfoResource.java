@@ -9,6 +9,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
+import ai.startree.thirdeye.auth.AuthManager;
 import ai.startree.thirdeye.auth.OAuthManager;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
@@ -29,8 +30,8 @@ public class AuthInfoResource {
   private final AuthConfiguration authConfig;
 
   @Inject
-  public AuthInfoResource(OAuthManager oAuthManager, AuthConfiguration authConfig){
-    this.oAuthManager = oAuthManager;
+  public AuthInfoResource(AuthManager authManager, AuthConfiguration authConfig){
+    this.oAuthManager = (OAuthManager) authManager;
     this.authConfig = authConfig;
   }
 

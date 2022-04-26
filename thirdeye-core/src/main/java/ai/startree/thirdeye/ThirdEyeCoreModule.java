@@ -7,6 +7,8 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.detection.cache.CacheConfigLoader.loadCacheDAO;
 
+import ai.startree.thirdeye.auth.AuthManager;
+import ai.startree.thirdeye.auth.OAuthManager;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfigurationModule;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
@@ -47,6 +49,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
     bind(TimeSeriesLoader.class).to(DefaultTimeSeriesLoader.class).in(Scopes.SINGLETON);
     bind(TimeSeriesCache.class).to(DefaultTimeSeriesCache.class).in(Scopes.SINGLETON);
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
+    bind(AuthManager.class).to(OAuthManager.class).in(Scopes.SINGLETON);
   }
 
   @Singleton

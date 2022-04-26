@@ -5,24 +5,28 @@
 
 package ai.startree.thirdeye.cube.data.dbclient;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.MetricFunction;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +52,13 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   private static final Logger LOG = LoggerFactory.getLogger(CubeFetcherImpl.class);
   private final static int TIME_OUT_VALUE = 1200;
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
+  public static final int QUERY_LIMIT = 100000;
 
   private final DataSourceCache dataSourceCache;
   private final CubeMetric<R> cubeMetric;
 
   /**
    * Constructs a Cube client.
-   *
    */
   public CubeFetcherImpl(DataSourceCache dataSourceCache, CubeMetric<R> cubeMetric) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
@@ -67,37 +71,52 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param datasetConfigDTO dataset config.
    * @param cubeSpecs the spec to retrieve the metrics.
    * @param groupBy groupBy for database.
-   * @param filterSets the data filter.
+   * @param predicates the filter predicates.
    * @return a list of ThirdEye requests.
    */
-  protected Map<CubeTag, ThirdEyeRequest> constructBulkRequests(
-      DatasetConfigDTO datasetConfigDTO,
-      List<CubeSpec> cubeSpecs, List<String> groupBy, Multimap<String, String> filterSets) {
+  protected Map<CubeTag, CalciteRequest> constructBulkRequests(DatasetConfigDTO datasetConfigDTO,
+      List<CubeSpec> cubeSpecs, List<String> groupBy, List<Predicate> predicates) {
 
-    Map<CubeTag, ThirdEyeRequest> requests = new HashMap<>();
+    Map<CubeTag, CalciteRequest> requests = new HashMap<>();
 
     for (CubeSpec cubeSpec : cubeSpecs) {
-      // Set dataset and metric
-      MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
-      MetricFunction  metricFunction = new MetricFunction(metricConfigDTO, datasetConfigDTO);
-
-      ThirdEyeRequest.ThirdEyeRequestBuilder builder = ThirdEyeRequest.newBuilder();
-
-      builder.setMetricFunction(metricFunction);
-      builder.setDataSource(datasetConfigDTO.getDataSource());
-
-      // Set start and end time
-      builder.setStartTimeInclusive(cubeSpec.getInterval().getStart());
-      builder.setEndTimeExclusive(cubeSpec.getInterval().getEnd());
-
-      // Set groupBy and filter
-      builder.setGroupBy(groupBy);
-      builder.setFilterSet(filterSets);
-
-      requests.put(cubeSpec.getTag(), builder.build(cubeSpec.getTag().toString()));
+      final CalciteRequest calciteRequest = constructRequest(datasetConfigDTO,
+          groupBy,
+          predicates,
+          cubeSpec);
+      requests.put(cubeSpec.getTag(), calciteRequest);
     }
 
     return requests;
+  }
+
+  private CalciteRequest constructRequest(final DatasetConfigDTO datasetConfigDTO,
+      final List<String> groupBy, final List<Predicate> predicates, final CubeSpec cubeSpec) {
+    final MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
+    final CalciteRequest.Builder builder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+        .withTimeFilter(cubeSpec.getInterval(),
+            datasetConfigDTO.getTimeColumn(),
+            datasetConfigDTO.getTimeFormat(),
+            datasetConfigDTO.getTimeUnit().name())
+        .addSelectProjection(QueryProjection.fromMetricConfig(metricConfigDTO)
+            .withAlias(Constants.COL_VALUE))
+        // notice this limit has a significant impact on the algorithm. When dicing by many dimensions, num of rows grows exponentially.
+        // Because there is no sorting, there is no insurance we will get the relevant rows, the ones with the biggest impact
+        // the query limit is high but does not solve the problem - a warning is raised if the limit is reached
+        .withLimit(QUERY_LIMIT);
+    if (isNotBlank(metricConfigDTO.getWhere())) {
+      builder.addPredicate(metricConfigDTO.getWhere());
+    }
+    for (Predicate predicate : predicates) {
+      builder.addPredicate(QueryPredicate.of(predicate, DimensionType.STRING));
+    }
+    for (String groupByColumn : groupBy) {
+      QueryProjection groupByProjection = QueryProjection.of(groupByColumn);
+      builder.addSelectProjection(groupByProjection);
+      builder.addGroupByProjection(groupByProjection);
+    }
+
+    return builder.build();
   }
 
   /**
@@ -118,16 +137,21 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * Returns a list of rows. The value of each row is evaluated and no further processing is needed.
    *
    * @param dimensions dimensions of the response
-   * @param response the response from backend database
+   * @param dataFrame the response dataFrame from backend database
    * @param rowTable the storage for rows
    * @param tag true if the response is for baseline values
    */
-  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions, ThirdEyeResponse response,
+  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions, DataFrame dataFrame,
       Map<List<String>, R> rowTable, CubeTag tag) {
-    for (int rowIdx = 0; rowIdx < response.getNumRows(); ++rowIdx) {
+    for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
       // If the metric expression is a single metric function, then we get the value immediately
-      double value = response.getRow(rowIdx).getMetrics().get(0);
-      List<String> dimensionValues = response.getRow(rowIdx).getDimensions();
+      double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
+      final int finalRowIdx = rowIdx;
+      List<String> dimensionValues = dataFrame.getSeriesNames()
+          .stream()
+          .filter(name -> !name.equals(Constants.COL_VALUE))
+          .map(dimensionName -> dataFrame.getString(dimensionName, finalRowIdx))
+          .collect(Collectors.toList());
       fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
     }
   }
@@ -140,37 +164,39 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @return Cube rows.
    */
   protected List<List<R>> constructAggregatedValues(Dimensions dimensions,
-      List<Map<CubeTag, ThirdEyeRequest>> bulkRequests) throws Exception {
+      List<Map<CubeTag, CalciteRequest>> bulkRequests) throws Exception {
 
-    List<ThirdEyeRequest> allRequests = new ArrayList<>();
-    for (Map<CubeTag, ThirdEyeRequest> bulkRequest : bulkRequests) {
-      for (Map.Entry<CubeTag, ThirdEyeRequest> entry : bulkRequest.entrySet()) {
-        ThirdEyeRequest thirdEyeRequest = entry.getValue();
-        allRequests.add(thirdEyeRequest);
-      }
-    }
+    List<CalciteRequest> allRequests = new ArrayList<>();
+    bulkRequests.forEach(bulkRequest -> allRequests.addAll(bulkRequest.values()));
 
-    Map<ThirdEyeRequest, Future<ThirdEyeResponse>> queryResponses = dataSourceCache
-        .getQueryResultsAsync(allRequests);
+    Map<CalciteRequest, Future<DataFrame>> queryResponses = dataSourceCache.getQueryResultsAsync(
+        allRequests,
+        cubeMetric.getDataset().getDataSource());
 
     List<List<R>> res = new ArrayList<>();
     int level = 0;
-    for (Map<CubeTag, ThirdEyeRequest> bulkRequest : bulkRequests) {
+    for (Map<CubeTag, CalciteRequest> bulkRequest : bulkRequests) {
       Map<List<String>, R> rowOfSameLevel = new HashMap<>();
 
-      for (Map.Entry<CubeTag, ThirdEyeRequest> entry : bulkRequest.entrySet()) {
+      for (Map.Entry<CubeTag, CalciteRequest> entry : bulkRequest.entrySet()) {
         CubeTag tag = entry.getKey();
-        ThirdEyeRequest thirdEyeRequest = entry.getValue();
-        ThirdEyeResponse thirdEyeResponse = queryResponses.get(thirdEyeRequest)
-            .get(TIME_OUT_VALUE, TIME_OUT_UNIT);
-        if (thirdEyeResponse.getNumRows() == 0) {
-          LOG.warn("Get 0 rows from the request(s): {}", thirdEyeRequest);
+        CalciteRequest calciteRequest = entry.getValue();
+        DataFrame df = queryResponses.get(calciteRequest).get(TIME_OUT_VALUE, TIME_OUT_UNIT);
+        if (df.size() == 0) {
+          LOG.warn("Get 0 rows from the request: {}", calciteRequest);
         }
-        buildMetricFunctionOrExpressionsRows(dimensions, thirdEyeResponse, rowOfSameLevel, tag);
+        if (df.size() == QUERY_LIMIT) {
+          LOG.warn(
+              "Got {} rows from the request. This corresponds to the LIMIT clause. "
+                  + "Rows are randomly chosen, dimension analysis algorithm may not return the best results. Request: {}",
+              calciteRequest);
+        }
+        buildMetricFunctionOrExpressionsRows(dimensions, df, rowOfSameLevel, tag);
       }
       if (rowOfSameLevel.size() == 0) {
         LOG.warn("Failed to retrieve non-zero results for requests of level {}. BulkRequest: {}",
-            level, bulkRequest);
+            level,
+            bulkRequest);
       }
       List<R> rows = new ArrayList<>(rowOfSameLevel.values());
       res.add(rows);
@@ -181,10 +207,11 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   }
 
   @Override
-  public R getTopAggregatedValues(Multimap<String, String> filterSets) throws Exception {
-    List<String> groupBy = Collections.emptyList();
-    List<Map<CubeTag, ThirdEyeRequest>> bulkRequests = Collections.singletonList(
-        constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
+  public R getTopAggregatedValues(List<Predicate> predicates) throws Exception {
+    List<Map<CubeTag, CalciteRequest>> bulkRequests = List.of(constructBulkRequests(cubeMetric.getDataset(),
+        cubeMetric.getCubeSpecs(),
+        List.of(),
+        predicates));
     // quickfix - redundant local variables for better IndexOutOfBoundsException logging
     List<List<R>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
     List<R> aggregatedValue = aggregatedValues.get(0);
@@ -194,26 +221,28 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
   @Override
   public List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
-      Multimap<String, String> filterSets)
-      throws Exception {
-    List<Map<CubeTag, ThirdEyeRequest>> bulkRequests = new ArrayList<>();
+      List<Predicate> predicates) throws Exception {
+    List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size(); ++level) {
-      List<String> groupBy = Lists.newArrayList(dimensions.get(level));
-      bulkRequests.add(
-          constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
+      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(cubeMetric.getDataset(),
+          cubeMetric.getCubeSpecs(),
+          List.of(dimensions.get(level)),
+          predicates);
+      bulkRequests.add(requests);
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }
 
   @Override
   public List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
-      Multimap<String, String> filterSets)
-      throws Exception {
-    List<Map<CubeTag, ThirdEyeRequest>> bulkRequests = new ArrayList<>();
+      List<Predicate> predicates) throws Exception {
+    List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size() + 1; ++level) {
-      List<String> groupBy = Lists.newArrayList(dimensions.namesToDepth(level));
-      bulkRequests.add(
-          constructBulkRequests(cubeMetric.getDataset(), cubeMetric.getCubeSpecs(), groupBy, filterSets));
+      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(cubeMetric.getDataset(),
+          cubeMetric.getCubeSpecs(),
+          dimensions.namesToDepth(level),
+          predicates);
+      bulkRequests.add(requests);
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }

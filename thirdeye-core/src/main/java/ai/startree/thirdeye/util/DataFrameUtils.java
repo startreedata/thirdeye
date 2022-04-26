@@ -41,7 +41,8 @@ public class DataFrameUtils {
    * @param response thirdeye client response
    * @return response as dataframe
    */
-  public static DataFrame parseResponse(ThirdEyeResponse response) {
+  @Deprecated
+  protected static DataFrame parseResponse(ThirdEyeResponse response) {
     // builders
     LongSeries.Builder timeBuilder = LongSeries.builder();
     List<StringSeries.Builder> dimensionBuilders = new ArrayList<>();
@@ -107,6 +108,7 @@ public class DataFrameUtils {
    * @param response thirdeye client response
    * @return response as dataframe
    */
+  @Deprecated
   public static DataFrame evaluateResponse(ThirdEyeResponse response) {
     // only the name is used to rename the result column --> inline this?
     DataFrame res = parseResponse(response);

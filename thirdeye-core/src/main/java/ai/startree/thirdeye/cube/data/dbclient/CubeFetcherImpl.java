@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -93,8 +92,8 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
   private CalciteRequest constructRequest(final DatasetConfigDTO datasetConfigDTO,
       final List<String> groupBy, final List<Predicate> predicates, final CubeSpec cubeSpec) {
-    MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
-    CalciteRequest.Builder builder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+    final MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
+    final CalciteRequest.Builder builder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
         .withTimeFilter(cubeSpec.getInterval(),
             datasetConfigDTO.getTimeColumn(),
             datasetConfigDTO.getTimeFormat(),
@@ -132,25 +131,6 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   protected void fillValueToRowTable(Map<List<String>, R> rowTable, Dimensions dimensions,
       List<String> dimensionValues, double value, CubeTag tag) {
     cubeMetric.fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
-  }
-
-  /**
-   * Returns a list of rows. The value of each row is evaluated and no further processing is needed.
-   *
-   * @param dimensions dimensions of the response
-   * @param response the response from backend database
-   * @param rowTable the storage for rows
-   * @param tag true if the response is for baseline values
-   */
-  @Deprecated
-  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions,
-      ThirdEyeResponse response, Map<List<String>, R> rowTable, CubeTag tag) {
-    for (int rowIdx = 0; rowIdx < response.getNumRows(); ++rowIdx) {
-      // If the metric expression is a single metric function, then we get the value immediately
-      double value = response.getRow(rowIdx).getMetrics().get(0);
-      List<String> dimensionValues = response.getRow(rowIdx).getDimensions();
-      fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
-    }
   }
 
   /**

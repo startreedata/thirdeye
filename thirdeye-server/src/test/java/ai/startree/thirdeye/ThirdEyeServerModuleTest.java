@@ -8,7 +8,6 @@ package ai.startree.thirdeye;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
-import ai.startree.thirdeye.auth.OAuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.TestDatabase;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
@@ -27,8 +26,7 @@ public class ThirdEyeServerModuleTest {
     final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
-        .setAuthConfiguration(new AuthConfiguration()
-            .setOAuthConfig(new OAuthConfiguration().setKeysUrl("xyz")))
+        .setAuthConfiguration(new AuthConfiguration())
         .setConfigPath("../config");
 
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(

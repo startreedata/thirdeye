@@ -53,7 +53,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   private static final Logger LOG = LoggerFactory.getLogger(CubeFetcherImpl.class);
   private final static int TIME_OUT_VALUE = 1200;
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
-  public static final int QUERY_LIMIT = 100;
+  public static final int QUERY_LIMIT = 100000;
 
   private final DataSourceCache dataSourceCache;
   private final CubeMetric<R> cubeMetric;
@@ -75,44 +75,50 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param predicates the filter predicates.
    * @return a list of ThirdEye requests.
    */
-  protected Map<CubeTag, CalciteRequest> constructBulkRequests(
-      DatasetConfigDTO datasetConfigDTO,
+  protected Map<CubeTag, CalciteRequest> constructBulkRequests(DatasetConfigDTO datasetConfigDTO,
       List<CubeSpec> cubeSpecs, List<String> groupBy, List<Predicate> predicates) {
 
     Map<CubeTag, CalciteRequest> requests = new HashMap<>();
 
     for (CubeSpec cubeSpec : cubeSpecs) {
-      MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
-      CalciteRequest.Builder builder = CalciteRequest
-          .newBuilder(datasetConfigDTO.getDataset())
-          .withTimeFilter(cubeSpec.getInterval(),
-              datasetConfigDTO.getTimeColumn(),
-              datasetConfigDTO.getTimeFormat(),
-              datasetConfigDTO.getTimeUnit().name())
-          .addSelectProjection(QueryProjection.fromMetricConfig(metricConfigDTO)
-              .withAlias(Constants.COL_VALUE))
-          // fixme cyril - notice this limit has a significant impact on the algorithm
-          // with group by many dimensions, num of rows grows exponentially.
-          // Because there is no sorting, there is no insurance we will get the relevant rows, the ones with the biggest impact
-          // in any case sorting is not relevant with the nex steps of the algo. Returning more rows may be enough - but not sure of the
-          .withLimit(QUERY_LIMIT);
-      if (isNotBlank(metricConfigDTO.getWhere())) {
-        builder.addPredicate(metricConfigDTO.getWhere());
-      }
-      for (Predicate predicate : predicates) {
-        builder.addPredicate(QueryPredicate.of(predicate, DimensionType.STRING));
-      }
-      for (String groupByColumn : groupBy) {
-        QueryProjection groupByProjection = QueryProjection.of(groupByColumn);
-        builder.addSelectProjection(groupByProjection);
-        builder.addGroupByProjection(groupByProjection);
-      }
-
-      final CalciteRequest calciteRequest = builder.build();
+      final CalciteRequest calciteRequest = constructRequest(datasetConfigDTO,
+          groupBy,
+          predicates,
+          cubeSpec);
       requests.put(cubeSpec.getTag(), calciteRequest);
     }
 
     return requests;
+  }
+
+  private CalciteRequest constructRequest(final DatasetConfigDTO datasetConfigDTO,
+      final List<String> groupBy, final List<Predicate> predicates, final CubeSpec cubeSpec) {
+    MetricConfigDTO metricConfigDTO = cubeSpec.getMetric();
+    CalciteRequest.Builder builder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+        .withTimeFilter(cubeSpec.getInterval(),
+            datasetConfigDTO.getTimeColumn(),
+            datasetConfigDTO.getTimeFormat(),
+            datasetConfigDTO.getTimeUnit().name())
+        .addSelectProjection(QueryProjection.fromMetricConfig(metricConfigDTO)
+            .withAlias(Constants.COL_VALUE))
+        // notice this limit has a significant impact on the algorithm. When dicing by many dimensions, num of rows grows exponentially.
+        // Because there is no sorting, there is no insurance we will get the relevant rows, the ones with the biggest impact
+        // the query limit is high but does not solve the problem - a warning is raised if the limit is reached
+        .withLimit(QUERY_LIMIT);
+    if (isNotBlank(metricConfigDTO.getWhere())) {
+      builder.addPredicate(metricConfigDTO.getWhere());
+    }
+    for (Predicate predicate : predicates) {
+      builder.addPredicate(QueryPredicate.of(predicate, DimensionType.STRING));
+    }
+    for (String groupByColumn : groupBy) {
+      QueryProjection groupByProjection = QueryProjection.of(groupByColumn);
+      builder.addSelectProjection(groupByProjection);
+      builder.addGroupByProjection(groupByProjection);
+    }
+
+    final CalciteRequest calciteRequest = builder.build();
+    return calciteRequest;
   }
 
   /**
@@ -139,8 +145,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    */
   @Deprecated
   protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions,
-      ThirdEyeResponse response,
-      Map<List<String>, R> rowTable, CubeTag tag) {
+      ThirdEyeResponse response, Map<List<String>, R> rowTable, CubeTag tag) {
     for (int rowIdx = 0; rowIdx < response.getNumRows(); ++rowIdx) {
       // If the metric expression is a single metric function, then we get the value immediately
       double value = response.getRow(rowIdx).getMetrics().get(0);
@@ -157,14 +162,14 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param rowTable the storage for rows
    * @param tag true if the response is for baseline values
    */
-  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions,
-      DataFrame dataFrame,
+  protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions, DataFrame dataFrame,
       Map<List<String>, R> rowTable, CubeTag tag) {
     for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
       // If the metric expression is a single metric function, then we get the value immediately
       double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
       final int finalRowIdx = rowIdx;
-      List<String> dimensionValues = dataFrame.getSeriesNames().stream()
+      List<String> dimensionValues = dataFrame.getSeriesNames()
+          .stream()
           .filter(name -> !name.equals(Constants.COL_VALUE))
           .map(dimensionName -> dataFrame.getString(dimensionName, finalRowIdx))
           .collect(Collectors.toList());
@@ -190,8 +195,9 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
       }
     }
 
-    Map<CalciteRequest, Future<DataFrame>> queryResponses = dataSourceCache.
-        getQueryResultsAsync(allRequests, cubeMetric.getDataset().getDataSource());
+    Map<CalciteRequest, Future<DataFrame>> queryResponses = dataSourceCache.getQueryResultsAsync(
+        allRequests,
+        cubeMetric.getDataset().getDataSource());
 
     List<List<R>> res = new ArrayList<>();
     int level = 0;
@@ -203,13 +209,20 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
         CalciteRequest calciteRequest = entry.getValue();
         DataFrame df = queryResponses.get(calciteRequest).get(TIME_OUT_VALUE, TIME_OUT_UNIT);
         if (df.size() == 0) {
-          LOG.warn("Get 0 rows from the request(s): {}", calciteRequest);
+          LOG.warn("Get 0 rows from the request: {}", calciteRequest);
+        }
+        if (df.size() == QUERY_LIMIT) {
+          LOG.warn(
+              "Got {} rows from the request. This corresponds to the LIMIT clause. "
+                  + "Rows are randomly chosen, dimension analysis algorithm may not return the best results. Request: {}",
+              calciteRequest);
         }
         buildMetricFunctionOrExpressionsRows(dimensions, df, rowOfSameLevel, tag);
       }
       if (rowOfSameLevel.size() == 0) {
         LOG.warn("Failed to retrieve non-zero results for requests of level {}. BulkRequest: {}",
-            level, bulkRequest);
+            level,
+            bulkRequest);
       }
       List<R> rows = new ArrayList<>(rowOfSameLevel.values());
       res.add(rows);
@@ -221,11 +234,10 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
   @Override
   public R getTopAggregatedValues(List<Predicate> predicates) throws Exception {
-    List<Map<CubeTag, CalciteRequest>> bulkRequests = List.of(
-        constructBulkRequests(
-            cubeMetric.getDataset(), cubeMetric.getCubeSpecs(),
-            List.of(),
-            predicates));
+    List<Map<CubeTag, CalciteRequest>> bulkRequests = List.of(constructBulkRequests(cubeMetric.getDataset(),
+        cubeMetric.getCubeSpecs(),
+        List.of(),
+        predicates));
     // quickfix - redundant local variables for better IndexOutOfBoundsException logging
     List<List<R>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
     List<R> aggregatedValue = aggregatedValues.get(0);
@@ -235,12 +247,10 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
   @Override
   public List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
-      List<Predicate> predicates)
-      throws Exception {
+      List<Predicate> predicates) throws Exception {
     List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size(); ++level) {
-      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(
-          cubeMetric.getDataset(),
+      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(cubeMetric.getDataset(),
           cubeMetric.getCubeSpecs(),
           List.of(dimensions.get(level)),
           predicates);
@@ -251,12 +261,10 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
 
   @Override
   public List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
-      List<Predicate> predicates)
-      throws Exception {
+      List<Predicate> predicates) throws Exception {
     List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size() + 1; ++level) {
-      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(
-          cubeMetric.getDataset(),
+      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(cubeMetric.getDataset(),
           cubeMetric.getCubeSpecs(),
           dimensions.namesToDepth(level),
           predicates);

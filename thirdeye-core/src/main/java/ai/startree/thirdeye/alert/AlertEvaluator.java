@@ -186,11 +186,11 @@ public class AlertEvaluator {
     final DatasetConfigDTO datasetConfigDTO = ensureExists(alertMetadataDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset");
     final String dataset = ensureExists(datasetConfigDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset$name");
 
-    final List<QueryPredicate> queryPredicates = parseAndCombinePredicates(filters).stream()
+    final List<QueryPredicate> timeseriesFilters = parseAndCombinePredicates(filters).stream()
         .map(p -> QueryPredicate.of(p, getDimensionType(p.getLhs(), dataset), dataset))
         .collect(Collectors.toList());
 
-    templateWithProperties.getNodes().forEach(n -> addFilters(n, queryPredicates));
+    templateWithProperties.getNodes().forEach(n -> addFilters(n, timeseriesFilters));
   }
 
   // fixme datatype from metricDTO is always double + abstraction metric/dimension needs refactoring

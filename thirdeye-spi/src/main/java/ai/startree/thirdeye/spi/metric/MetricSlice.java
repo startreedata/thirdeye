@@ -30,7 +30,7 @@ public final class MetricSlice {
   private final Interval interval;
   private final List<Predicate> predicates;
   @Deprecated
-  // use predicates - remove this asap - kept for compatibility with deprecated tests
+  // use predicates - remove this asap - kept for compatibility with deprecated classes
   private final Multimap<String, String> filters;
   private final @NonNull DatasetConfigDTO datasetConfigDTO;
 

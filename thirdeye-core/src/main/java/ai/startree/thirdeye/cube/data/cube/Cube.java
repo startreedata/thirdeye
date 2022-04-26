@@ -11,13 +11,13 @@ import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Multimap;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -111,13 +111,13 @@ public class Cube { // the cube (Ca|Cb)
    *
    * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions to be ordered.
-   * @param dataFilter the filter to be applied on the incoming data.
+   * @param dataFilters the filter to be applied on the incoming data.
    * @param depth the number of the top dimensions to be considered in the subcube.
    * @param hierarchy the hierarchy among the given dimensions, whose order will be honors
    *     before dimensions' cost.
    */
   public void buildWithAutoDimensionOrder(CubeFetcher olapClient,
-      Dimensions dimensions, Multimap<String, String> dataFilter, int depth,
+      Dimensions dimensions, List<Predicate> dataFilters, int depth,
       List<List<String>> hierarchy)
       throws Exception {
     long tStart = System.nanoTime();
@@ -126,17 +126,17 @@ public class Cube { // the cube (Ca|Cb)
           "Dimensions cannot be empty.");
       Preconditions.checkNotNull(hierarchy, "hierarchy cannot be null.");
 
-      initializeBasicInfo(olapClient, dataFilter);
-      Dimensions shrankDimensions = CubeUtils.shrinkDimensionsByFilterSets(dimensions, dataFilter);
+      initializeBasicInfo(olapClient, dataFilters);
+      Dimensions shrankDimensions = CubeUtils.shrinkDimensionsByFilterSets(dimensions, dataFilters);
       costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize,
           currentTotalSize,
-          shrankDimensions, dataFilter);
+          shrankDimensions, dataFilters);
       sortedDimensionCosts = calculateSortedDimensionCost(costSet);
       this.dimensions = sortDimensions(sortedDimensionCosts, depth, hierarchy);
 
       LOG.info("Auto-dimension order: " + this.dimensions);
 
-      buildSubCube(olapClient, this.dimensions, dataFilter);
+      buildSubCube(olapClient, this.dimensions, dataFilters);
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
@@ -151,14 +151,14 @@ public class Cube { // the cube (Ca|Cb)
    *
    * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions, whose order has been given, of the subcube.
-   * @param dataFilter the filter to be applied on the incoming data.
+   * @param dataFilters the filter to be applied on the incoming data.
    */
   public void buildWithManualDimensionOrder(CubeFetcher olapClient, Dimensions dimensions,
-      Multimap<String, String> dataFilter)
+      List<Predicate> dataFilters)
       throws Exception {
     long tStart = System.nanoTime();
     try {
-      buildSubCube(olapClient, dimensions, dataFilter);
+      buildSubCube(olapClient, dimensions, dataFilters);
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
@@ -176,7 +176,7 @@ public class Cube { // the cube (Ca|Cb)
    * @param dataFilter the data filter to applied on the data cube.
    */
   private void buildSubCube(CubeFetcher olapClient, Dimensions dimensions,
-      Multimap<String, String> dataFilter)
+      List<Predicate> dataFilter)
       throws Exception {
     Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
         "Dimensions cannot be empty.");
@@ -215,7 +215,7 @@ public class Cube { // the cube (Ca|Cb)
    *
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
-  private void initializeBasicInfo(CubeFetcher olapClient, Multimap<String, String> filterSets)
+  private void initializeBasicInfo(CubeFetcher olapClient, List<Predicate> filterSets)
       throws Exception {
 
     Row topAggValues = olapClient.getTopAggregatedValues(filterSets);
@@ -296,7 +296,7 @@ public class Cube { // the cube (Ca|Cb)
   private List<DimNameValueCostEntry> computeOneDimensionCost(CubeFetcher olapClient,
       double topBaselineValue,
       double topCurrentValue, double topBaselineSize, double topCurrentSize, Dimensions dimensions,
-      Multimap<String, String> filterSets) throws Exception {
+      List<Predicate> filterSets) throws Exception {
 
     double topRatio = topCurrentValue / topBaselineValue;
     LOG.info("topBaselineValue:{}, topCurrentValue:{}, changeRatio:{}", topBaselineValue,

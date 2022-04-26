@@ -6,53 +6,37 @@
 package ai.startree.thirdeye.cube.data.cube;
 
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import com.google.common.collect.Multimap;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import com.google.common.math.DoubleMath;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CubeUtils {
 
   private static final double epsilon = 0.0001;
 
   /**
-   * Removes dimensions from the given list of dimensions, which has single values in the filter
-   * set. Only dimensions
-   * with one value is removed from the given dimensions because setting a filter one dimension
-   * names with one dimension
-   * value (e.g., "country=US") implies that the final data cube does not contain other dimension
-   * values. Thus, the
+   * Removes dimensions from the given list of dimensions, which have single value constraint in the
+   * predicate list. Eg remove browser when there is a predicate browser=chrome
+   * This is because setting a filter with such one value predicate implies that the final data cube
+   * does not contain other dimension values. Thus, the
    * summary algorithm could simply ignore that dimension (because the cube does not have any other
-   * values to compare
-   * with in that dimension).
+   * values to compare with in that dimension).
    *
    * @param dimensions the list of dimensions to be modified.
    * @param filterSets the filter to be applied on the data cube.
    * @return the list of dimensions that should be used for retrieving the data for summary algorithm.
    */
   public static Dimensions shrinkDimensionsByFilterSets(Dimensions dimensions,
-      Multimap<String, String> filterSets) {
-    Set<String> dimensionsToRemove = new HashSet<>();
-    for (Map.Entry<String, Collection<String>> filterSetEntry : filterSets.asMap().entrySet()) {
-      if (filterSetEntry.getValue().size() == 1) {
-        dimensionsToRemove.add(filterSetEntry.getKey());
-      }
-    }
-    return removeDimensions(dimensions, dimensionsToRemove);
-  }
-
-  private static Dimensions removeDimensions(Dimensions dimensions,
-      Collection<String> dimensionsToRemove) {
-    List<String> dimensionsToRetain = new ArrayList<>();
-    for (String dimensionName : dimensions.names()) {
-      if (!dimensionsToRemove.contains(dimensionName)) {
-        dimensionsToRetain.add(dimensionName);
-      }
-    }
+      List<Predicate> filterSets) {
+    Set<String> dimensionsToRemove = filterSets.stream().filter(p -> p.getOper() != OPER.IN)
+        .map(Predicate::getLhs)
+        .collect(Collectors.toUnmodifiableSet());
+    List<String> dimensionsToRetain = new ArrayList<>(dimensions.names());
+    dimensionsToRetain.removeAll(dimensionsToRemove);
     return new Dimensions(dimensionsToRetain);
   }
 

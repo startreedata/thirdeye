@@ -8,25 +8,26 @@ import {
 import { getAlert as getAlertREST, getAlertEvaluation } from "./alerts.rest";
 
 export const useGetEvaluation = (): GetEvaluation => {
-    const { data, makeRequest, status, errorMessage } =
+    const { data, makeRequest, status, errorMessages } =
         useHTTPAction<AlertEvaluation>(getAlertEvaluation);
 
     const getEvaluation = (
-        evaluationParams: UseGetEvaluationParams
+        evaluationParams: UseGetEvaluationParams,
+        filters?: string[]
     ): Promise<AlertEvaluation | undefined> => {
-        return makeRequest(evaluationParams);
+        return makeRequest(evaluationParams, filters);
     };
 
-    return { evaluation: data, getEvaluation, status, errorMessage };
+    return { evaluation: data, getEvaluation, status, errorMessages };
 };
 
 export const useGetAlert = (): GetAlert => {
-    const { data, makeRequest, status, errorMessage } =
+    const { data, makeRequest, status, errorMessages } =
         useHTTPAction<Alert>(getAlertREST);
 
     const getAlert = (alertId: number): Promise<Alert | undefined> => {
         return makeRequest(alertId);
     };
 
-    return { alert: data, getAlert, status, errorMessage };
+    return { alert: data, getAlert, status, errorMessages };
 };

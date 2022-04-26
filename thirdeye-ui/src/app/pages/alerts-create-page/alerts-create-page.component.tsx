@@ -1,6 +1,7 @@
 import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
@@ -12,6 +13,7 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { createAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import {
@@ -29,10 +31,15 @@ import {
     createAlertEvaluation,
     createDefaultAlert,
 } from "../../utils/alerts/alerts.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
-    const { getEvaluation } = useGetEvaluation();
+    const {
+        getEvaluation,
+        errorMessages,
+        status: getEvaluationStatus,
+    } = useGetEvaluation();
     const { timeRangeDuration } = useTimeRange();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -85,11 +92,19 @@ export const AlertsCreatePage: FunctionComponent = () => {
                         navigate(getAlertsViewPath(alert.id));
                     });
             })
-            .catch(() => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.create-error", { entity: t("label.alert") })
-                );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.create-error", {
+                              entity: t("label.alert"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
 
@@ -115,7 +130,18 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
-            // Empty
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.create-error", {
+                          entity: t("label.subscription-group"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return newSubscriptionGroup;
@@ -128,7 +154,18 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            // Empty
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.subscription-groups"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedSubscriptionGroups;
@@ -139,7 +176,18 @@ export const AlertsCreatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            // Empty
+            const errMessages = getErrorMessages(error as AxiosError);
+
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alerts"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
         }
 
         return fetchedAlerts;
@@ -162,6 +210,21 @@ export const AlertsCreatePage: FunctionComponent = () => {
 
         return fetchedAlertEvaluation;
     };
+
+    useEffect(() => {
+        if (getEvaluationStatus === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
+        }
+    }, [errorMessages, getEvaluationStatus]);
 
     return (
         <PageV1>

@@ -1,17 +1,15 @@
 import { Grid, Typography, useTheme } from "@material-ui/core";
+import { Group } from "@visx/group";
 import {
     hierarchy,
+    stratify,
     Treemap as VisxTreemap,
     treemapSquarify,
 } from "@visx/hierarchy";
-import {
-    Group,
-    ParentSize,
-    scaleLinear,
-    stratify,
-    Text,
-    useTooltip,
-} from "@visx/visx";
+import { ParentSize } from "@visx/responsive";
+import { scaleLinear } from "@visx/scale";
+import { Text } from "@visx/text";
+import { useTooltip } from "@visx/tooltip";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 import React, { MouseEvent } from "react";
 import {

@@ -1,0 +1,28 @@
+# curl -X POST "http://localhost:8080/api/data-sources" -H "accept: application/json" -H "Content-Type: application/json" -d "[ { \"name\": \"pinot1\", \"type\": \"pinot\", \"properties\": { \"zookeeperUrl\": \"pinot-zookeeper:2181\", \"clusterName\": \"pinot-quickstart\", \"controllerConnectionScheme\": \"http\", \"controllerHost\": \"pinot-controller\", \"controllerPort\": 9000 }}]"
+GET http://localhost:8080/api/anomalies?a=b
+
+###
+
+GET http://localhost:8080/api/anomalies?metadata.metric.name=passenger_count
+
+###
+
+GET http://localhost:8080/api/anomalies?metadata.metric.name=nonexistentmetric
+
+###
+
+GET http://localhost:8080/api/anomalies?metadata.dataset.name=us_monthly_air_passengers_simplified
+
+###
+
+GET http://localhost:8080/api/anomalies?metadata.dataset.name=us_monthly_air_passengers_simplified
+
+###
+
+GET http://localhost:8080/api/anomalies?metadata.dataset.name=nonexistentdataset
+
+###
+
+GET http://localhost:8080/api/anomalies?metadata.dataset.name=us_monthly_air_passengers_simplified&metadata.metric.name=passenger_count
+
+###

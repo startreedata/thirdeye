@@ -1,11 +1,13 @@
 import { isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useTimeRangeStore } from "../../../stores/time-range/time-range.store";
 import { getTimeRangeDurationFromQueryString } from "../../../utils/params/params.util";
 import {
     TimeRange,
+    TimeRangeDuration,
     TimeRangeProviderProps,
+    TimeRangeQueryStringKey,
     UseTimeRangeProps,
 } from "./time-range-provider.interfaces";
 
@@ -20,6 +22,7 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
             state.refreshTimeRange,
         ]);
     const location = useLocation();
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         // When loading for the first time, initialize time range
@@ -35,6 +38,43 @@ export const TimeRangeProvider: FunctionComponent<TimeRangeProviderProps> = (
         // Use any navigation opportunity to refresh time range
         refreshTimeRange();
     }, [location.pathname]);
+
+    // Sync search params if they changed for the time range duration
+    useEffect(() => {
+        if (loading) {
+            return;
+        }
+
+        const queryStringTimeRageDuration = {
+            [TimeRangeQueryStringKey.TIME_RANGE]: searchParams.get(
+                TimeRangeQueryStringKey.TIME_RANGE
+            ),
+            [TimeRangeQueryStringKey.START_TIME]: Number(
+                searchParams.get(TimeRangeQueryStringKey.START_TIME)
+            ),
+            [TimeRangeQueryStringKey.END_TIME]: Number(
+                searchParams.get(TimeRangeQueryStringKey.END_TIME)
+            ),
+        };
+
+        if (
+            !queryStringTimeRageDuration[TimeRangeQueryStringKey.TIME_RANGE] ||
+            !queryStringTimeRageDuration[TimeRangeQueryStringKey.START_TIME] ||
+            !queryStringTimeRageDuration[TimeRangeQueryStringKey.END_TIME]
+        ) {
+            return;
+        }
+
+        if (
+            queryStringTimeRageDuration &&
+            !isEqual(queryStringTimeRageDuration, timeRangeDuration)
+        ) {
+            queryStringTimeRageDuration.timeRange = TimeRange.CUSTOM;
+            setTimeRangeDuration(
+                queryStringTimeRageDuration as TimeRangeDuration
+            );
+        }
+    }, [searchParams]);
 
     const initTimeRange = (): void => {
         // Pick up time range duration from query string

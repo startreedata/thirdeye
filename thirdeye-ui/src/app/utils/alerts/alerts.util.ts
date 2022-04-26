@@ -7,6 +7,7 @@ import {
     AlertNodeType,
     EditableAlert,
 } from "../../rest/dto/alert.interfaces";
+import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     UiAlert,
@@ -350,4 +351,9 @@ const mapSubscriptionGroupsToAlertIds = (
     }
 
     return subscriptionGroupsToAlertIdsMap;
+};
+
+export const DEFAULT_FEEDBACK = {
+    type: AnomalyFeedbackType.NO_FEEDBACK,
+    comment: "",
 };

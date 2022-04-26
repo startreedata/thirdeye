@@ -12,7 +12,7 @@ import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -21,7 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Period;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -156,9 +158,9 @@ public class MockThirdEyeDataSourceTest {
         metricId, "tracking", null, null);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(time - TimeUnit.DAYS.toMillis(1))
-        .setEndTimeExclusive(time)
-        .addMetricFunction(metricFunction)
+        .setStartTimeInclusive(new DateTime(time, DateTimeZone.UTC).minus(Period.days(1)))
+        .setEndTimeExclusive(new DateTime(time, DateTimeZone.UTC))
+        .setMetricFunction(metricFunction)
         .setGroupBy("browser")
         .build("ref");
 

@@ -7,23 +7,24 @@ package ai.startree.thirdeye.rootcause.callgraph;
 
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.MaxScoreSet;
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
+import ai.startree.thirdeye.rootcause.entity.DimensionsEntity;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionsEntity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -44,8 +45,8 @@ public class CallGraphPipeline extends Pipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(CallGraphPipeline.class);
 
-  private static final String COL_TIME = DataFrame.COL_TIME;
-  private static final String COL_VALUE = DataFrame.COL_VALUE;
+  private static final String COL_TIME = Constants.COL_TIME;
+  private static final String COL_VALUE = Constants.COL_VALUE;
   private static final String COL_COUNT = "count";
   private static final String COL_LATENCY = "latency";
   private static final String COL_AVERAGE = "average";
@@ -163,34 +164,34 @@ public class CallGraphPipeline extends Pipeline {
     // fetch data
     try {
       // prepare requests
-      RequestContainer rcCurrCount = DataFrameUtils
-          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
-      RequestContainer rcCurrLatency = DataFrameUtils
-          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
-      RequestContainer rcBaseCount = DataFrameUtils
-          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
-      RequestContainer rcBaseLatency = DataFrameUtils
-          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", this.metricDAO,
-              this.datasetDAO, thirdEyeCacheRegistry);
+      ThirdEyeRequest rcCurrCount = DataFrameUtils
+          .makeAggregateRequest(sliceCurrCount, explore, -1, "currCount", metricDAO,
+              datasetDAO);
+      ThirdEyeRequest rcCurrLatency = DataFrameUtils
+          .makeAggregateRequest(sliceCurrLatency, explore, -1, "currLatency", metricDAO,
+              datasetDAO);
+      ThirdEyeRequest rcBaseCount = DataFrameUtils
+          .makeAggregateRequest(sliceBaseCount, explore, -1, "baseCount", metricDAO,
+              datasetDAO);
+      ThirdEyeRequest rcBaseLatency = DataFrameUtils
+          .makeAggregateRequest(sliceBaseLatency, explore, -1, "baseLatency", metricDAO,
+              datasetDAO);
 
       // send requests
       Future<ThirdEyeResponse> resCurrCount = this.cache
-          .getQueryResultAsync(rcCurrCount.getRequest());
+          .getQueryResultAsync(rcCurrCount);
       Future<ThirdEyeResponse> resCurrLatency = this.cache
-          .getQueryResultAsync(rcCurrLatency.getRequest());
+          .getQueryResultAsync(rcCurrLatency);
       Future<ThirdEyeResponse> resBaseCount = this.cache
-          .getQueryResultAsync(rcBaseCount.getRequest());
+          .getQueryResultAsync(rcBaseCount);
       Future<ThirdEyeResponse> resBaseLatency = this.cache
-          .getQueryResultAsync(rcBaseLatency.getRequest());
+          .getQueryResultAsync(rcBaseLatency);
 
       // fetch responses
-      DataFrame dfCurrCount = getResponse(resCurrCount, rcCurrCount, explore);
-      DataFrame dfCurrLatency = getResponse(resCurrLatency, rcCurrLatency, explore);
-      DataFrame dfBaseCount = getResponse(resBaseCount, rcBaseCount, explore);
-      DataFrame dfBaseLatency = getResponse(resBaseLatency, rcBaseLatency, explore);
+      DataFrame dfCurrCount = getResponse(resCurrCount, explore);
+      DataFrame dfCurrLatency = getResponse(resCurrLatency, explore);
+      DataFrame dfBaseCount = getResponse(resBaseCount, explore);
+      DataFrame dfBaseLatency = getResponse(resBaseLatency, explore);
 
       // prepare data
       DataFrame dfCurr = alignResults(dfCurrCount, dfCurrLatency).sortedBy(COL_COUNT);
@@ -362,16 +363,11 @@ public class CallGraphPipeline extends Pipeline {
    * Retrieves and processes a raw aggregation response. drops time column and sets index.
    *
    * @param response thirdeye response
-   * @param container request container
    * @param dimensions dimensions to serve as index
    * @return response as formatted dataframe
    */
-  private DataFrame getResponse(Future<ThirdEyeResponse> response,
-      RequestContainer container,
-      List<String> dimensions) throws Exception {
-    return DataFrameUtils
-        .evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS),
-            container, thirdEyeCacheRegistry)
+  private DataFrame getResponse(Future<ThirdEyeResponse> response, List<String> dimensions) throws Exception {
+    return DataFrameUtils.evaluateResponse(response.get(TIMEOUT, TimeUnit.MILLISECONDS))
         .dropSeries(COL_TIME)
         .setIndex(dimensions);
   }

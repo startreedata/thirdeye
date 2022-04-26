@@ -11,11 +11,11 @@ import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneS
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
@@ -56,12 +56,12 @@ public class NotificationReportBuilder {
   @Inject
   public NotificationReportBuilder(final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final UiConfiguration uiConfiguration) {
+      final UiConfiguration uiConfiguration, final TimeConfiguration timeConfiguration) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
     this.uiConfiguration = uiConfiguration;
 
-    dateTimeZone = DateTimeZone.forID(Constants.DEFAULT_TIMEZONE);
+    dateTimeZone = timeConfiguration.getTimezone();
   }
 
   public NotificationReportApi buildNotificationReportApi(
@@ -71,8 +71,8 @@ public class NotificationReportBuilder {
     final List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
-    DateTime startTime = DateTime.now();
-    DateTime endTime = new DateTime(0L);
+    DateTime startTime = DateTime.now(dateTimeZone);
+    DateTime endTime = new DateTime(0L, dateTimeZone);
     for (final AnomalyResult anomalyResult : anomalies) {
       if (anomalyResult instanceof MergedAnomalyResultDTO) {
         final MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;

@@ -19,6 +19,7 @@
         "datasource": "Datasource",
         "datasources": "Datasources",
         "description": "Description",
+        "documentation": "Documentation",
         "login": "Login",
         "logout": "Logout",
         "document-title": "{{page}} - {{app}}",
@@ -154,7 +155,20 @@
         "root-cause-analysis": "Root Cause Analysis",
         "heatmap-data": "Heatmap Data",
         "chart-data": "Chart Data",
-        "alert-template-configuration": "Alert Template Configuration"
+        "alert-template-configuration": "Alert Template Configuration",
+        "anomaly-feedback": "Anomaly Feedback",
+        "view-configuration-docs": "View configuration documentation",
+        "comment": "Comment",
+        "baseline-week-offset": "Baseline Week Offset",
+        "dimension-analysis-data": "Dimension Analysis Data",
+        "dimension-analysis-row-chart-data": "Dimension Analysis Row Chart Data",
+        "anomaly-period": "Anomaly Period",
+        "non-filtered": "Non Filtered",
+        "filtered": "Filtered",
+        "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
+        "remove": "Remove",
+        "add-to-chart": "Add to Chart",
+        "filter-sets": "Filter Sets"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -174,6 +188,7 @@
         "onboard-error": "Error onboarding {{entity}}",
         "visualization-render-error": "Error rendering visualization",
         "validation-failed": "Validation failed",
+        "change-confirmation-to": "Are you sure you want to change to {{value}}?",
 
         "subscription-group-name-required": "Subscription Group name is required",
 
@@ -193,6 +208,8 @@
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
         "authentication-disabled": "Authentication has been disabled.",
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
-        "error-while-fetching": "An issue was experienced while retrieving {{entity}}"
+        "error-while-fetching": "An issue was experienced while retrieving {{entity}}",
+        "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range.",
+        "changes-not-saved": "Changes have not been saved"
     }
 }

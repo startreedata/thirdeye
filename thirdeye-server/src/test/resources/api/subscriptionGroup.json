@@ -28,10 +28,24 @@
             "user": "${SMTP_USER}",
             "password": "${SMTP_PASSWORD}"
           },
-          "from": "no-reply@startree.ai",
-          "to": [
-            "pyne.suvodeep@gmail.com"
-          ]
+          "emailRecipients": {
+            "from": "thirdeye-alerts@startree.ai",
+            "to": [
+              "suvodeep@startree.ai"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "slack-webhook",
+    "cron": "*/1 * * * * ?",
+    "specs": [
+      {
+        "type": "slack",
+        "params": {
+          "webhookUrl": "${SLACK_WEBHOOK_URL}"
         }
       }
     ]

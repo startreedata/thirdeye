@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import { AuthExceptionCodeV1 } from "../../platform/components/auth-provider-v1/auth-provider-v1.interfaces";
+import { AuthExceptionCodeV1Label } from "../../platform/utils";
 import { LoginPage } from "./login-page.component";
 
 jest.mock("../../platform/components/app-loading-indicator-v1", () => ({
@@ -68,7 +69,8 @@ describe("Login Page", () => {
             true
         );
         expect(mockT).toHaveBeenCalledWith("message.authentication-error", {
-            exceptionCode: AuthExceptionCodeV1.InfoCallFailure,
+            exceptionCode:
+                AuthExceptionCodeV1Label[AuthExceptionCodeV1.InfoCallFailure],
         });
     });
 

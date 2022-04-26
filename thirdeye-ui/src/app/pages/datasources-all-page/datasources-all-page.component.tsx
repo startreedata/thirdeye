@@ -1,15 +1,17 @@
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import {
     deleteDatasource,
     getAllDatasources,
@@ -17,12 +19,13 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasources } from "../../utils/datasources/datasources.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const DatasourcesAllPage: FunctionComponent = () => {
     const [uiDatasources, setUiDatasources] = useState<UiDatasource[] | null>(
         null
     );
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -39,8 +42,19 @@ export const DatasourcesAllPage: FunctionComponent = () => {
             .then((datasources) => {
                 fetchedUiDatasources = getUiDatasources(datasources);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.error-while-fetching", {
+                              entity: t("label.datasources"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => {
                 setUiDatasources(fetchedUiDatasources);
@@ -50,8 +64,11 @@ export const DatasourcesAllPage: FunctionComponent = () => {
     const handleDatasourceDelete = (uiDatasource: UiDatasource): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiDatasource.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiDatasource.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasourceDeleteOk(uiDatasource),
         });
     };
@@ -69,14 +86,20 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 // Remove deleted datasource from fetched datasources
                 removeUiDatasource(datasource);
             })
-            .catch(() =>
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.delete-error", {
-                        entity: t("label.datasource"),
-                    })
-                )
-            );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     const removeUiDatasource = (datasource: Datasource): void => {

@@ -97,7 +97,9 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         return Collections.emptyList();
       }
 
-      postExecution(alert, result, detectionInterval);
+      alert.setLastTimestamp(detectionInterval.getEndMillis());
+      alertManager.update(alert);
+      postExecution(alert, result);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
@@ -113,11 +115,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private void postExecution(final AlertDTO alert, final DetectionPipelineResult result,
-      final Interval detectionInterval) {
-    alert.setLastTimestamp(detectionInterval.getEndMillis());
-    alertManager.update(alert);
-    anomalyMerger.mergeAndSave(alert, result.getAnomalies(), detectionInterval);
+  private void postExecution(final AlertDTO alert, final DetectionPipelineResult result) {
+    anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     for (final EvaluationDTO evaluationDTO : result.getEvaluations()) {
       evaluationManager.save(evaluationDTO);

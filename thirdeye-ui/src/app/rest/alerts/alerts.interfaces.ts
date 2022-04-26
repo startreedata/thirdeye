@@ -12,11 +12,18 @@ export interface UseGetEvaluationParams {
 export interface GetEvaluation extends ActionHook {
     evaluation: AlertEvaluation | null;
     getEvaluation: (
-        evaluationParams: UseGetEvaluationParams
+        evaluationParams: UseGetEvaluationParams,
+        filters?: string[]
     ) => Promise<AlertEvaluation | undefined>;
 }
 
 export interface GetAlert extends ActionHook {
     alert: Alert | null;
     getAlert: (id: number) => Promise<Alert | undefined>;
+}
+
+export interface GetEvaluationRequestPayload extends UseGetEvaluationParams {
+    evaluationContext?: {
+        filters: string[];
+    };
 }

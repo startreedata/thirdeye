@@ -1,11 +1,10 @@
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 
 export interface AnomalyBreakdownComparisonHeatmapProps {
     anomalyId: number;
-    comparisonOffset?: AnomalyBreakdownAPIOffsetValues;
-    anomaly?: Anomaly | null;
     shouldTruncateText?: boolean;
+    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    onAddFilterSetClick?: (filters: AnomalyFilterOption[]) => void;
 }
 
 export interface SummaryData {

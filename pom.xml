@@ -5,13 +5,14 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.pinot.thirdeye</groupId>
+  <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.35.0-SNAPSHOT</version>
+  <version>1.43.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
   <modules>
+    <module>thirdeye-dataframe</module>
     <module>thirdeye-spi</module>
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
@@ -32,9 +33,6 @@
 
     <!-- Build ThirdEye UI -->
     <module>thirdeye-ui</module>
-
-    <!-- Build ThirdEye Documentation -->
-    <module>thirdeye-docs</module>
   </modules>
 
   <properties>
@@ -42,6 +40,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--  Dependency Versions -->
+    <!--  Please maintain a sorted list -->
+    <!--  Intellij: Search actions (Press shift twice), type "sort lines", then enter :-) -->
+    <aspectj.version>1.9.6</aspectj.version>
     <assertj.version>3.17.2</assertj.version>
     <auto-service.version>1.0.1</auto-service.version>
     <avro.version>1.7.7</avro.version>
@@ -72,16 +73,17 @@
     <mysql.connector.version>8.0.27</mysql.connector.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <parsii.version>1.5</parsii.version>
-    <pinot.version>0.10.0-ST.7</pinot.version>
+    <pinot.version>0.10.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
     <quartz.version>2.2.1</quartz.version>
     <retrofit2.version>2.9.0</retrofit2.version>
     <sendgrid.version>4.0.1</sendgrid.version>
+    <slack.version>1.20.2</slack.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
     <swagger.version>1.3.17-1</swagger.version>
     <testcontainers.version>1.15.3</testcontainers.version>
-    <aspectj.version>1.9.6</aspectj.version>
+    <flyway.version>8.5.7</flyway.version>
   </properties>
 
   <licenses>
@@ -334,48 +336,63 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-dataframe</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-spi</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-persistence</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-datasources</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-pinot</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-detection-components</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-server</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-dashboard</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
-        <artifactId>thirdeye-notifications</artifactId>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-notification-email</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-notification-webhook</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-notification-slack</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -404,28 +421,6 @@
       </dependency>
       <dependency>
         <groupId>org.apache.pinot</groupId>
-        <artifactId>pinot-common</artifactId>
-        <version>${pinot.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-server</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.pinot</groupId>
-        <artifactId>pinot-core</artifactId>
-        <version>${pinot.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-server</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.pinot</groupId>
         <artifactId>pinot-spi</artifactId>
         <version>${pinot.version}</version>
         <exclusions>
@@ -449,6 +444,11 @@
         <groupId>com.sendgrid</groupId>
         <artifactId>sendgrid-java</artifactId>
         <version>${sendgrid.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.slack.api</groupId>
+        <artifactId>slack-api-client</artifactId>
+        <version>${slack.version}</version>
       </dependency>
 
       <!-- This helps map pojos from one model to another. API <> DTO, etc -->
@@ -750,6 +750,16 @@
         <artifactId>guice-persist</artifactId>
         <version>${guice.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>${flyway.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-mysql</artifactId>
+        <version>${flyway.version}</version>
+      </dependency>
 
       <!-- macro dependencies -->
       <dependency>
@@ -765,7 +775,7 @@
 
       <!-- test dependencies -->
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-persistence</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
@@ -847,7 +857,7 @@
 
       <!-- Test containers -->
       <dependency>
-        <groupId>org.apache.pinot.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye</groupId>
         <artifactId>pinot-test-container</artifactId>
         <version>${project.version}</version>
       </dependency>

@@ -38,7 +38,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                         <Grid
                             container
                             alignItems="center"
-                            justify="center"
+                            justifyContent="center"
                             spacing={0}
                         >
                             <Grid item>
@@ -54,7 +54,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     </Grid>
 
                     {/* Current */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.current
                     ) && (
                         <Grid
@@ -89,7 +89,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     )}
 
                     {/* Baseline */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.expected
                     ) && (
                         <Grid
@@ -124,7 +124,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     )}
 
                     {/* Upper bound */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.upperBound
                     ) && (
                         <Grid
@@ -159,7 +159,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                     )}
 
                     {/* Lower bound */}
-                    {isFinite(
+                    {Number.isFinite(
                         props.alertEvaluationTimeSeriesTooltipPoint.lowerBound
                     ) && (
                         <Grid
@@ -208,7 +208,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                 <Grid
                                     container
                                     alignItems="center"
-                                    justify="center"
+                                    justifyContent="center"
                                     spacing={0}
                                 >
                                     <Grid item>
@@ -299,7 +299,7 @@ export const AlertEvaluationTimeSeriesTooltip: FunctionComponent<
                                     <Grid
                                         container
                                         alignItems="center"
-                                        justify="flex-end"
+                                        justifyContent="flex-end"
                                         spacing={0}
                                     >
                                         <Grid item>

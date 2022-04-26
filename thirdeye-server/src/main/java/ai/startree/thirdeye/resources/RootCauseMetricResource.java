@@ -5,31 +5,35 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.spi.detection.BaselineParsingUtils.parseOffset;
+import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
+import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.rootcause.util.EntityUtils;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi.HeatMapBreakdownApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
-import ai.startree.thirdeye.spi.detection.BaselineParsingUtils;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
+import ai.startree.thirdeye.spi.util.FilterPredicate;
+import ai.startree.thirdeye.spi.util.SpiUtils;
+import ai.startree.thirdeye.util.BaselineParsingUtils;
+import ai.startree.thirdeye.util.ParsedUrn;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -60,6 +64,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -111,6 +116,18 @@ public class RootCauseMetricResource {
     this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
 
     this.executor = Executors.newCachedThreadPool();
+  }
+
+  /**
+   * Filters in format dim1=val1, dim2!=val2
+   */
+  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
+      final Interval interval,
+      final List<String> filters,
+      final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    List<FilterPredicate> predicates = SpiUtils.extractFilterPredicates(filters);
+    Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
+    return new MetricSlice(metricConfigDTO, interval, filtersMap, datasetConfigDTO);
   }
 
   /**
@@ -220,55 +237,6 @@ public class RootCauseMetricResource {
     return Response.ok(urnToAggregates).build();
   }
 
-  /**
-   * Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.
-   * Aligns time stamps if necessary and omits null values.
-   *
-   * @param anomalyId anomaly id
-   * @param offset offset identifier (e.g. "current", "wo2w")
-   * @param limit limit results to the top k elements, plus a rollup element
-   * @return aggregate value, or NaN if data not available
-   * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
-   */
-  @GET
-  @Path("/breakdown/anomaly/{id}")
-  @ApiOperation(value =
-      "Returns a breakdown (de-aggregation) for the specified anomaly, and (optionally) offset.\n"
-          + "Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  public Response getAnomalyBreakdown(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")")
-      @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-
-    if (limit == null) {
-      limit = LIMIT_DEFAULT;
-    }
-    Baseline range = parseOffset(offset, DateTimeZone.UTC);
-
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
-        anomalyId);
-    final Interval anomalyInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        DateTimeZone.UTC);
-
-    final Map<String, Map<String, Double>> breakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
-        filters,
-        anomalyInterval,
-        range,
-        limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
-    return Response.ok(breakdown).build();
-  }
-
   @GET
   @Path("/heatmap/anomaly/{id}")
   @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
@@ -299,20 +267,20 @@ public class RootCauseMetricResource {
     );
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        rootCauseAnalysisInfo.getMetricConfigDTO(),
         filters,
         currentInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+        rootCauseAnalysisInfo.getDatasetConfigDTO());
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getId(),
+        rootCauseAnalysisInfo.getMetricConfigDTO(),
         filters,
         baselineInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO().bucketTimeGranularity());
+        rootCauseAnalysisInfo.getDatasetConfigDTO());
 
     // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
     fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
@@ -368,29 +336,28 @@ public class RootCauseMetricResource {
   private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
     final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
     LOG.info("RCA metric analysis - Base slice: {} - {}",
-        formatter.print(baseSlice.getStart()),
-        formatter.print(baseSlice.getEnd()));
+        formatter.print(baseSlice.getStartMillis()),
+        formatter.print(baseSlice.getEndMillis()));
     for (int i = 0; i < slices.size(); i++) {
       LOG.info("RCA metric analysis - Offset Slice {}:  {} - {}",
           i,
-          formatter.print(slices.get(i).getStart()),
-          formatter.print(slices.get(i).getEnd()));
+          formatter.print(slices.get(i).getStartMillis()),
+          formatter.print(slices.get(i).getEndMillis()));
     }
   }
 
   private Map<String, Map<String, Double>> computeBreakdown(
-      final long metricId,
+      final MetricConfigDTO metricConfigDTO,
       final List<String> filters,
       final Interval interval,
       final Baseline range,
       final int limit,
-      final TimeGranularity timeGranularity) throws Exception {
+      final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.from(metricId,
-        interval.getStartMillis(),
-        interval.getEndMillis(),
+    MetricSlice baseSlice = from(metricConfigDTO,
+        interval,
         filters,
-        timeGranularity);
+        datasetConfigDTO);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -408,11 +375,13 @@ public class RootCauseMetricResource {
       final long end,
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
-    MetricSlice baseSlice = MetricSlice.from(metricId,
-        start,
-        end,
+    DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
+    MetricSlice baseSlice = from(
+        findMetricConfig(metricId),
+        new Interval(start, end, dateTimeZone),
         filters,
-        findMetricGranularity(metricId));
+        datasetConfigDTO
+    );
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -421,7 +390,7 @@ public class RootCauseMetricResource {
     if (result.isEmpty()) {
       return Double.NaN;
     }
-    return result.getDouble(DataFrame.COL_VALUE, 0);
+    return result.getDouble(Constants.COL_VALUE, 0);
   }
 
   private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters,
@@ -449,8 +418,8 @@ public class RootCauseMetricResource {
       futures.put(slice, this.executor.submit(() -> {
         final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
         if (df.isEmpty()) {
-          return new DataFrame().addSeries(DataFrame.COL_TIME, slice.getStart())
-              .addSeries(DataFrame.COL_VALUE, Double.NaN).setIndex(DataFrame.COL_TIME);
+          return new DataFrame().addSeries(Constants.COL_TIME, slice.getStartMillis())
+              .addSeries(Constants.COL_VALUE, Double.NaN).setIndex(Constants.COL_TIME);
         }
         return df;
       }));
@@ -490,13 +459,20 @@ public class RootCauseMetricResource {
   }
 
   @Deprecated
+  // prefer getting MetricConfigDTO from RootCauseAnalysisInfo
+  private MetricConfigDTO findMetricConfig(final long metricId) {
+    return ensureExists(metricDAO.findById(metricId),
+        String.format("metric id: %d", metricId));
+  }
+
+  @Deprecated
   // prefer getting DatasetConfigDTO from RootCauseAnalysisInfo
-  private TimeGranularity findMetricGranularity(final Long metricId) {
+  private DatasetConfigDTO findDataset(final long metricId) {
     final MetricConfigDTO metric = ensureExists(metricDAO.findById(metricId),
         String.format("metric id: %d", metricId));
     final DatasetConfigDTO dataset = ensureExists(datasetDAO.findByDataset(metric.getDataset()),
         String.format("dataset name: %s", metric.getDataset()));
 
-    return dataset.bucketTimeGranularity();
+    return dataset;
   }
 }

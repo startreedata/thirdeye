@@ -1,5 +1,6 @@
 import { Grid } from "@material-ui/core";
-import { assign } from "lodash";
+import { AxiosError } from "axios";
+import { assign, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -16,6 +17,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplate } from "../../rest/alert-templates/alert-templates.actions";
 import { updateAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 import { AlertTemplatesUpdatePageParams } from "./alert-templates-update-page.interfaces";
 
@@ -24,6 +26,7 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
         alertTemplate,
         getAlertTemplate,
         status: alertTemplateRequestStatus,
+        errorMessages: alertTemplateErrors,
     } = useGetAlertTemplate();
     const { id: alertTemplateId } = useParams<AlertTemplatesUpdatePageParams>();
     const navigate = useNavigate();
@@ -59,15 +62,36 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
 
                 return;
             })
-            .catch((): void => {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.update-error", {
-                        entity: t("label.alert-template"),
-                    })
-                );
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.alert-template"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             });
     };
+
+    useEffect(() => {
+        if (alertTemplateRequestStatus === ActionStatus.Error) {
+            isEmpty(alertTemplateErrors)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alert-template"),
+                      })
+                  )
+                : alertTemplateErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [alertTemplateRequestStatus, alertTemplateErrors]);
 
     if (alertTemplateRequestStatus === ActionStatus.Working) {
         return <AppLoadingIndicatorV1 />;

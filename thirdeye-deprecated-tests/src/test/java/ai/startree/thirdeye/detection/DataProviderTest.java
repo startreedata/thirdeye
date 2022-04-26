@@ -16,14 +16,10 @@ import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.datasource.csv.CSVThirdEyeDataSource;
-import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
-import ai.startree.thirdeye.datasource.loader.DefaultTimeSeriesLoader;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
-import ai.startree.thirdeye.detection.cache.TimeSeriesCache;
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
-import ai.startree.thirdeye.detection.cache.builder.TimeSeriesCacheBuilder;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
@@ -38,15 +34,13 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.DataProvider;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.model.AnomalySlice;
 import ai.startree.thirdeye.spi.detection.model.EventSlice;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.io.InputStreamReader;
@@ -77,8 +71,7 @@ public class DataProviderTest {
   private List<Long> datasetIds;
   private List<Long> detectionIds;
 
-  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end,
-      Iterable<String> filterStrings) {
+  private static MergedAnomalyResultDTO makeAnomaly(Long id, Long configId, long start, long end) {
     MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
     anomaly.setDetectionConfigId(configId);
     anomaly.setStartTime(start);
@@ -87,12 +80,6 @@ public class DataProviderTest {
     anomaly.setChildIds(new HashSet<>());
     anomaly.setType(AnomalyType.DEVIATION);
 
-    StringBuilder filterUrn = new StringBuilder();
-    for (String fs : filterStrings) {
-      filterUrn.append(":").append(fs);
-    }
-
-    anomaly.setMetricUrn("thirdeye:metric:1234" + filterUrn.toString());
     return anomaly;
   }
 
@@ -207,24 +194,19 @@ public class DataProviderTest {
     // anomalies
     this.anomalyIds = new ArrayList<>();
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L,
-            Arrays.asList("a=1", "c=3", "b=2"))));
+        makeAnomaly(null, detectionIds.get(0), 4000000L, 8000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L, Arrays.asList("a=1", "c=4"))));
+        makeAnomaly(null, detectionIds.get(0), 8000000L, 12000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L,
-            Collections.emptyList())));
+        makeAnomaly(null, detectionIds.get(1), 604800000L, 1209600000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L, Arrays.asList("a=1", "c=3"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=3", "c=3"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
     this.anomalyIds.add(anomalyDAO.save(
-        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
+        makeAnomaly(null, detectionIds.get(1), 14400000L, 18000000L)));
 
     // metrics
     this.metricIds = new ArrayList<>();
@@ -242,9 +224,9 @@ public class DataProviderTest {
     try (Reader dataReader = new InputStreamReader(
         this.getClass().getResourceAsStream("/csv/timeseries-4w.csv"))) {
       data = DataFrame.fromCsv(dataReader);
-      data.setIndex(DataFrame.COL_TIME);
+      data.setIndex(Constants.COL_TIME);
       data
-          .addSeries(DataFrame.COL_TIME, data.getLongs(DataFrame.COL_TIME).multiply(1000));
+          .addSeries(Constants.COL_TIME, data.getLongs(Constants.COL_TIME).multiply(1000));
     }
 
     // register caches
@@ -290,28 +272,10 @@ public class DataProviderTest {
     cacheRegistry.registerDatasetConfigCache(mockDatasetConfigCache);
     cacheRegistry.registerDatasetMaxDataTimeCache(mockDatasetMaxDataTimeCache);
 
-    // aggregation loader
-    final AggregationLoader aggregationLoader = new DefaultAggregationLoader(metricDAO,
-        datasetDAO,
-        cacheRegistry, dataSourceCache);
-
-    // time series loader
-    DefaultTimeSeriesLoader timeSeriesLoader = new DefaultTimeSeriesLoader(
-        TestDbEnv.getInstance().getMetricConfigDAO(),
-        TestDbEnv.getInstance().getDatasetConfigDAO(),
-        cacheRegistry, CacheConfig.getInstance(),
-        mock(TimeSeriesCache.class), dataSourceCache);
-
-    // provider
-    final TimeSeriesCacheBuilder timeSeriesCacheBuilder = new TimeSeriesCacheBuilder(
-        CacheConfig.getInstance(),
-        timeSeriesLoader);
     this.provider = new DefaultDataProvider(metricDAO,
         datasetDAO,
         eventDAO,
         evaluationDAO,
-        aggregationLoader,
-        timeSeriesCacheBuilder,
         new AnomaliesCacheBuilder(anomalyDAO, CacheConfig.getInstance()));
   }
 
@@ -352,15 +316,6 @@ public class DataProviderTest {
         .assertTrue(metrics.contains(makeMetric(this.metricIds.get(1), "myMetric2", "myDataset2")));
     Assert
         .assertTrue(metrics.contains(makeMetric(this.metricIds.get(2), "myMetric3", "myDataset1")));
-  }
-
-  @Test
-  public void testFetchAggregation() {
-    MetricSlice metricSlice = MetricSlice
-        .from(this.metricIds.get(1), 0L, 32400000L, ArrayListMultimap.create());
-    Map<MetricSlice, DataFrame> aggregates = this.provider
-        .fetchAggregates(singletonList(metricSlice), Collections.emptyList(), 1);
-    Assert.assertEquals(aggregates.keySet().size(), 1);
   }
 
   @Test
@@ -438,8 +393,7 @@ public class DataProviderTest {
 
     Assert.assertEquals(anomalies.size(), 1);
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L,
-            Collections.emptyList())));
+        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L)));
   }
 
   @Test(enabled = false)
@@ -451,15 +405,12 @@ public class DataProviderTest {
 
     Assert.assertEquals(anomalies.size(), 2);
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(0), detectionIds.get(0), 4000000L, 8000000L,
-            Arrays.asList("a=1", "c=3", "b=2"))));
+        makeAnomaly(this.anomalyIds.get(0), detectionIds.get(0), 4000000L, 8000000L)));
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L)));
 
     Assert.assertFalse(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L,
-            Collections.emptyList())));
+        makeAnomaly(this.anomalyIds.get(2), detectionIds.get(1), 604800000L, 1209600000L)));
   }
 
   @Test(enabled = false)
@@ -470,16 +421,12 @@ public class DataProviderTest {
         .fetchAnomalies(Collections.singleton(slice)).get(slice);
     Assert.assertEquals(anomalies.size(), 2);
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(4), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(4), detectionIds.get(1), 14400000L, 18000000L)));
     Assert.assertTrue(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(6), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=2", "c=3", "d=4"))));
+        makeAnomaly(this.anomalyIds.get(6), detectionIds.get(1), 14400000L, 18000000L)));
     Assert.assertFalse(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(3), detectionIds.get(1), 14400000L, 18000000L)));
     Assert.assertFalse(anomalies.contains(
-        makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L,
-            Arrays.asList("a=1", "a=3", "c=3"))));
+        makeAnomaly(this.anomalyIds.get(5), detectionIds.get(1), 14400000L, 18000000L)));
   }
 }

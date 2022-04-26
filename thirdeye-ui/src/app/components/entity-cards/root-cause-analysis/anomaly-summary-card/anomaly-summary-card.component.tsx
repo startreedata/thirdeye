@@ -1,8 +1,13 @@
 import { Card, CardContent, Grid } from "@material-ui/core";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
@@ -11,12 +16,13 @@ import { AnomalySummaryCardProps } from "./anomaly-summary-card.interfaces";
 import { useAnomalySummaryCardStyles } from "./anomaly-summary-card.styles";
 
 export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
-    props: AnomalySummaryCardProps
+    props
 ) => {
-    const { alert, getAlert, status } = useGetAlert();
+    const { alert, getAlert, status, errorMessages } = useGetAlert();
     const anomalySummaryCardStyles = useAnomalySummaryCardStyles();
     const commonClasses = useCommonStyles();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
     const { uiAnomaly } = props;
 
     useEffect(() => {
@@ -25,8 +31,23 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
         }
     }, [uiAnomaly]);
 
+    useEffect(() => {
+        if (status === ActionStatus.Error) {
+            isEmpty(errorMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.alert"),
+                      })
+                  )
+                : errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  );
+        }
+    }, [status, errorMessages]);
+
     return (
-        <Card variant="outlined">
+        <Card className={props.className} variant="outlined">
             <CardContent>
                 {uiAnomaly && (
                     <Grid container spacing={4}>

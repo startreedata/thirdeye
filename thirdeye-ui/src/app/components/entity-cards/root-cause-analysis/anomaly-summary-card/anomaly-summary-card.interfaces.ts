@@ -5,4 +5,5 @@ export interface AnomalySummaryCardProps {
     searchWords?: string[];
     showViewDetails?: boolean;
     onDelete?: (uiAnomaly: UiAnomaly) => void;
+    className?: string;
 }

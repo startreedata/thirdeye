@@ -1,10 +1,9 @@
 import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -16,8 +15,10 @@ import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
@@ -25,7 +26,7 @@ import {
     getAlert,
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
-import { useGetAnomalyByAlertIdAndTime } from "../../rest/anomalies/anomaly.actions";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -35,7 +36,9 @@ import {
     createAlertEvaluation,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
+import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAlertsAllPath,
     getAnomaliesAnomalyPath,
@@ -46,10 +49,15 @@ export const AlertsViewPage: FunctionComponent = () => {
     const {
         evaluation,
         getEvaluation,
+        errorMessages,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
-    const { anomalies, getAnomalyByAlertIdAndTime } =
-        useGetAnomalyByAlertIdAndTime();
+    const {
+        anomalies,
+        getAnomalies,
+        status: anomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
     const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -57,7 +65,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
     const [searchParams] = useSearchParams();
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -84,14 +92,18 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         if (evaluationRequestStatus === ActionStatus.Error) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.error-while-fetching", {
-                    entity: t("label.anomalies"),
-                })
-            );
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
         }
-    }, [evaluationRequestStatus]);
+    }, [errorMessages, evaluationRequestStatus]);
 
     const fetchAlertEvaluation = (): void => {
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
@@ -102,11 +114,11 @@ export const AlertsViewPage: FunctionComponent = () => {
 
             return;
         }
-        getAnomalyByAlertIdAndTime(
-            uiAlert.alert.id,
-            Number(start),
-            Number(end)
-        );
+        getAnomalies({
+            alertId: uiAlert.alert.id,
+            startTime: Number(start),
+            endTime: Number(end),
+        });
         getEvaluation(
             createAlertEvaluation(uiAlert.alert, Number(start), Number(end))
         );
@@ -138,12 +150,41 @@ export const AlertsViewPage: FunctionComponent = () => {
             getAllSubscriptionGroups(),
         ])
             .then(([alertResponse, subscriptionGroupsResponse]) => {
+                // Determine if any of the calls failed
+                if (
+                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
+                    alertResponse.status === PROMISES.REJECTED
+                ) {
+                    const axiosError =
+                        alertResponse.status === PROMISES.REJECTED
+                            ? alertResponse.reason
+                            : subscriptionGroupsResponse.status ===
+                              PROMISES.REJECTED
+                            ? subscriptionGroupsResponse.reason
+                            : ({} as AxiosError);
+                    const errMessages = getErrorMessages(axiosError);
+                    isEmpty(errMessages)
+                        ? notify(
+                              NotificationTypeV1.Error,
+                              t("message.error-while-fetching", {
+                                  entity: t(
+                                      alertResponse.status === PROMISES.REJECTED
+                                          ? "label.alert"
+                                          : "label.subscription-groups"
+                                  ),
+                              })
+                          )
+                        : errMessages.map((err) =>
+                              notify(NotificationTypeV1.Error, err)
+                          );
+                }
+
                 // Attempt to gather data
-                if (subscriptionGroupsResponse.status === "fulfilled") {
+                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
                     fetchedSubscriptionGroups =
                         subscriptionGroupsResponse.value;
                 }
-                if (alertResponse.status === "fulfilled") {
+                if (alertResponse.status === PROMISES.FULFILLED) {
                     fetchedUiAlert = getUiAlert(
                         alertResponse.value,
                         fetchedSubscriptionGroups
@@ -178,8 +219,11 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAlert.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiAlert.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAlertDeleteOk(uiAlert),
         });
     };
@@ -199,6 +243,21 @@ export const AlertsViewPage: FunctionComponent = () => {
     const onAnomalyBarClick = (anomaly: Anomaly): void => {
         navigate(getAnomaliesAnomalyPath(anomaly.id));
     };
+
+    useEffect(() => {
+        if (anomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
+        }
+    }, [anomaliesRequestStatus, anomaliesRequestErrors]);
 
     return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
         <AppLoadingIndicatorV1 />

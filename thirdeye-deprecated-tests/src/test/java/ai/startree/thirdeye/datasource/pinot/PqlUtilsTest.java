@@ -10,17 +10,17 @@ import static org.mockito.Mockito.mock;
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
@@ -75,7 +75,7 @@ public class PqlUtilsTest {
   public void getBetweenClause(DateTime start, DateTime end, TimeSpec timeSpec, String expected) {
     DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
     datasetConfigDTO.setTimeFormat(TimeSpec.SINCE_EPOCH_FORMAT);
-    datasetConfigDTO.setTimezone(TimeSpec.DEFAULT_TIMEZONE);
+    datasetConfigDTO.setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
     String betweenClause = SqlUtils.getBetweenClause(start, end, timeSpec, datasetConfigDTO);
     Assert.assertEquals(betweenClause, expected);
   }
@@ -179,9 +179,9 @@ public class PqlUtilsTest {
 
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setMetricFunctions(Collections.singletonList(metricFunction))
-        .setStartTimeInclusive(1000)
-        .setEndTimeExclusive(2000)
+        .setMetricFunction(metricFunction)
+        .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")
         .setLimit(12345)
         .build("ref");
@@ -213,9 +213,9 @@ public class PqlUtilsTest {
             TimeGranularity.fromString("1_SECONDS"), TimeSpec.SINCE_EPOCH_FORMAT);
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .setMetricFunctions(Collections.singletonList(metricFunction))
-        .setStartTimeInclusive(1000)
-        .setEndTimeExclusive(2000)
+        .setMetricFunction(metricFunction)
+        .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(2000, DateTimeZone.UTC))
         .setGroupBy("dimension")
         .build("ref");
 

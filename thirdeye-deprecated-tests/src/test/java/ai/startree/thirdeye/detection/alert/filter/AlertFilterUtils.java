@@ -10,6 +10,7 @@ import static ai.startree.thirdeye.spi.Constants.NO_AUTH_USER;
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.detection.DetectionTestUtils;
 import ai.startree.thirdeye.detection.alert.DetectionAlertFilterNotification;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EmailSchemeDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -18,7 +19,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -44,19 +44,6 @@ public class AlertFilterUtils {
     recipients.addAll(toRecipients);
     return makeEmailNotifications(config, recipients, PROP_CC_VALUE, PROP_BCC_VALUE);
   }
-
-  // TODO enable this test when jira notification is supported
-//  static DetectionAlertFilterNotification makeJiraNotifications(SubscriptionGroupDTO config,
-//      String assignee) {
-//    Map<String, Object> alertProps = new HashMap<>();
-//    Map<String, Object> jiraParams = new HashMap<>();
-//    jiraParams.put(PROP_ASSIGNEE, assignee);
-//    alertProps.put(PROP_JIRA_SCHEME, jiraParams);
-//
-//    SubscriptionGroupDTO subsConfig = SubscriptionUtils
-//        .makeChildSubscriptionConfig(config, alertProps, config.getRefLinks());
-//    return new DetectionAlertFilterNotification(subsConfig);
-//  }
 
   static DetectionAlertFilterNotification makeEmailNotifications(SubscriptionGroupDTO config,
       List<String> toRecipients, List<String> ccRecipients, List<String> bccRecipients) {

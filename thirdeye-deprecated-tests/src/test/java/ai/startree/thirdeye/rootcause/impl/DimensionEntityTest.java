@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.spi.rootcause.impl.DimensionEntity;
+import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

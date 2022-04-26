@@ -169,6 +169,24 @@ describe("Alerts REST", () => {
         );
     });
 
+    it("getAlertEvaluation should invoke axios.post with appropriate input and return appropriate alert evaluation and filter properties", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: mockAlertEvaluationResponse,
+        });
+
+        await expect(
+            getAlertEvaluation(mockAlertEvaluationRequest, [
+                "hello=world",
+                "foo=bar",
+            ])
+        ).resolves.toEqual(mockAlertEvaluationResponse);
+
+        expect(axios.post).toHaveBeenCalledWith("/api/alerts/evaluate", {
+            ...mockAlertEvaluationRequest,
+            evaluationContext: { filters: ["hello=world", "foo=bar"] },
+        });
+    });
+
     it("getAlertEvaluation should throw encountered error", async () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 

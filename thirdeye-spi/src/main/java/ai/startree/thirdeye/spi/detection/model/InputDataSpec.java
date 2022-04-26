@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.spi.detection.model;
 
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.Collection;
 import java.util.Collections;
 

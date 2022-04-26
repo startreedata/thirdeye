@@ -5,14 +5,15 @@
 
 package ai.startree.thirdeye.detection.cache;
 
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.util.IntervalUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +149,7 @@ public class ThirdEyeCacheResponse {
         if (previousTimestamp + timeGranularity < currentTimestamp) {
           long missingIntervalStart = previousTimestamp + timeGranularity;
           long missingIntervalEnd = currentTimestamp - timeGranularity;
-          missingPeriods.add(new Interval(missingIntervalStart, missingIntervalEnd));
+          missingPeriods.add(new Interval(missingIntervalStart, missingIntervalEnd, DateTimeZone.UTC));
         }
       }
 

@@ -22,11 +22,11 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
 import java.io.IOException;
@@ -152,107 +152,106 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public ThirdEyeResponse execute(final ThirdEyeRequest request) throws Exception {
     DataFrame df = new DataFrame();
-    for (MetricFunction function : request.getMetricFunctions()) {
-      final String inputName = translator.translate(function.getMetricId());
-      final String outputName = function.toString();
+    MetricFunction function = request.getMetricFunction();
+    final String inputName = translator.translate(function.getMetricId());
+    final String outputName = function.toString();
 
-      final MetricAggFunction aggFunction = function.getFunctionName();
-      if (aggFunction != MetricAggFunction.SUM) {
-        throw new IllegalArgumentException(
-            String.format("Aggregation function '%s' not supported yet.", aggFunction));
-      }
-
-      DataFrame data = datasets.get(function.getDataset());
-
-      // filter constraints
-      if (request.getStartTimeInclusive() != null) {
-        data = data.filter(
-            (LongConditional) values -> values[0] >= request.getStartTimeInclusive().getMillis(),
-            COL_TIMESTAMP);
-      }
-
-      if (request.getEndTimeExclusive() != null) {
-        data = data.filter(
-            (LongConditional) values -> values[0] < request.getEndTimeExclusive().getMillis(),
-            COL_TIMESTAMP);
-      }
-
-      if (request.getFilterSet() != null) {
-        Multimap<String, String> filters = request.getFilterSet();
-        for (final Map.Entry<String, Collection<String>> filter : filters.asMap().entrySet()) {
-          data = data.filter(makeFilter(filter.getValue()), filter.getKey());
-        }
-      }
-
-      data = data.dropNull(inputName);
-
-      //
-      // with grouping
-      //
-      if (request.getGroupBy() != null && request.getGroupBy().size() != 0) {
-        Grouping.DataFrameGrouping dataFrameGrouping = data.groupByValue(request.getGroupBy());
-        List<String> aggregationExps = new ArrayList<>();
-        final String[] groupByColumns = request.getGroupBy().toArray(new String[0]);
-        for (String groupByCol : groupByColumns) {
-          aggregationExps.add(groupByCol + ":first");
-        }
-        aggregationExps.add(inputName + ":sum");
-
-        if (request.getGroupByTimeGranularity() != null) {
-          // group by both time granularity and column
-          List<DataFrame.Tuple> tuples =
-              dataFrameGrouping.aggregate(aggregationExps).getSeries().get("key").getObjects()
-                  .toListTyped();
-          for (final DataFrame.Tuple key : tuples) {
-            DataFrame filteredData = data.filter((StringConditional) values -> {
-              for (int i = 0; i < groupByColumns.length; i++) {
-                if (values[i] != key.getValues()[i]) {
-                  return false;
-                }
-              }
-              return true;
-            }, groupByColumns);
-            filteredData = filteredData.dropNull()
-                .groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
-                .aggregate(aggregationExps);
-            if (df.size() == 0) {
-              df = filteredData;
-            } else {
-              df = df.append(filteredData);
-            }
-          }
-          df.renameSeries(inputName, outputName);
-        } else {
-          // group by columns only
-          df = dataFrameGrouping.aggregate(aggregationExps);
-          df.dropSeries("key");
-          df.renameSeries(inputName, outputName);
-          df = df.sortedBy(outputName).reverse();
-
-          if (request.getLimit() > 0) {
-            df = df.head(request.getLimit());
-          }
-        }
-
-        //
-        // without dimension grouping
-        //
-      } else {
-        if (request.getGroupByTimeGranularity() != null) {
-          // group by time granularity only
-          // TODO handle non-UTC time zone gracefully
-          df = data.groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
-              .aggregate(inputName + ":sum");
-          df.renameSeries(inputName, outputName);
-        } else {
-          // aggregation only
-          df.addSeries(outputName, data.getDoubles(inputName).sum());
-          df.addSeries(COL_TIMESTAMP, LongSeries.buildFrom(-1));
-        }
-      }
-
-      df = df.dropNull(outputName);
+    final MetricAggFunction aggFunction = function.getFunctionName();
+    if (aggFunction != MetricAggFunction.SUM) {
+      throw new IllegalArgumentException(
+          String.format("Aggregation function '%s' not supported yet.", aggFunction));
     }
+
+    DataFrame data = datasets.get(function.getDataset());
+
+    // filter constraints
+    if (request.getStartTimeInclusive() != null) {
+      data = data.filter(
+          (LongConditional) values -> values[0] >= request.getStartTimeInclusive().getMillis(),
+          COL_TIMESTAMP);
+    }
+
+    if (request.getEndTimeExclusive() != null) {
+      data = data.filter(
+          (LongConditional) values -> values[0] < request.getEndTimeExclusive().getMillis(),
+          COL_TIMESTAMP);
+    }
+
+    if (request.getFilterSet() != null) {
+      Multimap<String, String> filters = request.getFilterSet();
+      for (final Map.Entry<String, Collection<String>> filter : filters.asMap().entrySet()) {
+        data = data.filter(makeFilter(filter.getValue()), filter.getKey());
+      }
+    }
+
+    data = data.dropNull(inputName);
+
+    //
+    // with grouping
+    //
+    if (request.getGroupBy() != null && request.getGroupBy().size() != 0) {
+      Grouping.DataFrameGrouping dataFrameGrouping = data.groupByValue(request.getGroupBy());
+      List<String> aggregationExps = new ArrayList<>();
+      final String[] groupByColumns = request.getGroupBy().toArray(new String[0]);
+      for (String groupByCol : groupByColumns) {
+        aggregationExps.add(groupByCol + ":first");
+      }
+      aggregationExps.add(inputName + ":sum");
+
+      if (request.getGroupByTimeGranularity() != null) {
+        // group by both time granularity and column
+        List<DataFrame.Tuple> tuples =
+            dataFrameGrouping.aggregate(aggregationExps).getSeries().get("key").getObjects()
+                .toListTyped();
+        for (final DataFrame.Tuple key : tuples) {
+          DataFrame filteredData = data.filter((StringConditional) values -> {
+            for (int i = 0; i < groupByColumns.length; i++) {
+              if (values[i] != key.getValues()[i]) {
+                return false;
+              }
+            }
+            return true;
+          }, groupByColumns);
+          filteredData = filteredData.dropNull()
+              .groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
+              .aggregate(aggregationExps);
+          if (df.size() == 0) {
+            df = filteredData;
+          } else {
+            df = df.append(filteredData);
+          }
+        }
+        df.renameSeries(inputName, outputName);
+      } else {
+        // group by columns only
+        df = dataFrameGrouping.aggregate(aggregationExps);
+        df.dropSeries("key");
+        df.renameSeries(inputName, outputName);
+        df = df.sortedBy(outputName).reverse();
+
+        if (request.getLimit() > 0) {
+          df = df.head(request.getLimit());
+        }
+      }
+
+      //
+      // without dimension grouping
+      //
+    } else {
+      if (request.getGroupByTimeGranularity() != null) {
+        // group by time granularity only
+        // TODO handle non-UTC time zone gracefully
+        df = data.groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
+            .aggregate(inputName + ":sum");
+        df.renameSeries(inputName, outputName);
+      } else {
+        // aggregation only
+        df.addSeries(outputName, data.getDoubles(inputName).sum());
+        df.addSeries(COL_TIMESTAMP, LongSeries.buildFrom(-1));
+      }
+    }
+
+    df = df.dropNull(outputName);
 
     // TODO handle non-dataset granularity gracefully
     TimeSpec timeSpec = new TimeSpec("timestamp", new TimeGranularity(1, TimeUnit.HOURS),
@@ -268,7 +267,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
     // fixme cyril implement this
-    LOG.error("fetchDataTable not implemented in CSVThirdEyeDataSource but returns an empty Df for e2e tests.");
+    LOG.error(
+        "fetchDataTable not implemented in CSVThirdEyeDataSource but returns an empty Df for e2e tests.");
     DataFrame dataFrame = new DataFrame()
         .addSeries("ts", new double[0])
         .addSeries("met", new long[0]);

@@ -1,10 +1,9 @@
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -12,8 +11,10 @@ import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import {
     deleteDatasource,
     getDatasource,
@@ -22,12 +23,13 @@ import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesAllPath } from "../../utils/routes/routes.util";
 import { DatasourcesViewPageParams } from "./datasources-view-page.interfaces";
 
 export const DatasourcesViewPage: FunctionComponent = () => {
     const [uiDatasource, setUiDatasource] = useState<UiDatasource | null>(null);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const params = useParams<DatasourcesViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -61,8 +63,19 @@ export const DatasourcesViewPage: FunctionComponent = () => {
             .then((datasource) => {
                 fetchedUiDatasource = getUiDatasource(datasource);
             })
-            .catch(() => {
-                notify(NotificationTypeV1.Error, t("message.fetch-error"));
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.error-while-fetching", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
             })
             .finally(() => {
                 setUiDatasource(fetchedUiDatasource);
@@ -72,8 +85,11 @@ export const DatasourcesViewPage: FunctionComponent = () => {
     const handleDatasourceDelete = (uiDatasource: UiDatasource): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiDatasource.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiDatasource.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasourceDeleteOk(uiDatasource),
         });
     };
@@ -91,14 +107,20 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 // Redirect to datasources all path
                 navigate(getDatasourcesAllPath());
             })
-            .catch(() =>
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.delete-error", {
-                        entity: t("label.datasource"),
-                    })
-                )
-            );
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.delete-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     return (

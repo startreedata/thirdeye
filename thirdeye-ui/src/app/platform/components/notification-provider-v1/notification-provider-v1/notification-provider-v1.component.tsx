@@ -9,6 +9,7 @@ import React, {
     useState,
 } from "react";
 import { useLocation } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 import {
     NotificationProviderV1ContextProps,
     NotificationProviderV1Props,
@@ -36,12 +37,13 @@ export const NotificationProviderV1: FunctionComponent<
         onDismiss?: () => void
     ): NotificationV1 => {
         const notification = {
-            id: Date.now(),
+            id: uuidv4(),
             type: type || NotificationTypeV1.Info,
             message: message || "",
             nonDismissible: Boolean(nonDismissible),
             scope: scope || NotificationScopeV1.Page,
             onDismiss: onDismiss,
+            createdAt: Date.now(),
         };
 
         setNotifications((draftNotifications) => {
@@ -107,7 +109,7 @@ export const NotificationProviderV1: FunctionComponent<
 
         if (notification1.nonDismissible === notification2.nonDismissible) {
             // Within dismissible and non dismissible notifications, show the latest first
-            return notification2.id - notification1.id;
+            return notification2.createdAt - notification1.createdAt;
         }
 
         return 0;

@@ -6,8 +6,8 @@
 package ai.startree.thirdeye.rootcause.timeseries;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +27,8 @@ public class BaselineOffset implements Baseline {
   @Override
   public List<MetricSlice> scatter(MetricSlice slice) {
     return Collections.singletonList(slice
-        .withStart(slice.getStart() + offset)
-        .withEnd(slice.getEnd() + offset));
+        .withStart(slice.getStartMillis() + offset)
+        .withEnd(slice.getEndMillis() + offset));
   }
 
   private Map<MetricSlice, DataFrame> filter(MetricSlice slice, Map<MetricSlice, DataFrame> data) {
@@ -51,7 +51,7 @@ public class BaselineOffset implements Baseline {
     MetricSlice dataSlice = filtered.entrySet().iterator().next().getKey();
     DataFrame input = new DataFrame(filtered.entrySet().iterator().next().getValue());
 
-    long offset = dataSlice.getStart() - slice.getStart();
+    long offset = dataSlice.getStartMillis() - slice.getStartMillis();
     if (offset != this.offset) {
       throw new IllegalArgumentException(
           String.format("Found slice with invalid offset %d", offset));

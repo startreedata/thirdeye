@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.notification;
 
+import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -14,7 +15,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -44,9 +45,10 @@ public class NotificationEventsBuilder {
   private final Period postEventCrawlOffset;
 
   @Inject
-  public NotificationEventsBuilder(final EventManager eventManager) {
+  public NotificationEventsBuilder(final EventManager eventManager,
+      final TimeConfiguration timeConfiguration) {
     this.eventManager = eventManager;
-    dateTimeZone = DateTimeZone.forID(Constants.DEFAULT_TIMEZONE);
+    dateTimeZone = timeConfiguration.getTimezone();
 
     final Period defaultPeriod = Period.parse(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
     preEventCrawlOffset = defaultPeriod;
@@ -77,8 +79,8 @@ public class NotificationEventsBuilder {
   }
 
   public List<EventApi> getRelatedEvents(final Collection<? extends AnomalyResult> anomalies) {
-    DateTime windowStart = DateTime.now();
-    DateTime windowEnd = new DateTime(0);
+    DateTime windowStart = DateTime.now(dateTimeZone);
+    DateTime windowEnd = new DateTime(0, dateTimeZone);
 
     for (final AnomalyResult anomalyResult : anomalies) {
       if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {

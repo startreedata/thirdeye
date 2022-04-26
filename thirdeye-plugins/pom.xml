@@ -7,8 +7,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>thirdeye</artifactId>
-    <groupId>org.apache.pinot.thirdeye</groupId>
-    <version>1.35.0-SNAPSHOT</version>
+    <groupId>ai.startree.thirdeye</groupId>
+    <version>1.43.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -22,12 +22,14 @@
     <module>thirdeye-detection-components</module>
     <module>thirdeye-pinot</module>
     <module>thirdeye-kafka</module>
-    <module>thirdeye-notifications</module>
+    <module>thirdeye-notification-email</module>
+    <module>thirdeye-notification-webhook</module>
+    <module>thirdeye-notification-slack</module>
   </modules>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.pinot.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-spi</artifactId>
       <scope>provided</scope>
     </dependency>

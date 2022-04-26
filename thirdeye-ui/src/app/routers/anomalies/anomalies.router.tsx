@@ -1,10 +1,11 @@
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { SaveLastUsedSearchParams } from "../../utils/routes/save-last-used-search-params/save-last-used-search-params.component";
 
 const AnomaliesAllPage = lazy(() =>
     import(
@@ -39,29 +40,40 @@ export const AnomaliesRouter: FunctionComponent = () => {
                 <Route
                     index
                     element={
-                        <RedirectWithDefaultParams
-                            replace
-                            to={AppRouteRelative.ANOMALIES_ALL}
-                        />
+                        <Navigate replace to={AppRouteRelative.ANOMALIES_ALL} />
                     }
                 />
 
                 {/* Anomalies all path */}
-                <Route
-                    element={
-                        <RedirectValidation
-                            queryParams={[
-                                TimeRangeQueryStringKey.TIME_RANGE,
-                                TimeRangeQueryStringKey.START_TIME,
-                                TimeRangeQueryStringKey.END_TIME,
-                            ]}
-                            to=".."
-                        >
-                            <AnomaliesAllPage />
-                        </RedirectValidation>
-                    }
-                    path={AppRouteRelative.ANOMALIES_ALL}
-                />
+                <Route path={AppRouteRelative.ANOMALIES_ALL}>
+                    <Route
+                        index
+                        element={
+                            <RedirectWithDefaultParams
+                                replace
+                                useStoredLastUsedParamsPathKey
+                                to={AppRouteRelative.ANOMALIES_ALL_RANGE}
+                            />
+                        }
+                    />
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    TimeRangeQueryStringKey.TIME_RANGE,
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
+                                ]}
+                                to=".."
+                            >
+                                <SaveLastUsedSearchParams>
+                                    <AnomaliesAllPage />
+                                </SaveLastUsedSearchParams>
+                            </RedirectValidation>
+                        }
+                        path={AppRouteRelative.ANOMALIES_ALL_RANGE}
+                    />
+                </Route>
 
                 <Route path={`${AppRouteRelative.ALERTS_ALERT}/*`}>
                     {/* Anomalies view index path to default the time range params */}

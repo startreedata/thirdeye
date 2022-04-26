@@ -1,0 +1,18 @@
+{
+  "name": "Threshold with template startree-threshold",
+  "description": "Uses template startree-threshold.",
+  "template": {"name": "startree-threshold"}
+,
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "timeColumn": "date",
+    "timeColumnFormat": "yyyyMMdd",
+    "aggregationFunction": "sum",
+    "aggregationColumn": "views",
+    "monitoringGranularity": "P1D",
+    "max": "10000",
+    "min": "200"
+  },
+  "cron": "0 0 0 1/1 * ? *"
+}

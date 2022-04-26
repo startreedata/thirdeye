@@ -20,19 +20,6 @@ public class EvaluationSlice {
     this.end = end;
   }
 
-  public EvaluationSlice() {
-    // -1 means match any
-    this(-1, -1);
-  }
-
-  public EvaluationSlice withStartTime(long startTime) {
-    return new EvaluationSlice(startTime, this.end);
-  }
-
-  public EvaluationSlice withEndTime(long endTime) {
-    return new EvaluationSlice(this.start, endTime);
-  }
-
   public long getStart() {
     return start;
   }

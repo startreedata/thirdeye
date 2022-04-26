@@ -13,10 +13,11 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -31,6 +32,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     const [anomalyOptionsAnchorElement, setAnomalyOptionsAnchorElement] =
         useState<HTMLElement | null>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
     const handleAnomalyOptionsClick = (
@@ -49,10 +51,6 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         }
 
         navigate(getAnomaliesAnomalyPath(props.uiAnomaly.id));
-        handleAnomalyOptionsClose();
-    };
-
-    const handleAnomalyInvestigate = (): void => {
         handleAnomalyOptionsClose();
     };
 
@@ -79,6 +77,15 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                 <CardHeader
                     action={
                         <>
+                            <Link
+                                href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
+                                    props.uiAnomaly.id
+                                )}?${searchParams.toString()}`}
+                            >
+                                {t("label.investigate-entity", {
+                                    entity: t("label.anomaly"),
+                                })}
+                            </Link>
                             {/* Anomaly options button */}
                             <IconButton
                                 color="secondary"
@@ -101,16 +108,6 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                                         {t("label.view-details")}
                                     </MenuItem>
                                 )}
-
-                                {/* Investigate anomaly */}
-                                <MenuItem
-                                    disabled
-                                    onClick={handleAnomalyInvestigate}
-                                >
-                                    {t("label.investigate-entity", {
-                                        entity: t("label.anomaly"),
-                                    })}
-                                </MenuItem>
 
                                 {/* Delete anomaly */}
                                 <MenuItem onClick={handleAnomalyDelete}>

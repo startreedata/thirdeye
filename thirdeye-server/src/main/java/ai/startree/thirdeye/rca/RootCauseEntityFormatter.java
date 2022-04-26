@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.rca;
 
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
-import ai.startree.thirdeye.spi.rootcause.Entity;
 
 /**
  * Foundation class for building UI formatters for RCA Entities. Takes in RCA Entities and returns

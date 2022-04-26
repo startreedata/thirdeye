@@ -6,8 +6,8 @@
 package ai.startree.thirdeye.rootcause.impl;
 
 import ai.startree.thirdeye.rootcause.Pipeline;
+import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
-import ai.startree.thirdeye.spi.rootcause.PipelineContext;
 import java.util.HashSet;
 
 /**

@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.rootcause;
 
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.MaxScoreSet;
 import java.util.Collections;
 import org.testng.Assert;
 import org.testng.annotations.Test;

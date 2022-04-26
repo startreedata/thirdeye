@@ -1,4 +1,5 @@
 
+{{ if .Values.scheduler.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -69,9 +70,13 @@ data:
     taskDriver:
       enabled: false
       id: 0 # must be a non-negative integer unique per instance/worker
+    
+    time:
+      timezone: {{ .Values.time.timezone }}
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}
+      clientId: {{ .Values.ui.clientId }}
 
     # Prometheus compatible metrics will be exposed at /admin/prometheus
     prometheus:
@@ -92,6 +97,9 @@ data:
       holidayEvents:
         enabled: {{ not .Values.config.holidayLoaderKey | ternary "false" "true" }}
         calendars:
+        {{- if .Values.config.calendars }}
+          {{- toYaml .Values.config.calendars | nindent 10 }}
+        {{- else }}
           - en.australian#holiday@group.v.calendar.google.com
           - en.austrian#holiday@group.v.calendar.google.com
           - en.brazilian#holiday@group.v.calendar.google.com
@@ -129,6 +137,7 @@ data:
           - en.uk#holiday@group.v.calendar.google.com
           - en.usa#holiday@group.v.calendar.google.com
           - en.vietnamese#holiday@group.v.calendar.google.com
+        {{- end }}
         holidayLoadRange: 2592000000
         runFrequency: 1  # in Days
 
@@ -266,3 +275,4 @@ data:
               trustStoreFilePath: 'trust/store/path/truststore_file' # e.g. '/etc/riddler/cacerts'
               trustStorePassword: ''
           # add your store of choice here
+{{ end }}

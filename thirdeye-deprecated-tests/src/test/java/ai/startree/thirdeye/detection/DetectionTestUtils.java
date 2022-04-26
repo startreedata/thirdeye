@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.detection;
 
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collections;
@@ -117,12 +117,6 @@ public class DetectionTestUtils {
     anomaly.setMetricUrn(metricUrn);
     anomaly.setAvgCurrentVal(currentVal);
     return anomaly;
-  }
-
-  public static MergedAnomalyResultDTO makeAnomalyWithProps(long start, long end,
-      Map<String, String> props) {
-    return DetectionTestUtils.makeAnomaly(PROP_ID_VALUE, null, start, end, null, null,
-        Collections.emptyMap(), props, AnomalySeverity.DEFAULT);
   }
 
   public static MergedAnomalyResultDTO makeAnomaly(long start, long end, AnomalySeverity severity) {

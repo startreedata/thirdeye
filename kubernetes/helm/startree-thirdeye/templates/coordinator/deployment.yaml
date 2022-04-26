@@ -66,27 +66,19 @@ spec:
         args: 
         - "server"
         env:
+          {{- range $name, $secret := .Values.secrets }}
+          {{- if and $secret.env $secret.value }}
+          - name: {{ $secret.env }}
+            valueFrom:
+              secretKeyRef:
+                name: thirdeye-secrets
+                key: {{ $name }}
+          {{- end }}
+          {{- end }}
           - name: SMTP_HOST
             value: {{ .Values.smtp.host | quote }}
           - name: SMTP_PORT
             value: {{ .Values.smtp.port  | quote }}
-          - name: SMTP_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.smtp.secretKeyRef.name }}
-                key: username
-          - name: SMTP_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.smtp.secretKeyRef.name }}
-                key: password
-          {{- if .Values.sendgrid }}
-          - name: SENDGRID_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: sendgrid-api-key
-                key: key
-          {{- end }}
           {{- if .Values.tls.enabled }}
           - name: JAVA_OPTS
             value: >
@@ -108,10 +100,10 @@ spec:
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
           {{- end }}
-          {{- if .Values.config.holidayLoaderKey }}
+          {{- if .Values.secrets.holidayLoaderKey }}
           - name: holiday-loader-key
             mountPath: "/home/thirdeye/thirdeye/config/holiday-loader-key.json"
-            subPath: "holiday-loader-key.json"
+            subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
         resources:
@@ -128,8 +120,8 @@ spec:
         - name: keystore
           emptyDir: {}
         {{- end }}
-        {{- if .Values.config.holidayLoaderKey }}
+        {{- if .Values.secrets.holidayLoaderKey }}
         - name: holiday-loader-key
           secret:
-            secretName: holiday-loader-key
+            secretName: thirdeye-secrets
         {{- end }}

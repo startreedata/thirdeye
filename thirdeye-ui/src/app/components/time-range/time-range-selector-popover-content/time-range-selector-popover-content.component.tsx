@@ -303,7 +303,10 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<
                             <Hidden xsDown>
                                 <Grid item xs={12}>
                                     <CardActions>
-                                        <Grid container justify="flex-end">
+                                        <Grid
+                                            container
+                                            justifyContent="flex-end"
+                                        >
                                             <Grid item>
                                                 <TimeRangeSelectorControls
                                                     onApply={handleApplyClick}
@@ -322,7 +325,7 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<
             {/* Controls when screen width is xs */}
             <Hidden smUp>
                 <CardActions>
-                    <Grid container justify="flex-end">
+                    <Grid container justifyContent="flex-end">
                         <Grid item>
                             <TimeRangeSelectorControls
                                 onApply={handleApplyClick}

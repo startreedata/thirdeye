@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

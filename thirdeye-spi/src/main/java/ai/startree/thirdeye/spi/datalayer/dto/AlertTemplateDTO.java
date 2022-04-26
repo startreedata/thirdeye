@@ -7,6 +7,7 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class AlertTemplateDTO extends AbstractDTO {
 
@@ -18,8 +19,10 @@ public class AlertTemplateDTO extends AbstractDTO {
   private UserBean owner;
   private List<PlanNodeBean> nodes;
   @Deprecated  // use AlertMetadataDTO
+  // todo cyril add json ignore mid-may 2022
   private RcaMetadataDTO rca;
   private AlertMetadataDTO metadata;
+  private Map<String, Object> defaultProperties;
 
   public String getName() {
     return name;
@@ -104,6 +107,16 @@ public class AlertTemplateDTO extends AbstractDTO {
   public AlertTemplateDTO setMetadata(
       final AlertMetadataDTO metadata) {
     this.metadata = metadata;
+    return this;
+  }
+
+  public Map<String, Object> getDefaultProperties() {
+    return defaultProperties;
+  }
+
+  public AlertTemplateDTO setDefaultProperties(
+      final Map<String, Object> defaultProperties) {
+    this.defaultProperties = defaultProperties;
     return this;
   }
 }

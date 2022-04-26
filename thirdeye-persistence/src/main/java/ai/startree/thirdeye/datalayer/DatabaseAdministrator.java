@@ -5,13 +5,11 @@
 
 package ai.startree.thirdeye.datalayer;
 
-import static java.util.Objects.requireNonNull;
+import static ai.startree.thirdeye.datalayer.DataSourceBuilder.migrateDatabase;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -76,15 +74,7 @@ public class DatabaseAdministrator {
   }
 
   public void createAllTables() throws SQLException, IOException {
-    try (Connection connection = dataSource.getConnection()) {
-      // create schema
-      final URL createSchemaUrl = requireNonNull(
-          getClass().getResource("/db/create-schema.sql"),
-          "failed to load createSchemaUrl");
-
-      final ScriptRunner scriptRunner = new ScriptRunner(connection, true);
-      scriptRunner.runScript(new FileReader(createSchemaUrl.getFile()));
-    }
+    migrateDatabase(dataSource);
   }
 
   public boolean validate() {

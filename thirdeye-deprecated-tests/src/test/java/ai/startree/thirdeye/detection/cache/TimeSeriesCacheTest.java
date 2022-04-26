@@ -15,9 +15,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -25,12 +25,10 @@ import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +37,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -56,9 +56,9 @@ public class TimeSeriesCacheTest {
       null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-      .setMetricFunctions(Collections.singletonList(metricFunction))
-      .setStartTimeInclusive(0)
-      .setEndTimeExclusive(10000)
+      .setMetricFunction(metricFunction)
+      .setStartTimeInclusive(new DateTime(0, DateTimeZone.UTC))
+      .setEndTimeExclusive(new DateTime(10000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))
       .setLimit(12345)
       .build("ref");
@@ -97,15 +97,8 @@ public class TimeSeriesCacheTest {
 
     executor = Executors.newSingleThreadExecutor();
 
-    final ThirdEyeCacheRegistry thirdEyeCacheRegistry = new ThirdEyeCacheRegistry(
-        metricDAO,
-        datasetDAO,
-        dataSourceCache);
-
-    cache = new DefaultTimeSeriesCache(metricDAO,
-        datasetDAO,
+    cache = new DefaultTimeSeriesCache(datasetDAO,
         cacheDAO,
-        thirdEyeCacheRegistry,
         config,
         dataSourceCache);
   }

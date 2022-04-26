@@ -159,7 +159,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
                     alignItems="stretch"
                     className={datasetWizardClasses.controlsContainer}
                     direction="column"
-                    justify="flex-end"
+                    justifyContent="flex-end"
                 >
                     {/* Separator */}
                     <Grid item>
@@ -173,7 +173,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
                     </Grid>
 
                     <Grid item>
-                        <Grid container justify="space-between">
+                        <Grid container justifyContent="space-between">
                             {/* Cancel button */}
                             <Grid item>
                                 {props.showCancel && (

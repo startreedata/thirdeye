@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.auth;
 
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import io.dropwizard.auth.AuthenticationException;
@@ -21,9 +22,10 @@ public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrin
 
   @Inject
   public ThirdEyeAuthenticator(final OAuthConfiguration oAuthConfig,
-    final OAuthManager oAuthManager) {
+    final OAuthManager oAuthManager,
+    final MetricRegistry metricRegistry) {
     OidcUtils.generateOAuthConfig(oAuthManager, oAuthConfig);
-    this.bindingsCache = OidcUtils.makeDefaultCache(new OidcContext(oAuthConfig));
+    this.bindingsCache = OidcUtils.makeDefaultCache(new OidcContext(oAuthConfig), metricRegistry);
   }
 
   @Override

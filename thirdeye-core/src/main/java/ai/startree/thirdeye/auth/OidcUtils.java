@@ -7,6 +7,7 @@ package ai.startree.thirdeye.auth;
 
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -24,12 +25,15 @@ public class OidcUtils {
     return context.getRequiredClaims();
   }
 
-  public static LoadingCache<String, ThirdEyePrincipal> makeDefaultCache(OidcContext context) {
+  public static LoadingCache<String, ThirdEyePrincipal> makeDefaultCache(OidcContext context,
+      MetricRegistry metricRegistry) {
+    OidcJWTProcessor processor = new OidcJWTProcessor();
+    processor.init(context, metricRegistry);
     return CacheBuilder.newBuilder()
       .maximumSize(context.getCacheSize())
       .expireAfterWrite(context.getCacheTtl(), TimeUnit.MILLISECONDS)
       .build(new OidcBindingsCache()
-        .setProcessor(new OidcJWTProcessor(context))
+        .setProcessor(processor)
         .setContext(context));
   }
 

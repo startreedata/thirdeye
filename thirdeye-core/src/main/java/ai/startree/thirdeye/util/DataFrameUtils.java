@@ -145,34 +145,6 @@ public class DataFrameUtils {
         .build(reference);
   }
 
-  /**
-   * Constructs and wraps a request for a simple metric.
-   *
-   * Assumes the slice contains a complete metricConfigDTO.
-   * Assumes the slice contains a complete datasetConfigDTO.
-   *
-   * @param slice metric data slice
-   * @param dimensions dimensions to group by
-   * @param limit top k element limit ({@code -1} for default)
-   * @param reference unique identifier for request
-   * @return ThirdEyeRequest
-   */
-  public static ThirdEyeRequest makeAggregateRequest(MetricSlice slice,
-      List<String> dimensions,
-      int limit,
-      String reference) {
-    MetricFunction function = new MetricFunction(slice.getMetricConfigDTO(), slice.getDatasetConfigDTO());
-    return ThirdEyeRequest.newBuilder()
-        .setStartTimeInclusive(slice.getStart())
-        .setEndTimeExclusive(slice.getEnd())
-        .setFilterSet(slice.getFilters())
-        .setMetricFunction(function)
-        .setDataSource(slice.getDatasetConfigDTO().getDataSource())
-        .setGroupBy(dimensions)
-        .setLimit(limit)
-        .build(reference);
-  }
-
   @Deprecated
   // use above - do not pass DAOs to dataframe utils
   public static ThirdEyeRequest makeAggregateRequest(MetricSlice slice,
@@ -194,10 +166,17 @@ public class DataFrameUtils {
               metricConfigDTO.getId()));
     }
 
-    return makeAggregateRequest(slice.withMetricConfigDto(metricConfigDTO)
-            .withDatasetConfigDto(dataset),
-        dimensions,
-        limit,
-        reference);
+    MetricSlice slice1 = slice.withMetricConfigDto(metricConfigDTO)
+            .withDatasetConfigDto(dataset);
+    MetricFunction function = new MetricFunction(slice1.getMetricConfigDTO(), slice1.getDatasetConfigDTO());
+    return ThirdEyeRequest.newBuilder()
+        .setStartTimeInclusive(slice1.getStart())
+        .setEndTimeExclusive(slice1.getEnd())
+        .setFilterSet(slice1.getFilters())
+        .setMetricFunction(function)
+        .setDataSource(slice1.getDatasetConfigDTO().getDataSource())
+        .setGroupBy(dimensions)
+        .setLimit(limit)
+        .build(reference);
   }
 }

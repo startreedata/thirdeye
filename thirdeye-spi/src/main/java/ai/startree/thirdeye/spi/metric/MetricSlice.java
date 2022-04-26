@@ -5,12 +5,14 @@
 
 package ai.startree.thirdeye.spi.metric;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -26,14 +28,19 @@ public final class MetricSlice {
 
   private final @NonNull MetricConfigDTO metricConfigDTO;
   private final Interval interval;
+  private final List<Predicate> predicates;
+  @Deprecated
+  // use predicates - remove this asap - kept for compatibility with deprecated classes
   private final Multimap<String, String> filters;
   private final @NonNull DatasetConfigDTO datasetConfigDTO;
 
-  public MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO,
+  protected MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO,
       final @NonNull Interval interval,
-      Multimap<String, String> filters, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+      final List<Predicate> predicates, Multimap<String, String> filters,
+      final @NonNull DatasetConfigDTO datasetConfigDTO) {
     this.metricConfigDTO = metricConfigDTO;
     this.interval = interval;
+    this.predicates = predicates;
     this.filters = filters;
     this.datasetConfigDTO = datasetConfigDTO;
   }
@@ -42,28 +49,38 @@ public final class MetricSlice {
       final Interval interval, final @NonNull DatasetConfigDTO datasetConfigDTO) {
     return new MetricSlice(metricConfigDTO,
         interval,
+        List.of(),
         ArrayListMultimap.create(),
         datasetConfigDTO);
   }
 
   public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
       final Interval interval,
-      final Multimap<String, String> filters, final @NonNull DatasetConfigDTO datasetConfigDTO) {
-    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
+      final List<Predicate> predicates, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+    return new MetricSlice(metricConfigDTO,
+        interval,
+        predicates,
+        ArrayListMultimap.create(),
+        datasetConfigDTO);
   }
 
   public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
       final Interval interval,
-      final Multimap<String, String> filters, TimeGranularity granularity,
+      final List<Predicate> predicates, TimeGranularity granularity,
       final @NonNull DatasetConfigDTO datasetConfigDTO) {
     // todo cyril set granularity
-    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
+    return new MetricSlice(metricConfigDTO,
+        interval,
+        predicates,
+        ArrayListMultimap.create(),
+        datasetConfigDTO);
   }
 
   @Deprecated
   public static MetricSlice from(final long metricId, long start, long end) {
     return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
         new Interval(start, end, DateTimeZone.UTC),
+        List.of(),
         ArrayListMultimap.create(),
         new DatasetConfigDTO());
   }
@@ -73,6 +90,7 @@ public final class MetricSlice {
       Multimap<String, String> filters) {
     return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
         new Interval(start, end, DateTimeZone.UTC),
+        List.of(),
         filters,
         new DatasetConfigDTO());
   }
@@ -85,6 +103,7 @@ public final class MetricSlice {
     datasetConfigDTO.setNonAdditiveBucketUnit(granularity.getUnit());
     return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
         new Interval(start, end, DateTimeZone.UTC),
+        List.of(),
         filters,
         new DatasetConfigDTO());
   }
@@ -124,6 +143,12 @@ public final class MetricSlice {
     return interval;
   }
 
+  public List<Predicate> getPredicates() {
+    return predicates;
+  }
+
+  @Deprecated
+  // use predicates
   public Multimap<String, String> getFilters() {
     return filters;
   }
@@ -141,6 +166,7 @@ public final class MetricSlice {
   public MetricSlice withStart(DateTime start) {
     return new MetricSlice(metricConfigDTO,
         interval.withStart(start),
+        predicates,
         filters,
         datasetConfigDTO);
   }
@@ -149,6 +175,7 @@ public final class MetricSlice {
   public MetricSlice withStart(long start) {
     return new MetricSlice(metricConfigDTO,
         interval.withStartMillis(start),
+        predicates,
         filters,
         datasetConfigDTO);
   }
@@ -156,6 +183,7 @@ public final class MetricSlice {
   public MetricSlice withEnd(DateTime end) {
     return new MetricSlice(metricConfigDTO,
         interval.withEnd(end),
+        predicates,
         filters,
         datasetConfigDTO);
   }
@@ -164,30 +192,21 @@ public final class MetricSlice {
   public MetricSlice withEnd(long end) {
     return new MetricSlice(metricConfigDTO,
         interval.withEndMillis(end),
+        predicates,
         filters,
         datasetConfigDTO);
   }
 
-  public MetricSlice withFilters(Multimap<String, String> filters) {
-    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
+  public MetricSlice withPredicates(List<Predicate> predicates) {
+    return new MetricSlice(metricConfigDTO, interval, predicates, filters, datasetConfigDTO);
   }
 
   public MetricSlice withMetricConfigDto(MetricConfigDTO metricConfigDTO) {
-    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDTO);
+    return new MetricSlice(metricConfigDTO, interval, predicates, filters, datasetConfigDTO);
   }
 
   public MetricSlice withDatasetConfigDto(DatasetConfigDTO datasetConfigDto) {
-    return new MetricSlice(metricConfigDTO, interval, filters, datasetConfigDto);
-  }
-
-  /**
-   * check if current metric slice contains another metric slice
-   */
-  public boolean containSlice(MetricSlice slice) {
-    return Objects.equals(slice.metricConfigDTO, this.metricConfigDTO) &&
-        slice.getFilters().equals(this.getFilters()) &&
-        Objects.equals(slice.datasetConfigDTO, this.datasetConfigDTO) &&
-        this.interval.contains(slice.interval);
+    return new MetricSlice(metricConfigDTO, interval, predicates, filters, datasetConfigDto);
   }
 
   @Override
@@ -201,13 +220,14 @@ public final class MetricSlice {
     MetricSlice that = (MetricSlice) o;
     return Objects.equals(metricConfigDTO, that.metricConfigDTO) &&
         Objects.equals(interval, that.interval) &&
+        Objects.equals(predicates, that.predicates) &&
         Objects.equals(filters, that.filters) &&
         Objects.equals(datasetConfigDTO, that.datasetConfigDTO);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metricConfigDTO, interval, filters, datasetConfigDTO);
+    return Objects.hash(metricConfigDTO, interval, predicates, filters, datasetConfigDTO);
   }
 
   @Override
@@ -216,6 +236,7 @@ public final class MetricSlice {
         .add("metricId", metricConfigDTO.getId())
         .add("start", interval.getStart())
         .add("end", interval.getEnd())
+        .add("predicates", predicates)
         .add("filters", filters)
         .add("dataset", datasetConfigDTO.getDataset())
         .toString();

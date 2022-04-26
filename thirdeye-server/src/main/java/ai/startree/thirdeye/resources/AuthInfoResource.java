@@ -30,7 +30,7 @@ public class AuthInfoResource {
   private final AuthConfiguration authConfig;
 
   @Inject
-  public AuthInfoResource(AuthManager authManager, AuthConfiguration authConfig){
+  public AuthInfoResource(final AuthManager authManager, final AuthConfiguration authConfig){
     this.oAuthManager = (OAuthManager) authManager;
     this.authConfig = authConfig;
   }
@@ -39,7 +39,7 @@ public class AuthInfoResource {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    AuthInfoApi info = oAuthManager.getInfo();
+    final AuthInfoApi info = oAuthManager.getInfo();
     if(authConfig.isEnabled() && info == null) {
       throw serverError(ThirdEyeStatus.ERR_UNKNOWN, "Auth server is not responding");
     }

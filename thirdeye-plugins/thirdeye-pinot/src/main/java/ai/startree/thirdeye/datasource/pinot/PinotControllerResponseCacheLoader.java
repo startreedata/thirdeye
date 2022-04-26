@@ -52,12 +52,15 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
   private final AtomicInteger activeConnections = new AtomicInteger();
   private Connection[] connections;
 
-  private static Connection[] fromHostList(final List<String> thirdeyeBrokers, JsonAsyncHttpPinotClientTransport transport) throws Exception {
-    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers, transport);
+  private static Connection[] fromHostList(final List<String> thirdeyeBrokers,
+      JsonAsyncHttpPinotClientTransport transport) throws Exception {
+    Callable<Connection> callable = () -> ConnectionFactory.fromHostList(thirdeyeBrokers,
+        transport);
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
 
-  private static Connection[] fromZookeeper(final String zkUrl, JsonAsyncHttpPinotClientTransport transport) throws Exception {
+  private static Connection[] fromZookeeper(final String zkUrl,
+      JsonAsyncHttpPinotClientTransport transport) throws Exception {
     Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(zkUrl, transport);
     return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
   }
@@ -81,26 +84,27 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
     return connections;
   }
 
-  private static JsonAsyncHttpPinotClientTransport buildTransport(PinotThirdEyeDataSourceConfig config){
+  private static JsonAsyncHttpPinotClientTransport buildTransport(
+      PinotThirdEyeDataSourceConfig config) {
     JsonAsyncHttpPinotClientTransportFactory factory = new JsonAsyncHttpPinotClientTransportFactory();
     Optional.ofNullable(config.getControllerConnectionScheme()).ifPresent(
-      schema -> {
-        factory.setScheme(schema);
-        if(schema.equals("https")) {
-          try {
-            factory.setSslContext(SSLContext.getDefault());
-          } catch (NoSuchAlgorithmException e) {
-            LOG.warn("SSL context not set for transport!");
+        schema -> {
+          factory.setScheme(schema);
+          if (schema.equals("https")) {
+            try {
+              factory.setSslContext(SSLContext.getDefault());
+            } catch (NoSuchAlgorithmException e) {
+              LOG.warn("SSL context not set for transport!");
+            }
           }
         }
-      }
     );
     Optional.ofNullable(config.getHeaders()).ifPresent(
-      headers -> {
-        if (!headers.isEmpty()) {
-          factory.setHeaders(headers);
-        }
-      });
+        headers -> {
+          if (!headers.isEmpty()) {
+            factory.setHeaders(headers);
+          }
+        });
     return (JsonAsyncHttpPinotClientTransport) factory.buildTransport();
   }
 
@@ -125,16 +129,16 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
    */
   private void init(PinotThirdEyeDataSourceConfig pinotThirdEyeDataSourceConfig) throws Exception {
     final String brokerUrl = pinotThirdEyeDataSourceConfig.getBrokerUrl();
-    final JsonAsyncHttpPinotClientTransport transport = buildTransport(pinotThirdEyeDataSourceConfig) ;
+    final JsonAsyncHttpPinotClientTransport transport = buildTransport(pinotThirdEyeDataSourceConfig);
 
     if (brokerUrl != null && brokerUrl.trim().length() > 0) {
       this.connections = fromHostList(Collections.singletonList(brokerUrl), transport);
       LOG.info("Created PinotControllerResponseCacheLoader with brokers [{}]", brokerUrl);
     } else {
       this.connections = fromZookeeper(
-        String.format("%s/%s", pinotThirdEyeDataSourceConfig.getZookeeperUrl(),
-          pinotThirdEyeDataSourceConfig.getClusterName()),
-        transport);
+          String.format("%s/%s", pinotThirdEyeDataSourceConfig.getZookeeperUrl(),
+              pinotThirdEyeDataSourceConfig.getClusterName()),
+          transport);
       LOG.info("Created PinotControllerResponseCacheLoader with controller {}:{}",
           pinotThirdEyeDataSourceConfig.getControllerHost(),
           pinotThirdEyeDataSourceConfig.getControllerPort());
@@ -153,7 +157,9 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
           ResultSetGroup resultSetGroup = connection
               .execute(pinotQuery.getTableName(), new Request(queryFormat, pinotQuery.getQuery()));
           long end = System.currentTimeMillis();
-          LOG.info("Query:{}  took:{} ms  connections:{}", pinotQuery.getQuery(), (end - start),
+          LOG.info("Query:{}  took:{} ms  connections:{}",
+              pinotQuery.getQuery().replace('\n', ' '),
+              (end - start),
               activeConnections);
 
           return ResultSetUtils.toThirdEyeResultSetGroup(resultSetGroup);
@@ -186,5 +192,4 @@ public class PinotControllerResponseCacheLoader extends PinotResponseCacheLoader
       }
     }
   }
-
 }

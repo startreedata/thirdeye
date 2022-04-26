@@ -215,10 +215,10 @@ public class Cube { // the cube (Ca|Cb)
    *
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
-  private void initializeBasicInfo(CubeFetcher olapClient, List<Predicate> filterSets)
+  private void initializeBasicInfo(CubeFetcher olapClient, List<Predicate> dataFilters)
       throws Exception {
 
-    Row topAggValues = olapClient.getTopAggregatedValues(filterSets);
+    Row topAggValues = olapClient.getTopAggregatedValues(dataFilters);
     CubeNode node = topAggValues.toNode();
 
     baselineTotal = node.getBaselineValue();

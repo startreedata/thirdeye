@@ -17,7 +17,7 @@ import {
 import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 
-const TOP_CHART_HEIGHT_RATIO = 0.8;
+const TOP_CHART_HEIGHT_RATIO = 0.85;
 const CHART_SEPARATION = 50;
 const CHART_MARGINS = {
     top: 20,
@@ -130,7 +130,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     if (brush) {
         topChartBottomMargin = isXAxisEnabled
-            ? CHART_SEPARATION / 2
+            ? CHART_SEPARATION
             : CHART_SEPARATION + 10;
         topChartHeight =
             TOP_CHART_HEIGHT_RATIO * innerHeight - topChartBottomMargin;

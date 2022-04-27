@@ -2,7 +2,12 @@ import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { formatDateAndTimeV1 } from "../../../../platform/utils";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "../../alert-evaluation-time-series/alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.styles";
-import { DataPoint, Series } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    NormalizedSeries,
+    SeriesType,
+    ThresholdDataPoint,
+} from "../time-series-chart.interfaces";
 import { TooltipPopoverProps } from "./tooltip.interfaces";
 import { useTooltipStyles } from "./tooltip.styles";
 import { getDataPointsInSeriesForXValue } from "./tooltip.utils";
@@ -15,7 +20,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
     const alertEvaluationTimeSeriesTooltipClasses =
         useAlertEvaluationTimeSeriesTooltipStyles();
     const timeSeriesChartTooltipClasses = useTooltipStyles();
-    const dataPointForXValue: [DataPoint, Series][] =
+    const dataPointForXValue: [DataPoint, NormalizedSeries][] =
         getDataPointsInSeriesForXValue(series, xValue);
 
     return (
@@ -44,13 +49,34 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                 <table className={timeSeriesChartTooltipClasses.table}>
                     <tbody>
                         {dataPointForXValue.map(([dataPoint, series]) => {
+                            const color =
+                                series.color === undefined
+                                    ? colorScale(series.name as string)
+                                    : series.color;
+
+                            let displayValue = series.tooltipValueFormatter(
+                                dataPoint.y,
+                                dataPoint,
+                                series
+                            );
+
+                            if (series.type === SeriesType.AREA_CLOSED) {
+                                displayValue = `${series.tooltipValueFormatter(
+                                    dataPoint.y,
+                                    dataPoint,
+                                    series
+                                )} - ${series.tooltipValueFormatter(
+                                    (dataPoint as ThresholdDataPoint).y1,
+                                    dataPoint,
+                                    series
+                                )}`;
+                            }
+
                             return (
                                 <tr key={series.name}>
                                     <td
                                         style={{
-                                            color: colorScale(
-                                                series.name as string
-                                            ),
+                                            color,
                                         }}
                                     >
                                         {series.name}
@@ -60,7 +86,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                                             timeSeriesChartTooltipClasses.valueCell
                                         }
                                     >
-                                        {dataPoint.y}
+                                        {displayValue}
                                     </td>
                                 </tr>
                             );

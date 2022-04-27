@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -83,25 +84,34 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   @Override
   public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-      final Period granularity, final @Nullable String timeUnit) {
+      final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
     if (timeFormat == null) {
-      return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS",granularity);
+      return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
     }
     if ("EPOCH".equals(timeFormat)) {
-      return getTimeGroupExpression(timeColumn, "1:" + timeUnit +":EPOCH",granularity);
+      return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
     }
     // case simple date format
-    return getTimeGroupExpression(timeColumn, timeFormat, granularity);
+    return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
   }
 
   @Override
   public String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
-      Period granularity) {
-    return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
+      Period granularity, @Nullable final String timezone) {
+    if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
+      return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
+          timeColumn,
+          timeColumnFormatToPinotFormat(timeColumnFormat),
+          periodToPinotFormat(granularity)
+      );
+    }
+    // workaround to bucket with a custom timezone - see https://github.com/apache/pinot/issues/8581
+    return String.format(
+        "FromDateTime(DATETIMECONVERT(%s, '%s', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(%s)', '%s'), 'yyyy-MM-dd HH:mm:ss.SSSZ') ",
         timeColumn,
         timeColumnFormatToPinotFormat(timeColumnFormat),
-        periodToPinotFormat(granularity)
-    );
+        timezone,
+        periodToPinotFormat(granularity));
   }
 
   private String timeColumnFormatToPinotFormat(String timeColumnFormat) {

@@ -12,7 +12,8 @@ public enum MacroMetadataKeys {
   TIME_COLUMN("metadata.timeColumn"),
   MIN_TIME_MILLIS("metadata.minTimeMillis"),
   MAX_TIME_MILLIS("metadata.maxTimeMillis"),
-  GRANULARITY("metadata.granularity");
+  GRANULARITY("metadata.granularity"),
+  TIMEZONE("metadata.timezone");
 
   private final String key;
 

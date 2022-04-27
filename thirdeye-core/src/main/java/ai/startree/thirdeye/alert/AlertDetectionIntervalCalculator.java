@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.alert;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
@@ -30,9 +31,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Compute a detection interval, based on task start and end.
  * Applies completenessDelay and monitoringGranularity rounding.
+ * Applies timezone.
  *
- * For detections/evaluations, this is the entrypoint that changes long startTime and endTimes into an Interval detectionInterval with a timeZone.
- * todo timeZone is harcoded to UTC. This could be parametrized.
+ * For detections/evaluations, this is the entrypoint that changes long startTime and endTimes into
+ * an Interval detectionInterval with a timeZone.
  */
 @Singleton
 public class AlertDetectionIntervalCalculator {
@@ -83,9 +85,10 @@ public class AlertDetectionIntervalCalculator {
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
-    // todo cyril datetimeZone info starts here
-    final DateTime taskStart = new DateTime(taskStartMillis, DateTimeZone.UTC);
-    final DateTime taskEnd = new DateTime(taskEndMillis, DateTimeZone.UTC);
+    final DateTimeZone dateTimeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+        .orElse(Constants.DEFAULT_TIMEZONE);
+    final DateTime taskStart = new DateTime(taskStartMillis, dateTimeZone);
+    final DateTime taskEnd = new DateTime(taskEndMillis, dateTimeZone);
 
     DateTime correctedStart = taskStart;
     DateTime correctedEnd = taskEnd;
@@ -134,6 +137,13 @@ public class AlertDetectionIntervalCalculator {
     }
 
     return new Interval(correctedStart, correctedEnd);
+  }
+
+  public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
+    return Optional.ofNullable(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getTimezone)
+        .map(DateTimeZone::forID)
+        .orElse(null);
   }
 
   @Nullable

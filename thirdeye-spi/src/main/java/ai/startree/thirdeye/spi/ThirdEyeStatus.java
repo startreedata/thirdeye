@@ -34,6 +34,7 @@ public enum ThirdEyeStatus {
   ERR_UNKNOWN("%s"),
   HEALTHY("Healthy"),
   ERR_RCA_DIM_ANALYSIS("Failed running the dimension analysis: %s"),
+  ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
   UNHEALTHY("Unhealthy %s : %s");
 
   final String message;

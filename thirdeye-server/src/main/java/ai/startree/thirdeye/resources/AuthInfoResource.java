@@ -41,7 +41,7 @@ public class AuthInfoResource {
   public Response get() {
     final AuthInfoApi info = oAuthManager.getInfo();
     if (authConfig.isEnabled() && info == null) {
-      throw serverError(ThirdEyeStatus.ERR_UNKNOWN, "Auth server is not responding");
+      throw serverError(ThirdEyeStatus.ERR_AUTH_SERVER_NOT_RESPONDING, authConfig.getOAuthConfig().getServerUrl());
     }
     return respondOk(info);
   }

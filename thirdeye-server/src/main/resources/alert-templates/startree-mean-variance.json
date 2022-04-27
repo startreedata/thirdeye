@@ -46,7 +46,7 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}', '${timezone}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -69,9 +69,11 @@
       "name": "${aggregationColumn}",
       "where": "${queryFilters}"
     },
+    "timezone": "${timezone}",
     "granularity": "${monitoringGranularity}"
   },
   "defaultProperties": {
+    "timezone": "UTC",
     "pattern": "UP_OR_DOWN",
     "completenessDelay": "P0D",
     "queryFilters": "",

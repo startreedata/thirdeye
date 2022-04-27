@@ -66,6 +66,8 @@ public interface SqlExpressionBuilder {
 
   /**
    * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
+   * Round with the given timezone. If timezone is null, keep the default timezone
+   * behavior of the datasource.
    * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
    * For example: for a MySQL implementation, {@code getTimeGroupExpression(dateTimeColumn,
    * DATETIME, P1D)} returns "UNIX_TIMESTAMP(DATE(dateTimeColumn))*1000"
@@ -77,13 +79,15 @@ public interface SqlExpressionBuilder {
    * @param granularity granularity of the output epoch milliseconds (minutes, days, etc...)
    */
   default String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
-      final Period granularity) {
+      final Period granularity, @Nullable final String timezone) {
     throw new UnsupportedOperationException();
   }
 
   /**
    * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
    * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
+   * Round with the given timezone. If timezone is null, keep the default timezone
+   * behavior of the datasource.
    *
    * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
    * datasource.
@@ -97,7 +101,7 @@ public interface SqlExpressionBuilder {
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
-      final Period granularity, @Nullable final String timeUnit) {
+      final Period granularity, @Nullable final String timeUnit , @Nullable final String timezone) {
     throw new UnsupportedOperationException();
   }
 

@@ -9,7 +9,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
-import ai.startree.thirdeye.auth.AuthManager;
 import ai.startree.thirdeye.auth.OAuthManager;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
@@ -26,12 +25,13 @@ import javax.ws.rs.core.Response;
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthInfoResource {
+
   private final OAuthManager oAuthManager;
   private final AuthConfiguration authConfig;
 
   @Inject
-  public AuthInfoResource(final AuthManager authManager, final AuthConfiguration authConfig){
-    this.oAuthManager = (OAuthManager) authManager;
+  public AuthInfoResource(final OAuthManager oAuthManager, final AuthConfiguration authConfig) {
+    this.oAuthManager = oAuthManager;
     this.authConfig = authConfig;
   }
 
@@ -40,7 +40,7 @@ public class AuthInfoResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
     final AuthInfoApi info = oAuthManager.getInfo();
-    if(authConfig.isEnabled() && info == null) {
+    if (authConfig.isEnabled() && info == null) {
       throw serverError(ThirdEyeStatus.ERR_UNKNOWN, "Auth server is not responding");
     }
     return respondOk(info);

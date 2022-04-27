@@ -28,7 +28,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Singleton
-public class OAuthManager implements AuthManager {
+public class OAuthManager {
 
   private static final Logger log = LoggerFactory.getLogger(OAuthManager.class);
   public static final String ISSUER_KEY = "issuer";
@@ -52,7 +52,6 @@ public class OAuthManager implements AuthManager {
     this.context = generateOidcContext(oAuthConfig);
   }
 
-  @Override
   public LoadingCache<String, ThirdEyePrincipal> getDefaultCache() {
     processor.init(context);
     return CacheBuilder.newBuilder()
@@ -64,15 +63,15 @@ public class OAuthManager implements AuthManager {
   }
 
   public AuthInfoApi getInfo() {
-    AuthInfoApi authInfo = new AuthInfoApi();
+    final AuthInfoApi authInfo = new AuthInfoApi();
     if (oAuthConfig != null && oAuthConfig.getServerUrl() != null) {
       try {
-        Map<String, Object> info = openidConfigCache.get(oAuthConfig.getServerUrl());
+        final Map<String, Object> info = openidConfigCache.get(oAuthConfig.getServerUrl());
         Optional.of(info.get(ISSUER_KEY)).ifPresent(issuer -> {
           authInfo.setOidcIssuerUrl(issuer.toString());
           authInfo.setOpenidConfiguration(info);
         });
-      } catch (ExecutionException | NullPointerException e) {
+      } catch (final ExecutionException | NullPointerException e) {
         e.printStackTrace();
         return null;
       }
@@ -81,7 +80,7 @@ public class OAuthManager implements AuthManager {
   }
 
   private OidcContext generateOidcContext(final OAuthConfiguration config) {
-    AuthInfoApi info = getInfo();
+    final AuthInfoApi info = getInfo();
     Optional.ofNullable(info.getOpenidConfiguration()).ifPresent(oidcConfig -> {
       Optional.ofNullable(oidcConfig.get(ISSUER_KEY))
           .ifPresent(iss -> config.getExactMatch().put("iss", iss.toString()));
@@ -105,14 +104,14 @@ public class OAuthManager implements AuthManager {
       final InfoService service = retrofit.create(InfoService.class);
       final Call<Map<String, Object>> call = service.getInfo(String.format("%s%s", url, OIDC_CONFIG_SUFFIX));
       try {
-        Response<Map<String, Object>> response = call.execute();
+        final Response<Map<String, Object>> response = call.execute();
         if (response.code() == 200) {
           return response.body();
         }
         log.error("Unable to fetch oidc info! code: {}, message: {}",
           response.code(),
           response.message());
-      } catch (IOException e) {
+      } catch (final IOException e) {
         log.error(String.format("Unable to fetch oidc info! url : %s", url), e);
       }
       return Collections.emptyMap();

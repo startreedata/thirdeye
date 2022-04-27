@@ -17,8 +17,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.HashMap;
 import java.util.List;
 import org.testng.annotations.Test;
@@ -61,7 +61,7 @@ public class AlertEvaluatorTest {
     assertThat(alertTemplateDTO.getNodes().get(4).getParams().get(EVALUATION_FILTERS_KEY)).isNotNull();
 
     // check the filter value for one data fetcher
-    List<TimeseriesFilter> injectedFilters = (List<TimeseriesFilter>) alertTemplateDTO
+    List<QueryPredicate> injectedFilters = (List<QueryPredicate>) alertTemplateDTO
         .getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY);
     assertThat(injectedFilters.size()).isEqualTo(1);
     assertThat(injectedFilters.get(0).getDataset()).isEqualTo(DATASET_NAME);

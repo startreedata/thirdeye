@@ -46,6 +46,7 @@ public interface Constants {
   /*
    * Dataframe related constants
    */
+  // todo cyril timestamp is a reserved keyword in some sql language - use another value for COL_TIME to be able to use it as SQL alias directly
   String COL_TIME = "timestamp";
   String COL_VALUE = "value"; // baseline value
   String COL_CURRENT = "current";

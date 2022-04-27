@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -22,6 +23,7 @@ import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi.HeatMapBreakdownApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -29,11 +31,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.spi.util.FilterPredicate;
-import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.BaselineParsingUtils;
-import ai.startree.thirdeye.util.ParsedUrn;
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -64,7 +62,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -116,18 +113,6 @@ public class RootCauseMetricResource {
     this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
 
     this.executor = Executors.newCachedThreadPool();
-  }
-
-  /**
-   * Filters in format dim1=val1, dim2!=val2
-   */
-  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
-      final Interval interval,
-      final List<String> filters,
-      final @NonNull DatasetConfigDTO datasetConfigDTO) {
-    List<FilterPredicate> predicates = SpiUtils.extractFilterPredicates(filters);
-    Multimap<String, String> filtersMap = ParsedUrn.toFiltersMap(predicates);
-    return new MetricSlice(metricConfigDTO, interval, filtersMap, datasetConfigDTO);
   }
 
   /**
@@ -268,7 +253,7 @@ public class RootCauseMetricResource {
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),
-        filters,
+        parseAndCombinePredicates(filters),
         currentInterval,
         getSimpleRange(),
         limit,
@@ -276,7 +261,7 @@ public class RootCauseMetricResource {
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),
-        filters,
+        parseAndCombinePredicates(filters),
         baselineInterval,
         getSimpleRange(),
         limit,
@@ -348,15 +333,15 @@ public class RootCauseMetricResource {
 
   private Map<String, Map<String, Double>> computeBreakdown(
       final MetricConfigDTO metricConfigDTO,
-      final List<String> filters,
+      final List<Predicate> predicates,
       final Interval interval,
       final Baseline range,
       final int limit,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
-    MetricSlice baseSlice = from(metricConfigDTO,
+    MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
-        filters,
+        predicates,
         datasetConfigDTO);
 
     List<MetricSlice> slices = range.scatter(baseSlice);
@@ -376,12 +361,11 @@ public class RootCauseMetricResource {
       final String offset,
       final DateTimeZone dateTimeZone) throws Exception {
     DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
-    MetricSlice baseSlice = from(
-        findMetricConfig(metricId),
+    List<Predicate> predicates = parseAndCombinePredicates(filters);
+    MetricSlice baseSlice = MetricSlice.from(findMetricConfig(metricId),
         new Interval(start, end, dateTimeZone),
-        filters,
-        datasetConfigDTO
-    );
+        predicates,
+        datasetConfigDTO);
     Baseline range = parseOffset(offset, dateTimeZone);
     List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
@@ -416,10 +400,13 @@ public class RootCauseMetricResource {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
     for (final MetricSlice slice : slices) {
       futures.put(slice, this.executor.submit(() -> {
-        final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), -1);
+        final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), 2);
         if (df.isEmpty()) {
-          return new DataFrame().addSeries(Constants.COL_TIME, slice.getStartMillis())
+          return new DataFrame().addSeries(Constants.COL_TIME, slice.getInterval().getStartMillis())
               .addSeries(Constants.COL_VALUE, Double.NaN).setIndex(Constants.COL_TIME);
+        }
+        if (df.size() > 1) {
+          throw new RuntimeException("Aggregation returned more than 1 line.");
         }
         return df;
       }));

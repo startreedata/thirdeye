@@ -49,7 +49,7 @@ public class OAuthManager {
       final OidcJWTProcessor processor) {
     this.oAuthConfig = oAuthConfig;
     this.processor = processor;
-    this.context = generateOidcContext(oAuthConfig);
+    this.context = oAuthConfig != null ? generateOidcContext(oAuthConfig) : null;
   }
 
   public LoadingCache<String, ThirdEyePrincipal> getDefaultCache() {

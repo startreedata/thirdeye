@@ -24,17 +24,15 @@ public class OidcContext implements SecurityContext {
   private long cacheTtl = DEFAULT_TTL;
 
   public OidcContext(final OAuthConfiguration config) {
-    if(config != null) {
-      this.keysUrl = config.getKeysUrl();
-      this.requiredClaims = new HashSet<>(config.getRequired());
-      final Builder builder = new JWTClaimsSet.Builder();
-      config.getExactMatch().forEach((name, value) -> builder.claim(name, value));
-      this.exactMatchClaimsSet = builder.build();
-      Optional.ofNullable(config.getCache()).ifPresent(cache -> {
-        this.cacheSize = config.getCache().getSize();
-        this.cacheTtl = config.getCache().getTtl();
-      });
-    }
+    this.keysUrl = config.getKeysUrl();
+    this.requiredClaims = new HashSet<>(config.getRequired());
+    final Builder builder = new JWTClaimsSet.Builder();
+    config.getExactMatch().forEach((name, value) -> builder.claim(name, value));
+    this.exactMatchClaimsSet = builder.build();
+    Optional.ofNullable(config.getCache()).ifPresent(cache -> {
+      this.cacheSize = config.getCache().getSize();
+      this.cacheTtl = config.getCache().getTtl();
+    });
   }
 
   public long getCacheSize() {

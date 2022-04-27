@@ -198,7 +198,8 @@ public class CalciteRequest {
           quoteIdentifierIfReserved(timeAggregationColumn, sqlParserConfig, dialect),
           timeAggregationColumnFormat,
           timeAggregationGranularity,
-          timeAggregationColumnUnit);
+          timeAggregationColumnUnit,
+          null); // todo cyril pass a realtimezone
       SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
       SqlNode timeGroupWithAlias = addAlias(timeGroupNode, TIME_AGGREGATION_ALIAS);
       selectIdentifiers.add(timeGroupWithAlias);

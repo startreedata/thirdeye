@@ -200,7 +200,7 @@ public class CalciteRequestTest {
   public void testGetSqlWithFreeTextProjectionWithAlias() throws SqlParseException {
     final String alias = "alias1";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
-        .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT + " as " + alias) ;
+        .addSelectProjection(COMPLEX_SQL_PROJECTION_TEXT + " as " + alias);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format("SELECT %s AS %s FROM %s.%s",
@@ -423,7 +423,12 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .withTimeAggregation(Period.days(7), timeAggregationColumn, "EPOCH", "SECONDS", false);
+        .withTimeAggregation(Period.days(7),
+            timeAggregationColumn,
+            "EPOCH",
+            "SECONDS",
+            false,
+            null);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -445,7 +450,12 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .withTimeAggregation(Period.days(7), timeAggregationColumn, "EPOCH", "MILLISECONDS", false);
+        .withTimeAggregation(Period.days(7),
+            timeAggregationColumn,
+            "EPOCH",
+            "MILLISECONDS",
+            false,
+            null);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -471,7 +481,7 @@ public class CalciteRequestTest {
             timeAggregationColumn,
             "SIMPLE_DATE_FORMAT:yyyyMMdd",
             null,
-            false);
+            false, null);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -494,7 +504,12 @@ public class CalciteRequestTest {
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         // null timeFormat defaults to milliseconds
-        .withTimeAggregation(Period.days(7), timeAggregationColumn, "EPOCH", "MILLISECONDS", true);
+        .withTimeAggregation(Period.days(7),
+            timeAggregationColumn,
+            "EPOCH",
+            "MILLISECONDS",
+            true,
+            null);
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -539,11 +554,16 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeFilterWithReservedKeyword() throws SqlParseException {
     final String reservedKeywordTimeAggregationColumn = "date";
-    final String quotedTimeAggregationColumn = TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING + reservedKeywordTimeAggregationColumn + TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING;
+    final String quotedTimeAggregationColumn =
+        TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING + reservedKeywordTimeAggregationColumn
+            + TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING;
     final Interval timeFilterInterval = new Interval(100L, 100000000L);
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
-        .withTimeFilter(timeFilterInterval, reservedKeywordTimeAggregationColumn, "EPOCH", "MILLISECONDS");
+        .withTimeFilter(timeFilterInterval,
+            reservedKeywordTimeAggregationColumn,
+            "EPOCH",
+            "MILLISECONDS");
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -595,7 +615,12 @@ public class CalciteRequestTest {
     final String timeColumnFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
-        .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
+        .withTimeAggregation(Period.days(1),
+            timeAggregationColumn,
+            timeColumnFormat,
+            null,
+            true,
+            null)
         // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
         .withTimeFilter(timeFilterInterval, timeAggregationColumn, timeColumnFormat, "DAYS");
     final CalciteRequest request = builder.build();
@@ -631,7 +656,12 @@ public class CalciteRequestTest {
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .addSelectProjection(QueryProjection.of(COLUMN_NAME_2))
         .addSelectProjection(freeTextProjection)
-        .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
+        .withTimeAggregation(Period.days(1),
+            timeAggregationColumn,
+            timeColumnFormat,
+            null,
+            true,
+            null)
         // missing projection on col3 : because group by col3 but don't select it for test purpose
         .addGroupByProjection(QueryProjection.of(COLUMN_NAME_2))
         .addGroupByProjection(freeTextProjection)
@@ -669,7 +699,12 @@ public class CalciteRequestTest {
     final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ")";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
-        .withTimeAggregation(Period.days(1), timeAggregationColumn, timeColumnFormat, null, true)
+        .withTimeAggregation(Period.days(1),
+            timeAggregationColumn,
+            timeColumnFormat,
+            null,
+            true,
+            null)
         // missing projection on col3 : because group by col3 but don't select it for test purpose
         .addOrderByProjection(QueryProjection.of(COLUMN_NAME_2))
         .addOrderByProjection(freeTextProjection)
@@ -824,12 +859,16 @@ public class CalciteRequestTest {
 
     @Override
     public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-        final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
+        final Period granularity, final @Nullable String timeUnit,
+        @Nullable final String timezone) {
       if (timeFormat == null) {
         return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
       }
       if ("EPOCH".equals(timeFormat)) {
-        return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
+        return getTimeGroupExpression(timeColumn,
+            "1:" + timeUnit + ":EPOCH",
+            granularity,
+            timezone);
       }
       // case simple date format
       return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);

@@ -62,6 +62,7 @@ public class CalciteRequest {
    * If set, is the timeAggregation will be the first order by column.
    */
   final private boolean timeAggregationOrderBy;
+  final private String timeAggregationTimezone;
 
   // FROM clause
   final private String database;
@@ -106,6 +107,7 @@ public class CalciteRequest {
     this.timeAggregationColumnUnit = builder.timeAggregationColumnUnit;
     this.timeAggregationColumn = builder.timeAggregationColumn;
     this.timeAggregationOrderBy = builder.timeAggregationOrderBy;
+    this.timeAggregationTimezone = builder.timeAggregationTimezone;
     this.database = builder.database;
     this.table = builder.table;
 
@@ -199,7 +201,7 @@ public class CalciteRequest {
           timeAggregationColumnFormat,
           timeAggregationGranularity,
           timeAggregationColumnUnit,
-          null); // todo cyril pass a realtimezone
+          timeAggregationTimezone);
       SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
       SqlNode timeGroupWithAlias = addAlias(timeGroupNode, TIME_AGGREGATION_ALIAS);
       selectIdentifiers.add(timeGroupWithAlias);
@@ -413,6 +415,7 @@ public class CalciteRequest {
     private String timeAggregationColumn = null;
     private String timeAggregationColumnUnit = null;
     private boolean timeAggregationOrderBy = false;
+    private String timeAggregationTimezone = null;
 
     private Interval timeFilterInterval = null;
     private String timeFilterColumn = null;
@@ -455,13 +458,15 @@ public class CalciteRequest {
     public Builder withTimeAggregation(final Period timeAggregationGranularity,
         final String timeAggregationColumn,
         final String timeAggregationColumnFormat,
-        @Nullable final String timeAggregationColumnUnit,
-        final boolean timeAggregationOrderBy) {
+        final @Nullable String timeAggregationColumnUnit,
+        final boolean timeAggregationOrderBy,
+        final @Nullable String timeAggregationTimezone) {
       this.timeAggregationGranularity = Objects.requireNonNull(timeAggregationGranularity);
       this.timeAggregationColumn = Objects.requireNonNull(timeAggregationColumn);
       this.timeAggregationColumnFormat = Objects.requireNonNull(timeAggregationColumnFormat);
       this.timeAggregationColumnUnit = timeAggregationColumnUnit;
       this.timeAggregationOrderBy = timeAggregationOrderBy;
+      this.timeAggregationTimezone = timeAggregationTimezone;
       return this;
     }
 

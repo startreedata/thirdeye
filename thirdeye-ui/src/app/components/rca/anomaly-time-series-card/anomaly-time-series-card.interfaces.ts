@@ -1,8 +1,8 @@
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyFilterOption } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
-export interface AnalysisTabsProps {
-    anomalyId: number;
+export interface AnomalyTimeSeriesCardProps {
     anomaly: Anomaly;
-    onAddFilterSetClick?: (filters: AnomalyFilterOption[]) => void;
+    timeSeriesFiltersSet: AnomalyFilterOption[][];
+    onRemoveBtnClick: (idx: number) => void;
 }

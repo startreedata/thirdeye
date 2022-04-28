@@ -28,6 +28,7 @@ import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
 export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     anomalyId,
     anomaly,
+    onAddFilterSetClick,
 }) => {
     const { t } = useTranslation();
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
@@ -159,6 +160,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                     <AnomalyBreakdownComparisonHeatmap
                         anomalyId={toNumber(anomalyId)}
                         comparisonOffset={comparisonOffset}
+                        onAddFilterSetClick={onAddFilterSetClick}
                     />
                 </Box>
             )}

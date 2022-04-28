@@ -1,4 +1,12 @@
-import { Box, Card, CardContent, Grid } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    ButtonGroup,
+    Card,
+    CardContent,
+    CardHeader,
+    Grid,
+} from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,6 +14,7 @@ import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
+    TooltipV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -22,10 +31,17 @@ import { AnomalyTimeSeriesCardProps } from "./anomaly-time-series-card.interface
 import { generateChartOptions } from "./anomaly-time-series-card.utils";
 import { FiltersSetTable } from "./filters-set-table/filters-set-table.component";
 
+const CHART_HEIGHT_KEY = "chartHeight";
+const CHART_SIZE_OPTIONS = [
+    ["S", 500],
+    ["M", 800],
+    ["L", 1100],
+];
+
 export const AnomalyTimeSeriesCard: FunctionComponent<
     AnomalyTimeSeriesCardProps
 > = ({ anomaly, timeSeriesFiltersSet, onRemoveBtnClick }) => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const {
@@ -43,6 +59,11 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     );
     const [endTsStr, setEndTsStr] = useState<string | null>(
         searchParams.get(TimeRangeQueryStringKey.END_TIME)
+    );
+    const [chartHeight, setChartHeight] = useState<number>(
+        searchParams.get(CHART_HEIGHT_KEY) !== null
+            ? Number(searchParams.get(CHART_HEIGHT_KEY))
+            : 500
     );
 
     const alertEvaluationPayload = createAlertEvaluation(
@@ -118,16 +139,50 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         }
     }, [errorMessages, getEvaluationRequestStatus]);
 
+    const handleChartHeightChange = (height: number): void => {
+        setChartHeight(height);
+        searchParams.set(CHART_HEIGHT_KEY, height.toString());
+        setSearchParams(searchParams);
+    };
+
     return (
         <Card variant="outlined">
+            <CardHeader
+                action={
+                    <>
+                        <TooltipV1
+                            placement="top"
+                            title={t("message.set-chart-height")}
+                        >
+                            <ButtonGroup
+                                color="secondary"
+                                size="small"
+                                variant="outlined"
+                            >
+                                {CHART_SIZE_OPTIONS.map((sizeOption) => (
+                                    <Button
+                                        disabled={chartHeight === sizeOption[1]}
+                                        key={sizeOption[0]}
+                                        onClick={() =>
+                                            handleChartHeightChange(
+                                                sizeOption[1] as number
+                                            )
+                                        }
+                                    >
+                                        {sizeOption[0]}
+                                    </Button>
+                                ))}
+                            </ButtonGroup>
+                        </TooltipV1>
+                    </>
+                }
+            />
             {getEvaluationRequestStatus === ActionStatus.Working && (
-                <Card variant="outlined">
-                    <CardContent>
-                        <Box pb={20} pt={20}>
-                            <AppLoadingIndicatorV1 />
-                        </Box>
-                    </CardContent>
-                </Card>
+                <CardContent>
+                    <Box pb={20} pt={20}>
+                        <AppLoadingIndicatorV1 />
+                    </Box>
+                </CardContent>
             )}
             {getEvaluationRequestStatus === ActionStatus.Error && (
                 <CardContent>
@@ -141,6 +196,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                 timeSeriesFiltersSet.length === 0 && (
                     <CardContent>
                         <TimeSeriesChart
+                            height={chartHeight}
                             {...generateChartOptions(
                                 alertEvaluation,
                                 anomaly,
@@ -157,6 +213,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                         <Grid container>
                             <Grid item md={8} sm={12} xs={12}>
                                 <TimeSeriesChart
+                                    height={chartHeight}
                                     {...generateChartOptions(
                                         alertEvaluation,
                                         anomaly,

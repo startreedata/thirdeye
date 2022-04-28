@@ -5,34 +5,35 @@
 
 package ai.startree.thirdeye.datalayer.bao;
 
-import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.TestDatabase;
-import ai.startree.thirdeye.spi.api.AnomalyApi;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class TestRootcauseSessionManager {
+public class TestRcaInvestigationManager {
 
-  private RootcauseSessionManager sessionDAO;
+  public static final String INVESTIGATION_NAME = "testInvestigation";
+  public static final String INVESTIGATION_DESCRIPTION = "this is a test investigation";
+  public static final Map<String, Object> INVESTIGATION_UI_METADATA = Map.of("k1", "v1");
+  public static final Long INVESTIGATION_ANOMALY_ID = 123L;
+  private RcaInvestigationManager sessionDAO;
 
   private static RcaInvestigationDTO makeDefault() {
-    return DatalayerTestUtils.getTestRootcauseSessionResult(1000,
-        1100,
-        1500,
-        2000,
-        "myname",
-        "myowner",
-        "mytext",
-        "mygranularity",
-        "mycomparemode",
-        12345L,
-        1234L);
+    RcaInvestigationDTO investigationDTO = new RcaInvestigationDTO();
+    investigationDTO.setName(INVESTIGATION_NAME);
+    investigationDTO.setText(INVESTIGATION_DESCRIPTION);
+    investigationDTO.setAnomaly((MergedAnomalyResultDTO) new MergedAnomalyResultDTO().setId(
+        INVESTIGATION_ANOMALY_ID));
+    investigationDTO.setUiMetadata(INVESTIGATION_UI_METADATA);
+    return investigationDTO;
   }
 
   private static RcaInvestigationDTO makeName(String name) {
@@ -43,44 +44,38 @@ public class TestRootcauseSessionManager {
 
   private static RcaInvestigationDTO makeOwner(String owner) {
     RcaInvestigationDTO session = makeDefault();
-    session.setOwner(owner);
+    session.setUpdatedBy(owner);
     return session;
   }
 
   private static RcaInvestigationDTO makeCreated(long created) {
     RcaInvestigationDTO session = makeDefault();
-    session.setCreated(created);
+    session.setCreateTime(new Timestamp(created));
     return session;
   }
 
   private static RcaInvestigationDTO makeUpdated(long updated) {
     RcaInvestigationDTO session = makeDefault();
-    session.setUpdated(updated);
+    session.setUpdateTime(new Timestamp(updated));
     return session;
   }
 
   private static RcaInvestigationDTO makeAnomaly(long anomalyId) {
     RcaInvestigationDTO session = makeDefault();
-    session.setAnomaly(new AnomalyApi().setId(anomalyId));
+    session.setAnomaly((MergedAnomalyResultDTO) new MergedAnomalyResultDTO().setId(anomalyId));
     return session;
   }
 
   private static RcaInvestigationDTO makeAnomalyRange(long start, long end) {
     RcaInvestigationDTO session = makeDefault();
-    session.setAnomalyRangeStart(start);
-    session.setAnomalyRangeEnd(end);
-    return session;
-  }
-
-  private static RcaInvestigationDTO makePrevious(long previousId) {
-    RcaInvestigationDTO session = makeDefault();
-    session.setPreviousId(previousId);
+    session.getAnomaly().setStartTime(start);
+    session.getAnomaly().setEndTime(end);
     return session;
   }
 
   @BeforeMethod
   void beforeMethod() {
-    sessionDAO = new TestDatabase().createInjector().getInstance(RootcauseSessionManager.class);
+    sessionDAO = new TestDatabase().createInjector().getInstance(RcaInvestigationManager.class);
   }
 
   @Test
@@ -106,17 +101,10 @@ public class TestRootcauseSessionManager {
     Long id = this.sessionDAO.save(makeDefault());
 
     RcaInvestigationDTO session = this.sessionDAO.findById(id);
-    Assert.assertEquals(session.getAnomalyRangeStart(), (Long) 1000L);
-    Assert.assertEquals(session.getAnomalyRangeEnd(), (Long) 1100L);
-    Assert.assertEquals(session.getAnalysisRangeStart(), (Long) 900L);
-    Assert.assertEquals(session.getAnalysisRangeEnd(), (Long) 1200L);
-    Assert.assertEquals(session.getCreated(), (Long) 1500L);
-    Assert.assertEquals(session.getName(), "myname");
-    Assert.assertEquals(session.getOwner(), "myowner");
-    Assert.assertEquals(session.getText(), "mytext");
-    Assert.assertEquals(session.getGranularity(), "mygranularity");
-    Assert.assertEquals(session.getCompareMode(), "mycomparemode");
-    Assert.assertEquals(session.getPreviousId(), (Long) 12345L);
+    Assert.assertEquals(session.getName(), INVESTIGATION_NAME);
+    Assert.assertEquals(session.getText(), INVESTIGATION_DESCRIPTION);
+    Assert.assertEquals(session.getUiMetadata(), INVESTIGATION_UI_METADATA);
+    Assert.assertEquals(session.getAnomaly().getId(), INVESTIGATION_ANOMALY_ID);
   }
 
   @Test
@@ -213,24 +201,6 @@ public class TestRootcauseSessionManager {
     Assert.assertEquals(sessionsBefore.size(), 0);
     Assert.assertEquals(sessionsMid.size(), 1);
     Assert.assertEquals(sessionsEnd.size(), 3);
-  }
-
-  @Test
-  public void testFindByPreviousId() {
-    this.sessionDAO.save(makePrevious(0));
-    this.sessionDAO.save(makePrevious(1));
-    this.sessionDAO.save(makePrevious(1));
-    this.sessionDAO.save(makePrevious(2));
-
-    List<RcaInvestigationDTO> sessions0 = this.sessionDAO.findByPreviousId(0);
-    List<RcaInvestigationDTO> sessions1 = this.sessionDAO.findByPreviousId(1);
-    List<RcaInvestigationDTO> sessions2 = this.sessionDAO.findByPreviousId(2);
-    List<RcaInvestigationDTO> sessions3 = this.sessionDAO.findByPreviousId(3);
-
-    Assert.assertEquals(sessions0.size(), 1);
-    Assert.assertEquals(sessions1.size(), 2);
-    Assert.assertEquals(sessions2.size(), 1);
-    Assert.assertEquals(sessions3.size(), 0);
   }
 
   @Test

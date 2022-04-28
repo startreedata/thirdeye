@@ -26,7 +26,7 @@ import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnboardDatasetMetricManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OverrideConfigManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.RootcauseSessionManagerImpl;
+import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.RootcauseTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.SubscriptionGroupManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
@@ -71,7 +71,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -146,7 +146,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(OnboardDatasetMetricManager.class).to(OnboardDatasetMetricManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(AlertSnapshotManager.class).to(AlertSnapshotManagerImpl.class).in(Scopes.SINGLETON);
-    bind(RootcauseSessionManager.class).to(RootcauseSessionManagerImpl.class).in(Scopes.SINGLETON);
+    bind(RcaInvestigationManager.class).to(RcaInvestigationManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
         .in(Scopes.SINGLETON);
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);

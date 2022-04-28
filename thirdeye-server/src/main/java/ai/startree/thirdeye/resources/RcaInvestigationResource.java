@@ -9,7 +9,7 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -46,7 +46,7 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
       .build();
 
   @Inject
-  public RcaInvestigationResource(final RootcauseSessionManager rootCauseSessionDAO) {
+  public RcaInvestigationResource(final RcaInvestigationManager rootCauseSessionDAO) {
     super(rootCauseSessionDAO, API_TO_BEAN_FILTER_MAP);
   }
 

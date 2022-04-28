@@ -7,7 +7,7 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
@@ -20,8 +20,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 @Singleton
-public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
-    RootcauseSessionManager {
+public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
+    RcaInvestigationManager {
 
   private static final String FIND_BY_LIKE_TEMPLATE = "WHERE %s";
   private static final String FIND_BY_LIKE_JOINER = " AND ";
@@ -31,7 +31,7 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RcaInvestig
   private static final String FIND_BY_NAME_LIKE_KEY = "name__%d";
 
   @Inject
-  public RootcauseSessionManagerImpl(GenericPojoDao genericPojoDao) {
+  public RcaInvestigationManagerImpl(GenericPojoDao genericPojoDao) {
     super(RcaInvestigationDTO.class, genericPojoDao);
   }
 
@@ -66,11 +66,6 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RcaInvestig
   public List<RcaInvestigationDTO> findByUpdatedRange(long start, long end) {
     return findByPredicate(
         Predicate.AND(Predicate.GE("updated", start), Predicate.LT("updated", end)));
-  }
-
-  @Override
-  public List<RcaInvestigationDTO> findByPreviousId(long id) {
-    return findByPredicate(Predicate.EQ("previousId", id));
   }
 
   @Override

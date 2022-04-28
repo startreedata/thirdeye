@@ -2,6 +2,7 @@ package ai.startree.thirdeye.spi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Date;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
@@ -12,6 +13,10 @@ public class RcaInvestigationApi implements ThirdEyeCrudApi<RcaInvestigationApi>
   private String text;
   private Map<String, Object> uiMetadata;
   private AnomalyApi anomaly;
+  private Date created;
+  private UserApi createdBy;
+  private Date updated;
+  private UserApi updatedBy;
 
   @Override
   public Long getId() {
@@ -57,6 +62,43 @@ public class RcaInvestigationApi implements ThirdEyeCrudApi<RcaInvestigationApi>
 
   public RcaInvestigationApi setAnomaly(final AnomalyApi anomaly) {
     this.anomaly = anomaly;
+    return this;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public RcaInvestigationApi setCreated(final Date created) {
+
+    this.created = created;
+    return this;
+  }
+
+  public UserApi getCreatedBy() {
+    return createdBy;
+  }
+
+  public RcaInvestigationApi setCreatedBy(final UserApi createdBy) {
+    this.createdBy = createdBy;
+    return this;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public RcaInvestigationApi setUpdated(final Date updated) {
+    this.updated = updated;
+    return this;
+  }
+
+  public UserApi getUpdatedBy() {
+    return updatedBy;
+  }
+
+  public RcaInvestigationApi setUpdatedBy(final UserApi updatedBy) {
+    this.updatedBy = updatedBy;
     return this;
   }
 }

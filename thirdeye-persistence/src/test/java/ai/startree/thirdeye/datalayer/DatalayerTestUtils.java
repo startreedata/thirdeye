@@ -8,7 +8,6 @@ package ai.startree.thirdeye.datalayer;
 import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
 
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -17,7 +16,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -118,26 +116,5 @@ public class DatalayerTestUtils {
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     return overrideConfigDTO;
-  }
-
-  public static RcaInvestigationDTO getTestRootcauseSessionResult(long start, long end,
-      long created, long updated,
-      String name, String owner, String text, String granularity, String compareMode,
-      Long previousId, Long anomalyId) {
-    RcaInvestigationDTO session = new RcaInvestigationDTO();
-    session.setAnomalyRangeStart(start);
-    session.setAnomalyRangeEnd(end);
-    session.setAnalysisRangeStart(start - 100);
-    session.setAnalysisRangeEnd(end + 100);
-    session.setName(name);
-    session.setOwner(owner);
-    session.setText(text);
-    session.setPreviousId(previousId);
-    session.setAnomaly(new AnomalyApi().setId(anomalyId));
-    session.setCreated(created);
-    session.setUpdated(updated);
-    session.setGranularity(granularity);
-    session.setCompareMode(compareMode);
-    return session;
   }
 }

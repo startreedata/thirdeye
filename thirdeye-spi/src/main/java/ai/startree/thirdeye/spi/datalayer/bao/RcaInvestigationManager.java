@@ -9,7 +9,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.util.List;
 import java.util.Set;
 
-public interface RootcauseSessionManager extends AbstractManager<RcaInvestigationDTO> {
+public interface RcaInvestigationManager extends AbstractManager<RcaInvestigationDTO> {
 
   List<RcaInvestigationDTO> findByName(String name);
 
@@ -22,8 +22,6 @@ public interface RootcauseSessionManager extends AbstractManager<RcaInvestigatio
   List<RcaInvestigationDTO> findByCreatedRange(long start, long end);
 
   List<RcaInvestigationDTO> findByUpdatedRange(long start, long end);
-
-  List<RcaInvestigationDTO> findByPreviousId(long id);
 
   List<RcaInvestigationDTO> findByAnomalyId(long id);
 }

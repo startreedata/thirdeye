@@ -13,6 +13,7 @@ import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -21,6 +22,10 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
+import {
+    deserializeKeyValuePair,
+    serializeKeyValuePair,
+} from "../../utils/params/params.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
@@ -37,6 +42,8 @@ import {
     summarizeDimensionValueData,
 } from "./anomaly-breakdown-comparison-heatmap.utils";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
+
+const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
 
 export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     AnomalyBreakdownComparisonHeatmapProps
@@ -57,13 +64,37 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
     >(null);
-    const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
-        []
-    );
     const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
         AnomalyFilterOption[]
     >([]);
+    const [searchParams, setSearchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
+
+    const heatmapFilterQueryParams = searchParams.get(HEATMAP_FILTERS_URL_KEY);
+    const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
+        heatmapFilterQueryParams
+            ? deserializeKeyValuePair(heatmapFilterQueryParams)
+            : []
+    );
+
+    // Sync the anomaly filters if it the search params changed
+    useEffect(() => {
+        const currentQueryFilterSearchQuery = searchParams.get(
+            HEATMAP_FILTERS_URL_KEY
+        );
+
+        if (
+            currentQueryFilterSearchQuery &&
+            currentQueryFilterSearchQuery !==
+                serializeKeyValuePair(anomalyFilters)
+        ) {
+            setAnomalyFilters(
+                deserializeKeyValuePair(currentQueryFilterSearchQuery)
+            );
+        } else if (currentQueryFilterSearchQuery === null) {
+            setAnomalyFilters([]);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (!anomalyMetricBreakdown) {
@@ -185,16 +216,29 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                 value: tileData.data.id,
             },
         ];
-        setAnomalyFilters([...resultantFilters]);
+        handleFilterChange([...resultantFilters]);
     };
 
     const handleNodeFilterOnDelete = (node: AnomalyFilterOption): void => {
         const resultantFilters = pull(anomalyFilters, node);
-        setAnomalyFilters([...resultantFilters]);
+        handleFilterChange([...resultantFilters]);
     };
 
     const handleOnChangeFilter = (options: AnomalyFilterOption[]): void => {
-        setAnomalyFilters([...options]);
+        handleFilterChange([...options]);
+    };
+
+    const handleFilterChange = (newFilters: AnomalyFilterOption[]): void => {
+        if (newFilters.length === 0) {
+            searchParams.delete(HEATMAP_FILTERS_URL_KEY);
+        } else {
+            searchParams.set(
+                HEATMAP_FILTERS_URL_KEY,
+                serializeKeyValuePair(newFilters)
+            );
+        }
+        setSearchParams(searchParams);
+        setAnomalyFilters(newFilters);
     };
 
     const colorChangeValueAccessor = (

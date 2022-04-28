@@ -3,6 +3,7 @@ import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
+import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import {
     Series,
@@ -24,12 +25,7 @@ export const generateSeriesDataForEvaluation = (
                     .output_AnomalyDetectorResult_0.data;
 
             return {
-                name: filterOptions
-                    .map(
-                        (filterOption) =>
-                            `${filterOption.key}=${filterOption.value}`
-                    )
-                    .join(" & "),
+                name: filterOptions.map(concatKeyValueWithEqual).join(" & "),
                 type: SeriesType.LINE,
                 data: filteredAlertEvaluationTimeSeriesData.current
                     .map((value, idx) => {

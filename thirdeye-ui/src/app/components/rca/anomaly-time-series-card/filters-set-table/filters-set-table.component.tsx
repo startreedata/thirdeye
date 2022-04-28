@@ -7,6 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { concatKeyValueWithEqual } from "../../../../utils/params/params.util";
 import { FiltersSetTableProps } from "./filters-set-table.interfaces";
 
 export const FiltersSetTable: FunctionComponent<FiltersSetTableProps> = ({
@@ -27,8 +28,7 @@ export const FiltersSetTable: FunctionComponent<FiltersSetTableProps> = ({
                 <TableBody>
                     {timeSeriesFiltersSet.map((filterOptions, idx) => {
                         const merged = filterOptions.map(
-                            (filterOption) =>
-                                `${filterOption.key}=${filterOption.value}`
+                            concatKeyValueWithEqual
                         );
 
                         return (

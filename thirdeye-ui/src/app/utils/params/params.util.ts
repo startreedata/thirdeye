@@ -160,6 +160,12 @@ export const isValidNumberId = (param: string): boolean => {
     return isInteger(numberId) && numberId >= 0;
 };
 
+export const concatKeyValueWithEqual = (
+    filterOption: AnomalyFilterOption
+): string => {
+    return `${filterOption.key}=${filterOption.value}`;
+};
+
 /**
  * Serialize and array of objects such as:
  * [{
@@ -180,7 +186,7 @@ export const serializeKeyValuePair = (
     const sorted = sortBy(keysValues, "key");
 
     return sorted
-        .map((keyValuePair) => `${keyValuePair.key}=${keyValuePair.value}`)
+        .map(concatKeyValueWithEqual)
         .join(SINGLE_SEARCH_PARAM_SEPARATOR);
 };
 

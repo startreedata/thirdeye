@@ -174,6 +174,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                 <Box mt={-4}>
                     <AnomalyBreakdownComparisonHeatmap
                         anomalyId={toNumber(anomalyId)}
+                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
                         onAddFilterSetClick={onAddFilterSetClick}
                     />

@@ -271,11 +271,19 @@ describe("Params Util", () => {
                     value: "1",
                 },
                 {
+                    key: "z",
+                    value: "2",
+                },
+                {
                     key: "c",
                     value: "2=4",
                 },
+                {
+                    key: "z",
+                    value: "1",
+                },
             ])
-        ).toEqual("a=1,c=2=4,z=3");
+        ).toEqual("a=1,c=2=4,z=1,z=2,z=3");
     });
 
     it("serializeKeyValuePair should return empty string when empty array is passed", () => {

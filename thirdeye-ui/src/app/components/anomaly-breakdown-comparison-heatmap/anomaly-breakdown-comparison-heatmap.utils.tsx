@@ -1,10 +1,12 @@
 import { isEmpty, map } from "lodash";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
 import { WEEK_IN_MILLISECONDS } from "../../utils/time/time.util";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
     AnomalyBreakdownComparisonData,
     AnomalyBreakdownComparisonDataByDimensionColumn,
+    AnomalyFilterOption,
     DimensionDisplayData,
     SummarizeDataFunctionParams,
     SummaryData,
@@ -64,4 +66,95 @@ export function formatTreemapData(
             };
         }),
     ];
+}
+
+export function formatDimensionOptions(
+    anomalyMetricBreakdown: AnomalyBreakdown
+): AnomalyFilterOption[] {
+    let options: AnomalyFilterOption[] = [];
+    Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
+        (dimensionColumnName) => {
+            const optionsForColumn = Object.keys(
+                anomalyMetricBreakdown.current.breakdown[dimensionColumnName]
+            ).map((value) => ({
+                key: dimensionColumnName,
+                value,
+            }));
+            options = [...options, ...optionsForColumn];
+        }
+    );
+
+    return options;
+}
+
+export function formatComparisonData(
+    anomalyMetricBreakdown: AnomalyBreakdown
+): AnomalyBreakdownComparisonDataByDimensionColumn[] {
+    const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
+        [];
+
+    Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
+        (dimensionColumnName) => {
+            const [currentTotal, currentDimensionValuesData] =
+                summarizeDimensionValueData(
+                    anomalyMetricBreakdown.current.breakdown[
+                        dimensionColumnName
+                    ]
+                );
+            const [baselineTotal, baselineDimensionValuesData] =
+                summarizeDimensionValueData(
+                    anomalyMetricBreakdown.baseline.breakdown[
+                        dimensionColumnName
+                    ]
+                );
+            const dimensionComparisonData: {
+                [key: string]: AnomalyBreakdownComparisonData;
+            } = {};
+
+            Object.keys(currentDimensionValuesData).forEach(
+                (dimension: string) => {
+                    const currentDataForDimension =
+                        currentDimensionValuesData[dimension];
+                    const baselineDataForDimension =
+                        baselineDimensionValuesData[dimension] || {};
+                    const baselineMetricValue =
+                        baselineDataForDimension.count || 0;
+
+                    dimensionComparisonData[dimension] = {
+                        current: currentDataForDimension.count,
+                        baseline: baselineMetricValue,
+                        metricValueDiff:
+                            currentDataForDimension.count - baselineMetricValue,
+                        metricValueDiffPercentage: null,
+                        currentContributionPercentage:
+                            currentDataForDimension.percentage || 0,
+                        baselineContributionPercentage:
+                            baselineDataForDimension.percentage || 0,
+                        contributionDiff:
+                            (currentDataForDimension.percentage || 0) -
+                            (baselineDataForDimension.percentage || 0),
+                        currentTotalCount: currentTotal,
+                        baselineTotalCount: baselineTotal,
+                    };
+
+                    if (baselineMetricValue > 0) {
+                        dimensionComparisonData[
+                            dimension
+                        ].metricValueDiffPercentage =
+                            ((currentDataForDimension.count -
+                                baselineMetricValue) /
+                                baselineMetricValue) *
+                            100;
+                    }
+                }
+            );
+
+            breakdownComparisonDataByDimensionColumn.push({
+                column: dimensionColumnName,
+                dimensionComparisonData,
+            });
+        }
+    );
+
+    return breakdownComparisonDataByDimensionColumn;
 }

@@ -1,4 +1,4 @@
-import { isInteger, sortBy, toNumber } from "lodash";
+import { isInteger, toNumber } from "lodash";
 import { useSearchParams } from "react-router-dom";
 import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
@@ -183,10 +183,9 @@ export const concatKeyValueWithEqual = (
 export const serializeKeyValuePair = (
     keysValues: AnomalyFilterOption[]
 ): string => {
-    const sorted = sortBy(keysValues, "key");
-
-    return sorted
+    return keysValues
         .map(concatKeyValueWithEqual)
+        .sort()
         .join(SINGLE_SEARCH_PARAM_SEPARATOR);
 };
 

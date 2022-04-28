@@ -21,7 +21,9 @@ export const FiltersSetTable: FunctionComponent<FiltersSetTableProps> = ({
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>{t("label.filter-sets")}</TableCell>
+                        <TableCell>
+                            <strong>{t("label.filter-sets")}</strong>
+                        </TableCell>
                         <TableCell />
                     </TableRow>
                 </TableHead>

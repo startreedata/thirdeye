@@ -168,6 +168,7 @@
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
         "remove": "Remove",
         "add-to-chart": "Add to Chart",
+        "remove-from-chart": "Remove from Chart",
         "filter-sets": "Filter Sets"
     },
     "message": {

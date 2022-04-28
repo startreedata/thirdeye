@@ -38,8 +38,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const [filteredAlertEvaluation, setFilteredAlertEvaluation] = useState<
         [AlertEvaluation, AnomalyFilterOption[]][]
     >([]);
-    const startTsStr = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-    const endTsStr = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+    const [startTsStr, setStartTsStr] = useState<string | null>(
+        searchParams.get(TimeRangeQueryStringKey.START_TIME)
+    );
+    const [endTsStr, setEndTsStr] = useState<string | null>(
+        searchParams.get(TimeRangeQueryStringKey.END_TIME)
+    );
 
     const alertEvaluationPayload = createAlertEvaluation(
         anomaly.alert.id,
@@ -83,12 +87,21 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     };
 
     useEffect(() => {
+        /**
+         * Ensure the chart data only refreshes when the start and end from the
+         * query params change
+         */
+        setStartTsStr(searchParams.get(TimeRangeQueryStringKey.START_TIME));
+        setEndTsStr(searchParams.get(TimeRangeQueryStringKey.END_TIME));
+    }, [searchParams]);
+
+    useEffect(() => {
         fetchAlertEvaluation();
-    }, [anomaly, searchParams]);
+    }, [anomaly]);
 
     useEffect(() => {
         fetchFilteredAlertEvaluations();
-    }, [anomaly, searchParams, timeSeriesFiltersSet]);
+    }, [anomaly, timeSeriesFiltersSet]);
 
     useEffect(() => {
         if (getEvaluationRequestStatus === ActionStatus.Error) {

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.cube.data.dbclient;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
@@ -214,6 +215,8 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
         predicates));
     // quickfix - redundant local variables for better IndexOutOfBoundsException logging
     List<List<R>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
+    checkArgument(aggregatedValues.size() > 0,
+        "No data found in timeframe. Cannot perform dimension analysis.");
     List<R> aggregatedValue = aggregatedValues.get(0);
     R topValue = aggregatedValue.get(0);
     return topValue;

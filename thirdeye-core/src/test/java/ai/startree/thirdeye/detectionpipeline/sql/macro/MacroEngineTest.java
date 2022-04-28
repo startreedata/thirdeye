@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -107,7 +105,8 @@ public class MacroEngineTest {
 
   @Test
   public void testTimeGroupMacro() {
-    // test if a macro with multiple arguments work - eg: __timeGroup(timeCol, myTestFormat, P0D)
+    // test if a macro with unquoted arguments work - eg: __timeGroup(timeCol, myTestFormat, P0D)
+    // support for unquoted arguments is not mandatory and not documented - drop this test if need be
     String timeColumnMacroArg = "timeCol";
     String timeColumnFormatMacroArg = "myTestFormat";
     Period granularityMacroArg = Period.ZERO;
@@ -120,7 +119,8 @@ public class MacroEngineTest {
     String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
-            granularityMacroArg));
+            granularityMacroArg,
+            null));
 
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
         Period.ZERO.toString());
@@ -146,13 +146,45 @@ public class MacroEngineTest {
     String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
-            granularityMacroArg));
+            granularityMacroArg,
+            null));
 
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
         Period.ZERO.toString());
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
+
+  @Test
+  public void testTimeGroupMacroWithTimeZoneArgument() {
+    // test if a macro with string literal params is parsed correctly
+    final String timeColumnMacroArg = "timeCol";
+    final String timeColumnFormatMacroArg = "myTestFormat";
+    final String timeZone = "Europe/Amsterdam";
+    final String timeColumnFormatMacroArgQuoted =
+        LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
+    final Period granularityMacroArg = Period.ZERO;
+    final String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
+    final String timeZoneQuoted = LITERAL_QUOTE_STRING + timeZone + LITERAL_QUOTE_STRING;
+
+    final String inputQuery = String.format("select __timeGroup(%s,%s,%s,%s) FROM tableName",
+        timeColumnMacroArg,
+        timeColumnFormatMacroArgQuoted,
+        granularityMacroArgQuoted,
+        timeZoneQuoted);
+
+    final String expectedQuery = String.format("SELECT %s FROM tableName",
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
+            timeColumnFormatMacroArg,
+            granularityMacroArg,
+            timeZone));
+
+    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+        Period.ZERO.toString());
+
+    prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
+  }
+
 
   @Test
   public void testNestedMacro() {
@@ -170,7 +202,8 @@ public class MacroEngineTest {
     String expectedTimeGroupMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
         timeColumnMacroArg,
         timeColumnFormatMacroArg,
-        granularityMacroArg);
+        granularityMacroArg,
+        null);
     String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
         expectedTimeGroupMacro,
         INPUT_START_TIME,
@@ -246,12 +279,20 @@ public class MacroEngineTest {
 
     @Override
     public String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
-        final Period granularity) {
-      return String.format("%s(%s, %s, %s)",
+        final Period granularity, final String timezone) {
+      if (timezone == null) {
+        return String.format("%s(%s, '%s', '%s')",
+            TIME_GROUP_MOCK,
+            timeColumn,
+            timeColumnFormat,
+            granularity);
+      }
+      return String.format("%s(%s, '%s', '%s', '%s')",
           TIME_GROUP_MOCK,
           timeColumn,
           timeColumnFormat,
-          granularity);
+          granularity,
+          timezone);
     }
   }
 }

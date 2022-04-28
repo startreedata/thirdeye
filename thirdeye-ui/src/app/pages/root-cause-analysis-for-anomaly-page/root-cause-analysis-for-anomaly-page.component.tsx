@@ -24,7 +24,10 @@ import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
-import { isValidNumberId } from "../../utils/params/params.util";
+import {
+    isValidNumberId,
+    serializeKeyValuePair,
+} from "../../utils/params/params.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "./root-cause-analysis-for-anomaly-page.interfaces";
 import { useRootCauseAnalysisForAnomalyPageStyles } from "./root-cause-analysis-for-anomaly-page.style";
 
@@ -88,7 +91,16 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     }, [getAnomalyRequestStatus, anomalyRequestErrors]);
 
     const handleAddFilterSetClick = (filters: AnomalyFilterOption[]): void => {
-        setChartTimeSeriesFilterSet((original) => [...original, filters]);
+        const serializedFilters = serializeKeyValuePair(filters);
+        const existingIndex = chartTimeSeriesFilterSet.findIndex(
+            (existingFilters) =>
+                serializeKeyValuePair(existingFilters) === serializedFilters
+        );
+        if (existingIndex === -1) {
+            setChartTimeSeriesFilterSet((original) => [...original, filters]);
+        } else {
+            handleRemoveBtnClick(existingIndex);
+        }
     };
 
     const handleRemoveBtnClick = (idx: number): void => {
@@ -182,6 +194,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         <AnalysisTabs
                             anomaly={anomaly}
                             anomalyId={toNumber(anomalyId)}
+                            chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                             onAddFilterSetClick={handleAddFilterSetClick}
                         />
                     )}

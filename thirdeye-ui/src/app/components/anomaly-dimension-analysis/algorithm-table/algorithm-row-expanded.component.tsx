@@ -20,8 +20,7 @@ import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/tim
 import { AlgorithmRowExpandedProps } from "./algorithm-table.interfaces";
 import {
     generateComparisonChartOptions,
-    SERVER_VALUE_ALL_VALUES,
-    SERVER_VALUE_FOR_OTHERS,
+    generateFilterStrings,
 } from "./algorithm-table.utils";
 
 export const AlgorithmRowExpanded: FunctionComponent<
@@ -118,18 +117,11 @@ export const AlgorithmRowExpanded: FunctionComponent<
     const fetchAlertEvaluation = (): void => {
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
-        const filters: string[] = [];
-
-        row.names.forEach((dimensionValue, idx) => {
-            if (dimensionValue === SERVER_VALUE_FOR_OTHERS) {
-                row.otherDimensionValues.forEach((otherValue) => {
-                    filters.push(`${dimensionColumns[idx]}=${otherValue}`);
-                });
-            } else if (dimensionValue !== SERVER_VALUE_ALL_VALUES) {
-                // (All) means no filter on the column
-                filters.push(`${dimensionColumns[idx]}=${dimensionValue}`);
-            }
-        });
+        const filters: string[] = generateFilterStrings(
+            row.names,
+            dimensionColumns,
+            row.otherDimensionValues
+        );
 
         getNonFilteredEvaluation(
             createAlertEvaluation(anomaly.alert.id, Number(start), Number(end))

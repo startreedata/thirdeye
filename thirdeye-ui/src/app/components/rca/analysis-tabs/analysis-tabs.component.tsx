@@ -13,6 +13,7 @@ import {
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AnomalyBreakdownAPIOffsetValues,
     BASELINE_OPTIONS,
@@ -25,17 +26,27 @@ import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatm
 import { AnomalyDimensionAnalysis } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.component";
 import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
 
+const ANALYSIS_TAB_IDX_KEY = "analysisTab";
+const ANALYSIS_TAB_OFFSET = "baselineWeekOffset";
+
 export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     anomalyId,
     anomaly,
     onAddFilterSetClick,
+    chartTimeSeriesFilterSet,
 }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
-    const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+    const [selectedTabIndex, setSelectedTabIndex] = useState(
+        Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 0
+    );
     const [comparisonOffset, setComparisonWeekOffset] =
         useState<AnomalyBreakdownAPIOffsetValues>(
-            AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO
+            (searchParams.get(
+                ANALYSIS_TAB_OFFSET
+            ) as AnomalyBreakdownAPIOffsetValues) ||
+                AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO
         );
 
     const onHandleComparisonOffsetSelection = (
@@ -44,10 +55,14 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         setComparisonWeekOffset(
             e.target.value as AnomalyBreakdownAPIOffsetValues
         );
+        searchParams.set(ANALYSIS_TAB_OFFSET, e.target.value);
+        setSearchParams(searchParams);
     };
 
     const handleTabIndexChange = (_event: unknown, newValue: number): void => {
         setSelectedTabIndex(newValue);
+        searchParams.set(ANALYSIS_TAB_IDX_KEY, newValue.toString());
+        setSearchParams(searchParams);
     };
 
     return (
@@ -169,7 +184,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                     <AnomalyDimensionAnalysis
                         anomaly={anomaly}
                         anomalyId={toNumber(anomalyId)}
+                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
+                        onCheckClick={onAddFilterSetClick}
                     />
                 </Box>
             )}

@@ -13,6 +13,7 @@ import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
+import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -67,9 +68,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         }
 
         const dataRequests = timeSeriesFiltersSet.map((filterSet) => {
-            const filters = filterSet.map(
-                (filter) => `${filter.key}=${filter.value}`
-            );
+            const filters = filterSet.map(concatKeyValueWithEqual);
 
             return getAlertEvaluation(alertEvaluationPayload, filters);
         });

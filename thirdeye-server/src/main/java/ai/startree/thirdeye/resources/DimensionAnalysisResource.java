@@ -58,7 +58,7 @@ public class DimensionAnalysisResource {
 
   private static final String DEFAULT_BASELINE_OFFSET = "P1W";
   public static final String DEFAULT_HIERARCHIES = "[]";
-  public static final String DEFAULT_ONE_SIDE_ERROR = "false";
+  public static final String DEFAULT_ONE_SIDE_ERROR = "true";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 

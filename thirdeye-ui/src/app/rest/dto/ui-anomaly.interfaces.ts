@@ -13,5 +13,7 @@ export interface UiAnomaly {
     duration: string;
     durationVal: number;
     startTime: string;
+    startTimeVal: number;
     endTime: string;
+    endTimeVal: number;
 }

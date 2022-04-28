@@ -8,7 +8,6 @@ package ai.startree.thirdeye.util;
 import ai.startree.thirdeye.spi.util.FilterPredicate;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -86,19 +85,11 @@ public final class ParsedUrn {
    * @deprecated Prefer manipulating FilterPredicate directly with getPredicates()
    * @return filter multimap from predicates
    */
-  // TODO prefer Predicate in all ThirdEye - see buildFilter in CrudResource
+  // prefer Predicate in all ThirdEye - see buildFilter in CrudResource
   @Deprecated
   public Multimap<String, String> toFiltersMap() {
-    return toFiltersMap(this.predicates);
-  }
-
-  /**
-   * For transition to FilterPredicate only. Prefer manipulating FilterPredicate directly.
-   * */
-  @Deprecated
-  public static Multimap<String, String> toFiltersMap(Collection<FilterPredicate> predicates) {
     Multimap<String, String> filters = TreeMultimap.create();
-    for (FilterPredicate predicate : predicates) {
+    for (FilterPredicate predicate : this.predicates) {
       if (!OPERATOR_TO_FILTER.containsKey(predicate.getOperator())) {
         throw new IllegalArgumentException(String
             .format("Operator '%s' could not be translated to filter prefix",

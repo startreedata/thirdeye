@@ -104,15 +104,11 @@ public class DatasetConfigDTO extends AbstractDTO {
   }
 
   /**
-   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives
-   * of the dataset.
-   *
    * This method is preserved for reading object from database via object mapping (i.e., Java
    * reflection)
    *
    * @return the time unit of the granularity of the timestamp of each data point.
    */
-  @Deprecated
   public TimeUnit getTimeUnit() {
     return timeUnit;
   }

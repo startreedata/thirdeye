@@ -73,6 +73,18 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         []
     );
 
+    const startTimeRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => data.startTime,
+        []
+    );
+
+    const endTimeRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => data.endTime,
+        []
+    );
+
     const isActionButtonDisable = !(
         selectedAnomaly && selectedAnomaly.rowKeyValues.length === 1
     );
@@ -116,17 +128,19 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             },
             {
                 key: "startTime",
-                dataKey: "startTime",
+                dataKey: "startTimeVal",
                 header: t("label.start"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: startTimeRenderer,
             },
             {
                 key: "endTime",
-                dataKey: "endTime",
+                dataKey: "endTimeVal",
                 header: t("label.end"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: endTimeRenderer,
             },
             {
                 key: "current",
@@ -160,6 +174,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             currentRenderer,
             predicatedRenderer,
             durationRenderer,
+            startTimeRenderer,
+            endTimeRenderer,
         ]
     );
 

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
 
@@ -12,6 +13,18 @@ public interface Constants {
 
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
   String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
+  // tz database names that are equivalent to UTC
+  List<String> UTC_LIKE_TIMEZONES = List.of("Etc/GMT",
+      "Etc/GMT+0",
+      "Etc/GMT0",
+      "GMT",
+      "GMT+0",
+      "GMT-0",
+      "GMT0",
+      "Etc/UTC",
+      "UTC",
+      "Etc/Zulu",
+      "Zulu");
 
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
@@ -46,6 +59,7 @@ public interface Constants {
   /*
    * Dataframe related constants
    */
+  // todo cyril timestamp is a reserved keyword in some sql language - use another value for COL_TIME to be able to use it as SQL alias directly
   String COL_TIME = "timestamp";
   String COL_VALUE = "value"; // baseline value
   String COL_CURRENT = "current";

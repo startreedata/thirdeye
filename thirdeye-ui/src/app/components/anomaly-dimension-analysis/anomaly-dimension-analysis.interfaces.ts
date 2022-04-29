@@ -9,6 +9,8 @@ export interface AnomalyDimensionAnalysisProps {
     anomalyId: number;
     comparisonOffset: AnomalyBreakdownAPIOffsetValues;
     anomaly: Anomaly;
+    chartTimeSeriesFilterSet: AnomalyFilterOption[][];
+    onCheckClick: (filters: AnomalyFilterOption[]) => void;
 }
 export interface AnomalyDimensionAnalysisTableProps {
     anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;

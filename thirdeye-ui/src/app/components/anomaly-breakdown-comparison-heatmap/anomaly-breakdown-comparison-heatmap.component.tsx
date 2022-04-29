@@ -23,6 +23,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
 import {
+    concatKeyValueWithEqual,
     deserializeKeyValuePair,
     serializeKeyValuePair,
 } from "../../utils/params/params.util";
@@ -193,11 +194,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     useEffect(() => {
         getMetricBreakdown(anomalyId, {
             baselineOffset: comparisonOffset,
-            filters: [
-                ...anomalyFilters.map(
-                    (option) => `${option.key}=${option.value}`
-                ),
-            ],
+            filters: [...anomalyFilters.map(concatKeyValueWithEqual)],
         });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
 

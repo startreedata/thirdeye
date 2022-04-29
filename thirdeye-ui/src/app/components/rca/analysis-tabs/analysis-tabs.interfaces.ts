@@ -4,5 +4,6 @@ import { AnomalyFilterOption } from "../../anomaly-breakdown-comparison-heatmap/
 export interface AnalysisTabsProps {
     anomalyId: number;
     anomaly: Anomaly;
-    onAddFilterSetClick?: (filters: AnomalyFilterOption[]) => void;
+    onAddFilterSetClick: (filters: AnomalyFilterOption[]) => void;
+    chartTimeSeriesFilterSet: AnomalyFilterOption[][];
 }

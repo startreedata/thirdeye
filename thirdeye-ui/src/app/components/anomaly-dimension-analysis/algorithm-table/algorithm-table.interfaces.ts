@@ -4,11 +4,14 @@ import {
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisMetricRow,
 } from "../../../rest/dto/rca.interfaces";
+import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 
 export interface AlgorithmTableProps {
     anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;
     anomaly: Anomaly;
     comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    onCheckClick?: (filters: AnomalyFilterOption[]) => void;
+    chartTimeSeriesFilterSet: AnomalyFilterOption[][];
 }
 
 export interface AlgorithmRowProps {
@@ -19,6 +22,8 @@ export interface AlgorithmRowProps {
     row: AnomalyDimensionAnalysisMetricRow;
     totalSum: number;
     dimensionColumns: string[];
+    checked: boolean;
+    onCheckClick?: (filters: AnomalyFilterOption[]) => void;
 }
 
 export interface AlgorithmRowExpandedProps {

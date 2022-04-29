@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.datalayer.entity;
 
-public class RootcauseSessionIndex extends AbstractIndexEntity {
+public class RcaInvestigationIndex extends AbstractIndexEntity {
 
   private String name;
   private String owner;

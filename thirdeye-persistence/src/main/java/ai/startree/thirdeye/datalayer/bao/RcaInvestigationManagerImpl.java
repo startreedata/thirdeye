@@ -7,9 +7,9 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseSessionManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 @Singleton
-public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSessionDTO> implements
-    RootcauseSessionManager {
+public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
+    RcaInvestigationManager {
 
   private static final String FIND_BY_LIKE_TEMPLATE = "WHERE %s";
   private static final String FIND_BY_LIKE_JOINER = " AND ";
@@ -31,55 +31,50 @@ public class RootcauseSessionManagerImpl extends AbstractManagerImpl<RootcauseSe
   private static final String FIND_BY_NAME_LIKE_KEY = "name__%d";
 
   @Inject
-  public RootcauseSessionManagerImpl(GenericPojoDao genericPojoDao) {
-    super(RootcauseSessionDTO.class, genericPojoDao);
+  public RcaInvestigationManagerImpl(GenericPojoDao genericPojoDao) {
+    super(RcaInvestigationDTO.class, genericPojoDao);
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByName(String name) {
+  public List<RcaInvestigationDTO> findByName(String name) {
     return findByPredicate(Predicate.EQ("name", name));
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByNameLike(Set<String> nameFragments) {
+  public List<RcaInvestigationDTO> findByNameLike(Set<String> nameFragments) {
     return findByLike(nameFragments, FIND_BY_NAME_LIKE_TEMPLATE, FIND_BY_NAME_LIKE_KEY);
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByOwner(String owner) {
+  public List<RcaInvestigationDTO> findByOwner(String owner) {
     return findByPredicate(Predicate.EQ("owner", owner));
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByAnomalyRange(long start, long end) {
+  public List<RcaInvestigationDTO> findByAnomalyRange(long start, long end) {
     return findByPredicate(Predicate
         .AND(Predicate.GT("anomalyRangeEnd", start), Predicate.LT("anomalyRangeStart", end)));
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByCreatedRange(long start, long end) {
+  public List<RcaInvestigationDTO> findByCreatedRange(long start, long end) {
     return findByPredicate(
         Predicate.AND(Predicate.GE("created", start), Predicate.LT("created", end)));
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByUpdatedRange(long start, long end) {
+  public List<RcaInvestigationDTO> findByUpdatedRange(long start, long end) {
     return findByPredicate(
         Predicate.AND(Predicate.GE("updated", start), Predicate.LT("updated", end)));
   }
 
   @Override
-  public List<RootcauseSessionDTO> findByPreviousId(long id) {
-    return findByPredicate(Predicate.EQ("previousId", id));
-  }
-
-  @Override
-  public List<RootcauseSessionDTO> findByAnomalyId(long id) {
+  public List<RcaInvestigationDTO> findByAnomalyId(long id) {
     return findByPredicate(Predicate.EQ("anomalyId", id));
   }
 
-  private List<RootcauseSessionDTO> findByLike(Set<String> fragments, String template, String key) {
-    return findByLike(fragments, template, key, RootcauseSessionDTO.class);
+  private List<RcaInvestigationDTO> findByLike(Set<String> fragments, String template, String key) {
+    return findByLike(fragments, template, key, RcaInvestigationDTO.class);
   }
 
   private <B extends AbstractDTO, D> List<D> findByLike(Set<String> fragments, String template,

@@ -26,7 +26,7 @@ public class OidcContext implements SecurityContext {
   public OidcContext(final OAuthConfiguration config) {
     this.keysUrl = config.getKeysUrl();
     this.requiredClaims = new HashSet<>(config.getRequired());
-    Builder builder = new JWTClaimsSet.Builder();
+    final Builder builder = new JWTClaimsSet.Builder();
     config.getExactMatch().forEach((name, value) -> builder.claim(name, value));
     this.exactMatchClaimsSet = builder.build();
     Optional.ofNullable(config.getCache()).ifPresent(cache -> {

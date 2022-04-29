@@ -25,11 +25,12 @@ import javax.ws.rs.core.Response;
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthInfoResource {
+
   private final OAuthManager oAuthManager;
   private final AuthConfiguration authConfig;
 
   @Inject
-  public AuthInfoResource(OAuthManager oAuthManager, AuthConfiguration authConfig){
+  public AuthInfoResource(final OAuthManager oAuthManager, final AuthConfiguration authConfig) {
     this.oAuthManager = oAuthManager;
     this.authConfig = authConfig;
   }
@@ -38,9 +39,9 @@ public class AuthInfoResource {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    AuthInfoApi info = oAuthManager.getInfo();
-    if(authConfig.isEnabled() && info == null) {
-      throw serverError(ThirdEyeStatus.ERR_UNKNOWN, "Auth server is not responding");
+    final AuthInfoApi info = oAuthManager.getInfo();
+    if (authConfig.isEnabled() && info == null) {
+      throw serverError(ThirdEyeStatus.ERR_AUTH_SERVER_NOT_RESPONDING, authConfig.getOAuthConfig().getServerUrl());
     }
     return respondOk(info);
   }

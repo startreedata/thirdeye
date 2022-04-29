@@ -13,9 +13,15 @@ export interface Series {
     type?: SeriesType;
     color?: string;
     enabled?: boolean;
+    strokeWidth?: number;
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
     y1Accessor?: (d: ThresholdDataPoint) => number;
+    tooltipValueFormatter?: (
+        value: number,
+        d: DataPoint | ThresholdDataPoint,
+        series: NormalizedSeries
+    ) => string;
 }
 
 export interface NormalizedSeries {
@@ -24,9 +30,15 @@ export interface NormalizedSeries {
     type: SeriesType;
     color?: string;
     enabled: boolean;
+    strokeWidth: number;
     xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
     yAccessor: (d: DataPoint | ThresholdDataPoint) => number;
     y1Accessor: (d: ThresholdDataPoint) => number;
+    tooltipValueFormatter: (
+        value: number,
+        d: DataPoint | ThresholdDataPoint,
+        series: NormalizedSeries
+    ) => string;
 }
 
 export interface PlotBand {

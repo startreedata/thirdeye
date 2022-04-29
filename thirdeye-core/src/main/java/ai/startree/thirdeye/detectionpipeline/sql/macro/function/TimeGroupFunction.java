@@ -24,18 +24,22 @@ public class TimeGroupFunction implements MacroFunction {
   @Override
   public String expandMacro(final List<String> macroParams, final MacroFunctionContext context) {
     //parse params
-    checkArgument(macroParams.size() == 3,
-        "timeGroup macro requires 3 parameters");
+    checkArgument(macroParams.size() == 3 || macroParams.size() == 4,
+        "timeGroup macro requires 3 or 4 parameters");
     final String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
     Period granularity = Period.parse(granularityText, ISOPeriodFormat.standard());
+    String timezone = null;
+    if (macroParams.size() >= 4) {
+      timezone = context.getLiteralUnquoter().apply(macroParams.get(3));
+    }
 
     //write granularity to metadata
     context.getProperties().put(GRANULARITY.toString(), granularityText);
 
     //generate SQL expression
     return context.getSqlExpressionBuilder()
-        .getTimeGroupExpression(timeColumn, timeColumnFormat, granularity);
+        .getTimeGroupExpression(timeColumn, timeColumnFormat, granularity, timezone);
   }
 }

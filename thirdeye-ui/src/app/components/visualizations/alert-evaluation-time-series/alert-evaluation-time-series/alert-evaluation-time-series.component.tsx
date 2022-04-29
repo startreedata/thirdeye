@@ -1,4 +1,5 @@
 import { Box, useTheme } from "@material-ui/core";
+import { Orientation } from "@visx/axis";
 import { Brush } from "@visx/brush";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
 import { Bounds } from "@visx/brush/lib/types";
@@ -35,7 +36,7 @@ import {
     getAlertEvaluationTimeSeriesPointsMinTimestamp,
 } from "../../../../utils/visualization/visualization.util";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
-import { LinearAxisLeft } from "../../linear-axis-left/linear-axis-left.component";
+import { LinearAxisY } from "../../linear-axis-y/linear-axis-y.component";
 import { MouseHoverMarker } from "../../mouse-hover-marker/mouse-hover-marker.component";
 import { TimeAxisBottom } from "../../time-axis-bottom/time-axis-bottom.component";
 import { TooltipWithBounds } from "../../tooltip-with-bounds/tooltip-with-bounds.component";
@@ -529,7 +530,11 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
                         />
 
                         {/* Y axis */}
-                        <LinearAxisLeft scale={timeSeriesYScale} />
+                        <LinearAxisY
+                            left={timeSeriesXMax}
+                            orientation={Orientation.right}
+                            scale={timeSeriesYScale}
+                        />
 
                         {/* Mouse hover marker  */}
                         <MouseHoverMarker

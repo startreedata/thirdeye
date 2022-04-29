@@ -7,7 +7,7 @@ package ai.startree.thirdeye.cube.data.dbclient;
 
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
-import com.google.common.collect.Multimap;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import java.util.List;
 
 /**
@@ -18,10 +18,10 @@ public interface CubeFetcher<R extends Row> {
   /**
    * Returns the baseline and current value for the root node.
    *
-   * @param filterSets the data filter.
+   * @param predicates the filter predicates.
    * @return a row of data that contains the baseline and current value for the root node.
    */
-  R getTopAggregatedValues(Multimap<String, String> filterSets) throws Exception;
+  R getTopAggregatedValues(List<Predicate> predicates) throws Exception;
 
   /**
    * Returns the baseline and current value for nodes at each dimension from the given list.
@@ -30,11 +30,11 @@ public interface CubeFetcher<R extends Row> {
    * "linkedin.com", "google.com", ...]
    *
    * @param dimensions the list of dimensions.
-   * @param filterSets the data filter.
+   * @param predicates the filter predicates.
    * @return the baseline and current value for nodes at each dimension from the given list.
    */
   List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
-      Multimap<String, String> filterSets)
+      List<Predicate> predicates)
       throws Exception;
 
   /**
@@ -47,10 +47,10 @@ public interface CubeFetcher<R extends Row> {
    * ]
    *
    * @param dimensions the dimensions to be drilled down.
-   * @param filterSets the data filter.
+   * @param predicates the filter predicates.
    * @return the baseline and current value for nodes for each dimension combination.
    */
   List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
-      Multimap<String, String> filterSets)
+      List<Predicate> predicates)
       throws Exception;
 }

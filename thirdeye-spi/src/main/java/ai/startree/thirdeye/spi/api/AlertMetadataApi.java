@@ -13,6 +13,7 @@ public class AlertMetadataApi {
    * For instance: P1D. Recommendation: same as in __timeGroup macro.
    */
   private String granularity;
+  private String timezone;
 
   public DataSourceApi getDatasource() {
     return datasource;
@@ -47,6 +48,15 @@ public class AlertMetadataApi {
 
   public AlertMetadataApi setGranularity(final String granularity) {
     this.granularity = granularity;
+    return this;
+  }
+
+  public String getTimezone() {
+    return timezone;
+  }
+
+  public AlertMetadataApi setTimezone(final String timezone) {
+    this.timezone = timezone;
     return this;
   }
 }

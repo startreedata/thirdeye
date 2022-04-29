@@ -45,6 +45,7 @@ export function normalizeSeries(series: Series[]): NormalizedSeries[] {
             name: item.name || `Series ${idx}`,
             enabled: item.enabled === undefined ? true : item.enabled,
             type: item.type === undefined ? DEFAULT_CHART_TYPE : item.type,
+            strokeWidth: item.strokeWidth === undefined ? 1 : item.strokeWidth,
             xAccessor:
                 item.xAccessor === undefined
                     ? defaultXAccessor
@@ -57,6 +58,10 @@ export function normalizeSeries(series: Series[]): NormalizedSeries[] {
                 item.y1Accessor === undefined
                     ? defaultY1Accessor
                     : item.y1Accessor,
+            tooltipValueFormatter:
+                item.tooltipValueFormatter === undefined
+                    ? defaultTooltipValueFormatter
+                    : item.tooltipValueFormatter,
         };
     });
 }
@@ -75,4 +80,8 @@ export const defaultYAccessor = (d: DataPoint | ThresholdDataPoint): number => {
 
 export const defaultY1Accessor = (d: ThresholdDataPoint): number => {
     return d.y1;
+};
+
+export const defaultTooltipValueFormatter = (value: number): string => {
+    return value.toString();
 };

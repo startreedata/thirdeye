@@ -134,7 +134,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                 data={seriesData.data}
                                 key={seriesData.name || `${idx}`}
                                 stroke={color}
-                                strokeWidth={1}
+                                strokeWidth={seriesData.strokeWidth}
                                 x={(d) =>
                                     xScaleToUse(seriesData.xAccessor(d)) || 0
                                 }

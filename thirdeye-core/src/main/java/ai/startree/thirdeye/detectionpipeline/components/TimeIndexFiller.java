@@ -11,6 +11,7 @@ import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TI
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.TIME_COLUMN;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
+import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
@@ -28,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
@@ -85,7 +86,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         .orElseGet(() -> Optional.ofNullable(properties.get(GRANULARITY.toString()))
             .orElseThrow(() -> new IllegalArgumentException(
                 "monitoringGranularity is missing from spec and DataTable properties")));
-    granularity = Period.parse(granularitySpec, ISOPeriodFormat.standard());
+    granularity = isoPeriod(granularitySpec);
 
     nullReplacer = new NullReplacerRegistry().buildNullReplacer(
         spec.getFillNullMethod().toUpperCase(), spec.getFillNullParams());
@@ -142,7 +143,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     DataFrame rawData = dataTable.getDataFrame();
     checkArgument(rawData.contains(timeColumn),
         "'" + timeColumn + "' column not found in DataFrame");
-    DataFrame correctIndex = generateCorrectIndex();
+    DataFrame correctIndex = generateCorrectIndex(detectionInterval.getChronology());
     DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
     DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
@@ -162,12 +163,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     );
   }
 
-  private DataFrame generateCorrectIndex() {
+  private DataFrame generateCorrectIndex(Chronology chronology) {
 
     DateTime firstIndexValue = TimeUtils.getSmallestDatetime(
-        new DateTime(minTime, DateTimeZone.UTC), granularity);
+        new DateTime(minTime, chronology), granularity);
     DateTime lastIndexValue = TimeUtils.getBiggestDatetime(
-        new DateTime(maxTime, DateTimeZone.UTC), granularity);
+        new DateTime(maxTime, chronology), granularity);
     Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(timeColumn, correctIndexSeries);
@@ -223,7 +224,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   private Series generateSeries(final DateTime firstValue, final DateTime lastValueIncluded,
       Period timePeriod) {
     Builder correctIndexSeries = LongSeries.builder();
-    DateTime indexValue = new DateTime(firstValue, DateTimeZone.UTC);
+    DateTime indexValue = new DateTime(firstValue);
     while (!indexValue.isAfter(lastValueIncluded)) {
       correctIndexSeries.addValues(indexValue.getMillis());
       indexValue = indexValue.plus(timePeriod);

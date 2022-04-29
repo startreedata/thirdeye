@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.auth;
 
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import io.dropwizard.auth.AuthenticationException;
@@ -18,14 +17,11 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrincipal> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthenticator.class);
-  private LoadingCache<String, ThirdEyePrincipal> bindingsCache;
+  private final LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
   @Inject
-  public ThirdEyeAuthenticator(final OAuthConfiguration oAuthConfig,
-    final OAuthManager oAuthManager,
-    final MetricRegistry metricRegistry) {
-    OidcUtils.generateOAuthConfig(oAuthManager, oAuthConfig);
-    this.bindingsCache = OidcUtils.makeDefaultCache(new OidcContext(oAuthConfig), metricRegistry);
+  public ThirdEyeAuthenticator(final OAuthManager oAuthManager) {
+    this.bindingsCache = oAuthManager.getDefaultCache();
   }
 
   @Override
@@ -33,7 +29,7 @@ public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrin
     throws AuthenticationException {
     try {
       return Optional.ofNullable(bindingsCache.get(authToken));
-    } catch (Exception exception) {
+    } catch (final Exception exception) {
       LOG.info("Authentication failed. ", exception);
       return Optional.empty();
     }

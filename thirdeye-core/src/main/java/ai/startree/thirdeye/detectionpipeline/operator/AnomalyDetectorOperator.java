@@ -9,6 +9,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static java.util.Collections.singletonList;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
@@ -35,17 +36,15 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
 
   private AnomalyDetector<? extends AbstractSpec> detector;
-  private AbstractSpec genericDetectorSpec;
+  private Period monitoringGranularity;
 
   public AnomalyDetectorOperator() {
     super();
@@ -65,10 +64,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     final Map<String, Object> componentSpec = getComponentSpec(params);
     // get generic detector info
-    genericDetectorSpec = AbstractSpec.fromProperties(componentSpec, GenericDetectorSpec.class);
+    AbstractSpec genericDetectorSpec = AbstractSpec.fromProperties(componentSpec,
+        GenericDetectorSpec.class);
     ensureExists(genericDetectorSpec.getMonitoringGranularity(),
         ERR_MISSING_CONFIGURATION_FIELD,
         "'monitoringGranularity' in detector config");
+    monitoringGranularity = isoPeriod(genericDetectorSpec.getMonitoringGranularity());
 
     return new DetectionRegistry()
         .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
@@ -127,17 +128,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       final AnomalyDetectorResult detectorV2Result) {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
-        detectorV2Result.getDataFrame(),
-        genericDetectorSpec.getTimezone(),
-        Period.parse(genericDetectorSpec.getMonitoringGranularity(), ISOPeriodFormat.standard()));
+        detectorV2Result.getDataFrame());
 
     return DetectionResult.from(anomalies,
         TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
   }
 
-  private static List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df,
-      final String datasetTimezone,
-      final Period monitoringGranularityPeriod) {
+  private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {
     if (df.isEmpty()) {
       return Collections.emptyList();
     }
@@ -176,19 +173,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     }
 
     if (lastStartMillis >= 0) {
-      // last anomaly has not been closed - let's close it
-      // estimate end time of anomaly range
+      // last anomaly has not been closed - let's close it - compute end time of anomaly range
       final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
-      // default: add 1 to lastTimestamp
-      long endMillis = lastTimestamp + 1;
-      if (datasetTimezone != null && monitoringGranularityPeriod != null) {
-        // exact computation of end of period
-        final DateTimeZone timezone = DateTimeZone.forID(datasetTimezone);
-        endMillis = new DateTime(lastTimestamp, timezone)
-            .plus(monitoringGranularityPeriod)
-            .getMillis();
-      }
-      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endMillis));
+      // exact computation of end of period
+      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology())
+          .plus(monitoringGranularity);
+      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endTime.getMillis()));
     }
 
     return anomalies;

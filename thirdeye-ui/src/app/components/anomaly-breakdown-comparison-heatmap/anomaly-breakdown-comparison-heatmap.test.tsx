@@ -29,6 +29,17 @@ jest.mock("../no-data-indicator/no-data-indicator.component", () => ({
         .mockImplementation(() => <span>MockedNoDataIndicator</span>),
 }));
 
+jest.mock("react-router-dom", () => ({
+    useSearchParams: jest.fn().mockImplementation(() => [
+        {
+            get: mockSearchParamsGet,
+            set: mockSearchParamsSet,
+            delete: mockSearchParamsDelete,
+        },
+        jest.fn(),
+    ]),
+}));
+
 describe("AnomalyBreakdownComparisonHeatmap", () => {
     beforeEach(() => {
         mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
@@ -43,6 +54,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                onAddFilterSetClick={() => null}
             />
         );
 
@@ -74,13 +86,14 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
     });
 
     it("should show filter pill when tile is clicked and removed when clicked on", async () => {
-        expect.assertions(2);
+        expect.assertions(4);
 
         render(
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
                 shouldTruncateText={false}
+                onAddFilterSetClick={() => null}
             />
         );
 
@@ -88,6 +101,11 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         fireEvent.click(chromeTile);
 
         const chromePill = await screen.findByText(/browser=chrome/);
+
+        expect(mockSearchParamsSet).toHaveBeenLastCalledWith(
+            "heatmapFilters",
+            "browser=chrome"
+        );
 
         // Check chromePill so typescript does not complain
         if (!chromePill || !chromePill.parentElement) {
@@ -99,6 +117,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         fireEvent.click(chromePill.parentElement.children[1]);
 
         expect(chromePill).not.toBeInTheDocument();
+        expect(mockSearchParamsDelete).toHaveBeenCalledWith("heatmapFilters");
     });
 
     it("should call notify indicating error if data requests errors", async () => {
@@ -110,6 +129,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                onAddFilterSetClick={() => null}
             />
         );
 
@@ -179,3 +199,7 @@ const mockNotify = jest.fn();
 let mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
     MOCK_HEATMAP_DATA_RESPONSE
 );
+
+const mockSearchParamsGet = jest.fn();
+const mockSearchParamsSet = jest.fn();
+const mockSearchParamsDelete = jest.fn();

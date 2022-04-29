@@ -5,9 +5,6 @@
 
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.auth.OidcUtils.getExactMatchClaimSet;
-import static ai.startree.thirdeye.auth.OidcUtils.getRequiredClaims;
-
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.nimbusds.jose.JOSEException;
@@ -37,30 +34,30 @@ public class OidcJWTProcessor extends DefaultJWTProcessor<OidcContext> {
   }
 
   public void init(final OidcContext context) {
-    JWTClaimsSetVerifier verifier = new DefaultJWTClaimsVerifier(
-        getExactMatchClaimSet(context),
-        getRequiredClaims(context));
+    final JWTClaimsSetVerifier verifier = new DefaultJWTClaimsVerifier(
+      context.getExactMatchClaimsSet(),
+      context.getRequiredClaims());
     setJWTClaimsSetVerifier(verifier);
     setJWSKeySelector((header, c) -> {
-      Key key = fetchKeys(c.getKeysUrl()).getKeys().stream()
+      final Key key = fetchKeys(c.getKeysUrl()).getKeys().stream()
           .collect(Collectors.toMap(JWK::getKeyID, value -> toPublicKey(value)))
           .get(header.getKeyID());
       return key != null ? Collections.singletonList(key) : Collections.emptyList();
     });
   }
 
-  private JWKSet fetchKeys(String keysUrl) {
+  private JWKSet fetchKeys(final String keysUrl) {
     try {
       authServerRunning = true;
       return JWKSet.load(new URL(keysUrl).openStream());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       authServerRunning = false;
       throw new IllegalArgumentException(String.format("Could not retrieve keys from '%s'",
           keysUrl), e);
     }
   }
 
-  private Key toPublicKey(JWK jwk) {
+  private Key toPublicKey(final JWK jwk) {
     try {
       switch (jwk.getKeyType().getValue()) {
         case "EC":
@@ -71,7 +68,7 @@ public class OidcJWTProcessor extends DefaultJWTProcessor<OidcContext> {
           throw new IllegalArgumentException(String.format("Unsupported key type '%s'",
               jwk.getKeyType().getValue()));
       }
-    } catch (JOSEException e) {
+    } catch (final JOSEException e) {
       throw new IllegalStateException("Could not infer public key", e);
     }
   }

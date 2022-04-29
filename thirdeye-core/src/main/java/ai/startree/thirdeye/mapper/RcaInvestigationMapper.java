@@ -27,7 +27,7 @@ public interface RcaInvestigationMapper {
   })
   RcaInvestigationApi toApi(RcaInvestigationDTO dto);
 
-  // mappers below are used by mapstruct
+  // mappers below are used by mapstruct -- see https://github.com/mapstruct/mapstruct/issues/1824
   // todo cyril share this with other mappers?
   @SuppressWarnings("unused")
   default Timestamp mapDateToTimestamp(Date date) {

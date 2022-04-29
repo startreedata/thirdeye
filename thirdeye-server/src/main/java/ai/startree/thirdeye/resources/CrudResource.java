@@ -51,14 +51,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
   protected final AbstractManager<DtoT> dtoManager;
-  protected final ImmutableMap<String, String> apiToBeanMap;
+  protected final ImmutableMap<String, String> apiToIndexMap;
 
   @Inject
   public CrudResource(
       final AbstractManager<DtoT> dtoManager,
-      final ImmutableMap<String, String> apiToBeanMap) {
+      final ImmutableMap<String, String> apiToIndexMap) {
     this.dtoManager = dtoManager;
-    this.apiToBeanMap = apiToBeanMap;
+    this.apiToIndexMap = apiToIndexMap;
   }
 
   /**
@@ -180,7 +180,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
-        ? dtoManager.filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(queryParameters))
+        ? dtoManager.filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters))
         : dtoManager.findAll();
 
     final RequestCache cache = createRequestCache();

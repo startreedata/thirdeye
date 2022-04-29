@@ -46,7 +46,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("type", "type")
       .put("status", "status")
       .put("created", "createTime")
@@ -55,7 +55,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
   @Inject
   public TaskResource(final TaskManager taskManager) {
-    super(taskManager, API_TO_BEAN_MAP);
+    super(taskManager, API_TO_INDEX_FILTER_MAP);
   }
 
   // Operation not supported to prevent create of tasks
@@ -104,7 +104,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     map.add("created", "[lt]" + df.format(new Date(twoMonthsBack)));
 
     dtoManager
-        .filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(map))
+        .filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(map))
         .forEach(this::deleteDto);
     return Response.ok().build();
   }

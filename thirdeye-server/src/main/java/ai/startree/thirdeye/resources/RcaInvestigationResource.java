@@ -29,13 +29,13 @@ import javax.ws.rs.core.MediaType;
 @Singleton
 public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, RcaInvestigationDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_BEAN_FILTER_MAP = ImmutableMap.<String, String>builder()
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("anomaly.id", "anomalyId")
       .build();
 
   @Inject
   public RcaInvestigationResource(final RcaInvestigationManager rootCauseSessionDAO) {
-    super(rootCauseSessionDAO, API_TO_BEAN_FILTER_MAP);
+    super(rootCauseSessionDAO, API_TO_INDEX_FILTER_MAP);
   }
 
   @Override

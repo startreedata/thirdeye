@@ -11,11 +11,14 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
+import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
+import ai.startree.thirdeye.datalayer.mapper.RcaInvestigationIndexMapper;
 import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.datalayer.util.SqlQueryBuilder;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
@@ -53,7 +56,14 @@ public class GenericPojoDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
   private static final ModelMapper MODEL_MAPPER = new ModelMapper();
+
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  static {
+    // add custom mapping from DTO to index
+    MODEL_MAPPER.createTypeMap(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
+        .addMappings(new RcaInvestigationIndexMapper());
+  }
 
   private final Counter dbReadCallCounter;
   private final Counter dbWriteCallCounter;
@@ -739,7 +749,8 @@ public class GenericPojoDao {
         boolean isAutoCommit = connection.getAutoCommit();
         // Ensure that transaction mode is enabled
         connection.setAutoCommit(false);
-        Class<? extends AbstractIndexEntity> indexEntityClass = SubEntities.BEAN_INDEX_MAP.get(pojoClass);
+        Class<? extends AbstractIndexEntity> indexEntityClass = SubEntities.BEAN_INDEX_MAP.get(
+            pojoClass);
         int updateCounter = 0;
         int minIdx = 0;
         int maxIdx = MAX_BATCH_SIZE;

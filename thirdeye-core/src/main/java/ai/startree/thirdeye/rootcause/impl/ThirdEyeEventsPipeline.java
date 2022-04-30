@@ -44,8 +44,6 @@ public class ThirdEyeEventsPipeline extends Pipeline {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeEventsPipeline.class);
 
-  private static final String DIMENSION_COUNTRY_CODE = "countryCode";
-
   enum StrategyType {
     LINEAR,
     TRIANGULAR,
@@ -95,11 +93,6 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     // use both provided and generated
     Set<DimensionEntity> dimensionEntities = context.filter(DimensionEntity.class);
     Map<String, DimensionEntity> countryCodeLookup = new HashMap<>();
-    for (DimensionEntity dimension : dimensionEntities) {
-      if (dimension.getName().equals(DIMENSION_COUNTRY_CODE)) {
-        countryCodeLookup.put(dimension.getValue(), dimension);
-      }
-    }
 
     Set<EventEntity> entities = new MaxScoreSet<>();
     entities.addAll(EntityUtils.addRelated(score(strategyAnomaly,
@@ -128,15 +121,6 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     List<EventEntity> entities = new ArrayList<>();
     for (EventDTO dto : events) {
       List<Entity> related = new ArrayList<>();
-
-      if (dto.getTargetDimensionMap().containsKey(DIMENSION_COUNTRY_CODE)) {
-        for (String countryCode : dto.getTargetDimensionMap().get(DIMENSION_COUNTRY_CODE)) {
-          final String countryKey = countryCode.toLowerCase();
-          if (countryCodeLookup.containsKey(countryKey)) {
-            related.add(countryCodeLookup.get(countryKey));
-          }
-        }
-      }
 
       ThirdEyeEventEntity entity = ThirdEyeEventEntity
           .fromDTO(1.0, related, dto, this.eventType.toLowerCase());
@@ -195,16 +179,7 @@ public class ThirdEyeEventsPipeline extends Pipeline {
 
     @Override
     public double score(ThirdEyeEventEntity entity) {
-      double max = 0.0;
-      for (Entity r : entity.getRelated()) {
-        if (r instanceof DimensionEntity) {
-          final DimensionEntity de = (DimensionEntity) r;
-          if (de.getName().equals(DIMENSION_COUNTRY_CODE)) {
-            max = Math.max(de.getScore(), max);
-          }
-        }
-      }
-      return max;
+      return 0.0;
     }
   }
 

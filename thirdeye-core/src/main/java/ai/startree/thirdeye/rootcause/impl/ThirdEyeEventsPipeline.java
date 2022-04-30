@@ -43,12 +43,7 @@ public class ThirdEyeEventsPipeline extends Pipeline {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeEventsPipeline.class);
 
   enum StrategyType {
-    LINEAR,
-    TRIANGULAR,
-    QUADRATIC,
-    HYPERBOLA,
-    DIMENSION,
-    COMPOUND
+    LINEAR, TRIANGULAR, QUADRATIC, HYPERBOLA, DIMENSION, COMPOUND
   }
 
   private static final String PROP_K = "k";
@@ -70,8 +65,9 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     super.init(context);
     Map<String, Object> properties = context.getProperties();
     this.eventDAO = context.getEventManager();
-    this.strategy = StrategyType.valueOf(
-        MapUtils.getString(properties, PROP_STRATEGY, PROP_STRATEGY_DEFAULT));
+    this.strategy = StrategyType.valueOf(MapUtils.getString(properties,
+        PROP_STRATEGY,
+        PROP_STRATEGY_DEFAULT));
     this.eventType = MapUtils.getString(properties, PROP_EVENT_TYPE, "holiday");
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
   }
@@ -82,9 +78,11 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     TimeRangeEntity baseline = TimeRangeEntity.getTimeRangeBaseline(context);
     TimeRangeEntity analysis = TimeRangeEntity.getTimeRangeAnalysis(context);
 
-    ScoringStrategy strategyAnomaly = makeStrategy(analysis.getStart(), anomaly.getStart(),
+    ScoringStrategy strategyAnomaly = makeStrategy(analysis.getStart(),
+        anomaly.getStart(),
         anomaly.getEnd());
-    ScoringStrategy strategyBaseline = makeStrategy(baseline.getStart(), baseline.getStart(),
+    ScoringStrategy strategyBaseline = makeStrategy(baseline.getStart(),
+        baseline.getStart(),
         baseline.getEnd());
 
     Set<EventEntity> entities = new MaxScoreSet<>();
@@ -99,11 +97,9 @@ public class ThirdEyeEventsPipeline extends Pipeline {
   }
 
   private List<EventDTO> getThirdEyeEvents(long start, long end) {
-    return this.eventDAO.findByPredicate(Predicate.AND(
-        Predicate.GE("startTime", start - OVERFETCH),
+    return this.eventDAO.findByPredicate(Predicate.AND(Predicate.GE("startTime", start - OVERFETCH),
         Predicate.LT("endTime", end + OVERFETCH),
-        Predicate.EQ("eventType", this.eventType.toUpperCase())
-    ));
+        Predicate.EQ("eventType", this.eventType.toUpperCase())));
   }
 
   /* **************************************************************************
@@ -115,8 +111,10 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     for (EventDTO dto : events) {
       List<Entity> related = new ArrayList<>();
 
-      ThirdEyeEventEntity entity = ThirdEyeEventEntity
-          .fromDTO(1.0, related, dto, this.eventType.toLowerCase());
+      ThirdEyeEventEntity entity = ThirdEyeEventEntity.fromDTO(1.0,
+          related,
+          dto,
+          this.eventType.toLowerCase());
       entities.add(entity.withScore(strategy.score(entity) * coefficient));
     }
     return entities;
@@ -129,8 +127,7 @@ public class ThirdEyeEventsPipeline extends Pipeline {
       case TRIANGULAR:
         return new ScoreWrapper(new TriangularStartTimeStrategy(lookback, start, end));
       case QUADRATIC:
-        return new ScoreWrapper(
-            new QuadraticTriangularStartTimeStrategy(lookback, start, end));
+        return new ScoreWrapper(new QuadraticTriangularStartTimeStrategy(lookback, start, end));
       case HYPERBOLA:
         return new ScoreWrapper(new HyperbolaStrategy(start, end));
       case DIMENSION:
@@ -138,8 +135,8 @@ public class ThirdEyeEventsPipeline extends Pipeline {
       case COMPOUND:
         return new CompoundStrategy(new ScoreWrapper(new HyperbolaStrategy(start, end)));
       default:
-        throw new IllegalArgumentException(
-            String.format("Invalid strategy type '%s'", this.strategy));
+        throw new IllegalArgumentException(String.format("Invalid strategy type '%s'",
+            this.strategy));
     }
   }
 
@@ -168,7 +165,8 @@ public class ThirdEyeEventsPipeline extends Pipeline {
   /**
    * Uses the highest score of dimension entities as they relate to an event
    *
-   * cyril - dimension strategy was linkedin custom code - this was removed - dimension strategy does nothing - implement later if need be
+   * cyril - dimension strategy was linkedin custom code - this was removed - dimension strategy
+   * does nothing - implement later if need be
    */
   private static class DimensionStrategy implements ScoringStrategy {
 

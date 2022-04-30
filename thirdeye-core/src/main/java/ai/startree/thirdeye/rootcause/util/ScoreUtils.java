@@ -12,13 +12,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class ScoreUtils {
 
-  public enum StrategyType {
-    LINEAR,
-    TRIANGULAR,
-    QUADRATIC,
-    HYPERBOLA
-  }
-
   private ScoreUtils() {
     // left blank
   }

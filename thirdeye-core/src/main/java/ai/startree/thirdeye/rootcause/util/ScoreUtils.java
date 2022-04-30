@@ -67,16 +67,6 @@ public class ScoreUtils {
   }
 
   /**
-   * Converts a string representation of a scoring strategy to a {@code StrategyType}.
-   *
-   * @param strategyType strategy type
-   * @return StrategyType
-   */
-  public static StrategyType parseStrategy(String strategyType) {
-    return StrategyType.valueOf(strategyType);
-  }
-
-  /**
    * Returns a scorer based on the string name representation and arguments.
    *
    * @param type score type

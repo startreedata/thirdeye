@@ -167,6 +167,8 @@ public class ThirdEyeEventsPipeline extends Pipeline {
 
   /**
    * Uses the highest score of dimension entities as they relate to an event
+   *
+   * cyril - dimension strategy was linkedin custom code - this was removed - dimension strategy does nothing - implement later if need be
    */
   private static class DimensionStrategy implements ScoringStrategy {
 

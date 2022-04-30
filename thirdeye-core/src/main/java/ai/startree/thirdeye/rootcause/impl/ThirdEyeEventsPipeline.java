@@ -11,7 +11,6 @@ import ai.startree.thirdeye.rootcause.Pipeline;
 import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineInitContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
-import ai.startree.thirdeye.rootcause.entity.DimensionEntity;
 import ai.startree.thirdeye.rootcause.entity.EventEntity;
 import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
@@ -24,7 +23,6 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +76,6 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     this.k = MapUtils.getInteger(properties, PROP_K, PROP_K_DEFAULT);
   }
 
-
   @Override
   public PipelineResult run(PipelineContext context) {
     TimeRangeEntity anomaly = TimeRangeEntity.getTimeRangeAnomaly(context);
@@ -90,16 +87,12 @@ public class ThirdEyeEventsPipeline extends Pipeline {
     ScoringStrategy strategyBaseline = makeStrategy(baseline.getStart(), baseline.getStart(),
         baseline.getEnd());
 
-    // use both provided and generated
-    Set<DimensionEntity> dimensionEntities = context.filter(DimensionEntity.class);
-    Map<String, DimensionEntity> countryCodeLookup = new HashMap<>();
-
     Set<EventEntity> entities = new MaxScoreSet<>();
     entities.addAll(EntityUtils.addRelated(score(strategyAnomaly,
-        this.getThirdEyeEvents(analysis.getStart(), anomaly.getEnd()), countryCodeLookup,
+        this.getThirdEyeEvents(analysis.getStart(), anomaly.getEnd()),
         anomaly.getScore()), anomaly));
     entities.addAll(EntityUtils.addRelated(score(strategyBaseline,
-        this.getThirdEyeEvents(baseline.getStart(), baseline.getEnd()), countryCodeLookup,
+        this.getThirdEyeEvents(baseline.getStart(), baseline.getEnd()),
         baseline.getScore()), baseline));
 
     return new PipelineResult(context, EntityUtils.topk(entities, this.k));
@@ -117,7 +110,7 @@ public class ThirdEyeEventsPipeline extends Pipeline {
    * Entity scoring
    * *************************************************************************/
   private List<EventEntity> score(ScoringStrategy strategy, Iterable<EventDTO> events,
-      Map<String, DimensionEntity> countryCodeLookup, double coefficient) {
+      double coefficient) {
     List<EventEntity> entities = new ArrayList<>();
     for (EventDTO dto : events) {
       List<Entity> related = new ArrayList<>();

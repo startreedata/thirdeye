@@ -5,9 +5,11 @@ import {
     AnomalyBreakdownRequest,
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisRequest,
+    Investigation,
 } from "../dto/rca.interfaces";
 
 const BASE_URL_RCA = "/api/rca";
+const INVESTIGATIONS_ENDPOINT = `${BASE_URL_RCA}/investigations`;
 
 export const getAnomalyMetricBreakdown = async (
     id: number,
@@ -44,4 +46,60 @@ export const getDimensionAnalysisForAnomaly = async (
     );
 
     return response.data;
+};
+
+export const getInvestigations = async (
+    anomalyId?: number
+): Promise<Investigation[]> => {
+    const queryParams = new URLSearchParams();
+    let queryString = "";
+
+    if (anomalyId) {
+        queryParams.set("anomaly.id", anomalyId.toString());
+        queryString = `?${queryParams.toString()}`;
+    }
+
+    const response = await axios.get(
+        `${BASE_URL_RCA}/investigations${queryString}`
+    );
+
+    return response.data;
+};
+
+export const getInvestigation = async (
+    investigationId: number
+): Promise<Investigation> => {
+    const response = await axios.get(
+        `${BASE_URL_RCA}/investigations/${investigationId}`
+    );
+
+    return response.data;
+};
+
+export const deleteInvestigation = async (
+    id: number
+): Promise<Investigation> => {
+    const response = await axios.delete(`${INVESTIGATIONS_ENDPOINT}/${id}`);
+
+    return response.data;
+};
+
+export const createInvestigation = async (
+    investigation: Investigation
+): Promise<Investigation> => {
+    const response = await axios.post(`${INVESTIGATIONS_ENDPOINT}`, [
+        investigation,
+    ]);
+
+    return response.data[0];
+};
+
+export const updateInvestigation = async (
+    investigation: Investigation
+): Promise<Investigation> => {
+    const response = await axios.put(`${INVESTIGATIONS_ENDPOINT}`, [
+        investigation,
+    ]);
+
+    return response.data[0];
 };

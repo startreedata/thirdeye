@@ -48,6 +48,7 @@ export const AppRouteRelative = {
     METRICS_CREATE: `create`,
     METRICS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS: `root-cause-analysis`,
+    ROOT_CAUSE_ANALYSIS_SAVED_INVESTIGATION: `investigations/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE: `investigate`,
 };
@@ -99,6 +100,7 @@ export const AppRoute = {
     METRICS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.METRICS}/${AppRouteRelative.METRICS_CREATE}`,
     METRICS_UPDATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.METRICS}/${AppRouteRelative.METRICS_UPDATE}`,
     ROOT_CAUSE_ANALYSIS: `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}`,
+    ROOT_CAUSE_ANALYSIS_SAVED_INVESTIGATION: `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_SAVED_INVESTIGATION}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE:
         `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
@@ -306,6 +308,15 @@ export const getMetricsCreatePath = (): string => {
 
 export const getMetricsUpdatePath = (id: number): string => {
     let path: string = AppRoute.METRICS_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getRootCauseAnalysisSavedInvestigationPath = (
+    id: number
+): string => {
+    let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_SAVED_INVESTIGATION;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return path;

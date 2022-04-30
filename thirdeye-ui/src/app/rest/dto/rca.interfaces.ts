@@ -1,4 +1,5 @@
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { Anomaly } from "./anomaly.interfaces";
 
 export interface AnomalyBreakdown {
     metric: {
@@ -100,4 +101,22 @@ export interface AnomalyDimensionAnalysisRequest {
     oneSideError?: boolean;
     excludedDimensions?: string[];
     hierarchies?: string[];
+}
+
+export interface Investigation {
+    id: number;
+    name: string;
+    text: string;
+    uiMetadata: {
+        [key: string]: any;
+    };
+    anomaly?: Anomaly;
+    created: number;
+    updated: number;
+    createdBy: {
+        principal: string;
+    };
+    updatedBy: {
+        principal: string;
+    };
 }

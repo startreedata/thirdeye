@@ -6,7 +6,6 @@
 package ai.startree.thirdeye.rootcause.util;
 
 import java.util.concurrent.TimeUnit;
-import org.joda.time.Period;
 
 /**
  * Utility for scoring entities
@@ -22,72 +21,6 @@ public class ScoreUtils {
 
   private ScoreUtils() {
     // left blank
-  }
-
-  /**
-   * Converts a string representation of a period into millis.
-   * <br/><b>NOTE:</b> parses weeks, days, hours, minutes, and seconds - e.g.
-   * {@code "1w 2d 3h 45m 6s"}.
-   *
-   * @param period period string
-   * @return period in millis
-   */
-  public static long parsePeriod(String period) {
-    // NOTE: JodaTime Parser/Formatter does not support optional sections
-
-    Period p = Period.ZERO;
-
-    final String[] parts = period.split("\\s+");
-    if (parts.length == 1) {
-      try {
-        return Long.parseLong(parts[0]);
-      } catch (NumberFormatException ignore) {
-        // ignore, parse individual parts
-      }
-    }
-
-    for (String part : parts) {
-      final String prefix = part.substring(0, part.length() - 1);
-      if (part.endsWith("w")) {
-        p = p.withWeeks(Integer.parseInt(prefix));
-      } else if (part.endsWith("d")) {
-        p = p.withDays(Integer.parseInt(prefix));
-      } else if (part.endsWith("h")) {
-        p = p.withHours(Integer.parseInt(prefix));
-      } else if (part.endsWith("m")) {
-        p = p.withMinutes(Integer.parseInt(prefix));
-      } else if (part.endsWith("s")) {
-        p = p.withSeconds(Integer.parseInt(prefix));
-      } else {
-        throw new IllegalArgumentException(String.format("Invalid token '%s'", part));
-      }
-    }
-
-    return p.toStandardSeconds().getSeconds() * 1000L;
-  }
-
-  /**
-   * Returns a scorer based on the string name representation and arguments.
-   *
-   * @param type score type
-   * @param lookback lookback in millis
-   * @param start window start in millis
-   * @param end window end in millis
-   * @return scorer instance
-   */
-  public static TimeRangeStrategy build(StrategyType type, long lookback, long start, long end) {
-    switch (type) {
-      case LINEAR:
-        return new LinearStartTimeStrategy(start, end);
-      case TRIANGULAR:
-        return new TriangularStartTimeStrategy(lookback, start, end);
-      case QUADRATIC:
-        return new QuadraticTriangularStartTimeStrategy(lookback, start, end);
-      case HYPERBOLA:
-        return new HyperbolaStrategy(start, end);
-      default:
-        throw new IllegalArgumentException(String.format("Unknown score type '%s'", type));
-    }
   }
 
   /**

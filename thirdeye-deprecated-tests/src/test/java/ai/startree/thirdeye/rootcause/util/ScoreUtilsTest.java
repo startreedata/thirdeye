@@ -10,7 +10,6 @@ import ai.startree.thirdeye.rootcause.util.ScoreUtils.LinearStartTimeStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.QuadraticTriangularStartTimeStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.TimeRangeStrategy;
 import ai.startree.thirdeye.rootcause.util.ScoreUtils.TriangularStartTimeStrategy;
-import java.util.concurrent.TimeUnit;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -63,17 +62,5 @@ public class ScoreUtilsTest {
     Assert.assertEquals(scorer.score(3600000, -1), 1.0d, EPSILON);
     Assert.assertEquals(scorer.score(5300000, -1), 0.6792d, EPSILON);
     Assert.assertEquals(scorer.score(5400000, -1), 0.0d, EPSILON);
-  }
-
-  @Test
-  public void testParsePeriod() {
-    Assert.assertEquals(ScoreUtils.parsePeriod("1w"), TimeUnit.DAYS.toMillis(7));
-    Assert.assertEquals(ScoreUtils.parsePeriod("2d"), TimeUnit.DAYS.toMillis(2));
-    Assert.assertEquals(ScoreUtils.parsePeriod("3h"), TimeUnit.HOURS.toMillis(3));
-    Assert.assertEquals(ScoreUtils.parsePeriod("43m"), TimeUnit.MINUTES.toMillis(43));
-    Assert.assertEquals(ScoreUtils.parsePeriod("16s"), TimeUnit.SECONDS.toMillis(16));
-
-    Assert.assertEquals(ScoreUtils.parsePeriod("1483506000"), 1483506000);
-    Assert.assertEquals(ScoreUtils.parsePeriod("2w 3d 4h 5m 6s"), 1483506000);
   }
 }

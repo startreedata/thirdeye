@@ -65,6 +65,7 @@ public class RcaResource {
   private final RcaInvestigationResource rcaInvestigationResource;
   private final RootCauseMetricResource rootCauseMetricResource;
   private final DimensionAnalysisResource dimensionAnalysisResource;
+  private final RcaEventsResource rcaEventsResource;
 
   @Inject
   public RcaResource(
@@ -72,13 +73,15 @@ public class RcaResource {
       final RootCauseTemplateResource rootCauseTemplateResource,
       final RcaInvestigationResource rcaInvestigationResource,
       final RootCauseMetricResource rootCauseMetricResource,
-      final DimensionAnalysisResource dimensionAnalysisResource) {
+      final DimensionAnalysisResource dimensionAnalysisResource,
+      final RcaEventsResource rcaEventsResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rcaInvestigationResource = rcaInvestigationResource;
     this.rootCauseMetricResource = rootCauseMetricResource;
     this.dimensionAnalysisResource = dimensionAnalysisResource;
+    this.rcaEventsResource = rcaEventsResource;
   }
 
   @Path(value = "/dim-analysis")
@@ -99,6 +102,11 @@ public class RcaResource {
   @Path(value = "/metrics")
   public RootCauseMetricResource getRootCauseMetricResource() {
     return rootCauseMetricResource;
+  }
+
+  @Path(value = "/events")
+  public RcaEventsResource getRcaEventsResource() {
+    return rcaEventsResource;
   }
 
   @GET

@@ -92,7 +92,7 @@ public class RcaResource {
   }
 
   @Path(value = "/investigations")
-  public RcaInvestigationResource getRootCauseSessionResource() {
+  public RcaInvestigationResource getRcaInvestigationResource() {
     return rcaInvestigationResource;
   }
 

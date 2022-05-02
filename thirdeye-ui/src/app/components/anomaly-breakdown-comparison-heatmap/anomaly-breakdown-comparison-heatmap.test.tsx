@@ -53,6 +53,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         render(
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
+                chartTimeSeriesFilterSet={[]}
                 comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
                 onAddFilterSetClick={() => null}
             />
@@ -91,6 +92,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         render(
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
+                chartTimeSeriesFilterSet={[]}
                 comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
                 shouldTruncateText={false}
                 onAddFilterSetClick={() => null}
@@ -128,6 +130,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         render(
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
+                chartTimeSeriesFilterSet={[]}
                 comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
                 onAddFilterSetClick={() => null}
             />

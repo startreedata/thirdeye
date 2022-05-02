@@ -168,6 +168,7 @@
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
         "remove": "Remove",
         "add-to-chart": "Add to Chart",
+        "remove-from-chart": "Remove from Chart",
         "filter-sets": "Filter Sets"
     },
     "message": {
@@ -210,6 +211,7 @@
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
         "error-while-fetching": "An issue was experienced while retrieving {{entity}}",
         "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range.",
-        "changes-not-saved": "Changes have not been saved"
+        "changes-not-saved": "Changes have not been saved",
+        "set-chart-height": "Set the chart height"
     }
 }

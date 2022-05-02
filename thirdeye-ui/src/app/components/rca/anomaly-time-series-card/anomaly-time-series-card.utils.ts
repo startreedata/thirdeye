@@ -126,7 +126,6 @@ export const generateChartOptions = (
         },
         legend: true,
         brush: true,
-        height: 500,
         tooltip: true,
     };
 };

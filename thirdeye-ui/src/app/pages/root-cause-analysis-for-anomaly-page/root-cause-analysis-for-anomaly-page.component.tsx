@@ -97,7 +97,10 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                 serializeKeyValuePair(existingFilters) === serializedFilters
         );
         if (existingIndex === -1) {
-            setChartTimeSeriesFilterSet((original) => [...original, filters]);
+            setChartTimeSeriesFilterSet((original) => [
+                ...original,
+                [...filters], // Make a copy of filters so changes to the reference one doesn't affect it
+            ]);
         } else {
             handleRemoveBtnClick(existingIndex);
         }

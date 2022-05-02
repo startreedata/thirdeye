@@ -20,8 +20,6 @@ export const LinearAxisY: FunctionComponent<LinearAxisYProps> = (
     const tickComponentRenderer = (
         tickRendererProps: TickRendererProps
     ): ReactNode => {
-        console.log(tickRendererProps.textAnchor);
-
         return (
             <Text
                 textAnchor={tickRendererProps.textAnchor}

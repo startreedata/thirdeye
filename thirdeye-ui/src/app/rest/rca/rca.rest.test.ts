@@ -31,7 +31,7 @@ describe("RCA REST", () => {
         await expect(getInvestigations()).rejects.toThrow("testError");
     });
 
-    it("getInvestigations with alertId should invoke axios.get with appropriate input and return appropriate investigations", async () => {
+    it("getInvestigations with anomalyId should invoke axios.get with appropriate input and return appropriate investigations", async () => {
         jest.spyOn(axios, "get").mockResolvedValue({
             data: [mockInvestigation, mockInvestigation],
         });
@@ -42,7 +42,7 @@ describe("RCA REST", () => {
         ]);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/rca/investigations?alert.id=1"
+            "/api/rca/investigations?anomaly.id=1"
         );
     });
 

@@ -125,7 +125,7 @@ public class HolidayEventsLoader implements Runnable {
 
     // Get the existing holidays within the time range from the database
     List<EventDTO> existingEvents = eventManager
-        .findEventsBetweenTimeRange(EventType.HOLIDAY.toString(), start, end);
+        .findEventsBetweenTimeRangeWithEventType(EventType.HOLIDAY.toString(), start, end);
 
     mergeWithExistingHolidays(holidayNameToHolidayEvent, existingEvents);
   }

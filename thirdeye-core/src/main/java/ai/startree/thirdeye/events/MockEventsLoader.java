@@ -84,7 +84,7 @@ public class MockEventsLoader implements Runnable {
 
       List<EventDTO> generated = generateEvents(conf, cutoff);
       List<EventDTO> existing = this.eventDAO
-          .findEventsBetweenTimeRange(conf.getType(), START_TIMESTAMP, cutoff);
+          .findEventsBetweenTimeRangeWithEventType(conf.getType(), START_TIMESTAMP, cutoff);
 
       Set<EventDTO> deduplicated = deduplicate(generated, existing);
       LOG.info("Generated '{}' events: {} generated, {} pre-existing, {} saved after deduplication",

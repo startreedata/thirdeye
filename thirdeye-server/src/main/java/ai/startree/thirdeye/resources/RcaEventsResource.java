@@ -95,11 +95,12 @@ public class RcaEventsResource {
         eventDAO.findEventsBetweenTimeRangeWithType(type, startWithLookback, endWithLookahead) :
         eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead);
 
-    events.sort(Comparator.comparingDouble(
+    final Comparator<EventDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,
             new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
             lookaroundPeriod)
-    ).reversed());
+    ).reversed();
+    events.sort(comparator);
 
     final List<EventApi> eventApis = events.stream().limit(limit).map(ApiBeanMapper::toApi).collect(
         Collectors.toList());
@@ -135,11 +136,12 @@ public class RcaEventsResource {
     final List<MergedAnomalyResultDTO> anomalies = anomalyDAO.findByTime(startWithLookback,
         endWithLookahead);
 
-    anomalies.sort(Comparator.comparingDouble(
+    final Comparator<MergedAnomalyResultDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<MergedAnomalyResultDTO>) dto -> scoring.score(anomalyInterval,
             new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
             lookaroundPeriod)
-    ).reversed());
+    ).reversed();
+    anomalies.sort(comparator);
 
     final List<AnomalyApi> anomalyApis = anomalies.stream()
         .limit(limit)

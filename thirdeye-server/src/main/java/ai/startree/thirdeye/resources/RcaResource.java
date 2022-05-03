@@ -60,6 +60,7 @@ public class RcaResource {
   private static final long BASELINE_RANGE_MAX = ANOMALY_RANGE_MAX;
 
   private final List<RootCauseEntityFormatter> formatters;
+  // todo cyril remove frameworks
   private final Map<String, RCAFramework> frameworks;
   private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RcaInvestigationResource rcaInvestigationResource;
@@ -112,6 +113,7 @@ public class RcaResource {
   @GET
   @Path("/query")
   @ApiOperation(value = "Send query")
+  @Deprecated
   public List<RootCauseEntity> query(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "framework name")
@@ -201,6 +203,7 @@ public class RcaResource {
   @GET
   @Path("/raw")
   @ApiOperation(value = "Raw")
+  @Deprecated
   public List<RootCauseEntity> raw(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("framework") String framework,

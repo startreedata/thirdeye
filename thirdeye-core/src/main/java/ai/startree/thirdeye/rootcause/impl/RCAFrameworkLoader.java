@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
  * property with absolute path information.
  */
 @Singleton
+@Deprecated
+// todo cyril - not used anymore - can be removed
 public class RCAFrameworkLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(RCAFrameworkLoader.class);

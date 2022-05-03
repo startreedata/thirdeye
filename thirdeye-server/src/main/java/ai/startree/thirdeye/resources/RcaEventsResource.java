@@ -133,8 +133,12 @@ public class RcaEventsResource {
         .plus(lookaroundPeriod)
         .getMillis(), anomalyInterval.getEnd().getMillis());
 
-    final List<MergedAnomalyResultDTO> anomalies = anomalyDAO.findByTime(startWithLookback,
-        endWithLookahead);
+    final List<MergedAnomalyResultDTO> anomalies = anomalyDAO
+        .findByTime(startWithLookback, endWithLookahead)
+        .stream()
+        // todo cyril - filter at the db level - not in the app
+        .filter(dto -> !dto.isChild())
+        .collect(Collectors.toList());
 
     final Comparator<MergedAnomalyResultDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<MergedAnomalyResultDTO>) dto -> scoring.score(anomalyInterval,

@@ -3,7 +3,7 @@ package ai.startree.thirdeye.resources;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
-import ai.startree.thirdeye.rootcause.events.EventScoring;
+import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
@@ -25,6 +25,7 @@ import io.swagger.annotations.SwaggerDefinition;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.ws.rs.DefaultValue;
@@ -47,7 +48,7 @@ import org.joda.time.format.ISOPeriodFormat;
 public class RcaEventsResource {
 
   private static final String DEFAULT_LOOKBACK = "P7D";
-  private static final String DEFAULT_LIMIT = "100";
+  private static final String DEFAULT_LIMIT = "50";
   private static final String DEFAULT_SCORING = "TRIANGULAR";
   private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
   private final EventManager eventDAO;
@@ -65,12 +66,12 @@ public class RcaEventsResource {
 
   @GET
   @Path("/calendar/anomaly/{id}")
-  @ApiOperation(value = "Returns calendar events related to the anomaly.")
+  @ApiOperation(value = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
   public Response getCalendarEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
       @ApiParam(value = "type") @QueryParam("type") @Nullable String type,
-      @ApiParam(value = "scoring") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) EventScoring scoring,
+      @ApiParam(value = "scoring") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @ApiParam(value = "limit") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
       @ApiParam(value = "lookaround") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
@@ -94,9 +95,11 @@ public class RcaEventsResource {
         eventDAO.findEventsBetweenTimeRangeWithType(type, startWithLookback, endWithLookahead) :
         eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead);
 
-    events.sort(Comparator.comparingDouble(dto -> scoring.score(anomalyInterval,
-        new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
-        lookaroundPeriod)));
+    events.sort(Comparator.comparingDouble(
+        (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,
+            new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
+            lookaroundPeriod)
+    ).reversed());
 
     final List<EventApi> eventApis = events.stream().limit(limit).map(ApiBeanMapper::toApi).collect(
         Collectors.toList());
@@ -105,11 +108,11 @@ public class RcaEventsResource {
 
   @GET
   @Path("/anomalies/anomaly/{id}")
-  @ApiOperation(value = "Returns anomalies related to the anomaly.")
+  @ApiOperation(value = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
   public Response getAnomaliesEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "scoring") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) EventScoring scoring,
+      @ApiParam(value = "scoring") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @ApiParam(value = "limit") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
       @ApiParam(value = "lookaround") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
@@ -132,9 +135,11 @@ public class RcaEventsResource {
     final List<MergedAnomalyResultDTO> anomalies = anomalyDAO.findByTime(startWithLookback,
         endWithLookahead);
 
-    anomalies.sort(Comparator.comparingDouble(dto -> scoring.score(anomalyInterval,
-        new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
-        lookaroundPeriod)));
+    anomalies.sort(Comparator.comparingDouble(
+        (ToDoubleFunction<MergedAnomalyResultDTO>) dto -> scoring.score(anomalyInterval,
+            new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
+            lookaroundPeriod)
+    ).reversed());
 
     final List<AnomalyApi> anomalyApis = anomalies.stream()
         .limit(limit)

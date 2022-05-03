@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
-public enum EventScoring {
+public enum IntervalSimilarityScoring {
   /**
    * Determines a score between {@code [0.0, 1.0]} based on the entity's start time. The closer
    * an entity's start time is to the start time of the interval, the higher the score. This

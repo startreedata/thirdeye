@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class AlertTemplateDTO extends AbstractDTO {
   private UserBean owner;
   private List<PlanNodeBean> nodes;
   @Deprecated  // use AlertMetadataDTO
-  // todo cyril add json ignore mid-may 2022
+  @JsonIgnore
   private RcaMetadataDTO rca;
   private AlertMetadataDTO metadata;
   private Map<String, Object> defaultProperties;

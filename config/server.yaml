@@ -224,16 +224,6 @@ rca:
         inputNames: [ INPUT ]
         className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
 
-    eventIssue:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
-
-    eventAC:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
-
 cache:
   useInMemoryCache: true
   useCentralizedCache: false

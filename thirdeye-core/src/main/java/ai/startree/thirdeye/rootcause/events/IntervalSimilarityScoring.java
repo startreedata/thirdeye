@@ -4,6 +4,14 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
+/**
+ * Different functions that score the similarity of two intervals.
+ * The first interval is an anomaly, the other interval is a potentially related event.
+ * lookaround is the period that was used to look before and after the start of the anomaly.
+ * Scoring functions should return high scores when intervals are similar.
+ * The definition of similarity for intervals is business specific, it is not necessarily a measure
+ * of overlapping.
+ */
 public enum IntervalSimilarityScoring {
   /**
    * Determines a score between {@code [0.0, 1.0]} based on the entity's start time. The closer

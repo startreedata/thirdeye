@@ -139,7 +139,7 @@ public class AlertDetectionIntervalCalculator {
     return new Interval(correctedStart, correctedEnd);
   }
 
-  // todo move below to a utils class
+  // todo cyril move below to a utils class
   @Nullable
   public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
     return Optional.ofNullable(templateWithProperties.getMetadata())

@@ -40,7 +40,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
@@ -104,7 +103,7 @@ public class DimensionAnalysisResource {
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        DateTimeZone.UTC);
+        rootCauseAnalysisInfo.getTimezone());
 
     Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
     final Interval baselineInterval = new Interval(

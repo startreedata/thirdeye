@@ -71,7 +71,7 @@ public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements 
   }
 
   @Override
-  public List<EventDTO> findEventsBetweenTimeRangeWithEventType(String eventType, long startTime, long endTime) {
+  public List<EventDTO> findEventsBetweenTimeRangeWithType(String eventType, long startTime, long endTime) {
     throw new AssertionError("not implemented");
   }
 

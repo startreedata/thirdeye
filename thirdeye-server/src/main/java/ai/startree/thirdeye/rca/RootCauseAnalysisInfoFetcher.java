@@ -5,10 +5,12 @@
 
 package ai.startree.thirdeye.rca;
 
+import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -42,7 +44,7 @@ public class RootCauseAnalysisInfoFetcher {
       final DatasetConfigManager datasetDAO,
       final MetricConfigManager metricDAO,
       final AlertTemplateRenderer alertTemplateRenderer
-      ) {
+  ) {
     this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;
     this.datasetDAO = datasetDAO;
@@ -96,11 +98,13 @@ public class RootCauseAnalysisInfoFetcher {
             anomalyId));
     final DatasetConfigDTO datasetConfigDTO = ensureExists(datasetDAO.findByDataset(metricConfigDTO.getDataset()),
         String.format("Dataset name: %s", metricConfigDTO.getDataset()));
-
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
-    return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO);
+    DateTimeZone timeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+        .orElse(Constants.DEFAULT_TIMEZONE);
+
+    return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);
   }
 
   private void addCustomFields(final DatasetConfigDTO datasetConfigDTO,

@@ -26,7 +26,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     return findByPredicate(predicate);
   }
 
-  public List<EventDTO> findEventsBetweenTimeRangeWithEventType(String eventType, long startTime,
+  public List<EventDTO> findEventsBetweenTimeRangeWithType(String eventType, long startTime,
       long endTime) {
     Predicate predicate = Predicate
         .AND(Predicate.EQ("eventType", eventType), Predicate.GT("endTime", startTime),

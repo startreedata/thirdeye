@@ -53,7 +53,7 @@ public class TestEventManager {
     Assert.assertEquals(results0.size(), 1);
 
     List<EventDTO> results1 = eventDAO
-        .findEventsBetweenTimeRangeWithEventType(EventType.DEPLOYMENT.name(), 0, System.currentTimeMillis());
+        .findEventsBetweenTimeRangeWithType(EventType.DEPLOYMENT.name(), 0, System.currentTimeMillis());
     Assert.assertEquals(results1.size(), 1);
   }
 

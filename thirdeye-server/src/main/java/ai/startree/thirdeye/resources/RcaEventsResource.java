@@ -70,10 +70,10 @@ public class RcaEventsResource {
   public Response getCalendarEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "type") @QueryParam("type") @Nullable String type,
-      @ApiParam(value = "scoring") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
-      @ApiParam(value = "limit") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
-      @ApiParam(value = "lookaround") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
+      @ApiParam(value = "Type of event.") @QueryParam("type") @Nullable String type,
+      @ApiParam(value = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
+      @ApiParam(value = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
+      @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
@@ -112,9 +112,9 @@ public class RcaEventsResource {
   public Response getAnomaliesEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "scoring") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
-      @ApiParam(value = "limit") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
-      @ApiParam(value = "lookaround") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
+      @ApiParam(value = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
+      @ApiParam(value = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
+      @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());

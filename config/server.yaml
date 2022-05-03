@@ -188,42 +188,6 @@ scheduler:
     holidayLoadRange: 2592000000
     runFrequency: 7 # in Days
 
-rca:
-  frameworks:
-    identity:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.NullPipeline
-
-    metricRelated:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricMappingPipeline
-
-    metricAnalysis:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
-
-    metricBreakdown:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricBreakdownPipeline
-
-    metricComponentAnalysis:
-      - outputName: OUTPUT
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
-        properties:
-          excludeDimensions: [ "environment", "continent" ]
-          parallelism: 5
-          k: 5
-
-    eventHoliday:
-      - outputName: METRIC_RELATED
-        inputNames: [ INPUT ]
-        className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
-
 cache:
   useInMemoryCache: true
   useCentralizedCache: false

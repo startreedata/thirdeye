@@ -48,8 +48,8 @@ public enum IntervalSimilarityScoring {
    * is proportional to the absolute distance from the anomaly region start and truncated to
    * {@code 0.0} after the midpoint of this region.
    *
-   * Note:  this was kept because it was the default scoring function used in legacy TE. New
-   * triangular and quadratic scorer look better and are easier to understand.
+   * Note:  this function was kept because it was the default scoring function in the legacy TE. New
+   * triangular and quadratic scoring look better and are easier to understand.
    */
   HYPERBOLA {
     public double score(final Interval anomalyInterval, final Interval eventInterval,

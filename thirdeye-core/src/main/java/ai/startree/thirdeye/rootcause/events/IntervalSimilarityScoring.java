@@ -10,7 +10,7 @@ import org.joda.time.Period;
  * lookaround is the period that was used to look before and after the start of the anomaly.
  * Scoring functions should return high scores when intervals are similar.
  * The definition of similarity for intervals is business specific, it is not necessarily a measure
- * of overlapping.
+ * of overlap.
  */
 public enum IntervalSimilarityScoring {
   /**

@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
@@ -65,11 +65,11 @@ public class RcaRelatedResource {
   }
 
   @GET
-  @Path("/events/anomaly/{id}")
+  @Path("/events")
   @ApiOperation(value = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
   public Response getCalendarEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
+      @ApiParam(value = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @ApiParam(value = "Type of event.") @QueryParam("type") @Nullable String type,
       @ApiParam(value = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @ApiParam(value = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
@@ -108,11 +108,11 @@ public class RcaRelatedResource {
   }
 
   @GET
-  @Path("/anomalies/anomaly/{id}")
+  @Path("/anomalies")
   @ApiOperation(value = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
   public Response getAnomaliesEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
+      @ApiParam(value = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @ApiParam(value = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @ApiParam(value = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
       @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)

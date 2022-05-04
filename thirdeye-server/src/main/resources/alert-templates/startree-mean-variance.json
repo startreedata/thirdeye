@@ -11,6 +11,7 @@
         "component.lookbackPeriod": "${lookback}",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
         "anomaly.source": "meanVariance-template/root",
         "type": "MEAN_VARIANCE",
         "component.pattern": "${pattern}",

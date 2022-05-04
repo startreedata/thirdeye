@@ -13,30 +13,30 @@ import org.testng.annotations.Test;
 
 public class PinotSqlExpressionBuilderTest implements SqlExpressionBuilder {
 
- @Test
+  @Test
   public void TestRemoveSimpleDateFormatPrefixWithNoPrefix() {
-   final String timeColumnFormat= "yyyyMMdd";
-   final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
-   final String expected = "yyyyMMdd";
+    final String timeColumnFormat = "yyyyMMdd";
+    final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
+    final String expected = "yyyyMMdd";
 
-   assertThat(output).isEqualTo(expected);
- }
+    assertThat(output).isEqualTo(expected);
+  }
 
- @Test
- public void TestRemoveSimpleDateFormatPrefixWithSimpleDateFormatPrefix() {
-  final String timeColumnFormat= "SIMPLE_DATE_FORMAT:yyyyMMdd";
-  final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
-  final String expected = "yyyyMMdd";
+  @Test
+  public void TestRemoveSimpleDateFormatPrefixWithSimpleDateFormatPrefix() {
+    final String timeColumnFormat = "SIMPLE_DATE_FORMAT:yyyyMMdd";
+    final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
+    final String expected = "yyyyMMdd";
 
-  assertThat(output).isEqualTo(expected);
- }
+    assertThat(output).isEqualTo(expected);
+  }
 
- @Test
- public void TestRemoveSimpleDateFormatPrefixWithFullPrefix() {
-  final String timeColumnFormat= "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd";
-  final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
-  final String expected = "yyyyMMdd";
+  @Test
+  public void TestRemoveSimpleDateFormatPrefixWithFullPrefix() {
+    final String timeColumnFormat = "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd";
+    final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
+    final String expected = "yyyyMMdd";
 
-  assertThat(output).isEqualTo(expected);
- }
+    assertThat(output).isEqualTo(expected);
+  }
 }

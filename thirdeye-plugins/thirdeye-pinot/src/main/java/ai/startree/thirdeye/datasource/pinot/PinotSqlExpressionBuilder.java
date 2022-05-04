@@ -13,6 +13,7 @@ import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -21,6 +22,50 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
+
+  enum EpochFormat {
+    MILLIS(List.of("EPOCH_MILLIS", "1:MILLISECONDS:EPOCH"), "1:MILLISECONDS:EPOCH", "MILLISECONDS"),
+    SECONDS(List.of("EPOCH", "1:SECONDS:EPOCH"), "1:SECONDS:EPOCH", "SECONDS"),
+    MINUTES(List.of("EPOCH_MINUTES", "1:MINUTES:EPOCH"), "1:MINUTES:EPOCH", "MINUTES"), // not implemented
+    HOURS(List.of("EPOCH_HOURS", "1:HOURS:EPOCH"), "1:HOURS:EPOCH", "HOURS");
+
+    private final List<String> userFacingStrings;
+    private final String dateTimeConvertString;
+    private final String dateTruncFormatString;
+
+    EpochFormat(final List<String> userFacingStrings,
+        final String dateTimeConvertString, final String dateTruncFormatString) {
+      this.userFacingStrings = userFacingStrings;
+      this.dateTimeConvertString = dateTimeConvertString;
+      this.dateTruncFormatString = dateTruncFormatString;
+    }
+
+    static EpochFormat fromString(String userTimeFormatInput) {
+      for (EpochFormat epochFormat:  EpochFormat.values()) {
+        for (String userFacingString: epochFormat.userFacingStrings) {
+          if (userFacingString.equals(userTimeFormatInput)) {
+            return epochFormat;
+          }
+        }
+      }
+      // not an epoch format
+      return null;
+    }
+  }
+
+  private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
+      Period.years(1), "year",
+      Period.months(1), "month",
+      Period.weeks(1), "week",
+      Period.days(1), "day",
+      Period.hours(1), "hour",
+      Period.minutes(1), "minute",
+      Period.seconds(1), "second",
+      Period.millis(1), "millisecond"
+  );
+
+  private static final List<Period> DATE_TRUNC_COMPATIBLE_PERIODS = List.copyOf(
+      DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.keySet());
 
   private static final String PERCENTILE_TDIGEST_PREFIX = "PERCENTILETDigest";
 
@@ -98,38 +143,40 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @Override
   public String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
       Period granularity, @Nullable final String timezone) {
+    final EpochFormat epochFormat = EpochFormat.fromString(timeColumnFormat);
+    final boolean isEpochFormat = epochFormat != null;
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
       return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
-          timeColumnFormatToPinotFormat(timeColumnFormat),
-          periodToPinotFormat(granularity)
+          isEpochFormat ? epochFormat.dateTimeConvertString : simpleDateFormatToDateTimeConvertFormat(timeColumnFormat),
+          periodToDateTimeConvertFormat(granularity)
       );
     }
+
+    if (isEpochFormat && DATE_TRUNC_COMPATIBLE_PERIODS.contains(granularity)) {
+      // optimized expression for client use case - can be removed once https://github.com/apache/pinot/issues/8581 is closed
+      return String.format(
+          " DATETRUNC('%s', %s, '%s', '%s', 'MILLISECONDS') ",
+          DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.get(granularity),
+          timeColumn,
+          epochFormat.dateTruncFormatString,
+          timezone
+      );
+    }
+
     // workaround to bucket with a custom timezone - see https://github.com/apache/pinot/issues/8581
     return String.format(
         "FromDateTime(DATETIMECONVERT(%s, '%s', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(%s)', '%s'), 'yyyy-MM-dd HH:mm:ss.SSSZ') ",
         timeColumn,
-        timeColumnFormatToPinotFormat(timeColumnFormat),
+        isEpochFormat ? epochFormat.dateTimeConvertString : simpleDateFormatToDateTimeConvertFormat(timeColumnFormat),
         timezone,
-        periodToPinotFormat(granularity));
+        periodToDateTimeConvertFormat(granularity));
   }
 
-  private String timeColumnFormatToPinotFormat(String timeColumnFormat) {
-    switch (timeColumnFormat) {
-      case "EPOCH_MILLIS":
-      case "1:MILLISECONDS:EPOCH":
-        return "1:MILLISECONDS:EPOCH";
-      case "EPOCH":
-      case "1:SECONDS:EPOCH":
-        return "1:SECONDS:EPOCH";
-      case "EPOCH_HOURS":
-      case "1:HOURS:EPOCH":
-        return "1:HOURS:EPOCH";
-      default:
-        final String simpleDateFormatString = removeSimpleDateFormatPrefix(timeColumnFormat);
-        new SimpleDateFormat(simpleDateFormatString);
-        return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);
-    }
+  private String simpleDateFormatToDateTimeConvertFormat(String timeColumnFormat) {
+    final String simpleDateFormatString = removeSimpleDateFormatPrefix(timeColumnFormat);
+    new SimpleDateFormat(simpleDateFormatString);
+    return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);
   }
 
   @NonNull
@@ -139,7 +186,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
   }
 
-  private String periodToPinotFormat(final Period period) {
+  private String periodToDateTimeConvertFormat(final Period period) {
+    // see https://docs.pinot.apache.org/configuration-reference/functions/datetimeconvert
     if (period.getYears() > 0) {
       throw new RuntimeException(String.format(
           "Pinot datasource cannot round to yearly granularity: %s",

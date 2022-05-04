@@ -23,36 +23,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
-  enum EpochFormat {
-    MILLIS(List.of("EPOCH_MILLIS", "1:MILLISECONDS:EPOCH"), "1:MILLISECONDS:EPOCH", "MILLISECONDS"),
-    SECONDS(List.of("EPOCH", "1:SECONDS:EPOCH"), "1:SECONDS:EPOCH", "SECONDS"),
-    MINUTES(List.of("EPOCH_MINUTES", "1:MINUTES:EPOCH"), "1:MINUTES:EPOCH", "MINUTES"), // not implemented
-    HOURS(List.of("EPOCH_HOURS", "1:HOURS:EPOCH"), "1:HOURS:EPOCH", "HOURS");
-
-    private final List<String> userFacingStrings;
-    private final String dateTimeConvertString;
-    private final String dateTruncFormatString;
-
-    EpochFormat(final List<String> userFacingStrings,
-        final String dateTimeConvertString, final String dateTruncFormatString) {
-      this.userFacingStrings = userFacingStrings;
-      this.dateTimeConvertString = dateTimeConvertString;
-      this.dateTruncFormatString = dateTruncFormatString;
-    }
-
-    static EpochFormat fromString(String userTimeFormatInput) {
-      for (EpochFormat epochFormat:  EpochFormat.values()) {
-        for (String userFacingString: epochFormat.userFacingStrings) {
-          if (userFacingString.equals(userTimeFormatInput)) {
-            return epochFormat;
-          }
-        }
-      }
-      // not an epoch format
-      return null;
-    }
-  }
-
   private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
       Period.years(1), "year",
       Period.months(1), "month",
@@ -143,23 +113,22 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @Override
   public String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
       Period granularity, @Nullable final String timezone) {
-    final EpochFormat epochFormat = EpochFormat.fromString(timeColumnFormat);
-    final boolean isEpochFormat = epochFormat != null;
+    final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
       return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
-          isEpochFormat ? epochFormat.dateTimeConvertString : simpleDateFormatToDateTimeConvertFormat(timeColumnFormat),
+          timeFormat.getDateTimeConvertString(),
           periodToDateTimeConvertFormat(granularity)
       );
     }
 
-    if (isEpochFormat && DATE_TRUNC_COMPATIBLE_PERIODS.contains(granularity)) {
+    if (timeFormat.isEpochFormat() && DATE_TRUNC_COMPATIBLE_PERIODS.contains(granularity)) {
       // optimized expression for client use case - can be removed once https://github.com/apache/pinot/issues/8581 is closed
       return String.format(
           " DATETRUNC('%s', %s, '%s', '%s', 'MILLISECONDS') ",
           DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.get(granularity),
           timeColumn,
-          epochFormat.dateTruncFormatString,
+          timeFormat.getDateTruncString(),
           timezone
       );
     }
@@ -168,15 +137,9 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     return String.format(
         "FromDateTime(DATETIMECONVERT(%s, '%s', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(%s)', '%s'), 'yyyy-MM-dd HH:mm:ss.SSSZ') ",
         timeColumn,
-        isEpochFormat ? epochFormat.dateTimeConvertString : simpleDateFormatToDateTimeConvertFormat(timeColumnFormat),
+        timeFormat.getDateTimeConvertString(),
         timezone,
         periodToDateTimeConvertFormat(granularity));
-  }
-
-  private String simpleDateFormatToDateTimeConvertFormat(String timeColumnFormat) {
-    final String simpleDateFormatString = removeSimpleDateFormatPrefix(timeColumnFormat);
-    new SimpleDateFormat(simpleDateFormatString);
-    return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);
   }
 
   @NonNull
@@ -184,6 +147,12 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
     // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
     return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
+  }
+
+  private String simpleDateFormatToDateTimeConvertFormat(String timeColumnFormat) {
+    final String simpleDateFormatString = removeSimpleDateFormatPrefix(timeColumnFormat);
+    new SimpleDateFormat(simpleDateFormatString);
+    return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);
   }
 
   private String periodToDateTimeConvertFormat(final Period period) {
@@ -243,6 +212,70 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
             .toString();
       default:
         throw new UnsupportedOperationException();
+    }
+  }
+
+  /**
+   * Class that allows to match multiple user facing time format strings to a given time format.
+   * Can return the timeformat for different Pinot functions.
+   */
+  private static class TimeFormat {
+
+    private final String dateTimeConvertString;
+    private final String dateTruncString;
+    private final boolean isEpochFormat;
+
+    TimeFormat(String userFacingTimeColumnFormat) {
+      switch (userFacingTimeColumnFormat) {
+        case "EPOCH_MILLIS":
+        case "1:MILLISECONDS:EPOCH":
+          dateTimeConvertString = "1:MILLISECONDS:EPOCH";
+          dateTruncString = "MILLISECONDS";
+          isEpochFormat = true;
+          break;
+        case "EPOCH":
+        case "1:SECONDS:EPOCH":
+          dateTimeConvertString = "1:SECONDS:EPOCH";
+          dateTruncString = "SECONDS";
+          isEpochFormat = true;
+          break;
+        case "EPOCH_HOURS":
+        case "1:HOURS:EPOCH":
+          dateTimeConvertString = "1:HOURS:EPOCH";
+          dateTruncString = "HOURS";
+          isEpochFormat = true;
+          break;
+        case "EPOCH_MINUTES":
+        case "1:MINUTES:EPOCH":
+          dateTimeConvertString = "1:MINUTES:EPOCH";
+          dateTruncString = "MINUTES";
+          isEpochFormat = true;
+          break;
+        default:
+          // assume simple date format - fail if it's not the case
+          final String simpleDateFormatString = removeSimpleDateFormatPrefix(
+              userFacingTimeColumnFormat);
+          new SimpleDateFormat(simpleDateFormatString);
+          dateTimeConvertString = String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s",
+              userFacingTimeColumnFormat);
+          dateTruncString = null;
+          isEpochFormat = false;
+      }
+    }
+
+    public String getDateTimeConvertString() {
+      return dateTimeConvertString;
+    }
+
+    public String getDateTruncString() {
+      if (!isEpochFormat) {
+        throw new UnsupportedOperationException("Datetrunc is only compatible with epoch formats.");
+      }
+      return dateTruncString;
+    }
+
+    public boolean isEpochFormat() {
+      return isEpochFormat;
     }
   }
 }

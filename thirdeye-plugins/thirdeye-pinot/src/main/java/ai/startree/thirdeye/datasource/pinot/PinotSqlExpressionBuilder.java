@@ -149,12 +149,6 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
   }
 
-  private String simpleDateFormatToDateTimeConvertFormat(String timeColumnFormat) {
-    final String simpleDateFormatString = removeSimpleDateFormatPrefix(timeColumnFormat);
-    new SimpleDateFormat(simpleDateFormatString);
-    return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", timeColumnFormat);
-  }
-
   private String periodToDateTimeConvertFormat(final Period period) {
     // see https://docs.pinot.apache.org/configuration-reference/functions/datetimeconvert
     if (period.getYears() > 0) {

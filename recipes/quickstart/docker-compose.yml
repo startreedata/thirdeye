@@ -1,0 +1,86 @@
+#
+# Copyright (c) 2022 StarTree Inc. All rights reserved.
+# Confidential and Proprietary Information of StarTree Inc.
+#
+
+version: '3.9'
+
+services:
+  ui:
+    image: repo.startreedata.io/external-docker-registry/thirdeye-ui:latest
+    ports:
+      - "7005:8081"
+    environment:
+      NGINX_PORT: 8081
+      THIRDEYE_API_BASE_URL: "http://coordinator:8080"
+    volumes:
+      #  TODO: shounak refer this file from thirdeye-ui/docker/templates/default.conf.template once
+      #  the resolver is accepted as environment variable
+      - ./resources/default.conf.template:/home/thirdeye/nginx/templates/default.conf.template
+    depends_on:
+      coordinator:
+        condition: service_healthy
+  coordinator:
+    image: repo.startreedata.io/external-docker-registry/thirdeye:latest
+    ports:
+      - "7004:8080"
+      - "7003:8090"
+    volumes:
+      - ./resources/server.yaml:/home/thirdeye/thirdeye/config/server.yaml
+    command: server
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget" , "http://localhost:8080" ]
+      timeout: 15s
+      retries: 10
+  db:
+    image: mysql:8.0.28
+    ports:
+      - "7002:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: thirdeye_test
+      MYSQL_USER: uthirdeye
+      MYSQL_PASSWORD: pass
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 15s
+      retries: 10
+
+  pinot:
+    image: apachepinot/pinot:latest
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    command: QuickStart -type batch
+    healthcheck:
+      test: [ "CMD", "wget", "http://localhost:8000/query" ]
+      timeout: 15s
+      retries: 10
+
+  dataloader:
+    image: apachepinot/pinot:latest
+    volumes:
+      - ../../examples:/home/thirdeye/examples
+      - ./resources:/home/thirdeye/resources
+    environment:
+      DATASET: pageviews
+    working_dir: /home/thirdeye
+    entrypoint: ["sh", "resources/thirdeye-quickstart-pinot.sh"]
+    depends_on:
+      pinot:
+        condition: service_healthy
+
+  entityloader:
+    image: curlimages/curl
+    volumes:
+      - ./resources:/home/thirdeye/resources
+    environment:
+      DATASET: pageviews
+    working_dir: /home/thirdeye
+    entrypoint: [ "sh", "resources/thirdeye-quickstart.sh" ]
+    depends_on:
+      coordinator:
+        condition: service_healthy

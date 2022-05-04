@@ -101,7 +101,7 @@ public class RootCauseAnalysisInfoFetcher {
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
-    DateTimeZone timeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+    final DateTimeZone timeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
         .orElse(Constants.DEFAULT_TIMEZONE);
 
     return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);

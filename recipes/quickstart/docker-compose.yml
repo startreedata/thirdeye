@@ -56,18 +56,31 @@ services:
       - "8000:8000"
     command: QuickStart -type batch
     healthcheck:
-      test: [ "CMD", "wget" , "http://localhost:9000" ]
+      test: [ "CMD", "wget", "http://localhost:8000/query" ]
       timeout: 15s
       retries: 10
 
   dataloader:
-    build: .
+    image: apachepinot/pinot:latest
     volumes:
       - ../../examples:/home/thirdeye/examples
+      - ./resources:/home/thirdeye/resources
     environment:
       DATASET: pageviews
+    working_dir: /home/thirdeye
+    entrypoint: ["sh", "resources/thirdeye-quickstart-pinot.sh"]
     depends_on:
       pinot:
         condition: service_healthy
+
+  entityloader:
+    image: curlimages/curl
+    volumes:
+      - ./resources:/home/thirdeye/resources
+    environment:
+      DATASET: pageviews
+    working_dir: /home/thirdeye
+    entrypoint: [ "sh", "resources/thirdeye-quickstart.sh" ]
+    depends_on:
       coordinator:
         condition: service_healthy

@@ -45,7 +45,7 @@ import org.joda.time.format.ISOPeriodFormat;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RcaEventsResource {
+public class RcaRelatedResource {
 
   private static final String DEFAULT_LOOKBACK = "P7D";
   private static final String DEFAULT_LIMIT = "50";
@@ -55,7 +55,7 @@ public class RcaEventsResource {
   private final MergedAnomalyResultManager anomalyDAO;
 
   @Inject
-  public RcaEventsResource(
+  public RcaRelatedResource(
       final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher,
       final EventManager eventDAO,
       final MergedAnomalyResultManager anomalyDAO) {
@@ -65,7 +65,7 @@ public class RcaEventsResource {
   }
 
   @GET
-  @Path("/calendar/anomaly/{id}")
+  @Path("/events/anomaly/{id}")
   @ApiOperation(value = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
   public Response getCalendarEvents(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,

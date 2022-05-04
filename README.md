@@ -1,3 +1,4 @@
+
 # Introduction to ThirdEye
 [![Build Status](https://api.travis-ci.org/apache/incubator-pinot.svg?branch=master)](https://travis-ci.org/apache/incubator-pinot) [![license](https://img.shields.io/github/license/linkedin/pinot.svg)](LICENSE)
 
@@ -274,6 +275,9 @@ In other words, it’s a limitation on your use of ThirdEye to compete with our 
 
 ### Is the StarTree ThirdEye Community License a EULA?
 No, a EULA only gives you the right to use; the StarTree ThirdEye Community License grants other rights as well.
+
+### If the StarTree ThirdEye Open Source Software usage will be tracked?
+Yes. The StarTree ThirdEye Community License includes that the software usage will be tracked. The usage will include no PII data. Users who want access to the quick-start dockerized project will be required to provide their email address with a few additional details.
 
 
 

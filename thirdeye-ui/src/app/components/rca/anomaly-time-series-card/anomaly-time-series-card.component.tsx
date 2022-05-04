@@ -118,7 +118,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
 
     useEffect(() => {
         fetchAlertEvaluation();
-    }, [anomaly]);
+    }, [anomaly, startTsStr, endTsStr]);
 
     useEffect(() => {
         fetchFilteredAlertEvaluations();

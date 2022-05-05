@@ -14,6 +14,7 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
@@ -44,22 +45,22 @@ public class TimeFilterFunction implements MacroFunction {
     }
 
     // compute timeLimits
-    Interval detectionInterval = context.getDetectionInterval();
-    long minTimeMillis = detectionInterval.getStart()
-        .minus(Period.parse(lookbackFromStart, ISOPeriodFormat.standard()))
-        .getMillis();
-    long maxTimeMillis = detectionInterval.getEnd()
-        .minus(Period.parse(lookbackFromEnd, ISOPeriodFormat.standard()))
-        .getMillis();
+    final Interval detectionInterval = context.getDetectionInterval();
+    final DateTime filterLowerBound = detectionInterval.getStart()
+        .minus(Period.parse(lookbackFromStart, ISOPeriodFormat.standard()));
+    final DateTime filterUpperBound = detectionInterval.getEnd()
+        .minus(Period.parse(lookbackFromEnd, ISOPeriodFormat.standard()));
+    final Interval filterInterval = new Interval(filterLowerBound, filterUpperBound);
+
 
     //write time limits to metadata
     Map<String, String> properties = context.getProperties();
     properties.put(TIME_COLUMN.toString(), timeColumn);
-    properties.put(MIN_TIME_MILLIS.toString(), String.valueOf(minTimeMillis));
-    properties.put(MAX_TIME_MILLIS.toString(), String.valueOf(maxTimeMillis));
+    properties.put(MIN_TIME_MILLIS.toString(), String.valueOf(filterLowerBound.getMillis()));
+    properties.put(MAX_TIME_MILLIS.toString(), String.valueOf(filterUpperBound.getMillis()));
 
     // generate SQL expression
     return context.getSqlExpressionBuilder()
-        .getTimeFilterExpression(timeColumn, minTimeMillis, maxTimeMillis);
+        .getTimeFilterExpression(timeColumn, filterInterval);
   }
 }

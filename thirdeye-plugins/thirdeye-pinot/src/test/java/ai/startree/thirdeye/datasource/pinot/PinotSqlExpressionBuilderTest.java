@@ -8,25 +8,10 @@ package ai.startree.thirdeye.datasource.pinot;
 import static ai.startree.thirdeye.datasource.pinot.PinotSqlExpressionBuilder.removeSimpleDateFormatPrefix;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import org.testng.annotations.Test;
 
-public class PinotSqlExpressionBuilderTest {
-
-  //fixme cyril add test for timezone
-  @Test
-  public void testCyril() {
-    String simpleDateFormatString = removeSimpleDateFormatPrefix("yyyyMMdd");
-    final DateTimeFormatter utcDataDateTimeFormatter = DateTimeFormat.forPattern(
-        simpleDateFormatString).withZoneUTC();
-    final DateTimeFormatter cetDataDateTimeFormatter = DateTimeFormat.forPattern(
-        simpleDateFormatString).withZone(DateTimeZone.forID("Europe/Amsterdam"));
-    String utcBound = utcDataDateTimeFormatter.print(1651791600000L);
-    String cetBound = cetDataDateTimeFormatter.print(1651791600000L);
-    String lol ="lol";
-  }
+public class PinotSqlExpressionBuilderTest implements SqlExpressionBuilder {
 
   @Test
   public void TestRemoveSimpleDateFormatPrefixWithNoPrefix() {

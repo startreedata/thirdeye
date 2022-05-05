@@ -5,10 +5,13 @@
 
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.DaoFilterBuilder;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.TaskApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -29,15 +32,15 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 @Api(tags = "Task", authorizations = {@Authorization(value = "oauth")})
@@ -94,17 +97,24 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   }
 
   @DELETE
-  @Path("/cleanup")
+  @Path("/purge")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response cleanUp(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
-    final MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+  public Response cleanUp(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @ApiParam(value = "Older than (number of days)", defaultValue = "60") @QueryParam("olderThanInDays") @NotNull Integer nDays,
+      @ApiParam(value = "Max Entries to delete", defaultValue = "10000") @QueryParam("limit") @NotNull Integer limitOptional
+  ) {
     final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    final long twoMonthsBack = System.currentTimeMillis() - Duration.ofDays(60).toMillis();
-    map.add("created", "[lt]" + df.format(new Date(twoMonthsBack)));
+    final int nDaysToDelete = optional(nDays).orElse(60);
+    final long twoMonthsBack = System.currentTimeMillis() - Duration.ofDays(nDaysToDelete).toMillis();
+    final String formattedDate = df.format(new Date(twoMonthsBack));
 
+    final int limit = optional(limitOptional).orElse(10000);
     dtoManager
-        .filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(map))
+        .filter(new DaoFilter()
+            .setPredicate(Predicate.LT("createTime", formattedDate))
+            .setLimit(limit)
+        )
         .forEach(this::deleteDto);
     return Response.ok().build();
   }

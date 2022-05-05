@@ -11,6 +11,7 @@
         "component.metric": "met",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
         "anomaly.source": "absolute-change-template/root",
         "type": "ABSOLUTE_CHANGE",
         "component.pattern": "${pattern}"

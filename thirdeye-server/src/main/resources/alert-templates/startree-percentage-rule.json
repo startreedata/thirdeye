@@ -11,6 +11,7 @@
         "component.metric": "met",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
         "anomaly.source": "percentage-change-template/root",
         "type": "PERCENTAGE_CHANGE",
         "component.pattern": "${pattern}"

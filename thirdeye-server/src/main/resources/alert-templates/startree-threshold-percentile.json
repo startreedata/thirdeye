@@ -12,6 +12,7 @@
         "component.monitoringGranularity": "${monitoringGranularity}",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
         "anomaly.source": "threshold-template/root",
         "type": "THRESHOLD"
       },

@@ -21,6 +21,7 @@ public enum ThirdEyeStatus {
   ERR_ALERT_PIPELINE_EXECUTION("Failed to run alert pipeline. Error caused by : %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is null!"),
+  ERR_MISSING_NAME("name is null!"),
   ERR_NOTIFICATION_DISPATCH("%s"),
   ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),
   ERR_ID_UNEXPECTED_AT_CREATION("ID should be null at creation time."),

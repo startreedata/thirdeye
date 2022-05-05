@@ -228,8 +228,7 @@ public class CalciteRequest {
           quoteIdentifierIfReserved(timeFilterColumn, sqlParserConfig, dialect);
       final String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
           preparedTimeColumn,
-          timeFilterInterval.getStartMillis(),
-          timeFilterInterval.getEndMillis(),
+          timeFilterInterval,
           isAggregatedTimeColumn ? null : timeFilterColumnFormat,
           isAggregatedTimeColumn ? null : timeFilterColumnUnit);
       final SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);

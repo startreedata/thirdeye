@@ -68,9 +68,7 @@ public class MacroEngineTest {
         macroArgument);
 
     String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
-        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
-            INPUT_START_TIME,
-            INPUT_END_TIME));
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument, INPUT_INTERVAL));
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         macroArgument,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -90,9 +88,7 @@ public class MacroEngineTest {
         macroArgument);
 
     String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
-        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
-            INPUT_START_TIME,
-            INPUT_END_TIME));
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument, INPUT_INTERVAL));
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         macroArgument,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -164,7 +160,8 @@ public class MacroEngineTest {
     final String timeColumnFormatMacroArgQuoted =
         LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
     final Period granularityMacroArg = Period.ZERO;
-    final String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
+    final String granularityMacroArgQuoted =
+        LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
     final String timeZoneQuoted = LITERAL_QUOTE_STRING + timeZone + LITERAL_QUOTE_STRING;
 
     final String inputQuery = String.format("select __timeGroup(%s,%s,%s,%s) FROM tableName",
@@ -184,7 +181,6 @@ public class MacroEngineTest {
 
     prepareRequestAndAssert(inputQuery, expectedQuery, expectedProperties);
   }
-
 
   @Test
   public void testNestedMacro() {
@@ -206,8 +202,7 @@ public class MacroEngineTest {
         null);
     String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
         expectedTimeGroupMacro,
-        INPUT_START_TIME,
-        INPUT_END_TIME);
+        INPUT_INTERVAL);
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         expectedTimeGroupMacro,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -230,9 +225,7 @@ public class MacroEngineTest {
         macroArgument);
 
     String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
-        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
-            INPUT_START_TIME,
-            INPUT_END_TIME));
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument, INPUT_INTERVAL));
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.TIME_COLUMN.toString(),
         macroArgument,
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -268,13 +261,12 @@ public class MacroEngineTest {
     public static final String TIME_FILTER_MOCK = "TIME_FILTER_MACRO_EXPANDED";
 
     @Override
-    public String getTimeFilterExpression(final String column, final long minTimeMillisIncluded,
-        final long maxTimeMillisExcluded) {
+    public String getTimeFilterExpression(final String column, final Interval filterInterval) {
       return String.format("%s(%s, %s, %s)",
           TIME_FILTER_MOCK,
           column,
-          minTimeMillisIncluded,
-          maxTimeMillisExcluded);
+          filterInterval.getStartMillis(),
+          filterInterval.getEndMillis());
     }
 
     @Override

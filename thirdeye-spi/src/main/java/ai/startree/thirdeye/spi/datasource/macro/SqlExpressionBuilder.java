@@ -8,6 +8,7 @@ package ai.startree.thirdeye.spi.datasource.macro;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joda.time.Interval;
 import org.joda.time.Period;
 
 /**
@@ -25,14 +26,12 @@ public interface SqlExpressionBuilder {
    * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
    * Used by the macro __timeFilter().
-   * Expects the column to be in epoch milliseconds.
+   * Expects the column to be in epoch milliseconds. //fixme cyril add more choice
    *
    * @param timeColumn time column name
-   * @param minTimeMillisIncluded minimum epoch milliseconds - included
-   * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
+   * @param filterInterval interval to filter on. // fixme cyril explain timezone
    */
-  default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-      final long maxTimeMillisExcluded) {
+  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval) {
     throw new UnsupportedOperationException();
   }
 
@@ -52,14 +51,12 @@ public interface SqlExpressionBuilder {
    * runtime.
    *
    * @param timeColumn time column name
-   * @param minTimeMillisIncluded minimum epoch milliseconds - included
-   * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
+   * @param filterInterval interval to filter on. // fixme cyril explain timezone
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
-  default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-      final long maxTimeMillisExcluded, final @Nullable String timeFormat,
+  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval, final @Nullable String timeFormat,
       @Nullable final String timeUnit) {
     throw new UnsupportedOperationException();
   }

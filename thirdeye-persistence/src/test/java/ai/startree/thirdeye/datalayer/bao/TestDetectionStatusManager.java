@@ -11,6 +11,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import java.util.List;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.testng.Assert;
@@ -21,7 +22,7 @@ import org.testng.annotations.Test;
 public class TestDetectionStatusManager {
 
   private static final String collection1 = "my dataset1";
-  private final DateTime now = new DateTime();
+  private final DateTime now = new DateTime(DateTimeZone.UTC);
   private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMddHH");
   private Long detectionStatusId1;
   private Long detectionStatusId2;
@@ -57,7 +58,7 @@ public class TestDetectionStatusManager {
             true,
             2));
 
-    dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
+    dateMillis = new DateTime(dateMillis, DateTimeZone.UTC).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusId2 = detectionStatusDAO.
         save(DatalayerTestUtils.getTestDetectionStatus(collection1,
@@ -72,7 +73,7 @@ public class TestDetectionStatusManager {
             true,
             2));
 
-    dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
+    dateMillis = new DateTime(dateMillis, DateTimeZone.UTC).minusHours(1).getMillis();
     dateString = dateTimeFormatter.print(dateMillis);
     detectionStatusDAO
         .save(DatalayerTestUtils.getTestDetectionStatus(collection1,
@@ -97,7 +98,7 @@ public class TestDetectionStatusManager {
     Assert.assertEquals(detectionStatusDTO.isDetectionRun(), false);
 
     long dateMillis = dateTimeFormatter.parseMillis(dateString);
-    dateMillis = new DateTime(dateMillis).minusHours(1).getMillis();
+    dateMillis = new DateTime(dateMillis, DateTimeZone.UTC).minusHours(1).getMillis();
 
     List<DetectionStatusDTO> detectionStatusDTOs = detectionStatusDAO.
         findAllInTimeRangeForFunctionAndDetectionRun(dateMillis, now.getMillis(), 2, true);

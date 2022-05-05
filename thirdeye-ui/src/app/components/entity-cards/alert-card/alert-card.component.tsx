@@ -19,7 +19,7 @@ import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     getAlertsUpdatePath,
     getAlertsViewPath,
-    getAnomaliesAllPath,
+    getAnomaliesAllRangePath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -195,7 +195,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                 valueRenderer={(value) => {
                                     if (value) {
                                         const filteredAnomaliesUrl =
-                                            getAnomaliesAllPath(
+                                            getAnomaliesAllRangePath(
                                                 props.uiAlert?.name
                                             );
 

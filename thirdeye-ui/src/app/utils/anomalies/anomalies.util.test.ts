@@ -207,12 +207,18 @@ const mockEmptyUiAnomaly = {
     alertName: "label.no-data-marker",
     alertId: -1,
     current: "label.no-data-marker",
+    currentVal: -1,
     predicted: "label.no-data-marker",
+    predictedVal: -1,
     deviation: "label.no-data-marker",
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "label.no-data-marker",
+    durationVal: 0,
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
+    startTimeVal: -1,
+    endTimeVal: -1,
 };
 
 const mockAnomaly1 = {
@@ -270,10 +276,16 @@ const mockUiAnomaly1 = {
     current: "4",
     predicted: "5",
     deviation: "-0.2",
+    currentVal: 4,
+    predictedVal: 5,
+    deviationVal: -0.2,
     negativeDeviation: true,
     duration: "2 3",
+    durationVal: 1,
     startTime: "2",
     endTime: "3",
+    startTimeVal: 2,
+    endTimeVal: 3,
 };
 
 const mockUiAnomaly2 = {
@@ -284,10 +296,16 @@ const mockUiAnomaly2 = {
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
+    currentVal: -1,
+    predictedVal: -1,
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "8 9",
+    durationVal: 1,
     startTime: "8",
     endTime: "9",
+    startTimeVal: 8,
+    endTimeVal: 9,
 };
 
 const mockUiAnomaly3 = {
@@ -298,10 +316,16 @@ const mockUiAnomaly3 = {
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
+    currentVal: -1,
+    predictedVal: -1,
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "3 8",
+    durationVal: 5,
     startTime: "3",
     endTime: "8",
+    startTimeVal: 3,
+    endTimeVal: 8,
 };
 
 const mockUiAnomaly4 = {
@@ -312,10 +336,16 @@ const mockUiAnomaly4 = {
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
+    currentVal: -1,
+    predictedVal: -1,
+    deviationVal: -1,
     negativeDeviation: false,
     duration: "label.no-data-marker",
+    durationVal: 0,
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
+    startTimeVal: -1,
+    endTimeVal: -1,
 };
 
 const mockUiAnomaly5 = {
@@ -326,10 +356,16 @@ const mockUiAnomaly5 = {
     current: "0",
     predicted: "5",
     deviation: "-1",
+    currentVal: 0,
+    predictedVal: 5,
+    deviationVal: -1,
     negativeDeviation: true,
     duration: "100 110",
+    durationVal: 10,
     startTime: "100",
     endTime: "110",
+    startTimeVal: 100,
+    endTimeVal: 110,
 };
 
 const mockUiAnomalies = [

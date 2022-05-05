@@ -6,8 +6,8 @@
 package ai.startree.thirdeye.spi.detection;
 
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 
 /**
  * The baseline provider to calculate predicted baseline.

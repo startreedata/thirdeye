@@ -12,9 +12,10 @@ export const useGetEvaluation = (): GetEvaluation => {
         useHTTPAction<AlertEvaluation>(getAlertEvaluation);
 
     const getEvaluation = (
-        evaluationParams: UseGetEvaluationParams
+        evaluationParams: UseGetEvaluationParams,
+        filters?: string[]
     ): Promise<AlertEvaluation | undefined> => {
-        return makeRequest(evaluationParams);
+        return makeRequest(evaluationParams, filters);
     };
 
     return { evaluation: data, getEvaluation, status, errorMessages };

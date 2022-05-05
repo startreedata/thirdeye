@@ -4,9 +4,11 @@ import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    HelpLinkIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
+    TooltipV1,
 } from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
@@ -160,6 +162,27 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                 `label.${kebabCase(
                                     DatasourceWizardStep[currentWizardStep]
                                 )}`
+                            )}
+
+                            {currentWizardStep ===
+                                DatasourceWizardStep.DATASOURCE_CONFIGURATION && (
+                                <TooltipV1
+                                    placement="top"
+                                    title={
+                                        t(
+                                            "label.view-configuration-docs"
+                                        ) as string
+                                    }
+                                >
+                                    <span>
+                                        <HelpLinkIconV1
+                                            displayInline
+                                            enablePadding
+                                            externalLink
+                                            href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                        />
+                                    </span>
+                                </TooltipV1>
                             )}
                         </Typography>
                     </Grid>

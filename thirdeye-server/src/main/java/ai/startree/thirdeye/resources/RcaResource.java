@@ -10,13 +10,13 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.rca.RootCauseAnalysisService;
 import ai.startree.thirdeye.rca.RootCauseEntityFormatter;
+import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.RCAFramework;
 import ai.startree.thirdeye.rootcause.RCAFrameworkExecutionResult;
+import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.impl.TimeRangeEntity;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -62,7 +62,7 @@ public class RcaResource {
   private final List<RootCauseEntityFormatter> formatters;
   private final Map<String, RCAFramework> frameworks;
   private final RootCauseTemplateResource rootCauseTemplateResource;
-  private final RootCauseSessionResource rootCauseSessionResource;
+  private final RcaInvestigationResource rcaInvestigationResource;
   private final RootCauseMetricResource rootCauseMetricResource;
   private final DimensionAnalysisResource dimensionAnalysisResource;
 
@@ -70,13 +70,13 @@ public class RcaResource {
   public RcaResource(
       final RootCauseAnalysisService rootCauseAnalysisService,
       final RootCauseTemplateResource rootCauseTemplateResource,
-      final RootCauseSessionResource rootCauseSessionResource,
+      final RcaInvestigationResource rcaInvestigationResource,
       final RootCauseMetricResource rootCauseMetricResource,
       final DimensionAnalysisResource dimensionAnalysisResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.rootCauseTemplateResource = rootCauseTemplateResource;
-    this.rootCauseSessionResource = rootCauseSessionResource;
+    this.rcaInvestigationResource = rcaInvestigationResource;
     this.rootCauseMetricResource = rootCauseMetricResource;
     this.dimensionAnalysisResource = dimensionAnalysisResource;
   }
@@ -91,9 +91,9 @@ public class RcaResource {
     return rootCauseTemplateResource;
   }
 
-  @Path(value = "/sessions")
-  public RootCauseSessionResource getRootCauseSessionResource() {
-    return rootCauseSessionResource;
+  @Path(value = "/investigations")
+  public RcaInvestigationResource getRootCauseSessionResource() {
+    return rcaInvestigationResource;
   }
 
   @Path(value = "/metrics")

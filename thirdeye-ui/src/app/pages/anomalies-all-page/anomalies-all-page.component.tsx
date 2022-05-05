@@ -1,19 +1,22 @@
 import { Grid } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
+    TooltipV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
@@ -25,9 +28,12 @@ import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
-    const { getAnomalies, status: getAnomaliesRequestStatus } =
-        useGetAnomalies();
-    const { showDialog } = useDialog();
+    const {
+        getAnomalies,
+        status: getAnomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -70,8 +76,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiAnomaly.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
     };
@@ -109,13 +118,46 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         setSearchParams(searchParams);
     };
 
+    useEffect(() => {
+        if (getAnomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
+        }
+    }, [getAnomaliesRequestStatus, anomaliesRequestErrors]);
+
     return (
         <PageV1>
             <PageHeader
                 showCreateButton
                 showTimeRange
                 title={t("label.anomalies")}
-            />
+            >
+                <TooltipV1
+                    placement="top"
+                    title={
+                        t(
+                            "label.how-to-perform-root-cause-analysis-doc"
+                        ) as string
+                    }
+                >
+                    <span>
+                        <HelpLinkIconV1
+                            displayInline
+                            enablePadding
+                            externalLink
+                            href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                        />
+                    </span>
+                </TooltipV1>
+            </PageHeader>
 
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>

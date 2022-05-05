@@ -25,6 +25,8 @@ function useHTTPAction<DataResponseType>(
 
     const makeRequest = useCallback(async (...options) => {
         setStatus(ActionStatus.Working);
+        // Reset error message to avoid displaying previous errors
+        setErrorMessages([]);
         try {
             const fetchedData = await restFunction(...options);
             setData(fetchedData);
@@ -35,8 +37,8 @@ function useHTTPAction<DataResponseType>(
         } catch (error) {
             const axiosError = error as AxiosError;
             setData(null);
-            setStatus(ActionStatus.Error);
             setErrorMessages(getErrorMessages(axiosError));
+            setStatus(ActionStatus.Error);
         }
 
         return undefined;

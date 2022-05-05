@@ -11,13 +11,7 @@ import static java.util.Objects.requireNonNull;
 import static org.h2.tools.RunScript.execute;
 
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,18 +20,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
-import org.h2.engine.Constants;
-import org.h2.store.fs.FileUtils;
 import org.h2.tools.Server;
-import org.h2.util.ScriptReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ThirdEyeH2DatabaseServer {
 
   public static final String BASE_DIR = "../";
-  public static final String CREATE_SCHEMA_SQL =
-      BASE_DIR + "thirdeye-persistence/src/main/resources/db/create-schema.sql";
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeH2DatabaseServer.class);
 
   private final Server server;
@@ -91,22 +80,7 @@ public class ThirdEyeH2DatabaseServer {
     log.info(String.format("Working Dir: %s", System.getProperty("user.dir")));
     try {
       server.start();
-      checkState(new File(CREATE_SCHEMA_SQL).canRead());
       checkState(server.isRunning(true));
-
-      try (
-          final Connection connection = createConnection();
-          final InputStream in = FileUtils.newInputStream(CREATE_SCHEMA_SQL);
-          final Reader reader = new InputStreamReader(
-              new BufferedInputStream(in, Constants.IO_BUFFER_SIZE),
-              StandardCharsets.UTF_8)
-      ) {
-        final ScriptReader r = new ScriptReader(reader);
-        String sql;
-        while ((sql = r.readStatement()) != null) {
-          process(connection, sql);
-        }
-      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

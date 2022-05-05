@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
@@ -25,6 +25,7 @@ public class MetricConfigDTO extends AbstractDTO {
   private String alias;
   private Set<String> tags;
   private MetricType datatype;
+  @Deprecated // derived columns are named in Pinot + custom derived in TE not relevant anymore
   private String derivedMetricExpression;
   private String aggregationColumn;
   private MetricAggFunction defaultAggFunction;

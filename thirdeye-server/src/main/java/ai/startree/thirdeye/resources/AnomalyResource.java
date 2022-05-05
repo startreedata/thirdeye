@@ -45,11 +45,13 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResultDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("alert.id", "detectionConfigId")
       .put("startTime", "startTime")
       .put("endTime", "endTime")
       .put("isChild", "child")
+      .put("metadata.metric.name", "metric")
+      .put("metadata.dataset.name", "collection")
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
@@ -58,7 +60,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   public AnomalyResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager) {
-    super(mergedAnomalyResultManager, API_TO_BEAN_MAP);
+    super(mergedAnomalyResultManager, API_TO_INDEX_FILTER_MAP);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
   }

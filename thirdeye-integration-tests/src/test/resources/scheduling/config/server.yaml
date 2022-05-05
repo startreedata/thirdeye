@@ -29,11 +29,11 @@ auth:
   enabled: false
 
 database:
-  # Assuming a local MySQL server running on the default port 3306
-  url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
-  user: uthirdeye
-  password: pass
-  driver: com.mysql.cj.jdbc.Driver
+  # database info is set at runtime by the SchedulingTest with a test db
+  url: setByTest
+  user: setByTest
+  password: setByTest
+  driver: setByTest
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

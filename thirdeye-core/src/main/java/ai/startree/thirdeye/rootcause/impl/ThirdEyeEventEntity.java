@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
+import ai.startree.thirdeye.rootcause.Entity;
+import ai.startree.thirdeye.rootcause.entity.EntityType;
+import ai.startree.thirdeye.rootcause.entity.EventEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.rootcause.Entity;
-import ai.startree.thirdeye.spi.rootcause.impl.EntityType;
-import ai.startree.thirdeye.spi.rootcause.impl.EventEntity;
 import java.util.ArrayList;
 import java.util.List;
 

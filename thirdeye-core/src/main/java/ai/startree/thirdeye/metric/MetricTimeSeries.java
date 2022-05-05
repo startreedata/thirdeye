@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.metric;
 
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.util.NumberUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

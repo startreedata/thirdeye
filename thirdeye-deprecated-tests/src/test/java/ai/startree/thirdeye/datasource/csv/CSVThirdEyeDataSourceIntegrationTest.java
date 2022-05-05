@@ -11,16 +11,17 @@ import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.DataFrameUtils;
-import ai.startree.thirdeye.util.RequestContainer;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import java.net.URL;
@@ -83,25 +84,24 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     thirdEyeCacheRegistry.initializeCaches();
 
     MetricSlice slice = MetricSlice.from(configDTO.getId(), 0, 7200000);
-    RequestContainer requestContainer = makeAggregateRequest(slice,
+    ThirdEyeRequest thirdEyeRequest = makeAggregateRequest(slice,
         Collections.emptyList(),
         -1,
-        "ref",
-        thirdEyeCacheRegistry);
-    ThirdEyeResponse response = dataSourceCache
-        .getQueryResult(requestContainer.getRequest());
-    DataFrame df = DataFrameUtils.evaluateResponse(response, requestContainer,
-        thirdEyeCacheRegistry);
+        "ref");
+    ThirdEyeResponse response = dataSourceCache.getQueryResult(thirdEyeRequest);
+    DataFrame df = DataFrameUtils.evaluateResponse(response);
 
-    Assert.assertEquals(df.getDoubles(DataFrame.COL_VALUE).toList(),
+    Assert.assertEquals(df.getDoubles(Constants.COL_VALUE).toList(),
         Collections.singletonList(1503d));
   }
 
-  private RequestContainer makeAggregateRequest(MetricSlice slice, List<String> dimensions,
-      int limit, String reference, final ThirdEyeCacheRegistry thirdEyeCacheRegistry)
-      throws Exception {
-    return DataFrameUtils
-        .makeAggregateRequest(slice, dimensions, limit, reference, metricConfigDAO, datasetConfigDAO,
-            thirdEyeCacheRegistry);
+  private ThirdEyeRequest makeAggregateRequest(MetricSlice slice, List<String> dimensions,
+      int limit, String reference) {
+    return DataFrameUtils.makeAggregateRequest(slice,
+        dimensions,
+        limit,
+        reference,
+        metricConfigDAO,
+        datasetConfigDAO);
   }
 }

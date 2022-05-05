@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
+    HelpLinkIconV1,
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsCardV1,
     StepperV1,
+    TooltipV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import {
@@ -101,7 +103,9 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                     isEmpty(errMessages)
                         ? notify(
                               NotificationTypeV1.Error,
-                              t("message.fetch-error")
+                              t("message.error-while-fetching", {
+                                  entity: t("label.subscription-groups"),
+                              })
                           )
                         : errMessages.map((err) =>
                               notify(NotificationTypeV1.Error, err)
@@ -339,6 +343,26 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                         `label.${kebabCase(
                                             AlertWizardStep[currentWizardStep]
                                         )}`
+                                    )}
+                                    {currentWizardStep ===
+                                        AlertWizardStep.DETECTION_CONFIGURATION && (
+                                        <TooltipV1
+                                            placement="top"
+                                            title={
+                                                t(
+                                                    "label.view-configuration-docs"
+                                                ) as string
+                                            }
+                                        >
+                                            <span>
+                                                <HelpLinkIconV1
+                                                    displayInline
+                                                    enablePadding
+                                                    externalLink
+                                                    href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                                />
+                                            </span>
+                                        </TooltipV1>
                                     )}
                                 </Typography>
                             </Grid>

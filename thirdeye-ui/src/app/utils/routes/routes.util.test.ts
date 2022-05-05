@@ -11,6 +11,7 @@ import {
     getAlertTemplatesUpdatePath,
     getAlertTemplatesViewPath,
     getAnomaliesAllPath,
+    getAnomaliesAllRangePath,
     getAnomaliesAnomalyPath,
     getAnomaliesAnomalyViewPath,
     getAnomaliesPath,
@@ -74,6 +75,12 @@ describe("Routes Util", () => {
 
     it("getAnomaliesAllPath should return appropriate path with appropriate query string", () => {
         expect(getAnomaliesAllPath()).toEqual("/anomalies/all?testQueryString");
+    });
+
+    it("getAnomaliesAllRangePath should return appropriate path with appropriate query string", () => {
+        expect(getAnomaliesAllRangePath()).toEqual(
+            "/anomalies/all/range?testQueryString"
+        );
     });
 
     it("getAnomaliesAnomalyPath should return appropriate path with appropriate query string for id", () => {

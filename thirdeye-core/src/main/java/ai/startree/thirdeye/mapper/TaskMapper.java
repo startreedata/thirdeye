@@ -18,9 +18,13 @@ public interface TaskMapper {
 
   @Mapping(source = "job.id", target = "jobId")
   @Mapping(source = "job.jobName", target = "jobName")
+  @Mapping(source = "created", target = "createTime")
+  @Mapping(source = "updated", target = "updateTime")
   TaskDTO toDto(TaskApi api);
 
   @Mapping(target = "job.id", source = "jobId")
   @Mapping(target = "job.jobName", source = "jobName")
+  @Mapping(source = "createTime", target = "created")
+  @Mapping(source = "updateTime", target = "updated")
   TaskApi toApi(TaskDTO dto);
 }

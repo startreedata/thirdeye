@@ -33,12 +33,18 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         alertId: -1,
         alertName: noDataMarker,
         current: noDataMarker,
+        currentVal: -1,
         predicted: noDataMarker,
+        predictedVal: -1,
         deviation: noDataMarker,
+        deviationVal: -1,
         negativeDeviation: false,
         duration: noDataMarker,
+        durationVal: 0,
         startTime: noDataMarker,
         endTime: noDataMarker,
+        endTimeVal: -1,
+        startTimeVal: -1,
     };
 };
 
@@ -78,9 +84,11 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     // Current and predicted values
     if (isNumber(anomaly.avgCurrentVal)) {
         uiAnomaly.current = formatLargeNumberV1(anomaly.avgCurrentVal);
+        uiAnomaly.currentVal = anomaly.avgCurrentVal;
     }
     if (isNumber(anomaly.avgBaselineVal)) {
         uiAnomaly.predicted = formatLargeNumberV1(anomaly.avgBaselineVal);
+        uiAnomaly.predictedVal = anomaly.avgBaselineVal;
     }
 
     // Calculate deviation if both current and average values are available
@@ -89,15 +97,18 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;
         uiAnomaly.deviation = formatPercentageV1(deviation);
+        uiAnomaly.deviationVal = deviation;
         uiAnomaly.negativeDeviation = deviation < 0;
     }
 
     // Start and end time
     if (anomaly.startTime) {
         uiAnomaly.startTime = formatDateAndTimeV1(anomaly.startTime);
+        uiAnomaly.startTimeVal = anomaly.startTime;
     }
     if (anomaly.endTime) {
         uiAnomaly.endTime = formatDateAndTimeV1(anomaly.endTime);
+        uiAnomaly.endTimeVal = anomaly.endTime;
     }
 
     // Duration
@@ -106,6 +117,7 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
             anomaly.startTime,
             anomaly.endTime
         );
+        uiAnomaly.durationVal = anomaly.endTime - anomaly.startTime;
     }
 
     return uiAnomaly;

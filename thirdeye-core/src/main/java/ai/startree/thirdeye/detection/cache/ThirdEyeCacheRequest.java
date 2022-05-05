@@ -5,8 +5,8 @@
 
 package ai.startree.thirdeye.detection.cache;
 
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.util.CacheUtils;
 
 /**
@@ -42,7 +42,7 @@ public class ThirdEyeCacheRequest {
   }
 
   public long getMetricId() {
-    return request.getMetricFunctions().get(0).getMetricId();
+    return request.getMetricFunction().getMetricId();
   }
 
   public String getMetricUrn() {

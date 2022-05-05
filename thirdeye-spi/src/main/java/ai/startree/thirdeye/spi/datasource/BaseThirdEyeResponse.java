@@ -21,7 +21,8 @@ public abstract class BaseThirdEyeResponse implements ThirdEyeResponse {
   public BaseThirdEyeResponse(ThirdEyeRequest request, TimeSpec dataTimeSpec) {
     this.request = request;
     this.dataTimeSpec = dataTimeSpec;
-    this.metricFunctions = request.getMetricFunctions();
+    // todo cyril remove the list
+    this.metricFunctions = List.of(request.getMetricFunction());
     this.groupKeyColumns = new ArrayList<>();
     if (request.getGroupByTimeGranularity() != null) {
       groupKeyColumns.add(dataTimeSpec.getColumnName());
@@ -29,7 +30,7 @@ public abstract class BaseThirdEyeResponse implements ThirdEyeResponse {
     groupKeyColumns.addAll(request.getGroupBy());
     ArrayList<String> allColumnNameList = new ArrayList<>();
     allColumnNameList.addAll(request.getGroupBy());
-    for (MetricFunction function : request.getMetricFunctions()) {
+    for (MetricFunction function : List.of(request.getMetricFunction())) {
       allColumnNameList.add(function.toString());
     }
     allColumnNames = new String[allColumnNameList.size()];

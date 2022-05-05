@@ -8,16 +8,17 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.alert.AlertEvaluator.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.detection.v2.plan.AnomalyDetectorPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.DataFetcherPlanNode;
-import ai.startree.thirdeye.detection.v2.plan.IndexFillerPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaMetadataDTO;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.HashMap;
 import java.util.List;
 import org.testng.annotations.Test;
@@ -32,8 +33,10 @@ public class AlertEvaluatorTest {
   @Test
   public void testInjectFilters() {
     AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null, null);
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
+    datasetConfigDTO.setDataset(DATASET_NAME);
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
-        .setRca(new RcaMetadataDTO().setDataset(DATASET_NAME))
+        .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO))
         .setNodes(List.of(
             new PlanNodeBean().setName("root").setType(ANOMALY_DETECTOR_TYPE),
             new PlanNodeBean().setName("indexFiller1").setType(INDEX_FILLER_TYPE),
@@ -58,7 +61,7 @@ public class AlertEvaluatorTest {
     assertThat(alertTemplateDTO.getNodes().get(4).getParams().get(EVALUATION_FILTERS_KEY)).isNotNull();
 
     // check the filter value for one data fetcher
-    List<TimeseriesFilter> injectedFilters = (List<TimeseriesFilter>) alertTemplateDTO
+    List<QueryPredicate> injectedFilters = (List<QueryPredicate>) alertTemplateDTO
         .getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY);
     assertThat(injectedFilters.size()).isEqualTo(1);
     assertThat(injectedFilters.get(0).getDataset()).isEqualTo(DATASET_NAME);

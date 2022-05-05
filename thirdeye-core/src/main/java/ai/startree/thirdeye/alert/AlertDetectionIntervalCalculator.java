@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.alert;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
@@ -27,10 +28,19 @@ import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Compute a detection interval, based on task start and end.
+ * Applies completenessDelay and monitoringGranularity rounding.
+ * Applies timezone.
+ *
+ * For detections/evaluations, this is the entrypoint that changes long startTime and endTimes into
+ * an Interval detectionInterval with a timeZone.
+ */
 @Singleton
 public class AlertDetectionIntervalCalculator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+  private static final Interval DUMMY_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
@@ -41,14 +51,13 @@ public class AlertDetectionIntervalCalculator {
   public Interval getCorrectedInterval(final AlertApi alertApi, final long taskStartMillis,
       final long taskEndMillis) throws IOException, ClassNotFoundException {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
-        0L,
-        0L);
+        DUMMY_INTERVAL);
     // alertApi does not have an idea if it's new alert tested in the create alert flow
-    long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
+    final long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
 
     return getCorrectedInterval(alertId,
-        new DateTime(taskStartMillis, DateTimeZone.UTC),
-        new DateTime(taskEndMillis, DateTimeZone.UTC),
+        taskStartMillis,
+        taskEndMillis,
         templateWithProperties);
   }
 
@@ -64,19 +73,23 @@ public class AlertDetectionIntervalCalculator {
       final long taskEndMillis) throws IOException, ClassNotFoundException {
     // render properties - startTime/endTime not important - objective is to get metadata
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-        0L,
-        0L);
+        DUMMY_INTERVAL);
 
     return getCorrectedInterval(alertDTO.getId(),
-        new DateTime(taskStartMillis, DateTimeZone.UTC),
-        new DateTime(taskEndMillis, DateTimeZone.UTC),
+        taskStartMillis,
+        taskEndMillis,
         templateWithProperties);
   }
 
   @NotNull
   @VisibleForTesting
-  protected static Interval getCorrectedInterval(final long alertId, final DateTime taskStart,
-      final DateTime taskEnd, final AlertTemplateDTO templateWithProperties) {
+  protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
+      final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
+    final DateTimeZone dateTimeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+        .orElse(Constants.DEFAULT_TIMEZONE);
+    final DateTime taskStart = new DateTime(taskStartMillis, dateTimeZone);
+    final DateTime taskEnd = new DateTime(taskEndMillis, dateTimeZone);
+
     DateTime correctedStart = taskStart;
     DateTime correctedEnd = taskEnd;
     // apply delay correction
@@ -105,6 +118,8 @@ public class AlertDetectionIntervalCalculator {
     }
 
     // apply granularity correction
+    // granularity correction is compatible with datetimezone, but UTC is hardcoded above
+    // given that grouping is performed by Pinot, it is UTC grouping - other dbs may manage timezone-aware grouping
     final Period granularity = getGranularity(templateWithProperties);
     if (granularity != null) {
       // if alert has already run: start = lastTimestamp = correctedEnd = floor(end) and floor(floor(x)) = floor(x)
@@ -122,6 +137,13 @@ public class AlertDetectionIntervalCalculator {
     }
 
     return new Interval(correctedStart, correctedEnd);
+  }
+
+  public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
+    return Optional.ofNullable(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getTimezone)
+        .map(DateTimeZone::forID)
+        .orElse(null);
   }
 
   @Nullable

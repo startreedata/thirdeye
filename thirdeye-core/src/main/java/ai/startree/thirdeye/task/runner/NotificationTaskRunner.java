@@ -23,6 +23,7 @@ import ai.startree.thirdeye.task.TaskContext;
 import ai.startree.thirdeye.task.TaskResult;
 import ai.startree.thirdeye.task.TaskRunner;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * The Detection alert task runner. This runner looks for the new anomalies and run the detection
@@ -49,6 +51,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
+  private final Histogram notificationTaskDuration;
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
 
@@ -66,6 +69,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
+    notificationTaskDuration = metricRegistry.histogram("notificationTaskDuration");
     this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
   }
@@ -100,12 +104,14 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
+    final long tStart = System.currentTimeMillis();
     notificationTaskCounter.inc();
 
     final SubscriptionGroupDTO subscriptionGroupDTO = getSubscriptionGroupDTO(subscriptionGroupId);
 
     executeInternal(subscriptionGroupDTO);
     notificationTaskSuccessCounter.inc();
+    notificationTaskDuration.update(System.currentTimeMillis() - tStart);
     return Collections.emptyList();
   }
 

@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 public abstract class AbstractManagerImpl<E extends AbstractDTO> implements AbstractManager<E> {
 
@@ -94,7 +95,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   @Override
   @Transactional
   public int deleteRecordsOlderThanDays(final int days) {
-    final DateTime expireDate = new DateTime().minusDays(days);
+    final DateTime expireDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     final Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
     final Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
     return deleteByPredicate(timestampPredicate);

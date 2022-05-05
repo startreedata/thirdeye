@@ -5,11 +5,13 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./app";
 import { AuthProviderWrapper } from "./components/auth-provider-wrapper/auth-provider-wrapper.component";
-import { DialogProvider } from "./components/dialogs/dialog-provider/dialog-provider.component";
 import { TimeRangeProvider } from "./components/time-range/time-range-provider/time-range-provider.component";
 import "./platform/assets/styles/fonts.scss";
 import "./platform/assets/styles/layout.scss";
-import { NotificationProviderV1 } from "./platform/components";
+import {
+    DialogProviderV1,
+    NotificationProviderV1,
+} from "./platform/components";
 import { lightV1 } from "./platform/utils";
 import { initLocale } from "./utils/locale/locale.util";
 
@@ -31,9 +33,9 @@ ReactDOM.render(
                 <NotificationProviderV1>
                     <AuthProviderWrapper>
                         <TimeRangeProvider>
-                            <DialogProvider>
+                            <DialogProviderV1>
                                 <App />
-                            </DialogProvider>
+                            </DialogProviderV1>
                         </TimeRangeProvider>
                     </AuthProviderWrapper>
                 </NotificationProviderV1>

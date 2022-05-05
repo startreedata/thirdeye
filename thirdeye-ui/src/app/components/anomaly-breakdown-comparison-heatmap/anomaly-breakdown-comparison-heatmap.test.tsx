@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
 jest.mock("../../platform/components", () => ({
@@ -29,6 +29,17 @@ jest.mock("../no-data-indicator/no-data-indicator.component", () => ({
         .mockImplementation(() => <span>MockedNoDataIndicator</span>),
 }));
 
+jest.mock("react-router-dom", () => ({
+    useSearchParams: jest.fn().mockImplementation(() => [
+        {
+            get: mockSearchParamsGet,
+            set: mockSearchParamsSet,
+            delete: mockSearchParamsDelete,
+        },
+        jest.fn(),
+    ]),
+}));
+
 describe("AnomalyBreakdownComparisonHeatmap", () => {
     beforeEach(() => {
         mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
@@ -37,12 +48,14 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
     });
 
     it("should show all the UI components for valid data responses", async () => {
-        expect.assertions(8);
+        expect.assertions(7);
 
         render(
             <AnomalyBreakdownComparisonHeatmap
-                anomaly={mockAnomalyDetailsResponse as Anomaly}
                 anomalyId={451751}
+                chartTimeSeriesFilterSet={[]}
+                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                onAddFilterSetClick={() => null}
             />
         );
 
@@ -52,12 +65,6 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         );
 
         expect(filterDataControlsContainer).toBeInTheDocument();
-
-        const tooltipReferenceContainer = await screen.findByText(
-            "Tooltip Reference"
-        );
-
-        expect(tooltipReferenceContainer).toBeInTheDocument();
 
         // Ensure a treemap shows for each dimension in the data payload.
         // These are the labels for each treemap
@@ -80,13 +87,15 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
     });
 
     it("should show filter pill when tile is clicked and removed when clicked on", async () => {
-        expect.assertions(2);
+        expect.assertions(4);
 
         render(
             <AnomalyBreakdownComparisonHeatmap
-                anomaly={mockAnomalyDetailsResponse as Anomaly}
                 anomalyId={451751}
+                chartTimeSeriesFilterSet={[]}
+                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
                 shouldTruncateText={false}
+                onAddFilterSetClick={() => null}
             />
         );
 
@@ -94,6 +103,11 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         fireEvent.click(chromeTile);
 
         const chromePill = await screen.findByText(/browser=chrome/);
+
+        expect(mockSearchParamsSet).toHaveBeenLastCalledWith(
+            "heatmapFilters",
+            "browser=chrome"
+        );
 
         // Check chromePill so typescript does not complain
         if (!chromePill || !chromePill.parentElement) {
@@ -105,6 +119,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         fireEvent.click(chromePill.parentElement.children[1]);
 
         expect(chromePill).not.toBeInTheDocument();
+        expect(mockSearchParamsDelete).toHaveBeenCalledWith("heatmapFilters");
     });
 
     it("should call notify indicating error if data requests errors", async () => {
@@ -114,8 +129,10 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
 
         render(
             <AnomalyBreakdownComparisonHeatmap
-                anomaly={mockAnomalyDetailsResponse as Anomaly}
                 anomalyId={451751}
+                chartTimeSeriesFilterSet={[]}
+                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                onAddFilterSetClick={() => null}
             />
         );
 
@@ -181,22 +198,11 @@ const MOCK_HEATMAP_DATA_RESPONSE = {
     },
 };
 
-const mockAnomalyDetailsResponse = {
-    id: 451751,
-    startTime: 1585353600000,
-    endTime: 1585526400000,
-    avgCurrentVal: 360957.0,
-    avgBaselineVal: 196314.0,
-    score: 0.0,
-    weight: 0.0,
-    impactToGlobal: 0.0,
-    sourceType: "ANOMALY_REPLAY",
-    created: 1640811064046,
-    notified: true,
-    alert: { id: 451747, name: "pageviews-percentage-change" },
-};
-
 const mockNotify = jest.fn();
 let mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
     MOCK_HEATMAP_DATA_RESPONSE
 );
+
+const mockSearchParamsGet = jest.fn();
+const mockSearchParamsSet = jest.fn();
+const mockSearchParamsDelete = jest.fn();

@@ -5,9 +5,10 @@
 
 package ai.startree.thirdeye.spi.detection.model;
 
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -27,14 +28,14 @@ public class TimeSeries {
 
   public TimeSeries(LongSeries timestamps, DoubleSeries baselineValues) {
     this.df = new DataFrame();
-    this.df.addSeries(DataFrame.COL_TIME, timestamps).setIndex(DataFrame.COL_TIME);
-    this.df.addSeries(DataFrame.COL_VALUE, baselineValues);
+    this.df.addSeries(Constants.COL_TIME, timestamps).setIndex(Constants.COL_TIME);
+    this.df.addSeries(Constants.COL_VALUE, baselineValues);
   }
 
   public TimeSeries(LongSeries timestamps, DoubleSeries baselineValues, DoubleSeries currentValues,
       DoubleSeries upperBoundValues, DoubleSeries lowerBoundValues) {
     this(timestamps, baselineValues);
-    this.df.addSeries(DataFrame.COL_CURRENT, currentValues);
+    this.df.addSeries(Constants.COL_CURRENT, currentValues);
     this.df.addSeries(COL_UPPER_BOUND, upperBoundValues);
     this.df.addSeries(COL_LOWER_BOUND, lowerBoundValues);
   }
@@ -67,12 +68,12 @@ public class TimeSeries {
    */
   public static TimeSeries empty() {
     TimeSeries ts = new TimeSeries();
-    ts.df.addSeries(DataFrame.COL_TIME, LongSeries.empty())
-        .addSeries(DataFrame.COL_VALUE, DoubleSeries.empty())
-        .addSeries(DataFrame.COL_CURRENT, DoubleSeries.empty())
+    ts.df.addSeries(Constants.COL_TIME, LongSeries.empty())
+        .addSeries(Constants.COL_VALUE, DoubleSeries.empty())
+        .addSeries(Constants.COL_CURRENT, DoubleSeries.empty())
         .addSeries(COL_UPPER_BOUND, DoubleSeries.empty())
         .addSeries(COL_LOWER_BOUND, DoubleSeries.empty())
-        .setIndex(DataFrame.COL_TIME);
+        .setIndex(Constants.COL_TIME);
     return ts;
   }
 
@@ -83,15 +84,15 @@ public class TimeSeries {
    * @return TimeSeries that contains the predicted values.
    */
   public static TimeSeries fromDataFrame(DataFrame df) {
-    Preconditions.checkArgument(df.contains(DataFrame.COL_TIME));
-    Preconditions.checkArgument(df.contains(DataFrame.COL_VALUE));
+    Preconditions.checkArgument(df.contains(Constants.COL_TIME));
+    Preconditions.checkArgument(df.contains(Constants.COL_VALUE));
     TimeSeries ts = new TimeSeries();
     // time stamp
-    ts.df.addSeries(DataFrame.COL_TIME, df.get(DataFrame.COL_TIME)).setIndex(DataFrame.COL_TIME);
+    ts.df.addSeries(Constants.COL_TIME, df.get(Constants.COL_TIME)).setIndex(Constants.COL_TIME);
     // predicted baseline values
-    addSeries(ts, df, DataFrame.COL_VALUE);
+    addSeries(ts, df, Constants.COL_VALUE);
     // current values
-    addSeries(ts, df, DataFrame.COL_CURRENT);
+    addSeries(ts, df, Constants.COL_CURRENT);
     // upper bound
     addSeries(ts, df, COL_UPPER_BOUND);
     // lower bound
@@ -100,15 +101,15 @@ public class TimeSeries {
   }
 
   public DoubleSeries getCurrent() {
-    return this.df.getDoubles(DataFrame.COL_CURRENT);
+    return this.df.getDoubles(Constants.COL_CURRENT);
   }
 
   public LongSeries getTime() {
-    return this.df.getLongs(DataFrame.COL_TIME);
+    return this.df.getLongs(Constants.COL_TIME);
   }
 
   public DoubleSeries getPredictedBaseline() {
-    return this.df.getDoubles(DataFrame.COL_VALUE);
+    return this.df.getDoubles(Constants.COL_VALUE);
   }
 
   public boolean hasUpperBound() {

@@ -6,19 +6,23 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
-import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
+import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,7 +49,7 @@ public class DataSourceCache {
   private final Map<String, DataSourceWrapper> cache = new HashMap<>();
 
   private final Counter datasourceExceptionCounter;
-  private final Counter datasourceDurationCounter;
+  private final Histogram datasourceCallDuration;
   private final Counter datasourceCallCounter;
 
   @Inject
@@ -58,7 +62,7 @@ public class DataSourceCache {
     executorService = Executors.newCachedThreadPool();
 
     datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
-    datasourceDurationCounter = metricRegistry.counter("datasourceDurationCounter");
+    datasourceCallDuration = metricRegistry.histogram("datasourceCallDuration");
     datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
   }
 
@@ -66,14 +70,14 @@ public class DataSourceCache {
     final Optional<DataSourceDTO> dataSource = findByName(name);
 
     // datasource absent in DB
-    if(dataSource.isEmpty()) {
+    if (dataSource.isEmpty()) {
       // remove redundant cache if datasource was recently deleted
       removeDataSource(name);
-      throw badRequest(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
+      throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
     }
     final DataSourceWrapper cachedEntry = cache.get(name);
     if (cachedEntry != null) {
-      if(cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
+      if (cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
         // cache hit
         return cachedEntry.getDataSource();
       }
@@ -111,6 +115,26 @@ public class DataSourceCache {
     return thirdEyeDataSource;
   }
 
+  public DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
+      throws Exception {
+    datasourceCallCounter.inc();
+    final long tStart = System.nanoTime();
+    try {
+      final ThirdEyeDataSource thirdEyeDataSource = getDataSource(dataSource);
+      final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
+          thirdEyeDataSource.getSqlExpressionBuilder());
+      // table info is only used with legacy Pinot client - should be removed
+      final ThirdEyeRequestV2 requestV2 = new ThirdEyeRequestV2(null, query, Map.of());
+      return thirdEyeDataSource.fetchDataTable(requestV2).getDataFrame();
+    } catch (final Exception e) {
+      datasourceExceptionCounter.inc();
+      throw e;
+    } finally {
+      datasourceCallDuration.update(System.nanoTime() - tStart);
+    }
+  }
+
+  @Deprecated
   public ThirdEyeResponse getQueryResult(final ThirdEyeRequest request) throws Exception {
     datasourceCallCounter.inc();
     final long tStart = System.nanoTime();
@@ -122,14 +146,30 @@ public class DataSourceCache {
       datasourceExceptionCounter.inc();
       throw e;
     } finally {
-      datasourceDurationCounter.inc(System.nanoTime() - tStart);
+      datasourceCallDuration.update(System.nanoTime() - tStart);
     }
   }
 
+  public Future<DataFrame> getQueryResultAsync(final CalciteRequest request,
+      final String dataSource) {
+    return executorService.submit(() -> getQueryResult(request, dataSource));
+  }
+
+  @Deprecated
   public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request) {
     return executorService.submit(() -> getQueryResult(request));
   }
 
+  public Map<CalciteRequest, Future<DataFrame>> getQueryResultsAsync(
+      final List<CalciteRequest> requests, final String dataSource) {
+    final Map<CalciteRequest, Future<DataFrame>> responseFuturesMap = new LinkedHashMap<>();
+    for (final CalciteRequest request : requests) {
+      responseFuturesMap.put(request, getQueryResultAsync(request, dataSource));
+    }
+    return responseFuturesMap;
+  }
+
+  @Deprecated
   public Map<ThirdEyeRequest, Future<ThirdEyeResponse>> getQueryResultsAsync(
       final List<ThirdEyeRequest> requests) {
     final Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();

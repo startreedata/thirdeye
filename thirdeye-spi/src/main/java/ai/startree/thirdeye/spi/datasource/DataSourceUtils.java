@@ -6,9 +6,7 @@
 package ai.startree.thirdeye.spi.datasource;
 
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -92,15 +90,6 @@ public class DataSourceUtils {
     return new TimeSpec(datasetConfig.getTimeColumn(),
         new TimeGranularity(datasetConfig.getTimeDuration(), datasetConfig.getTimeUnit()),
         timeFormat);
-  }
-
-  public static MetricConfigDTO getMetricConfigFromId(Long metricId,
-      final MetricConfigManager metricConfigManager) {
-    MetricConfigDTO metricConfig = null;
-    if (metricId != null) {
-      metricConfig = metricConfigManager.findById(metricId);
-    }
-    return metricConfig;
   }
 
   public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildResponseCache(

@@ -9,9 +9,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public class ThirdEyeResultSetUtils {
     if (numGroupByKeys > 0) {
       hasGroupBy = true;
     }
-    int numMetrics = request.getMetricFunctions().size();
+    int numMetrics = 1;
     int numCols = numGroupByKeys + numMetrics;
     boolean hasGroupByTime = false;
     if (request.getGroupByTimeGranularity() != null) {

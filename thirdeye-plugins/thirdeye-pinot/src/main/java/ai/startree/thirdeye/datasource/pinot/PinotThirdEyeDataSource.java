@@ -25,14 +25,13 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetDataTable;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.rootcause.util.EntityUtils;
-import ai.startree.thirdeye.spi.rootcause.util.FilterPredicate;
+import ai.startree.thirdeye.spi.util.FilterPredicate;
+import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ArrayListMultimap;
@@ -182,68 +181,67 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       LinkedHashMap<MetricFunction, List<ThirdEyeResultSet>> metricFunctionToResultSetList = new LinkedHashMap<>();
 
       TimeSpec timeSpec = null;
-      for (MetricFunction metricFunction : request.getMetricFunctions()) {
-        String dataset = metricFunction.getDataset();
-        DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
-        TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-        if (timeSpec == null) {
-          timeSpec = dataTimeSpec;
-        }
+      final MetricFunction metricFunction = request.getMetricFunction();
+      String dataset = metricFunction.getDataset();
+      DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
+      TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+      if (timeSpec == null) {
+        timeSpec = dataTimeSpec;
+      }
 
-        MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
-        Multimap<String, String> filterSetFromView;
-        Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
-        if (metricConfig != null && metricConfig.getViews() != null
-            && metricConfig.getViews().size() > 0) {
-          Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
-          filterContextMap = convertToContextMap(viewToTEResultSet);
-          filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
-        } else {
-          filterSetFromView = request.getFilterSet();
-        }
+      MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
+      Multimap<String, String> filterSetFromView;
+      Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
+      if (metricConfig != null && metricConfig.getViews() != null
+          && metricConfig.getViews().size() > 0) {
+        Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
+        filterContextMap = convertToContextMap(viewToTEResultSet);
+        filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
+      } else {
+        filterSetFromView = request.getFilterSet();
+      }
 
-        Multimap<String, String> decoratedFilterSet = filterSetFromView;
-        // Decorate filter set for pre-computed (non-additive) dataset
-        // NOTE: We do not decorate the filter if the metric name is '*', which is used by count(*) query, because
-        // the results are usually meta-data and should be shown regardless the filter setting.
-        if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
-          decoratedFilterSet =
-              generateFilterSetWithPreAggregatedDimensionValue(filterSetFromView,
-                  request.getGroupBy(),
-                  datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
-                  datasetConfig.getPreAggregatedKeyword());
-        }
-        String sql;
-        if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
-          sql = SqlUtils
-              .getDimensionAsMetricSql(request, metricFunction, decoratedFilterSet,
-                  filterContextMap, dataTimeSpec,
-                  datasetConfig);
-        } else {
-          sql = SqlUtils
-              .getSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
-        }
+      Multimap<String, String> decoratedFilterSet = filterSetFromView;
+      // Decorate filter set for pre-computed (non-additive) dataset
+      // NOTE: We do not decorate the filter if the metric name is '*', which is used by count(*) query, because
+      // the results are usually meta-data and should be shown regardless the filter setting.
+      if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
+        decoratedFilterSet =
+            generateFilterSetWithPreAggregatedDimensionValue(filterSetFromView,
+                request.getGroupBy(),
+                datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
+                datasetConfig.getPreAggregatedKeyword());
+      }
+      String sql;
+      if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
+        sql = SqlUtils
+            .getDimensionAsMetricSql(request, metricFunction, decoratedFilterSet,
+                filterContextMap, dataTimeSpec,
+                datasetConfig);
+      } else {
+        sql = SqlUtils
+            .getSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
+      }
 
-        ThirdEyeResultSetGroup resultSetGroup;
-        final long tStartFunction = System.nanoTime();
-        try {
-          resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
-          if (metricConfig != null) {
+      ThirdEyeResultSetGroup resultSetGroup;
+      final long tStartFunction = System.nanoTime();
+      try {
+        resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
+        if (metricConfig != null) {
 //            RequestStatisticsLogger.getRequestLog()
 //                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
 //                    tStartFunction, System.nanoTime());
-          }
-        } catch (Exception e) {
-          if (metricConfig != null) {
+        }
+      } catch (Exception e) {
+        if (metricConfig != null) {
 //            RequestStatisticsLogger.getRequestLog()
 //                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
 //                    tStartFunction, System.nanoTime(), e);
-          }
-          throw e;
         }
-
-        metricFunctionToResultSetList.put(metricFunction, resultSetGroup.getResultSets());
+        throw e;
       }
+
+      metricFunctionToResultSetList.put(metricFunction, resultSetGroup.getResultSets());
 
       List<String[]> resultRows = ThirdEyeResultSetUtils
           .parseResultSets(request, metricFunctionToResultSetList,
@@ -340,11 +338,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     Multimap<String, String> resolvedFilterSet = ArrayListMultimap.create();
     for (Map.Entry<String, String> filterEntry : unresolvedFilterSet.entries()) {
       String value = filterEntry.getValue();
-      boolean isFilterOpExists = EntityUtils.isFilterOperatorExists(value);
+      boolean isFilterOpExists = SpiUtils.isFilterOperatorExists(value);
       if (!isFilterOpExists) {
         value = EQUALS + value;
       }
-      FilterPredicate filterPredicate = EntityUtils
+      FilterPredicate filterPredicate = SpiUtils
           .extractFilterPredicate(filterEntry.getKey() + value);
       String[] fullyQualifiedColumnNameTokens = extractView(filterPredicate.getValue());
 

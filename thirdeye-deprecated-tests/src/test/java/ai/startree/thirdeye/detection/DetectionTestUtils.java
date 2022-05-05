@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.detection;
 
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collections;

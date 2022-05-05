@@ -9,12 +9,13 @@ import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.DAORegistry;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.detection.events.EventType;
+import ai.startree.thirdeye.spi.events.EventType;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -26,10 +27,10 @@ public class TestHolidayEventProvider {
 
     long testEventId;
     HolidayEventProvider holidayEventProvider = null;
-    long hoursAgo5 = new DateTime().minusHours(5).getMillis();
-    long hoursAgo4 = new DateTime().minusHours(4).getMillis();
-    long hoursAgo3 = new DateTime().minusHours(3).getMillis();
-    long hoursAgo2 = new DateTime().minusHours(2).getMillis();
+    long hoursAgo5 = new DateTime(DateTimeZone.UTC).minusHours(5).getMillis();
+    long hoursAgo4 = new DateTime(DateTimeZone.UTC).minusHours(4).getMillis();
+    long hoursAgo3 = new DateTime(DateTimeZone.UTC).minusHours(3).getMillis();
+    long hoursAgo2 = new DateTime(DateTimeZone.UTC).minusHours(2).getMillis();
 
     private TestDbEnv testDAOProvider;
     private EventManager eventDAO;

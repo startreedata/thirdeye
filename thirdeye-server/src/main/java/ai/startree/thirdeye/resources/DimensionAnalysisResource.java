@@ -5,6 +5,9 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_RCA_DIM_ANALYSIS;
+import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+
 import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
@@ -33,6 +36,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -54,7 +58,7 @@ public class DimensionAnalysisResource {
 
   private static final String DEFAULT_BASELINE_OFFSET = "P1W";
   public static final String DEFAULT_HIERARCHIES = "[]";
-  public static final String DEFAULT_ONE_SIDE_ERROR = "false";
+  public static final String DEFAULT_ONE_SIDE_ERROR = "true";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
@@ -116,20 +120,26 @@ public class DimensionAnalysisResource {
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
-    DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
-        rootCauseAnalysisInfo.getMetricConfigDTO().getName(),
-        rootCauseAnalysisInfo.getDatasetConfigDTO().getName(),
-        currentInterval,
-        baselineInterval,
-        summarySize,
-        depth,
-        doOneSideError,
-        rootCauseAnalysisInfo.getMetricConfigDTO().getDerivedMetricExpression(),
-        dimensions,
-        excludedDimensions,
-        filters,
-        hierarchies
-    );
+    DimensionAnalysisResultApi resultApi;
+    try {
+      resultApi = dataCubeSummaryCalculator.computeCube(
+          rootCauseAnalysisInfo.getMetricConfigDTO(),
+          rootCauseAnalysisInfo.getDatasetConfigDTO(),
+          currentInterval,
+          baselineInterval,
+          summarySize,
+          depth,
+          doOneSideError,
+          dimensions,
+          excludedDimensions,
+          filters,
+          hierarchies
+      );
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (final Exception e) {
+      throw serverError(ERR_RCA_DIM_ANALYSIS, e.getCause().getMessage());
+    }
 
     return Response.ok(resultApi).build();
   }

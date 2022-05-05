@@ -6,16 +6,17 @@
 package ai.startree.thirdeye.detection.cache;
 
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -34,9 +35,9 @@ public class ThirdEyeCacheResponseTest {
       COLLECTION, null, null);
 
   private static final ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-      .setMetricFunctions(Collections.singletonList(metricFunction))
-      .setStartTimeInclusive(1000)
-      .setEndTimeExclusive(20000)
+      .setMetricFunction(metricFunction)
+      .setStartTimeInclusive(new DateTime(1000, DateTimeZone.UTC))
+      .setEndTimeExclusive(new DateTime(20000, DateTimeZone.UTC))
       .setGroupByTimeGranularity(TimeGranularity.fromString("1_SECONDS"))
       .setLimit(12345)
       .build("ref");

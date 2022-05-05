@@ -20,7 +20,8 @@ public abstract class AbstractSpec implements Serializable {
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
 
-  private String timezone = Constants.DEFAULT_TIMEZONE;
+  // avoid using this field - interval.getChronology at runtime should be enough most of the time - not sure if this deserves deprecation yet
+  private String timezone = Constants.DEFAULT_TIMEZONE_STRING;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
   /**

@@ -7,14 +7,14 @@ package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import java.util.Map;
+import org.joda.time.Interval;
 
 public class PlanNodeContext {
 
   private String name;
   private Map<String, PlanNode> pipelinePlanNodes;
   private PlanNodeBean planNodeBean;
-  private long startTime;
-  private long endTime;
+  private Interval detectionInterval;
   private Map<String, Object> properties;
 
   public String getName() {
@@ -44,21 +44,12 @@ public class PlanNodeContext {
     return this;
   }
 
-  public long getStartTime() {
-    return startTime;
+  public Interval getDetectionInterval() {
+    return detectionInterval;
   }
 
-  public PlanNodeContext setStartTime(final long startTime) {
-    this.startTime = startTime;
-    return this;
-  }
-
-  public long getEndTime() {
-    return endTime;
-  }
-
-  public PlanNodeContext setEndTime(final long endTime) {
-    this.endTime = endTime;
+  public PlanNodeContext setDetectionInterval(final Interval detectionInterval) {
+    this.detectionInterval = detectionInterval;
     return this;
   }
 

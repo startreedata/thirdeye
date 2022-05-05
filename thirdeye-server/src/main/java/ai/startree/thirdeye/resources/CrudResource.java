@@ -7,10 +7,15 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_NAME;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 import static java.util.Objects.requireNonNull;
 
@@ -18,6 +23,8 @@ import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -42,6 +49,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +58,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
   protected final AbstractManager<DtoT> dtoManager;
-  protected final ImmutableMap<String, String> apiToBeanMap;
+  protected final ImmutableMap<String, String> apiToIndexMap;
 
   @Inject
   public CrudResource(
       final AbstractManager<DtoT> dtoManager,
-      final ImmutableMap<String, String> apiToBeanMap) {
+      final ImmutableMap<String, String> apiToIndexMap) {
     this.dtoManager = dtoManager;
-    this.apiToBeanMap = apiToBeanMap;
+    this.apiToIndexMap = apiToIndexMap;
   }
 
   /**
@@ -136,6 +144,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   /**
    * Initialize Request Cache
+   *
    * @return cache container
    */
   protected RequestCache createRequestCache() {
@@ -178,7 +187,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
-        ? dtoManager.filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(queryParameters))
+        ? dtoManager.filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters))
         : dtoManager.findAll();
 
     final RequestCache cache = createRequestCache();
@@ -193,16 +202,24 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       List<ApiT> list) {
     ensureExists(list, "Invalid request");
 
+    return respondOk(internalCreateMultiple(principal, list));
+  }
+
+  /**
+   * Child classes should use this method and not reimplement creation logic in other places.
+   */
+  @NotNull
+  final protected List<ApiT> internalCreateMultiple(final ThirdEyePrincipal principal,
+      final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    return respondOk(list.stream()
+    return list.stream()
         .peek(api1 -> validate(api1, null))
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
         .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
         .map(dto -> toApi(dto, cache))
-        .collect(Collectors.toList())
-    );
+        .collect(Collectors.toList());
   }
 
   @PUT
@@ -211,12 +228,22 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response editMultiple(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
+
+    return respondOk(internalEditMultiple(principal, list));
+  }
+
+  /**
+   * Child classes should use this method and not reimplement edit logic in other places.
+   */
+  @NotNull
+  final protected List<ApiT> internalEditMultiple(final ThirdEyePrincipal principal,
+      final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    return respondOk(list.stream()
+    return list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .map(dto -> toApi(dto, cache))
-        .collect(Collectors.toList()));
+        .collect(Collectors.toList());
   }
 
   @GET
@@ -228,6 +255,29 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @PathParam("id") Long id) {
     final RequestCache cache = createRequestCache();
     return respondOk(toApi(get(id), cache));
+  }
+
+  @GET
+  @Path("name/{name}")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("name") String name) {
+    final RequestCache cache = createRequestCache();
+    ensureExists(name, ERR_MISSING_NAME);
+
+    /* If name column is mapped, use the mapping, else use 'name' */
+    final String nameColumn = optional(apiToIndexMap.get("name")).orElse("name");
+    final List<DtoT> byName = dtoManager.filter(new DaoFilter()
+        .setPredicate(Predicate.EQ(nameColumn, name)));
+
+    ensure(byName.size() > 0, ERR_OBJECT_DOES_NOT_EXIST, name);
+    if (byName.size() > 1) {
+      throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
+    }
+    DtoT dtoT = byName.iterator().next();
+    return respondOk(toApi(dtoT, cache));
   }
 
   @DELETE

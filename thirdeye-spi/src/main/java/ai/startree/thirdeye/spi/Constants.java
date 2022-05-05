@@ -5,11 +5,26 @@
 
 package ai.startree.thirdeye.spi;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTimeZone;
 
 public interface Constants {
 
-  String DEFAULT_TIMEZONE = "America/Los_Angeles";
+  DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
+  String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
+  // tz database names that are equivalent to UTC
+  List<String> UTC_LIKE_TIMEZONES = List.of("Etc/GMT",
+      "Etc/GMT+0",
+      "Etc/GMT0",
+      "GMT",
+      "GMT+0",
+      "GMT-0",
+      "GMT0",
+      "Etc/UTC",
+      "UTC",
+      "Etc/Zulu",
+      "Zulu");
 
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
@@ -39,8 +54,23 @@ public interface Constants {
 
   String NOTIFICATIONS_DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
   String NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
-  String NOTIFICATIONS_RAW_VALUE_FORMAT = "%.0f";
   String NOTIFICATIONS_PERCENTAGE_FORMAT = "%.2f %%";
+
+  /*
+   * Dataframe related constants
+   */
+  // todo cyril timestamp is a reserved keyword in some sql language - use another value for COL_TIME to be able to use it as SQL alias directly
+  String COL_TIME = "timestamp";
+  String COL_VALUE = "value"; // baseline value
+  String COL_CURRENT = "current";
+  String COL_UPPER_BOUND = "upper_bound";
+  String COL_LOWER_BOUND = "lower_bound";
+  String COL_ANOMALY = "anomaly";
+  String COL_PATTERN = "pattern";
+  String COL_ERROR = "error";
+  String COL_DIFF = "diff";
+  String COL_DIFF_VIOLATION = "diff_violation";
+  String COL_IN_WINDOW = "is_in_window";
 
   enum JobStatus {
     SCHEDULED,

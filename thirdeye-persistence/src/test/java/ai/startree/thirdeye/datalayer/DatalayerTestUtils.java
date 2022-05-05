@@ -16,8 +16,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Lists;
@@ -27,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 public class DatalayerTestUtils {
 
@@ -62,8 +62,8 @@ public class DatalayerTestUtils {
     jobSpec.setStatus(Constants.JobStatus.SCHEDULED);
     jobSpec.setTaskType(TaskType.DETECTION);
     jobSpec.setScheduleStartTime(System.currentTimeMillis());
-    jobSpec.setWindowStartTime(new DateTime().minusHours(20).getMillis());
-    jobSpec.setWindowEndTime(new DateTime().minusHours(10).getMillis());
+    jobSpec.setWindowStartTime(new DateTime(DateTimeZone.UTC).minusHours(20).getMillis());
+    jobSpec.setWindowEndTime(new DateTime(DateTimeZone.UTC).minusHours(10).getMillis());
     jobSpec.setConfigId(100);
     return jobSpec;
   }
@@ -116,26 +116,5 @@ public class DatalayerTestUtils {
     overrideConfigDTO.setTargetLevel(overrideTarget);
 
     return overrideConfigDTO;
-  }
-
-  public static RootcauseSessionDTO getTestRootcauseSessionResult(long start, long end,
-      long created, long updated,
-      String name, String owner, String text, String granularity, String compareMode,
-      Long previousId, Long anomalyId) {
-    RootcauseSessionDTO session = new RootcauseSessionDTO();
-    session.setAnomalyRangeStart(start);
-    session.setAnomalyRangeEnd(end);
-    session.setAnalysisRangeStart(start - 100);
-    session.setAnalysisRangeEnd(end + 100);
-    session.setName(name);
-    session.setOwner(owner);
-    session.setText(text);
-    session.setPreviousId(previousId);
-    session.setAnomalyId(anomalyId);
-    session.setCreated(created);
-    session.setUpdated(updated);
-    session.setGranularity(granularity);
-    session.setCompareMode(compareMode);
-    return session;
   }
 }

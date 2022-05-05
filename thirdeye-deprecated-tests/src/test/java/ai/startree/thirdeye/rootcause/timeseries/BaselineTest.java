@@ -5,15 +5,15 @@
 
 package ai.startree.thirdeye.rootcause.timeseries;
 
+import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
-import ai.startree.thirdeye.spi.dataframe.util.MetricSlice;
+import ai.startree.thirdeye.spi.detection.Baseline;
+import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.rootcause.timeseries.Baseline;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregate;
-import ai.startree.thirdeye.spi.rootcause.timeseries.BaselineAggregateType;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +60,8 @@ public class BaselineTest {
     List<MetricSlice> slices = baseline.scatter(BASE_SLICE);
     Assert.assertEquals(slices.size(), 1);
     Assert.assertEquals(slices.get(0).getMetricId(), 12345);
-    Assert.assertEquals(slices.get(0).getStart(), 14000);
-    Assert.assertEquals(slices.get(0).getEnd(), 16000);
+    Assert.assertEquals(slices.get(0).getStartMillis(), 14000);
+    Assert.assertEquals(slices.get(0).getEndMillis(), 16000);
   }
 
   @Test
@@ -131,11 +131,11 @@ public class BaselineTest {
     List<MetricSlice> slices = baseline.scatter(BASE_SLICE);
     Assert.assertEquals(slices.size(), 2);
     Assert.assertEquals(slices.get(0).getMetricId(), 12345);
-    Assert.assertEquals(slices.get(0).getStart(), 13800);
-    Assert.assertEquals(slices.get(0).getEnd(), 15800);
+    Assert.assertEquals(slices.get(0).getStartMillis(), 13800);
+    Assert.assertEquals(slices.get(0).getEndMillis(), 15800);
     Assert.assertEquals(slices.get(1).getMetricId(), 12345);
-    Assert.assertEquals(slices.get(1).getStart(), 10500);
-    Assert.assertEquals(slices.get(1).getEnd(), 12500);
+    Assert.assertEquals(slices.get(1).getStartMillis(), 10500);
+    Assert.assertEquals(slices.get(1).getEndMillis(), 12500);
   }
 
   @Test
@@ -206,23 +206,23 @@ public class BaselineTest {
 
     // expect DST correction
     Assert
-        .assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(7));
-    Assert.assertEquals(slicesDefault.get(0).getEnd(),
+        .assertEquals(slicesDefault.get(0).getStartMillis(), 1520681115000L - TimeUnit.DAYS.toMillis(7));
+    Assert.assertEquals(slicesDefault.get(0).getEndMillis(),
         1520842545000L - TimeUnit.DAYS.toMillis(7) + TimeUnit.HOURS.toMillis(1));
     Assert
-        .assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(14));
-    Assert.assertEquals(slicesDefault.get(1).getEnd(),
+        .assertEquals(slicesDefault.get(1).getStartMillis(), 1520681115000L - TimeUnit.DAYS.toMillis(14));
+    Assert.assertEquals(slicesDefault.get(1).getEndMillis(),
         1520842545000L - TimeUnit.DAYS.toMillis(14) + TimeUnit.HOURS.toMillis(1));
 
     List<MetricSlice> slicesSummer = baseline.scatter(PST_PDT_SLICE);
 
     // expect DST correction
-    Assert.assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(7));
-    Assert.assertEquals(slicesSummer.get(0).getEnd(),
+    Assert.assertEquals(slicesSummer.get(0).getStartMillis(), 1541240715000L - TimeUnit.DAYS.toMillis(7));
+    Assert.assertEquals(slicesSummer.get(0).getEndMillis(),
         1541409345000L - TimeUnit.DAYS.toMillis(7) - TimeUnit.HOURS.toMillis(1));
     Assert
-        .assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(14));
-    Assert.assertEquals(slicesSummer.get(1).getEnd(),
+        .assertEquals(slicesSummer.get(1).getStartMillis(), 1541240715000L - TimeUnit.DAYS.toMillis(14));
+    Assert.assertEquals(slicesSummer.get(1).getEndMillis(),
         1541409345000L - TimeUnit.DAYS.toMillis(14) - TimeUnit.HOURS.toMillis(1));
   }
 
@@ -236,22 +236,22 @@ public class BaselineTest {
 
     // expect DST correction
     Assert
-        .assertEquals(slicesDefault.get(0).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(1));
-    Assert.assertEquals(slicesDefault.get(0).getEnd(),
+        .assertEquals(slicesDefault.get(0).getStartMillis(), 1520681115000L - TimeUnit.DAYS.toMillis(1));
+    Assert.assertEquals(slicesDefault.get(0).getEndMillis(),
         1520842545000L - TimeUnit.DAYS.toMillis(1) + TimeUnit.HOURS.toMillis(1));
     Assert
-        .assertEquals(slicesDefault.get(1).getStart(), 1520681115000L - TimeUnit.DAYS.toMillis(2));
-    Assert.assertEquals(slicesDefault.get(1).getEnd(),
+        .assertEquals(slicesDefault.get(1).getStartMillis(), 1520681115000L - TimeUnit.DAYS.toMillis(2));
+    Assert.assertEquals(slicesDefault.get(1).getEndMillis(),
         1520842545000L - TimeUnit.DAYS.toMillis(2) + TimeUnit.HOURS.toMillis(1));
 
     List<MetricSlice> slicesSummer = baseline.scatter(PST_PDT_SLICE);
 
     // expect DST correction
-    Assert.assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(1));
-    Assert.assertEquals(slicesSummer.get(0).getEnd(),
+    Assert.assertEquals(slicesSummer.get(0).getStartMillis(), 1541240715000L - TimeUnit.DAYS.toMillis(1));
+    Assert.assertEquals(slicesSummer.get(0).getEndMillis(),
         1541409345000L - TimeUnit.DAYS.toMillis(1) - TimeUnit.HOURS.toMillis(1));
-    Assert.assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.DAYS.toMillis(2));
-    Assert.assertEquals(slicesSummer.get(1).getEnd(),
+    Assert.assertEquals(slicesSummer.get(1).getStartMillis(), 1541240715000L - TimeUnit.DAYS.toMillis(2));
+    Assert.assertEquals(slicesSummer.get(1).getEndMillis(),
         1541409345000L - TimeUnit.DAYS.toMillis(2) - TimeUnit.HOURS.toMillis(1));
   }
 
@@ -264,24 +264,24 @@ public class BaselineTest {
     List<MetricSlice> slicesDefault = baseline.scatter(PDT_PST_SLICE);
 
     // do NOT expect DST correction
-    Assert.assertEquals(slicesDefault.get(0).getStart(),
+    Assert.assertEquals(slicesDefault.get(0).getStartMillis(),
         1520681115000L - TimeUnit.HOURS.toMillis(23));
     Assert
-        .assertEquals(slicesDefault.get(0).getEnd(), 1520842545000L - TimeUnit.HOURS.toMillis(23));
-    Assert.assertEquals(slicesDefault.get(1).getStart(),
+        .assertEquals(slicesDefault.get(0).getEndMillis(), 1520842545000L - TimeUnit.HOURS.toMillis(23));
+    Assert.assertEquals(slicesDefault.get(1).getStartMillis(),
         1520681115000L - TimeUnit.HOURS.toMillis(24));
     Assert
-        .assertEquals(slicesDefault.get(1).getEnd(), 1520842545000L - TimeUnit.HOURS.toMillis(24));
+        .assertEquals(slicesDefault.get(1).getEndMillis(), 1520842545000L - TimeUnit.HOURS.toMillis(24));
 
     List<MetricSlice> slicesSummer = baseline.scatter(PST_PDT_SLICE);
 
     // do NOT expect DST correction
     Assert
-        .assertEquals(slicesSummer.get(0).getStart(), 1541240715000L - TimeUnit.HOURS.toMillis(23));
-    Assert.assertEquals(slicesSummer.get(0).getEnd(), 1541409345000L - TimeUnit.HOURS.toMillis(23));
+        .assertEquals(slicesSummer.get(0).getStartMillis(), 1541240715000L - TimeUnit.HOURS.toMillis(23));
+    Assert.assertEquals(slicesSummer.get(0).getEndMillis(), 1541409345000L - TimeUnit.HOURS.toMillis(23));
     Assert
-        .assertEquals(slicesSummer.get(1).getStart(), 1541240715000L - TimeUnit.HOURS.toMillis(24));
-    Assert.assertEquals(slicesSummer.get(1).getEnd(), 1541409345000L - TimeUnit.HOURS.toMillis(24));
+        .assertEquals(slicesSummer.get(1).getStartMillis(), 1541240715000L - TimeUnit.HOURS.toMillis(24));
+    Assert.assertEquals(slicesSummer.get(1).getEndMillis(), 1541409345000L - TimeUnit.HOURS.toMillis(24));
   }
 
   private static List<Period> makePeriods(PeriodType periodType, long... offsetMillis) {

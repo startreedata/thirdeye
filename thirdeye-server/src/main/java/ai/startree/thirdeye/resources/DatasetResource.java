@@ -29,10 +29,13 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class DatasetResource extends CrudResource<DatasetApi, DatasetConfigDTO> {
 
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
+      .put("name", "dataset")
+      .build();
+
   @Inject
-  public DatasetResource(
-      final DatasetConfigManager datasetConfigManager) {
-    super(datasetConfigManager, ImmutableMap.of());
+  public DatasetResource(final DatasetConfigManager datasetConfigManager) {
+    super(datasetConfigManager, API_TO_INDEX_FILTER_MAP);
   }
 
   @Override

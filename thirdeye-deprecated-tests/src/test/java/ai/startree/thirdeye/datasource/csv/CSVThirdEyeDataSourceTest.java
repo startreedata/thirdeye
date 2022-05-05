@@ -13,9 +13,9 @@ import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.detection.MetricAggFunction;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.net.URL;
@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -137,7 +139,7 @@ public class CSVThirdEyeDataSourceTest {
   @Test
   public void testExecuteAggregation() throws Exception {
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .build("ref");
@@ -157,7 +159,7 @@ public class CSVThirdEyeDataSourceTest {
   @Test
   public void testExecuteTimeSeries() throws Exception {
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.HOURS))
@@ -178,12 +180,12 @@ public class CSVThirdEyeDataSourceTest {
   @Test
   public void testExecuteSelectTimeSeries() throws Exception {
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.HOURS))
-        .setStartTimeInclusive(2000000)
-        .setEndTimeExclusive(10800000)
+        .setStartTimeInclusive(new DateTime(2000000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(10800000, DateTimeZone.UTC))
         .build("ref");
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
         request,
@@ -201,11 +203,11 @@ public class CSVThirdEyeDataSourceTest {
   @Test
   public void testExecuteSelectAggregation() throws Exception {
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
-        .setStartTimeInclusive(1000000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(1000000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
         request,
@@ -226,12 +228,12 @@ public class CSVThirdEyeDataSourceTest {
     Multimap<String, String> filter = ArrayListMultimap.create();
     filter.put("country", "cn");
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setFilterSet(filter)
-        .setStartTimeInclusive(3600000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(3600000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
 
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
@@ -254,12 +256,12 @@ public class CSVThirdEyeDataSourceTest {
     filter.put("country", "cn");
     filter.put("browser", "chrome");
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setFilterSet(filter)
-        .setStartTimeInclusive(3600000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(3600000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
 
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
@@ -282,12 +284,12 @@ public class CSVThirdEyeDataSourceTest {
     filter.put("country", "!cn");
     filter.put("browser", "!safari");
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setFilterSet(filter)
-        .setStartTimeInclusive(3600000)
-        .setEndTimeExclusive(11000000)
+        .setStartTimeInclusive(new DateTime(3600000, DateTimeZone.UTC))
+        .setEndTimeExclusive(new DateTime(11000000, DateTimeZone.UTC))
         .build("ref");
 
     ThirdEyeResponse expectedResponse = new CSVThirdEyeResponse(
@@ -307,7 +309,7 @@ public class CSVThirdEyeDataSourceTest {
   public void testExecuteGroupByColumns() throws Exception {
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .addGroupBy(Arrays.asList("country", "browser"))
@@ -331,7 +333,7 @@ public class CSVThirdEyeDataSourceTest {
   public void testExecuteGroupByOneColumn() throws Exception {
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .addGroupBy(Collections.singletonList("country"))
@@ -354,7 +356,7 @@ public class CSVThirdEyeDataSourceTest {
   public void testExecuteGroupByColumnsLimit() throws Exception {
 
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .addGroupBy(Arrays.asList("country", "browser"))
@@ -381,7 +383,7 @@ public class CSVThirdEyeDataSourceTest {
     Multimap<String, String> filter = ArrayListMultimap.create();
     filter.put("country", "cn");
     ThirdEyeRequest request = ThirdEyeRequest.newBuilder()
-        .addMetricFunction(
+        .setMetricFunction(
             new MetricFunction(MetricAggFunction.SUM, "views", 1L, "source", null, null))
         .setDataSource("source")
         .setGroupByTimeGranularity(new TimeGranularity(1, TimeUnit.HOURS))

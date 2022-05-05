@@ -8,7 +8,7 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyList;
 
-import ai.startree.thirdeye.detection.v2.plan.PlanNodeFactory;
+import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.joda.time.Interval;
 
 @Singleton
 public class PlanExecutor {
@@ -82,14 +83,12 @@ public class PlanExecutor {
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
   public Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> planNodeBeans,
-      final long startTime,
-      final long endTime)
+      final Interval detectionInterval)
       throws Exception {
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
         planNodeBeans,
-        startTime,
-        endTime);
+        detectionInterval);
 
     /* The context stores all the outputs from all the nodes */
     final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
@@ -104,13 +103,12 @@ public class PlanExecutor {
 
   @VisibleForTesting
   Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
-      final long startTime, final long endTime) {
+      final Interval detectionInterval) {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean planNodeBean : planNodeBeans) {
       final PlanNode planNode = planNodeFactory.build(
           planNodeBean,
-          startTime,
-          endTime,
+          detectionInterval,
           pipelinePlanNodes
       );
 

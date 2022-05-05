@@ -8,9 +8,10 @@ package ai.startree.thirdeye.detection.anomalydetection.function;
 import ai.startree.thirdeye.detection.anomalydetection.context.TimeSeries;
 import ai.startree.thirdeye.metric.MetricSchema;
 import ai.startree.thirdeye.metric.MetricTimeSeries;
-import ai.startree.thirdeye.spi.detection.metric.MetricType;
+import ai.startree.thirdeye.spi.metric.MetricType;
 import java.util.ArrayList;
 import java.util.List;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -51,8 +52,8 @@ public class BackwardAnomalyFunctionUtilsTest {
   public void testSplitSetsOfTimeSeries(List<String> metricNames, MetricTimeSeries metricTimeSeries)
       throws Exception {
     List<Interval> intervals = new ArrayList<Interval>() {{
-      add(new Interval(1L, 4L));
-      add(new Interval(3L, 6L));
+      add(new Interval(1L, 4L, DateTimeZone.UTC));
+      add(new Interval(3L, 6L, DateTimeZone.UTC));
     }};
 
     List<TimeSeries> actualTimeSeriesList =
@@ -68,7 +69,7 @@ public class BackwardAnomalyFunctionUtilsTest {
       add(5.0);
     }};
     final TimeSeries timeSeries1 = new TimeSeries(timestamps1, values1);
-    timeSeries1.setTimeSeriesInterval(new Interval(3L, 6L));
+    timeSeries1.setTimeSeriesInterval(new Interval(3L, 6L, DateTimeZone.UTC));
 
     List<Long> timestamps2 = new ArrayList<Long>() {{
       add(1L);
@@ -81,7 +82,7 @@ public class BackwardAnomalyFunctionUtilsTest {
       add(3.0);
     }};
     final TimeSeries timeSeries2 = new TimeSeries(timestamps2, values2);
-    timeSeries2.setTimeSeriesInterval(new Interval(1L, 4L));
+    timeSeries2.setTimeSeriesInterval(new Interval(1L, 4L, DateTimeZone.UTC));
 
     List<TimeSeries> expectedTimeSeriesList = new ArrayList<TimeSeries>() {{
       add(timeSeries1);

@@ -5,7 +5,9 @@
 
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TEMPLATE_MISSING_PROPERTY;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
@@ -15,8 +17,10 @@ import ai.startree.thirdeye.detection.DataProviderException;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
+import groovy.lang.MissingPropertyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +43,10 @@ public class AlertExceptionHandler {
       l.add(statusApi(ERR_TIMEOUT));
     } else if (e instanceof DataProviderException) {
       l.add(statusApi(ERR_DATA_UNAVAILABLE, e.getMessage()));
+    } else if (e instanceof MissingPropertyException) {
+      l.add(statusApi(ERR_TEMPLATE_MISSING_PROPERTY, ((MissingPropertyException) e).getProperty()));
+    } else if (e instanceof ExecutionException ){
+      l.add(statusApi(ERR_ALERT_PIPELINE_EXECUTION, e.getCause().getMessage()));
     } else if (e instanceof ThirdEyeException) {
       final ThirdEyeException thirdEyeException = (ThirdEyeException) e;
       l.add(new StatusApi()

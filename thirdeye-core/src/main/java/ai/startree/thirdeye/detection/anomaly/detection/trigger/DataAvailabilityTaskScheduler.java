@@ -11,6 +11,7 @@ import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
+import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -18,7 +19,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.rootcause.impl.MetricEntity;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
@@ -179,8 +179,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         if (!metricCache.containsKey(me.getId())) {
           datasets.addAll(ThirdEyeUtils.getDatasetConfigsFromMetricUrn(urn,
                   datasetConfigManager,
-                  metricConfigManager,
-                  thirdEyeCacheRegistry)
+                  metricConfigManager)
               .stream().map(DatasetConfigDTO::getDataset).collect(Collectors.toList()));
           // cache the mapping in memory to avoid duplicate retrieval
           metricCache.put(me.getId(), datasets);

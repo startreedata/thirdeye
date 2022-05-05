@@ -9,7 +9,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
-import ai.startree.thirdeye.spi.api.AlertNodeApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
@@ -19,12 +18,12 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
+import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
@@ -34,6 +33,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -48,10 +48,6 @@ import java.util.stream.Collectors;
 public abstract class ApiBeanMapper {
 
   private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
-
-  private static Boolean boolApi(final boolean value) {
-    return value ? true : null;
-  }
 
   public static DataSourceApi toApi(final DataSourceDTO dto) {
     return DataSourceMapper.INSTANCE.toApi(dto);
@@ -96,16 +92,6 @@ public abstract class ApiBeanMapper {
 
   public static MetricConfigDTO toMetricConfigDto(final MetricApi api) {
     return MetricMapper.INSTANCE.toBean(api);
-  }
-
-  private static AlertNodeApi toDetectionAlertNodeApi(final String detectorComponentName) {
-    final String[] splitted = detectorComponentName.split(":");
-    checkState(splitted.length == 2);
-
-    return new AlertNodeApi()
-        .setName(splitted[0])
-        .setType(AlertNodeType.DETECTION)
-        .setSubType(splitted[1]);
   }
 
   public static MetricApi toMetricApi(final String metricUrn) {
@@ -216,45 +202,14 @@ public abstract class ApiBeanMapper {
   }
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
-    AnomalyApi anomalyApi = new AnomalyApi()
-        .setId(dto.getId())
-        .setStartTime(new Date(dto.getStartTime()))
-        .setEndTime(new Date(dto.getEndTime()))
-        .setCreated(new Date(dto.getCreatedTime()))
-        .setAvgCurrentVal(dto.getAvgCurrentVal())
-        .setAvgBaselineVal(dto.getAvgBaselineVal())
-        .setScore(dto.getScore())
-        .setWeight(dto.getWeight())
-        .setImpactToGlobal(dto.getImpactToGlobal())
-        .setSourceType(dto.getAnomalyResultSource())
-        .setNotified(dto.isNotified())
-        .setMessage(dto.getMessage())
-        .setMetric(optional(dto.getMetric())
-            .map(metric -> new MetricApi().setName(metric))
-            .orElse(null));
-    if (dto.getMetricUrn() != null) {
-      anomalyApi
-          .setMetric(toMetricApi(dto.getMetricUrn())
-              .setName(dto.getMetric())
-              .setDataset(new DatasetApi()
-                  .setName(dto.getCollection())
-              )
-          );
-    }
-    anomalyApi.setAlert(new AlertApi()
-            .setId(dto.getDetectionConfigId())
-        )
-        .setAlertNode(optional(dto.getProperties())
-            .map(p -> p.get("detectorComponentName"))
-            .map(ApiBeanMapper::toDetectionAlertNodeApi)
-            .orElse(null))
-        .setFeedback(optional(dto.getFeedback())
-            .map(ApiBeanMapper::toApi)
-            .orElse(null));
-    return anomalyApi;
+    return AnomalyMapper.INSTANCE.toApi(dto);
   }
 
-  private static AnomalyFeedbackApi toApi(final AnomalyFeedback feedbackDto) {
+  public static MergedAnomalyResultDTO toDto(final AnomalyApi api) {
+    return AnomalyMapper.INSTANCE.toDto(api);
+  }
+
+  public static AnomalyFeedbackApi toApi(final AnomalyFeedback feedbackDto) {
     return new AnomalyFeedbackApi()
         .setComment(feedbackDto.getComment())
         .setType(feedbackDto.getFeedbackType());
@@ -284,5 +239,13 @@ public abstract class ApiBeanMapper {
 
   public static EventDTO toEventDto(final EventApi api) {
     return EventMapper.INSTANCE.toDto(api);
+  }
+
+  public static RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
+    return RcaInvestigationMapper.INSTANCE.toApi(dto);
+  }
+
+  public static RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
+    return RcaInvestigationMapper.INSTANCE.toDto(api);
   }
 }

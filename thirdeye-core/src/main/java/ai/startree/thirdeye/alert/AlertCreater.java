@@ -51,9 +51,7 @@ public class AlertCreater {
   }
 
   public AlertDTO create(AlertApi api) {
-    ensure(alertManager
-        .findByPredicate(Predicate.EQ("name", api.getName()))
-        .isEmpty(), ERR_DUPLICATE_NAME);
+    ensureCreationIsPossible(api);
 
     final AlertDTO dto = alertApiBeanMapper.toAlertDTO(api);
 
@@ -62,6 +60,12 @@ public class AlertCreater {
 
     createOnboardingTask(dto);
     return dto;
+  }
+
+  public void ensureCreationIsPossible(final AlertApi api) {
+    ensure(alertManager
+        .findByPredicate(Predicate.EQ("name", api.getName()))
+        .isEmpty(), ERR_DUPLICATE_NAME);
   }
 
   private void createOnboardingTask(final AlertDTO dto) {

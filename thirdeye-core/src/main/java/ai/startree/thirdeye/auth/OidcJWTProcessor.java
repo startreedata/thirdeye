@@ -5,9 +5,6 @@
 
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.auth.OidcUtils.getExactMatchClaimSet;
-import static ai.startree.thirdeye.auth.OidcUtils.getRequiredClaims;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -21,11 +18,10 @@ import java.util.stream.Collectors;
 
 public class OidcJWTProcessor extends DefaultJWTProcessor<OidcContext> {
 
-  public OidcJWTProcessor(OidcContext context) {
-    super();
+  public void init(final OidcContext context) {
     JWTClaimsSetVerifier verifier = new DefaultJWTClaimsVerifier(
-      getExactMatchClaimSet(context),
-      getRequiredClaims(context));
+      context.getExactMatchClaimsSet(),
+      context.getRequiredClaims());
     setJWTClaimsSetVerifier(verifier);
     setJWSKeySelector((header, c) -> {
       Key key = fetchKeys(c.getKeysUrl()).getKeys().stream()

@@ -18,7 +18,7 @@ describe("App Config Actions", () => {
             expect(result.current.appConfig).toBeNull();
             expect(result.current.getAppConfiguration).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Initial);
-            expect(result.current.errorMessage).toEqual("");
+            expect(result.current.errorMessages).toEqual([]);
         });
 
         it("should update data appropriately when making a successful REST call", async () => {
@@ -41,7 +41,7 @@ describe("App Config Actions", () => {
                 expect(result.current.appConfig).toBeNull();
                 expect(result.current.getAppConfiguration).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Working);
-                expect(result.current.errorMessage).toEqual("");
+                expect(result.current.errorMessages).toEqual([]);
 
                 return promise.then(() => {
                     // When REST call is completed
@@ -50,7 +50,7 @@ describe("App Config Actions", () => {
                     );
                     expect(result.current.getAppConfiguration).toBeDefined();
                     expect(result.current.status).toEqual(ActionStatus.Done);
-                    expect(result.current.errorMessage).toEqual("");
+                    expect(result.current.errorMessages).toEqual([]);
                 });
             });
         });

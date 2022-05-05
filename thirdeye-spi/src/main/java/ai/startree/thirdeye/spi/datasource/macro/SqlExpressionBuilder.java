@@ -74,6 +74,7 @@ public interface SqlExpressionBuilder {
    * @param timeColumn time column name
    * @param timeColumnFormat time column time format. Managed formats depend on the datasource
    * @param granularity granularity of the output epoch milliseconds (minutes, days, etc...)
+   * @param timezone timezone string in tz database format
    */
   default String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
       final Period granularity, @Nullable final String timezone) {
@@ -96,6 +97,7 @@ public interface SqlExpressionBuilder {
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
+   * @param timezone timezone string in tz database format
    */
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
       final Period granularity, @Nullable final String timeUnit , @Nullable final String timezone) {

@@ -9,8 +9,6 @@ import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
-import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.TIME_COLUMN;
-import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -76,11 +74,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   private void initWithRuntimeInfo(final Interval detectionInterval, final DataTable dataTable) {
     // principle: custom config takes precedence over dataTable properties. If both config and properties are not set: use default config.
     Map<String, String> properties = dataTable.getProperties();
-    if (spec.getTimestamp() != null && !spec.getTimestamp().equals(DEFAULT_TIMESTAMP)) {
-      timeColumn = spec.getTimestamp();
-    } else {
-      timeColumn = properties.getOrDefault(TIME_COLUMN.toString(), DEFAULT_TIMESTAMP);
-    }
+    timeColumn = Objects.requireNonNull(spec.getTimestamp());
 
     String granularitySpec = Optional.ofNullable(spec.getMonitoringGranularity())
         .orElseGet(() -> Optional.ofNullable(properties.get(GRANULARITY.toString()))

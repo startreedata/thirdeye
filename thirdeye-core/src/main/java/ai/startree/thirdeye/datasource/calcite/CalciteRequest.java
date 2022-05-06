@@ -220,17 +220,12 @@ public class CalciteRequest {
       throws SqlParseException {
     List<SqlNode> predicates = new ArrayList<>();
     if (timeFilterInterval != null) {
-      // use the alias of the aggregated time column - in this case it's sure time is in epoch millis
-      boolean isAggregatedTimeColumn =
-          timeAggregationGranularity != null && timeAggregationColumn.equals(timeFilterColumn);
-      final String preparedTimeColumn = isAggregatedTimeColumn ?
-          TIME_AGGREGATION_ALIAS :
-          quoteIdentifierIfReserved(timeFilterColumn, sqlParserConfig, dialect);
+      final String preparedTimeColumn = quoteIdentifierIfReserved(timeFilterColumn, sqlParserConfig, dialect);
       final String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
           preparedTimeColumn,
           timeFilterInterval,
-          isAggregatedTimeColumn ? null : timeFilterColumnFormat,
-          isAggregatedTimeColumn ? null : timeFilterColumnUnit);
+          timeFilterColumnFormat,
+          timeFilterColumnUnit);
       final SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }

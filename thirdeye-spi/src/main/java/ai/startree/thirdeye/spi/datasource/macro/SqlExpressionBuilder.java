@@ -31,7 +31,8 @@ public interface SqlExpressionBuilder {
    * @param timeColumn time column name
    * @param filterInterval interval to filter on. // fixme cyril explain timezone
    */
-  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval) {
+  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+      final String timeColumnFormat) {
     throw new UnsupportedOperationException();
   }
 
@@ -56,7 +57,8 @@ public interface SqlExpressionBuilder {
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
-  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval, final @Nullable String timeFormat,
+  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+      final @Nullable String timeFormat,
       @Nullable final String timeUnit) {
     throw new UnsupportedOperationException();
   }
@@ -100,7 +102,7 @@ public interface SqlExpressionBuilder {
    * @param timezone timezone string in tz database format
    */
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
-      final Period granularity, @Nullable final String timeUnit , @Nullable final String timezone) {
+      final Period granularity, @Nullable final String timeUnit, @Nullable final String timezone) {
     throw new UnsupportedOperationException();
   }
 

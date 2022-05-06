@@ -44,7 +44,7 @@ public class TestRcaInvestigationManager {
 
   private static RcaInvestigationDTO makeOwner(String owner) {
     RcaInvestigationDTO session = makeDefault();
-    session.setUpdatedBy(owner);
+    session.setCreatedBy(owner);
     return session;
   }
 

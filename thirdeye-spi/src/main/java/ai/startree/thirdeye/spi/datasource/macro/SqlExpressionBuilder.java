@@ -31,6 +31,7 @@ public interface SqlExpressionBuilder {
    *
    * @param timeColumn time column name
    * @param filterInterval interval to filter on.
+   * @param timeColumnFormat time column time format. Managed formats depend on the datasource
    */
   default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
       final String timeColumnFormat) {

@@ -5,8 +5,6 @@
 
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
@@ -94,7 +92,7 @@ public class FilterEngineTest {
 
   @Test
   public void testSingleFilterAndMacros() throws SqlParseException {
-    final String query = "SELECT __timeGroup(timeCol, yyyyMMdd, P5D) AS ts, metric AS met FROM tableName WHERE __timeFilter(ts)";
+    final String query = "SELECT __timeGroup(timeCol, yyyyMMdd, P5D) AS ts, metric AS met FROM tableName WHERE __timeFilter(ts, 'EPOCH')";
     final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
         query,
         List.of(STRING_FILTER_EQUAL));
@@ -108,7 +106,7 @@ public class FilterEngineTest {
   @Test
   public void testSingleFilterAndEscapedFunction() throws SqlParseException {
     // "date" is a function that is escaped - here it's a column identifier
-    final String query = "SELECT __timeGroup(\"date\", yyyyMMdd, P5D) AS ts, metric AS met FROM tableName WHERE __timeFilter(ts)";
+    final String query = "SELECT __timeGroup(\"date\", yyyyMMdd, P5D) AS ts, metric AS met FROM tableName WHERE __timeFilter(ts, 'EPOCH')";
     final QueryPredicate stringFilter = QueryPredicate.of(
         new Predicate("browser", OPER.EQ, "chrome"),
         DimensionType.STRING,

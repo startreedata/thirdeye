@@ -14,9 +14,11 @@ import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
+import java.util.function.Function;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -40,60 +42,36 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   private static final String PERCENTILE_TDIGEST_PREFIX = "PERCENTILETDigest";
 
-  public static final long SECOND_SCALE = 1000; // number of second in milliseconds
-  public static final long MINUTE_SCALE = 60 * SECOND_SCALE; // number of second in milliseconds
-  public static final long HOUR_SCALE = 60 * MINUTE_SCALE;
-  public static final long DAY_SCALE = 24 * HOUR_SCALE;
+  public static final long SECOND_MILLIS = 1000; // number of milliseconds in a second
+  public static final long MINUTE_MILLIS =
+      60 * SECOND_MILLIS; // number of milliseconds in a minute
+  public static final long HOUR_MILLIS = 60 * MINUTE_MILLIS;
+  public static final long DAY_MILLIS = 24 * HOUR_MILLIS;
 
   @Override
-  public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval) {
+  public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+      @NonNull final String timeColumnFormat) {
+    final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
+
     return String.format("%s >= %s AND %s < %s",
         timeColumn,
-        filterInterval.getStartMillis(),
+        timeFormat.timeFormatter.apply(filterInterval.getStart()),
         timeColumn,
-        filterInterval.getEndMillis());
+        timeFormat.timeFormatter.apply(filterInterval.getEnd()));
   }
 
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      @Nullable final String timeFormat,
-      @Nullable final String timeUnit) {
+      @Nullable final String timeFormat, @Nullable final String timeUnit) {
     if (timeFormat == null) {
-      return getTimeFilterExpression(timeColumn, filterInterval);
+      return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH_MILLIS");
     }
-    String lowerBound;
-    String upperBound;
     if ("EPOCH".equals(timeFormat)) {
-      if (TimeUnit.MILLISECONDS.toString().equals(timeUnit)) {
-        lowerBound = String.valueOf(filterInterval.getStartMillis());
-        upperBound = String.valueOf(filterInterval.getEndMillis());
-      } else if (timeUnit == null || TimeUnit.SECONDS.toString().equals(timeUnit)) {
-        lowerBound = String.valueOf(filterInterval.getStartMillis() / SECOND_SCALE);
-        upperBound = String.valueOf(filterInterval.getEndMillis() / SECOND_SCALE);
-      } else if (TimeUnit.MINUTES.toString().equals(timeUnit)) {
-        lowerBound = String.valueOf(filterInterval.getStartMillis() / MINUTE_SCALE);
-        upperBound = String.valueOf(filterInterval.getEndMillis() / MINUTE_SCALE);
-      } else if (TimeUnit.HOURS.toString().equals(timeUnit)) {
-        lowerBound = String.valueOf(filterInterval.getStartMillis() / HOUR_SCALE);
-        upperBound = String.valueOf(filterInterval.getEndMillis() / HOUR_SCALE);
-      } else if (TimeUnit.DAYS.toString().equals(timeUnit)) {
-        lowerBound = String.valueOf(filterInterval.getStartMillis() / DAY_SCALE);
-        upperBound = String.valueOf(filterInterval.getEndMillis() / DAY_SCALE);
-      } else {
-        throw new UnsupportedOperationException(String.format(
-            "Unsupported TimeUnit for filter expression: %s",
-            timeUnit));
-      }
-    } else {
-      // case SIMPLE_DATE_FORMAT
-      String simpleDateFormatString = removeSimpleDateFormatPrefix(timeFormat);
-      final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
-          simpleDateFormatString).withChronology(filterInterval.getChronology());
-      lowerBound = inputDataDateTimeFormatter.print(filterInterval.getStartMillis());
-      upperBound = inputDataDateTimeFormatter.print(filterInterval.getEndMillis());
+      Objects.requireNonNull(timeUnit);
+      return getTimeFilterExpression(timeColumn, filterInterval, "1:" + timeUnit + ":EPOCH");
     }
-
-    return String.format("%s >= %s AND %s < %s", timeColumn, lowerBound, timeColumn, upperBound);
+    // case simple date format
+    return getTimeFilterExpression(timeColumn, filterInterval, timeFormat);
   }
 
   @Override
@@ -103,6 +81,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
     }
     if ("EPOCH".equals(timeFormat)) {
+      Objects.requireNonNull(timeUnit);
       return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
     }
     // case simple date format
@@ -110,24 +89,24 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   }
 
   @Override
-  public String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
+  public String getTimeGroupExpression(String timeColumn, @NonNull String timeColumnFormat,
       Period granularity, @Nullable final String timezone) {
     final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
       return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
-          timeFormat.getDateTimeConvertString(),
+          timeFormat.dateTimeConvertString,
           periodToDateTimeConvertFormat(granularity)
       );
     }
 
-    if (timeFormat.isEpochFormat() && DATE_TRUNC_COMPATIBLE_PERIODS.contains(granularity)) {
+    if (timeFormat.isEpochFormat && DATE_TRUNC_COMPATIBLE_PERIODS.contains(granularity)) {
       // optimized expression for client use case - can be removed once https://github.com/apache/pinot/issues/8581 is closed
       return String.format(
           " DATETRUNC('%s', %s, '%s', '%s', 'MILLISECONDS') ",
           DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.get(granularity),
           timeColumn,
-          timeFormat.getDateTruncString(),
+          timeFormat.dateTruncString,
           timezone
       );
     }
@@ -136,7 +115,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     return String.format(
         "FromDateTime(DATETIMECONVERT(%s, '%s', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(%s)', '%s'), 'yyyy-MM-dd HH:mm:ss.SSSZ') ",
         timeColumn,
-        timeFormat.getDateTimeConvertString(),
+        timeFormat.dateTimeConvertString,
         timezone,
         periodToDateTimeConvertFormat(granularity));
   }
@@ -217,6 +196,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     private final String dateTimeConvertString;
     private final String dateTruncString;
     private final boolean isEpochFormat;
+    private final Function<DateTime, String> timeFormatter;
 
     TimeFormat(String userFacingTimeColumnFormat) {
       switch (userFacingTimeColumnFormat) {
@@ -225,50 +205,51 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTimeConvertString = "1:MILLISECONDS:EPOCH";
           dateTruncString = "MILLISECONDS";
           isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis());
           break;
         case "EPOCH":
         case "1:SECONDS:EPOCH":
           dateTimeConvertString = "1:SECONDS:EPOCH";
           dateTruncString = "SECONDS";
           isEpochFormat = true;
-          break;
-        case "EPOCH_HOURS":
-        case "1:HOURS:EPOCH":
-          dateTimeConvertString = "1:HOURS:EPOCH";
-          dateTruncString = "HOURS";
-          isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis() / SECOND_MILLIS);
           break;
         case "EPOCH_MINUTES":
         case "1:MINUTES:EPOCH":
           dateTimeConvertString = "1:MINUTES:EPOCH";
           dateTruncString = "MINUTES";
           isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis() / MINUTE_MILLIS);
+          break;
+        case "EPOCH_HOURS":
+        case "1:HOURS:EPOCH":
+          dateTimeConvertString = "1:HOURS:EPOCH";
+          dateTruncString = "HOURS";
+          isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis() / HOUR_MILLIS);
+          break;
+        case "EPOCH_DAYS":
+        case "1:DAYS:EPOCH":
+          dateTimeConvertString = "1:DAYS:EPOCH";
+          dateTruncString = "DAYS";
+          isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis() / DAY_MILLIS);
           break;
         default:
           // assume simple date format - fail if it's not the case
-          final String simpleDateFormatString = removeSimpleDateFormatPrefix(
+          final String cleanSimpleDateFormat = removeSimpleDateFormatPrefix(
               userFacingTimeColumnFormat);
-          new SimpleDateFormat(simpleDateFormatString);
+          new SimpleDateFormat(cleanSimpleDateFormat);
           dateTimeConvertString = String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s",
-              userFacingTimeColumnFormat);
+              cleanSimpleDateFormat);
           dateTruncString = null;
           isEpochFormat = false;
+          timeFormatter = d -> {
+            final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
+                cleanSimpleDateFormat).withChronology(d.getChronology());
+            return inputDataDateTimeFormatter.print(d);
+          };
       }
-    }
-
-    public String getDateTimeConvertString() {
-      return dateTimeConvertString;
-    }
-
-    public String getDateTruncString() {
-      if (!isEpochFormat) {
-        throw new UnsupportedOperationException("Datetrunc is only compatible with epoch formats.");
-      }
-      return dateTruncString;
-    }
-
-    public boolean isEpochFormat() {
-      return isEpochFormat;
     }
   }
 }

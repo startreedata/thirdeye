@@ -609,9 +609,8 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithTimeAggregationAndTimeFilter() throws SqlParseException {
-    // test that the filter is applied on the bucketed column - important - this is the purpose of the high level withTimeAggregation and withTimeFilter
     final String timeAggregationColumn = "date_sdf";
-    final Interval timeFilterInterval = new Interval(100L, 100000000L);
+    final Interval timeFilterInterval = new Interval(100L, 100000000L); // 19700101 - 19700102
     final String timeColumnFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
@@ -627,17 +626,18 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format(
-        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY %s ORDER BY %s",
+        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:%s', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY %s ORDER BY %s",
         COLUMN_NAME_1,
         timeAggregationColumn,
+        timeColumnFormat,
         "1:DAYS",
         TIME_AGGREGATION_ALIAS,
         DATABASE,
         TABLE,
-        TIME_AGGREGATION_ALIAS,
-        timeFilterInterval.getStartMillis(),
-        TIME_AGGREGATION_ALIAS,
-        timeFilterInterval.getEndMillis(),
+        timeAggregationColumn,
+        "19700101",
+        timeAggregationColumn,
+        "19700102",
         TIME_AGGREGATION_ALIAS,
         TIME_AGGREGATION_ALIAS
     );
@@ -799,7 +799,9 @@ public class CalciteRequestTest {
     public static final long DAY_SCALE = 24 * HOUR_SCALE;
 
     @Override
-    public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval) {
+    public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+        final String timeColumnFormat) {
+      // ignore timeColumnFormat in this test expression builder
       return String.format("%s >= %s AND %s < %s",
           timeColumn,
           filterInterval.getStartMillis(),
@@ -812,7 +814,7 @@ public class CalciteRequestTest {
         @Nullable final String timeFormat,
         @Nullable final String timeUnit) {
       if (timeFormat == null) {
-        return getTimeFilterExpression(timeColumn, filterInterval);
+        return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH");
       }
       String lowerBound;
       String upperBound;

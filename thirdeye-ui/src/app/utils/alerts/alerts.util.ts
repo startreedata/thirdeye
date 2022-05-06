@@ -16,6 +16,7 @@ import {
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
+// fixme cyril update this template
 export const createDefaultAlert = (): EditableAlert => {
     return {
         name: "simple-threshold-template",
@@ -54,7 +55,7 @@ export const createDefaultAlert = (): EditableAlert => {
                         "component.query":
                             "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}'," +
                             " '${monitoringGranularity}') as ts, ${aggregateFunction}(${metric}) as met FROM " +
-                            "${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000",
+                            "${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000",
                     },
                     outputs: [
                         {
@@ -77,7 +78,7 @@ export const createDefaultAlert = (): EditableAlert => {
             },
         },
         templateProperties: {
-            dataSource: "pinotQuickStartAzure",
+            dataSource: "pinotQuickStart",
             dataset: "pageviews",
             aggregateFunction: "sum",
             metric: "views",

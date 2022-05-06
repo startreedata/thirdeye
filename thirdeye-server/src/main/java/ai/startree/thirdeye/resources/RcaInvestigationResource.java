@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
@@ -54,5 +56,11 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
     return ApiBeanMapper.toApi(dto);
+  }
+
+  @Override
+  protected void validate(final RcaInvestigationApi api, final RcaInvestigationDTO existing) {
+    super.validate(api, existing);
+    ensureExists(api.getName(), "Name must be present");
   }
 }

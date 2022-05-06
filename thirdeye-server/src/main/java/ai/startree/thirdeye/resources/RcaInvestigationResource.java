@@ -33,6 +33,8 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
 
   public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("anomaly.id", "anomalyId")
+      .put("createdBy.principal", "owner") // will most likely be deprecated or underlying column will change - ui will need update to get the owner
+      .put("created", "created")
       .build();
 
   @Inject

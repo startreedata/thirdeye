@@ -22,6 +22,9 @@ public interface AnomalyMapper {
   AnomalyMapper INSTANCE = Mappers.getMapper(AnomalyMapper.class);
 
   default MergedAnomalyResultDTO toDto(AnomalyApi api) {
+    if (api == null) {
+      return null;
+    }
     // incomplete because only used by RcaInvestigation for the moment
     return (MergedAnomalyResultDTO) new MergedAnomalyResultDTO().setId(api.getId());
   }

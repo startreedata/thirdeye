@@ -30,6 +30,9 @@ public interface AnomalyMapper {
   }
 
   default AnomalyApi toApi(MergedAnomalyResultDTO dto) {
+    if (dto == null) {
+      return null;
+    }
     final MetricApi metricApi = optional(dto.getMetric())
         .map(metric -> new MetricApi().setName(metric))
         .orElse(null);

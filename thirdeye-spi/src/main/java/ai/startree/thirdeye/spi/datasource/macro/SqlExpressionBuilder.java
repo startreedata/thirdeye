@@ -22,14 +22,15 @@ public interface SqlExpressionBuilder {
    * Implementation should be careful with identifier quoting.
    * Identifiers may be passed quoted or unquoted.
    *
-   * For example: {@code getTimeFilterExpression(myTimeEpoch, 42, 84, null)} returns
+   * Implementation should respect the filterInterval timezone.
+   *
+   * For example: {@code getTimeFilterExpression(myTimeEpoch, Interval(42,84), "EPOCH_MILLIS")} returns
    * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
    * Used by the macro __timeFilter().
-   * Expects the column to be in epoch milliseconds. //fixme cyril add more choice
    *
    * @param timeColumn time column name
-   * @param filterInterval interval to filter on. // fixme cyril explain timezone
+   * @param filterInterval interval to filter on.
    */
   default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
       final String timeColumnFormat) {
@@ -41,6 +42,7 @@ public interface SqlExpressionBuilder {
    * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
    *
    * Used internally to generate queries. For RCA for instance.
+   * Implementation should respect the filterInterval timezone.
    *
    * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
    * datasource.
@@ -52,7 +54,7 @@ public interface SqlExpressionBuilder {
    * runtime.
    *
    * @param timeColumn time column name
-   * @param filterInterval interval to filter on. // fixme cyril explain timezone
+   * @param filterInterval interval to filter on.
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.

@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
@@ -31,6 +33,8 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
 
   public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("anomaly.id", "anomalyId")
+      .put("createdBy.principal", "owner") // will most likely be deprecated or underlying column will change - ui will need update to get the owner
+      .put("created", "created")
       .build();
 
   @Inject
@@ -54,5 +58,11 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
     return ApiBeanMapper.toApi(dto);
+  }
+
+  @Override
+  protected void validate(final RcaInvestigationApi api, final RcaInvestigationDTO existing) {
+    super.validate(api, existing);
+    ensureExists(api.getName(), "Name must be present");
   }
 }

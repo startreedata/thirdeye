@@ -17,7 +17,7 @@ public class RcaInvestigationIndexMapper extends
     map().setAnomalyId(source.getAnomaly().getId());
     map().setAnomalyRangeStart(source.getAnomaly().getStartTime());
     map().setAnomalyRangeEnd(source.getAnomaly().getEndTime());
-    map().setOwner(source.getUpdatedBy());
+    map().setOwner(source.getCreatedBy());
     map().setCreated(source.getCreateTime().getTime());
     map().setUpdated(source.getUpdateTime().getTime());
   }

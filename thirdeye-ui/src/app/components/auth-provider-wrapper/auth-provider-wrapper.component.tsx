@@ -84,7 +84,6 @@ export const AuthProviderWrapper: FunctionComponent<
         <AuthProviderV1
             appInitFailure={appInitFailure as boolean}
             clientId={clientId as string}
-            oidcIssuerLogoutPath="/v2/logout"
             redirectMethod={AuthRedirectMethodV1.Post}
             redirectPathBlacklist={[AppRoute.LOGIN, AppRoute.LOGOUT]}
         >

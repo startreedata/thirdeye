@@ -20,7 +20,7 @@ export const AuthProviderWrapper: FunctionComponent<
     const {
         appConfig: fetchedAppConfiguration,
         getAppConfiguration,
-        status: getSecurityConfigurationStatus,
+        status: getAppConfigurationStatus,
     } = useGetAppConfiguration();
 
     useEffect(() => {
@@ -53,26 +53,26 @@ export const AuthProviderWrapper: FunctionComponent<
     }, [appInitFailure]);
 
     useEffect(() => {
-        if (getSecurityConfigurationStatus === ActionStatus.Done) {
+        if (getAppConfigurationStatus === ActionStatus.Done) {
             gatherAuthData(fetchedAppConfiguration);
         }
 
-        if (getSecurityConfigurationStatus === ActionStatus.Error) {
+        if (getAppConfigurationStatus === ActionStatus.Error) {
             gatherAuthData(null);
         }
-    }, [getSecurityConfigurationStatus]);
+    }, [getAppConfigurationStatus]);
 
     const gatherAuthData = (
-        securityConfiguration: AppConfiguration | null
+        appConfiguration: AppConfiguration | null
     ): void => {
         // Validate received data
-        if (!securityConfiguration || !securityConfiguration.clientId) {
+        if (!appConfiguration || !appConfiguration.clientId) {
             setClientId("");
 
             return;
         }
 
-        setClientId(securityConfiguration.clientId);
+        setClientId(appConfiguration.clientId);
     };
 
     // Loading indicator
@@ -85,7 +85,7 @@ export const AuthProviderWrapper: FunctionComponent<
             appInitFailure={appInitFailure as boolean}
             clientId={clientId as string}
             oidcIssuerLogoutPath="/v2/logout"
-            redirectMethod={AuthRedirectMethodV1.Get}
+            redirectMethod={AuthRedirectMethodV1.Post}
             redirectPathBlacklist={[AppRoute.LOGIN, AppRoute.LOGOUT]}
         >
             {children}

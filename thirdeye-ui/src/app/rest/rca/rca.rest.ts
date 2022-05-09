@@ -8,6 +8,8 @@ import {
     Investigation,
 } from "../dto/rca.interfaces";
 
+const ANOMALY_ID_QUERY_PARAM_KEY = "anomalyId";
+const ANOMALY_ID_FILTER_QUERY_PARAM_KEY = "anomaly.id";
 const BASE_URL_RCA = "/api/rca";
 const INVESTIGATIONS_ENDPOINT = `${BASE_URL_RCA}/investigations`;
 
@@ -15,8 +17,11 @@ export const getAnomalyMetricBreakdown = async (
     id: number,
     params: AnomalyBreakdownRequest
 ): Promise<AnomalyBreakdown> => {
+    const queryParams = new URLSearchParams([
+        [ANOMALY_ID_QUERY_PARAM_KEY, id.toString()],
+    ]);
     const response = await axios.get(
-        `${BASE_URL_RCA}/metrics/heatmap/anomaly/${id}`,
+        `${BASE_URL_RCA}/metrics/heatmap?${queryParams.toString()}`,
         {
             params,
             paramsSerializer: duplicateKeyForArrayQueryParams,
@@ -37,8 +42,11 @@ export const getDimensionAnalysisForAnomaly = async (
     id: number,
     params: AnomalyDimensionAnalysisRequest
 ): Promise<AnomalyDimensionAnalysisData> => {
+    const queryParams = new URLSearchParams([
+        [ANOMALY_ID_QUERY_PARAM_KEY, id.toString()],
+    ]);
     const response = await axios.get(
-        `${BASE_URL_RCA}/dim-analysis/anomaly/${id}`,
+        `${BASE_URL_RCA}/dim-analysis?${queryParams.toString()}`,
         {
             params,
             paramsSerializer: duplicateKeyForArrayQueryParams,
@@ -55,7 +63,10 @@ export const getInvestigations = async (
     let queryString = "";
 
     if (anomalyId) {
-        queryParams.set("anomaly.id", anomalyId.toString());
+        queryParams.set(
+            ANOMALY_ID_FILTER_QUERY_PARAM_KEY,
+            anomalyId.toString()
+        );
         queryString = `?${queryParams.toString()}`;
     }
 

@@ -29,13 +29,13 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
                 target="blank"
             >
                 <Grid container alignItems="center">
+                    <Grid item>{cellValue}</Grid>
                     <Grid item>
                         <OpenInNewIcon
                             className={classes.iconAlignVertical}
                             fontSize="small"
                         />
                     </Grid>
-                    <Grid item>{cellValue}</Grid>
                 </Grid>
             </Link>
         );

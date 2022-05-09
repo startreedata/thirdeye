@@ -1,3 +1,4 @@
+import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "./anomaly.interfaces";
 
@@ -103,14 +104,22 @@ export interface AnomalyDimensionAnalysisRequest {
     hierarchies?: string[];
 }
 
+export enum SavedStateKeys {
+    QUERY_SEARCH_STRING = "querySearchString",
+    CHART_FILTER_SET = "chartFilterSet",
+}
+
+export interface UIStateMetaData {
+    [SavedStateKeys.QUERY_SEARCH_STRING]?: string;
+    [SavedStateKeys.CHART_FILTER_SET]?: AnomalyFilterOption[][];
+}
+
 export interface Investigation {
     id: number;
     name: string;
     text: string;
-    uiMetadata: {
-        [key: string]: unknown;
-    };
-    anomaly?: Anomaly;
+    uiMetadata: UIStateMetaData;
+    anomaly?: Partial<Anomaly>;
     created: number;
     updated: number;
     createdBy: {

@@ -140,7 +140,7 @@ const mockInvestigation = {
     uiMetadata: {
         additionalProp3: [1, 2, 3],
         additionalProp2: 3,
-        additionalProp1: "yes",
+        querySearchString: "yes",
     },
     created: 1651236574971,
     createdBy: {

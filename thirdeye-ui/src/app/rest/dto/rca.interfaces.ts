@@ -108,7 +108,7 @@ export interface Investigation {
     name: string;
     text: string;
     uiMetadata: {
-        [key: string]: any;
+        [key: string]: unknown;
     };
     anomaly?: Anomaly;
     created: number;

@@ -60,7 +60,7 @@ export const getInvestigations = async (
     }
 
     const response = await axios.get(
-        `${BASE_URL_RCA}/investigations${queryString}`
+        `${INVESTIGATIONS_ENDPOINT}${queryString}`
     );
 
     return response.data;
@@ -70,7 +70,7 @@ export const getInvestigation = async (
     investigationId: number
 ): Promise<Investigation> => {
     const response = await axios.get(
-        `${BASE_URL_RCA}/investigations/${investigationId}`
+        `${INVESTIGATIONS_ENDPOINT}/${investigationId}`
     );
 
     return response.data;

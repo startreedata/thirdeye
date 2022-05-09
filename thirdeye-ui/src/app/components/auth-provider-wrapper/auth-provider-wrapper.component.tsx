@@ -7,9 +7,9 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAppConfiguration } from "../../rest/app-config/app-config.action";
-import { AppConfiguration } from "../../rest/dto/app-config.interface";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { AuthProviderWrapperProps } from "./auth-provider-wrapper.interfaces";
+import { isAuthDisabled, processAuthData } from "./auth-provider-wrapper.utils";
 
 export const AuthProviderWrapper: FunctionComponent<
     AuthProviderWrapperProps
@@ -28,22 +28,6 @@ export const AuthProviderWrapper: FunctionComponent<
     }, []);
 
     useEffect(() => {
-        if (isNull(clientId)) {
-            // Auth data yet to be gathered
-            return;
-        }
-
-        if (!clientId) {
-            // Auth data missing
-            setAppInitFailure(true);
-
-            return;
-        }
-
-        setAppInitFailure(false);
-    }, [clientId]);
-
-    useEffect(() => {
         if (isNull(appInitFailure)) {
             // Auth data yet to be processed
             return;
@@ -54,26 +38,15 @@ export const AuthProviderWrapper: FunctionComponent<
 
     useEffect(() => {
         if (getAppConfigurationStatus === ActionStatus.Done) {
-            gatherAuthData(fetchedAppConfiguration);
+            setClientId(processAuthData(fetchedAppConfiguration));
+            setAppInitFailure(false);
         }
 
         if (getAppConfigurationStatus === ActionStatus.Error) {
-            gatherAuthData(null);
+            setClientId(processAuthData(null));
+            setAppInitFailure(true);
         }
     }, [getAppConfigurationStatus]);
-
-    const gatherAuthData = (
-        appConfiguration: AppConfiguration | null
-    ): void => {
-        // Validate received data
-        if (!appConfiguration || !appConfiguration.clientId) {
-            setClientId("");
-
-            return;
-        }
-
-        setClientId(appConfiguration.clientId);
-    };
 
     // Loading indicator
     if (loading) {
@@ -84,6 +57,7 @@ export const AuthProviderWrapper: FunctionComponent<
         <AuthProviderV1
             appInitFailure={appInitFailure as boolean}
             clientId={clientId as string}
+            disableAuthOverride={isAuthDisabled(fetchedAppConfiguration)}
             redirectMethod={AuthRedirectMethodV1.Post}
             redirectPathBlacklist={[AppRoute.LOGIN, AppRoute.LOGOUT]}
         >

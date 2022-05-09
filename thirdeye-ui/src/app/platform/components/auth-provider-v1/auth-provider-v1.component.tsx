@@ -43,6 +43,7 @@ import {
 } from "./auth-provider-v1.interfaces";
 
 export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
+    disableAuthOverride,
     clientId,
     redirectMethod,
     oidcIssuerAudiencePath,
@@ -82,6 +83,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
         clearRedirectHref,
         setAuthAction,
         clearAuthAction,
+        enableAuthDisabledNotification,
     ] = useAuthV1((state) => [
         state.authenticated,
         state.authDisabled,
@@ -101,6 +103,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
         state.clearRedirectHref,
         state.setAuthAction,
         state.clearAuthAction,
+        state.enableAuthDisabledNotification,
     ]);
     const {
         infoV1: fetchedInfoV1,
@@ -114,8 +117,14 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     } = useGetOpenIDConfigurationV1();
 
     useEffect(() => {
-        // Loading for the first time
-        initAuthProvider();
+        if (disableAuthOverride) {
+            enableAuthDisabledNotification();
+            disableAuth();
+            setAuthProviderLoading(false);
+        } else {
+            // Loading for the first time
+            initAuthProvider();
+        }
     }, []);
 
     useEffect(() => {

@@ -113,6 +113,7 @@ module.exports = {
             // Mock the configuration payload for development
             app.get("/api/ui/config", function (req, res) {
                 res.json({
+                    authEnabled: false,
                     clientId: "fake-id-for-development",
                 });
             });

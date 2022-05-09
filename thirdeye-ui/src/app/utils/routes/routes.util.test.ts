@@ -25,6 +25,7 @@ import {
     getMetricsViewPath,
     getRootCauseAnalysisForAnomalyInvestigatePath,
     getRootCauseAnalysisForAnomalyPath,
+    getRootCauseAnalysisSavedInvestigationPath,
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsCreatePath,
     getSubscriptionGroupsPath,
@@ -138,6 +139,12 @@ describe("Routes Util", () => {
     it("getMetricsViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getMetricsViewPath(1)).toEqual(
             "/configuration/metrics/view/id/1"
+        );
+    });
+
+    it("getRootCauseAnalysisSavedInvestigationPath should return appropriate path with appropriate query string for anomaly id", () => {
+        expect(getRootCauseAnalysisSavedInvestigationPath(1)).toEqual(
+            "/root-cause-analysis/investigations/1"
         );
     });
 

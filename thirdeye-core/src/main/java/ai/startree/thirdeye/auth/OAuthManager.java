@@ -8,6 +8,7 @@ package ai.startree.thirdeye.auth;
 import ai.startree.thirdeye.restclient.InfoService;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -38,6 +39,7 @@ public class OAuthManager {
   private final OidcJWTProcessor processor;
   private final OAuthConfiguration oAuthConfig;
   private final OidcContext context;
+  private final MetricRegistry metricRegistry;
   LoadingCache<String, Map<String, Object>> openidConfigCache = CacheBuilder.newBuilder()
     .expireAfterWrite(1, TimeUnit.MINUTES)
     .maximumSize(1)
@@ -46,14 +48,16 @@ public class OAuthManager {
 
   @Inject
   public OAuthManager(@Nullable final OAuthConfiguration oAuthConfig,
-      final OidcJWTProcessor processor) {
+      final OidcJWTProcessor processor,
+      final MetricRegistry metricRegistry) {
     this.oAuthConfig = oAuthConfig;
     this.processor = processor;
+    this.metricRegistry = metricRegistry;
     this.context = oAuthConfig != null ? generateOidcContext(oAuthConfig) : null;
   }
 
   public LoadingCache<String, ThirdEyePrincipal> getDefaultCache() {
-    processor.init(context);
+    processor.init(context, metricRegistry);
     return CacheBuilder.newBuilder()
         .maximumSize(context.getCacheSize())
         .expireAfterWrite(context.getCacheTtl(), TimeUnit.MILLISECONDS)

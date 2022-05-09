@@ -8,6 +8,7 @@ package ai.startree.thirdeye.spi.datasource.macro;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joda.time.Interval;
 import org.joda.time.Period;
 
 /**
@@ -21,18 +22,19 @@ public interface SqlExpressionBuilder {
    * Implementation should be careful with identifier quoting.
    * Identifiers may be passed quoted or unquoted.
    *
-   * For example: {@code getTimeFilterExpression(myTimeEpoch, 42, 84, null)} returns
+   * Implementation should respect the filterInterval timezone.
+   *
+   * For example: {@code getTimeFilterExpression(myTimeEpoch, Interval(42,84), "EPOCH_MILLIS")} returns
    * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
    * Used by the macro __timeFilter().
-   * Expects the column to be in epoch milliseconds.
    *
    * @param timeColumn time column name
-   * @param minTimeMillisIncluded minimum epoch milliseconds - included
-   * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
+   * @param filterInterval interval to filter on.
+   * @param timeColumnFormat time column time format. Managed formats depend on the datasource
    */
-  default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-      final long maxTimeMillisExcluded) {
+  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+      final String timeColumnFormat) {
     throw new UnsupportedOperationException();
   }
 
@@ -41,6 +43,7 @@ public interface SqlExpressionBuilder {
    * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
    *
    * Used internally to generate queries. For RCA for instance.
+   * Implementation should respect the filterInterval timezone.
    *
    * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
    * datasource.
@@ -52,14 +55,13 @@ public interface SqlExpressionBuilder {
    * runtime.
    *
    * @param timeColumn time column name
-   * @param minTimeMillisIncluded minimum epoch milliseconds - included
-   * @param maxTimeMillisExcluded maximum epoch milliseconds - excluded
+   * @param filterInterval interval to filter on.
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
-  default String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-      final long maxTimeMillisExcluded, final @Nullable String timeFormat,
+  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+      final @Nullable String timeFormat,
       @Nullable final String timeUnit) {
     throw new UnsupportedOperationException();
   }
@@ -77,6 +79,7 @@ public interface SqlExpressionBuilder {
    * @param timeColumn time column name
    * @param timeColumnFormat time column time format. Managed formats depend on the datasource
    * @param granularity granularity of the output epoch milliseconds (minutes, days, etc...)
+   * @param timezone timezone string in tz database format
    */
   default String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
       final Period granularity, @Nullable final String timezone) {
@@ -99,9 +102,10 @@ public interface SqlExpressionBuilder {
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
+   * @param timezone timezone string in tz database format
    */
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
-      final Period granularity, @Nullable final String timeUnit , @Nullable final String timezone) {
+      final Period granularity, @Nullable final String timeUnit, @Nullable final String timezone) {
     throw new UnsupportedOperationException();
   }
 

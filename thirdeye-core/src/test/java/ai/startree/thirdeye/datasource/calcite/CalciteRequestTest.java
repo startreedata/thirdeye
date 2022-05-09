@@ -609,9 +609,8 @@ public class CalciteRequestTest {
 
   @Test
   public void testGetSqlWithTimeAggregationAndTimeFilter() throws SqlParseException {
-    // test that the filter is applied on the bucketed column - important - this is the purpose of the high level withTimeAggregation and withTimeFilter
     final String timeAggregationColumn = "date_sdf";
-    final Interval timeFilterInterval = new Interval(100L, 100000000L);
+    final Interval timeFilterInterval = new Interval(100L, 100000000L); // 19700101 - 19700102
     final String timeColumnFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
@@ -627,17 +626,18 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format(
-        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY %s ORDER BY %s",
+        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:%s', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY %s ORDER BY %s",
         COLUMN_NAME_1,
         timeAggregationColumn,
+        timeColumnFormat,
         "1:DAYS",
         TIME_AGGREGATION_ALIAS,
         DATABASE,
         TABLE,
-        TIME_AGGREGATION_ALIAS,
-        timeFilterInterval.getStartMillis(),
-        TIME_AGGREGATION_ALIAS,
-        timeFilterInterval.getEndMillis(),
+        timeAggregationColumn,
+        "19700101",
+        timeAggregationColumn,
+        "19700102",
         TIME_AGGREGATION_ALIAS,
         TIME_AGGREGATION_ALIAS
     );
@@ -799,41 +799,41 @@ public class CalciteRequestTest {
     public static final long DAY_SCALE = 24 * HOUR_SCALE;
 
     @Override
-    public String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-        final long maxTimeMillisExcluded) {
+    public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
+        final String timeColumnFormat) {
+      // ignore timeColumnFormat in this test expression builder
       return String.format("%s >= %s AND %s < %s",
           timeColumn,
-          minTimeMillisIncluded,
+          filterInterval.getStartMillis(),
           timeColumn,
-          maxTimeMillisExcluded);
+          filterInterval.getEndMillis());
     }
 
     @Override
-    public String getTimeFilterExpression(final String timeColumn, final long minTimeMillisIncluded,
-        final long maxTimeMillisExcluded,
+    public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
         @Nullable final String timeFormat,
         @Nullable final String timeUnit) {
       if (timeFormat == null) {
-        return getTimeFilterExpression(timeColumn, minTimeMillisIncluded, maxTimeMillisExcluded);
+        return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH");
       }
       String lowerBound;
       String upperBound;
       if ("EPOCH".equals(timeFormat)) {
         if (TimeUnit.MILLISECONDS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(minTimeMillisIncluded);
-          upperBound = String.valueOf(maxTimeMillisExcluded);
+          lowerBound = String.valueOf(filterInterval.getStartMillis());
+          upperBound = String.valueOf(filterInterval.getEndMillis());
         } else if (timeUnit == null || TimeUnit.SECONDS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(minTimeMillisIncluded / SECOND_SCALE);
-          upperBound = String.valueOf(maxTimeMillisExcluded / SECOND_SCALE);
+          lowerBound = String.valueOf(filterInterval.getStartMillis() / SECOND_SCALE);
+          upperBound = String.valueOf(filterInterval.getEndMillis() / SECOND_SCALE);
         } else if (TimeUnit.MINUTES.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(minTimeMillisIncluded / MINUTE_SCALE);
-          upperBound = String.valueOf(maxTimeMillisExcluded / MINUTE_SCALE);
+          lowerBound = String.valueOf(filterInterval.getStartMillis() / MINUTE_SCALE);
+          upperBound = String.valueOf(filterInterval.getEndMillis() / MINUTE_SCALE);
         } else if (TimeUnit.HOURS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(minTimeMillisIncluded / HOUR_SCALE);
-          upperBound = String.valueOf(maxTimeMillisExcluded / HOUR_SCALE);
+          lowerBound = String.valueOf(filterInterval.getStartMillis() / HOUR_SCALE);
+          upperBound = String.valueOf(filterInterval.getEndMillis() / HOUR_SCALE);
         } else if (TimeUnit.DAYS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(minTimeMillisIncluded / DAY_SCALE);
-          upperBound = String.valueOf(maxTimeMillisExcluded / DAY_SCALE);
+          lowerBound = String.valueOf(filterInterval.getStartMillis() / DAY_SCALE);
+          upperBound = String.valueOf(filterInterval.getEndMillis() / DAY_SCALE);
         } else {
           throw new UnsupportedOperationException(String.format(
               "Unsupported TimeUnit for filter expression: %s",
@@ -844,8 +844,8 @@ public class CalciteRequestTest {
         String simpleDateFormatString = removeSimpleDateFormatPrefix(timeFormat);
         final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
             simpleDateFormatString);
-        lowerBound = inputDataDateTimeFormatter.print(minTimeMillisIncluded);
-        upperBound = inputDataDateTimeFormatter.print(maxTimeMillisExcluded);
+        lowerBound = inputDataDateTimeFormatter.print(filterInterval.getStartMillis());
+        upperBound = inputDataDateTimeFormatter.print(filterInterval.getEndMillis());
       }
 
       return String.format("%s >= %s AND %s < %s", timeColumn, lowerBound, timeColumn, upperBound);

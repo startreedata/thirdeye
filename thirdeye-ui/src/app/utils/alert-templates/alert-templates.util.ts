@@ -36,7 +36,7 @@ export const createDefaultAlertTemplate = (): NewAlertTemplate => {
                     "component.dataSource": "${dataSource}",
                     "component.query":
                         "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') " +
-                        "as ts, ${aggregateFunction}(${metric}) as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY" +
+                        "as ts, ${aggregateFunction}(${metric}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY" +
                         " ts ORDER BY ts LIMIT 1000",
                 },
                 outputs: [

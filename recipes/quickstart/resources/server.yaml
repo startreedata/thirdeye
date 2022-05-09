@@ -99,6 +99,7 @@ mockEvents:
 
 ui:
   externalUrl: "http://localhost:7005"
+  clientId: clientId
 
 notifications:
   useSendgridEmail: false

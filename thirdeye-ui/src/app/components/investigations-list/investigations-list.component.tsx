@@ -1,4 +1,5 @@
-import { Link, Typography } from "@material-ui/core";
+import { Grid, Link, Typography } from "@material-ui/core";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import React, { FunctionComponent, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -9,11 +10,13 @@ import {
 import { formatDateAndTimeV1 } from "../../platform/utils";
 import { Investigation } from "../../rest/dto/rca.interfaces";
 import { getRootCauseAnalysisSavedInvestigationPath } from "../../utils/routes/routes.util";
+import { useInvestigationListStyles } from "./investigation-list.styles";
 import { InvestigationsListProps } from "./investigations-list.interfaces";
 
 export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
     investigations,
 }) => {
+    const classes = useInvestigationListStyles();
     const { t } = useTranslation();
 
     const renderLink = (
@@ -21,8 +24,19 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
         data: Investigation
     ): ReactElement => {
         return (
-            <Link href={getRootCauseAnalysisSavedInvestigationPath(data.id)}>
-                {cellValue}
+            <Link
+                href={getRootCauseAnalysisSavedInvestigationPath(data.id)}
+                target="blank"
+            >
+                <Grid container alignItems="center">
+                    <Grid item>
+                        <OpenInNewIcon
+                            className={classes.iconAlignVertical}
+                            fontSize="small"
+                        />
+                    </Grid>
+                    <Grid item>{cellValue}</Grid>
+                </Grid>
             </Link>
         );
     };
@@ -36,10 +50,9 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
             flex: 1.5,
             sortable: true,
             customCellRenderer: renderLink,
-            customCellTooltipRenderer: (
-                _: Record<string, unknown>,
-                data: Investigation
-            ) => <span>{data.text}</span>,
+            customCellTooltipRenderer: () => (
+                <span>{t("label.view-investigation")}</span>
+            ),
         },
         {
             key: "createdBy.principal",

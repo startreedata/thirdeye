@@ -20,6 +20,7 @@ services:
     depends_on:
       coordinator:
         condition: service_healthy
+
   coordinator:
     image: repo.startreedata.io/external-docker-registry/thirdeye:latest
     ports:
@@ -35,6 +36,7 @@ services:
       test: [ "CMD", "wget" , "http://localhost:8080" ]
       timeout: 15s
       retries: 10
+
   db:
     image: mysql:8.0.28
     ports:
@@ -56,7 +58,7 @@ services:
       - "8000:8000"
     command: QuickStart -type batch
     healthcheck:
-      test: [ "CMD", "wget", "http://localhost:8000/query" ]
+      test: [ "CMD", "wget", "http://localhost:8000/health" ]
       timeout: 15s
       retries: 10
 

@@ -4,6 +4,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
+import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
@@ -62,9 +63,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+        const alert = searchParams.get(AnomalyFilterQueryStringKey.ALERT);
 
         let fetchedUiAnomalies: UiAnomaly[] = [];
-        getAnomalies({ startTime: Number(start), endTime: Number(end) })
+
+        getAnomalies({
+            startTime: Number(start),
+            endTime: Number(end),
+            alertId: parseInt(alert || ""),
+        })
             .then((anomalies) => {
                 if (anomalies && anomalies.length) {
                     fetchedUiAnomalies = getUiAnomalies(anomalies);

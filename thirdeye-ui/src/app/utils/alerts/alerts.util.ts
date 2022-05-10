@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { cloneDeep, isEmpty, omit, sortBy } from "lodash";
+import { FilterOption } from "../../components/quick-filter-chip/quick-filter-chip.interfaces";
 import {
     Alert,
     AlertAnomalyDetectorNode,
@@ -352,6 +353,21 @@ const mapSubscriptionGroupsToAlertIds = (
     }
 
     return subscriptionGroupsToAlertIdsMap;
+};
+
+// Return list of unique filter options for alerts
+export const getUniqueAlertLists = (
+    alerts: Array<Alert>
+): Array<FilterOption> => {
+    if (!Array.isArray(alerts)) {
+        return [];
+    }
+
+    return alerts.reduce(
+        (acc, { id, name }) =>
+            acc.find((a) => a.id === id) ? acc : [...acc, { id, label: name }],
+        [] as Array<FilterOption>
+    );
 };
 
 export const DEFAULT_FEEDBACK = {

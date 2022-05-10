@@ -1,4 +1,4 @@
-import { Button, Typography } from "@material-ui/core";
+import { Box, Button, Typography } from "@material-ui/core";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -17,6 +17,7 @@ import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
 } from "../../utils/routes/routes.util";
+import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
@@ -190,14 +191,17 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 entity: t("label.anomalies"),
             })}
             toolbarComponent={
-                <Button
-                    data-testid="button-delete"
-                    disabled={isActionButtonDisable}
-                    variant="contained"
-                    onClick={handleAnomalyDelete}
-                >
-                    {t("label.delete")}
-                </Button>
+                <Box display="flex" justifyContent="space-between">
+                    <Button
+                        data-testid="button-delete"
+                        disabled={isActionButtonDisable}
+                        variant="contained"
+                        onClick={handleAnomalyDelete}
+                    >
+                        {t("label.delete")}
+                    </Button>
+                    <AnomalyQuickFilters />
+                </Box>
             }
             onSearchFilterValueChange={props.onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}

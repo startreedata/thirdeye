@@ -1,5 +1,8 @@
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
-import { getFromSavedInvestigationOrDefault } from "./investigation.util";
+import {
+    createNewInvestigation,
+    getFromSavedInvestigationOrDefault,
+} from "./investigation.util";
 
 describe("Investigation Util", () => {
     it("getFromSavedInvestigationOrDefault return default value if key is missing", () => {
@@ -20,5 +23,14 @@ describe("Investigation Util", () => {
         );
 
         expect(result).toEqual("defaultString");
+    });
+
+    it("createNewInvestigation returns object with expected fields", () => {
+        const result = createNewInvestigation(123);
+
+        expect(result).toEqual({
+            uiMetadata: {},
+            anomaly: { id: 123 },
+        });
     });
 });

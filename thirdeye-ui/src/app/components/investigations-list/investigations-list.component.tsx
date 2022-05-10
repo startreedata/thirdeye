@@ -8,7 +8,7 @@ import {
     PageContentsCardV1,
 } from "../../platform/components";
 import { formatDateAndTimeV1 } from "../../platform/utils";
-import { Investigation } from "../../rest/dto/rca.interfaces";
+import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { getRootCauseAnalysisForAnomalyInvestigatePath } from "../../utils/routes/routes.util";
 import { useInvestigationListStyles } from "./investigation-list.styles";
 import { InvestigationsListProps } from "./investigations-list.interfaces";
@@ -24,10 +24,9 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
         data: Investigation
     ): ReactElement => {
         if (data.anomaly) {
-            // #TODO replace with enum when PR 439 is merged
             const url = `${getRootCauseAnalysisForAnomalyInvestigatePath(
-                data.anomaly.id
-            )}?${data.uiMetadata["querySearchString"]}`;
+                data.anomaly.id as number
+            )}?${data.uiMetadata[SavedStateKeys.QUERY_SEARCH_STRING]}`;
 
             return (
                 <Link href={url} target="blank">
@@ -40,6 +39,7 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
                             />
                         </Grid>
                     </Grid>
+                    :
                 </Link>
             );
         }

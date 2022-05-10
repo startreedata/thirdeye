@@ -38,8 +38,19 @@ export const AuthProviderWrapper: FunctionComponent<
 
     useEffect(() => {
         if (getAppConfigurationStatus === ActionStatus.Done) {
-            setClientId(processAuthData(fetchedAppConfiguration));
-            setAppInitFailure(false);
+            const clientIdFromServer = processAuthData(fetchedAppConfiguration);
+
+            setClientId(clientIdFromServer);
+
+            // If auth is enabled but client id is missing, indicate there is an issue
+            if (
+                !isAuthDisabled(fetchedAppConfiguration) &&
+                clientIdFromServer === ""
+            ) {
+                setAppInitFailure(true);
+            } else {
+                setAppInitFailure(false);
+            }
         }
 
         if (getAppConfigurationStatus === ActionStatus.Error) {

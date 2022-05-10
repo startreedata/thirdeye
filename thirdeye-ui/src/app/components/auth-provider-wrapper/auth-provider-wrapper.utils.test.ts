@@ -32,6 +32,14 @@ describe("Auth Provider Wrapper Utils", () => {
 
             expect(result).toEqual("hello-world");
         });
+
+        it("should return empty string if auth enabled but client id missing", () => {
+            const result = processAuthData({
+                authEnabled: true,
+            });
+
+            expect(result).toEqual("");
+        });
     });
 
     describe("isAuthDisabled", () => {

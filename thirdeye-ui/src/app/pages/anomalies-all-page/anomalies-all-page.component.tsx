@@ -21,6 +21,7 @@ import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
+import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
@@ -63,15 +64,32 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
-        const alert = searchParams.get(AnomalyFilterQueryStringKey.ALERT);
+        const params: GetAnomaliesProps = {
+            startTime: Number(start),
+            endTime: Number(end),
+        };
+
+        if (searchParams.has(AnomalyFilterQueryStringKey.ALERT)) {
+            params.alertId = parseInt(
+                searchParams.get(AnomalyFilterQueryStringKey.ALERT) || ""
+            );
+        }
+
+        if (searchParams.has(AnomalyFilterQueryStringKey.DATASET)) {
+            params.dataset = searchParams.get(
+                AnomalyFilterQueryStringKey.DATASET
+            ) as string;
+        }
+
+        if (searchParams.has(AnomalyFilterQueryStringKey.METRIC)) {
+            params.metric = searchParams.get(
+                AnomalyFilterQueryStringKey.METRIC
+            ) as string;
+        }
 
         let fetchedUiAnomalies: UiAnomaly[] = [];
 
-        getAnomalies({
-            startTime: Number(start),
-            endTime: Number(end),
-            alertId: parseInt(alert || ""),
-        })
+        getAnomalies(params)
             .then((anomalies) => {
                 if (anomalies && anomalies.length) {
                     fetchedUiAnomalies = getUiAnomalies(anomalies);

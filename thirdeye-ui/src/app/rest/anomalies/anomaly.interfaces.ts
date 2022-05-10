@@ -16,4 +16,6 @@ export interface GetAnomaliesProps {
     alertId?: number;
     startTime?: number;
     endTime?: number;
+    dataset?: string;
+    metric?: string;
 }

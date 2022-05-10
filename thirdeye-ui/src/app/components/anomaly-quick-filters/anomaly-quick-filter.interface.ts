@@ -1,5 +1,5 @@
 export enum AnomalyFilterQueryStringKey {
     ALERT = "alert",
-    Metric = "metric",
+    METRIC = "metric",
     DATASET = "dataset",
 }

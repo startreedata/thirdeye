@@ -1,76 +1,150 @@
-import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import {
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
+import { useDataGridV1Styles } from "../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.styles";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { getUniqueAlertLists } from "../../utils/alerts/alerts.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
-import { ChipFilter } from "../quick-filter-chip/quick-filter-chip.component";
-import { FilterOption } from "../quick-filter-chip/quick-filter-chip.interfaces";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { FilterOptionsAutoComplete } from "../filter-options-auto-complete/filter-options-auto-complete.component";
+import { FilterOption } from "../filter-options-auto-complete/filter-options-auto-complete.interfaces";
+import { AnomalyFilterQueryStringKey } from "./anomaly-quick-filter.interface";
 import { useAnomalyQuickFilterStyles } from "./anomaly-quick-filters.styles";
 
+function initializeSelected(
+    searchParams: URLSearchParams,
+    searchParamKey: string
+): FilterOption | null {
+    if (searchParams.has(searchParamKey)) {
+        return {
+            id: searchParams.get(searchParamKey) as string,
+            label: searchParams.get(searchParamKey) as string,
+        };
+    }
+
+    return null;
+}
+
 export const AnomalyQuickFilters: FunctionComponent = () => {
-    const classes = useAnomalyQuickFilterStyles();
-    const { notify } = useNotificationProviderV1();
-    const [alertOptions, setAlertOptions] = useState<Array<FilterOption>>([]);
     const { t } = useTranslation();
-
+    const dataGridV1Classes = useDataGridV1Styles();
+    const classes = useAnomalyQuickFilterStyles();
     const [searchParams, setSearchParams] = useSearchParams();
+    const [selectedAlert, setSelectedAlert] = useState(
+        initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
+    );
+    // const [selectedDataset, setSelectedDataset] = useState(
+    //     initializeSelected(searchParams, AnomalyFilterQueryStringKey.DATASET)
+    // );
+    // const [selectedMetric, setSelectedMetric] = useState(
+    //     initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+    // );
 
-    useEffect(() => {
-        fetchAlerts();
-    }, []);
-
-    const fetchAlerts = async (): Promise<void> => {
-        try {
-            const alerts = await getAllAlerts();
-            setAlertOptions(getUniqueAlertLists(alerts));
-        } catch (error) {
-            const errorMsgs = getErrorMessages(error as AxiosError);
-
-            !isEmpty(errorMsgs)
-                ? errorMsgs.map((msg) => notify(NotificationTypeV1.Error, msg))
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.alerts"),
-                      })
-                  );
-        }
-    };
-
-    const handleAlertFilter = (filter?: FilterOption): void => {
-        if (!filter) {
-            searchParams.delete("alert");
+    const handleChange = (
+        filter: FilterOption | null,
+        queryParamKey: string,
+        setFunc: (option: FilterOption | null) => void
+    ): void => {
+        if (filter) {
+            searchParams.set(queryParamKey, filter.id.toString());
+            setFunc(filter);
         } else {
-            searchParams.set("alert", filter.id + "");
+            searchParams.delete(queryParamKey);
+            setFunc(null);
         }
 
         setSearchParams(searchParams);
     };
 
-    const alertValue = useMemo(
-        () => ({
-            id: parseInt(searchParams.get("alert") || ""),
-            label: "",
-        }),
-        [searchParams]
-    );
+    useEffect(() => {
+        setSelectedAlert(
+            initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
+        );
+        // setSelectedDataset(
+        //     initializeSelected(
+        //         searchParams,
+        //         AnomalyFilterQueryStringKey.DATASET
+        //     )
+        // );
+        // setSelectedMetric(
+        //     initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+        // );
+    }, [searchParams]);
 
     return (
         <div className={classes.root}>
-            <ChipFilter
-                label="Alert"
-                name="alert"
-                options={alertOptions}
-                value={alertValue}
-                onFilter={handleAlertFilter}
-            />
+            <div className={dataGridV1Classes.dataGridToolbarSearch}>
+                <FilterOptionsAutoComplete<Alert>
+                    fetchOptions={getAllAlerts}
+                    formatOptionFromServer={(rawOption) => {
+                        return {
+                            id: rawOption.id,
+                            label: rawOption.name,
+                        };
+                    }}
+                    formatSelectedAfterOptionsFetch={(
+                        selected: FilterOption,
+                        options: FilterOption[]
+                    ) => {
+                        const selectedId = Number(selected.id);
+                        const matching = options.find(
+                            (item) => item.id === selectedId
+                        );
+
+                        return matching || selected;
+                    }}
+                    label={t("label.alert")}
+                    name={t("label.alert")}
+                    selected={selectedAlert}
+                    onSelectionChange={(selected) =>
+                        handleChange(
+                            selected,
+                            AnomalyFilterQueryStringKey.ALERT,
+                            setSelectedAlert
+                        )
+                    }
+                />
+            </div>
+            {/* <div className={dataGridV1Classes.dataGridToolbarSearch}>*/}
+            {/*    <FilterOptionsAutoComplete<Dataset>*/}
+            {/*        fetchOptions={getAllDatasets}*/}
+            {/*        formatOptionFromServer={(rawOption) => {*/}
+            {/*            return {*/}
+            {/*                id: rawOption.name,*/}
+            {/*                label: rawOption.name,*/}
+            {/*            };*/}
+            {/*        }}*/}
+            {/*        label={t("label.dataset")}*/}
+            {/*        name={t("label.dataset")}*/}
+            {/*        selected={selectedDataset}*/}
+            {/*        onSelectionChange={(selected) =>*/}
+            {/*            handleChange(*/}
+            {/*                selected,*/}
+            {/*                AnomalyFilterQueryStringKey.DATASET,*/}
+            {/*                setSelectedDataset*/}
+            {/*            )*/}
+            {/*        }*/}
+            {/*    />*/}
+            {/* </div>*/}
+            {/* <div className={dataGridV1Classes.dataGridToolbarSearch}>*/}
+            {/*    <FilterOptionsAutoComplete<Metric>*/}
+            {/*        fetchOptions={getAllMetrics}*/}
+            {/*        formatOptionFromServer={(rawOption) => {*/}
+            {/*            return {*/}
+            {/*                id: rawOption.name,*/}
+            {/*                label: rawOption.name,*/}
+            {/*            };*/}
+            {/*        }}*/}
+            {/*        label={t("label.metric")}*/}
+            {/*        name={t("label.metric")}*/}
+            {/*        selected={selectedMetric}*/}
+            {/*        onSelectionChange={(selected) =>*/}
+            {/*            handleChange(*/}
+            {/*                selected,*/}
+            {/*                AnomalyFilterQueryStringKey.METRIC,*/}
+            {/*                setSelectedMetric*/}
+            {/*            )*/}
+            {/*        }*/}
+            {/*    />*/}
+            {/* </div>*/}
         </div>
     );
 };

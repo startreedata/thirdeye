@@ -4,7 +4,6 @@ import {
     ButtonGroup,
     Card,
     CardContent,
-    CardHeader,
     Grid,
 } from "@material-ui/core";
 import { isEmpty } from "lodash";
@@ -25,6 +24,7 @@ import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
 import { AnomalyTimeSeriesCardProps } from "./anomaly-time-series-card.interfaces";
@@ -147,18 +147,17 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
 
     return (
         <Card variant="outlined">
-            <CardHeader
-                action={
-                    <>
+            <CardContent>
+                <Grid container justifyContent="flex-end">
+                    <Grid item>
+                        <TimeRangeButtonWithContext />
+                    </Grid>
+                    <Grid item>
                         <TooltipV1
                             placement="top"
                             title={t("message.set-chart-height")}
                         >
-                            <ButtonGroup
-                                color="secondary"
-                                size="small"
-                                variant="outlined"
-                            >
+                            <ButtonGroup color="secondary" variant="outlined">
                                 {CHART_SIZE_OPTIONS.map((sizeOption) => (
                                     <Button
                                         disabled={chartHeight === sizeOption[1]}
@@ -174,9 +173,9 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                 ))}
                             </ButtonGroup>
                         </TooltipV1>
-                    </>
-                }
-            />
+                    </Grid>
+                </Grid>
+            </CardContent>
             {getEvaluationRequestStatus === ActionStatus.Working && (
                 <CardContent>
                     <Box pb={20} pt={20}>

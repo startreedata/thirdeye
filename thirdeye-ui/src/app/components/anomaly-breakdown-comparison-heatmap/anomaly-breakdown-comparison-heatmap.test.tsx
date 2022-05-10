@@ -40,6 +40,8 @@ jest.mock("react-router-dom", () => ({
     ]),
 }));
 
+jest.useFakeTimers();
+
 describe("AnomalyBreakdownComparisonHeatmap", () => {
     beforeEach(() => {
         mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
@@ -135,6 +137,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
                 onAddFilterSetClick={() => null}
             />
         );
+        jest.runAllTimers();
 
         await screen.findByText(/MockedNoDataIndicator/);
 

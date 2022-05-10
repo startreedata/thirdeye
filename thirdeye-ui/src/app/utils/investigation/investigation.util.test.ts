@@ -1,7 +1,9 @@
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import {
     createNewInvestigation,
+    determineInvestigationIDFromSearchParams,
     getFromSavedInvestigationOrDefault,
+    INVESTIGATION_ID_QUERY_PARAM,
 } from "./investigation.util";
 
 describe("Investigation Util", () => {
@@ -32,5 +34,21 @@ describe("Investigation Util", () => {
             uiMetadata: {},
             anomaly: { id: 123 },
         });
+    });
+
+    it("determineInvestigationIDFromSearchParams should return null if id missing", () => {
+        const result = determineInvestigationIDFromSearchParams(
+            new URLSearchParams()
+        );
+
+        expect(result).toBeNull();
+    });
+
+    it("determineInvestigationIDFromSearchParams should return id as number if it exists", () => {
+        const result = determineInvestigationIDFromSearchParams(
+            new URLSearchParams([[INVESTIGATION_ID_QUERY_PARAM, "456"]])
+        );
+
+        expect(result).toEqual(456);
     });
 });

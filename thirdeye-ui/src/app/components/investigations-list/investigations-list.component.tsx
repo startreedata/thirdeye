@@ -29,7 +29,7 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
             )}?${data.uiMetadata[SavedStateKeys.QUERY_SEARCH_STRING]}`;
 
             return (
-                <Link href={url} target="blank">
+                <Link href={url} target="_blank">
                     <Grid container alignItems="center">
                         <Grid item>{cellValue}</Grid>
                         <Grid item>
@@ -39,7 +39,6 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
                             />
                         </Grid>
                     </Grid>
-                    :
                 </Link>
             );
         }

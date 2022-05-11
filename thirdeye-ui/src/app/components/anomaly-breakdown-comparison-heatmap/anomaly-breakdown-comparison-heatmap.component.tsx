@@ -123,16 +123,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
      * This is often triggered multiple times within a re-render
      */
     useEffect(() => {
-        const apiCallWaiting = setTimeout(() => {
-            getMetricBreakdown(anomalyId, {
-                baselineOffset: comparisonOffset,
-                filters: [...anomalyFilters.map(concatKeyValueWithEqual)],
-            });
-        }, 25);
-
-        return () => {
-            clearTimeout(apiCallWaiting);
-        };
+        getMetricBreakdown(anomalyId, {
+            baselineOffset: comparisonOffset,
+            filters: [...anomalyFilters.map(concatKeyValueWithEqual)],
+        });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
 
     useEffect(() => {

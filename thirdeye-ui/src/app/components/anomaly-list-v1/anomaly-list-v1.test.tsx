@@ -29,7 +29,7 @@ jest.mock("../../platform/utils", () => ({
         )),
 }));
 
-jest.mock("../anomaly-quick-filter/anomaly-quick-filters.component", () => ({
+jest.mock("../anomaly-quick-filters/anomaly-quick-filters.component", () => ({
     AnomalyQuickFilters: jest.fn().mockImplementation(() => <>testFilters</>),
 }));
 

@@ -243,7 +243,8 @@ public class RootCauseMetricResource {
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        DateTimeZone.UTC);
+        rootCauseAnalysisInfo.getTimezone()
+    );
 
     Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
     final Interval baselineInterval = new Interval(

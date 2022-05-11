@@ -9,6 +9,7 @@ import {
 } from "../../platform/components";
 import { formatDateAndTimeV1 } from "../../platform/utils";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
+import { INVESTIGATION_ID_QUERY_PARAM } from "../../utils/investigation/investigation.util";
 import { getRootCauseAnalysisForAnomalyInvestigatePath } from "../../utils/routes/routes.util";
 import { useInvestigationListStyles } from "./investigation-list.styles";
 import { InvestigationsListProps } from "./investigations-list.interfaces";
@@ -24,12 +25,16 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
         data: Investigation
     ): ReactElement => {
         if (data.anomaly) {
+            const searchParams = new URLSearchParams(
+                data.uiMetadata[SavedStateKeys.QUERY_SEARCH_STRING]
+            );
+            searchParams.set(INVESTIGATION_ID_QUERY_PARAM, data.id.toString());
             const url = `${getRootCauseAnalysisForAnomalyInvestigatePath(
                 data.anomaly.id as number
-            )}?${data.uiMetadata[SavedStateKeys.QUERY_SEARCH_STRING]}`;
+            )}?${searchParams.toString()}`;
 
             return (
-                <Link href={url} target="blank">
+                <Link href={url} target="_blank">
                     <Grid container alignItems="center">
                         <Grid item>{cellValue}</Grid>
                         <Grid item>
@@ -39,7 +44,6 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
                             />
                         </Grid>
                     </Grid>
-                    :
                 </Link>
             );
         }

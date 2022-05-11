@@ -119,6 +119,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         );
     }, [anomalyMetricBreakdown]);
 
+    /**
+     * This is often triggered multiple times within a re-render
+     */
     useEffect(() => {
         getMetricBreakdown(anomalyId, {
             baselineOffset: comparisonOffset,

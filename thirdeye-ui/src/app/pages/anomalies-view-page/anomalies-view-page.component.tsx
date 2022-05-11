@@ -1,15 +1,24 @@
-import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
+import {
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    Paper,
+    Typography,
+} from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
+    AppLoadingIndicatorV1,
     HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsGridV1,
@@ -25,6 +34,7 @@ import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
@@ -36,6 +46,11 @@ import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
+    const {
+        investigations,
+        getInvestigations,
+        status: getInvestigationsRequestStatus,
+    } = useGetInvestigations();
     const {
         evaluation,
         getEvaluation,
@@ -60,7 +75,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const style = useAnomaliesViewPageStyles();
 
     useEffect(() => {
-        // Time range refreshed, fetch anomaly
+        anomalyId && getInvestigations(Number(anomalyId));
         anomalyId &&
             isValidNumberId(anomalyId) &&
             getAnomaly(toNumber(anomalyId));
@@ -245,6 +260,51 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             onRefresh={fetchAlertEvaluation}
                         />
                     )}
+                </Grid>
+
+                {/* Existing investigations */}
+                <Grid item xs={12}>
+                    {getInvestigationsRequestStatus ===
+                        ActionStatus.Working && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Box pb={20} pt={20}>
+                                    <AppLoadingIndicatorV1 />
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {getInvestigationsRequestStatus === ActionStatus.Error && (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator />
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {getInvestigationsRequestStatus === ActionStatus.Done &&
+                        investigations &&
+                        investigations.length > 0 && (
+                            <InvestigationsList
+                                investigations={investigations}
+                            />
+                        )}
+                    {getInvestigationsRequestStatus === ActionStatus.Done &&
+                        investigations &&
+                        investigations.length === 0 && (
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Box pb={3} pt={3} textAlign="center">
+                                        <Typography variant="h6">
+                                            {t(
+                                                "message.no-saved-investigations"
+                                            )}
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        )}
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

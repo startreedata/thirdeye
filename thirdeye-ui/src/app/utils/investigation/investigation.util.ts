@@ -1,5 +1,7 @@
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 
+export const INVESTIGATION_ID_QUERY_PARAM = "investigationId";
+
 export function getFromSavedInvestigationOrDefault<ExpectedReturnType>(
     investigation: Investigation | null,
     key: SavedStateKeys,
@@ -21,4 +23,16 @@ export function createNewInvestigation(anomalyId: number): Investigation {
         uiMetadata: {},
         anomaly: { id: anomalyId },
     } as Investigation;
+}
+
+export function determineInvestigationIDFromSearchParams(
+    searchParams: URLSearchParams
+): number | null {
+    const investigationIdFromQueryParams = searchParams.get(
+        INVESTIGATION_ID_QUERY_PARAM
+    );
+
+    return investigationIdFromQueryParams
+        ? Number(investigationIdFromQueryParams)
+        : null;
 }

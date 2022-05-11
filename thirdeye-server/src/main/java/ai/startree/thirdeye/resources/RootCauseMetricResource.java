@@ -225,9 +225,26 @@ public class RootCauseMetricResource {
   @GET
   @Path("/heatmap/anomaly/{id}")
   @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
-  public Response getAnomalyHeatmap(
+  @Deprecated
+  // todo cyril remove once removed by frontend - september max
+  public Response getAnomalyHeatmapUriPath(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
+      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
+      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
+      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
+      @QueryParam("filters") List<String> filters,
+      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
+      @QueryParam("limit") Integer limit) throws Exception {
+    return getAnomalyHeatmap(principal, anomalyId, baselineOffset, filters, limit);
+  }
+
+  @GET
+  @Path("/heatmap")
+  @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
+  public Response getAnomalyHeatmap(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @ApiParam(value = "id of the anomaly") @QueryParam("id") long anomalyId,
       @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
       @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
@@ -243,7 +260,8 @@ public class RootCauseMetricResource {
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        DateTimeZone.UTC);
+        rootCauseAnalysisInfo.getTimezone()
+    );
 
     Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
     final Interval baselineInterval = new Interval(

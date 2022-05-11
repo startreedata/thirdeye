@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  *                  \                    /
  *                   \-> pipeline.run() /
  */
+@Deprecated
 public class RCAFramework {
 
   private static final Logger LOG = LoggerFactory.getLogger(RCAFramework.class);

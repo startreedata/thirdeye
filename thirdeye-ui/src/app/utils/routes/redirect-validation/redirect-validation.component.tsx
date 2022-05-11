@@ -28,7 +28,12 @@ export const RedirectValidation: FunctionComponent<RedirectValidationProps> = ({
         });
 
         if (!validSoFar) {
-            navigate(to, { replace });
+            let urlToNavigateTo = to;
+
+            if (searchParams.toString()) {
+                urlToNavigateTo += `?${searchParams.toString()}`;
+            }
+            navigate(urlToNavigateTo, { replace });
         }
 
         setIsValid(validSoFar);

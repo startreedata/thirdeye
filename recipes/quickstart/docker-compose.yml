@@ -7,7 +7,7 @@ version: '3.9'
 
 services:
   ui:
-    image: repo.startreedata.io/external-docker-registry/thirdeye-ui:latest
+    image: ${DOCKER_CONTAINER_URL}thirdeye-ui:latest
     ports:
       - "7005:8081"
     environment:
@@ -22,7 +22,7 @@ services:
         condition: service_healthy
 
   coordinator:
-    image: repo.startreedata.io/external-docker-registry/thirdeye:latest
+    image: ${DOCKER_CONTAINER_URL}thirdeye:latest
     ports:
       - "7004:8080"
       - "7003:8090"

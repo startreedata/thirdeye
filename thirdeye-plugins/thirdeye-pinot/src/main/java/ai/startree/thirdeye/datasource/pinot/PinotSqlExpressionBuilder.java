@@ -47,6 +47,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       60 * SECOND_MILLIS; // number of milliseconds in a minute
   public static final long HOUR_MILLIS = 60 * MINUTE_MILLIS;
   public static final long DAY_MILLIS = 24 * HOUR_MILLIS;
+  public static final String STRING_LITERAL_QUOTE = "'";
 
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
@@ -247,7 +248,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           timeFormatter = d -> {
             final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
                 cleanSimpleDateFormat).withChronology(d.getChronology());
-            return inputDataDateTimeFormatter.print(d);
+            return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d) + STRING_LITERAL_QUOTE;
           };
       }
     }

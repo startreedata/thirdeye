@@ -210,7 +210,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                                 )
                                             }
                                         >
-                                            Hide filters table
+                                            {t("label.hide-filters-table")}
                                         </Button>
                                     )}
                                     {!showFilterSetTable && (
@@ -220,7 +220,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                                 handleShowHideFiltersTable(true)
                                             }
                                         >
-                                            Show filters table
+                                            {t("label.show-filters-table")}
                                         </Button>
                                     )}
                                 </>

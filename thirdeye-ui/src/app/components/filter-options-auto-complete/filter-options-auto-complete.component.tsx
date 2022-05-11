@@ -10,6 +10,7 @@ import {
     FilterOption,
     FilterOptionsAutoCompleteProps,
 } from "./filter-options-auto-complete.interfaces";
+import { useFilterOptionsAutoCompleteStyles } from "./filter-options-auto-complete.style";
 
 function FilterOptionsAutoComplete<FetchedDataType>({
     label,
@@ -21,6 +22,7 @@ function FilterOptionsAutoComplete<FetchedDataType>({
 }: FilterOptionsAutoCompleteProps<FetchedDataType>): JSX.Element {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
+    const classes = useFilterOptionsAutoCompleteStyles();
 
     const [availableOptions, setAvailableOptions] = useState<FilterOption[]>(
         []
@@ -67,8 +69,9 @@ function FilterOptionsAutoComplete<FetchedDataType>({
                     InputProps={{
                         ...params.InputProps,
                         // Override class name so the size of input is smaller
-                        className: "",
+                        className: classes.input,
                     }}
+                    fullWidth={false}
                     placeholder={t("message.filter-by-entity", {
                         entity: label,
                     })}

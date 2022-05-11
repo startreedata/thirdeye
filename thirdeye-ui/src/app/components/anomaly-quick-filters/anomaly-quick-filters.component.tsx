@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { useDataGridV1Styles } from "../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.styles";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { FilterOptionsAutoComplete } from "../filter-options-auto-complete/filter-options-auto-complete.component";
@@ -25,7 +24,6 @@ function initializeSelected(
 
 export const AnomalyQuickFilters: FunctionComponent = () => {
     const { t } = useTranslation();
-    const dataGridV1Classes = useDataGridV1Styles();
     const classes = useAnomalyQuickFilterStyles();
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedAlert, setSelectedAlert] = useState(
@@ -71,7 +69,7 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
 
     return (
         <div className={classes.root}>
-            <div className={dataGridV1Classes.dataGridToolbarSearch}>
+            <div className={classes.dataGridToolbarSearch}>
                 <FilterOptionsAutoComplete<Alert>
                     fetchOptions={getAllAlerts}
                     formatOptionFromServer={(rawOption) => {
@@ -103,7 +101,7 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
                     }
                 />
             </div>
-            {/* <div className={dataGridV1Classes.dataGridToolbarSearch}>*/}
+            {/* <div className={classes.dataGridToolbarSearch}>*/}
             {/*    <FilterOptionsAutoComplete<Dataset>*/}
             {/*        fetchOptions={getAllDatasets}*/}
             {/*        formatOptionFromServer={(rawOption) => {*/}
@@ -124,7 +122,7 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
             {/*        }*/}
             {/*    />*/}
             {/* </div>*/}
-            {/* <div className={dataGridV1Classes.dataGridToolbarSearch}>*/}
+            {/* <div className={classes.dataGridToolbarSearch}>*/}
             {/*    <FilterOptionsAutoComplete<Metric>*/}
             {/*        fetchOptions={getAllMetrics}*/}
             {/*        formatOptionFromServer={(rawOption) => {*/}

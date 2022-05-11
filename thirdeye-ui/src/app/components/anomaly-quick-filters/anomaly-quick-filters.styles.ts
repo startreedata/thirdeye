@@ -4,8 +4,9 @@ export const useAnomalyQuickFilterStyles = makeStyles((theme) => ({
     root: {
         display: "flex",
         flexWrap: "wrap",
-        "& > *": {
-            marginRight: theme.spacing(1),
-        },
+    },
+    dataGridToolbarSearch: {
+        width: 225,
+        marginLeft: theme.spacing(1),
     },
 }));

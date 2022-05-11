@@ -2,7 +2,11 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
+import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
+import { Metric } from "../../rest/dto/metric.interfaces";
+import { getAllMetrics } from "../../rest/metrics/metrics.rest";
 import { FilterOptionsAutoComplete } from "../filter-options-auto-complete/filter-options-auto-complete.component";
 import { FilterOption } from "../filter-options-auto-complete/filter-options-auto-complete.interfaces";
 import { AnomalyFilterQueryStringKey } from "./anomaly-quick-filter.interface";
@@ -29,12 +33,12 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
     const [selectedAlert, setSelectedAlert] = useState(
         initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
     );
-    // const [selectedDataset, setSelectedDataset] = useState(
-    //     initializeSelected(searchParams, AnomalyFilterQueryStringKey.DATASET)
-    // );
-    // const [selectedMetric, setSelectedMetric] = useState(
-    //     initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
-    // );
+    const [selectedDataset, setSelectedDataset] = useState(
+        initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+    );
+    const [selectedMetric, setSelectedMetric] = useState(
+        initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+    );
 
     const handleChange = (
         filter: FilterOption | null,
@@ -56,15 +60,15 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
         setSelectedAlert(
             initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
         );
-        // setSelectedDataset(
-        //     initializeSelected(
-        //         searchParams,
-        //         AnomalyFilterQueryStringKey.DATASET
-        //     )
-        // );
-        // setSelectedMetric(
-        //     initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
-        // );
+        setSelectedDataset(
+            initializeSelected(
+                searchParams,
+                AnomalyFilterQueryStringKey.DATASET
+            )
+        );
+        setSelectedMetric(
+            initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+        );
     }, [searchParams]);
 
     return (
@@ -101,48 +105,48 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
                     }
                 />
             </div>
-            {/* <div className={classes.dataGridToolbarSearch}>*/}
-            {/*    <FilterOptionsAutoComplete<Dataset>*/}
-            {/*        fetchOptions={getAllDatasets}*/}
-            {/*        formatOptionFromServer={(rawOption) => {*/}
-            {/*            return {*/}
-            {/*                id: rawOption.name,*/}
-            {/*                label: rawOption.name,*/}
-            {/*            };*/}
-            {/*        }}*/}
-            {/*        label={t("label.dataset")}*/}
-            {/*        name={t("label.dataset")}*/}
-            {/*        selected={selectedDataset}*/}
-            {/*        onSelectionChange={(selected) =>*/}
-            {/*            handleChange(*/}
-            {/*                selected,*/}
-            {/*                AnomalyFilterQueryStringKey.DATASET,*/}
-            {/*                setSelectedDataset*/}
-            {/*            )*/}
-            {/*        }*/}
-            {/*    />*/}
-            {/* </div>*/}
-            {/* <div className={classes.dataGridToolbarSearch}>*/}
-            {/*    <FilterOptionsAutoComplete<Metric>*/}
-            {/*        fetchOptions={getAllMetrics}*/}
-            {/*        formatOptionFromServer={(rawOption) => {*/}
-            {/*            return {*/}
-            {/*                id: rawOption.name,*/}
-            {/*                label: rawOption.name,*/}
-            {/*            };*/}
-            {/*        }}*/}
-            {/*        label={t("label.metric")}*/}
-            {/*        name={t("label.metric")}*/}
-            {/*        selected={selectedMetric}*/}
-            {/*        onSelectionChange={(selected) =>*/}
-            {/*            handleChange(*/}
-            {/*                selected,*/}
-            {/*                AnomalyFilterQueryStringKey.METRIC,*/}
-            {/*                setSelectedMetric*/}
-            {/*            )*/}
-            {/*        }*/}
-            {/*    />*/}
-            {/* </div>*/}
+            <div className={classes.dataGridToolbarSearch}>
+                <FilterOptionsAutoComplete<Dataset>
+                    fetchOptions={getAllDatasets}
+                    formatOptionFromServer={(rawOption) => {
+                        return {
+                            id: rawOption.name,
+                            label: rawOption.name,
+                        };
+                    }}
+                    label={t("label.dataset")}
+                    name={t("label.dataset")}
+                    selected={selectedDataset}
+                    onSelectionChange={(selected) =>
+                        handleChange(
+                            selected,
+                            AnomalyFilterQueryStringKey.DATASET,
+                            setSelectedDataset
+                        )
+                    }
+                />
+            </div>
+            <div className={classes.dataGridToolbarSearch}>
+                <FilterOptionsAutoComplete<Metric>
+                    fetchOptions={getAllMetrics}
+                    formatOptionFromServer={(rawOption) => {
+                        return {
+                            id: rawOption.name,
+                            label: rawOption.name,
+                        };
+                    }}
+                    label={t("label.metric")}
+                    name={t("label.metric")}
+                    selected={selectedMetric}
+                    onSelectionChange={(selected) =>
+                        handleChange(
+                            selected,
+                            AnomalyFilterQueryStringKey.METRIC,
+                            setSelectedMetric
+                        )
+                    }
+                />
+            </div>
         </div>
     );
 };

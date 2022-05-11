@@ -33,6 +33,8 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         alertId: -1,
         alertName: noDataMarker,
         current: noDataMarker,
+        metricId: -1,
+        metricName: noDataMarker,
         currentVal: -1,
         predicted: noDataMarker,
         predictedVal: -1,
@@ -118,6 +120,12 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
             anomaly.endTime
         );
         uiAnomaly.durationVal = anomaly.endTime - anomaly.startTime;
+    }
+
+    // Metric
+    if (anomaly.metric) {
+        uiAnomaly.metricId = anomaly.metric.id;
+        uiAnomaly.metricName = anomaly.metric.name;
     }
 
     return uiAnomaly;

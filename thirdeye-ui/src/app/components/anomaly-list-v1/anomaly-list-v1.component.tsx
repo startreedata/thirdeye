@@ -16,6 +16,7 @@ import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
+    getMetricsViewPath,
 } from "../../utils/routes/routes.util";
 import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
@@ -37,6 +38,17 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
             return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
+        },
+        []
+    );
+
+    const metricNameRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            // currently we don't have id with us
+            // but it will be good to have id to redirect
+            return data.metricId
+                ? linkRendererV1(cellValue, getMetricsViewPath(data.metricId))
+                : cellValue;
         },
         []
     );
@@ -120,6 +132,14 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 customCellRenderer: alertNameRenderer,
             },
             {
+                key: "metricName",
+                dataKey: "metricName",
+                header: t("label.metric"),
+                sortable: true,
+                minWidth: 180,
+                customCellRenderer: metricNameRenderer,
+            },
+            {
                 key: "duration",
                 dataKey: "durationVal",
                 header: t("label.duration"),
@@ -177,6 +197,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             durationRenderer,
             startTimeRenderer,
             endTimeRenderer,
+            metricNameRenderer,
         ]
     );
 

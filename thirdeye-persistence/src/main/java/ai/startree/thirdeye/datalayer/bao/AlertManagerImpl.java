@@ -8,6 +8,8 @@ package ai.startree.thirdeye.datalayer.bao;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -18,14 +20,21 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     AlertManager {
 
   @Inject
-  public AlertManagerImpl(GenericPojoDao genericPojoDao) {
+  public AlertManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
+    metricRegistry.register("activeAlertsCount", new Gauge<Integer>() {
+      @Override
+      public Integer getValue() {
+        return findAllActive().size();
+      }
+    });
   }
 
   @Override
-  public int update(AlertDTO alertDTO) {
+  public int update(final AlertDTO alertDTO) {
     if (alertDTO.getId() == null) {
-      Long id = save(alertDTO);
+      final Long id = save(alertDTO);
       if (id > 0) {
         return 1;
       } else {
@@ -37,21 +46,21 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   }
 
   @Override
-  public Long save(AlertDTO alertDTO) {
+  public Long save(final AlertDTO alertDTO) {
     if (alertDTO.getId() != null) {
       //TODO: throw exception and force the caller to call update instead
       update(alertDTO);
       return alertDTO.getId();
     }
 
-    Long id = genericPojoDao.put(alertDTO);
+    final Long id = genericPojoDao.put(alertDTO);
     alertDTO.setId(id);
     return id;
   }
 
   @Override
   public List<AlertDTO> findAllActive() {
-    List<AlertDTO> detectionConfigs = findAll();
+    final List<AlertDTO> detectionConfigs = findAll();
     return detectionConfigs.stream().filter(AlertDTO::isActive)
         .collect(Collectors.toList());
   }

@@ -12,8 +12,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -49,23 +47,14 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   final AlertManager detectionDAO;
   final Scheduler scheduler;
   final ScheduledExecutorService executorService;
-  private Integer activeAlerts;
 
   @Inject
-  public DetectionCronScheduler(
-      final AlertManager detectionDAO,
-      final MetricRegistry metricRegistry) {
+  public DetectionCronScheduler(AlertManager detectionDAO) {
     this.detectionDAO = detectionDAO;
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    metricRegistry.register("activeAlertsCount", new Gauge<Integer>() {
-      @Override
-      public Integer getValue() {
-        return activeAlerts;
-      }
-    });
     try {
       this.scheduler = StdSchedulerFactory.getDefaultScheduler();
-    } catch (final SchedulerException e) {
+    } catch (SchedulerException e) {
       throw new RuntimeException(e);
     }
   }
@@ -74,7 +63,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   public void addToContext(final String identifier, final Object instance) {
     try {
       scheduler.getContext().put(identifier, instance);
-    } catch (final SchedulerException e) {
+    } catch (SchedulerException e) {
       throw new RuntimeException(e);
     }
   }
@@ -89,10 +78,10 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   @Override
   public void run() {
     try {
-      final Collection<AlertDTO> configs = this.detectionDAO.findAll();
-      activeAlerts = detectionDAO.findAllActive().size();
+      Collection<AlertDTO> configs = this.detectionDAO.findAll();
+
       // add or update
-      for (final AlertDTO config : configs) {
+      for (AlertDTO config : configs) {
         if (!config.isActive()) {
           LOG.debug("Detection config " + config.getId() + " is inactive. Skipping.");
           continue;
@@ -100,10 +89,10 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
 
         try {
           // Schedule detection jobs
-          final JobKey detectionJobKey = new JobKey(
+          JobKey detectionJobKey = new JobKey(
               getJobKey(config.getId(), TaskType.DETECTION),
               QUARTZ_DETECTION_GROUPER);
-          final JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class)
+          JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class)
               .withIdentity(detectionJobKey).build();
           if (scheduler.checkExists(detectionJobKey)) {
             LOG.info("Detection config " + detectionJobKey.getName()
@@ -115,16 +104,16 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
             startJob(config, detectionJob);
           }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
           LOG.error("Error creating/updating job key for detection config {}", config.getId());
         }
       }
 
-      final Set<JobKey> scheduledJobs = getScheduledJobs();
-      for (final JobKey jobKey : scheduledJobs) {
+      Set<JobKey> scheduledJobs = getScheduledJobs();
+      for (JobKey jobKey : scheduledJobs) {
         try {
-          final Long id = TaskUtils.getIdFromJobKey(jobKey.getName());
-          final AlertDTO detectionDTO = detectionDAO.findById(id);
+          Long id = TaskUtils.getIdFromJobKey(jobKey.getName());
+          AlertDTO detectionDTO = detectionDAO.findById(id);
           if (detectionDTO == null) {
             LOG.info("Found a scheduled detection config task, but not found in the database {}",
                 id);
@@ -135,16 +124,16 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
             stopJob(jobKey);
             continue;
           }
-        } catch (final Exception e) {
+        } catch (Exception e) {
           LOG.error("Error removing job key {}", jobKey);
         }
       }
-    } catch (final SchedulerException e) {
+    } catch (SchedulerException e) {
       LOG.error("Error while scheduling detection pipeline", e);
     }
   }
 
-  private void restartJob(final AlertDTO config, final JobDetail job) throws SchedulerException {
+  private void restartJob(AlertDTO config, JobDetail job) throws SchedulerException {
     stopJob(job.getKey());
     startJob(config, job);
   }
@@ -161,8 +150,8 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public void startJob(final AbstractDTO config, final JobDetail job) throws SchedulerException {
-    final Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
+  public void startJob(AbstractDTO config, JobDetail job) throws SchedulerException {
+    Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
         CronScheduleBuilder.cronSchedule(((AlertDTO) config).getCron())
             .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE))).build();
     this.scheduler.scheduleJob(job, trigger);
@@ -170,7 +159,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public void stopJob(final JobKey jobKey) throws SchedulerException {
+  public void stopJob(JobKey jobKey) throws SchedulerException {
     if (!this.scheduler.checkExists(jobKey)) {
       throw new IllegalStateException(
           "Cannot stop detection pipeline " + jobKey.getName() + ", it has not been scheduled");
@@ -180,14 +169,14 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   @Override
-  public String getJobKey(final Long id, final TaskType taskType) {
+  public String getJobKey(Long id, TaskType taskType) {
     return String.format("%s_%d", taskType, id);
   }
 
-  private boolean isJobUpdated(final AlertDTO config, final JobKey key) throws SchedulerException {
-    final List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
-    final CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
-    final String cronInSchedule = cronTrigger.getCronExpression();
+  private boolean isJobUpdated(AlertDTO config, JobKey key) throws SchedulerException {
+    List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
+    CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
+    String cronInSchedule = cronTrigger.getCronExpression();
 
     if (!config.getCron().equals(cronInSchedule)) {
       LOG.info("Cron expression for detection pipeline {} has been changed from {}  to {}. "

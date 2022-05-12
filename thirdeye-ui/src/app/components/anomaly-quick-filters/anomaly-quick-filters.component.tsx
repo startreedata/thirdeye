@@ -71,6 +71,19 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
         );
     }, [searchParams]);
 
+    // Return uniq metric as filter options
+    const getUniqMetrics = async (): Promise<Metric[]> => {
+        const metrics = await getAllMetrics();
+
+        return metrics.reduce(
+            (acc, metric) =>
+                acc.find((m) => m.name === metric.name)
+                    ? acc
+                    : [...acc, metric],
+            [] as Metric[]
+        );
+    };
+
     return (
         <div className={classes.root}>
             <div className={classes.dataGridToolbarSearch}>
@@ -128,7 +141,7 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
             </div>
             <div className={classes.dataGridToolbarSearch}>
                 <FilterOptionsAutoComplete<Metric>
-                    fetchOptions={getAllMetrics}
+                    fetchOptions={getUniqMetrics}
                     formatOptionFromServer={(rawOption) => {
                         return {
                             id: rawOption.name,

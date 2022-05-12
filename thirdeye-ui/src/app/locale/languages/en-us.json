@@ -180,7 +180,9 @@
         "saving": "Saving",
         "view-investigation": "View Investigation",
         "about": "About",
-        "thirdeye-website-url": "https://www.startree.ai"
+        "thirdeye-website-url": "https://www.startree.ai",
+        "hide-filters-table": "Hide filters table",
+        "show-filters-table": "Show filters table"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

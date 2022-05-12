@@ -32,6 +32,7 @@ import { generateChartOptions } from "./anomaly-time-series-card.utils";
 import { FiltersSetTable } from "./filters-set-table/filters-set-table.component";
 
 const CHART_HEIGHT_KEY = "chartHeight";
+const SHOW_FILTER_TABLE = "showFilterTable";
 const CHART_SIZE_OPTIONS = [
     ["S", 500],
     ["M", 800],
@@ -65,6 +66,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             ? Number(searchParams.get(CHART_HEIGHT_KEY))
             : 500
     );
+    const [showFilterSetTable, setShowFilterSetTable] = useState<boolean>(true);
 
     const alertEvaluationPayload = createAlertEvaluation(
         anomaly.alert.id,
@@ -114,6 +116,15 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
          */
         setStartTsStr(searchParams.get(TimeRangeQueryStringKey.START_TIME));
         setEndTsStr(searchParams.get(TimeRangeQueryStringKey.END_TIME));
+
+        if (searchParams.has(SHOW_FILTER_TABLE)) {
+            setShowFilterSetTable(
+                searchParams.get(SHOW_FILTER_TABLE) === "true"
+            );
+        } else {
+            // If missing from query params, assume true
+            setShowFilterSetTable(true);
+        }
     }, [searchParams]);
 
     useEffect(() => {
@@ -142,6 +153,15 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const handleChartHeightChange = (height: number): void => {
         setChartHeight(height);
         searchParams.set(CHART_HEIGHT_KEY, height.toString());
+        setSearchParams(searchParams);
+    };
+
+    const handleShowHideFiltersTable = (status: boolean): void => {
+        if (status) {
+            searchParams.delete(SHOW_FILTER_TABLE);
+        } else {
+            searchParams.set(SHOW_FILTER_TABLE, "false");
+        }
         setSearchParams(searchParams);
     };
 
@@ -174,6 +194,39 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                             </ButtonGroup>
                         </TooltipV1>
                     </Grid>
+                    {timeSeriesFiltersSet.length > 0 && (
+                        <Grid item>
+                            <TooltipV1
+                                placement="top"
+                                title="Show advanced options"
+                            >
+                                <>
+                                    {showFilterSetTable && (
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() =>
+                                                handleShowHideFiltersTable(
+                                                    false
+                                                )
+                                            }
+                                        >
+                                            {t("label.hide-filters-table")}
+                                        </Button>
+                                    )}
+                                    {!showFilterSetTable && (
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() =>
+                                                handleShowHideFiltersTable(true)
+                                            }
+                                        >
+                                            {t("label.show-filters-table")}
+                                        </Button>
+                                    )}
+                                </>
+                            </TooltipV1>
+                        </Grid>
+                    )}
                 </Grid>
             </CardContent>
             {getEvaluationRequestStatus === ActionStatus.Working && (
@@ -192,7 +245,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             )}
             {getEvaluationRequestStatus === ActionStatus.Done &&
                 alertEvaluation !== null &&
-                timeSeriesFiltersSet.length === 0 && (
+                (timeSeriesFiltersSet.length === 0 || !showFilterSetTable) && (
                     <CardContent>
                         <TimeSeriesChart
                             height={chartHeight}
@@ -207,7 +260,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                 )}
             {getEvaluationRequestStatus === ActionStatus.Done &&
                 alertEvaluation !== null &&
-                timeSeriesFiltersSet.length > 0 && (
+                timeSeriesFiltersSet.length > 0 &&
+                showFilterSetTable && (
                     <CardContent>
                         <Grid container>
                             <Grid item md={8} sm={12} xs={12}>

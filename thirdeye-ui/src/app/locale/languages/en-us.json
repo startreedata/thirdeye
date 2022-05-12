@@ -178,7 +178,9 @@
         "saved-investigations-anomaly": "Saved Investigations for Anomaly",
         "save-progress": "Save Progress",
         "saving": "Saving",
-        "view-investigation": "View Investigation"
+        "view-investigation": "View Investigation",
+        "hide-filters-table": "Hide filters table",
+        "show-filters-table": "Show filters table"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

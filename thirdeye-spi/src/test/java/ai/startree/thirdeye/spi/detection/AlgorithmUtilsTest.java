@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.detection;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import java.io.InputStreamReader;
@@ -24,15 +25,15 @@ public class AlgorithmUtilsTest {
     try (Reader dataReader = new InputStreamReader(
         this.getClass().getResourceAsStream("/csv/timeseries-4w.csv"))) {
       this.data = DataFrame.fromCsv(dataReader);
-      this.data.setIndex(DataFrame.COL_TIME);
+      this.data.setIndex(Constants.COL_TIME);
       this.data
-          .addSeries(DataFrame.COL_TIME, this.data.getLongs(DataFrame.COL_TIME).multiply(1000));
+          .addSeries(Constants.COL_TIME, this.data.getLongs(Constants.COL_TIME).multiply(1000));
     }
 
     this.outlierData = new DataFrame(this.data);
-    this.outlierData.set(DataFrame.COL_VALUE,
-        this.outlierData.getLongs(DataFrame.COL_TIME).between(86400000L, 86400000L * 3),
-        this.outlierData.getDoubles(DataFrame.COL_VALUE).multiply(0.5));
+    this.outlierData.set(Constants.COL_VALUE,
+        this.outlierData.getLongs(Constants.COL_TIME).between(86400000L, 86400000L * 3),
+        this.outlierData.getDoubles(Constants.COL_VALUE).multiply(0.5));
   }
 
   @Test
@@ -162,12 +163,12 @@ public class AlgorithmUtilsTest {
       return false;
     }
 
-    if (!a.get(DataFrame.COL_TIME).equals(b.get(DataFrame.COL_TIME))) {
+    if (!a.get(Constants.COL_TIME).equals(b.get(Constants.COL_TIME))) {
       return false;
     }
 
-    DoubleSeries valA = a.getDoubles(DataFrame.COL_VALUE);
-    DoubleSeries valB = b.getDoubles(DataFrame.COL_VALUE);
+    DoubleSeries valA = a.getDoubles(Constants.COL_VALUE);
+    DoubleSeries valB = b.getDoubles(Constants.COL_VALUE);
 
     return equals(valA, valB, epsilon);
   }

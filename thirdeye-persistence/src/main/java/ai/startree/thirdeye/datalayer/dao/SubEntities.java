@@ -25,7 +25,7 @@ import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.RootcauseSessionIndex;
+import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
 import ai.startree.thirdeye.datalayer.entity.TaskIndex;
@@ -46,7 +46,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RootcauseSessionDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -84,7 +84,7 @@ public class SubEntities {
         .put(OnboardDatasetMetricDTO.class, OnboardDatasetMetricIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
         .put(OverrideConfigDTO.class, OverrideConfigIndex.class)
-        .put(RootcauseSessionDTO.class, RootcauseSessionIndex.class)
+        .put(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
         .put(RootcauseTemplateDTO.class, RootcauseTemplateIndex.class)
         .put(SubscriptionGroupDTO.class, DetectionAlertConfigIndex.class)
         .put(TaskDTO.class, TaskIndex.class)
@@ -110,7 +110,7 @@ public class SubEntities {
         .put(OnboardDatasetMetricDTO.class, SubEntityType.ONBOARD_DATASET_METRIC)
         .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)
         .put(OverrideConfigDTO.class, SubEntityType.OVERRIDE_CONFIG)
-        .put(RootcauseSessionDTO.class, SubEntityType.ROOT_CAUSE_SESSION)
+        .put(RcaInvestigationDTO.class, SubEntityType.RCA_INVESTIGATION)
         .put(RootcauseTemplateDTO.class, SubEntityType.ROOT_CAUSE_TEMPLATE)
         .put(SubscriptionGroupDTO.class, SubEntityType.SUBSCRIPTION_GROUP)
         .put(TaskDTO.class, SubEntityType.TASK)

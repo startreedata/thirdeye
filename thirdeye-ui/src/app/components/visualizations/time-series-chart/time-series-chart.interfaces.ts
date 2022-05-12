@@ -3,11 +3,42 @@ export interface DataPoint {
     y: number;
 }
 
+export interface ThresholdDataPoint extends DataPoint {
+    y1: number; // y1 is used in Threshold shapes
+}
+
 export interface Series {
     name?: string;
-    data: DataPoint[];
-    type?: string;
+    data: DataPoint[] | ThresholdDataPoint[];
+    type?: SeriesType;
+    color?: string;
     enabled?: boolean;
+    strokeWidth?: number;
+    xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
+    yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
+    y1Accessor?: (d: ThresholdDataPoint) => number;
+    tooltipValueFormatter?: (
+        value: number,
+        d: DataPoint | ThresholdDataPoint,
+        series: NormalizedSeries
+    ) => string;
+}
+
+export interface NormalizedSeries {
+    name: string;
+    data: DataPoint[] | ThresholdDataPoint[];
+    type: SeriesType;
+    color?: string;
+    enabled: boolean;
+    strokeWidth: number;
+    xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
+    yAccessor: (d: DataPoint | ThresholdDataPoint) => number;
+    y1Accessor: (d: ThresholdDataPoint) => number;
+    tooltipValueFormatter: (
+        value: number,
+        d: DataPoint | ThresholdDataPoint,
+        series: NormalizedSeries
+    ) => string;
 }
 
 export interface PlotBand {
@@ -38,4 +69,9 @@ export interface TimeSeriesChartProps {
 export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
     height: number;
     width: number;
+}
+
+export enum SeriesType {
+    LINE = "line",
+    AREA_CLOSED = "areaclosed",
 }

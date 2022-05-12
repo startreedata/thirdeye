@@ -6,7 +6,7 @@ import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
 import { Legend } from "./legend/legend.component";
 import {
-    Series,
+    NormalizedSeries,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
 } from "./time-series-chart.interfaces";
@@ -17,7 +17,7 @@ import {
 import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 
-const TOP_CHART_HEIGHT_RATIO = 0.8;
+const TOP_CHART_HEIGHT_RATIO = 0.85;
 const CHART_SEPARATION = 50;
 const CHART_MARGINS = {
     top: 20,
@@ -99,10 +99,12 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
 export const TimeSeriesChartInternal: FunctionComponent<
     TimeSeriesChartInternalProps
 > = ({ series, legend, brush, height, width, xAxis, yAxis, tooltip }) => {
-    const [processedMainChartSeries, setProcessedMainChartSeries] =
-        useState<Series[]>(series);
-    const [processedBrushChartSeries, setProcessedBrushChartSeries] =
-        useState<Series[]>(series);
+    const [processedMainChartSeries, setProcessedMainChartSeries] = useState<
+        NormalizedSeries[]
+    >(normalizeSeries(series));
+    const [processedBrushChartSeries, setProcessedBrushChartSeries] = useState<
+        NormalizedSeries[]
+    >(normalizeSeries(series));
     const [enabledDisabledMapping, setEnabledDisabledMapping] = useState<
         boolean[]
     >(series.map(syncEnabledDisabled));
@@ -128,7 +130,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     if (brush) {
         topChartBottomMargin = isXAxisEnabled
-            ? CHART_SEPARATION / 2
+            ? CHART_SEPARATION
             : CHART_SEPARATION + 10;
         topChartHeight =
             TOP_CHART_HEIGHT_RATIO * innerHeight - topChartBottomMargin;
@@ -203,7 +205,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
             return copied;
         });
-        setProcessedMainChartSeries(seriesDataCopy);
+        setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
     };
 
     const handleBrushClick = (): void => {
@@ -213,7 +215,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
             return copied;
         });
-        setProcessedMainChartSeries(seriesDataCopy);
+        setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
     };
 
     return (

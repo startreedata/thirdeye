@@ -60,30 +60,34 @@ public class RcaResource {
   private static final long BASELINE_RANGE_MAX = ANOMALY_RANGE_MAX;
 
   private final List<RootCauseEntityFormatter> formatters;
+  // todo cyril remove frameworks
   private final Map<String, RCAFramework> frameworks;
   private final RootCauseTemplateResource rootCauseTemplateResource;
-  private final RootCauseSessionResource rootCauseSessionResource;
+  private final RcaInvestigationResource rcaInvestigationResource;
   private final RootCauseMetricResource rootCauseMetricResource;
-  private final DimensionAnalysisResource dimensionAnalysisResource;
+  private final RcaDimensionAnalysisResource rcaDimensionAnalysisResource;
+  private final RcaRelatedResource rcaRelatedResource;
 
   @Inject
   public RcaResource(
       final RootCauseAnalysisService rootCauseAnalysisService,
       final RootCauseTemplateResource rootCauseTemplateResource,
-      final RootCauseSessionResource rootCauseSessionResource,
+      final RcaInvestigationResource rcaInvestigationResource,
       final RootCauseMetricResource rootCauseMetricResource,
-      final DimensionAnalysisResource dimensionAnalysisResource) {
+      final RcaDimensionAnalysisResource rcaDimensionAnalysisResource,
+      final RcaRelatedResource rcaRelatedResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.rootCauseTemplateResource = rootCauseTemplateResource;
-    this.rootCauseSessionResource = rootCauseSessionResource;
+    this.rcaInvestigationResource = rcaInvestigationResource;
     this.rootCauseMetricResource = rootCauseMetricResource;
-    this.dimensionAnalysisResource = dimensionAnalysisResource;
+    this.rcaDimensionAnalysisResource = rcaDimensionAnalysisResource;
+    this.rcaRelatedResource = rcaRelatedResource;
   }
 
   @Path(value = "/dim-analysis")
-  public DimensionAnalysisResource getDimensionAnalysisResource() {
-    return dimensionAnalysisResource;
+  public RcaDimensionAnalysisResource getDimensionAnalysisResource() {
+    return rcaDimensionAnalysisResource;
   }
 
   @Path(value = "/template")
@@ -91,9 +95,9 @@ public class RcaResource {
     return rootCauseTemplateResource;
   }
 
-  @Path(value = "/sessions")
-  public RootCauseSessionResource getRootCauseSessionResource() {
-    return rootCauseSessionResource;
+  @Path(value = "/investigations")
+  public RcaInvestigationResource getRcaInvestigationResource() {
+    return rcaInvestigationResource;
   }
 
   @Path(value = "/metrics")
@@ -101,9 +105,15 @@ public class RcaResource {
     return rootCauseMetricResource;
   }
 
+  @Path(value = "/related")
+  public RcaRelatedResource getRcaRelatedResource() {
+    return rcaRelatedResource;
+  }
+
   @GET
   @Path("/query")
   @ApiOperation(value = "Send query")
+  @Deprecated
   public List<RootCauseEntity> query(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "framework name")
@@ -193,6 +203,7 @@ public class RcaResource {
   @GET
   @Path("/raw")
   @ApiOperation(value = "Raw")
+  @Deprecated
   public List<RootCauseEntity> raw(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("framework") String framework,

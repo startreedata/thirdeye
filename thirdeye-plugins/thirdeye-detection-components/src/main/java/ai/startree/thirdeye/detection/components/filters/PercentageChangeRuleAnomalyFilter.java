@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.detection.components.filters;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFilter;
@@ -79,7 +80,7 @@ public class PercentageChangeRuleAnomalyFilter implements
     } else {
       try {
         baselineValue = this.baseline.gather(currentSlice, aggregates)
-            .getDouble(DataFrame.COL_VALUE, 0);
+            .getDouble(Constants.COL_VALUE, 0);
       } catch (Exception e) {
         baselineValue = anomaly.getAvgBaselineVal();
         LOG.warn(

@@ -10,8 +10,10 @@ import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
+import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
 export const SERVER_VALUE_ALL_VALUES = "(ALL)";
@@ -129,4 +131,35 @@ export const generateComparisonChartOptions = (
             ],
         },
     };
+};
+
+export const generateFilterOptions = (
+    names: string[],
+    dimensionColumns: string[],
+    otherDimensionValues: string[]
+): AnomalyFilterOption[] => {
+    const filters: AnomalyFilterOption[] = [];
+
+    names.forEach((dimensionValue, idx) => {
+        if (dimensionValue === SERVER_VALUE_FOR_OTHERS) {
+            otherDimensionValues.forEach((otherValue) => {
+                filters.push({ key: dimensionColumns[idx], value: otherValue });
+            });
+        } else if (dimensionValue !== SERVER_VALUE_ALL_VALUES) {
+            // (All) means no filter on the column
+            filters.push({ key: dimensionColumns[idx], value: dimensionValue });
+        }
+    });
+
+    return filters;
+};
+
+export const generateFilterStrings = (
+    names: string[],
+    dimensionColumns: string[],
+    otherDimensionValues: string[]
+): string[] => {
+    return generateFilterOptions(names, dimensionColumns, otherDimensionValues)
+        .map(concatKeyValueWithEqual)
+        .sort();
 };

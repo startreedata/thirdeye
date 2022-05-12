@@ -13,6 +13,7 @@ import ai.startree.thirdeye.rootcause.PipelineContext;
 import ai.startree.thirdeye.rootcause.PipelineResult;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
@@ -60,8 +61,8 @@ public class MetricAnalysisPipeline2 extends Pipeline {
 
   private static final long TRAINING_WINDOW = TimeUnit.DAYS.toMillis(7);
 
-  private static final String COL_TIME = DataFrame.COL_TIME;
-  private static final String COL_VALUE = DataFrame.COL_VALUE;
+  private static final String COL_TIME = Constants.COL_TIME;
+  private static final String COL_VALUE = Constants.COL_VALUE;
   private static final String COL_CURRENT = "current";
   private static final String COL_BASELINE = "baseline";
 

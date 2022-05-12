@@ -3,15 +3,15 @@ import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -28,7 +28,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
         UiSubscriptionGroup[] | null
     >(null);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -95,10 +95,11 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     ): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", {
+            contents: t("message.delete-confirmation", {
                 name: uiSubscriptionGroup.name,
             }),
-            okButtonLabel: t("label.delete"),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
         });
     };

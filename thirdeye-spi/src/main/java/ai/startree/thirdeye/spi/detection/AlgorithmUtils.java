@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.detection;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
@@ -26,8 +27,8 @@ public class AlgorithmUtils {
 
   private static final int FAST_SPLINE_ITERATIONS = 4;
 
-  private static final String COL_TIME = DataFrame.COL_TIME;
-  private static final String COL_VALUE = DataFrame.COL_VALUE;
+  private static final String COL_TIME = Constants.COL_TIME;
+  private static final String COL_VALUE = Constants.COL_VALUE;
 
   private AlgorithmUtils() {
     // left blank

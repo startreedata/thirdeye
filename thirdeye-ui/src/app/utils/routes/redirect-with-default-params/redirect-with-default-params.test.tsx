@@ -9,6 +9,9 @@ jest.mock("react-router-dom", () => ({
     useLocation: jest.fn().mockImplementation(() => {
         return mockLocation;
     }),
+    useSearchParams: jest.fn().mockImplementation(() => {
+        return [mockUrlSearchParamsInstance];
+    }),
 }));
 
 jest.mock(
@@ -119,6 +122,7 @@ const mockTimeRangeDuration = {
     endTime: 2,
 };
 
+const mockUrlSearchParamsInstance = new URLSearchParams();
 const mockNavigate = jest.fn();
 const mockLocation = jest.fn();
 const mockGetLastUsedForPath = jest.fn();

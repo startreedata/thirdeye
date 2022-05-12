@@ -1,5 +1,10 @@
 import React, { FunctionComponent, useEffect } from "react";
-import { resolvePath, useLocation, useNavigate } from "react-router-dom";
+import {
+    resolvePath,
+    useLocation,
+    useNavigate,
+    useSearchParams,
+} from "react-router-dom";
 import { useTimeRange } from "../../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     TimeRange,
@@ -33,6 +38,7 @@ export const RedirectWithDefaultParams: FunctionComponent<
 }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { getLastUsedForPath } = useLastUsedSearchParams();
     const { timeRangeDuration } = useTimeRange();
     let searchString: string | undefined;
@@ -44,36 +50,36 @@ export const RedirectWithDefaultParams: FunctionComponent<
     }
 
     if (!searchString) {
-        let timeRangeQuery;
         if (customDurationGenerator) {
             const [customTimeStart, customTimeEnd] = customDurationGenerator();
-            timeRangeQuery = new URLSearchParams([
-                [TimeRangeQueryStringKey.TIME_RANGE, TimeRange.CUSTOM],
-                [
-                    TimeRangeQueryStringKey.START_TIME,
-                    customTimeStart.toString(),
-                ],
-                [TimeRangeQueryStringKey.END_TIME, customTimeEnd.toString()],
-            ]);
+            searchParams.set(
+                TimeRangeQueryStringKey.TIME_RANGE,
+                TimeRange.CUSTOM
+            );
+            searchParams.set(
+                TimeRangeQueryStringKey.START_TIME,
+                customTimeStart.toString()
+            );
+            searchParams.set(
+                TimeRangeQueryStringKey.END_TIME,
+                customTimeEnd.toString()
+            );
         } else {
-            timeRangeQuery = new URLSearchParams([
-                [
-                    TimeRangeQueryStringKey.TIME_RANGE,
-                    timeRangeDuration.timeRange,
-                ],
-                [
-                    TimeRangeQueryStringKey.START_TIME,
-                    timeRangeDuration.startTime.toString(),
-                ],
-                [
-                    TimeRangeQueryStringKey.END_TIME,
-                    timeRangeDuration.endTime.toString(),
-                ],
-            ]);
+            searchParams.set(
+                TimeRangeQueryStringKey.TIME_RANGE,
+                timeRangeDuration.timeRange
+            );
+            searchParams.set(
+                TimeRangeQueryStringKey.START_TIME,
+                timeRangeDuration.startTime.toString()
+            );
+            searchParams.set(
+                TimeRangeQueryStringKey.END_TIME,
+                timeRangeDuration.endTime.toString()
+            );
         }
-        searchString = timeRangeQuery.toString();
+        searchString = searchParams.toString();
     }
-
     useEffect(() => {
         navigate(`${to}?${searchString}`, { replace });
     });

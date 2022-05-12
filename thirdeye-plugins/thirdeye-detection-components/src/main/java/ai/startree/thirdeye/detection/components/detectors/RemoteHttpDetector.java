@@ -5,12 +5,12 @@
 
 package ai.startree.thirdeye.detection.components.detectors;
 
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
+import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
+import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;

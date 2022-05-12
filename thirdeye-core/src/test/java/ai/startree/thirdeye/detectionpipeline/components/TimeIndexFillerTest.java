@@ -243,6 +243,7 @@ public class TimeIndexFillerTest {
   public void testFillIndexWithAllPropertiesInDataTable() {
     // test filling of data without config - all info obtained from the datatable properties
     final TimeIndexFillerSpec spec = new TimeIndexFillerSpec();
+    spec.setTimestamp("ts");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
 
@@ -259,7 +260,6 @@ public class TimeIndexFillerTest {
     final Map<String, String> inputProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(), Long.toString(inputInterval.getStartMillis()),
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(), Long.toString(inputInterval.getEndMillis()),
-        MacroMetadataKeys.TIME_COLUMN.toString(), "ts",
         MacroMetadataKeys.GRANULARITY.toString(), "P1D");
     inputDataTable.getProperties().putAll(inputProperties);
 
@@ -280,6 +280,7 @@ public class TimeIndexFillerTest {
   public void testFillIndexWithTimePropertiesInDataTableGranularityInSpec() {
     // test filling of data with time info obtained from the datatable properties and granularity in config
     final TimeIndexFillerSpec spec = new TimeIndexFillerSpec();
+    spec.setTimestamp("ts");
     spec.setMonitoringGranularity("P1D");
     final TimeIndexFiller timeIndexFiller = new TimeIndexFiller();
     timeIndexFiller.init(spec);
@@ -296,8 +297,7 @@ public class TimeIndexFillerTest {
 
     final Map<String, String> inputProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(), Long.toString(inputInterval.getStartMillis()),
-        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), Long.toString(inputInterval.getEndMillis()),
-        MacroMetadataKeys.TIME_COLUMN.toString(), "ts");
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(), Long.toString(inputInterval.getEndMillis()));
     inputDataTable.getProperties().putAll(inputProperties);
 
     final DataFrame expectedDataFrame = new DataFrame();

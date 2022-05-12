@@ -4,14 +4,14 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import {
     deleteDataset,
     getAllDatasets,
@@ -23,7 +23,7 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
     const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -60,8 +60,11 @@ export const DatasetsAllPage: FunctionComponent = () => {
     const handleDatasetDelete = (uiDataset: UiDataset): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiDataset.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiDataset.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasetDeleteOk(uiDataset),
         });
     };

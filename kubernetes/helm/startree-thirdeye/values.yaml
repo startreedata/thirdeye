@@ -80,7 +80,7 @@ smtp:
 
 tls:
   enabled: false
-  password: password
+  password: changeit
   type: PKCS12
 
 # Expose prometheus metrics.

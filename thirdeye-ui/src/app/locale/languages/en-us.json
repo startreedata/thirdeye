@@ -65,6 +65,7 @@
         "back": "Back",
         "next": "Next",
         "finish": "Finish",
+        "save": "Save",
         "review-and-submit": "Review & Submit",
         "actions": "Actions",
         "view-details": "View Details",
@@ -110,6 +111,7 @@
         "year-lowercase": "year",
         "years-lowercase": "years",
         "created-by": "Created by",
+        "created": "Created",
         "detection-type": "Detection Type",
         "dataset-metric": "Dataset/Metric",
         "filtered-by": "Filtered by",
@@ -166,7 +168,17 @@
         "non-filtered": "Non Filtered",
         "filtered": "Filtered",
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
-
+        "remove": "Remove",
+        "add-to-chart": "Add to Chart",
+        "remove-from-chart": "Remove from Chart",
+        "filter-sets": "Filter Sets",
+        "last-updated": "Last Updated",
+        "investigation": "Investigation",
+        "saved-investigation": "Saved Investigation",
+        "saved-investigations-anomaly": "Saved Investigations for Anomaly",
+        "save-progress": "Save Progress",
+        "saving": "Saving",
+        "view-investigation": "View Investigation",
         "about": "About",
         "thirdeye-website-url": "https://www.startree.ai"
     },
@@ -208,8 +220,11 @@
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
         "authentication-disabled": "Authentication has been disabled.",
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
-        "error-while-fetching": "An issue was experienced while retrieving {{entity}}",
+        "error-while-fetching": "An issue was experienced while retrieving {{entity}} data",
         "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range.",
-        "changes-not-saved": "Changes have not been saved"
+        "changes-not-saved": "Changes have not been saved",
+        "set-chart-height": "Set the chart height",
+        "no-saved-investigations": "No saved investigations for Anomaly",
+        "extend-entity-by-week": "Extend {{entity}} by a week"
     }
 }

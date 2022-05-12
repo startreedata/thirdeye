@@ -1,4 +1,12 @@
-import { getMinMax, normalizeSeries } from "./time-series-chart.utils";
+import { SeriesType } from "./time-series-chart.interfaces";
+import {
+    defaultTooltipValueFormatter,
+    defaultXAccessor,
+    defaultY1Accessor,
+    defaultYAccessor,
+    getMinMax,
+    normalizeSeries,
+} from "./time-series-chart.utils";
 
 describe("Time Series Chart Utils", () => {
     it("should return correct min and max values", () => {
@@ -61,7 +69,7 @@ describe("Time Series Chart Utils", () => {
         const result = normalizeSeries([
             {
                 data: [],
-                type: "bar",
+                type: SeriesType.AREA_CLOSED,
             },
             {
                 data: [],
@@ -74,13 +82,23 @@ describe("Time Series Chart Utils", () => {
             data: [],
             enabled: true,
             name: "Series 0",
-            type: "bar",
+            type: SeriesType.AREA_CLOSED,
+            xAccessor: defaultXAccessor,
+            yAccessor: defaultYAccessor,
+            y1Accessor: defaultY1Accessor,
+            strokeWidth: 1,
+            tooltipValueFormatter: defaultTooltipValueFormatter,
         });
         expect(result[1]).toEqual({
             data: [],
             enabled: false,
             name: "hello world",
-            type: "line",
+            type: SeriesType.LINE,
+            xAccessor: defaultXAccessor,
+            yAccessor: defaultYAccessor,
+            y1Accessor: defaultY1Accessor,
+            strokeWidth: 1,
+            tooltipValueFormatter: defaultTooltipValueFormatter,
         });
     });
 });

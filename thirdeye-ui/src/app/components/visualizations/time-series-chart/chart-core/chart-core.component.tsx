@@ -1,10 +1,14 @@
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
-import { Bar, LinePath } from "@visx/shape";
+import { AreaClosed, Bar, LinePath } from "@visx/shape";
 import React, { FunctionComponent, MouseEvent, useMemo } from "react";
 import { PlotBand } from "../plot-band/plot-band.component";
-import { DataPoint, Series } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    NormalizedSeries,
+    ThresholdDataPoint,
+} from "../time-series-chart.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
 import { determineXPointForHover } from "../tooltip/tooltip.utils";
 import { ChartCoreProps } from "./chart-core.interfaces";
@@ -35,8 +39,6 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     top,
     left,
     colorScale,
-    xAccessor = (d: DataPoint) => new Date(d.x),
-    yAccessor = (d: DataPoint) => d.y,
     children,
     xAxisOptions,
     tooltipUtils,
@@ -108,21 +110,77 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
 
     return (
         <Group left={marginLeft} top={marginTop}>
-            {series.map((seriesData: Series, idx: number) => {
-                if (seriesData.enabled) {
+            {xAxisOptions &&
+                xAxisOptions.plotBands &&
+                xAxisOptions.plotBands.map((plotBand, idx) => {
                     return (
-                        <LinePath<DataPoint>
-                            data={seriesData.data}
-                            key={seriesData.name || `${idx}`}
-                            stroke={colorScale(seriesData.name as string)}
-                            strokeWidth={1}
-                            x={(d) => xScaleToUse(xAccessor(d)) || 0}
-                            y={(d) => yScaleToUse(yAccessor(d)) || 0}
+                        <PlotBand
+                            key={`plotband-${idx}`}
+                            plotBand={plotBand}
+                            xScale={xScaleToUse}
+                            yScale={yScaleToUse}
                         />
                     );
-                } else {
-                    return;
+                })}
+            {series.map((seriesData: NormalizedSeries, idx: number) => {
+                if (seriesData.enabled) {
+                    const color =
+                        seriesData.color === undefined
+                            ? colorScale(seriesData.name as string)
+                            : seriesData.color;
+                    if (seriesData.type === "line") {
+                        return (
+                            <LinePath<DataPoint>
+                                data={seriesData.data}
+                                key={seriesData.name || `${idx}`}
+                                stroke={color}
+                                strokeWidth={seriesData.strokeWidth}
+                                x={(d) =>
+                                    xScaleToUse(seriesData.xAccessor(d)) || 0
+                                }
+                                y={(d) =>
+                                    yScaleToUse(seriesData.yAccessor(d)) || 0
+                                }
+                            />
+                        );
+                    } else if (seriesData.type === "areaclosed") {
+                        return (
+                            <AreaClosed<ThresholdDataPoint>
+                                data={seriesData.data as ThresholdDataPoint[]}
+                                defined={(alertEvaluationTimeSeriesPoint) => {
+                                    if (
+                                        Number.isFinite(
+                                            alertEvaluationTimeSeriesPoint.y
+                                        ) &&
+                                        Number.isFinite(
+                                            alertEvaluationTimeSeriesPoint.y1
+                                        )
+                                    ) {
+                                        // Upper and lower bound both available
+                                        return true;
+                                    }
+
+                                    return false;
+                                }}
+                                fill={color}
+                                fillOpacity={0.6}
+                                key={seriesData.name || `${idx}`}
+                                x={(d: ThresholdDataPoint) =>
+                                    xScaleToUse(seriesData.xAccessor(d)) || 0
+                                }
+                                y0={(d: ThresholdDataPoint) =>
+                                    yScaleToUse(seriesData.yAccessor(d)) || 0
+                                }
+                                y1={(d: ThresholdDataPoint) =>
+                                    yScaleToUse(seriesData.y1Accessor(d)) || 0
+                                }
+                                yScale={yScaleToUse}
+                            />
+                        );
+                    }
                 }
+
+                return;
             })}
             {tooltipUtils && (
                 /* Mouse hover region for tooltip */
@@ -137,18 +195,6 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                     onMouseMove={handleMouseOver}
                 />
             )}
-            {xAxisOptions &&
-                xAxisOptions.plotBands &&
-                xAxisOptions.plotBands.map((plotBand, idx) => {
-                    return (
-                        <PlotBand
-                            key={`plotband-${idx}`}
-                            plotBand={plotBand}
-                            xScale={xScaleToUse}
-                            yScale={yScaleToUse}
-                        />
-                    );
-                })}
             {showXAxis && (
                 <AxisBottom
                     numTicks={width > 520 ? 10 : 5}

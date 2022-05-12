@@ -1,32 +1,3 @@
-resource_types:
-- name: slack
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
-
-- name: azure-blobstore
-  type: docker-image
-  source:
-    repository: pcfabr/azure-blobstore-resource
-
-resources:
-- name: ci-src
-  type: git
-  icon: github
-  source:
-    uri: ((git-uri))
-    private_key: ((ssh-private-key))
-    branch: ((git-branch))
-    path:
-    - .concourse
-
-- name: thirdeye-docker-image
-  type: docker-image
-  source:
-    repository: ((docker-registry))/thirdeye
-    username: ((artifactory-username))
-    password: ((artifactory-password))
 
 - name: thirdeye-ui-docker-image
   type: docker-image
@@ -78,7 +49,7 @@ jobs:
       build: src
       tag_file: version/version
       tag_as_latest: ((docker-tag-as-latest))
-    get_params: 
+    get_params:
       skip_download: true
   on_success:
     put: slack
@@ -124,7 +95,7 @@ jobs:
       build: ui-src/thirdeye-ui
       tag_file: version/version
       tag_as_latest: ((docker-tag-as-latest))
-    get_params: 
+    get_params:
       skip_download: true
   on_success:
     put: slack

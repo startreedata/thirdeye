@@ -1,5 +1,6 @@
 import {
     Box,
+    Button,
     CardContent,
     Chip,
     Divider,
@@ -12,6 +13,7 @@ import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -20,6 +22,11 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
+import {
+    concatKeyValueWithEqual,
+    deserializeKeyValuePair,
+    serializeKeyValuePair,
+} from "../../utils/params/params.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
 import { Treemap } from "../visualizations/treemap/treemap.component";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
@@ -32,14 +39,23 @@ import {
 } from "./anomaly-breakdown-comparison-heatmap.interfaces";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "./anomaly-breakdown-comparison-heatmap.styles";
 import {
+    formatComparisonData,
+    formatDimensionOptions,
     formatTreemapData,
-    summarizeDimensionValueData,
 } from "./anomaly-breakdown-comparison-heatmap.utils";
 import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip/dimension-heatmap-tooltip.component";
 
+const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
+
 export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     AnomalyBreakdownComparisonHeatmapProps
-> = ({ anomalyId, shouldTruncateText = true, comparisonOffset }) => {
+> = ({
+    anomalyId,
+    shouldTruncateText = true,
+    comparisonOffset,
+    onAddFilterSetClick,
+    chartTimeSeriesFilterSet,
+}) => {
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const { t } = useTranslation();
     const {
@@ -48,16 +64,42 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
         status: anomalyBreakdownReqStatus,
         errorMessages: anomalyBreakdownReqErrors,
     } = useGetAnomalyMetricBreakdown();
+    const [shouldDisplayRemoveText, setShouldDisplayRemoveText] =
+        useState<boolean>(false);
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
     >(null);
-    const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
-        []
-    );
     const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
         AnomalyFilterOption[]
     >([]);
+    const [searchParams, setSearchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
+
+    const heatmapFilterQueryParams = searchParams.get(HEATMAP_FILTERS_URL_KEY);
+    const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
+        heatmapFilterQueryParams
+            ? deserializeKeyValuePair(heatmapFilterQueryParams)
+            : []
+    );
+
+    // Sync the anomaly filters if it the search params changed
+    useEffect(() => {
+        const currentQueryFilterSearchQuery = searchParams.get(
+            HEATMAP_FILTERS_URL_KEY
+        );
+
+        if (
+            currentQueryFilterSearchQuery &&
+            currentQueryFilterSearchQuery !==
+                serializeKeyValuePair(anomalyFilters)
+        ) {
+            setAnomalyFilters(
+                deserializeKeyValuePair(currentQueryFilterSearchQuery)
+            );
+        } else if (currentQueryFilterSearchQuery === null) {
+            setAnomalyFilters([]);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (!anomalyMetricBreakdown) {
@@ -66,103 +108,35 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             return;
         }
 
-        const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
-            [];
-
         if (anomalyFilterOptions.length === 0) {
-            let optionsMenu: AnomalyFilterOption[] = [];
-            Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
-                (dimensionColumnName) => {
-                    const options = Object.keys(
-                        anomalyMetricBreakdown.current.breakdown[
-                            dimensionColumnName
-                        ]
-                    ).map((value) => ({
-                        key: dimensionColumnName,
-                        value,
-                    }));
-                    optionsMenu = [...optionsMenu, ...options];
-                }
+            setAnomalyFilterOptions(
+                formatDimensionOptions(anomalyMetricBreakdown)
             );
-            setAnomalyFilterOptions(optionsMenu);
         }
 
-        Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
-            (dimensionColumnName) => {
-                const [currentTotal, currentDimensionValuesData] =
-                    summarizeDimensionValueData(
-                        anomalyMetricBreakdown.current.breakdown[
-                            dimensionColumnName
-                        ]
-                    );
-                const [baselineTotal, baselineDimensionValuesData] =
-                    summarizeDimensionValueData(
-                        anomalyMetricBreakdown.baseline.breakdown[
-                            dimensionColumnName
-                        ]
-                    );
-                const dimensionComparisonData: {
-                    [key: string]: AnomalyBreakdownComparisonData;
-                } = {};
-
-                Object.keys(currentDimensionValuesData).forEach(
-                    (dimension: string) => {
-                        const currentDataForDimension =
-                            currentDimensionValuesData[dimension];
-                        const baselineDataForDimension =
-                            baselineDimensionValuesData[dimension] || {};
-                        const baselineMetricValue =
-                            baselineDataForDimension.count || 0;
-
-                        dimensionComparisonData[dimension] = {
-                            current: currentDataForDimension.count,
-                            baseline: baselineMetricValue,
-                            metricValueDiff:
-                                currentDataForDimension.count -
-                                baselineMetricValue,
-                            metricValueDiffPercentage: null,
-                            currentContributionPercentage:
-                                currentDataForDimension.percentage || 0,
-                            baselineContributionPercentage:
-                                baselineDataForDimension.percentage || 0,
-                            contributionDiff:
-                                (currentDataForDimension.percentage || 0) -
-                                (baselineDataForDimension.percentage || 0),
-                            currentTotalCount: currentTotal,
-                            baselineTotalCount: baselineTotal,
-                        };
-
-                        if (baselineMetricValue > 0) {
-                            dimensionComparisonData[
-                                dimension
-                            ].metricValueDiffPercentage =
-                                ((currentDataForDimension.count -
-                                    baselineMetricValue) /
-                                    baselineMetricValue) *
-                                100;
-                        }
-                    }
-                );
-
-                breakdownComparisonDataByDimensionColumn.push({
-                    column: dimensionColumnName,
-                    dimensionComparisonData,
-                });
-            }
+        setBreakdownComparisonData(
+            formatComparisonData(anomalyMetricBreakdown)
         );
-        setBreakdownComparisonData(breakdownComparisonDataByDimensionColumn);
     }, [anomalyMetricBreakdown]);
 
+    /**
+     * This is often triggered multiple times within a re-render
+     */
     useEffect(() => {
         getMetricBreakdown(anomalyId, {
             baselineOffset: comparisonOffset,
-            filters: [
-                ...anomalyFilters.map(
-                    (option) => `${option.key}=${option.value}`
-                ),
-            ],
+            filters: [...anomalyFilters.map(concatKeyValueWithEqual)],
         });
     }, [anomalyId, comparisonOffset, anomalyFilters]);
+
+    useEffect(() => {
+        const id = anomalyFilters.map(concatKeyValueWithEqual).sort().join();
+        const existsInSet = chartTimeSeriesFilterSet.some(
+            (filterSet) =>
+                filterSet.map(concatKeyValueWithEqual).sort().join() === id
+        );
+        setShouldDisplayRemoveText(existsInSet);
+    }, [chartTimeSeriesFilterSet, anomalyFilters]);
 
     const handleNodeClick = (
         tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
@@ -179,16 +153,29 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                 value: tileData.data.id,
             },
         ];
-        setAnomalyFilters([...resultantFilters]);
+        handleFilterChange([...resultantFilters]);
     };
 
     const handleNodeFilterOnDelete = (node: AnomalyFilterOption): void => {
         const resultantFilters = pull(anomalyFilters, node);
-        setAnomalyFilters([...resultantFilters]);
+        handleFilterChange([...resultantFilters]);
     };
 
     const handleOnChangeFilter = (options: AnomalyFilterOption[]): void => {
-        setAnomalyFilters([...options]);
+        handleFilterChange([...options]);
+    };
+
+    const handleFilterChange = (newFilters: AnomalyFilterOption[]): void => {
+        if (newFilters.length === 0) {
+            searchParams.delete(HEATMAP_FILTERS_URL_KEY);
+        } else {
+            searchParams.set(
+                HEATMAP_FILTERS_URL_KEY,
+                serializeKeyValuePair(newFilters)
+            );
+        }
+        setSearchParams(searchParams);
+        setAnomalyFilters(newFilters);
     };
 
     const colorChangeValueAccessor = (
@@ -228,7 +215,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                 </Typography>
                             </Box>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item md={10} sm={9} xs={12}>
                             <Autocomplete
                                 freeSolo
                                 multiple
@@ -280,6 +267,28 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
                                     )
                                 }
                             />
+                        </Grid>
+                        <Grid item md={2} sm={3} xs={12}>
+                            <Button
+                                fullWidth
+                                color="primary"
+                                disabled={anomalyFilters.length === 0}
+                                style={{ height: "100%" }}
+                                variant={
+                                    shouldDisplayRemoveText
+                                        ? "outlined"
+                                        : "contained"
+                                }
+                                onClick={() =>
+                                    anomalyFilters.length > 0 &&
+                                    onAddFilterSetClick &&
+                                    onAddFilterSetClick(anomalyFilters)
+                                }
+                            >
+                                {shouldDisplayRemoveText
+                                    ? t("label.remove-from-chart")
+                                    : t("label.add-to-chart")}
+                            </Button>
                         </Grid>
                     </Grid>
                 )}

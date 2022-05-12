@@ -37,6 +37,9 @@ Content-Type: application/json
         {
           "name": "missingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -54,7 +57,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -119,6 +122,9 @@ Content-Type: application/json
         {
           "name": "missingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -136,7 +142,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${lookback}') AND ts < ${endTime} GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -208,6 +214,9 @@ Content-Type: application/json
         {
           "name": "baselineMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "baselineDataFetcher",
@@ -225,7 +234,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -238,6 +247,9 @@ Content-Type: application/json
         {
           "name": "currentMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -255,7 +267,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -321,6 +333,9 @@ Content-Type: application/json
         {
           "name": "currentMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -338,7 +353,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -410,6 +425,9 @@ Content-Type: application/json
         {
           "name": "baselineMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "baselineDataFetcher",
@@ -427,7 +445,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -440,6 +458,9 @@ Content-Type: application/json
         {
           "name": "currentMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -457,7 +478,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -514,69 +535,19 @@ Content-Type: application/json
           },
           "inputs": [
             {
-              "targetProperty": "baseline",
-              "sourcePlanNode": "baselineMissingDataManager",
-              "sourceProperty": "baselineOutput"
-            },
-            {
               "targetProperty": "current",
-              "sourcePlanNode": "currentMissingDataManager",
+              "sourcePlanNode": "currentDataFetcher",
               "sourceProperty": "currentOutput"
             }
           ],
           "outputs": []
         },
         {
-          "name": "baselineMissingDataManager",
-          "type": "TimeIndexFiller",
-          "inputs": [
-            {
-              "sourcePlanNode": "baselineDataFetcher",
-              "sourceProperty": "baselineOutput"
-            }
-          ],
-          "outputs": [
-            {
-              "outputName": "baselineOutput"
-            }
-          ]
-        },
-        {
-          "name": "baselineDataFetcher",
-          "type": "DataFetcher",
-          "params": {
-            "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}', '${lookback}') GROUP BY ts ORDER BY ts LIMIT 1000"
-          },
-          "inputs": [],
-          "outputs": [
-            {
-              "outputKey": "pinot",
-              "outputName": "baselineOutput"
-            }
-          ]
-        },
-        {
-          "name": "currentMissingDataManager",
-          "type": "TimeIndexFiller",
-          "inputs": [
-            {
-              "sourcePlanNode": "currentDataFetcher",
-              "sourceProperty": "currentOutput"
-            }
-          ],
-          "outputs": [
-            {
-              "outputName": "currentOutput"
-            }
-          ]
-        },
-        {
           "name": "currentDataFetcher",
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -594,11 +565,7 @@ Content-Type: application/json
       "metric": "sum(views)",
       "monitoringGranularity": "P1D",
       "timeColumn": "date",
-      "timeColumnFormat": "yyyyMMdd",
-      "percentageChange": "0.1",
-      "offset": "wo1w",
-      "lookback": "P7D",
-      "pattern": "down"
+      "timeColumnFormat": "yyyyMMdd"
     }
   },
   "start": "1613376000000",

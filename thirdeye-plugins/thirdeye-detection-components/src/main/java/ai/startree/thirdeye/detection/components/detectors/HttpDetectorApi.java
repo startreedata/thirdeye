@@ -5,15 +5,12 @@
 
 package ai.startree.thirdeye.detection.components.detectors;
 
-import ai.startree.thirdeye.spi.api.DetectionDataApi;
-
 public class HttpDetectorApi {
 
   private Long startMillis;
   private Long endMillis;
   private RemoteHttpDetectorSpec spec;
   private DataFrameApi dataframe;
-  private DetectionDataApi data;
 
   public Long getStartMillis() {
     return startMillis;
@@ -50,15 +47,6 @@ public class HttpDetectorApi {
   public HttpDetectorApi setDataframe(
       final DataFrameApi dataframe) {
     this.dataframe = dataframe;
-    return this;
-  }
-
-  public DetectionDataApi getData() {
-    return data;
-  }
-
-  public HttpDetectorApi setData(final DetectionDataApi data) {
-    this.data = data;
     return this;
   }
 }

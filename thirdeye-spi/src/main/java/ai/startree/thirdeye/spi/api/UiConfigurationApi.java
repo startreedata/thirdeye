@@ -6,13 +6,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class UiConfigurationApi implements ThirdEyeApi {
 
     private String clientId;
+    private boolean authEnabled;
 
     public String getClientId() {
         return clientId;
     }
 
-    public UiConfigurationApi setClientId(String clientId) {
+    public UiConfigurationApi setClientId(final String clientId) {
         this.clientId = clientId;
         return this;
     }
+
+  public boolean isAuthEnabled() {
+    return authEnabled;
+  }
+
+  public UiConfigurationApi setAuthEnabled(final boolean authEnabled) {
+    this.authEnabled = authEnabled;
+    return this;
+  }
 }

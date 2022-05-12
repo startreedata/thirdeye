@@ -19,4 +19,5 @@ export interface AuthV1 {
     clearRedirectHref: () => void;
     setAuthAction: (action: string, actionData?: string) => void;
     clearAuthAction: () => void;
+    enableAuthDisabledNotification: () => void;
 }

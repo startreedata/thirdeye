@@ -1,3 +1,4 @@
 export interface AppConfiguration {
-    clientId: string;
+    authEnabled?: boolean;
+    clientId?: string;
 }

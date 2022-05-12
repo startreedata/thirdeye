@@ -13,9 +13,12 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.MetricApi;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -40,10 +43,17 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
 
   @Inject
   public MetricResource(final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final MetricRegistry metricRegistry) {
     super(metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
+    metricRegistry.register("activeMetricsCount", new Gauge<Integer>() {
+      @Override
+      public Integer getValue() {
+        return metricConfigManager.findByPredicate(Predicate.EQ("active", true)).size();
+      }
+    });
   }
 
   @Override

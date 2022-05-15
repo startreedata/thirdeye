@@ -7,14 +7,14 @@
     },
     "templateProperties": {
       "dataSource": "pinot",
-      "dataset": "pageviews",
-      "timeColumn": "date",
-      "timeColumnFormat": "yyyyMMdd",
-      "aggregationFunction": "sum",
-      "aggregationColumn": "views",
-      "lookback": "P14D",
+      "dataset": "order_events",
+      "timeColumn": "timestamp",
+      "timeColumnFormat": "1:MILLISECONDS:EPOCH",
+      "aggregationFunction": "count",
+      "aggregationColumn": "event_type",
+      "lookback": "P30D",
       "monitoringGranularity": "P1D",
-      "sensitivity": "1"
+      "sensitivity": "3"
     },
     "cron": "0 0 0 1/1 * ? *"
   }

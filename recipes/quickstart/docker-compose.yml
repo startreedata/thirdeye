@@ -68,7 +68,7 @@ services:
       - ../../examples:/home/thirdeye/examples
       - ./resources:/home/thirdeye/resources
     environment:
-      DATASET: pageviews
+      DATASET: order_events
     working_dir: /home/thirdeye
     entrypoint: ["sh", "resources/thirdeye-quickstart-pinot.sh"]
     depends_on:
@@ -80,7 +80,7 @@ services:
     volumes:
       - ./resources:/home/thirdeye/resources
     environment:
-      DATASET: pageviews
+      DATASET: order_events
     working_dir: /home/thirdeye
     entrypoint: [ "sh", "resources/thirdeye-quickstart.sh" ]
     depends_on:

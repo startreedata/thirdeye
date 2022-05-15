@@ -1,0 +1,11 @@
+[
+  {
+    "name": "event_type",
+    "dataset": {
+      "name": "order_events"
+    },
+    "active": true,
+    "datatype": "INT",
+    "aggregationFunction": "COUNT"
+  }
+]

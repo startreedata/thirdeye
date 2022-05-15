@@ -34,7 +34,7 @@ wait_service() {
       healthy="$(curl -sw "%{http_code}\n" "http://${BROKER_HOST}:${BROKER_PORT}/health")"
       printf '.'
       attempt_counter=$(($attempt_counter+1))
-      sleep 5
+      sleep 10
   done
 }
 

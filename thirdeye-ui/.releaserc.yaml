@@ -1,7 +1,7 @@
 ---
 # Release branches
 branches:
-    - name: TE-520
+    - name: steven/versioning-for-ui
 
 # Concourse is not recognized as a CI provider
 ci: false

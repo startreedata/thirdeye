@@ -1,5 +1,6 @@
 import axios from "axios";
-import { Event } from "../dto/event.interfaces";
+import { EditableEvent, Event } from "../dto/event.interfaces";
+import { GetAllEventsProps } from "./events.interfaces";
 
 const BASE_URL_EVENT = "/api/events";
 
@@ -9,11 +10,11 @@ export const getEvent = async (id: number): Promise<Event> => {
     return response.data;
 };
 
-export const getAllEvents = async (
-    startTime?: string,
-    endTime?: string,
-    type?: string
-): Promise<Event[]> => {
+export const getAllEvents = async ({
+    startTime,
+    endTime,
+    type,
+}: GetAllEventsProps = {}): Promise<Event[]> => {
     const queryParams = new URLSearchParams();
 
     if (startTime) {
@@ -25,7 +26,7 @@ export const getAllEvents = async (
     }
 
     if (type) {
-        queryParams.set("metadata.dataset.name", type);
+        queryParams.set("type", type);
     }
 
     const response = await axios.get(

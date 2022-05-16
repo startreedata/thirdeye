@@ -8,7 +8,7 @@ import {
     getEvent,
     updateEvent,
     updateEvents,
-} from "./event.rest";
+} from "./events.rest";
 
 jest.mock("axios");
 
@@ -40,13 +40,49 @@ describe("Event REST", () => {
 
         await expect(getAllEvents()).resolves.toEqual([mockEventResponse]);
 
-        expect(axios.get).toHaveBeenCalledWith("/api/events");
+        expect(axios.get).toHaveBeenCalledWith("/api/events?");
     });
 
     it("getAllEvents should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAllEvents()).rejects.toThrow("testError");
+    });
+
+    it("getAllEvents with startTime should invoke axios.get with appropriate input and return appropriate events", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockEventResponse],
+        });
+
+        await expect(getAllEvents({ startTime: 1 })).resolves.toEqual([
+            mockEventResponse,
+        ]);
+
+        expect(axios.get).toHaveBeenCalledWith("/api/events?startTime=1");
+    });
+
+    it("getAllEvents with endTime should invoke axios.get with appropriate input and return appropriate events", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockEventResponse],
+        });
+
+        await expect(getAllEvents({ endTime: 1 })).resolves.toEqual([
+            mockEventResponse,
+        ]);
+
+        expect(axios.get).toHaveBeenCalledWith("/api/events?endTime=1");
+    });
+
+    it("getAllEvents with type should invoke axios.get with appropriate input and return appropriate events", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockEventResponse],
+        });
+
+        await expect(getAllEvents({ type: "testType" })).resolves.toEqual([
+            mockEventResponse,
+        ]);
+
+        expect(axios.get).toHaveBeenCalledWith("/api/events?type=testType");
     });
 
     it("createEvent should invoke axios.post with appropriate input and return appropriate event", async () => {

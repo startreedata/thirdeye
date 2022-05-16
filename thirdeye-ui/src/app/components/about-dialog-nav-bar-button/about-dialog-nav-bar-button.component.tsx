@@ -8,22 +8,22 @@ import {
     NavBarLinkIconV1,
     NavBarLinkTextV1,
     NavBarLinkV1,
+    useDialogProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getThirdEyeUiVersion } from "../../utils/version/version.util";
-import { useDialog } from "../dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../dialogs/dialog-provider/dialog-provider.interfaces";
 import { useAboutDialogNavBarButtonStyles } from "./about-dialog-nav-bar-button.styles";
 
 export const AboutDialogNavBarButton: FunctionComponent = () => {
     const aboutDialogNavBarButtonClasses = useAboutDialogNavBarButtonStyles();
     const { t } = useTranslation();
-    const { hideDialog, visible, showDialog } = useDialog();
+    const { showDialog, hideDialog, visible } = useDialogProviderV1();
 
     const handleButtonClick = (): void => {
         showDialog({
             type: DialogType.CUSTOM,
-            title: t("label.thirdeye"),
-            children: (
+            headerText: t("label.thirdeye"),
+            contents: (
                 <Grid container alignItems="center">
                     {/* App logo */}
                     <Grid
@@ -69,7 +69,7 @@ export const AboutDialogNavBarButton: FunctionComponent = () => {
                 </Grid>
             ),
             hideCancelButton: true,
-            okButtonLabel: t("label.ok"),
+            okButtonText: t("label.ok"),
             onOk: hideDialog,
         });
     };

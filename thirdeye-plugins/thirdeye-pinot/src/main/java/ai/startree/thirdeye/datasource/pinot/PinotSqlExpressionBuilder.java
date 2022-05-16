@@ -50,6 +50,10 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   public static final String STRING_LITERAL_QUOTE = "'";
   public static final String ESCAPED_STRING_LITERAL_QUOTE = "''";
 
+  private static final String escapeLiteralQuote(String s) {
+    return s.replace(STRING_LITERAL_QUOTE, ESCAPED_STRING_LITERAL_QUOTE);
+  }
+
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
       @NonNull final String timeColumnFormat) {
@@ -97,7 +101,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
       return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
-          timeFormat.dateTimeConvertString,
+          escapeLiteralQuote(timeFormat.dateTimeConvertString),
           periodToDateTimeConvertFormat(granularity)
       );
     }
@@ -117,7 +121,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     return String.format(
         "FromDateTime(DATETIMECONVERT(%s, '%s', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(%s)', '%s'), 'yyyy-MM-dd HH:mm:ss.SSSZ') ",
         timeColumn,
-        timeFormat.dateTimeConvertString,
+        escapeLiteralQuote(timeFormat.dateTimeConvertString),
         timezone,
         periodToDateTimeConvertFormat(granularity));
   }
@@ -238,12 +242,13 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           timeFormatter = d -> String.valueOf(d.getMillis() / DAY_MILLIS);
           break;
         default:
-          // assume simple date format - fail if it's not the case
+          // assume simple date format
           final String cleanSimpleDateFormat = removeSimpleDateFormatPrefix(
               userFacingTimeColumnFormat);
+          // fail if invalid format
           new SimpleDateFormat(cleanSimpleDateFormat);
           dateTimeConvertString = String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s",
-              cleanSimpleDateFormat).replace(STRING_LITERAL_QUOTE, ESCAPED_STRING_LITERAL_QUOTE);
+              cleanSimpleDateFormat);
           dateTruncString = null;
           isEpochFormat = false;
           timeFormatter = d -> {

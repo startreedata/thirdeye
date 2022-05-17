@@ -10,8 +10,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.TaskApi;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -25,14 +23,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -55,10 +49,15 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       .put("created", "createTime")
       .put("updated", "updateTime")
       .build();
+  public static final String N_DAYS_TO_DELETE = "30";
+  public static final String MAX_ENTRIES_TO_DELETE = "1000";
+
+  private final TaskManager taskManager;
 
   @Inject
   public TaskResource(final TaskManager taskManager) {
     super(taskManager, API_TO_INDEX_FILTER_MAP);
+    this.taskManager = taskManager;
   }
 
   // Operation not supported to prevent create of tasks
@@ -100,22 +99,14 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Path("/purge")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response cleanUp(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
-      @ApiParam(value = "Older than (number of days)", defaultValue = "60") @QueryParam("olderThanInDays") @NotNull Integer nDays,
-      @ApiParam(value = "Max Entries to delete", defaultValue = "10000") @QueryParam("limit") @NotNull Integer limitOptional
+  public Response purge(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @ApiParam(value = "Older than (number of days)", defaultValue = N_DAYS_TO_DELETE) @QueryParam("olderThanInDays") Integer nDays,
+      @ApiParam(value = "Max Entries to delete", defaultValue = MAX_ENTRIES_TO_DELETE) @QueryParam("limit") Integer limitOptional
   ) {
-    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    final int nDaysToDelete = optional(nDays).orElse(60);
-    final long twoMonthsBack = System.currentTimeMillis() - Duration.ofDays(nDaysToDelete).toMillis();
-    final String formattedDate = df.format(new Date(twoMonthsBack));
+    final int nDaysToDelete = optional(nDays).orElse(Integer.valueOf(N_DAYS_TO_DELETE));
+    final int limit = optional(limitOptional).orElse(Integer.valueOf(MAX_ENTRIES_TO_DELETE));
 
-    final int limit = optional(limitOptional).orElse(10000);
-    dtoManager
-        .filter(new DaoFilter()
-            .setPredicate(Predicate.LT("createTime", formattedDate))
-            .setLimit(limit)
-        )
-        .forEach(this::deleteDto);
+    taskManager.purge(Duration.ofDays(nDaysToDelete), limit);
     return Response.ok().build();
   }
 }

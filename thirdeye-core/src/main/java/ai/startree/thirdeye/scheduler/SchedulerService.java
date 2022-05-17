@@ -10,15 +10,26 @@ import ai.startree.thirdeye.datasource.AutoOnboardService;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
 import ai.startree.thirdeye.detection.anomaly.monitor.MonitorJobScheduler;
+import ai.startree.thirdeye.detection.anomaly.monitor.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.detection.download.ModelDownloaderManager;
 import ai.startree.thirdeye.events.HolidayEventsLoader;
 import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
+import java.time.Duration;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class SchedulerService implements Managed {
+
+  public static final int CORE_POOL_SIZE = 8;
+  private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
 
   private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
@@ -31,6 +42,9 @@ public class SchedulerService implements Managed {
   private final ModelDownloaderManager modelDownloaderManager;
   private final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
   private final SubscriptionCronScheduler subscriptionScheduler;
+  private final TaskManager taskManager;
+
+  private final ScheduledExecutorService executorService;
 
   @Inject
   public SchedulerService(final ThirdEyeSchedulerConfiguration config,
@@ -43,7 +57,8 @@ public class SchedulerService implements Managed {
       final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver,
       final ModelDownloaderManager modelDownloaderManager,
       final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler,
-      final SubscriptionCronScheduler subscriptionScheduler) {
+      final SubscriptionCronScheduler subscriptionScheduler,
+      final TaskManager taskManager) {
     this.config = config;
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.autoOnboardConfiguration = autoOnboardConfiguration;
@@ -55,6 +70,9 @@ public class SchedulerService implements Managed {
     this.modelDownloaderManager = modelDownloaderManager;
     this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
     this.subscriptionScheduler = subscriptionScheduler;
+    this.taskManager = taskManager;
+
+    executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
   }
 
   @Override
@@ -85,10 +103,35 @@ public class SchedulerService implements Managed {
     if (config.getModelDownloaderConfigs() != null) {
       modelDownloaderManager.start();
     }
+
+    // TODO spyne improve scheduler arch and localize
+    // TODO spyne explore: consolidate all orphan maintenance tasks in a single pool
+    scheduleTaskCleanUp(config.getTaskCleanUpConfiguration());
+  }
+
+  private void scheduleTaskCleanUp(final TaskCleanUpConfiguration config) {
+    executorService.scheduleWithFixedDelay(() -> cleanTasks(config),
+        1,
+        config.getIntervalInMinutes(),
+        TimeUnit.MINUTES);
+  }
+
+  private void cleanTasks(final TaskCleanUpConfiguration config) {
+    // try catch is important to not throw exceptions while running in the scheduler.
+    try {
+      taskManager.purge(
+          Duration.ofDays(config.getRetentionInDays()),
+          config.getMaxEntriesToDelete());
+    } catch (Exception e) {
+      // catching exceptions only. errors will be escalated.
+      LOG.error("Error occurred during task purge", e);
+    }
   }
 
   @Override
   public void stop() throws Exception {
+    executorService.shutdown();
+
     if (monitorJobScheduler != null) {
       monitorJobScheduler.shutdown();
     }

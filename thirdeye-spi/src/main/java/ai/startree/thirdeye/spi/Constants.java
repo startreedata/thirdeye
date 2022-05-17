@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
@@ -55,6 +56,9 @@ public interface Constants {
   String NOTIFICATIONS_DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
   String NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET = "P2D";
   String NOTIFICATIONS_PERCENTAGE_FORMAT = "%.2f %%";
+
+  Duration TASK_EXPIRY_DURATION = Duration.ofDays(30);
+  int TASK_MAX_DELETES_PER_CLEANUP = 10000;
 
   /*
    * Dataframe related constants

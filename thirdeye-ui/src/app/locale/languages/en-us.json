@@ -179,6 +179,8 @@
         "save-progress": "Save Progress",
         "saving": "Saving",
         "view-investigation": "View Investigation",
+        "about": "About",
+        "thirdeye-website-url": "https://www.startree.ai",
         "hide-filters-table": "Hide filters table",
         "show-filters-table": "Show filters table"
     },

@@ -53,41 +53,15 @@ This will switch to the required Node version if already installed and make `npm
 If the required Node version is not installed, it will recommend the command to install it
 
 ```
-Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.7.0>
-N/A: version "14.7.0 -> N/A" is not yet installed.
+Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.18.1>
+N/A: version "14.18.1 -> N/A" is not yet installed.
 
-You need to run "nvm install 14.7.0" to install it before using it.
+You need to run "nvm install 14.18.1" to install it before using it.
 ```
 
 Following the installation, the command above will let you switch to the required Node version.
 
 :warning: `nvm use` (without version number) might not work when using nvm for [Windows](https://github.com/coreybutler/nvm-windows). You may need to specify precise Node version from project root [**.nvmrc**](./.nvmrc).
-
-#### Configure [Node Package Manager (npm)](https://www.npmjs.com) for use with [Artifactory](https://repo.startreedata.io)
-
-The project may depend on some packages to be installed from Artifactory and npm needs to be configured to allow access to these packages.
-The Artifactory repository to install packages from is configured in project root [**.npmrc**](./.npmrc).
-
-You need to append your credentials to [**.npmrc**](./.npmrc) to access the Artifactory.
-
--   Go to [https://repo.startreedata.io/ui/admin/artifactory/user_profile](https://repo.startreedata.io/ui/admin/artifactory/user_profile). You can connect with the Okta SSO.
--   Create an API key
--   Run the request:
-
-```shell
-curl -H "X-JFrog-Art-Api:[YOUR_API_KEY]" https://repo.startreedata.io/artifactory/api/npm/auth
-```
-
-This will return HTTP basic auth credentials:
-
-    _auth = VERY_LONG_BASE_64_TOKENY3lyaWxAc3RhcnRyZWUuYWNG1lcVBiS0QyRjJhN3M3Qm9uV1dkV2FxbzVWNVJraWF0Z2sxbmViYVVmeFpqZ1NTMw==
-    always-auth = true
-    email = your_name@startree.ai
-
--   Append these credentials to the [**.npmrc**](./.npmrc) file.
-
-To avoid making tracked changes to this project, you can also copy [**.npmrc**](./.npmrc) in your shared **user** `~/.npmrc`
-file.
 
 ### Setup
 
@@ -115,9 +89,8 @@ $ npm run start
 
 This will build and deploy the project using [webpack-dev-server](https://github.com/webpack/webpack-dev-server) at http://localhost:7004.
 
-Note that configuration for the proxy to the `/api` endpoint is located in `webpack.config.dev.js` under `devServer.proxy`. Currently
-this points to the [Azure demo deployment](https://cortexdata.atlassian.net/wiki/spaces/CORTEXDATA/pages/1278541825/ThirdEye+Demo+Environment+-+Azure).
-For interacting with dev instance of ThirdEye, you should the proxy to `http://localhost:8080`.
+Note that configuration for the proxy to the `/api` endpoint is located in `webpack.config.dev.js` under `devServer.proxy`. Currently,
+this points to value of `TE_DEV_PROXY_SERVER` environment variable or by default `http://localhost:8080/`.
 
 ## Supported Browsers
 

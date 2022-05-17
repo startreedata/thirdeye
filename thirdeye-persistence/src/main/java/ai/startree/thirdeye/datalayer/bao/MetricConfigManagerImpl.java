@@ -9,6 +9,8 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -27,8 +29,15 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
   private static final String FIND_BY_ALIAS_LIKE_PART = " AND alias LIKE :alias__%d";
 
   @Inject
-  public MetricConfigManagerImpl(GenericPojoDao genericPojoDao) {
+  public MetricConfigManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(MetricConfigDTO.class, genericPojoDao);
+    metricRegistry.register("activeMetricsCount", new Gauge<Long>() {
+      @Override
+      public Long getValue() {
+        return countActive();
+      }
+    });
   }
 
   @Override
@@ -88,5 +97,9 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
 
     return genericPojoDao
         .executeParameterizedSQL(query.toString(), parameterMap, MetricConfigDTO.class);
+  }
+
+  public Long countActive() {
+    return count(Predicate.EQ("active", true));
   }
 }

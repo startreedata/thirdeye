@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.detection.anomaly.monitor;
 
-import ai.startree.thirdeye.detection.anomaly.job.JobRunner;
+import ai.startree.thirdeye.detection.anomaly.job.JobRunnable;
 import ai.startree.thirdeye.spi.Constants.JobStatus;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -22,9 +22,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MonitorJobRunner implements JobRunner {
+public class MonitorJobRunnable implements JobRunnable {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunnable.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final JobManager jobDAO;
@@ -32,7 +32,7 @@ public class MonitorJobRunner implements JobRunner {
   private final TaskGenerator taskGenerator;
   private final MonitorJobContext monitorJobContext;
 
-  public MonitorJobRunner(MonitorJobContext monitorJobContext) {
+  public MonitorJobRunnable(MonitorJobContext monitorJobContext) {
     this.monitorJobContext = monitorJobContext;
     this.jobDAO = monitorJobContext.getJobDAO();
     this.taskDAO = monitorJobContext.getTaskDAO();

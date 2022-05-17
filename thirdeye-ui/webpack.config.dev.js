@@ -109,14 +109,6 @@ module.exports = {
 
     // webpack-dev-server
     devServer: {
-        before: function (app) {
-            // Mock the configuration payload for development
-            app.get("/api/ui/config", function (req, res) {
-                res.json({
-                    clientId: "saas-thirdeye",
-                });
-            });
-        },
         contentBase: outputPath,
         compress: true,
         port: 7004,

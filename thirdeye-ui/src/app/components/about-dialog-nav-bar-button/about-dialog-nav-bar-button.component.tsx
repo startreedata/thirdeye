@@ -43,7 +43,7 @@ export const AboutDialogNavBarButton: FunctionComponent = () => {
                     </Grid>
 
                     <Grid container item xs={9}>
-                        {/* Remote Managed UI version */}
+                        {/* ThirdEye UI version */}
                         <Grid item xs={12}>
                             <Typography variant="subtitle2">
                                 {t("label.thirdeye")}

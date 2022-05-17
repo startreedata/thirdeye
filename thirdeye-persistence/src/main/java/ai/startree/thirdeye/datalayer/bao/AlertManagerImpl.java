@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.Gauge;
@@ -23,10 +24,10 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   public AlertManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
-    metricRegistry.register("activeAlertsCount", new Gauge<Integer>() {
+    metricRegistry.register("activeAlertsCount", new Gauge<Long>() {
       @Override
-      public Integer getValue() {
-        return findAllActive().size();
+      public Long getValue() {
+        return countActive();
       }
     });
   }
@@ -63,5 +64,9 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     final List<AlertDTO> detectionConfigs = findAll();
     return detectionConfigs.stream().filter(AlertDTO::isActive)
         .collect(Collectors.toList());
+  }
+
+  private Long countActive() {
+    return count(Predicate.EQ("active", true));
   }
 }

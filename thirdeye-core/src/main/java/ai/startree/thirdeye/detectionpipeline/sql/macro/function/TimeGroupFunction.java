@@ -24,7 +24,7 @@ public class TimeGroupFunction implements MacroFunction {
   @Override
   public String expandMacro(final List<String> macroParams, final MacroFunctionContext context) {
     //parse params
-    checkArgument(macroParams.size() == 3, "timeGroup macro requires 3 parameters");
+    checkArgument(macroParams.size() == 3, "timeGroup macro requires 3 parameters. Eg: __timeGroup(timeColumn, 'timeFormat', 'granularity')");
     final String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));

@@ -99,7 +99,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       Period granularity, @Nullable final String timezone) {
     final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
-      return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
+      return String.format(" DATETIMECONVERT(%s, '%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
           escapeLiteralQuote(timeFormat.dateTimeConvertString),
           periodToDateTimeConvertFormat(granularity)

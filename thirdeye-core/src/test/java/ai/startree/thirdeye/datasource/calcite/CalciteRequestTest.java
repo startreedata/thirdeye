@@ -16,9 +16,12 @@ import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.testutils.SqlUtils;
+import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -27,6 +30,7 @@ import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -132,7 +136,7 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format("SELECT %s(%s, 90) FROM %s.%s",
-        TestPinotLikeSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
+        TestPinotLikeSqlExpressionBuilder.PERCENTILE_TDIGEST_PREFIX,
         COLUMN_NAME_1,
         DATABASE,
         TABLE);
@@ -172,7 +176,7 @@ public class CalciteRequestTest {
         COLUMN_NAME_1,
         COLUMN_NAME_1,
         COLUMN_NAME_1,
-        TestPinotLikeSqlExpressionBuilder.DIALECT_SPECIFIC_PERCENTILE_FN_NAME,
+        TestPinotLikeSqlExpressionBuilder.PERCENTILE_TDIGEST_PREFIX,
         COLUMN_NAME_1,
         COLUMN_NAME_1,
         COLUMN_NAME_2,
@@ -394,7 +398,7 @@ public class CalciteRequestTest {
     final SqlNode sqlNodePredicate = new SqlBasicCall(EQUALS_OPERATOR,
         new SqlNode[]{identifierOf("col3"), stringLiteralOf("test3")},
         SqlParserPos.ZERO);
-    final Interval timeFilterInterval = new Interval(100L, 100000L);
+    final Interval timeFilterInterval = new Interval(100L, 100000L, DateTimeZone.UTC);
     final String epoch_date = "epoch_date";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
@@ -530,7 +534,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeFilter() throws SqlParseException {
     final String timeAggregationColumn = "date_epoch";
-    final Interval timeFilterInterval = new Interval(100L, 100000000L);
+    final Interval timeFilterInterval = new Interval(100L, 100000000L, DateTimeZone.UTC);
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeFilter(timeFilterInterval, timeAggregationColumn, "EPOCH", "MILLISECONDS");
@@ -557,7 +561,7 @@ public class CalciteRequestTest {
     final String quotedTimeAggregationColumn =
         TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING + reservedKeywordTimeAggregationColumn
             + TestPinotLikeSqlLanguage.IDENTIFIER_QUOTE_STRING;
-    final Interval timeFilterInterval = new Interval(100L, 100000000L);
+    final Interval timeFilterInterval = new Interval(100L, 100000000L, DateTimeZone.UTC);
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
         .withTimeFilter(timeFilterInterval,
@@ -584,8 +588,8 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeFilterInSimpleDateFormat() throws SqlParseException {
     final String timeAggregationColumn = "date_sdf";
-    final Interval timeFilterInterval = new Interval(new DateTime(2020, 1, 1, 0, 0),
-        new DateTime(2021, 10, 10, 0, 0));
+    final Interval timeFilterInterval = new Interval(new DateTime(2020, 1, 1, 0, 0, DateTimeZone.UTC),
+        new DateTime(2021, 10, 10, 0, 0, DateTimeZone.UTC));
     final String simpleDateFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION)
@@ -594,7 +598,7 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format(
-        "SELECT %s FROM %s.%s WHERE %s >= %s AND %s < %s",
+        "SELECT %s FROM %s.%s WHERE %s >= '%s' AND %s < '%s'",
         COLUMN_NAME_1,
         DATABASE,
         TABLE,
@@ -610,7 +614,7 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeAggregationAndTimeFilter() throws SqlParseException {
     final String timeAggregationColumn = "date_sdf";
-    final Interval timeFilterInterval = new Interval(100L, 100000000L); // 19700101 - 19700102
+    final Interval timeFilterInterval = new Interval(100L, 100000000L, DateTimeZone.UTC); // 19700101 - 19700102
     final String timeColumnFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
@@ -626,7 +630,7 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format(
-        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:%s', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= %s AND %s < %s GROUP BY %s ORDER BY %s",
+        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:%s', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s WHERE %s >= '%s' AND %s < '%s' GROUP BY %s ORDER BY %s",
         COLUMN_NAME_1,
         timeAggregationColumn,
         timeColumnFormat,
@@ -792,126 +796,115 @@ public class CalciteRequestTest {
 
   private static class TestPinotLikeSqlExpressionBuilder implements SqlExpressionBuilder {
 
-    public static final String DIALECT_SPECIFIC_PERCENTILE_FN_NAME = "PERCENTILE_TDIGEST";
-    public static final long SECOND_SCALE = 1000; // number of second in milliseconds
-    public static final long MINUTE_SCALE = 60 * SECOND_SCALE; // number of second in milliseconds
-    public static final long HOUR_SCALE = 60 * MINUTE_SCALE;
-    public static final long DAY_SCALE = 24 * HOUR_SCALE;
+    private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
+        Period.years(1), "year",
+        Period.months(1), "month",
+        Period.weeks(1), "week",
+        Period.days(1), "day",
+        Period.hours(1), "hour",
+        Period.minutes(1), "minute",
+        Period.seconds(1), "second",
+        Period.millis(1), "millisecond"
+    );
+
+    private static final List<Period> DATE_TRUNC_COMPATIBLE_PERIODS = List.copyOf(
+        DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.keySet());
+
+    private static final String PERCENTILE_TDIGEST_PREFIX = "PERCENTILETDigest";
+
+    public static final long SECOND_MILLIS = 1000; // number of milliseconds in a second
+    public static final long MINUTE_MILLIS =
+        60 * SECOND_MILLIS; // number of milliseconds in a minute
+    public static final long HOUR_MILLIS = 60 * MINUTE_MILLIS;
+    public static final long DAY_MILLIS = 24 * HOUR_MILLIS;
+    public static final String STRING_LITERAL_QUOTE = "'";
+    public static final String ESCAPED_STRING_LITERAL_QUOTE = "''";
+
+    private static final String escapeLiteralQuote(String s) {
+      return s.replace(STRING_LITERAL_QUOTE, ESCAPED_STRING_LITERAL_QUOTE);
+    }
 
     @Override
     public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-        final String timeColumnFormat) {
-      // ignore timeColumnFormat in this test expression builder
+        @NonNull final String timeColumnFormat) {
+      final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
+
       return String.format("%s >= %s AND %s < %s",
           timeColumn,
-          filterInterval.getStartMillis(),
+          timeFormat.timeFormatter.apply(filterInterval.getStart()),
           timeColumn,
-          filterInterval.getEndMillis());
+          timeFormat.timeFormatter.apply(filterInterval.getEnd()));
     }
 
     @Override
     public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-        @Nullable final String timeFormat,
-        @Nullable final String timeUnit) {
+        @Nullable final String timeFormat, @Nullable final String timeUnit) {
       if (timeFormat == null) {
-        return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH");
+        return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH_MILLIS");
       }
-      String lowerBound;
-      String upperBound;
       if ("EPOCH".equals(timeFormat)) {
-        if (TimeUnit.MILLISECONDS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(filterInterval.getStartMillis());
-          upperBound = String.valueOf(filterInterval.getEndMillis());
-        } else if (timeUnit == null || TimeUnit.SECONDS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(filterInterval.getStartMillis() / SECOND_SCALE);
-          upperBound = String.valueOf(filterInterval.getEndMillis() / SECOND_SCALE);
-        } else if (TimeUnit.MINUTES.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(filterInterval.getStartMillis() / MINUTE_SCALE);
-          upperBound = String.valueOf(filterInterval.getEndMillis() / MINUTE_SCALE);
-        } else if (TimeUnit.HOURS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(filterInterval.getStartMillis() / HOUR_SCALE);
-          upperBound = String.valueOf(filterInterval.getEndMillis() / HOUR_SCALE);
-        } else if (TimeUnit.DAYS.toString().equals(timeUnit)) {
-          lowerBound = String.valueOf(filterInterval.getStartMillis() / DAY_SCALE);
-          upperBound = String.valueOf(filterInterval.getEndMillis() / DAY_SCALE);
-        } else {
-          throw new UnsupportedOperationException(String.format(
-              "Unsupported TimeUnit for filter expression: %s",
-              timeUnit));
-        }
-      } else {
-        // case SIMPLE_DATE_FORMAT
-        String simpleDateFormatString = removeSimpleDateFormatPrefix(timeFormat);
-        final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
-            simpleDateFormatString);
-        lowerBound = inputDataDateTimeFormatter.print(filterInterval.getStartMillis());
-        upperBound = inputDataDateTimeFormatter.print(filterInterval.getEndMillis());
+        Objects.requireNonNull(timeUnit);
+        return getTimeFilterExpression(timeColumn, filterInterval, "1:" + timeUnit + ":EPOCH");
       }
-
-      return String.format("%s >= %s AND %s < %s", timeColumn, lowerBound, timeColumn, upperBound);
-    }
-
-    @NonNull
-    private String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
-      // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
-      return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
+      // case simple date format
+      return getTimeFilterExpression(timeColumn, filterInterval, timeFormat);
     }
 
     @Override
     public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-        final Period granularity, final @Nullable String timeUnit,
-        @Nullable final String timezone) {
+        final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
       if (timeFormat == null) {
         return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
       }
       if ("EPOCH".equals(timeFormat)) {
-        return getTimeGroupExpression(timeColumn,
-            "1:" + timeUnit + ":EPOCH",
-            granularity,
-            timezone);
+        Objects.requireNonNull(timeUnit);
+        return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
       }
       // case simple date format
       return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
     }
 
     @Override
-    public String getTimeGroupExpression(String timeColumn, String timeColumnFormat,
+    public String getTimeGroupExpression(String timeColumn, @NonNull String timeColumnFormat,
         Period granularity, @Nullable final String timezone) {
+      final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
       if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
-        return String.format(" DATETIMECONVERT(%s,'%s', '1:MILLISECONDS:EPOCH', '%s') ",
+        return String.format(" DATETIMECONVERT(%s, '%s', '1:MILLISECONDS:EPOCH', '%s') ",
             timeColumn,
-            timeColumnFormatToPinotFormat(timeColumnFormat),
-            periodToPinotFormat(granularity)
+            escapeLiteralQuote(timeFormat.dateTimeConvertString),
+            periodToDateTimeConvertFormat(granularity)
         );
       }
+
+      if (timeFormat.isEpochFormat && DATE_TRUNC_COMPATIBLE_PERIODS.contains(granularity)) {
+        // optimized expression for client use case - can be removed once https://github.com/apache/pinot/issues/8581 is closed
+        return String.format(
+            " DATETRUNC('%s', %s, '%s', '%s', 'MILLISECONDS') ",
+            DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.get(granularity),
+            timeColumn,
+            timeFormat.dateTruncString,
+            timezone
+        );
+      }
+
       // workaround to bucket with a custom timezone - see https://github.com/apache/pinot/issues/8581
       return String.format(
           "FromDateTime(DATETIMECONVERT(%s, '%s', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(%s)', '%s'), 'yyyy-MM-dd HH:mm:ss.SSSZ') ",
           timeColumn,
-          timeColumnFormatToPinotFormat(timeColumnFormat),
+          escapeLiteralQuote(timeFormat.dateTimeConvertString),
           timezone,
-          periodToPinotFormat(granularity));
+          periodToDateTimeConvertFormat(granularity));
     }
 
-    private String timeColumnFormatToPinotFormat(String timeColumnFormat) {
-      switch (timeColumnFormat) {
-        case "EPOCH_MILLIS":
-        case "1:MILLISECONDS:EPOCH":
-          return "1:MILLISECONDS:EPOCH";
-        case "EPOCH":
-        case "1:SECONDS:EPOCH":
-          return "1:SECONDS:EPOCH";
-        case "EPOCH_HOURS":
-        case "1:HOURS:EPOCH":
-          return "1:HOURS:EPOCH";
-        default:
-          final String simpleDateFormatString = removeSimpleDateFormatPrefix(timeColumnFormat);
-          new SimpleDateFormat(simpleDateFormatString);
-          return String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s", simpleDateFormatString);
-      }
+    @NonNull
+    @VisibleForTesting
+    protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
+      // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
+      return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
     }
 
-    private String periodToPinotFormat(final Period period) {
+    private String periodToDateTimeConvertFormat(final Period period) {
+      // see https://docs.pinot.apache.org/configuration-reference/functions/datetimeconvert
       if (period.getYears() > 0) {
         throw new RuntimeException(String.format(
             "Pinot datasource cannot round to yearly granularity: %s",
@@ -940,6 +933,11 @@ public class CalciteRequestTest {
     }
 
     @Override
+    public boolean needsCustomDialect(final MetricAggFunction metricAggFunction) {
+      return SqlExpressionBuilder.super.needsCustomDialect(metricAggFunction);
+    }
+
+    @Override
     public String getCustomDialectSql(final MetricAggFunction metricAggFunction,
         final List<String> operands,
         final String quantifier) {
@@ -953,7 +951,7 @@ public class CalciteRequestTest {
           checkArgument(operands.size() == 1,
               "Incorrect number of operands for percentile sql generation. Expected: 1. Got: %s",
               operands.size());
-          return new StringBuilder().append(DIALECT_SPECIFIC_PERCENTILE_FN_NAME)
+          return new StringBuilder().append(PERCENTILE_TDIGEST_PREFIX)
               .append("(")
               .append(operands.get(0))
               .append(",")
@@ -962,6 +960,73 @@ public class CalciteRequestTest {
               .toString();
         default:
           throw new UnsupportedOperationException();
+      }
+    }
+
+    /**
+     * Class that allows to match multiple user facing time format strings to a given time format.
+     * Can return the timeformat for different Pinot functions.
+     */
+    private static class TimeFormat {
+
+      private final String dateTimeConvertString;
+      private final String dateTruncString;
+      private final boolean isEpochFormat;
+      private final Function<DateTime, String> timeFormatter;
+
+      TimeFormat(String userFacingTimeColumnFormat) {
+        switch (userFacingTimeColumnFormat) {
+          case "EPOCH_MILLIS":
+          case "1:MILLISECONDS:EPOCH":
+            dateTimeConvertString = "1:MILLISECONDS:EPOCH";
+            dateTruncString = "MILLISECONDS";
+            isEpochFormat = true;
+            timeFormatter = d -> String.valueOf(d.getMillis());
+            break;
+          case "EPOCH":
+          case "1:SECONDS:EPOCH":
+            dateTimeConvertString = "1:SECONDS:EPOCH";
+            dateTruncString = "SECONDS";
+            isEpochFormat = true;
+            timeFormatter = d -> String.valueOf(d.getMillis() / SECOND_MILLIS);
+            break;
+          case "EPOCH_MINUTES":
+          case "1:MINUTES:EPOCH":
+            dateTimeConvertString = "1:MINUTES:EPOCH";
+            dateTruncString = "MINUTES";
+            isEpochFormat = true;
+            timeFormatter = d -> String.valueOf(d.getMillis() / MINUTE_MILLIS);
+            break;
+          case "EPOCH_HOURS":
+          case "1:HOURS:EPOCH":
+            dateTimeConvertString = "1:HOURS:EPOCH";
+            dateTruncString = "HOURS";
+            isEpochFormat = true;
+            timeFormatter = d -> String.valueOf(d.getMillis() / HOUR_MILLIS);
+            break;
+          case "EPOCH_DAYS":
+          case "1:DAYS:EPOCH":
+            dateTimeConvertString = "1:DAYS:EPOCH";
+            dateTruncString = "DAYS";
+            isEpochFormat = true;
+            timeFormatter = d -> String.valueOf(d.getMillis() / DAY_MILLIS);
+            break;
+          default:
+            // assume simple date format
+            final String cleanSimpleDateFormat = removeSimpleDateFormatPrefix(
+                userFacingTimeColumnFormat);
+            // fail if invalid format
+            new SimpleDateFormat(cleanSimpleDateFormat);
+            dateTimeConvertString = String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s",
+                cleanSimpleDateFormat);
+            dateTruncString = null;
+            isEpochFormat = false;
+            timeFormatter = d -> {
+              final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
+                  cleanSimpleDateFormat).withChronology(d.getChronology());
+              return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d) + STRING_LITERAL_QUOTE;
+            };
+        }
       }
     }
   }

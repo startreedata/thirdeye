@@ -53,4 +53,13 @@ public interface AbstractManager<E extends AbstractDTO> {
   default long count() {
     throw new UnsupportedOperationException();
   }
+
+  /**
+   * Count how many entities are there in the table matching the predicate
+   *
+   * @return the number of total entities matching the predicate
+   */
+  default long count(final Predicate predicate) {
+    throw new UnsupportedOperationException();
+  }
 }

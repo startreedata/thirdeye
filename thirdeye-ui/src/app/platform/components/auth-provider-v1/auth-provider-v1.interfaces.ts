@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 
 export interface AuthProviderV1Props {
+    disableAuthOverride?: boolean;
     clientId?: string;
     redirectMethod: AuthRedirectMethodV1;
     oidcIssuerAudiencePath?: string;

@@ -2,6 +2,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
+import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.spi.api.UiConfigurationApi;
 import com.codahale.metrics.annotation.Timed;
@@ -19,11 +20,14 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class UiResource {
 
-    private UiConfiguration configuration;
+    private final UiConfiguration configuration;
+    private final AuthConfiguration authConfiguration;
 
     @Inject
-    public UiResource(final UiConfiguration uiConfiguration) {
+    public UiResource(final UiConfiguration uiConfiguration,
+        final AuthConfiguration authConfiguration) {
         this.configuration = uiConfiguration;
+        this.authConfiguration = authConfiguration;
     }
 
     @GET
@@ -31,6 +35,10 @@ public class UiResource {
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     public Response get() {
-        return respondOk(new UiConfigurationApi().setClientId(configuration.getClientId()));
+        return respondOk(
+            new UiConfigurationApi()
+                .setClientId(configuration.getClientId())
+                .setAuthEnabled(authConfiguration.isEnabled())
+        );
     }
 }

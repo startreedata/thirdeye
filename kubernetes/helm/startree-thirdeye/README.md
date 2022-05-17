@@ -19,12 +19,12 @@ components.
 
 #### Docker Registry Credentials for Kubernetes
 
-To deploy thirdeye on Kubernetes, you may need access credentials to fetch the docker image from the
-startree artifactory. To do that, simply create a kubernetes secret using the vault credentials.
+To deploy thirdeye on Kubernetes, you may need access credentials to fetch docker images from the
+Startree artifactory. To do that, simply create a kubernetes secret using the vault credentials.
 
 ```bash
 kubectl create secret docker-registry startree \ 
-  --docker-server="repo.startreedata.io/external-docker-registry" \
+  --docker-server="<DOCKER-REPO>" \
   --docker-username=<your-name> \
   --docker-password=<your-pword> \
   --docker-email=<your-email>
@@ -56,8 +56,12 @@ Make sure you pass the `ui.publicUrl` as it will be used to form the anomaly pag
 export SMTP_PASSWORD="password"
 export SMTP_USERNAME="from.email@gmail.com"
 export THIRDEYE_UI_PUBLIC_URL="http://localhost:8081"
+# please ask for access to Startree repo - see https://github.com/startreedata/thirdeye/tree/master/recipes/quickstart 
+export DOCKER_CONTAINER_URL=<TE_DOCKER_CONTAINER_URL>
 
 helm install thirdeye . \
+  --set image.repository="${DOCKER_CONTAINER_URL}thirdeye" \
+  --set ui.image.repository="${DOCKER_CONTAINER_URL}thirdeye-ui" \
   --set ui.publicUrl="${THIRDEYE_UI_PUBLIC_URL}" \
   --set smtp.host="smtp.gmail.com" \
   --set smtp.port="465" \

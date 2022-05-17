@@ -1,14 +1,12 @@
 # Default values for ThirdEye Deployment
 
 image:
-  repository: repo.startreedata.io/external-docker-registry/thirdeye
   tag: latest
   pullPolicy: Always
   pullSecretsName: startree
 
 ui:
   image:
-    repository: repo.startreedata.io/external-docker-registry/thirdeye-ui
     tag: latest
     pullPolicy: Always
     pullSecretsName: startree

@@ -39,7 +39,7 @@ public class TimeFilterFunction implements MacroFunction {
     //parse params
     int numParams = macroParams.size();
     checkArgument(numParams >= 2 && numParams <= 4,
-        "timeFilter macro requires 2, 3 or 4 parameters");
+        "timeFilter macro requires 2, 3 or 4 parameters. Eg: __timeFilter(timeColumn, 'timeFormat', ['lookbackFromStartTime'], ['lookbackFromEndTime'])");
     String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     String lookbackFromStart = NO_LOOKBACK;

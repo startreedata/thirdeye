@@ -46,23 +46,12 @@ export function normalizeSeries(series: Series[]): NormalizedSeries[] {
             enabled: item.enabled === undefined ? true : item.enabled,
             type: item.type === undefined ? DEFAULT_CHART_TYPE : item.type,
             strokeWidth: item.strokeWidth === undefined ? 1 : item.strokeWidth,
-            xAccessor:
-                item.xAccessor === undefined
-                    ? defaultXAccessor
-                    : item.xAccessor,
+            xAccessor: item.xAccessor ?? defaultXAccessor,
             x1Accessor: item.x1Accessor ?? defaultX1Accessor,
-            yAccessor:
-                item.yAccessor === undefined
-                    ? defaultYAccessor
-                    : item.yAccessor,
-            y1Accessor:
-                item.y1Accessor === undefined
-                    ? defaultY1Accessor
-                    : item.y1Accessor,
+            yAccessor: item.yAccessor ?? defaultYAccessor,
+            y1Accessor: item.y1Accessor ?? defaultY1Accessor,
             tooltipValueFormatter:
-                item.tooltipValueFormatter === undefined
-                    ? defaultTooltipValueFormatter
-                    : item.tooltipValueFormatter,
+                item.tooltipValueFormatter ?? defaultTooltipValueFormatter,
         };
     });
 }

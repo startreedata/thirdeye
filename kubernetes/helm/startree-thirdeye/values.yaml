@@ -15,6 +15,7 @@ ui:
   port: 8081
   publicUrl: http://localhost:8081
   serviceType: LoadBalancer
+  resolver: kube-dns.kube-system.svc.cluster.local
 
   resources: {}
   nodeSelector: {}

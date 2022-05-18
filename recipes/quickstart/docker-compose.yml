@@ -13,10 +13,7 @@ services:
     environment:
       NGINX_PORT: 8081
       THIRDEYE_API_BASE_URL: "http://coordinator:8080"
-    volumes:
-      #  TODO: shounak refer this file from thirdeye-ui/docker/templates/default.conf.template once
-      #  the resolver is accepted as environment variable
-      - ./resources/default.conf.template:/home/thirdeye/nginx/templates/default.conf.template
+      DNS_RESOLVER: "127.0.0.11"
     depends_on:
       coordinator:
         condition: service_healthy

@@ -40,8 +40,22 @@ export function getMinMax(
  */
 export function normalizeSeries(series: Series[]): NormalizedSeries[] {
     return series.map((item, idx) => {
+        const hasY1 = item.type === SeriesType.AREA_CLOSED;
+
         return {
             ...item,
+            data: item.data.filter(
+                (dataPoint: DataPoint | ThresholdDataPoint) => {
+                    if (hasY1) {
+                        return (
+                            dataPoint.y !== null &&
+                            (dataPoint as ThresholdDataPoint).y1
+                        );
+                    }
+
+                    return dataPoint.y !== null;
+                }
+            ),
             name: item.name || `Series ${idx}`,
             enabled: item.enabled === undefined ? true : item.enabled,
             type: item.type === undefined ? DEFAULT_CHART_TYPE : item.type,

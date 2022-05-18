@@ -5,6 +5,7 @@ import {
     AnomalyBreakdownAPIOffsetValues,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
@@ -12,7 +13,10 @@ import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
-import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+import {
+    SeriesType,
+    TimeSeriesChartProps,
+} from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
@@ -78,6 +82,8 @@ export const generateComparisonChartOptions = (
     comparisonOffset: AnomalyBreakdownAPIOffsetValues,
     translation: (labelName: string) => string = (s) => s
 ): TimeSeriesChartProps => {
+    const filteredTimeSeriesData =
+        filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data;
     const series = [
         {
             name: translation("label.non-filtered"),
@@ -94,20 +100,44 @@ export const generateComparisonChartOptions = (
         },
         {
             name: translation("label.filtered"),
-            data: filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
-                (value, idx) => {
-                    return {
-                        y: value,
-                        x: filtered.detectionEvaluations
-                            .output_AnomalyDetectorResult_0.data.timestamp[idx],
-                    };
-                }
-            ),
+            data: filteredTimeSeriesData.current.map((value, idx) => {
+                return {
+                    y: value,
+                    x: filtered.detectionEvaluations
+                        .output_AnomalyDetectorResult_0.data.timestamp[idx],
+                };
+            }),
+        },
+        {
+            name: translation("label.baseline"),
+            data: filteredTimeSeriesData.expected.map((value, idx) => {
+                return {
+                    y: value,
+                    x: filtered.detectionEvaluations
+                        .output_AnomalyDetectorResult_0.data.timestamp[idx],
+                };
+            }),
+        },
+        {
+            enabled: false,
+            name: translation("label.upper-and-lower-bound"),
+            type: SeriesType.AREA_CLOSED,
+            color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+            data: filteredTimeSeriesData.lowerBound.map((value, idx) => {
+                return {
+                    y: value,
+                    y1: filteredTimeSeriesData.upperBound[idx],
+                    x: filteredTimeSeriesData.timestamp[idx],
+                };
+            }),
+            tooltipValueFormatter: (value: number): string =>
+                formatLargeNumberV1(value),
         },
     ];
 
     return {
-        height: 300,
+        brush: true,
+        height: 400,
         series,
         xAxis: {
             plotBands: [

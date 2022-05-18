@@ -43,6 +43,7 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
@@ -272,7 +273,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
         optimizedParams.add(params);
       } else {
-        params = new HoltWintersParams(alpha, beta, gamma);
+        params = new HoltWintersParams(alpha, beta, gamma, null);
       }
 
       lastAlpha = params.getAlpha();
@@ -341,12 +342,11 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     try {
       final PointValuePair optimal = optimizer
           .optimize(objectiveFunction, goal, bounds, initGuess, maxIter, maxEval);
-      LOG.debug("Performed {} iterations to optimize Holt-Winters", optimizer.getIterations());
       params = new HoltWintersParams(optimal.getPoint()[0], optimal.getPoint()[1],
-          optimal.getPoint()[2]);
+          optimal.getPoint()[2], optimizer.getIterations());
     } catch (final Exception e) {
       LOG.error(e.toString());
-      params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma);
+      params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma, null);
     }
     return params;
   }
@@ -359,11 +359,14 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     private final double alpha;
     private final double beta;
     private final double gamma;
+    private final Integer optimizationIterations;
 
-    HoltWintersParams(final double alpha, final double beta, final double gamma) {
+    HoltWintersParams(final double alpha, final double beta, final double gamma,
+        @Nullable final Integer optimizationIterations) {
       this.alpha = alpha;
       this.beta = beta;
       this.gamma = gamma;
+      this.optimizationIterations = optimizationIterations;
     }
 
     double getAlpha() {
@@ -384,6 +387,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       return "{alpha=" + alpha +
           ", beta=" + beta +
           ", gamma=" + gamma +
+          ", optimizationIterations=" + optimizationIterations +
           '}';
     }
   }

@@ -20,17 +20,15 @@ public class MonitorJobScheduler {
 
   private static final Logger LOG = LoggerFactory.getLogger(MonitorJobScheduler.class);
   private final ScheduledExecutorService scheduledExecutorService;
-  private final TaskManager anomalyTaskDAO;
   private final MonitorConfiguration monitorConfiguration;
+  private final TaskManager taskManager;
   private final JobManager jobManager;
-  private MonitorJobRunner monitorJobRunner;
-  private MonitorJobContext monitorJobContext;
 
   @Inject
-  public MonitorJobScheduler(MonitorConfiguration monitorConfiguration,
+  public MonitorJobScheduler(final MonitorConfiguration monitorConfiguration,
       final TaskManager taskManager,
       final JobManager jobManager) {
-    this.anomalyTaskDAO = taskManager;
+    this.taskManager = taskManager;
     this.monitorConfiguration = monitorConfiguration;
     this.jobManager = jobManager;
 
@@ -40,20 +38,20 @@ public class MonitorJobScheduler {
   public void start() {
     LOG.info("Starting monitor service");
 
-    monitorJobContext = new MonitorJobContext();
-    monitorJobContext.setTaskDAO(anomalyTaskDAO);
+    final MonitorJobContext monitorJobContext = new MonitorJobContext();
+    monitorJobContext.setTaskDAO(taskManager);
     monitorJobContext.setMonitorConfiguration(monitorConfiguration);
     monitorJobContext.setJobDAO(jobManager);
 
-    monitorJobRunner = new MonitorJobRunner(monitorJobContext);
-    scheduledExecutorService
-        .scheduleWithFixedDelay(monitorJobRunner, 0,
-            monitorConfiguration.getMonitorFrequency().getSize(),
-            monitorConfiguration.getMonitorFrequency().getUnit());
+    final MonitorJobRunnable monitorJobRunnable = new MonitorJobRunnable(monitorJobContext);
+    scheduledExecutorService.scheduleWithFixedDelay(monitorJobRunnable,
+        0,
+        monitorConfiguration.getMonitorFrequency().getSize(),
+        monitorConfiguration.getMonitorFrequency().getUnit());
   }
 
   public void shutdown() {
     LOG.info("Stopping monitor service");
-    AnomalyUtils.safelyShutdownExecutionService(scheduledExecutorService, this.getClass());
+    AnomalyUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
   }
 }

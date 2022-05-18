@@ -33,6 +33,8 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         alertId: -1,
         alertName: noDataMarker,
         current: noDataMarker,
+        metricId: -1,
+        metricName: noDataMarker,
         currentVal: -1,
         predicted: noDataMarker,
         predictedVal: -1,
@@ -96,7 +98,9 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;
-        uiAnomaly.deviation = formatPercentageV1(deviation);
+        uiAnomaly.deviation = isNaN(deviation)
+            ? i18n.t("label.no-data-marker")
+            : formatPercentageV1(deviation);
         uiAnomaly.deviationVal = deviation;
         uiAnomaly.negativeDeviation = deviation < 0;
     }
@@ -118,6 +122,12 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
             anomaly.endTime
         );
         uiAnomaly.durationVal = anomaly.endTime - anomaly.startTime;
+    }
+
+    // Metric
+    if (anomaly.metric) {
+        uiAnomaly.metricId = anomaly.metric.id;
+        uiAnomaly.metricName = anomaly.metric.name;
     }
 
     return uiAnomaly;

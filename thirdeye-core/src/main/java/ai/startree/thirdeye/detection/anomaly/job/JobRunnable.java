@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * An interface for ReplayTaskRunner classes of the executors
  */
-public interface JobRunner extends Runnable {
+public interface JobRunnable extends Runnable {
 
   Long createJob();
 

@@ -242,7 +242,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double lastBeta = beta;
     double lastGamma = gamma;
 
-    List<HoltWintersParams> optimizedParams = new ArrayList<>();
+    final List<HoltWintersParams> optimizedParams = new ArrayList<>();
     for (int k = 0; k < size; k++) {
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 

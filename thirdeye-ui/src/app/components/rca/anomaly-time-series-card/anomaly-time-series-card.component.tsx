@@ -303,6 +303,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                 alertEvaluation,
                                 anomaly,
                                 filteredAlertEvaluation,
+                                events,
                                 t
                             )}
                             chartEvents={{
@@ -326,6 +327,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                         alertEvaluation,
                                         anomaly,
                                         filteredAlertEvaluation,
+                                        events,
                                         t
                                     )}
                                     chartEvents={{

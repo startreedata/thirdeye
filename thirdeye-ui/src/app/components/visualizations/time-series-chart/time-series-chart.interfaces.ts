@@ -7,6 +7,7 @@ export interface DataPoint {
 
 export interface ThresholdDataPoint extends DataPoint {
     y1: number; // y1 is used in Threshold shapes
+    x1: number; // x1 is used in Line only shapes
 }
 
 export interface LineDataPoint extends ThresholdDataPoint {
@@ -93,4 +94,5 @@ export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
 export enum SeriesType {
     LINE = "line",
     AREA_CLOSED = "areaclosed",
+    LINE_STACKED = "line-stacked",
 }

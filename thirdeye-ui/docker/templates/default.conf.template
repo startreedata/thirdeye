@@ -7,7 +7,7 @@ server {
         if ($args = "") {
             proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
         }
-        resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+        resolver ${DNS_RESOLVER} valid=30s;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;
@@ -17,7 +17,7 @@ server {
     }
     location /swagger {
         proxy_pass ${THIRDEYE_API_BASE_URL}/swagger;
-        resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+        resolver ${DNS_RESOLVER} valid=30s;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;

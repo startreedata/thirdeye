@@ -23,6 +23,7 @@ import {
     getLoginPath,
     getLogoutPath,
 } from "../../utils/routes/routes.util";
+import { AboutDialogNavBarButton } from "../about-dialog-nav-bar-button/about-dialog-nav-bar-button.component";
 
 export const AppBar: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();
@@ -86,6 +87,8 @@ export const AppBar: FunctionComponent = () => {
                 </NavBarLinkV1>
             </NavBarPrimaryContainerV1>
             <NavBarSecondaryContainerV1>
+                {/* About */}
+                <AboutDialogNavBarButton />
                 {/* Documentation */}
                 <NavBarLinkV1
                     externalLink

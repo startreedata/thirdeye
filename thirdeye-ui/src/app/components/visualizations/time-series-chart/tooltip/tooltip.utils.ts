@@ -2,7 +2,11 @@ import { localPoint } from "@visx/event";
 import { bisector } from "d3-array";
 import { ScaleTime } from "d3-scale";
 import { MouseEvent } from "react";
-import { DataPoint, NormalizedSeries } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    NormalizedSeries,
+    ThresholdDataPoint,
+} from "../time-series-chart.interfaces";
 
 /**
  * Find the closest valid x value from the data points of all the series to the
@@ -97,7 +101,7 @@ export const getDataPointsInSeriesForXValue = (
     series.forEach((seriesData) => {
         if (seriesData.enabled) {
             const dataPointForXValue = seriesData.data.find(
-                (d) => d.x === xValue
+                (d) => d.x === xValue || (d as ThresholdDataPoint).x1 === xValue
             );
 
             if (dataPointForXValue) {

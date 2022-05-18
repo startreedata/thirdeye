@@ -18,6 +18,8 @@
         "datasets": "Datasets",
         "datasource": "Datasource",
         "datasources": "Datasources",
+        "event": "Event",
+        "events": "Events",
         "description": "Description",
         "documentation": "Documentation",
         "login": "Login",

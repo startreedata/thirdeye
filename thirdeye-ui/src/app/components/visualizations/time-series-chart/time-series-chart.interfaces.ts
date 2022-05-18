@@ -5,6 +5,7 @@ export interface DataPoint {
 
 export interface ThresholdDataPoint extends DataPoint {
     y1: number; // y1 is used in Threshold shapes
+    x1: number; // x1 is used in Line only shapes
 }
 
 export interface Series {
@@ -15,6 +16,7 @@ export interface Series {
     enabled?: boolean;
     strokeWidth?: number;
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
+    x1Accessor?: (d: ThresholdDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
     y1Accessor?: (d: ThresholdDataPoint) => number;
     tooltipValueFormatter?: (
@@ -32,6 +34,7 @@ export interface NormalizedSeries {
     enabled: boolean;
     strokeWidth: number;
     xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
+    x1Accessor: (d: ThresholdDataPoint) => Date;
     yAccessor: (d: DataPoint | ThresholdDataPoint) => number;
     y1Accessor: (d: ThresholdDataPoint) => number;
     tooltipValueFormatter: (
@@ -74,4 +77,5 @@ export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
 export enum SeriesType {
     LINE = "line",
     AREA_CLOSED = "areaclosed",
+    LINE_STACKED = "line-stacked",
 }

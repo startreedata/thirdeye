@@ -3,10 +3,12 @@ import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { AreaClosed, Bar, LinePath } from "@visx/shape";
 import React, { FunctionComponent, MouseEvent, useMemo } from "react";
+import { StackedLine } from "../../stacked-line/stacked-line.component";
 import { PlotBand } from "../plot-band/plot-band.component";
 import {
     DataPoint,
     NormalizedSeries,
+    SeriesType,
     ThresholdDataPoint,
 } from "../time-series-chart.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
@@ -175,6 +177,33 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                     yScaleToUse(seriesData.y1Accessor(d)) || 0
                                 }
                                 yScale={yScaleToUse}
+                            />
+                        );
+                    } else if (seriesData.type === SeriesType.LINE_STACKED) {
+                        // Inverting range so that placement should be done upside down
+                        const inverseScale = yScaleToUse.copy();
+                        inverseScale.range([
+                            yScaleToUse.range()[1],
+                            yScaleToUse.range()[0],
+                        ]);
+
+                        return (
+                            <StackedLine
+                                points={seriesData.data}
+                                stroke={seriesData.color}
+                                strokeWidth={seriesData.strokeWidth}
+                                x={(d: DataPoint) =>
+                                    xScaleToUse(seriesData.xAccessor(d)) || 0
+                                }
+                                x1={(d: ThresholdDataPoint) =>
+                                    xScaleToUse(seriesData.x1Accessor(d)) || 0
+                                }
+                                y={(d: DataPoint) =>
+                                    inverseScale(seriesData.yAccessor(d)) || 0
+                                }
+                                y1={(d: ThresholdDataPoint) =>
+                                    inverseScale(seriesData.y1Accessor(d)) || 0
+                                }
                             />
                         );
                     }

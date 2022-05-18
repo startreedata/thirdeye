@@ -50,6 +50,7 @@ export function normalizeSeries(series: Series[]): NormalizedSeries[] {
                 item.xAccessor === undefined
                     ? defaultXAccessor
                     : item.xAccessor,
+            x1Accessor: item.x1Accessor ?? defaultX1Accessor,
             yAccessor:
                 item.yAccessor === undefined
                     ? defaultYAccessor
@@ -72,6 +73,10 @@ export const syncEnabledDisabled = (seriesData: Series): boolean => {
 
 export const defaultXAccessor = (d: DataPoint | ThresholdDataPoint): Date => {
     return new Date(d.x);
+};
+
+export const defaultX1Accessor = (d: ThresholdDataPoint): Date => {
+    return new Date(d.x1);
 };
 
 export const defaultYAccessor = (d: DataPoint | ThresholdDataPoint): number => {

@@ -24,6 +24,7 @@ import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-compa
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import { AnomalyDimensionAnalysis } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.component";
+import { EventsTab } from "../events-tab/event-tab.component";
 import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
 
 const ANALYSIS_TAB_IDX_KEY = "analysisTab";
@@ -34,6 +35,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     anomaly,
     onAddFilterSetClick,
     chartTimeSeriesFilterSet,
+    events,
+    selectedEvents,
+    onEventSelectionChange,
 }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
@@ -79,6 +83,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                 value={0}
                             />
                             <Tab label="Dimension Analysis" value={1} />
+                            <Tab label={t("label.events")} value={2} />
                         </Tabs>
                     </Grid>
                     <Grid item md={5} sm={6} xs={12}>
@@ -188,6 +193,15 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
                         onCheckClick={onAddFilterSetClick}
+                    />
+                </Box>
+            )}
+            {selectedTabIndex === 2 && (
+                <Box mt={-4}>
+                    <EventsTab
+                        events={events}
+                        selectedEvents={selectedEvents}
+                        onCheckClick={onEventSelectionChange}
                     />
                 </Box>
             )}

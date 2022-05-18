@@ -18,11 +18,11 @@ export const getAllEvents = async ({
     const queryParams = new URLSearchParams();
 
     if (startTime) {
-        queryParams.set("startTime", `${startTime}`);
+        queryParams.set("startTime", `[gte]${startTime}`);
     }
 
     if (endTime) {
-        queryParams.set("endTime", `${endTime}`);
+        queryParams.set("endTime", `[lte]${endTime}`);
     }
 
     if (type) {

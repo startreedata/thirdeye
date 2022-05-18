@@ -98,7 +98,9 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;
-        uiAnomaly.deviation = formatPercentageV1(deviation);
+        uiAnomaly.deviation = isNaN(deviation)
+            ? i18n.t("label.no-data-marker")
+            : formatPercentageV1(deviation);
         uiAnomaly.deviationVal = deviation;
         uiAnomaly.negativeDeviation = deviation < 0;
     }

@@ -10,6 +10,8 @@ export interface UiAnomaly {
     deviation: string;
     deviationVal: number;
     negativeDeviation: boolean;
+    metricId: number;
+    metricName: string;
     duration: string;
     durationVal: number;
     startTime: string;

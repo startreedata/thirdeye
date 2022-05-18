@@ -225,6 +225,8 @@
         "changes-not-saved": "Changes have not been saved",
         "set-chart-height": "Set the chart height",
         "no-saved-investigations": "No saved investigations for Anomaly",
-        "extend-entity-by-week": "Extend {{entity}} by a week"
+        "extend-entity-by-week": "Extend {{entity}} by a week",
+        "filter-by-entity": "Filter by {{entity}}",
+        "no-filter-options-available-entity": "No filter {{entity}} options available"
     }
 }

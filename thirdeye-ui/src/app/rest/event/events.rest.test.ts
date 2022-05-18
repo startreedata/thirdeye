@@ -58,7 +58,9 @@ describe("Event REST", () => {
             mockEventResponse,
         ]);
 
-        expect(axios.get).toHaveBeenCalledWith("/api/events?startTime=1");
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/events?startTime=%5Bgte%5D1"
+        );
     });
 
     it("getAllEvents with endTime should invoke axios.get with appropriate input and return appropriate events", async () => {
@@ -70,7 +72,9 @@ describe("Event REST", () => {
             mockEventResponse,
         ]);
 
-        expect(axios.get).toHaveBeenCalledWith("/api/events?endTime=1");
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/events?endTime=%5Blte%5D1"
+        );
     });
 
     it("getAllEvents with type should invoke axios.get with appropriate input and return appropriate events", async () => {

@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLoadingIndicatorV1 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { Event } from "../../../rest/dto/event.interfaces";
@@ -21,6 +22,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     onCheckClick,
     events,
 }: EventsTabProps) => {
+    const { t } = useTranslation();
     const handleOnCheckboxClick = (event: Event, checked: boolean): void => {
         let events: Event[] = [];
         if (checked) {
@@ -43,7 +45,12 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
                     </Box>
                 ) : isEmpty(events) ? (
                     <Box pb={20} pt={20}>
-                        <NoDataIndicator />
+                        <NoDataIndicator
+                            text={t(
+                                "message.no-data-for-entity-for-date-range",
+                                { entity: t("label.events") }
+                            )}
+                        />
                     </Box>
                 ) : (
                     <Table>

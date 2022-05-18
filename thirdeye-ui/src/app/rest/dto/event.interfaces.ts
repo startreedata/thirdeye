@@ -1,9 +1,5 @@
-export interface Event {
+export interface Event extends EditableEvent {
     id: number;
-    name: string;
-    type?: string;
-    startTime: number;
-    endTime: number;
 }
 
 export interface EditableEvent {

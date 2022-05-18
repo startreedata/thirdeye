@@ -242,6 +242,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double lastBeta = beta;
     double lastGamma = gamma;
 
+    final List<HoltWintersParams> optimizedParams = new ArrayList<>();
     for (int k = 0; k < size; k++) {
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
@@ -269,10 +270,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
-        LOG.info("Optimized parameters for Holt-Winters: alpha: {}, beta: {}, gamma: {}",
-            params.getAlpha(),
-            params.getBeta(),
-            params.getGamma());
+        optimizedParams.add(params);
       } else {
         params = new HoltWintersParams(alpha, beta, gamma);
       }
@@ -293,6 +291,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       upperBoundArray[k] = predicted + error;
       lowerBoundArray[k] = predicted - error;
     }
+    LOG.info("Optimized parameters for Holt-Winters {} times. Values: {}",
+        optimizedParams.size(),
+        optimizedParams);
 
     resultDF.addSeries(COL_TIME, LongSeries.buildFrom(resultTimeArray)).setIndex(COL_TIME);
     resultDF.addSeries(COL_VALUE, DoubleSeries.buildFrom(baselineArray));
@@ -375,6 +376,15 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     double getGamma() {
       return gamma;
+    }
+
+
+    @Override
+    public String toString() {
+      return "{alpha=" + alpha +
+          ", beta=" + beta +
+          ", gamma=" + gamma +
+          '}';
     }
   }
 

@@ -7,6 +7,7 @@ package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -21,15 +22,22 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class RootCauseAnalysisInfoFetcher {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RootCauseAnalysisInfoFetcher.class);
 
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
@@ -89,13 +97,18 @@ public class RootCauseAnalysisInfoFetcher {
         "metadata$dataset$dataset");
 
     // take config from persistence - makes it sure dataset/metric DTO configs are correct for RCA
-    final MetricConfigDTO metricConfigDTO = ensureExists(
-        metricDAO.findByMetricAndDataset(metricName, datasetName),
-        String.format(
-            "Could not find metric %s for dataset %s. Invalid RCA configuration for the alert %s?",
-            metricName,
-            datasetName,
-            anomalyId));
+    MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);
+    if (metricConfigDTO == null) {
+      LOG.warn("Could not find metric %s for dataset %s. Building a custom metric for RCA.");
+      final String metricAggFunction = metadataMetricDTO.getDefaultAggFunction();
+      ensure(StringUtils.isNotBlank(metricAggFunction), ERR_MISSING_CONFIGURATION_FIELD,
+          String.format(
+              "metadata$metric$aggregationFunction. It must be set when using a custom metric. Possible values: %s",
+              List.of(MetricAggFunction.values())));
+      metricConfigDTO = new MetricConfigDTO().setDataset(datasetName)
+          .setName(metricName)
+          .setDefaultAggFunction(metricAggFunction);
+    }
     final DatasetConfigDTO datasetConfigDTO = ensureExists(datasetDAO.findByDataset(metricConfigDTO.getDataset()),
         String.format("Dataset name: %s", metricConfigDTO.getDataset()));
     addCustomFields(metricConfigDTO, metadataMetricDTO);
@@ -114,8 +127,10 @@ public class RootCauseAnalysisInfoFetcher {
 
   private void addCustomFields(final MetricConfigDTO metricConfigDTO,
       final MetricConfigDTO metadataMetricDTO) {
-    // todo cyril add DefaultAggFunction to custom rcaInfoFetcher to allow custom aggregationfunction
     // fields that can be configured at the alert level can be added here
     Optional.ofNullable(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
+    if (StringUtils.isNotBlank(metadataMetricDTO.getDefaultAggFunction())) {
+      metricConfigDTO.setDefaultAggFunction(metadataMetricDTO.getDefaultAggFunction());
+    }
   }
 }

@@ -8,6 +8,7 @@
     "templateProperties": {
       "dataSource": "pinot",
       "dataset": "order_events",
+      "rcaAggregationFunction": "count",
       "timeColumn": "timestamp",
       "timeColumnFormat": "1:MILLISECONDS:EPOCH",
       "aggregationFunction": "count",

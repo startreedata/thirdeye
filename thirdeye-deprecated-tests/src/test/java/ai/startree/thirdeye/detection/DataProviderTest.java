@@ -144,7 +144,7 @@ public class DataProviderTest {
     metricDTO.setId(id);
     metricDTO.setName(metric);
     metricDTO.setDataset(dataset);
-    metricDTO.setDefaultAggFunction(MetricAggFunction.SUM);
+    metricDTO.setDefaultAggFunction(MetricAggFunction.SUM.toString());
     metricDTO.setAlias(dataset + "::" + metric);
     return metricDTO;
   }

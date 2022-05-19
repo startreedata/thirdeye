@@ -110,10 +110,10 @@ public class ConfigGenerator {
     String dataTypeStr = metricFieldSpec.getDataType().toString();
     if (BYTES_STRING.equals(dataTypeStr)) {
       // Assume if the column is BYTES type, use the default TDigest function and set the return data type to double
-      metricConfigDTO.setDefaultAggFunction(DEFAULT_TDIGEST_AGG_FUNCTION);
+      metricConfigDTO.setDefaultAggFunction(DEFAULT_TDIGEST_AGG_FUNCTION.toString());
       metricConfigDTO.setDatatype(MetricType.DOUBLE);
     } else {
-      metricConfigDTO.setDefaultAggFunction(DEFAULT_AGG_FUNCTION);
+      metricConfigDTO.setDefaultAggFunction(DEFAULT_AGG_FUNCTION.toString());
       metricConfigDTO.setDatatype(MetricType.valueOf(dataTypeStr));
     }
 

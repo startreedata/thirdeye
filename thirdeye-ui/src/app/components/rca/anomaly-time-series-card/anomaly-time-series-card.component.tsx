@@ -6,8 +6,13 @@ import {
     CardContent,
     Grid,
 } from "@material-ui/core";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { debounce, isEmpty } from "lodash";
+import React, {
+    FunctionComponent,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -27,8 +32,14 @@ import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.compo
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
+import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyTimeSeriesCardProps } from "./anomaly-time-series-card.interfaces";
-import { generateChartOptions } from "./anomaly-time-series-card.utils";
+import {
+    determineInitialZoom,
+    generateChartOptions,
+    ZOOM_END_KEY,
+    ZOOM_START_KEY,
+} from "./anomaly-time-series-card.utils";
 import { FiltersSetTable } from "./filters-set-table/filters-set-table.component";
 
 const CHART_HEIGHT_KEY = "chartHeight";
@@ -68,6 +79,10 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             : 500
     );
     const [showFilterSetTable, setShowFilterSetTable] = useState<boolean>(true);
+
+    const [initialZoom, setInitialZoom] = useState<ZoomDomain | undefined>(
+        determineInitialZoom(searchParams)
+    );
 
     const alertEvaluationPayload = createAlertEvaluation(
         anomaly.alert.id,
@@ -166,6 +181,39 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         setSearchParams(searchParams);
     };
 
+    const debouncedChangeSearchParamsForDomain = useCallback(
+        debounce(
+            (
+                domain: ZoomDomain | null,
+                searchParamsProp: URLSearchParams,
+                setSearchParamFunc: (
+                    newSearchParams: URLSearchParams,
+                    options: { replace: boolean }
+                ) => void
+            ) => {
+                setInitialZoom(domain ?? undefined);
+                if (domain) {
+                    searchParamsProp.set(ZOOM_START_KEY, domain.x0.toString());
+                    searchParamsProp.set(ZOOM_END_KEY, domain.x1.toString());
+                } else {
+                    searchParamsProp.delete(ZOOM_START_KEY);
+                    searchParamsProp.delete(ZOOM_END_KEY);
+                }
+                setSearchParamFunc(searchParamsProp, { replace: true });
+            },
+            250
+        ),
+        []
+    );
+
+    const handleZoomChange = (domain: ZoomDomain | null): void => {
+        debouncedChangeSearchParamsForDomain(
+            domain,
+            searchParams,
+            setSearchParams
+        );
+    };
+
     return (
         <Card variant="outlined">
             <CardContent>
@@ -257,6 +305,10 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                 events,
                                 t
                             )}
+                            chartEvents={{
+                                onZoomChange: handleZoomChange,
+                            }}
+                            initialZoom={initialZoom}
                         />
                     </CardContent>
                 )}
@@ -276,6 +328,10 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                         events,
                                         t
                                     )}
+                                    chartEvents={{
+                                        onZoomChange: handleZoomChange,
+                                    }}
+                                    initialZoom={initialZoom}
                                 />
                             </Grid>
                             <Grid item md={4} sm={12} xs={12}>

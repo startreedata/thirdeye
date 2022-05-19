@@ -16,7 +16,11 @@ import {
     Series,
     SeriesType,
     TimeSeriesChartProps,
+    ZoomDomain,
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+
+export const ZOOM_START_KEY = "zoomStart";
+export const ZOOM_END_KEY = "zoomEnd";
 
 export const generateSeriesDataForEvaluation = (
     alertEvaluation: AlertEvaluation,
@@ -166,4 +170,17 @@ export const generateChartOptions = (
         brush: true,
         tooltip: true,
     };
+};
+
+export const determineInitialZoom = (
+    searchParams: URLSearchParams
+): ZoomDomain | undefined => {
+    if (searchParams.has(ZOOM_START_KEY) && searchParams.has(ZOOM_END_KEY)) {
+        return {
+            x0: Number(searchParams.get(ZOOM_START_KEY)),
+            x1: Number(searchParams.get(ZOOM_END_KEY)),
+        };
+    }
+
+    return undefined;
 };

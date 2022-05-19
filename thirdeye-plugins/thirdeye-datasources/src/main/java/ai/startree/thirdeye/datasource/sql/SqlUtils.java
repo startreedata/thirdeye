@@ -193,7 +193,7 @@ public class SqlUtils {
       metricConfig.setName(metric.getKey());
       metricConfig.setDataset(datasetName);
       metricConfig.setAlias(String.format("%s::%s", datasetName, metric.getKey()));
-      metricConfig.setDefaultAggFunction(metric.getValue());
+      metricConfig.setDefaultAggFunction(metric.getValue().toString());
       metricConfigs.add(metricConfig);
     }
 

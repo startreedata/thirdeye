@@ -96,10 +96,10 @@ public class PinotDatasetOnboarderTest {
       assertThat(schemaMetricNames.contains(metricConfig.getName())).isTrue();
       metricIds.add(metricConfig.getId());
       if (metricConfig.getName().equals("latency_tdigest")) {
-        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_TDIGEST_AGG_FUNCTION);
+        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_TDIGEST_AGG_FUNCTION.toString());
         assertThat(metricConfig.getDatatype()).isEqualTo(MetricType.DOUBLE);
       } else {
-        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_AGG_FUNCTION);
+        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_AGG_FUNCTION.toString());
       }
     }
   }

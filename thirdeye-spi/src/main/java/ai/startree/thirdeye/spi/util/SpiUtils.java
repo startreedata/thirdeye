@@ -294,7 +294,7 @@ public class SpiUtils {
    * check if the metric aggregation is cumulative
    */
   public static boolean isAggCumulative(MetricConfigDTO metric) {
-    MetricAggFunction aggFunction = metric.getDefaultAggFunction();
+    final MetricAggFunction aggFunction = MetricAggFunction.fromString(metric.getDefaultAggFunction());
     return aggFunction.equals(MetricAggFunction.SUM) || aggFunction.equals(MetricAggFunction.COUNT);
   }
 

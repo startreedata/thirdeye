@@ -69,6 +69,7 @@
     },
     "metric": {
       "name": "${aggregationColumn}",
+      "aggregationFunction": "${rcaAggregationFunction}",
       "where": "${queryFilters}"
     },
     "timezone": "${timezone}",
@@ -77,6 +78,7 @@
   "defaultProperties": {
     "timezone": "UTC",
     "completenessDelay": "P0D",
+    "rcaAggregationFunction": "",
     "queryFilters": "",
     "queryLimit": "100000000"
   }

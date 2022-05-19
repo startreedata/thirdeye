@@ -189,21 +189,11 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
 
                         return (
                             <StackedLine
-                                points={seriesData.data}
+                                series={seriesData}
                                 stroke={seriesData.color}
                                 strokeWidth={seriesData.strokeWidth}
-                                x={(d: DataPoint) =>
-                                    xScaleToUse(seriesData.xAccessor(d)) || 0
-                                }
-                                x1={(d: ThresholdDataPoint) =>
-                                    xScaleToUse(seriesData.x1Accessor(d)) || 0
-                                }
-                                y={(d: DataPoint) =>
-                                    inverseScale(seriesData.yAccessor(d)) || 0
-                                }
-                                y1={(d: ThresholdDataPoint) =>
-                                    inverseScale(seriesData.y1Accessor(d)) || 0
-                                }
+                                xScale={xScaleToUse}
+                                yScale={inverseScale}
                             />
                         );
                     }

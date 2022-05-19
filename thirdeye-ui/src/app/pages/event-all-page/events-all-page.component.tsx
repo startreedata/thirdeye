@@ -12,9 +12,11 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { UiEvent } from "../../rest/dto/ui-event.interfaces";
-import { deleteEvent, getAllEvents } from "../../rest/event/events.rest";
+import { useGetEvents } from "../../rest/event/event.actions";
+import { deleteEvent } from "../../rest/event/events.rest";
 import { getUiEvents } from "../../utils/events/events.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
@@ -23,6 +25,7 @@ export const EventsAllPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
+    const { getEvents, status, errorMessages } = useGetEvents();
 
     useEffect(() => {
         fetchAllEvents();
@@ -32,9 +35,9 @@ export const EventsAllPage: FunctionComponent = () => {
         setUiEvents(null);
 
         let fetchedEvents: UiEvent[] = [];
-        getAllEvents()
+        getEvents()
             .then((events) => {
-                fetchedEvents = getUiEvents(events);
+                fetchedEvents = getUiEvents(events || []);
             })
             .catch((error: AxiosError) => {
                 const errMessages = getErrorMessages(error);
@@ -43,7 +46,7 @@ export const EventsAllPage: FunctionComponent = () => {
                     ? notify(
                           NotificationTypeV1.Error,
                           t("message.error-while-fetching", {
-                              entity: t("label.event"),
+                              entity: t("label.events"),
                           })
                       )
                     : errMessages.map((err) =>
@@ -54,6 +57,32 @@ export const EventsAllPage: FunctionComponent = () => {
                 setUiEvents(fetchedEvents);
             });
     };
+
+    useEffect(() => {
+        if (status === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.events"),
+                      })
+                  );
+        }
+    }, [status]);
+
+    useEffect(() => {
+        if (status === ActionStatus.Done && uiEvents && uiEvents.length === 0) {
+            notify(
+                NotificationTypeV1.Info,
+                t("message.no-data-for-entity", {
+                    entity: t("label.events"),
+                })
+            );
+        }
+    }, [status, uiEvents]);
 
     const handleEventDelete = (uiEvent: UiEvent): void => {
         showDialog({

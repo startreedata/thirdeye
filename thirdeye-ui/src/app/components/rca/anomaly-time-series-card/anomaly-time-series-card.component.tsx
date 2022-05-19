@@ -297,12 +297,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                 (timeSeriesFiltersSet.length === 0 || !showFilterSetTable) && (
                     <CardContent>
                         <TimeSeriesChart
+                            events={events}
                             height={chartHeight}
                             {...generateChartOptions(
                                 alertEvaluation,
                                 anomaly,
                                 filteredAlertEvaluation,
-                                events,
                                 t
                             )}
                             chartEvents={{
@@ -320,12 +320,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                         <Grid container>
                             <Grid item md={8} sm={12} xs={12}>
                                 <TimeSeriesChart
+                                    events={events}
                                     height={chartHeight}
                                     {...generateChartOptions(
                                         alertEvaluation,
                                         anomaly,
                                         filteredAlertEvaluation,
-                                        events,
                                         t
                                     )}
                                     chartEvents={{

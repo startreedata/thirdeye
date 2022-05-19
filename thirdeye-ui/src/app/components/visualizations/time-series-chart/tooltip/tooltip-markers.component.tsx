@@ -7,9 +7,10 @@ import {
     ThresholdDataPoint,
 } from "../time-series-chart.interfaces";
 import { TooltipMarkersProps } from "./tooltip.interfaces";
-import { getDataPointsInSeriesForXValue } from "./tooltip.utils";
-
-const LINE_COLOR = "#AAAAAA";
+import {
+    getDataPointsInSeriesForXValue,
+    TOOLTIP_LINE_COLOR,
+} from "./tooltip.utils";
 
 export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
     xScale,
@@ -28,7 +29,7 @@ export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
             <Line
                 from={{ x: xScale(xValue), y: 0 }}
                 pointerEvents="none"
-                stroke={LINE_COLOR}
+                stroke={TOOLTIP_LINE_COLOR}
                 strokeDasharray="5,2"
                 strokeWidth={2}
                 to={{

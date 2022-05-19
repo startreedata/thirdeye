@@ -66,7 +66,8 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     }, [events]);
 
     const handleOnCheckboxClick = (event: Event, checked: boolean): void => {
-        let events: Event[] = [];
+        let events: Event[];
+
         if (checked) {
             events = [...selectedEvents, event];
         } else {

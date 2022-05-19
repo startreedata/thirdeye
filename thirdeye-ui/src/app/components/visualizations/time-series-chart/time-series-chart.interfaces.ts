@@ -1,3 +1,5 @@
+import { Event } from "../../../rest/dto/event.interfaces";
+
 export interface DataPoint {
     x: number;
     y: number;
@@ -75,6 +77,7 @@ export interface TimeSeriesChartProps {
         onZoomChange?: (domain: ZoomDomain | null) => void;
     };
     initialZoom?: ZoomDomain;
+    events?: Event[];
 }
 
 export interface ZoomDomain {
@@ -90,5 +93,4 @@ export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
 export enum SeriesType {
     LINE = "line",
     AREA_CLOSED = "areaclosed",
-    LINE_STACKED = "line-stacked",
 }

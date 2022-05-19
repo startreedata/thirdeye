@@ -1,5 +1,6 @@
 import { Brush } from "@visx/brush";
 import BaseBrush from "@visx/brush/lib/BaseBrush";
+import { PartialBrushStartEnd } from "@visx/brush/lib/types";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import React, { FunctionComponent, useMemo, useRef } from "react";
 import { ChartCore } from "../chart-core/chart-core.component";
@@ -23,6 +24,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     onBrushChange,
     onBrushClick,
     xAxisOptions,
+    initialZoom,
 }) => {
     const brushRef = useRef<BaseBrush>(null);
 
@@ -102,6 +104,14 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
                     brushDirection="horizontal"
                     handleSize={8}
                     height={yBrushMax}
+                    initialBrushPosition={
+                        initialZoom
+                            ? ({
+                                  start: { x: dateScale(initialZoom.x0) },
+                                  end: { x: dateScale(initialZoom.x1) },
+                              } as PartialBrushStartEnd)
+                            : undefined
+                    }
                     innerRef={brushRef}
                     margin={BRUSH_MARGIN}
                     resizeTriggerAreas={["left", "right"]}

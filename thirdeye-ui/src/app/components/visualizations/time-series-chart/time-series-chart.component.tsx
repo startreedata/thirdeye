@@ -9,6 +9,7 @@ import {
     NormalizedSeries,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
+    ZoomDomain,
 } from "./time-series-chart.interfaces";
 import {
     normalizeSeries,
@@ -98,10 +99,24 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
 
 export const TimeSeriesChartInternal: FunctionComponent<
     TimeSeriesChartInternalProps
-> = ({ series, legend, brush, height, width, xAxis, yAxis, tooltip }) => {
+> = ({
+    series,
+    legend,
+    brush,
+    height,
+    width,
+    xAxis,
+    yAxis,
+    tooltip,
+    initialZoom,
+    events,
+}) => {
+    const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
+        initialZoom
+    );
     const [processedMainChartSeries, setProcessedMainChartSeries] = useState<
         NormalizedSeries[]
-    >(normalizeSeries(series));
+    >(normalizeSeries(series, currentZoom));
     const [processedBrushChartSeries, setProcessedBrushChartSeries] = useState<
         NormalizedSeries[]
     >(normalizeSeries(series));
@@ -172,7 +187,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     // If series changed, reset everything
     useEffect(() => {
-        setProcessedMainChartSeries(normalizeSeries(series));
+        setProcessedMainChartSeries(normalizeSeries(series, currentZoom));
         setProcessedBrushChartSeries(normalizeSeries(series));
         setEnabledDisabledMapping(series.map(syncEnabledDisabled));
     }, [series]);
@@ -186,9 +201,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         setEnabledDisabledMapping([...copied]);
     };
 
-    const handleBrushChange = (
-        domain: { x0: number; x1: number } | null
-    ): void => {
+    const handleBrushChange = (domain: ZoomDomain | null): void => {
         if (!domain) {
             return;
         }
@@ -206,6 +219,11 @@ export const TimeSeriesChartInternal: FunctionComponent<
             return copied;
         });
         setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
+        setCurrentZoom({ x0, x1 });
+
+        if (events && events.onZoomChange) {
+            events.onZoomChange(domain);
+        }
     };
 
     const handleBrushClick = (): void => {
@@ -215,7 +233,13 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
             return copied;
         });
+
         setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
+        setCurrentZoom(undefined);
+
+        if (events && events.onZoomChange) {
+            events.onZoomChange(null);
+        }
     };
 
     return (
@@ -254,6 +278,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     <ChartBrush
                         colorScale={colorScale}
                         height={brushChartHeight}
+                        initialZoom={initialZoom}
                         series={processedBrushChartSeries}
                         top={
                             topChartHeight +

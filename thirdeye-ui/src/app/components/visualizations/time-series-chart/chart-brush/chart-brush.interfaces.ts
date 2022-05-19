@@ -2,6 +2,7 @@ import { Bounds } from "@visx/brush/lib/types";
 import {
     NormalizedSeries,
     XAxisOptions,
+    ZoomDomain,
 } from "../time-series-chart.interfaces";
 
 export interface ChartBrushProps {
@@ -13,4 +14,5 @@ export interface ChartBrushProps {
     onBrushChange: (domain: Bounds | null) => void;
     onBrushClick: () => void;
     xAxisOptions?: XAxisOptions;
+    initialZoom?: ZoomDomain;
 }

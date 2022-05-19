@@ -1,6 +1,7 @@
 import { SeriesType } from "./time-series-chart.interfaces";
 import {
     defaultTooltipValueFormatter,
+    defaultX1Accessor,
     defaultXAccessor,
     defaultY1Accessor,
     defaultYAccessor,
@@ -84,6 +85,7 @@ describe("Time Series Chart Utils", () => {
             name: "Series 0",
             type: SeriesType.AREA_CLOSED,
             xAccessor: defaultXAccessor,
+            x1Accessor: defaultX1Accessor,
             yAccessor: defaultYAccessor,
             y1Accessor: defaultY1Accessor,
             strokeWidth: 1,
@@ -95,6 +97,7 @@ describe("Time Series Chart Utils", () => {
             name: "hello world",
             type: SeriesType.LINE,
             xAccessor: defaultXAccessor,
+            x1Accessor: defaultX1Accessor,
             yAccessor: defaultYAccessor,
             y1Accessor: defaultY1Accessor,
             strokeWidth: 1,

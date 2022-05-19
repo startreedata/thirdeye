@@ -41,10 +41,11 @@ const CHART_SIZE_OPTIONS = [
 
 export const AnomalyTimeSeriesCard: FunctionComponent<
     AnomalyTimeSeriesCardProps
-> = ({ anomaly, timeSeriesFiltersSet, onRemoveBtnClick }) => {
+> = ({ anomaly, timeSeriesFiltersSet, onRemoveBtnClick, events }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+
     const {
         getEvaluation,
         errorMessages,
@@ -253,6 +254,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                 alertEvaluation,
                                 anomaly,
                                 filteredAlertEvaluation,
+                                events,
                                 t
                             )}
                         />
@@ -271,6 +273,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                         alertEvaluation,
                                         anomaly,
                                         filteredAlertEvaluation,
+                                        events,
                                         t
                                     )}
                                 />

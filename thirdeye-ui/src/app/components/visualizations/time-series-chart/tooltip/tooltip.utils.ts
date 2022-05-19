@@ -2,7 +2,12 @@ import { localPoint } from "@visx/event";
 import { bisector } from "d3-array";
 import { ScaleTime } from "d3-scale";
 import { MouseEvent } from "react";
-import { DataPoint, NormalizedSeries } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    LineDataPoint,
+    NormalizedSeries,
+    SeriesType,
+} from "../time-series-chart.interfaces";
 
 /**
  * Find the closest valid x value from the data points of all the series to the
@@ -96,9 +101,17 @@ export const getDataPointsInSeriesForXValue = (
 
     series.forEach((seriesData) => {
         if (seriesData.enabled) {
-            const dataPointForXValue = seriesData.data.find(
-                (d) => d.x === xValue
-            );
+            let dataPointForXValue: DataPoint | undefined;
+
+            if (seriesData.type === SeriesType.LINE_STACKED) {
+                dataPointForXValue = seriesData.data.find(
+                    (d) => d.x <= xValue || (d as LineDataPoint).x1 >= xValue
+                );
+            } else {
+                dataPointForXValue = seriesData.data.find(
+                    (d) => d.x === xValue || (d as LineDataPoint).x1 === xValue
+                );
+            }
 
             if (dataPointForXValue) {
                 dataPointsWithSeries.push([dataPointForXValue, seriesData]);

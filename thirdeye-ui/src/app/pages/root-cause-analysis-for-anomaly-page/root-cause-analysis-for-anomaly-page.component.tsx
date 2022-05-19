@@ -17,6 +17,7 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
+import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
@@ -49,6 +50,8 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             []
         )
     );
+    const [selectedEvents, setSelectedEvents] = useState<Event[]>([]);
+
     const { notify } = useNotificationProviderV1();
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
@@ -122,6 +125,10 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         );
     };
 
+    const handleEventSelectionChange = (selectedEvents: Event[]): void => {
+        setSelectedEvents([...selectedEvents]);
+    };
+
     return (
         <PageContentsGridV1>
             {/* Anomaly Summary */}
@@ -175,6 +182,8 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                 {anomaly && (
                     <AnomalyTimeSeriesCard
                         anomaly={anomaly}
+                        // Selected events should be shown on the graph
+                        events={selectedEvents}
                         timeSeriesFiltersSet={chartTimeSeriesFilterSet}
                         onRemoveBtnClick={handleRemoveBtnClick}
                     />
@@ -188,7 +197,9 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         anomaly={anomaly}
                         anomalyId={toNumber(anomalyId)}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
+                        selectedEvents={selectedEvents}
                         onAddFilterSetClick={handleAddFilterSetClick}
+                        onEventSelectionChange={handleEventSelectionChange}
                     />
                 )}
             </Grid>

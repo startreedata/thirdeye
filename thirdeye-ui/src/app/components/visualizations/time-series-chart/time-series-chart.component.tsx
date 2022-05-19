@@ -109,7 +109,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     yAxis,
     tooltip,
     initialZoom,
-    events,
+    chartEvents,
 }) => {
     const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
         initialZoom
@@ -221,8 +221,8 @@ export const TimeSeriesChartInternal: FunctionComponent<
         setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
         setCurrentZoom({ x0, x1 });
 
-        if (events && events.onZoomChange) {
-            events.onZoomChange(domain);
+        if (chartEvents && chartEvents.onZoomChange) {
+            chartEvents.onZoomChange(domain);
         }
     };
 
@@ -237,8 +237,8 @@ export const TimeSeriesChartInternal: FunctionComponent<
         setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
         setCurrentZoom(undefined);
 
-        if (events && events.onZoomChange) {
-            events.onZoomChange(null);
+        if (chartEvents && chartEvents.onZoomChange) {
+            chartEvents.onZoomChange(null);
         }
     };
 

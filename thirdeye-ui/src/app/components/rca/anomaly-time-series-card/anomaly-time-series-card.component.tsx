@@ -305,7 +305,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                 events,
                                 t
                             )}
-                            events={{
+                            chartEvents={{
                                 onZoomChange: handleZoomChange,
                             }}
                             initialZoom={initialZoom}
@@ -328,7 +328,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                         events,
                                         t
                                     )}
-                                    events={{
+                                    chartEvents={{
                                         onZoomChange: handleZoomChange,
                                     }}
                                     initialZoom={initialZoom}

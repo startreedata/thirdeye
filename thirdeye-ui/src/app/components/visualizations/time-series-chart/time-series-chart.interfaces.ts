@@ -71,7 +71,7 @@ export interface TimeSeriesChartProps {
     legend?: boolean;
     brush?: boolean;
     height?: number;
-    events?: {
+    chartEvents?: {
         onZoomChange?: (domain: ZoomDomain | null) => void;
     };
     initialZoom?: ZoomDomain;

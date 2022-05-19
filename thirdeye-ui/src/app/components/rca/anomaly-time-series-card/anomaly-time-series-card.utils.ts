@@ -12,9 +12,9 @@ import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import {
     DataPoint,
+    LineDataPoint,
     Series,
     SeriesType,
-    ThresholdDataPoint,
     TimeSeriesChartProps,
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 
@@ -124,7 +124,7 @@ export const generateSeriesDataForEvaluation = (
                           return `${formatDateAndTimeV1(
                               point.x
                           )} - ${formatDateAndTimeV1(
-                              (point as ThresholdDataPoint).x1
+                              (point as LineDataPoint).x1
                           )}`;
                       },
                   },

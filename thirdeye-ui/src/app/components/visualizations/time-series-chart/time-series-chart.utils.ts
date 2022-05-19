@@ -1,5 +1,6 @@
 import {
     DataPoint,
+    LineDataPoint,
     NormalizedSeries,
     Series,
     SeriesType,
@@ -64,7 +65,7 @@ export const defaultXAccessor = (d: DataPoint | ThresholdDataPoint): Date => {
     return new Date(d.x);
 };
 
-export const defaultX1Accessor = (d: ThresholdDataPoint): Date => {
+export const defaultX1Accessor = (d: LineDataPoint): Date => {
     return new Date(d.x1);
 };
 

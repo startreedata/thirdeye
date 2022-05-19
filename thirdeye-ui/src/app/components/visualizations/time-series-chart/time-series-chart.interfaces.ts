@@ -5,41 +5,44 @@ export interface DataPoint {
 
 export interface ThresholdDataPoint extends DataPoint {
     y1: number; // y1 is used in Threshold shapes
+}
+
+export interface LineDataPoint extends ThresholdDataPoint {
     x1: number; // x1 is used in Line only shapes
 }
 
 export interface Series {
     name?: string;
-    data: DataPoint[] | ThresholdDataPoint[];
+    data: DataPoint[] | ThresholdDataPoint[] | LineDataPoint[];
     type?: SeriesType;
     color?: string;
     enabled?: boolean;
     strokeWidth?: number;
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
-    x1Accessor?: (d: ThresholdDataPoint) => Date;
+    x1Accessor?: (d: LineDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
     y1Accessor?: (d: ThresholdDataPoint) => number;
     tooltipValueFormatter?: (
         value: number,
-        d: DataPoint | ThresholdDataPoint,
+        d: DataPoint | ThresholdDataPoint | LineDataPoint,
         series: NormalizedSeries
     ) => string;
 }
 
 export interface NormalizedSeries {
     name: string;
-    data: DataPoint[] | ThresholdDataPoint[];
+    data: DataPoint[] | ThresholdDataPoint[] | LineDataPoint[];
     type: SeriesType;
     color?: string;
     enabled: boolean;
     strokeWidth: number;
     xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
-    x1Accessor: (d: ThresholdDataPoint) => Date;
+    x1Accessor: (d: LineDataPoint) => Date;
     yAccessor: (d: DataPoint | ThresholdDataPoint) => number;
     y1Accessor: (d: ThresholdDataPoint) => number;
     tooltipValueFormatter: (
         value: number,
-        d: DataPoint | ThresholdDataPoint,
+        d: DataPoint | ThresholdDataPoint | LineDataPoint,
         series: NormalizedSeries
     ) => string;
 }

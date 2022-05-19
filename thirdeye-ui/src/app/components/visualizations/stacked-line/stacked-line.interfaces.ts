@@ -1,16 +1,12 @@
-import {
-    DataPoint,
-    ThresholdDataPoint,
-} from "../time-series-chart/time-series-chart.interfaces";
+import { AxisScale } from "@visx/axis";
+import { NormalizedSeries } from "../time-series-chart/time-series-chart.interfaces";
 
 export interface StackedLineProps {
-    points: DataPoint[];
     paddingTop?: number;
     strokeWidth: number;
     stroke?: string;
     gapBetweenLines?: number;
-    x: (d: DataPoint) => number;
-    x1: (d: ThresholdDataPoint) => number;
-    y: (d: DataPoint) => number;
-    y1: (d: ThresholdDataPoint) => number;
+    series: NormalizedSeries;
+    xScale: AxisScale<number>;
+    yScale: AxisScale<number>;
 }

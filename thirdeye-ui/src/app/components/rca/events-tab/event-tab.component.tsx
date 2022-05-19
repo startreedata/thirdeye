@@ -8,14 +8,8 @@ import {
     TableHead,
     TableRow,
 } from "@material-ui/core";
-import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, {
-    FunctionComponent,
-    useCallback,
-    useEffect,
-    useState,
-} from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -24,9 +18,9 @@ import {
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
-import { getAllEvents } from "../../../rest/event/events.rest";
-import { getErrorMessages } from "../../../utils/rest/rest.util";
+import { useGetEvents } from "../../../rest/event/event.actions";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { EventsTabProps } from "./event-tab.interfaces";
@@ -37,7 +31,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
 }: EventsTabProps) => {
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
-    const [events, setEvents] = useState<Event[]>();
+    const { getEvents, errorMessages, status, events } = useGetEvents();
 
     const { notify } = useNotificationProviderV1();
 
@@ -45,34 +39,31 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     const endTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
 
     useEffect(() => {
-        fetchEvents();
+        getEvents({
+            startTime: Number(startTime),
+            endTime: Number(endTime),
+        });
     }, [startTime, endTime]);
 
-    const fetchEvents = useCallback(async () => {
-        setEvents(undefined);
-        let events: Event[] = [];
-        try {
-            events = await getAllEvents({
-                startTime: Number(startTime),
-                endTime: Number(endTime),
-            });
-        } catch (error) {
-            const errorMessages = getErrorMessages(error as AxiosError);
-            const genericMsg = t("message.error-while-fetching", {
-                entity: t("label.events"),
-            });
-            if (isEmpty(errorMessages)) {
-                notify(NotificationTypeV1.Error, genericMsg);
-            } else {
-                errorMessages.map((msg) =>
-                    notify(NotificationTypeV1.Error, `${genericMsg}: ${msg}`)
-                );
-            }
-        } finally {
-            onCheckClick([]);
-            setEvents(events);
+    useEffect(() => {
+        if (status === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.dimension-analysis-data"),
+                      })
+                  );
         }
-    }, [startTime, endTime, setEvents]);
+    }, [status]);
+
+    useEffect(() => {
+        // Reset selected event on event list change
+        onCheckClick([]);
+    }, [events]);
 
     const handleOnCheckboxClick = (event: Event, checked: boolean): void => {
         let events: Event[] = [];
@@ -90,19 +81,14 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     return (
         <>
             <CardContent>
-                {!events ? (
+                {/* Loading Indicator when request is in flight */}
+                {status === ActionStatus.Working && (
                     <Box pb={20} pt={20}>
                         <AppLoadingIndicatorV1 />
                     </Box>
-                ) : isEmpty(events) ? (
-                    <Box pb={20} pt={20}>
-                        <NoDataIndicator
-                            text={t("message.no-data-for-entity", {
-                                entity: t("label.events"),
-                            })}
-                        />
-                    </Box>
-                ) : (
+                )}
+
+                {status === ActionStatus.Done && events && events.length ? (
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -155,6 +141,14 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
                             ))}
                         </TableBody>
                     </Table>
+                ) : (
+                    <Box pb={20} pt={20}>
+                        <NoDataIndicator
+                            text={t("message.no-data-for-entity", {
+                                entity: t("label.events"),
+                            })}
+                        />
+                    </Box>
                 )}
             </CardContent>
         </>

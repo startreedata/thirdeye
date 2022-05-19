@@ -42,11 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The MetricAnalysisPipeline ranks metrics based on the degree of anomalous behavior during
  * the anomaly period. It scores anomalous behavior with user-configured strategies.
- *
- * <br/><b>NOTE:</b> this is the successor to {@code MetricCorrelationRankingPipeline}, and can
- * be used as a drop-in replacement that handles MetricEntities with filter URNs
- *
- * see MetricCorrelationRankingPipeline
  */
 public class MetricAnalysisPipeline extends Pipeline {
 

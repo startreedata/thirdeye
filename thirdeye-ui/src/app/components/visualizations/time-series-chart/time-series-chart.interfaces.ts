@@ -64,6 +64,7 @@ export interface XAxisOptions {
     enabled?: boolean;
     plotBands?: PlotBand[];
 }
+
 export interface TimeSeriesChartProps {
     series: Series[];
     tooltip?: boolean;
@@ -72,7 +73,16 @@ export interface TimeSeriesChartProps {
     legend?: boolean;
     brush?: boolean;
     height?: number;
+    chartEvents?: {
+        onZoomChange?: (domain: ZoomDomain | null) => void;
+    };
+    initialZoom?: ZoomDomain;
     events?: Event[];
+}
+
+export interface ZoomDomain {
+    x0: number;
+    x1: number;
 }
 
 export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {

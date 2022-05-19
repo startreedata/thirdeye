@@ -5,6 +5,7 @@ import {
     Series,
     SeriesType,
     ThresholdDataPoint,
+    ZoomDomain,
 } from "./time-series-chart.interfaces";
 
 const DEFAULT_CHART_TYPE = SeriesType.LINE;
@@ -50,7 +51,10 @@ export function getMinMax(
 /**
  * Normalize series data to always have `name` and `enabled` flag and `type`
  */
-export function normalizeSeries(series: Series[]): NormalizedSeries[] {
+export function normalizeSeries(
+    series: Series[],
+    filterByDomain?: ZoomDomain
+): NormalizedSeries[] {
     return series.map((item, idx) => {
         const hasY1 = item.type === SeriesType.AREA_CLOSED;
 
@@ -58,14 +62,22 @@ export function normalizeSeries(series: Series[]): NormalizedSeries[] {
             ...item,
             data: item.data.filter(
                 (dataPoint: DataPoint | ThresholdDataPoint) => {
+                    let shouldKeep = dataPoint.y !== null;
+
                     if (hasY1) {
-                        return (
-                            dataPoint.y !== null &&
-                            (dataPoint as ThresholdDataPoint).y1
-                        );
+                        shouldKeep =
+                            shouldKeep &&
+                            !!(dataPoint as ThresholdDataPoint).y1;
                     }
 
-                    return dataPoint.y !== null;
+                    if (filterByDomain) {
+                        shouldKeep =
+                            shouldKeep &&
+                            dataPoint.x >= filterByDomain.x0 &&
+                            dataPoint.x <= filterByDomain.x1;
+                    }
+
+                    return shouldKeep;
                 }
             ),
             name: item.name || `Series ${idx}`,

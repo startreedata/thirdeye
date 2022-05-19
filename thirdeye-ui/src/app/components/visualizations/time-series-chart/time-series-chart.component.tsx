@@ -10,6 +10,7 @@ import {
     NormalizedSeries,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
+    ZoomDomain,
 } from "./time-series-chart.interfaces";
 import {
     COLOR_PALETTE,
@@ -98,11 +99,16 @@ export const TimeSeriesChartInternal: FunctionComponent<
     xAxis,
     yAxis,
     tooltip,
+    initialZoom,
+    chartEvents,
     events,
 }) => {
+    const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
+        initialZoom
+    );
     const [processedMainChartSeries, setProcessedMainChartSeries] = useState<
         NormalizedSeries[]
-    >(normalizeSeries(series));
+    >(normalizeSeries(series, currentZoom));
     const [processedBrushChartSeries, setProcessedBrushChartSeries] = useState<
         NormalizedSeries[]
     >(normalizeSeries(series));
@@ -173,7 +179,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     // If series changed, reset everything
     useEffect(() => {
-        setProcessedMainChartSeries(normalizeSeries(series));
+        setProcessedMainChartSeries(normalizeSeries(series, currentZoom));
         setProcessedBrushChartSeries(normalizeSeries(series));
         setEnabledDisabledMapping(series.map(syncEnabledDisabled));
     }, [series]);
@@ -187,9 +193,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         setEnabledDisabledMapping([...copied]);
     };
 
-    const handleBrushChange = (
-        domain: { x0: number; x1: number } | null
-    ): void => {
+    const handleBrushChange = (domain: ZoomDomain | null): void => {
         if (!domain) {
             return;
         }
@@ -207,6 +211,11 @@ export const TimeSeriesChartInternal: FunctionComponent<
             return copied;
         });
         setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
+        setCurrentZoom({ x0, x1 });
+
+        if (chartEvents && chartEvents.onZoomChange) {
+            chartEvents.onZoomChange(domain);
+        }
     };
 
     const handleBrushClick = (): void => {
@@ -216,7 +225,13 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
             return copied;
         });
+
         setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
+        setCurrentZoom(undefined);
+
+        if (chartEvents && chartEvents.onZoomChange) {
+            chartEvents.onZoomChange(null);
+        }
     };
 
     return (
@@ -266,6 +281,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     <ChartBrush
                         colorScale={colorScale}
                         height={brushChartHeight}
+                        initialZoom={currentZoom}
                         series={processedBrushChartSeries}
                         top={
                             topChartHeight +

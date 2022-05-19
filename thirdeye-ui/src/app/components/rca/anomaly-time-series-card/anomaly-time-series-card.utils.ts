@@ -1,18 +1,11 @@
-import { isEmpty } from "lodash";
-import {
-    formatDateAndTimeV1,
-    formatLargeNumberV1,
-} from "../../../platform/utils";
+import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-import { Event } from "../../../rest/dto/event.interfaces";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import {
-    DataPoint,
-    LineDataPoint,
     Series,
     SeriesType,
     TimeSeriesChartProps,
@@ -21,7 +14,6 @@ import {
 export const generateSeriesDataForEvaluation = (
     alertEvaluation: AlertEvaluation,
     filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][],
-    events: Event[],
     translation: (id: string) => string
 ): Series[] => {
     const filteredTimeSeriesData: Series[] = filteredAlertEvaluations.map(
@@ -102,34 +94,6 @@ export const generateSeriesDataForEvaluation = (
             tooltipValueFormatter: (value: number): string =>
                 formatLargeNumberV1(value),
         },
-        ...(!isEmpty(events)
-            ? [
-                  {
-                      enabled: true,
-                      name: translation("label.events"),
-                      type: SeriesType.LINE_STACKED,
-                      color: Palette.COLOR_VISUALIZATION_STROKE_EVENTS,
-                      strokeWidth:
-                          Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
-                      data: events.map((event) => ({
-                          x: event.startTime,
-                          y: 0,
-                          x1: event.endTime,
-                          y1: 0,
-                      })),
-                      tooltipValueFormatter: (
-                          _value: number,
-                          point: DataPoint
-                      ): string => {
-                          return `${formatDateAndTimeV1(
-                              point.x
-                          )} - ${formatDateAndTimeV1(
-                              (point as LineDataPoint).x1
-                          )}`;
-                      },
-                  },
-              ]
-            : []),
         ...filteredTimeSeriesData,
     ];
 };
@@ -138,7 +102,6 @@ export const generateChartOptions = (
     alertEvaluation: AlertEvaluation,
     anomaly: Anomaly,
     filteredAlertEvaluation: [AlertEvaluation, AnomalyFilterOption[]][],
-    events: Event[],
     translation: (id: string) => string
 ): TimeSeriesChartProps => {
     return {
@@ -147,7 +110,6 @@ export const generateChartOptions = (
                 ? generateSeriesDataForEvaluation(
                       alertEvaluation,
                       filteredAlertEvaluation,
-                      events,
                       translation
                   )
                 : [],

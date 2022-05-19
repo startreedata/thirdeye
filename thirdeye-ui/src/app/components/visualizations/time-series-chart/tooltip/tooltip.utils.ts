@@ -6,9 +6,9 @@ import {
     DataPoint,
     LineDataPoint,
     NormalizedSeries,
-    SeriesType,
 } from "../time-series-chart.interfaces";
 
+export const TOOLTIP_LINE_COLOR = "#AAAAAA";
 /**
  * Find the closest valid x value from the data points of all the series to the
  * x value the mouse is event represents.
@@ -101,17 +101,9 @@ export const getDataPointsInSeriesForXValue = (
 
     series.forEach((seriesData) => {
         if (seriesData.enabled) {
-            let dataPointForXValue: DataPoint | undefined;
-
-            if (seriesData.type === SeriesType.LINE_STACKED) {
-                dataPointForXValue = seriesData.data.find(
-                    (d) => d.x <= xValue || (d as LineDataPoint).x1 >= xValue
-                );
-            } else {
-                dataPointForXValue = seriesData.data.find(
-                    (d) => d.x === xValue || (d as LineDataPoint).x1 === xValue
-                );
-            }
+            const dataPointForXValue = seriesData.data.find(
+                (d) => d.x === xValue || (d as LineDataPoint).x1 === xValue
+            );
 
             if (dataPointForXValue) {
                 dataPointsWithSeries.push([dataPointForXValue, seriesData]);

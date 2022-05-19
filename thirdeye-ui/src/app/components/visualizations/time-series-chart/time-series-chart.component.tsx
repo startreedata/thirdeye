@@ -4,6 +4,7 @@ import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
+import { EventsChart } from "./events-chart/events-chart.component";
 import { Legend } from "./legend/legend.component";
 import {
     NormalizedSeries,
@@ -11,6 +12,7 @@ import {
     TimeSeriesChartProps,
 } from "./time-series-chart.interfaces";
 import {
+    COLOR_PALETTE,
     normalizeSeries,
     syncEnabledDisabled,
 } from "./time-series-chart.utils";
@@ -25,17 +27,6 @@ const CHART_MARGINS = {
     bottom: 20,
     right: 20,
 };
-const COLOR_PALETTE = [
-    "#fd7f6f",
-    "#7eb0d5",
-    "#b2e061",
-    "#bd7ebe",
-    "#ffb55a",
-    "#ffee65",
-    "#beb9db",
-    "#fdcce5",
-    "#8bd3c7",
-];
 
 /**
  *
@@ -98,7 +89,17 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
 
 export const TimeSeriesChartInternal: FunctionComponent<
     TimeSeriesChartInternalProps
-> = ({ series, legend, brush, height, width, xAxis, yAxis, tooltip }) => {
+> = ({
+    series,
+    legend,
+    brush,
+    height,
+    width,
+    xAxis,
+    yAxis,
+    tooltip,
+    events,
+}) => {
     const [processedMainChartSeries, setProcessedMainChartSeries] = useState<
         NormalizedSeries[]
     >(normalizeSeries(series));
@@ -220,6 +221,17 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     return (
         <div style={{ position: "relative" }}>
+            {events && events.length > 0 && (
+                <EventsChart
+                    events={events}
+                    isTooltipEnabled={isTooltipEnabled}
+                    margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
+                    series={processedMainChartSeries}
+                    tooltipUtils={tooltipUtils}
+                    width={width}
+                    xMax={xMax}
+                />
+            )}
             <svg height={height} width={width}>
                 <ChartCore
                     colorScale={colorScale}

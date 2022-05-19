@@ -1,3 +1,5 @@
+import { Event } from "../../../rest/dto/event.interfaces";
+
 export interface DataPoint {
     x: number;
     y: number;
@@ -70,6 +72,7 @@ export interface TimeSeriesChartProps {
     legend?: boolean;
     brush?: boolean;
     height?: number;
+    events?: Event[];
 }
 
 export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
@@ -80,5 +83,4 @@ export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
 export enum SeriesType {
     LINE = "line",
     AREA_CLOSED = "areaclosed",
-    LINE_STACKED = "line-stacked",
 }

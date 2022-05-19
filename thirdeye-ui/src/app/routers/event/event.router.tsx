@@ -15,11 +15,12 @@ const EventsViewPage = lazy(() =>
     ).then((module) => ({ default: module.EventsViewPage }))
 );
 
-const EventsCreatePage = lazy(() =>
-    import(
-        /* webpackChunkName: "events-view-page" */ "../../pages/events-create-page/events-create-page.component"
-    ).then((module) => ({ default: module.EventsCreatePage }))
-);
+// const EventsCreatePage = lazy(() =>
+//     import(
+//         /* webpackChunkName: "events-view-page" */
+// "../../pages/events-create-page/events-create-page.component"
+//     ).then((module) => ({ default: module.EventsCreatePage }))
+// );
 
 const PageNotFoundPage = lazy(() =>
     import(
@@ -50,10 +51,10 @@ export const EventRouter: FunctionComponent = () => {
                 />
 
                 {/* Events create page */}
-                <Route
+                {/* <Route
                     element={<EventsCreatePage />}
                     path={AppRouteRelative.EVENTS_CREATE}
-                />
+                /> */}
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

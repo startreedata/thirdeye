@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.spi.metric;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum MetricAggFunction {
@@ -21,5 +22,12 @@ public enum MetricAggFunction {
 
   public boolean isPercentile() {
     return this.toString().startsWith(PERCENTILE_PREFIX);
+  }
+
+  public static MetricAggFunction fromString(String aggFunction) {
+    if (aggFunction == null) {
+      return null;
+    }
+    return valueOf(aggFunction.toUpperCase(Locale.ROOT));
   }
 }

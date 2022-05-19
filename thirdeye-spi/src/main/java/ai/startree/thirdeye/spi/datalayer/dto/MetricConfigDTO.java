@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,7 +27,7 @@ public class MetricConfigDTO extends AbstractDTO {
   @Deprecated // derived columns are named in Pinot + custom derived in TE not relevant anymore
   private String derivedMetricExpression;
   private String aggregationColumn;
-  private MetricAggFunction defaultAggFunction;
+  private String defaultAggFunction;
   @Deprecated
   @JsonIgnore // not used anymore
   private Double rollupThreshold;
@@ -116,12 +115,12 @@ public class MetricConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public MetricAggFunction getDefaultAggFunction() {
+  public String getDefaultAggFunction() {
     return defaultAggFunction;
   }
 
   public MetricConfigDTO setDefaultAggFunction(
-      final MetricAggFunction defaultAggFunction) {
+      final String defaultAggFunction) {
     this.defaultAggFunction = defaultAggFunction;
     return this;
   }

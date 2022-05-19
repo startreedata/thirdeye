@@ -27,7 +27,12 @@ public class MetricFunction implements Comparable<MetricFunction> {
   }
 
   public MetricFunction(final MetricConfigDTO metricConfig, final DatasetConfigDTO datasetConfig) {
-    this(metricConfig.getDefaultAggFunction(), metricConfig.getName(), metricConfig.getId(), datasetConfig.getDataset(), metricConfig, datasetConfig);
+    this(MetricAggFunction.fromString(metricConfig.getDefaultAggFunction()),
+        metricConfig.getName(),
+        metricConfig.getId(),
+        datasetConfig.getDataset(),
+        metricConfig,
+        datasetConfig);
   }
 
   @Deprecated

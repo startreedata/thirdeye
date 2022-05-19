@@ -57,7 +57,7 @@ public class TestSqlUtils {
     metricConfigDTO.setDataset(this.dataset)
         .setName(this.metricDataset.getMetricName())
         .setAlias(this.metricDataset.getDataset() + "::" + this.metricDataset.getMetricName())
-        .setDefaultAggFunction(MetricAggFunction.SUM);
+        .setDefaultAggFunction(MetricAggFunction.SUM.toString());
 
     DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
     datasetConfigDTO.setDataset(dataset);

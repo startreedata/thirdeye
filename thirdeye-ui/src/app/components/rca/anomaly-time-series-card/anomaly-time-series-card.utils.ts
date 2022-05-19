@@ -1,3 +1,4 @@
+import { isEmpty } from "lodash";
 import {
     formatDateAndTimeV1,
     formatLargeNumberV1,
@@ -101,28 +102,34 @@ export const generateSeriesDataForEvaluation = (
             tooltipValueFormatter: (value: number): string =>
                 formatLargeNumberV1(value),
         },
-        {
-            enabled: true,
-            name: translation("label.events"),
-            type: SeriesType.LINE_STACKED,
-            color: Palette.COLOR_VISUALIZATION_STROKE_EVENTS,
-            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
-            data: events.map((event) => ({
-                x: event.startTime,
-                y: 0,
-                x1: event.endTime,
-                y1: 0,
-            })),
-            tooltipValueFormatter: (
-                _value: number,
-                point: DataPoint
-            ): string => {
-                return `${formatDateAndTimeV1(point.x)} - ${formatDateAndTimeV1(
-                    (point as ThresholdDataPoint).x1
-                )}`;
-            },
-        },
-
+        ...(!isEmpty(events)
+            ? [
+                  {
+                      enabled: true,
+                      name: translation("label.events"),
+                      type: SeriesType.LINE_STACKED,
+                      color: Palette.COLOR_VISUALIZATION_STROKE_EVENTS,
+                      strokeWidth:
+                          Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
+                      data: events.map((event) => ({
+                          x: event.startTime,
+                          y: 0,
+                          x1: event.endTime,
+                          y1: 0,
+                      })),
+                      tooltipValueFormatter: (
+                          _value: number,
+                          point: DataPoint
+                      ): string => {
+                          return `${formatDateAndTimeV1(
+                              point.x
+                          )} - ${formatDateAndTimeV1(
+                              (point as ThresholdDataPoint).x1
+                          )}`;
+                      },
+                  },
+              ]
+            : []),
         ...filteredTimeSeriesData,
     ];
 };

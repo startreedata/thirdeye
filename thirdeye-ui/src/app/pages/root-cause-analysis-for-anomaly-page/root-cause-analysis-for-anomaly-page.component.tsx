@@ -1,21 +1,14 @@
 import { Card, CardContent, Grid } from "@material-ui/core";
-import { AxiosError } from "axios";
 import { isEmpty, toNumber } from "lodash";
-import React, {
-    FunctionComponent,
-    useCallback,
-    useEffect,
-    useState,
-} from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
 import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { AnomalyTimeSeriesCard } from "../../components/rca/anomaly-time-series-card/anomaly-time-series-card.component";
-import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -27,7 +20,6 @@ import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { getAllEvents } from "../../rest/event/events.rest";
 import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
 import { getFromSavedInvestigationOrDefault } from "../../utils/investigation/investigation.util";
@@ -35,7 +27,6 @@ import {
     isValidNumberId,
     serializeKeyValuePair,
 } from "../../utils/params/params.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
 import { InvestigationContext } from "../root-cause-analysis-investigation-state-tracker/investigation-state-tracker.interfaces";
 import { RootCauseAnalysisForAnomalyPageParams } from "./root-cause-analysis-for-anomaly-page.interfaces";
 import { useRootCauseAnalysisForAnomalyPageStyles } from "./root-cause-analysis-for-anomaly-page.style";
@@ -59,45 +50,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             []
         )
     );
-    const [searchParams] = useSearchParams();
-    const [events, setEvents] = useState<Event[]>();
     const [selectedEvents, setSelectedEvents] = useState<Event[]>([]);
-
-    const startTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-    const endTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-
-    useEffect(() => {
-        fetchEvents();
-    }, [startTime, endTime]);
-
-    const fetchEvents = useCallback(async () => {
-        setEvents(undefined);
-        try {
-            const events = await getAllEvents({
-                startTime: Number(startTime),
-                endTime: Number(endTime),
-            });
-
-            setEvents(events);
-        } catch (error) {
-            setEvents([]);
-            const errorMessages = getErrorMessages(error as AxiosError);
-            const genericMsg = t("message.error-while-fetching", {
-                entity: t("label.events"),
-            });
-            if (isEmpty(errorMessages)) {
-                notify(NotificationTypeV1.Error, genericMsg);
-            } else {
-                errorMessages.map((msg) =>
-                    notify(NotificationTypeV1.Error, `${genericMsg}: ${msg}`)
-                );
-            }
-        }
-    }, [startTime, endTime, setEvents]);
-
-    useEffect(() => {
-        setSelectedEvents([]);
-    }, [events, setSelectedEvents]);
 
     const { notify } = useNotificationProviderV1();
     const { id: anomalyId } =
@@ -244,7 +197,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         anomaly={anomaly}
                         anomalyId={toNumber(anomalyId)}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
-                        events={events}
                         selectedEvents={selectedEvents}
                         onAddFilterSetClick={handleAddFilterSetClick}
                         onEventSelectionChange={handleEventSelectionChange}

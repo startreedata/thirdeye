@@ -7,7 +7,6 @@ export interface AnalysisTabsProps {
     anomaly: Anomaly;
     onAddFilterSetClick: (filters: AnomalyFilterOption[]) => void;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
-    events?: Event[];
     selectedEvents: Event[];
     onEventSelectionChange: (events: Event[]) => void;
 }

@@ -35,7 +35,6 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     anomaly,
     onAddFilterSetClick,
     chartTimeSeriesFilterSet,
-    events,
     selectedEvents,
     onEventSelectionChange,
 }) => {
@@ -126,7 +125,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             </CardContent>
 
             <CardContent>
-                {anomaly && (
+                {anomaly && selectedTabIndex !== 2 && (
                     <Grid container>
                         <Grid item xs={12}>
                             <Typography variant="h6">Date Reference</Typography>
@@ -199,7 +198,6 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             {selectedTabIndex === 2 && (
                 <Box mt={-4}>
                     <EventsTab
-                        events={events}
                         selectedEvents={selectedEvents}
                         onCheckClick={onEventSelectionChange}
                     />

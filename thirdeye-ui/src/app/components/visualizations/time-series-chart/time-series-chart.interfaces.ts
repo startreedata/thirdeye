@@ -7,6 +7,9 @@ export interface DataPoint {
 
 export interface ThresholdDataPoint extends DataPoint {
     y1: number; // y1 is used in Threshold shapes
+}
+
+export interface LineDataPoint extends ThresholdDataPoint {
     x1: number; // x1 is used in Line only shapes
 }
 

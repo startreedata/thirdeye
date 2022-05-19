@@ -3,6 +3,7 @@ import React, { FunctionComponent } from "react";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import {
     DataPoint,
+    LineDataPoint,
     ThresholdDataPoint,
 } from "../time-series-chart/time-series-chart.interfaces";
 import { StackedLineProps } from "./stacked-line.interfaces";
@@ -17,20 +18,14 @@ export const StackedLine: FunctionComponent<StackedLineProps> = ({
     strokeWidth,
     series,
 }: StackedLineProps) => {
-    const {
-        xAccessor,
-        x1Accessor,
-        yAccessor,
-        y1Accessor,
-        data: points,
-    } = series;
+    const { xAccessor, x1Accessor, yAccessor, y1Accessor, data } = series;
 
     const getXValue = (d: DataPoint): number => {
         return xScale(xAccessor(d)) ?? 0;
     };
 
     const getX1Value = (d: DataPoint): number => {
-        return xScale(x1Accessor(d as ThresholdDataPoint)) ?? 0;
+        return xScale(x1Accessor(d as LineDataPoint)) ?? 0;
     };
 
     const getYValue = (d: DataPoint): number => {
@@ -43,19 +38,19 @@ export const StackedLine: FunctionComponent<StackedLineProps> = ({
 
     return (
         <>
-            {points &&
-                points.map((event, index) => {
+            {data &&
+                (data as DataPoint[]).map((point, index) => {
                     const from = {
-                        x: getXValue(event),
+                        x: getXValue(point),
                         y: getYValue({
-                            ...event,
+                            ...point,
                             y: (index + 1) * gapBetweenLines,
                         }),
                     };
                     const to = {
-                        x: getX1Value(event as ThresholdDataPoint),
+                        x: getX1Value(point as ThresholdDataPoint),
                         y: getY1Value({
-                            ...(event as ThresholdDataPoint),
+                            ...point,
                             y1: (index + 1) * gapBetweenLines,
                         }),
                     };
@@ -63,13 +58,13 @@ export const StackedLine: FunctionComponent<StackedLineProps> = ({
                     return (
                         <React.Fragment key={`stacked-line-${index}`}>
                             <Circle
-                                cx={getXValue(event as ThresholdDataPoint)}
+                                cx={from.x}
                                 cy={from.y}
                                 fill={stroke}
                                 r={strokeWidth}
                             />
                             <Circle
-                                cx={getX1Value(event as ThresholdDataPoint)}
+                                cx={to.x}
                                 cy={to.y}
                                 fill={stroke}
                                 r={strokeWidth}

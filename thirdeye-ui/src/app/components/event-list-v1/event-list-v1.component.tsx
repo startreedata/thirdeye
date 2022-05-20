@@ -95,7 +95,6 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             header: t("label.type"),
             minWidth: 300,
             sortable: true,
-            // customCellRenderer: endTimeRenderer,
         },
     ];
 

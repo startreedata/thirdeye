@@ -48,7 +48,7 @@ export const ConfigurationPageHeader: FunctionComponent<
                     {t("label.subscription-groups")}
                 </PageHeaderTabV1>
                 <PageHeaderTabV1 href={getEventsAllPath()}>
-                    {t("label.event")}
+                    {t("label.events")}
                 </PageHeaderTabV1>
             </PageHeaderTabsV1>
         </PageHeaderV1>

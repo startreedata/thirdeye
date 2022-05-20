@@ -9,7 +9,7 @@ import {
     TableRow,
 } from "@material-ui/core";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -35,8 +35,13 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
 
     const { notify } = useNotificationProviderV1();
 
-    const startTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-    const endTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+    const [startTime, endTime] = useMemo(
+        () => [
+            searchParams.get(TimeRangeQueryStringKey.START_TIME),
+            searchParams.get(TimeRangeQueryStringKey.END_TIME),
+        ],
+        [searchParams]
+    );
 
     useEffect(() => {
         getEvents({
@@ -60,11 +65,6 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
         }
     }, [status]);
 
-    useEffect(() => {
-        // Reset selected event on event list change
-        onCheckClick([]);
-    }, [events]);
-
     const handleOnCheckboxClick = (event: Event, checked: boolean): void => {
         let events: Event[];
 
@@ -78,6 +78,16 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
 
         onCheckClick(events);
     };
+
+    // Update investigation events with actual event
+    useEffect(() => {
+        if (selectedEvents && selectedEvents.length && !isEmpty(events)) {
+            const copiedSelectedEvents = events?.filter((event) =>
+                selectedEvents.find((e) => e.id === event.id)
+            );
+            onCheckClick(copiedSelectedEvents || []);
+        }
+    }, [events]);
 
     return (
         <>

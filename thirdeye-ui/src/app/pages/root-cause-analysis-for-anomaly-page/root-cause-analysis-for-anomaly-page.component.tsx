@@ -50,7 +50,13 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             []
         )
     );
-    const [selectedEvents, setSelectedEvents] = useState<Event[]>([]);
+    const [selectedEvents, setSelectedEvents] = useState<Event[]>(
+        getFromSavedInvestigationOrDefault<Event[]>(
+            investigation,
+            SavedStateKeys.EVENT_SET,
+            []
+        )
+    );
 
     const { notify } = useNotificationProviderV1();
     const { id: anomalyId } =
@@ -66,6 +72,17 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             investigationHasChanged(copied);
         }
     }, [chartTimeSeriesFilterSet]);
+
+    // save selected events to investigation
+    useEffect(() => {
+        if (investigation) {
+            const copied: Investigation = { ...investigation };
+            copied.uiMetadata[SavedStateKeys.EVENT_SET] = selectedEvents.map(
+                ({ id, name }) => ({ id, name })
+            );
+            investigationHasChanged(copied);
+        }
+    }, [selectedEvents]);
 
     useEffect(() => {
         !!anomalyId &&

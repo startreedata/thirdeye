@@ -48,3 +48,5 @@ webpack/
 .DS_Store
 
 pom.xml
+
+scripts/verify-version-replacement.js

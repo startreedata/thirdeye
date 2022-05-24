@@ -45,7 +45,7 @@
         "prettier-fix": "prettier . --write",
         "lint": "npm run eslint-fix && npm run stylelint-fix && npm run prettier-fix",
         "lint-check": "npm run eslint-check && npm run stylelint-check && npm run prettier-check",
-        "release": "semantic-release"
+        "release": "semantic-release && ./scripts/verify-version-replacement.js"
     },
     "dependencies": {
         "@date-io/luxon": "^1.3.13",

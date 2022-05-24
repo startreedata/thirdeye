@@ -27,3 +27,5 @@ src/test/e2e/downloads/
 # webpack (ESLint rules don't agree with how these configs are written)
 webpack.config.*.js
 webpack/
+
+scripts/verify-version-replacement.js

@@ -16,6 +16,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
 import {
@@ -23,7 +24,10 @@ import {
     determineInvestigationIDFromSearchParams,
     INVESTIGATION_ID_QUERY_PARAM,
 } from "../../utils/investigation/investigation.util";
-import { getAnomaliesAnomalyViewPath } from "../../utils/routes/routes.util";
+import {
+    getAlertsViewPath,
+    getAnomaliesAnomalyViewPath,
+} from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 
 export const InvestigationStateTracker: FunctionComponent = () => {
@@ -39,12 +43,17 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         useState<Investigation | null>(null);
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
+    const { anomaly, getAnomaly } = useGetAnomaly();
 
     const {
         getInvestigation,
         status: getInvestigationRequestStatus,
         errorMessages: getInvestigationRequestErrors,
     } = useGetInvestigation();
+
+    useEffect(() => {
+        getAnomaly(Number(anomalyId));
+    }, [anomalyId]);
 
     /**
      * If investigation's associated anomaly id does not match current anomalyId
@@ -163,14 +172,26 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                 <Box display="inline">
                     <div>
                         <PageHeaderTextV1>
-                            {t("label.root-cause-analysis")}:{" "}
-                            {t("label.anomaly")}{" "}
+                            {anomaly && (
+                                <>
+                                    {t("label.investigate")}:{" "}
+                                    <Link
+                                        href={getAlertsViewPath(
+                                            anomaly.alert.id
+                                        )}
+                                    >
+                                        {anomaly.alert.name}
+                                    </Link>
+                                    :{" "}
+                                </>
+                            )}
+                            {!anomaly && <>{t("label.investigate")}: </>}
                             <Link
                                 href={getAnomaliesAnomalyViewPath(
                                     Number(anomalyId)
                                 )}
                             >
-                                #{anomalyId}
+                                {t("label.anomaly")} #{anomalyId}
                             </Link>
                             <TooltipV1
                                 placement="top"

@@ -8,7 +8,7 @@ import {
     Investigation,
 } from "../dto/rca.interfaces";
 
-const ANOMALY_ID_QUERY_PARAM_KEY = "anomalyId";
+const ANOMALY_ID_QUERY_PARAM_KEY = "id";
 const ANOMALY_ID_FILTER_QUERY_PARAM_KEY = "anomaly.id";
 const BASE_URL_RCA = "/api/rca";
 const INVESTIGATIONS_ENDPOINT = `${BASE_URL_RCA}/investigations`;

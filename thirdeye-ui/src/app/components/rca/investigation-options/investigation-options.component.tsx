@@ -113,7 +113,7 @@ export const InvestigationOptions: FunctionComponent<
                     variant="contained"
                     onClick={() => setShouldShowCreateDialog(true)}
                 >
-                    {t("label.save")} {t("label.investigation")}
+                    {t("label.save-investigation")}
                 </Button>
             )}
             {shouldShowCreateDialog && (

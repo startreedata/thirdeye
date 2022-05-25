@@ -6,6 +6,7 @@ import {
     deleteEvent,
     getAllEvents,
     getEvent,
+    getEventsForAnomaly,
     updateEvent,
     updateEvents,
 } from "./events.rest";
@@ -191,6 +192,28 @@ describe("Event REST", () => {
         jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
         await expect(deleteEvent(1)).rejects.toThrow("testError");
+    });
+
+    it("getEventsForAnomaly should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getEventsForAnomaly({ anomalyId: 123 })).rejects.toThrow(
+            "testError"
+        );
+    });
+
+    it("getEventsForAnomaly with limit should invoke axios.get with appropriate url and return appropriate events", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockEventResponse],
+        });
+
+        await expect(
+            getEventsForAnomaly({ anomalyId: 123, limit: 100 })
+        ).resolves.toEqual([mockEventResponse]);
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/rca/related/events?anomalyId=123&limit=100"
+        );
     });
 });
 

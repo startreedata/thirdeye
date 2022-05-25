@@ -198,6 +198,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             {selectedTabIndex === 2 && (
                 <Box mt={-4}>
                     <EventsTab
+                        anomalyId={anomalyId}
                         selectedEvents={selectedEvents}
                         onCheckClick={onEventSelectionChange}
                     />

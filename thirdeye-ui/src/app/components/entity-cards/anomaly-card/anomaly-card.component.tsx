@@ -74,7 +74,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                                 href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
                                     props.uiAnomaly.id
                                 )}?${searchParams.toString()}`}
-                                variant="outlined"
+                                variant="contained"
                             >
                                 {t("label.investigate-entity", {
                                     entity: t("label.anomaly"),

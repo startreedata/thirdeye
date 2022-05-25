@@ -189,7 +189,9 @@ public class InternalResource {
     String result = hmacSHA512(payload, secretKey);
     log.info("Header signature: {}", signature);
     log.info("Generated signature: {}", result);
-    ensure(result.equals(signature), "Broken request!");
+    if (signature != null) {
+      ensure(result.equals(signature), "Broken request!");
+    }
     log.info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
     log.info("========================================================================");
     return Response.ok().build();

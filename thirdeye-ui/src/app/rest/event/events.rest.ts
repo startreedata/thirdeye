@@ -1,6 +1,9 @@
 import axios from "axios";
 import { EditableEvent, Event } from "../dto/event.interfaces";
-import { GetAllEventsProps } from "./events.interfaces";
+import {
+    GetAllEventsProps,
+    GetEventsForAnomalyRestProps,
+} from "./events.interfaces";
 
 const BASE_URL_EVENT = "/api/events";
 
@@ -62,6 +65,40 @@ export const updateEvents = async (events: Event[]): Promise<Event[]> => {
 
 export const deleteEvent = async (id: number): Promise<Event> => {
     const response = await axios.delete(`${BASE_URL_EVENT}/${id}`);
+
+    return response.data;
+};
+
+export const getEventsForAnomaly = async ({
+    anomalyId,
+    eventType,
+    limit,
+    lookaround,
+    scoring,
+}: GetEventsForAnomalyRestProps): Promise<Event[]> => {
+    const queryParams = new URLSearchParams([
+        ["anomalyId", anomalyId.toString()],
+    ]);
+
+    if (eventType) {
+        queryParams.set("eventType", eventType);
+    }
+
+    if (limit) {
+        queryParams.set("limit", limit.toString());
+    }
+
+    if (lookaround) {
+        queryParams.set("lookaround", lookaround);
+    }
+
+    if (scoring) {
+        queryParams.set("scoring", scoring);
+    }
+
+    const response = await axios.get(
+        `/api/rca/related/events?${queryParams.toString()}`
+    );
 
     return response.data;
 };

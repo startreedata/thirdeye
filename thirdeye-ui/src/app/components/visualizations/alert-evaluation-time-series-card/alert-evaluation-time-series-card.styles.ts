@@ -5,6 +5,6 @@ export const useAlertEvaluationTimeSeriesCardStyles = makeStyles((theme) => ({
         paddingRight: theme.spacing(1),
     },
     refreshIcon: {
-        color: "#000000",
+        color: theme.palette.text.primary,
     },
 }));

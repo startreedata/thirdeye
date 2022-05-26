@@ -203,9 +203,11 @@ describe("Routes Util", () => {
         const range = generateDateRangeMonthsFromNow(
             3,
             // Thursday, May 26, 2022 12:00:00 PM (GMT)
-            DateTime.fromMillis(1653566400000)
+            DateTime.fromMillis(1653566400000),
+            "day"
         );
 
-        expect(range[1] - range[0]).toEqual(9860399999);
+        // about 115 days
+        expect(range[1] - range[0]).toEqual(9935999999);
     });
 });

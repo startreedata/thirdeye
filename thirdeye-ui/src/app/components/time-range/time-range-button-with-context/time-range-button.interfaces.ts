@@ -7,5 +7,5 @@ export interface TimeRangeButtonProps {
 }
 
 export interface TimeRangeButtonWithContextProps {
-    onTimeRangeChange: (start: number, end: number) => void;
+    onTimeRangeChange?: (start: number, end: number) => void;
 }

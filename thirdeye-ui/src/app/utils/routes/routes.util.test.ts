@@ -1,5 +1,7 @@
+import { DateTime } from "luxon";
 import {
     createPathWithRecognizedQueryString,
+    generateDateRangeMonthsFromNow,
     getAlertsAllPath,
     getAlertsCreatePath,
     getAlertsPath,
@@ -195,5 +197,15 @@ describe("Routes Util", () => {
         expect(getAlertTemplatesUpdatePath(1)).toEqual(
             "/configuration/alert-templates/1/update"
         );
+    });
+
+    it("generateDateRangeMonthsFromNow should return expected values", () => {
+        const range = generateDateRangeMonthsFromNow(
+            3,
+            // Thursday, May 26, 2022 12:00:00 PM (GMT)
+            DateTime.fromMillis(1653566400000)
+        );
+
+        expect(range[1] - range[0]).toEqual(9860399999);
     });
 });

@@ -6,8 +6,11 @@ import {
     TimeRangeDuration,
     TimeRangeQueryStringKey,
 } from "../time-range-provider/time-range-provider.interfaces";
+import { TimeRangeButtonWithContextProps } from "./time-range-button.interfaces";
 
-export const TimeRangeButtonWithContext: FunctionComponent = () => {
+export const TimeRangeButtonWithContext: FunctionComponent<
+    TimeRangeButtonWithContextProps
+> = ({ onTimeRangeChange }) => {
     const {
         timeRangeDuration,
         recentCustomTimeRangeDurations,
@@ -32,6 +35,13 @@ export const TimeRangeButtonWithContext: FunctionComponent = () => {
             timeRangeDuration.endTime.toString()
         );
         setSearchParams(searchParams);
+
+        if (onTimeRangeChange) {
+            onTimeRangeChange(
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            );
+        }
     };
 
     return (

@@ -1,12 +1,12 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { assign, isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -35,7 +35,10 @@ import {
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import {
+    generateDateRangeMonthsFromNow,
+    getAlertsViewPath,
+} from "../../utils/routes/routes.util";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdatePage: FunctionComponent = () => {
@@ -46,11 +49,32 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     } = useGetEvaluation();
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState<Alert>();
-    const { timeRangeDuration } = useTimeRange();
     const params = useParams<AlertsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+
+    useEffect(() => {
+        // Default the time range to 6 months ago
+        const [defaultStart, defaultEnd] = generateDateRangeMonthsFromNow(6);
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            defaultStart.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            defaultEnd.toString()
+        );
+        setSearchParams(searchParams, { replace: true });
+    }, []);
 
     useEffect(() => {
         fetchAlert();
@@ -241,11 +265,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         alert: Alert
     ): Promise<AlertEvaluation> => {
         const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(
-                alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
+            createAlertEvaluation(alert, startTime, endTime)
         );
 
         if (fetchedAlertEvaluation === undefined) {
@@ -315,7 +335,6 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
-                showTimeRange
                 title={t("label.update-entity", {
                     entity: t("label.alert"),
                 })}

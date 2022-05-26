@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime, DurationUnit } from "luxon";
 import {
     getRecognizedQuery,
     SEARCH_TERM_QUERY_PARAM_KEY,
@@ -348,13 +348,15 @@ export const createPathWithRecognizedQueryString = (path: string): string => {
  *
  * @param monthsAgo - Number of months to set the start of range
  * @param nowOverride - Override now with this value
+ * @param roundNowTime - Round the end time
  */
 export const generateDateRangeMonthsFromNow = (
     monthsAgo: number,
-    nowOverride?: DateTime
+    nowOverride?: DateTime,
+    roundNowTime?: DurationUnit
 ): [number, number] => {
     const now = nowOverride || DateTime.local();
-    const roundedNow = now.endOf("hour");
+    const roundedNow = now.endOf(roundNowTime || "hour");
     const xMonthsAgo = now.minus({ month: monthsAgo }).startOf("month");
 
     return [xMonthsAgo.toMillis(), roundedNow.toMillis()];

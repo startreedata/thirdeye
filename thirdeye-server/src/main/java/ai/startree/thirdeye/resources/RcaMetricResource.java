@@ -286,10 +286,10 @@ public class RcaMetricResource {
     final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
     if (dimensions.isEmpty()) {
       dimensions = datasetConfigDTO.getDimensions();
+      // todo cyril get blacklist from dataset config
     }
     dimensions = cleanDimensionStrings(dimensions);
     excludedDimensions = cleanDimensionStrings(excludedDimensions);
-    // todo cyril get blacklist from dataset config
     dimensions.removeAll(excludedDimensions);
     datasetConfigDTO.setDimensions(dimensions);
 

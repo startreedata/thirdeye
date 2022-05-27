@@ -154,6 +154,7 @@ public class RcaDimensionAnalysisResource {
     if (dimensions.isEmpty()) {
       dimensions = rootCauseAnalysisInfo.getDatasetConfigDTO().getDimensions();
     }
+    // fixme cyril dimension white/black list logic should happen in the same place in all rca resources
     excludedDimensions = cleanDimensionStrings(excludedDimensions);
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);

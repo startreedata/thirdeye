@@ -182,7 +182,7 @@ public class RcaDimensionAnalysisResource {
     return Response.ok(resultApi).build();
   }
 
-  private static List<String> cleanDimensionStrings(List<String> dimensions) {
+  protected static List<String> cleanDimensionStrings(List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 

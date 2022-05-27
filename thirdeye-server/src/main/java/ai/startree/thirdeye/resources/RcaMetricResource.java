@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.resources.RcaDimensionAnalysisResource.cleanDimensionStrings;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
@@ -235,8 +236,18 @@ public class RcaMetricResource {
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-    return getAnomalyHeatmap(principal, anomalyId, baselineOffset, filters, limit);
+      @QueryParam("limit") Integer limit,
+      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
+      @QueryParam("dimensions") List<String> dimensions,
+      @ApiParam(value = "List of dimensions to exclude from the analysis.")
+      @QueryParam("excludedDimensions") List<String> excludedDimensions) throws Exception {
+    return getAnomalyHeatmap(principal,
+        anomalyId,
+        baselineOffset,
+        filters,
+        limit,
+        dimensions,
+        excludedDimensions);
   }
 
   @GET
@@ -250,7 +261,11 @@ public class RcaMetricResource {
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
+      @QueryParam("limit") Integer limit,
+      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
+      @QueryParam("dimensions") List<String> dimensions,
+      @ApiParam(value = "List of dimensions to exclude from the analysis.")
+      @QueryParam("excludedDimensions") List<String> excludedDimensions) throws Exception {
 
     if (limit == null) {
       limit = LIMIT_DEFAULT;
@@ -269,13 +284,24 @@ public class RcaMetricResource {
         currentInterval.getEnd().minus(baselineOffsetPeriod)
     );
 
+    // apply dimension filters
+    final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+    if (dimensions.isEmpty()) {
+      dimensions = datasetConfigDTO.getDimensions();
+    }
+    dimensions = cleanDimensionStrings(dimensions);
+    excludedDimensions = cleanDimensionStrings(excludedDimensions);
+    // todo cyril get blacklist from dataset config
+    dimensions.removeAll(excludedDimensions);
+    datasetConfigDTO.setDimensions(dimensions);
+
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),
         parseAndCombinePredicates(filters),
         currentInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO());
+        datasetConfigDTO);
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),
@@ -283,7 +309,7 @@ public class RcaMetricResource {
         baselineInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO());
+        datasetConfigDTO);
 
     // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
     fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
@@ -292,8 +318,7 @@ public class RcaMetricResource {
     final HeatMapResultApi resultApi = new HeatMapResultApi()
         .setMetric(new MetricApi()
             .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
-            .setDataset(new DatasetApi().setName(rootCauseAnalysisInfo.getDatasetConfigDTO()
-                .getName())))
+            .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
         .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
         .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
 

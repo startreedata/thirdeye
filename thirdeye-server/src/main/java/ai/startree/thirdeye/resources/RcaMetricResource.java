@@ -75,9 +75,7 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>RcaMetricResource is a central endpoint for querying different views on metrics as used
  * by the
- * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).
- * The endpoint parses metric urns and a unified set of "offsets", i.e. time-warped baseline of the
- * specified metric. It further aligns queried time stamps to sensibly match the raw dataset.</p>
+ * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).</p>
  *
  * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
  */

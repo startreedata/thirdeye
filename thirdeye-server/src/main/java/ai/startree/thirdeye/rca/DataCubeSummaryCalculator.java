@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,20 +59,15 @@ public class DataCubeSummaryCalculator {
       final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
-      final List<String> dimensions,
-      final List<String> excludedDimensions,
       final List<String> filters, final List<List<String>> hierarchies)
       throws Exception {
-
-    Dimensions filteredDimensions = new Dimensions(dimensions.stream()
-        .filter(dim -> !excludedDimensions.contains(dim)).collect(Collectors.toUnmodifiableList()));
 
     CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
         datasetConfigDTO,
         metricConfigDTO,
         currentInterval,
         currentBaseline,
-        filteredDimensions,
+        new Dimensions(datasetConfigDTO.getDimensions()),
         filters,
         summarySize,
         depth,

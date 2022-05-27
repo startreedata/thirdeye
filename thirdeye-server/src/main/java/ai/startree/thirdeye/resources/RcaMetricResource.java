@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.resources.RcaDimensionAnalysisResource.cleanDimensionStrings;
+import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
@@ -254,16 +254,10 @@ public class RcaMetricResource {
         currentInterval.getEnd().minus(baselineOffsetPeriod)
     );
 
-    // apply dimension filters
+    // override dimensions
     final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
-    if (dimensions.isEmpty()) {
-      dimensions = datasetConfigDTO.getDimensions();
-      // todo cyril get blacklist from dataset config
-    }
-    dimensions = cleanDimensionStrings(dimensions);
-    excludedDimensions = cleanDimensionStrings(excludedDimensions);
-    dimensions.removeAll(excludedDimensions);
-    datasetConfigDTO.setDimensions(dimensions);
+    List<String> rcaDimensions = getRcaDimensions(dimensions, excludedDimensions, datasetConfigDTO);
+    datasetConfigDTO.setDimensions(rcaDimensions);
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),

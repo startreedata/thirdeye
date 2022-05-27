@@ -57,7 +57,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
@@ -219,33 +218,6 @@ public class RcaMetricResource {
     }
 
     return Response.ok(urnToAggregates).build();
-  }
-
-  @GET
-  @Path("/heatmap/anomaly/{id}")
-  @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  // todo cyril remove once removed by frontend - september max
-  public Response getAnomalyHeatmapUriPath(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
-      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit,
-      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
-      @QueryParam("dimensions") List<String> dimensions,
-      @ApiParam(value = "List of dimensions to exclude from the analysis.")
-      @QueryParam("excludedDimensions") List<String> excludedDimensions) throws Exception {
-    return getAnomalyHeatmap(principal,
-        anomalyId,
-        baselineOffset,
-        filters,
-        limit,
-        dimensions,
-        excludedDimensions);
   }
 
   @GET

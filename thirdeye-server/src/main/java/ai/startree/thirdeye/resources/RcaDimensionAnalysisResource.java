@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -70,46 +68,6 @@ public class RcaDimensionAnalysisResource {
       final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
     this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
-  }
-
-  @GET
-  @Path("anomaly/{id}")
-  @ApiOperation("Retrieve the likely root causes behind an anomaly")
-  @Deprecated
-  // todo cyril remove once removed by frontend - september max
-  public Response dataCubeSummaryDeprecated(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
-      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "Number of entries to put in the summary.")
-      @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @ApiParam(value = "Number of dimensions to drill down by.")
-      @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
-      @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
-      @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
-      @QueryParam("dimensions") List<String> dimensions,
-      @ApiParam(value = "List of dimensions to exclude from the analysis.")
-      @QueryParam("excludedDimensions") List<String> excludedDimensions,
-      @ApiParam(value =
-          "Hierarchy among some dimensions. The order will be respected in the result. "
-              + "An example of a hierarchical group is {continent, country}. "
-              + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
-      @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
-  ) throws Exception {
-    return dataCubeSummary(principal,
-        anomalyId,
-        baselineOffset,
-        filters,
-        summarySize,
-        depth,
-        doOneSideError,
-        dimensions,
-        excludedDimensions,
-        hierarchiesPayload);
   }
 
   @GET

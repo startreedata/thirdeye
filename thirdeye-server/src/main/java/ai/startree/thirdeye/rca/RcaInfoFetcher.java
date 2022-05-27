@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class RootCauseAnalysisInfoFetcher {
+public class RcaInfoFetcher {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RootCauseAnalysisInfoFetcher.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
 
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
@@ -46,7 +46,7 @@ public class RootCauseAnalysisInfoFetcher {
   private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
-  public RootCauseAnalysisInfoFetcher(
+  public RcaInfoFetcher(
       final MergedAnomalyResultManager mergedAnomalyDAO,
       final AlertManager alertDAO,
       final DatasetConfigManager datasetDAO,
@@ -96,7 +96,7 @@ public class RootCauseAnalysisInfoFetcher {
         ERR_MISSING_CONFIGURATION_FIELD,
         "metadata$dataset$dataset");
 
-    // take config from persistence - makes it sure dataset/metric DTO configs are correct for RCA
+    // take config from persistence - ensure dataset/metric DTO configs are correct for RCA
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);
     if (metricConfigDTO == null) {
       LOG.warn("Could not find metric %s for dataset %s. Building a custom metric for RCA.");
@@ -123,6 +123,10 @@ public class RootCauseAnalysisInfoFetcher {
   private void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
       final DatasetConfigDTO metadataDatasetDTO) {
     // fields that can be configured at the alert level can be added here
+    Optional.ofNullable(metadataDatasetDTO.getDimensions())
+        .ifPresent(datasetConfigDTO::setDimensions);
+    Optional.ofNullable(metadataDatasetDTO.getRcaExcludedDimensions())
+        .ifPresent(datasetConfigDTO::setRcaExcludedDimensions);
   }
 
   private void addCustomFields(final MetricConfigDTO metricConfigDTO,

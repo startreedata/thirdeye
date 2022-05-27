@@ -10,8 +10,8 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_RCA_DIM_ANALYSIS;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
+import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -61,14 +61,14 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
-  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
+  private final RcaInfoFetcher rcaInfoFetcher;
 
   @Inject
   public RcaDimensionAnalysisResource(
       final DataCubeSummaryCalculator dataCubeSummaryCalculator,
-      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
+      final RcaInfoFetcher rcaInfoFetcher) {
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
-    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
+    this.rcaInfoFetcher = rcaInfoFetcher;
   }
 
   @GET
@@ -96,7 +96,7 @@ public class RcaDimensionAnalysisResource {
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),

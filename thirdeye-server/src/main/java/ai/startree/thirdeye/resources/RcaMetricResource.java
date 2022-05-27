@@ -12,8 +12,8 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
+import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
@@ -93,22 +93,22 @@ public class RcaMetricResource {
   private final ExecutorService executor;
   private final AggregationLoader aggregationLoader;
   @Deprecated
-  // prefer getting datasetDAO from rootCauseAnalysisInfoFetcher
+  // prefer getting datasetDAO from rcaInfoFetcher
   private final MetricConfigManager metricDAO;
   @Deprecated
-  // prefer getting datasetDAO from rootCauseAnalysisInfoFetcher
+  // prefer getting datasetDAO from rcaInfoFetcher
   private final DatasetConfigManager datasetDAO;
-  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
+  private final RcaInfoFetcher rcaInfoFetcher;
 
   @Inject
   public RcaMetricResource(final AggregationLoader aggregationLoader,
       final MetricConfigManager metricDAO,
       final DatasetConfigManager datasetDAO,
-      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
+      final RcaInfoFetcher rcaInfoFetcher) {
     this.aggregationLoader = aggregationLoader;
     this.metricDAO = metricDAO;
     this.datasetDAO = datasetDAO;
-    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
+    this.rcaInfoFetcher = rcaInfoFetcher;
 
     this.executor = Executors.newCachedThreadPool();
   }
@@ -240,7 +240,7 @@ public class RcaMetricResource {
     if (limit == null) {
       limit = LIMIT_DEFAULT;
     }
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),

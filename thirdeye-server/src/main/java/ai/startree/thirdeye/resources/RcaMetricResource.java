@@ -72,7 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>RootCauseMetricResource is a central endpoint for querying different views on metrics as used
+ * <p>RcaMetricResource is a central endpoint for querying different views on metrics as used
  * by the
  * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).
  * The endpoint parses metric urns and a unified set of "offsets", i.e. time-warped baseline of the
@@ -84,9 +84,9 @@ import org.slf4j.LoggerFactory;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RootCauseMetricResource {
+public class RcaMetricResource {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RcaMetricResource.class);
   private static final long TIMEOUT = 600000;
   private static final String OFFSET_DEFAULT = "current";
   private static final int LIMIT_DEFAULT = 100;
@@ -103,7 +103,7 @@ public class RootCauseMetricResource {
   private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
 
   @Inject
-  public RootCauseMetricResource(final AggregationLoader aggregationLoader,
+  public RcaMetricResource(final AggregationLoader aggregationLoader,
       final MetricConfigManager metricDAO,
       final DatasetConfigManager datasetDAO,
       final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {

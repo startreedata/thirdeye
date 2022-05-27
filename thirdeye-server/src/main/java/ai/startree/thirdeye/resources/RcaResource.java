@@ -64,7 +64,7 @@ public class RcaResource {
   private final Map<String, RCAFramework> frameworks;
   private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RcaInvestigationResource rcaInvestigationResource;
-  private final RootCauseMetricResource rootCauseMetricResource;
+  private final RcaMetricResource rcaMetricResource;
   private final RcaDimensionAnalysisResource rcaDimensionAnalysisResource;
   private final RcaRelatedResource rcaRelatedResource;
 
@@ -73,14 +73,14 @@ public class RcaResource {
       final RootCauseAnalysisService rootCauseAnalysisService,
       final RootCauseTemplateResource rootCauseTemplateResource,
       final RcaInvestigationResource rcaInvestigationResource,
-      final RootCauseMetricResource rootCauseMetricResource,
+      final RcaMetricResource rcaMetricResource,
       final RcaDimensionAnalysisResource rcaDimensionAnalysisResource,
       final RcaRelatedResource rcaRelatedResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rcaInvestigationResource = rcaInvestigationResource;
-    this.rootCauseMetricResource = rootCauseMetricResource;
+    this.rcaMetricResource = rcaMetricResource;
     this.rcaDimensionAnalysisResource = rcaDimensionAnalysisResource;
     this.rcaRelatedResource = rcaRelatedResource;
   }
@@ -101,8 +101,8 @@ public class RcaResource {
   }
 
   @Path(value = "/metrics")
-  public RootCauseMetricResource getRootCauseMetricResource() {
-    return rootCauseMetricResource;
+  public RcaMetricResource getRcaMetricResource() {
+    return rcaMetricResource;
   }
 
   @Path(value = "/related")

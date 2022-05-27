@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.resources.RcaDimensionAnalysisResource.cleanDimensionStrings;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
@@ -56,7 +57,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
@@ -72,11 +72,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>RootCauseMetricResource is a central endpoint for querying different views on metrics as used
+ * <p>RcaMetricResource is a central endpoint for querying different views on metrics as used
  * by the
- * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).
- * The endpoint parses metric urns and a unified set of "offsets", i.e. time-warped baseline of the
- * specified metric. It further aligns queried time stamps to sensibly match the raw dataset.</p>
+ * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).</p>
  *
  * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
  */
@@ -84,9 +82,9 @@ import org.slf4j.LoggerFactory;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RootCauseMetricResource {
+public class RcaMetricResource {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RootCauseMetricResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RcaMetricResource.class);
   private static final long TIMEOUT = 600000;
   private static final String OFFSET_DEFAULT = "current";
   private static final int LIMIT_DEFAULT = 100;
@@ -103,7 +101,7 @@ public class RootCauseMetricResource {
   private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
 
   @Inject
-  public RootCauseMetricResource(final AggregationLoader aggregationLoader,
+  public RcaMetricResource(final AggregationLoader aggregationLoader,
       final MetricConfigManager metricDAO,
       final DatasetConfigManager datasetDAO,
       final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
@@ -223,23 +221,6 @@ public class RootCauseMetricResource {
   }
 
   @GET
-  @Path("/heatmap/anomaly/{id}")
-  @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
-  @Deprecated
-  // todo cyril remove once removed by frontend - september max
-  public Response getAnomalyHeatmapUriPath(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
-      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
-    return getAnomalyHeatmap(principal, anomalyId, baselineOffset, filters, limit);
-  }
-
-  @GET
   @Path("/heatmap")
   @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
   public Response getAnomalyHeatmap(
@@ -250,7 +231,11 @@ public class RootCauseMetricResource {
       @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit) throws Exception {
+      @QueryParam("limit") Integer limit,
+      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
+      @QueryParam("dimensions") List<String> dimensions,
+      @ApiParam(value = "List of dimensions to exclude from the analysis.")
+      @QueryParam("excludedDimensions") List<String> excludedDimensions) throws Exception {
 
     if (limit == null) {
       limit = LIMIT_DEFAULT;
@@ -269,13 +254,24 @@ public class RootCauseMetricResource {
         currentInterval.getEnd().minus(baselineOffsetPeriod)
     );
 
+    // apply dimension filters
+    final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+    if (dimensions.isEmpty()) {
+      dimensions = datasetConfigDTO.getDimensions();
+      // todo cyril get blacklist from dataset config
+    }
+    dimensions = cleanDimensionStrings(dimensions);
+    excludedDimensions = cleanDimensionStrings(excludedDimensions);
+    dimensions.removeAll(excludedDimensions);
+    datasetConfigDTO.setDimensions(dimensions);
+
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),
         parseAndCombinePredicates(filters),
         currentInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO());
+        datasetConfigDTO);
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
         rootCauseAnalysisInfo.getMetricConfigDTO(),
@@ -283,7 +279,7 @@ public class RootCauseMetricResource {
         baselineInterval,
         getSimpleRange(),
         limit,
-        rootCauseAnalysisInfo.getDatasetConfigDTO());
+        datasetConfigDTO);
 
     // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
     fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
@@ -292,8 +288,7 @@ public class RootCauseMetricResource {
     final HeatMapResultApi resultApi = new HeatMapResultApi()
         .setMetric(new MetricApi()
             .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
-            .setDataset(new DatasetApi().setName(rootCauseAnalysisInfo.getDatasetConfigDTO()
-                .getName())))
+            .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
         .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
         .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
 

@@ -286,7 +286,7 @@ public class RcaResource {
     return dimensions;
   }
 
-  protected static List<String> cleanDimensionStrings(@NonNull final List<String> dimensions) {
+  private static List<String> cleanDimensionStrings(@NonNull final List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 }

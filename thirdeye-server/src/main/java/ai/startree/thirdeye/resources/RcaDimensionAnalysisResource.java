@@ -5,9 +5,8 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_RCA_DIM_ANALYSIS;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
@@ -95,7 +94,8 @@ public class RcaDimensionAnalysisResource {
               + "An example of a hierarchical group is {continent, country}. "
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
-  ) throws Exception {
+  ) {
+    try {
     RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
     final Interval currentInterval = new Interval(
@@ -117,7 +117,6 @@ public class RcaDimensionAnalysisResource {
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
     DimensionAnalysisResultApi resultApi;
-    try {
       resultApi = dataCubeSummaryCalculator.computeCube(
           rootCauseAnalysisInfo.getMetricConfigDTO(),
           datasetConfigDTO,
@@ -129,13 +128,14 @@ public class RcaDimensionAnalysisResource {
           filters,
           hierarchies
       );
+      return Response.ok(resultApi).build();
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
-      throw serverError(ERR_RCA_DIM_ANALYSIS, e.getCause().getMessage());
+      handleRcaAlgorithmException(e);
     }
 
-    return Response.ok(resultApi).build();
+    return null;
   }
 
   private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)

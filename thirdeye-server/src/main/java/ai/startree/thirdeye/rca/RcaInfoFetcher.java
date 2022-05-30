@@ -94,7 +94,7 @@ public class RcaInfoFetcher {
         "metadata$dataset");
     final String datasetName = ensureExists(metadataDatasetDTO.getDataset(),
         ERR_MISSING_CONFIGURATION_FIELD,
-        "metadata$dataset$dataset");
+        "metadata$dataset$name");
 
     // take config from persistence - ensure dataset/metric DTO configs are correct for RCA
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);

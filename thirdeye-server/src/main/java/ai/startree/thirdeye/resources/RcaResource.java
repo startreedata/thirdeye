@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -273,18 +274,19 @@ public class RcaResource {
       List<String> excludedDimensions,
       DatasetConfigDTO datasetConfigDTO) {
     if (dimensions.isEmpty()) {
-      dimensions = datasetConfigDTO.getDimensions();
+      dimensions = Optional.ofNullable(datasetConfigDTO.getDimensions()).orElse(List.of());
     }
     dimensions = cleanDimensionStrings(dimensions);
     if (excludedDimensions.isEmpty()) {
-      excludedDimensions = datasetConfigDTO.getRcaExcludedDimensions();
+      excludedDimensions = Optional.ofNullable(datasetConfigDTO.getRcaExcludedDimensions())
+          .orElse(List.of());
     }
     excludedDimensions = cleanDimensionStrings(excludedDimensions);
     dimensions.removeAll(excludedDimensions);
     return dimensions;
   }
 
-  protected static List<String> cleanDimensionStrings(List<String> dimensions) {
+  protected static List<String> cleanDimensionStrings(@NonNull List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 }

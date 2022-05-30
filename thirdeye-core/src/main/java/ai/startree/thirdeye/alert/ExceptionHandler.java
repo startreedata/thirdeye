@@ -54,6 +54,12 @@ public class ExceptionHandler {
       .put(MissingPropertyException.class,
           e -> statusApi(ERR_TEMPLATE_MISSING_PROPERTY,
               ((MissingPropertyException) e).getProperty()))
+      .put(ThirdEyeException.class,
+          e -> {
+            final ThirdEyeException thirdEyeException = (ThirdEyeException) e;
+            return new StatusApi().setCode(thirdEyeException.getStatus())
+                .setMsg(thirdEyeException.getMessage());
+          })
       .put(Throwable.class, e -> statusApi(ERR_UNKNOWN_RCA_ALGORITHM, e.getMessage()))
       .build();
 

@@ -5,14 +5,16 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_RCA_DIM_ANALYSIS;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
+import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +30,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -60,14 +61,14 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
-  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
+  private final RcaInfoFetcher rcaInfoFetcher;
 
   @Inject
   public RcaDimensionAnalysisResource(
       final DataCubeSummaryCalculator dataCubeSummaryCalculator,
-      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
+      final RcaInfoFetcher rcaInfoFetcher) {
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
-    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
+    this.rcaInfoFetcher = rcaInfoFetcher;
   }
 
   @GET
@@ -95,7 +96,7 @@ public class RcaDimensionAnalysisResource {
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) throws Exception {
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+    RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
     final Interval currentInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
@@ -108,12 +109,10 @@ public class RcaDimensionAnalysisResource {
         currentInterval.getEnd().minus(baselineOffsetPeriod)
     );
 
-    dimensions = cleanDimensionStrings(dimensions);
-    if (dimensions.isEmpty()) {
-      dimensions = rootCauseAnalysisInfo.getDatasetConfigDTO().getDimensions();
-    }
-    // fixme cyril dimension white/black list logic should happen in the same place in all rca resources
-    excludedDimensions = cleanDimensionStrings(excludedDimensions);
+    // override dimensions
+    final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+    List<String> rcaDimensions = getRcaDimensions(dimensions, excludedDimensions, datasetConfigDTO);
+    datasetConfigDTO.setDimensions(rcaDimensions);
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
@@ -121,14 +120,12 @@ public class RcaDimensionAnalysisResource {
     try {
       resultApi = dataCubeSummaryCalculator.computeCube(
           rootCauseAnalysisInfo.getMetricConfigDTO(),
-          rootCauseAnalysisInfo.getDatasetConfigDTO(),
+          datasetConfigDTO,
           currentInterval,
           baselineInterval,
           summarySize,
           depth,
           doOneSideError,
-          dimensions,
-          excludedDimensions,
           filters,
           hierarchies
       );
@@ -139,10 +136,6 @@ public class RcaDimensionAnalysisResource {
     }
 
     return Response.ok(resultApi).build();
-  }
-
-  protected static List<String> cleanDimensionStrings(List<String> dimensions) {
-    return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 
   private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)

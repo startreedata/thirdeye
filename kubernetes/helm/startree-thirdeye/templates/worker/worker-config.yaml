@@ -69,9 +69,7 @@ data:
     # Start the Task Driver. This module runs the detection and notification tasks
     taskDriver:
       enabled: true
-      # negative value provided in case of multiple worker replicas 
-      # so that each worker replica gets unique id.
-      id: {{ if eq ( .Values.worker.replicas | toString ) ( 1 | toString ) -}} 0 {{- else -}} -1 {{- end }}
+      id: 0 # must be a non-negative integer unique per instance/worker
     
     time:
       timezone: {{ .Values.time.timezone }}

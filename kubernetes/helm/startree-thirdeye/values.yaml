@@ -58,7 +58,7 @@ worker:
   name: worker
   port: 8083
   serviceType: ClusterIP
-  replicas: 1
+
   resources: {}
   nodeSelector: {}
   tolerations: []

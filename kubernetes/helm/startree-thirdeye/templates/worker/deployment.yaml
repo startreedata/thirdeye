@@ -16,7 +16,7 @@ spec:
       app: {{ include "thirdeye.name" . }}
       release: {{ .Release.Name }}
       component: {{ .Values.worker.name }}
-  replicas: {{ .Values.worker.replicas }}
+  replicas: 1
   template:
     metadata:
       labels:

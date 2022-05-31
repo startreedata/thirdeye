@@ -1,5 +1,5 @@
 import { Card, CardContent, Grid } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { clone, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
@@ -77,9 +77,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     useEffect(() => {
         if (investigation) {
             const copied: Investigation = { ...investigation };
-            copied.uiMetadata[SavedStateKeys.EVENT_SET] = selectedEvents.map(
-                ({ id, name }) => ({ id, name })
-            );
+            copied.uiMetadata[SavedStateKeys.EVENT_SET] = clone(selectedEvents);
             investigationHasChanged(copied);
         }
     }, [selectedEvents]);

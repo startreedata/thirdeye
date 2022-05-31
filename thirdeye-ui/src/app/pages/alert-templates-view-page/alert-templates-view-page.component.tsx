@@ -17,8 +17,6 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
@@ -27,8 +25,10 @@ import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplate } from "../../rest/alert-templates/alert-templates.actions";
 import { deleteAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
@@ -40,7 +40,7 @@ import {
 import { AlertsTemplatesViewPageParams } from "./alert-templates-view-page.interfaces";
 
 export const AlertTemplatesViewPage: FunctionComponent = () => {
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const {
         alertTemplate,
         getAlertTemplate,
@@ -97,10 +97,11 @@ export const AlertTemplatesViewPage: FunctionComponent = () => {
         alertTemplate &&
             showDialog({
                 type: DialogType.ALERT,
-                text: t("message.delete-confirmation", {
+                contents: t("message.delete-confirmation", {
                     name: alertTemplate.name,
                 }),
-                okButtonLabel: t("label.delete"),
+                okButtonText: t("label.delete"),
+                cancelButtonText: t("label.cancel"),
                 onOk: () => handleAlertTemplateDeleteOk(alertTemplate),
             });
     };

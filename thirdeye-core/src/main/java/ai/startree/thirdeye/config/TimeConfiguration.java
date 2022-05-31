@@ -6,6 +6,7 @@ import org.joda.time.DateTimeZone;
 
 public class TimeConfiguration {
 
+  /**Timezone used for notifications*/
   private DateTimeZone timezone = DEFAULT_TIMEZONE;
 
   public DateTimeZone getTimezone() {

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.spi.datasource.resultset;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
@@ -54,7 +55,7 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
     List<String> groupKeyColumnNames = new ArrayList<>();
     List<ColumnType> groupKeyColumnTypes = new ArrayList<>();
     if (aggGranularity != null && !groupByKeys.contains(timeSpec.getColumnName())) {
-      groupKeyColumnNames.add(0, DataFrame.COL_TIME);
+      groupKeyColumnNames.add(0, Constants.COL_TIME);
       groupKeyColumnTypes.add(0, new ColumnType(ColumnDataType.LONG));
     }
 

@@ -206,6 +206,8 @@ const mockEmptyUiAnomaly = {
     name: "label.no-data-marker",
     alertName: "label.no-data-marker",
     alertId: -1,
+    metricId: -1,
+    metricName: "label.no-data-marker",
     current: "label.no-data-marker",
     currentVal: -1,
     predicted: "label.no-data-marker",
@@ -217,6 +219,8 @@ const mockEmptyUiAnomaly = {
     durationVal: 0,
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
+    startTimeVal: -1,
+    endTimeVal: -1,
 };
 
 const mockAnomaly1 = {
@@ -271,6 +275,8 @@ const mockUiAnomaly1 = {
     name: "label.anomaly label.entity-id",
     alertId: 6,
     alertName: "testNameAlert6",
+    metricId: -1,
+    metricName: "label.no-data-marker",
     current: "4",
     predicted: "5",
     deviation: "-0.2",
@@ -282,6 +288,8 @@ const mockUiAnomaly1 = {
     durationVal: 1,
     startTime: "2",
     endTime: "3",
+    startTimeVal: 2,
+    endTimeVal: 3,
 };
 
 const mockUiAnomaly2 = {
@@ -289,6 +297,8 @@ const mockUiAnomaly2 = {
     name: "label.anomaly label.entity-id",
     alertId: 10,
     alertName: "label.no-data-marker",
+    metricId: -1,
+    metricName: "label.no-data-marker",
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
@@ -300,6 +310,8 @@ const mockUiAnomaly2 = {
     durationVal: 1,
     startTime: "8",
     endTime: "9",
+    startTimeVal: 8,
+    endTimeVal: 9,
 };
 
 const mockUiAnomaly3 = {
@@ -307,6 +319,8 @@ const mockUiAnomaly3 = {
     name: "label.anomaly label.entity-id",
     alertId: -1,
     alertName: "label.no-data-marker",
+    metricId: -1,
+    metricName: "label.no-data-marker",
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
@@ -318,6 +332,8 @@ const mockUiAnomaly3 = {
     durationVal: 5,
     startTime: "3",
     endTime: "8",
+    startTimeVal: 3,
+    endTimeVal: 8,
 };
 
 const mockUiAnomaly4 = {
@@ -325,6 +341,8 @@ const mockUiAnomaly4 = {
     name: "label.anomaly label.entity-id",
     alertId: -1,
     alertName: "label.no-data-marker",
+    metricId: -1,
+    metricName: "label.no-data-marker",
     current: "label.no-data-marker",
     predicted: "label.no-data-marker",
     deviation: "label.no-data-marker",
@@ -336,6 +354,8 @@ const mockUiAnomaly4 = {
     durationVal: 0,
     startTime: "label.no-data-marker",
     endTime: "label.no-data-marker",
+    startTimeVal: -1,
+    endTimeVal: -1,
 };
 
 const mockUiAnomaly5 = {
@@ -344,6 +364,8 @@ const mockUiAnomaly5 = {
     alertId: -1,
     alertName: "label.no-data-marker",
     current: "0",
+    metricId: -1,
+    metricName: "label.no-data-marker",
     predicted: "5",
     deviation: "-1",
     currentVal: 0,
@@ -354,6 +376,8 @@ const mockUiAnomaly5 = {
     durationVal: 10,
     startTime: "100",
     endTime: "110",
+    startTimeVal: 100,
+    endTimeVal: 110,
 };
 
 const mockUiAnomalies = [

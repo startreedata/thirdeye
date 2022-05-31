@@ -1,14 +1,12 @@
 # Default values for ThirdEye Deployment
 
 image:
-  repository: repo.startreedata.io/external-docker-registry/thirdeye
   tag: latest
   pullPolicy: Always
   pullSecretsName: startree
 
 ui:
   image:
-    repository: repo.startreedata.io/external-docker-registry/thirdeye-ui
     tag: latest
     pullPolicy: Always
     pullSecretsName: startree
@@ -17,6 +15,7 @@ ui:
   port: 8081
   publicUrl: http://localhost:8081
   serviceType: LoadBalancer
+  resolver: kube-dns.kube-system.svc.cluster.local
 
   resources: {}
   nodeSelector: {}
@@ -80,7 +79,7 @@ smtp:
 
 tls:
   enabled: false
-  password: password
+  password: changeit
   type: PKCS12
 
 # Expose prometheus metrics.

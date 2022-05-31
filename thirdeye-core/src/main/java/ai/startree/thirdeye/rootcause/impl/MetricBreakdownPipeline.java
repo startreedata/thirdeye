@@ -14,6 +14,7 @@ import ai.startree.thirdeye.rootcause.PipelineResult;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
@@ -174,7 +175,7 @@ public class MetricBreakdownPipeline extends Pipeline {
 
     DataFrame out = new DataFrame();
     out.addSeries(dimension, raw.getStrings(dimension));
-    out.addSeries(COL_CONTRIB, raw.getDoubles(DataFrame.COL_VALUE).normalizeSum());
+    out.addSeries(COL_CONTRIB, raw.getDoubles(Constants.COL_VALUE).normalizeSum());
     out.setIndex(dimension);
 
     return out;

@@ -34,6 +34,12 @@ export const useAuthV1 = create<AuthV1>(
                 });
             },
 
+            enableAuthDisabledNotification: () => {
+                set({
+                    authDisabledNotification: true,
+                });
+            },
+
             clearAuthDisabledNotification: () => {
                 set({
                     authDisabledNotification: false,

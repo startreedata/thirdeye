@@ -26,6 +26,14 @@ data:
         - type: http
           port: {{ .Values.coordinator.port }}
           idleTimeout: 620s
+  
+      requestLog:
+        appenders:
+        - type: console
+          filterFactories:
+          - type: uri
+            uris:
+            - "/admin/prometheus"
 
     logging:
       level: INFO
@@ -186,106 +194,6 @@ data:
         {{- end }}
         holidayLoadRange: 2592000000
         runFrequency: 1  # in Days
-
-    rca:
-      frameworks:
-        identity:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.NullPipeline
-
-        metricRelated:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.MetricMappingPipeline
-
-        metricAnalysis:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
-
-        metricBreakdown:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.MetricBreakdownPipeline
-
-        metricComponentAnalysis:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.MetricComponentAnalysisPipeline
-            properties:
-              excludeDimensions: [ "environment", "continent" ]
-              parallelism: 5
-              k: 5
-
-        eventExperiment:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
-            properties:
-              strategy: COMPOUND
-              k: 500
-              eventType: LIX
-
-        eventHoliday:
-          - outputName: METRIC_RELATED
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.MetricAnalysisPipeline
-
-          - outputName: OUTPUT
-            inputNames: [ INPUT, METRIC_RELATED ]
-            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
-            properties:
-              strategy: COMPOUND
-              k: 500
-              eventType: HOLIDAY
-
-        eventCustom:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
-            properties:
-              strategy: COMPOUND
-              k: 500
-              eventType: CUSTOM
-
-        eventAnomaly:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.AnomalyEventsPipeline
-            properties:
-              strategyClass: ai.startree.thirdeye.rootcause.impl.AnomalyEventsPipeline$TimeRangeScoreStrategy
-              strategyProperties:
-                type: HYPERBOLA
-              k: 500
-
-        eventIssue:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
-
-        eventChange:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
-            properties:
-              strategy: COMPOUND
-              k: 500
-              eventType: CM
-
-        eventDeployment:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.ThirdEyeEventsPipeline
-            properties:
-              strategy: COMPOUND
-              k: 500
-              eventType: INFORMED
-
-        eventAC:
-          - outputName: OUTPUT
-            inputNames: [ INPUT ]
-            className: ai.startree.thirdeye.rootcause.impl.EmptyPipeline
 
     cache:
       useInMemoryCache: true

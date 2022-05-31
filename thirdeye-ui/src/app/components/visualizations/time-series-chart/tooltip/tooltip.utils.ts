@@ -2,15 +2,20 @@ import { localPoint } from "@visx/event";
 import { bisector } from "d3-array";
 import { ScaleTime } from "d3-scale";
 import { MouseEvent } from "react";
-import { DataPoint, Series } from "../time-series-chart.interfaces";
+import {
+    DataPoint,
+    LineDataPoint,
+    NormalizedSeries,
+} from "../time-series-chart.interfaces";
 
+export const TOOLTIP_LINE_COLOR = "#AAAAAA";
 /**
  * Find the closest valid x value from the data points of all the series to the
  * x value the mouse is event represents.
  */
 export const determineXPointForHover = (
     event: MouseEvent<SVGRectElement>,
-    series: Series[],
+    series: NormalizedSeries[],
     dateScale: ScaleTime<number, number, never>,
     marginLeft: number
 ): [number, { x: number; y: number }] | [null, null] => {
@@ -89,15 +94,15 @@ export const determineXPointForHover = (
  * @param xValue - Find the datapoint that whose `x` value matches this
  */
 export const getDataPointsInSeriesForXValue = (
-    series: Series[],
+    series: NormalizedSeries[],
     xValue: number
-): [DataPoint, Series][] => {
-    const dataPointsWithSeries: [DataPoint, Series][] = [];
+): [DataPoint, NormalizedSeries][] => {
+    const dataPointsWithSeries: [DataPoint, NormalizedSeries][] = [];
 
     series.forEach((seriesData) => {
         if (seriesData.enabled) {
             const dataPointForXValue = seriesData.data.find(
-                (d) => d.x === xValue
+                (d) => d.x === xValue || (d as LineDataPoint).x1 === xValue
             );
 
             if (dataPointForXValue) {

@@ -5,20 +5,33 @@
 
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
+import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
+import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -42,8 +55,15 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
   @Inject
-  public TaskManagerImpl(final GenericPojoDao genericPojoDao) {
+  public TaskManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(TaskDTO.class, genericPojoDao);
+    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return count();
+      }
+    });
   }
 
   @Override
@@ -140,13 +160,6 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  @Transactional
-  public List<TaskDTO> findByStatusNotIn(final TaskStatus status) {
-    final Predicate statusPredicate = Predicate.NEQ("status", status.toString());
-    return findByPredicate(statusPredicate);
-  }
-
-  @Override
   public List<TaskDTO> findByStatusWithinDays(final TaskStatus status, final int days) {
     final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
     final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
@@ -185,5 +198,29 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     final Predicate statusPredicate = Predicate.EQ("status", status.toString());
     final Predicate workerIdPredicate = Predicate.EQ("workerId", workerId);
     return findByPredicate(Predicate.AND(statusPredicate, workerIdPredicate));
+  }
+
+  public void purge(@Nullable Duration expiryDurationOptional, @Nullable Integer limitOptional) {
+    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    final Duration expiryDuration = optional(expiryDurationOptional).orElse(TASK_EXPIRY_DURATION);
+    final long twoMonthsBack = System.currentTimeMillis() - expiryDuration.toMillis();
+    final String formattedDate = df.format(new Date(twoMonthsBack));
+
+    final int limit = optional(limitOptional).orElse(TASK_MAX_DELETES_PER_CLEANUP);
+
+    final long startTime = System.nanoTime();
+    final List<TaskDTO> tasksToBeDeleted = filter(new DaoFilter()
+        .setPredicate(Predicate.LT("createTime", formattedDate))
+        .setLimit(limit)
+    );
+
+    /* Delete each task */
+    tasksToBeDeleted.forEach(this::delete);
+
+    double totalTime = (System.nanoTime() - startTime) / 1e9;
+
+    LOG.info(String.format("Task cleanup complete. removed %d tasks. (time taken: %.2fs)",
+        tasksToBeDeleted.size(),
+        totalTime));
   }
 }

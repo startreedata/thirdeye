@@ -18,6 +18,7 @@ import ai.startree.thirdeye.datasource.cache.MetricDataset;
 import ai.startree.thirdeye.datasource.csv.CSVThirdEyeDataSource;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -143,7 +144,7 @@ public class DataProviderTest {
     metricDTO.setId(id);
     metricDTO.setName(metric);
     metricDTO.setDataset(dataset);
-    metricDTO.setDefaultAggFunction(MetricAggFunction.SUM);
+    metricDTO.setDefaultAggFunction(MetricAggFunction.SUM.toString());
     metricDTO.setAlias(dataset + "::" + metric);
     return metricDTO;
   }
@@ -223,9 +224,9 @@ public class DataProviderTest {
     try (Reader dataReader = new InputStreamReader(
         this.getClass().getResourceAsStream("/csv/timeseries-4w.csv"))) {
       data = DataFrame.fromCsv(dataReader);
-      data.setIndex(DataFrame.COL_TIME);
+      data.setIndex(Constants.COL_TIME);
       data
-          .addSeries(DataFrame.COL_TIME, data.getLongs(DataFrame.COL_TIME).multiply(1000));
+          .addSeries(Constants.COL_TIME, data.getLongs(Constants.COL_TIME).multiply(1000));
     }
 
     // register caches

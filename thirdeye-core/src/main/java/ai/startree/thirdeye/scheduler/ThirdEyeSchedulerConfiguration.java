@@ -7,6 +7,7 @@ package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.datasource.AutoOnboardConfiguration;
 import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
+import ai.startree.thirdeye.detection.anomaly.monitor.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.detection.download.ModelDownloaderConfiguration;
 import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,6 +22,9 @@ public class ThirdEyeSchedulerConfiguration {
   private boolean dataAvailabilityEventListener = false;
   private boolean dataAvailabilityTaskScheduler = false;
 
+  @JsonProperty("taskCleanUp")
+  private TaskCleanUpConfiguration taskCleanUpConfiguration = new TaskCleanUpConfiguration();
+
   @JsonProperty("holidayEvents")
   private HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = new HolidayEventsLoaderConfiguration();
 
@@ -32,6 +36,16 @@ public class ThirdEyeSchedulerConfiguration {
 
   public boolean isEnabled() {
     return enabled;
+  }
+
+  public TaskCleanUpConfiguration getTaskCleanUpConfiguration() {
+    return taskCleanUpConfiguration;
+  }
+
+  public ThirdEyeSchedulerConfiguration setTaskCleanUpConfiguration(
+      final TaskCleanUpConfiguration taskCleanUpConfiguration) {
+    this.taskCleanUpConfiguration = taskCleanUpConfiguration;
+    return this;
   }
 
   public ThirdEyeSchedulerConfiguration setEnabled(final boolean enabled) {

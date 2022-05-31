@@ -6,16 +6,16 @@
 package ai.startree.thirdeye.detection.components.detectors;
 
 import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_IN_WINDOW;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
+import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
+import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
+import static ai.startree.thirdeye.spi.Constants.COL_DIFF_VIOLATION;
+import static ai.startree.thirdeye.spi.Constants.COL_IN_WINDOW;
+import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_PATTERN;
+import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
 import static ai.startree.thirdeye.spi.detection.Pattern.DOWN;
 import static ai.startree.thirdeye.spi.detection.Pattern.UP;

@@ -10,6 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
@@ -18,7 +19,6 @@ import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
 import java.util.List;
 import java.util.Map;
 
@@ -51,8 +51,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
-    @SuppressWarnings("unchecked") final List<TimeseriesFilter> timeseriesFilters =
-        (List<TimeseriesFilter>) params.getOrDefault(AlertEvaluator.EVALUATION_FILTERS_KEY, List.of());
+    @SuppressWarnings("unchecked") final List<QueryPredicate> timeseriesFilters =
+        (List<QueryPredicate>) params.getOrDefault(AlertEvaluator.EVALUATION_FILTERS_KEY, List.of());
     spec.setTimeseriesFilters(timeseriesFilters);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();

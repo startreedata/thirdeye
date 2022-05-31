@@ -4,14 +4,19 @@ import {
     AnomalyBreakdownRequest,
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisRequest,
+    Investigation,
 } from "../dto/rca.interfaces";
 import {
     GetAnomalyDimensionAnalysis,
     GetAnomalyMetricBreakdown,
+    GetInvestigation,
+    GetInvestigations,
 } from "./rca.interfaces";
 import {
     getAnomalyMetricBreakdown,
     getDimensionAnalysisForAnomaly,
+    getInvestigation as getInvestigationRest,
+    getInvestigations as getInvestigationsRest,
 } from "./rca.rest";
 
 export const useGetAnomalyMetricBreakdown = (): GetAnomalyMetricBreakdown => {
@@ -54,3 +59,40 @@ export const useGetAnomalyDimensionAnalysis =
             errorMessages,
         };
     };
+
+export const useGetInvestigations = (): GetInvestigations => {
+    const { data, makeRequest, status, errorMessages } = useHTTPAction<
+        Investigation[]
+    >(getInvestigationsRest);
+
+    const getInvestigations = (
+        anomalyId?: number
+    ): Promise<Investigation[] | undefined> => {
+        return makeRequest(anomalyId);
+    };
+
+    return {
+        investigations: data,
+        getInvestigations,
+        status,
+        errorMessages,
+    };
+};
+
+export const useGetInvestigation = (): GetInvestigation => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<Investigation>(getInvestigationRest);
+
+    const getInvestigation = (
+        investigationId: number
+    ): Promise<Investigation | undefined> => {
+        return makeRequest(investigationId);
+    };
+
+    return {
+        investigation: data,
+        getInvestigation,
+        status,
+        errorMessages,
+    };
+};

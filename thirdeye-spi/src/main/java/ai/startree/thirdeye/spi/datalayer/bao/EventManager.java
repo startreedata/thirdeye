@@ -12,7 +12,9 @@ public interface EventManager extends AbstractManager<EventDTO> {
 
   List<EventDTO> findByEventType(String eventType);
 
-  List<EventDTO> findEventsBetweenTimeRange(String eventType, long startTime, long endTime);
+  List<EventDTO> findEventsBetweenTimeRangeWithType(String eventType, long startTime, long endTime);
+
+  List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime);
 
   List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long startTime,
       long endTime);

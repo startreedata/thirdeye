@@ -11,6 +11,7 @@
         "component.metric": "met",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
         "anomaly.source": "percentage-change-template/root",
         "type": "PERCENTAGE_CHANGE",
         "component.pattern": "${pattern}"
@@ -32,6 +33,9 @@
     {
       "name": "baselineMissingDataManager",
       "type": "TimeIndexFiller",
+      "params": {
+        "component.timestamp": "ts"
+      },
       "inputs": [
         {
           "sourcePlanNode": "baselineDataFetcher",
@@ -49,7 +53,7 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(ts, '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -62,6 +66,9 @@
     {
       "name": "currentMissingDataManager",
       "type": "TimeIndexFiller",
+      "params": {
+        "component.timestamp": "ts"
+      },
       "inputs": [
         {
           "sourcePlanNode": "currentDataFetcher",
@@ -79,7 +86,7 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(ts) ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -100,13 +107,17 @@
     },
     "metric": {
       "name": "${aggregationColumn}",
+      "aggregationFunction": "${rcaAggregationFunction}",
       "where": "${queryFilters}"
     },
+    "timezone": "${timezone}",
     "granularity": "${monitoringGranularity}"
   },
   "defaultProperties": {
+    "timezone": "UTC",
     "pattern": "UP_OR_DOWN",
     "completenessDelay": "P0D",
+    "rcaAggregationFunction": "",
     "queryFilters": "",
     "queryLimit": "100000000"
   }

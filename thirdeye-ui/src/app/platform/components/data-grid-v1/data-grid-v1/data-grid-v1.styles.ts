@@ -61,7 +61,6 @@ export const useDataGridV1Styles = makeStyles((theme) => ({
     },
     dataGridToolbar: {
         minHeight: HEIGHT_DATA_GRID_TOOLBAR,
-        maxHeight: HEIGHT_DATA_GRID_TOOLBAR,
         borderBottom: BorderV1.BorderDefault,
     },
     dataGridToolbarGutters: {

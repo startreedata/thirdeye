@@ -52,7 +52,7 @@ public class ThirdEyeCoreModule extends AbstractModule {
   @Singleton
   @Provides
   @Nullable
-  public CacheDAO getCacheDAO(CacheConfig config) throws Exception {
+  public CacheDAO getCacheDAO(final CacheConfig config) throws Exception {
     return config.useCentralizedCache() ? loadCacheDAO(config) : null;
   }
 }

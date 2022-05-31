@@ -51,7 +51,7 @@ spec:
               ssl_password_file /home/thirdeye/tls-pass/pass;
               {{- end }}
               set $backend_servers ${THIRDEYE_API_BASE_URL};
-              resolver kube-dns.kube-system.svc.cluster.local valid=30s;
+              resolver {{ .Values.ui.resolver }} valid=30s;
               location ~/api(.*) {
                 if ($args != "") {
                   proxy_pass $backend_servers/api$1?$args;

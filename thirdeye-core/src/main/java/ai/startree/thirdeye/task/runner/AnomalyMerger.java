@@ -5,17 +5,23 @@
 
 package ai.startree.thirdeye.task.runner;
 
-import static ai.startree.thirdeye.util.TimeUtils.utcDatetime;
+import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detection.algorithm.AnomalyKey;
+import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import ai.startree.thirdeye.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +33,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +46,7 @@ public class AnomalyMerger {
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
   private static final String PROP_PATTERN_KEY = "pattern";
   private static final String PROP_GROUP_KEY = "groupKey";
+  private static final Interval DUMMY_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
     // smallest startTime is smaller
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
@@ -68,16 +78,20 @@ public class AnomalyMerger {
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
-  public AnomalyMerger(final MergedAnomalyResultManager mergedAnomalyResultManager) {
+  public AnomalyMerger(final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AlertTemplateRenderer alertTemplateRenderer) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
   public void mergeAndSave(final AlertDTO alert, final List<MergedAnomalyResultDTO> anomalies) {
     if (anomalies.isEmpty()) {
       return;
     }
+    final DateTimeZone dateTimeZone = getDateTimezone(alert);
     final Period maxGap = getMaxGap(alert);
     final long alertId = Objects.requireNonNull(alert.getId(),
         "Alert must be an existing alert for merging.");
@@ -85,7 +99,8 @@ public class AnomalyMerger {
     final List<MergedAnomalyResultDTO> existingAnomalies = retrieveRelevantAnomaliesFromDatabase(
         alertId,
         anomalies,
-        maxGap);
+        maxGap,
+        dateTimeZone);
 
     final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = combineAndSort(anomalies,
         existingAnomalies);
@@ -93,7 +108,8 @@ public class AnomalyMerger {
     final Period maxDurationMillis = getMaxDuration(alert);
     final List<MergedAnomalyResultDTO> mergedAnomalies = merge(sortedRelevantAnomalies,
         maxGap,
-        maxDurationMillis);
+        maxDurationMillis,
+        dateTimeZone);
 
     for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
       Long id = mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
@@ -120,7 +136,7 @@ public class AnomalyMerger {
    */
   @VisibleForTesting
   protected List<MergedAnomalyResultDTO> merge(final Collection<MergedAnomalyResultDTO> anomalies,
-      final Period maxGap, final Period maxDurationMillis) {
+      final Period maxGap, final Period maxDurationMillis, final DateTimeZone dateTimeZone) {
     final List<MergedAnomalyResultDTO> anomaliesToUpdate = new ArrayList<>();
     final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
     for (final MergedAnomalyResultDTO anomaly : anomalies) {
@@ -135,7 +151,7 @@ public class AnomalyMerger {
         parents.put(key, anomaly);
         continue;
       }
-      if (shouldMerge(parent, anomaly, maxGap, maxDurationMillis)) {
+      if (shouldMerge(parent, anomaly, maxGap, maxDurationMillis, dateTimeZone)) {
         // anomaly is merged into the existing parent
         mergeIntoParent(parent, anomaly);
       } else {
@@ -201,12 +217,15 @@ public class AnomalyMerger {
    * @return whether they should be merged
    */
   private boolean shouldMerge(final MergedAnomalyResultDTO parent,
-      final MergedAnomalyResultDTO child, final Period maxGap, final Period maxDuration) {
+      final MergedAnomalyResultDTO child, final Period maxGap, final Period maxDuration,
+      final DateTimeZone dateTimeZone) {
     Objects.requireNonNull(parent);
 
-    return utcDatetime(child.getStartTime()).minus(maxGap).isBefore(parent.getEndTime())
-        && (child.getEndTime() <= parent.getEndTime() ||
-        utcDatetime(child.getEndTime()).minus(maxDuration).isBefore(parent.getStartTime()));
+    return
+        new DateTime(child.getStartTime(), dateTimeZone).minus(maxGap).isBefore(parent.getEndTime())
+            && (child.getEndTime() <= parent.getEndTime() ||
+            new DateTime(child.getEndTime(), dateTimeZone).minus(maxDuration)
+                .isBefore(parent.getStartTime()));
   }
 
   private String getPatternKey(final MergedAnomalyResultDTO anomaly) {
@@ -223,6 +242,7 @@ public class AnomalyMerger {
   @VisibleForTesting
   protected Period getMaxGap(final AlertDTO alert) {
     return Optional.ofNullable(alert.getProperties())
+        // todo cyril move this to metadata
         .map(m -> (String) m.get("maxGap"))
         .map(TimeUtils::isoPeriod)
         .orElse(DEFAULT_MERGE_MAX_GAP);
@@ -230,13 +250,27 @@ public class AnomalyMerger {
 
   private Period getMaxDuration(final AlertDTO alert) {
     return Optional.ofNullable(alert.getProperties())
+        // todo cyril move this to field metadata
         .map(m -> (String) m.get("maxDuration"))
         .map(TimeUtils::isoPeriod)
         .orElse(DEFAULT_ANOMALY_MAX_DURATION);
   }
 
+  private DateTimeZone getDateTimezone(final AlertDTO alertDTO) {
+    try {
+      // todo cyril move rendering to upper level once above methods are using template metadata
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
+          DUMMY_INTERVAL);
+      return Optional.ofNullable(getDateTimeZone(templateWithProperties))
+          .orElse(Constants.DEFAULT_TIMEZONE);
+    } catch (ClassNotFoundException | IOException e) {
+      throw new ThirdEyeException(ERR_ALERT_PIPELINE_EXECUTION, e.getCause());
+    }
+  }
+
   private List<MergedAnomalyResultDTO> retrieveRelevantAnomaliesFromDatabase(final long alertId,
-      final List<MergedAnomalyResultDTO> anomalies, final Period maxGap) {
+      final List<MergedAnomalyResultDTO> anomalies, final Period maxGap,
+      final DateTimeZone dateTimeZone) {
 
     final long minTime = anomalies.stream()
         .map(MergedAnomalyResultDTO::getStartTime)
@@ -254,8 +288,12 @@ public class AnomalyMerger {
             "When trying to merge anomalies for alert id %s: No endTime in the anomalies.",
             alertId)));
 
-    final long mergeLowerBound = utcDatetime(minTime).minus(maxGap).minus(1).getMillis();
-    final long mergeUpperBound = utcDatetime(maxTime).plus(maxGap).plus(1).getMillis();
+    final long mergeLowerBound = new DateTime(minTime, dateTimeZone).minus(maxGap)
+        .minus(1)
+        .getMillis();
+    final long mergeUpperBound = new DateTime(maxTime, dateTimeZone).plus(maxGap)
+        .plus(1)
+        .getMillis();
 
     return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(mergeLowerBound,
         mergeUpperBound,

@@ -8,6 +8,7 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -16,8 +17,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);
 
   List<TaskDTO> findByNameOrderByCreateTime(String name, int fetchSize, boolean asc);
-
-  List<TaskDTO> findByStatusNotIn(TaskStatus status);
 
   List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days);
 
@@ -39,4 +38,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   void updateTaskStartTime(Long id, Long taskStartTime);
 
   int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
+
+  void purge(Duration expiryDuration, Integer limitOptional);
 }

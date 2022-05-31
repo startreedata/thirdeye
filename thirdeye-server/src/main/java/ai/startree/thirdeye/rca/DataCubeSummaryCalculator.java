@@ -23,21 +23,18 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.util.SpiUtils;
-import ai.startree.thirdeye.util.ParsedUrn;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,20 +59,15 @@ public class DataCubeSummaryCalculator {
       final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
       final int depth, final boolean doOneSideError,
-      final List<String> dimensions,
-      final List<String> excludedDimensions,
       final List<String> filters, final List<List<String>> hierarchies)
       throws Exception {
-
-    Dimensions filteredDimensions = new Dimensions(dimensions.stream()
-        .filter(dim -> !excludedDimensions.contains(dim)).collect(Collectors.toUnmodifiableList()));
 
     CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
         datasetConfigDTO,
         metricConfigDTO,
         currentInterval,
         currentBaseline,
-        filteredDimensions,
+        new Dimensions(datasetConfigDTO.getDimensions()),
         filters,
         summarySize,
         depth,
@@ -100,7 +92,7 @@ public class DataCubeSummaryCalculator {
     private final Interval currentInterval;
     private final Interval baselineInterval;
     private final Dimensions dimensions;
-    private final Multimap<String, String> dataFilters;
+    private final List<Predicate> dataFilters;
     private final int summarySize;
     private final int depth;
     private final List<List<String>> hierarchies;
@@ -142,7 +134,7 @@ public class DataCubeSummaryCalculator {
       checkArgument(dimensions.size() > 0);
       this.dimensions = dimensions;
       // fixme cyril prefer parsing to List<Predicate>
-      this.dataFilters = ParsedUrn.toFiltersMap(SpiUtils.extractFilterPredicates(filters));
+      this.dataFilters = Predicate.parseAndCombinePredicates(filters);
       checkArgument(summarySize > 1);
       this.summarySize = summarySize;
       checkArgument(depth >= 0);

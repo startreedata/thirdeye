@@ -29,6 +29,10 @@ jest.mock("../../platform/utils", () => ({
         )),
 }));
 
+jest.mock("../anomaly-quick-filters/anomaly-quick-filters.component", () => ({
+    AnomalyQuickFilters: jest.fn().mockImplementation(() => <>testFilters</>),
+}));
+
 jest.mock("../../platform/components/data-grid-v1", () => ({
     DataGridV1: jest.fn().mockImplementation((props) => (
         <>

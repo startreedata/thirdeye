@@ -6,15 +6,15 @@ package ai.startree.thirdeye.detection.components.detectors;
 
 import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.computeSteps;
 import static ai.startree.thirdeye.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_DIFF;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_DIFF_VIOLATION;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_PATTERN;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
+import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
+import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
+import static ai.startree.thirdeye.spi.Constants.COL_DIFF_VIOLATION;
+import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_PATTERN;
+import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -43,6 +43,7 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 import org.slf4j.Logger;
@@ -242,6 +243,7 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     double lastBeta = beta;
     double lastGamma = gamma;
 
+    final List<HoltWintersParams> optimizedParams = new ArrayList<>();
     for (int k = 0; k < size; k++) {
       final DataFrame trainingDF = getLookbackDF(inputDF, forecastDF.getLong(COL_TIME, k));
 
@@ -269,12 +271,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       final HoltWintersParams params;
       if (alpha < 0 && beta < 0 && gamma < 0) {
         params = fitModelWithBOBYQA(y, lastAlpha, lastBeta, lastGamma);
-        LOG.info("Optimized parameters for Holt-Winters: alpha: {}, beta: {}, gamma: {}",
-            params.getAlpha(),
-            params.getBeta(),
-            params.getGamma());
+        optimizedParams.add(params);
       } else {
-        params = new HoltWintersParams(alpha, beta, gamma);
+        params = new HoltWintersParams(alpha, beta, gamma, null);
       }
 
       lastAlpha = params.getAlpha();
@@ -293,6 +292,9 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       upperBoundArray[k] = predicted + error;
       lowerBoundArray[k] = predicted - error;
     }
+    LOG.info("Optimized parameters for Holt-Winters {} times. Values: {}",
+        optimizedParams.size(),
+        optimizedParams);
 
     resultDF.addSeries(COL_TIME, LongSeries.buildFrom(resultTimeArray)).setIndex(COL_TIME);
     resultDF.addSeries(COL_VALUE, DoubleSeries.buildFrom(baselineArray));
@@ -340,12 +342,11 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     try {
       final PointValuePair optimal = optimizer
           .optimize(objectiveFunction, goal, bounds, initGuess, maxIter, maxEval);
-      LOG.debug("Performed {} iterations to optimize Holt-Winters", optimizer.getIterations());
       params = new HoltWintersParams(optimal.getPoint()[0], optimal.getPoint()[1],
-          optimal.getPoint()[2]);
+          optimal.getPoint()[2], optimizer.getIterations());
     } catch (final Exception e) {
       LOG.error(e.toString());
-      params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma);
+      params = new HoltWintersParams(lastAlpha, lastBeta, lastGamma, null);
     }
     return params;
   }
@@ -358,11 +359,14 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
     private final double alpha;
     private final double beta;
     private final double gamma;
+    private final Integer optimizationIterations;
 
-    HoltWintersParams(final double alpha, final double beta, final double gamma) {
+    HoltWintersParams(final double alpha, final double beta, final double gamma,
+        @Nullable final Integer optimizationIterations) {
       this.alpha = alpha;
       this.beta = beta;
       this.gamma = gamma;
+      this.optimizationIterations = optimizationIterations;
     }
 
     double getAlpha() {
@@ -375,6 +379,16 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
 
     double getGamma() {
       return gamma;
+    }
+
+
+    @Override
+    public String toString() {
+      return "{alpha=" + alpha +
+          ", beta=" + beta +
+          ", gamma=" + gamma +
+          ", optimizationIterations=" + optimizationIterations +
+          '}';
     }
   }
 

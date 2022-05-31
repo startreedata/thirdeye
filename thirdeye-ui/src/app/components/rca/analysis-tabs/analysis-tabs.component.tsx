@@ -13,6 +13,7 @@ import {
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AnomalyBreakdownAPIOffsetValues,
     BASELINE_OPTIONS,
@@ -23,18 +24,32 @@ import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-compa
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import { AnomalyDimensionAnalysis } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.component";
+import { EventsTab } from "../events-tab/event-tab.component";
 import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
+
+const ANALYSIS_TAB_IDX_KEY = "analysisTab";
+const ANALYSIS_TAB_OFFSET = "baselineWeekOffset";
 
 export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     anomalyId,
     anomaly,
+    onAddFilterSetClick,
+    chartTimeSeriesFilterSet,
+    selectedEvents,
+    onEventSelectionChange,
 }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
-    const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+    const [selectedTabIndex, setSelectedTabIndex] = useState(
+        Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 0
+    );
     const [comparisonOffset, setComparisonWeekOffset] =
         useState<AnomalyBreakdownAPIOffsetValues>(
-            AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO
+            (searchParams.get(
+                ANALYSIS_TAB_OFFSET
+            ) as AnomalyBreakdownAPIOffsetValues) ||
+                AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO
         );
 
     const onHandleComparisonOffsetSelection = (
@@ -43,10 +58,14 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         setComparisonWeekOffset(
             e.target.value as AnomalyBreakdownAPIOffsetValues
         );
+        searchParams.set(ANALYSIS_TAB_OFFSET, e.target.value);
+        setSearchParams(searchParams);
     };
 
     const handleTabIndexChange = (_event: unknown, newValue: number): void => {
         setSelectedTabIndex(newValue);
+        searchParams.set(ANALYSIS_TAB_IDX_KEY, newValue.toString());
+        setSearchParams(searchParams);
     };
 
     return (
@@ -59,10 +78,11 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             onChange={handleTabIndexChange}
                         >
                             <Tab
-                                label="Heatmap of Change in Contribution"
+                                label={t("label.top-contributors")}
                                 value={0}
                             />
-                            <Tab label="Dimension Analysis" value={1} />
+                            <Tab label={t("label.heatmap")} value={1} />
+                            <Tab label={t("label.events")} value={2} />
                         </Tabs>
                     </Grid>
                     <Grid item md={5} sm={6} xs={12}>
@@ -105,7 +125,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             </CardContent>
 
             <CardContent>
-                {anomaly && (
+                {anomaly && selectedTabIndex !== 2 && (
                     <Grid container>
                         <Grid item xs={12}>
                             <Typography variant="h6">Date Reference</Typography>
@@ -156,18 +176,31 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             </CardContent>
             {selectedTabIndex === 0 && (
                 <Box mt={-4}>
-                    <AnomalyBreakdownComparisonHeatmap
+                    <AnomalyDimensionAnalysis
+                        anomaly={anomaly}
                         anomalyId={toNumber(anomalyId)}
+                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
+                        onCheckClick={onAddFilterSetClick}
                     />
                 </Box>
             )}
             {selectedTabIndex === 1 && (
                 <Box mt={-4}>
-                    <AnomalyDimensionAnalysis
-                        anomaly={anomaly}
+                    <AnomalyBreakdownComparisonHeatmap
                         anomalyId={toNumber(anomalyId)}
+                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
+                        onAddFilterSetClick={onAddFilterSetClick}
+                    />
+                </Box>
+            )}
+            {selectedTabIndex === 2 && (
+                <Box mt={-4}>
+                    <EventsTab
+                        anomalyId={anomalyId}
+                        selectedEvents={selectedEvents}
+                        onCheckClick={onEventSelectionChange}
                     />
                 </Box>
             )}

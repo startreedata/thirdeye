@@ -35,6 +35,10 @@ public class DatasetConfigDTO extends AbstractDTO {
   private Boolean active;
   /** Expected delay for data to be complete. In ISO 8601. Eg P1D*/
   private String completenessDelay;
+  /**
+   * Dimensions to exclude from RCA algorithm runs.
+   */
+  private List<String> rcaExcludedDimensions;
 
   /**
    * Configuration for non-additive dataset
@@ -104,15 +108,11 @@ public class DatasetConfigDTO extends AbstractDTO {
   }
 
   /**
-   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives
-   * of the dataset.
-   *
    * This method is preserved for reading object from database via object mapping (i.e., Java
    * reflection)
    *
    * @return the time unit of the granularity of the timestamp of each data point.
    */
-  @Deprecated
   public TimeUnit getTimeUnit() {
     return timeUnit;
   }
@@ -275,6 +275,16 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   public DatasetConfigDTO setCompletenessDelay(final String completenessDelay) {
     this.completenessDelay = completenessDelay;
+    return this;
+  }
+
+  public List<String> getRcaExcludedDimensions() {
+    return rcaExcludedDimensions;
+  }
+
+  public DatasetConfigDTO setRcaExcludedDimensions(
+      final List<String> rcaExcludedDimensions) {
+    this.rcaExcludedDimensions = rcaExcludedDimensions;
     return this;
   }
 

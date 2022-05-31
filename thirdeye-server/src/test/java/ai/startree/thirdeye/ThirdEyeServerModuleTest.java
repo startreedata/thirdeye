@@ -22,7 +22,7 @@ public class ThirdEyeServerModuleTest {
 
   @Test
   public void testRootResourceInjection() throws Exception {
-    TestDatabase db = new TestDatabase();
+    final TestDatabase db = new TestDatabase();
     final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()

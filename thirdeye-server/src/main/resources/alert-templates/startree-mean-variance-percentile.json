@@ -11,6 +11,7 @@
         "component.lookbackPeriod": "${lookback}",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
         "anomaly.source": "meanVariance-template/root",
         "type": "MEAN_VARIANCE",
         "component.pattern": "${pattern}",
@@ -29,6 +30,9 @@
     {
       "name": "missingDataPointsFiller",
       "type": "TimeIndexFiller",
+      "params": {
+        "component.timestamp": "ts"
+      },
       "inputs": [
         {
           "sourcePlanNode": "currentDataWithHistoryFetcher",
@@ -46,7 +50,7 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(ts, '${lookback}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${lookback}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -67,13 +71,17 @@
     },
     "metric": {
       "name": "${aggregationColumn}",
+      "aggregationFunction": "${rcaAggregationFunction}",
       "where": "${queryFilters}"
     },
+    "timezone": "${timezone}",
     "granularity": "${monitoringGranularity}"
   },
   "defaultProperties": {
+    "timezone": "UTC",
     "pattern": "UP_OR_DOWN",
     "completenessDelay": "P0D",
+    "rcaAggregationFunction": "",
     "queryFilters": "",
     "queryLimit": "100000000",
     "seasonalityPeriod": "PT0S"

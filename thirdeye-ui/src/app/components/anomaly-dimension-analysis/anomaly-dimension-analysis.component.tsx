@@ -14,7 +14,13 @@ import { AnomalyDimensionAnalysisProps } from "./anomaly-dimension-analysis.inte
 
 export const AnomalyDimensionAnalysis: FunctionComponent<
     AnomalyDimensionAnalysisProps
-> = ({ anomalyId, anomaly, comparisonOffset }) => {
+> = ({
+    anomalyId,
+    anomaly,
+    comparisonOffset,
+    chartTimeSeriesFilterSet,
+    onCheckClick,
+}) => {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const {
@@ -61,7 +67,9 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
                             anomalyDimensionAnalysisData={
                                 anomalyDimensionAnalysisData
                             }
+                            chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                             comparisonOffset={comparisonOffset}
+                            onCheckClick={onCheckClick}
                         />
                     )}
             </CardContent>

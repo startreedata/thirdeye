@@ -3,16 +3,16 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
 import { getUiMetric } from "../../utils/metrics/metrics.util";
@@ -26,7 +26,7 @@ import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 export const MetricsViewPage: FunctionComponent = () => {
     const [uiMetric, setUiMetric] = useState<UiMetric | null>(null);
 
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const params = useParams<MetricsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -66,8 +66,11 @@ export const MetricsViewPage: FunctionComponent = () => {
     const handleMetricDelete = (uiMetric: UiMetric): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiMetric.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiMetric.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleMetricDeleteOk(uiMetric),
         });
     };

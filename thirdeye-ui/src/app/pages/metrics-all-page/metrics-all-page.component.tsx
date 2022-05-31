@@ -1,15 +1,15 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricListV1 } from "../../components/metric-list-v1/metric-list-v1.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
@@ -17,7 +17,7 @@ import { getUiMetrics } from "../../utils/metrics/metrics.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
     const [uiMetrics, setUiMetrics] = useState<UiMetric[] | null>(null);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -40,8 +40,11 @@ export const MetricsAllPage: FunctionComponent = () => {
     const handleMetricDelete = (uiMetric: UiMetric): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiMetric.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiMetric.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleMetricDeleteOk(uiMetric),
         });
     };

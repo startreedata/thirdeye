@@ -15,6 +15,7 @@ import java.util.Set;
  *
  * @see RCAFramework
  */
+@Deprecated
 public abstract class Pipeline {
 
   private String outputName;

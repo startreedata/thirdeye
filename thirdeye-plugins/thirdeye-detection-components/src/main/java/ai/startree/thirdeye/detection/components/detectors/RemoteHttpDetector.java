@@ -5,12 +5,12 @@
 
 package ai.startree.thirdeye.detection.components.detectors;
 
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_ANOMALY;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_CURRENT;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_TIME;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_UPPER_BOUND;
-import static ai.startree.thirdeye.spi.dataframe.DataFrame.COL_VALUE;
+import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
+import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
+import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.components.SimpleAnomalyDetectorResult;
@@ -104,12 +104,14 @@ public class RemoteHttpDetector implements AnomalyDetector<RemoteHttpDetectorSpe
   private HttpDetectorApi runDetection(final HttpDetectorApi api) {
     final String url = spec.getUrl();
 
+    // base url must end with '/'. url itself can be a full path.
+    final String baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
     final Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(url)
+        .baseUrl(baseUrl)
         .addConverterFactory(JacksonConverterFactory.create())
         .build();
     final HttpDetectorService service = retrofit.create(HttpDetectorService.class);
-    final Call<HttpDetectorApi> call = service.evaluate(api);
+    final Call<HttpDetectorApi> call = service.evaluate(url, api);
     try {
       Response<HttpDetectorApi> response = call.execute();
       if (!response.isSuccessful()) {

@@ -5,17 +5,16 @@
 
 package ai.startree.thirdeye.alert;
 
-import static ai.startree.thirdeye.alert.AlertExceptionHandler.handleAlertEvaluationException;
+import static ai.startree.thirdeye.alert.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DETECTION_INTERVAL_COMPUTATION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -30,11 +29,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter;
-import ai.startree.thirdeye.spi.detection.v2.TimeseriesFilter.DimensionType;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -151,16 +150,13 @@ public class AlertEvaluator {
     return null;
   }
 
-  private Interval computeDetectionInterval(final AlertEvaluationApi request) {
+  private Interval computeDetectionInterval(final AlertEvaluationApi request)
+      throws IOException, ClassNotFoundException {
     // this method only exists to catch exception and translate into a TE exception
     Interval detectionInterval;
-    try {
-      detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
-          request.getStart().getTime(),
-          request.getEnd().getTime());
-    } catch (Exception e) {
-      throw new ThirdEyeException(ERR_DETECTION_INTERVAL_COMPUTATION, e.getMessage());
-    }
+    detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
+        request.getStart().getTime(),
+        request.getEnd().getTime());
     return detectionInterval;
   }
 
@@ -182,12 +178,18 @@ public class AlertEvaluator {
     if (filters.isEmpty()) {
       return;
     }
-    final AlertMetadataDTO alertMetadataDTO = ensureExists(templateWithProperties.getMetadata(), ERR_MISSING_CONFIGURATION_FIELD,"metadata");
-    final DatasetConfigDTO datasetConfigDTO = ensureExists(alertMetadataDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset");
-    final String dataset = ensureExists(datasetConfigDTO.getDataset(), ERR_MISSING_CONFIGURATION_FIELD, "metadata$dataset$name");
+    final AlertMetadataDTO alertMetadataDTO = ensureExists(templateWithProperties.getMetadata(),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "metadata");
+    final DatasetConfigDTO datasetConfigDTO = ensureExists(alertMetadataDTO.getDataset(),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "metadata$dataset");
+    final String dataset = ensureExists(datasetConfigDTO.getDataset(),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "metadata$dataset$name");
 
-    final List<TimeseriesFilter> timeseriesFilters = parseAndCombinePredicates(filters).stream()
-        .map(p -> TimeseriesFilter.of(p, getDimensionType(p.getLhs(), dataset), dataset))
+    final List<QueryPredicate> timeseriesFilters = parseAndCombinePredicates(filters).stream()
+        .map(p -> QueryPredicate.of(p, getDimensionType(p.getLhs(), dataset), dataset))
         .collect(Collectors.toList());
 
     templateWithProperties.getNodes().forEach(n -> addFilters(n, timeseriesFilters));
@@ -200,7 +202,7 @@ public class AlertEvaluator {
     return DimensionType.STRING;
   }
 
-  private void addFilters(PlanNodeBean planNodeBean, List<TimeseriesFilter> filters) {
+  private void addFilters(PlanNodeBean planNodeBean, List<QueryPredicate> filters) {
     if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
       if (planNodeBean.getParams() == null) {
         planNodeBean.setParams(new HashMap<>());

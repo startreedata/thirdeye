@@ -7,6 +7,7 @@ package ai.startree.thirdeye.detection.components.detectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
@@ -46,7 +47,7 @@ public class HoltWintersDetectorTest {
   private static final long JANUARY_8_2021 = 1610064000000L;
 
   private static final DataFrame HISTORICAL_DATA = new DataFrame()
-      .addSeries(DataFrame.COL_TIME,
+      .addSeries(Constants.COL_TIME,
           DECEMBER_22_2020,
           DECEMBER_23_2020,
           DECEMBER_24_2020,
@@ -58,7 +59,7 @@ public class HoltWintersDetectorTest {
           DECEMBER_30_2020,
           DECEMBER_31_2020)
       // mean 100, std 16.329932
-      .addSeries(DataFrame.COL_VALUE,
+      .addSeries(Constants.COL_VALUE,
           100.,
           120.,
           80.,
@@ -76,15 +77,15 @@ public class HoltWintersDetectorTest {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
             JANUARY_4_2021,
             JANUARY_5_2021)
-        .addSeries(DataFrame.COL_VALUE, 120, 80, 100, 120, 80)
+        .addSeries(Constants.COL_VALUE, 120, 80, 100, 120, 80)
         .append(HISTORICAL_DATA)
-        .sortedBy(DataFrame.COL_TIME);
+        .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
@@ -99,11 +100,11 @@ public class HoltWintersDetectorTest {
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
-    LongSeries outputTimeSeries = outputDf.getLongs(DataFrame.COL_TIME);
-    LongSeries expectedTimeSeries = currentDf.getLongs(DataFrame.COL_TIME);
+    LongSeries outputTimeSeries = outputDf.getLongs(Constants.COL_TIME);
+    LongSeries expectedTimeSeries = currentDf.getLongs(Constants.COL_TIME);
     assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
 
-    DoubleSeries outputValueSeries = outputDf.getDoubles(DataFrame.COL_VALUE);
+    DoubleSeries outputValueSeries = outputDf.getDoubles(Constants.COL_VALUE);
     assertThat(outputValueSeries.sliceTo(10)).isEqualTo(DoubleSeries.nulls(10));
     Offset<Double> predictionPrecision = Offset.offset(0.1);
     double valueDay1 = outputValueSeries.getDouble(10);
@@ -117,20 +118,20 @@ public class HoltWintersDetectorTest {
     double valueDay5 = outputValueSeries.getDouble(10 + 4);
     assertThat(valueDay5).isCloseTo(80, predictionPrecision);
 
-    DoubleSeries outputCurrentSeries = outputDf.getDoubles(DataFrame.COL_CURRENT);
-    DoubleSeries expectedCurrentSeries = currentDf.getDoubles(DataFrame.COL_VALUE);
+    DoubleSeries outputCurrentSeries = outputDf.getDoubles(Constants.COL_CURRENT);
+    DoubleSeries expectedCurrentSeries = currentDf.getDoubles(Constants.COL_VALUE);
     assertThat(outputCurrentSeries).isEqualTo(expectedCurrentSeries);
 
-    DoubleSeries outputUpperBoundSeries = outputDf.getDoubles(DataFrame.COL_UPPER_BOUND);
+    DoubleSeries outputUpperBoundSeries = outputDf.getDoubles(Constants.COL_UPPER_BOUND);
     assertThat(outputUpperBoundSeries.sliceTo(10)).isEqualTo(DoubleSeries.nulls(10));
     // todo cyril not checking values because the error behavior is strange and should be fixed
     assertThat(outputUpperBoundSeries.sliceFrom(10).hasNull()).isFalse();
 
-    DoubleSeries outputLowerBoundSeries = outputDf.getDoubles(DataFrame.COL_LOWER_BOUND);
+    DoubleSeries outputLowerBoundSeries = outputDf.getDoubles(Constants.COL_LOWER_BOUND);
     assertThat(outputLowerBoundSeries.sliceTo(10)).isEqualTo(DoubleSeries.nulls(10));
     assertThat(outputLowerBoundSeries.sliceFrom(10).hasNull()).isFalse();
 
-    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
         .append(BooleanSeries.fillValues(5, false));
     assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
@@ -139,7 +140,7 @@ public class HoltWintersDetectorTest {
   @Test
   public void testZeroesInHistoricalData() throws DetectorException {
     final DataFrame historicalDataWithZeroes = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             DECEMBER_22_2020,
             DECEMBER_23_2020,
             DECEMBER_24_2020,
@@ -151,7 +152,7 @@ public class HoltWintersDetectorTest {
             DECEMBER_30_2020,
             DECEMBER_31_2020)
         // mean 100, std 16.329932
-        .addSeries(DataFrame.COL_VALUE,
+        .addSeries(Constants.COL_VALUE,
             0,
             0,
             0,
@@ -165,7 +166,7 @@ public class HoltWintersDetectorTest {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
@@ -174,9 +175,9 @@ public class HoltWintersDetectorTest {
             JANUARY_6_2021,
             JANUARY_7_2021,
             JANUARY_8_2021)
-        .addSeries(DataFrame.COL_VALUE, 0, 0, 100, 120, 80, 100, 120, 80)
+        .addSeries(Constants.COL_VALUE, 0, 0, 100, 120, 80, 100, 120, 80)
         .append(historicalDataWithZeroes)
-        .sortedBy(DataFrame.COL_TIME);
+        .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
@@ -204,15 +205,15 @@ public class HoltWintersDetectorTest {
     Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
             JANUARY_4_2021,
             JANUARY_5_2021)
-        .addSeries(DataFrame.COL_VALUE, 120, 80, 100, 120, 80)
+        .addSeries(Constants.COL_VALUE, 120, 80, 100, 120, 80)
         .append(HISTORICAL_DATA)
-        .sortedBy(DataFrame.COL_TIME);
+        .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
@@ -225,7 +226,7 @@ public class HoltWintersDetectorTest {
 
     AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
-    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     // out of window is null
     BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10 + 2)
         // only 3 non null
@@ -239,15 +240,15 @@ public class HoltWintersDetectorTest {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
             JANUARY_4_2021,
             JANUARY_5_2021)
-        .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
+        .addSeries(Constants.COL_VALUE, 180, 80, 100, 70, 80)
         .append(HISTORICAL_DATA)
-        .sortedBy(DataFrame.COL_TIME);
+        .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
@@ -262,7 +263,7 @@ public class HoltWintersDetectorTest {
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
-    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
         .append(BooleanSeries.buildFrom(
             BooleanSeries.TRUE, // change is up
@@ -279,15 +280,15 @@ public class HoltWintersDetectorTest {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
             JANUARY_4_2021,
             JANUARY_5_2021)
-        .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
+        .addSeries(Constants.COL_VALUE, 180, 80, 100, 70, 80)
         .append(HISTORICAL_DATA)
-        .sortedBy(DataFrame.COL_TIME);
+        .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
@@ -303,7 +304,7 @@ public class HoltWintersDetectorTest {
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
-    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
         .append(BooleanSeries.buildFrom(
             BooleanSeries.TRUE, // change is up
@@ -320,15 +321,15 @@ public class HoltWintersDetectorTest {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
-        .addSeries(DataFrame.COL_TIME,
+        .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
             JANUARY_4_2021,
             JANUARY_5_2021)
-        .addSeries(DataFrame.COL_VALUE, 180, 80, 100, 70, 80)
+        .addSeries(Constants.COL_VALUE, 180, 80, 100, 70, 80)
         .append(HISTORICAL_DATA)
-        .sortedBy(DataFrame.COL_TIME);
+        .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
@@ -344,7 +345,7 @@ public class HoltWintersDetectorTest {
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
-    BooleanSeries outputAnomalySeries = outputDf.getBooleans(DataFrame.COL_ANOMALY);
+    BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
         .append(BooleanSeries.buildFrom(
             BooleanSeries.FALSE, // change is up

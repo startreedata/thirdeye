@@ -1,5 +1,5 @@
-import { UiEvent } from "../../../rest/dto/ui-event.interfaces";
+import { Event } from "../../../rest/dto/event.interfaces";
 
 export interface EventRendererProps {
-    uiEvent: UiEvent;
+    event: Event;
 }

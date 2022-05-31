@@ -1,12 +1,22 @@
 import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { EventRendererProps } from "./events-renderer.interfaces";
 
 export const EventRenderer: FunctionComponent<EventRendererProps> = (
     props: EventRendererProps
 ) => {
     const { t } = useTranslation();
+
+    const startTime =
+        props.event && props.event.startTime
+            ? formatDateAndTimeV1(props.event.startTime)
+            : t("label.no-data-marker");
+    const endTime =
+        props.event && props.event.endTime
+            ? formatDateAndTimeV1(props.event.endTime)
+            : t("label.no-data-marker");
 
     return (
         <Grid container item justifyContent="flex-end">
@@ -19,7 +29,7 @@ export const EventRenderer: FunctionComponent<EventRendererProps> = (
 
             <Grid item sm={9}>
                 <Typography variant="body2">
-                    {(props.uiEvent && props.uiEvent.name) ||
+                    {(props.event && props.event.name) ||
                         t("label.no-data-marker")}
                 </Typography>
             </Grid>
@@ -33,7 +43,7 @@ export const EventRenderer: FunctionComponent<EventRendererProps> = (
 
             <Grid item sm={9}>
                 <Typography variant="body2">
-                    {(props.uiEvent && props.uiEvent.type) ||
+                    {(props.event && props.event.type) ||
                         t("label.no-data-marker")}
                 </Typography>
             </Grid>
@@ -46,10 +56,7 @@ export const EventRenderer: FunctionComponent<EventRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body2">
-                    {(props.uiEvent && props.uiEvent.startTime) ||
-                        t("label.no-data-marker")}
-                </Typography>
+                <Typography variant="body2">{startTime}</Typography>
             </Grid>
 
             {/* End Time */}
@@ -60,10 +67,7 @@ export const EventRenderer: FunctionComponent<EventRendererProps> = (
             </Grid>
 
             <Grid item sm={9}>
-                <Typography variant="body2">
-                    {(props.uiEvent && props.uiEvent.endTime) ||
-                        t("label.no-data-marker")}
-                </Typography>
+                <Typography variant="body2">{endTime}</Typography>
             </Grid>
         </Grid>
     );

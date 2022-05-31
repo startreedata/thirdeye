@@ -4,7 +4,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Event } from "../../rest/dto/event.interfaces";
-import { createEmptyEvent, getUiEvent } from "../../utils/events/events.util";
+import { createEmptyEvent } from "../../utils/events/events.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { EventsWizardStep, EventWizardProps } from "./event-wizard.interface";
@@ -138,7 +138,7 @@ export const EventsWizard: FunctionComponent<EventWizardProps> = (
                             EventsWizardStep.REVIEW_AND_SUBMIT && (
                             <>
                                 {/* Event information */}
-                                <EventRenderer uiEvent={getUiEvent(newEvent)} />
+                                <EventRenderer event={newEvent} />
                             </>
                         )}
 

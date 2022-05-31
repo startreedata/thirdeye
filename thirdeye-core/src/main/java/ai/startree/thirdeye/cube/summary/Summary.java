@@ -144,7 +144,7 @@ public class Summary {
           // Set parent's name tag from ALL to (ALL_OTHERS) String.
           int allOthersLevel = node.getLevel() - levelDiff;
           parentNameTag.setAllOthers(allOthersLevel);
-          // After that, set the names after (ALL_OTHERS) to empty, e.g., [home page, (ALL_OTHERS), ""]
+          // After that, set the names after (ALL_OTHERS) to (NO_FILTER), e.g., [home page, (ALL_OTHERS), ""]
           for (int i = allOthersLevel + 1; i < maxNodeLevel; ++i) {
             parentNameTag.setEmpty(i);
           }

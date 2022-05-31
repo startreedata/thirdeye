@@ -9,12 +9,11 @@ import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import java.util.ArrayList;
 import java.util.List;
 
-// fixme cyril this is an enum
 public class NameTag {
 
   public static final String ALL = "(ALL)";
   public static final String ALL_OTHERS = "(ALL_OTHERS)";
-  public static final String EMPTY = "";
+  public static final String EMPTY = "(NO_FILTER)";
 
   public final List<String> names;
 

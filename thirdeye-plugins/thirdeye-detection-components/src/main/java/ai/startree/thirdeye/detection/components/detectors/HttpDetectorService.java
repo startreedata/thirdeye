@@ -8,9 +8,10 @@ package ai.startree.thirdeye.detection.components.detectors;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
+import retrofit2.http.Url;
 
 public interface HttpDetectorService {
 
-  @POST("http-detector")
-  Call<HttpDetectorApi> evaluate(@Body HttpDetectorApi request);
+  @POST
+  Call<HttpDetectorApi> evaluate(@Url String url, @Body HttpDetectorApi request);
 }

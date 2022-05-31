@@ -16,6 +16,8 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
+import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -52,8 +55,15 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
   @Inject
-  public TaskManagerImpl(final GenericPojoDao genericPojoDao) {
+  public TaskManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(TaskDTO.class, genericPojoDao);
+    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return count();
+      }
+    });
   }
 
   @Override

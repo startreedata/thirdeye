@@ -3,6 +3,7 @@ import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { AreaClosed, Bar, LinePath } from "@visx/shape";
 import React, { FunctionComponent, MouseEvent, useMemo } from "react";
+import { formatLargeNumberForVisualization } from "../../../../utils/visualization/visualization.util";
 import { PlotBand } from "../plot-band/plot-band.component";
 import {
     DataPoint,
@@ -207,6 +208,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                 <AxisLeft
                     numTicks={5}
                     scale={yScaleToUse}
+                    tickFormat={formatLargeNumberForVisualization}
                     tickLabelProps={() => axisLeftTickLabelProps}
                 />
             )}

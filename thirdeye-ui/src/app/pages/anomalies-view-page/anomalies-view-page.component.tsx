@@ -3,6 +3,7 @@ import {
     Card,
     CardContent,
     Grid,
+    Link,
     Paper,
     Typography,
 } from "@material-ui/core";
@@ -41,7 +42,10 @@ import {
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
+import {
+    getAlertsViewPath,
+    getAnomaliesAllPath,
+} from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
@@ -184,11 +188,15 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                showCreateButton
-                showTimeRange
-                title={uiAnomaly ? uiAnomaly.name : ""}
-            >
+            <PageHeader showCreateButton showTimeRange title="">
+                {anomaly && uiAnomaly && (
+                    <>
+                        <Link href={getAlertsViewPath(anomaly.alert.id)}>
+                            {anomaly.alert.name}
+                        </Link>
+                        : {uiAnomaly.name}
+                    </>
+                )}
                 <TooltipV1
                     placement="top"
                     title={

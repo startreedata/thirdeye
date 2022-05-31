@@ -18,3 +18,18 @@ export interface GetEvents extends ActionHook {
         getEventsParams?: GetAllEventsProps
     ) => Promise<Event[] | undefined>;
 }
+
+export interface GetEventsForAnomalyRestProps {
+    anomalyId: number;
+    eventType?: string;
+    limit?: number;
+    lookaround?: string;
+    scoring?: string;
+}
+
+export interface GetEventsForAnomaly extends ActionHook {
+    events: Event[] | null;
+    getEventsForAnomaly: (
+        getEventsForAnomalyParams: GetEventsForAnomalyRestProps
+    ) => Promise<Event[] | undefined>;
+}

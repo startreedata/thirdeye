@@ -28,6 +28,14 @@ data:
           port: {{ .Values.worker.port }}
           idleTimeout: 620s
 
+      requestLog:
+        appenders:
+        - type: console
+          filterFactories:
+          - type: uri
+            uris:
+            - "/admin/prometheus"
+
     logging:
       level: INFO
       loggers:

@@ -1,8 +1,8 @@
 package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -50,16 +50,16 @@ public class RcaRelatedResource {
   private static final String DEFAULT_LOOKBACK = "P7D";
   private static final String DEFAULT_LIMIT = "50";
   private static final String DEFAULT_SCORING = "TRIANGULAR";
-  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
+  private final RcaInfoFetcher rcaInfoFetcher;
   private final EventManager eventDAO;
   private final MergedAnomalyResultManager anomalyDAO;
 
   @Inject
   public RcaRelatedResource(
-      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher,
+      final RcaInfoFetcher rcaInfoFetcher,
       final EventManager eventDAO,
       final MergedAnomalyResultManager anomalyDAO) {
-    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
+    this.rcaInfoFetcher = rcaInfoFetcher;
     this.eventDAO = eventDAO;
     this.anomalyDAO = anomalyDAO;
   }
@@ -77,7 +77,7 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
@@ -119,7 +119,7 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
+    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
         rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),

@@ -26,6 +26,14 @@ data:
         - type: http
           port: {{ .Values.coordinator.port }}
           idleTimeout: 620s
+  
+      requestLog:
+        appenders:
+        - type: console
+          filterFactories:
+          - type: uri
+            uris:
+            - "/admin/prometheus"
 
     logging:
       level: INFO

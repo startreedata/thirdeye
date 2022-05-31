@@ -1,5 +1,7 @@
 package ai.startree.thirdeye.util;
 
+import static org.apache.calcite.sql.SqlOperator.MDX_PRECEDENCE;
+
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import java.util.List;
 import java.util.Locale;
@@ -13,6 +15,7 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.SqlPostfixOperator;
 import org.apache.calcite.sql.parser.SqlAbstractParserImpl.Metadata;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -85,6 +88,13 @@ public class CalciteUtils {
       null,
       null);
 
+  public static final SqlOperator DESC_OPERATOR = new SqlPostfixOperator("DESC",
+      SqlKind.DESCENDING,
+      MDX_PRECEDENCE,
+      null,
+      null,
+      null);
+
   public static final Map<OPER, SqlOperator> FILTER_PREDICATE_OPER_TO_CALCITE = Map.of(
       OPER.EQ, EQUALS_OPERATOR,
       OPER.NEQ, NOT_EQUALS_OPERATOR,
@@ -119,7 +129,7 @@ public class CalciteUtils {
     Metadata metadata = SqlParser.create("", sqlParserConfig).getMetadata();
     String upperIdentifier = identifier.toUpperCase(Locale.ENGLISH);
     if (metadata.isReservedWord(upperIdentifier) || metadata.isSql92ReservedWord(upperIdentifier)
-        || metadata.isReservedFunctionName(upperIdentifier)){
+        || metadata.isReservedFunctionName(upperIdentifier)) {
       return dialect.quoteIdentifier(identifier);
     }
     return identifier;
@@ -171,6 +181,11 @@ public class CalciteUtils {
     return new SqlBasicCall(new SqlAsOperator(),
         aliasOperands.toArray(new SqlNode[0]),
         SqlParserPos.ZERO);
+  }
+
+  @NonNull
+  public static SqlNode addDesc(final SqlNode node) {
+    return new SqlBasicCall(CalciteUtils.DESC_OPERATOR, new SqlNode[]{node}, SqlParserPos.ZERO);
   }
 
   /**

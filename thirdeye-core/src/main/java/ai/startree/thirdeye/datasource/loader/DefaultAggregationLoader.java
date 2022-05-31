@@ -73,6 +73,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
           .newBuilderFrom(slice)
           .addSelectProjection(dimensionProjection)
           .addGroupByProjection(dimensionProjection)
+          // ensure multiple runs return the same values when num rows > limit - see te-636
+          .addOrderByProjection(QueryProjection.of(Constants.COL_VALUE).withDescOrder())
           .withLimit(limit).build();
       Future<DataFrame> res = dataSourceCache.getQueryResultAsync(request,
           datasetConfigDTO.getDataSource());

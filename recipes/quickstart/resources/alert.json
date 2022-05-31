@@ -1,22 +1,21 @@
 [
   {
-    "name": "HoltWinters with template startree-holt-winters",
-    "description": "Uses template startree-holt-winters.",
+    "name": "threshold-alert-orders-sample",
+    "description": "Threshold alert on orders",
     "template": {
-      "name": "startree-holt-winters"
+      "name": "startree-threshold"
     },
     "templateProperties": {
       "dataSource": "pinot",
       "dataset": "order_events",
-      "rcaAggregationFunction": "count",
-      "timeColumn": "timestamp",
-      "timeColumnFormat": "1:MILLISECONDS:EPOCH",
       "aggregationFunction": "count",
       "aggregationColumn": "event_type",
-      "lookback": "P30D",
       "monitoringGranularity": "P1D",
-      "sensitivity": "3"
+      "timeColumn": "timestamp",
+      "timeColumnFormat": "1:MILLISECONDS:EPOCH",
+      "max": "900",
+      "min": "200"
     },
-    "cron": "0 0 0 1/1 * ? *"
+    "cron": "0 0 0/2 1/1 * ? *"
   }
 ]

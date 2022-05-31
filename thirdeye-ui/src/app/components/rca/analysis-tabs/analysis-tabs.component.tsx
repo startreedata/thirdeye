@@ -78,10 +78,10 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             onChange={handleTabIndexChange}
                         >
                             <Tab
-                                label="Heatmap of Change in Contribution"
+                                label={t("label.top-contributors")}
                                 value={0}
                             />
-                            <Tab label="Dimension Analysis" value={1} />
+                            <Tab label={t("label.heatmap")} value={1} />
                             <Tab label={t("label.events")} value={2} />
                         </Tabs>
                     </Grid>
@@ -176,16 +176,6 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             </CardContent>
             {selectedTabIndex === 0 && (
                 <Box mt={-4}>
-                    <AnomalyBreakdownComparisonHeatmap
-                        anomalyId={toNumber(anomalyId)}
-                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
-                        comparisonOffset={comparisonOffset}
-                        onAddFilterSetClick={onAddFilterSetClick}
-                    />
-                </Box>
-            )}
-            {selectedTabIndex === 1 && (
-                <Box mt={-4}>
                     <AnomalyDimensionAnalysis
                         anomaly={anomaly}
                         anomalyId={toNumber(anomalyId)}
@@ -195,9 +185,20 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                     />
                 </Box>
             )}
+            {selectedTabIndex === 1 && (
+                <Box mt={-4}>
+                    <AnomalyBreakdownComparisonHeatmap
+                        anomalyId={toNumber(anomalyId)}
+                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
+                        comparisonOffset={comparisonOffset}
+                        onAddFilterSetClick={onAddFilterSetClick}
+                    />
+                </Box>
+            )}
             {selectedTabIndex === 2 && (
                 <Box mt={-4}>
                     <EventsTab
+                        anomalyId={anomalyId}
                         selectedEvents={selectedEvents}
                         onCheckClick={onEventSelectionChange}
                     />

@@ -185,7 +185,9 @@
         "about": "About",
         "thirdeye-website-url": "https://www.startree.ai",
         "hide-filters-table": "Hide filters table",
-        "show-filters-table": "Show filters table"
+        "show-filters-table": "Show filters table",
+        "heatmap": "Heatmap",
+        "top-contributors": "Top Contributors"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

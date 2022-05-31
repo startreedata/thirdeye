@@ -41,7 +41,12 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                         {/* Refresh button */}
                         {!props.hideRefreshButton && (
                             <Grid item>
-                                <IconButton onClick={props.onRefresh}>
+                                <IconButton
+                                    className={
+                                        alertEvaluationTimeSeriesCardClasses.refreshIcon
+                                    }
+                                    onClick={props.onRefresh}
+                                >
                                     <RefreshIcon />
                                 </IconButton>
                             </Grid>

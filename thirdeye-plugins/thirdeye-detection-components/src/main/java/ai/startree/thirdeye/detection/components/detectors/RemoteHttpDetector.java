@@ -104,12 +104,14 @@ public class RemoteHttpDetector implements AnomalyDetector<RemoteHttpDetectorSpe
   private HttpDetectorApi runDetection(final HttpDetectorApi api) {
     final String url = spec.getUrl();
 
+    // base url must end with '/'. url itself can be a full path.
+    final String baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
     final Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(url)
+        .baseUrl(baseUrl)
         .addConverterFactory(JacksonConverterFactory.create())
         .build();
     final HttpDetectorService service = retrofit.create(HttpDetectorService.class);
-    final Call<HttpDetectorApi> call = service.evaluate(api);
+    final Call<HttpDetectorApi> call = service.evaluate(url, api);
     try {
       Response<HttpDetectorApi> response = call.execute();
       if (!response.isSuccessful()) {

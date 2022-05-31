@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
@@ -59,6 +60,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -235,58 +237,67 @@ public class RcaMetricResource {
       @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
       @ApiParam(value = "List of dimensions to exclude from the analysis.")
-      @QueryParam("excludedDimensions") List<String> excludedDimensions) throws Exception {
+      @QueryParam("excludedDimensions") List<String> excludedDimensions) {
+    try {
+      if (limit == null) {
+        limit = LIMIT_DEFAULT;
+      }
+      final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+          anomalyId);
+      final Interval currentInterval = new Interval(
+          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
+          rootCauseAnalysisInfo.getTimezone()
+      );
 
-    if (limit == null) {
-      limit = LIMIT_DEFAULT;
+      Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
+      final Interval baselineInterval = new Interval(
+          currentInterval.getStart().minus(baselineOffsetPeriod),
+          currentInterval.getEnd().minus(baselineOffsetPeriod)
+      );
+
+      // override dimensions
+      final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+      List<String> rcaDimensions = getRcaDimensions(dimensions,
+          excludedDimensions,
+          datasetConfigDTO);
+      datasetConfigDTO.setDimensions(rcaDimensions);
+
+      final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
+          rootCauseAnalysisInfo.getMetricConfigDTO(),
+          parseAndCombinePredicates(filters),
+          currentInterval,
+          getSimpleRange(),
+          limit,
+          datasetConfigDTO);
+
+      final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
+          rootCauseAnalysisInfo.getMetricConfigDTO(),
+          parseAndCombinePredicates(filters),
+          baselineInterval,
+          getSimpleRange(),
+          limit,
+          datasetConfigDTO);
+
+      // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
+      fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
+      fillMissingKeysWithZeroes(anomalyBreakdown, baselineBreakdown);
+
+      final HeatMapResultApi resultApi = new HeatMapResultApi()
+          .setMetric(new MetricApi()
+              .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
+              .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
+          .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
+          .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
+
+      return Response.ok(resultApi).build();
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (final Exception e) {
+      handleRcaAlgorithmException(e);
     }
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
-        anomalyId);
-    final Interval currentInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        rootCauseAnalysisInfo.getTimezone()
-    );
 
-    Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
-    final Interval baselineInterval = new Interval(
-        currentInterval.getStart().minus(baselineOffsetPeriod),
-        currentInterval.getEnd().minus(baselineOffsetPeriod)
-    );
-
-    // override dimensions
-    final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
-    List<String> rcaDimensions = getRcaDimensions(dimensions, excludedDimensions, datasetConfigDTO);
-    datasetConfigDTO.setDimensions(rcaDimensions);
-
-    final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO(),
-        parseAndCombinePredicates(filters),
-        currentInterval,
-        getSimpleRange(),
-        limit,
-        datasetConfigDTO);
-
-    final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO(),
-        parseAndCombinePredicates(filters),
-        baselineInterval,
-        getSimpleRange(),
-        limit,
-        datasetConfigDTO);
-
-    // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
-    fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
-    fillMissingKeysWithZeroes(anomalyBreakdown, baselineBreakdown);
-
-    final HeatMapResultApi resultApi = new HeatMapResultApi()
-        .setMetric(new MetricApi()
-            .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
-            .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
-        .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
-        .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
-
-    return Response.ok(resultApi).build();
+    return null;
   }
 
   /**

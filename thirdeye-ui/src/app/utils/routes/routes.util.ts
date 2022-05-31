@@ -1,3 +1,4 @@
+import { DateTime, DurationUnit } from "luxon";
 import {
     getRecognizedQuery,
     SEARCH_TERM_QUERY_PARAM_KEY,
@@ -339,4 +340,24 @@ export const getLogoutPath = (): string => {
 // to be carried forward when navigating
 export const createPathWithRecognizedQueryString = (path: string): string => {
     return `${path}?${getRecognizedQuery().toString()}`;
+};
+
+/**
+ * Helper function to quickly generate a date range for any number of months from
+ * now. The month ago will start at the beginning of the month.
+ *
+ * @param monthsAgo - Number of months to set the start of range
+ * @param nowOverride - Override now with this value
+ * @param roundNowTime - Round the end time
+ */
+export const generateDateRangeMonthsFromNow = (
+    monthsAgo: number,
+    nowOverride?: DateTime,
+    roundNowTime?: DurationUnit
+): [number, number] => {
+    const now = nowOverride || DateTime.local();
+    const roundedNow = now.endOf(roundNowTime || "hour");
+    const xMonthsAgo = now.minus({ month: monthsAgo }).startOf("month");
+
+    return [xMonthsAgo.toMillis(), roundedNow.toMillis()];
 };

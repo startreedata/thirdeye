@@ -1,6 +1,6 @@
-import { UiEvent } from "../../rest/dto/ui-event.interfaces";
+import { Event } from "../../rest/dto/event.interfaces";
 
 export interface EventListV1Props {
-    events: UiEvent[] | null;
-    onDelete?: (uiEvent: UiEvent) => void;
+    events: Event[] | null;
+    onDelete?: (event: Event) => void;
 }

@@ -15,17 +15,16 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { UiEvent } from "../../rest/dto/ui-event.interfaces";
+import { Event } from "../../rest/dto/event.interfaces";
 import { useGetEvent } from "../../rest/event/event.actions";
 import { deleteEvent } from "../../rest/event/events.rest";
-import { getUiEvent } from "../../utils/events/events.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getEventsAllPath } from "../../utils/routes/routes.util";
 import { EventsViewPageParams } from "./events-view-page.interface";
 
 export const EventsViewPage: FunctionComponent = () => {
-    const [uiEvent, setUiEvent] = useState<UiEvent | null>(null);
+    const [uiEvent, setUiEvent] = useState<Event | null>(null);
     const { showDialog } = useDialogProviderV1();
     const { id: eventId } = useParams<EventsViewPageParams>();
     const { t } = useTranslation();
@@ -43,7 +42,7 @@ export const EventsViewPage: FunctionComponent = () => {
     }, [eventId]);
 
     useEffect(() => {
-        !!event && setUiEvent(getUiEvent(event));
+        !!event && setUiEvent(event);
     }, [event]);
 
     useEffect(() => {
@@ -61,20 +60,20 @@ export const EventsViewPage: FunctionComponent = () => {
         }
     }, [eventRequestStatus, eventRequestErrors]);
 
-    const handleEventDelete = (uiEvent: UiEvent): void => {
+    const handleEventDelete = (event: Event): void => {
         showDialog({
             type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
-                name: uiEvent.name,
+                name: event.name,
             }),
             okButtonText: t("label.delete"),
             cancelButtonText: t("label.cancel"),
-            onOk: () => handleEventDeleteOk(uiEvent),
+            onOk: () => handleEventDeleteOk(event),
         });
     };
 
-    const handleEventDeleteOk = (uiEvent: UiEvent): void => {
-        deleteEvent(uiEvent.id)
+    const handleEventDeleteOk = (event: Event): void => {
+        deleteEvent(event.id)
             .then(() => {
                 notify(
                     NotificationTypeV1.Success,

@@ -1,9 +1,9 @@
-import { UiEvent } from "../../../rest/dto/ui-event.interfaces";
+import { Event } from "../../../rest/dto/event.interfaces";
 
 export interface EventCardProps {
-    event: UiEvent | null;
+    event: Event | null;
     searchWords?: string[];
     showViewDetails?: boolean;
-    onDelete?: (event: UiEvent) => void;
+    onDelete?: (event: Event) => void;
     onEdit?: (id: number) => void;
 }

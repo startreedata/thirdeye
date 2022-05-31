@@ -13,7 +13,8 @@ import {
     DataGridV1,
     PageContentsCardV1,
 } from "../../platform/components";
-import { UiEvent } from "../../rest/dto/ui-event.interfaces";
+import { formatDateAndTimeV1 } from "../../platform/utils";
+import { Event } from "../../rest/dto/event.interfaces";
 import { getEventsViewPath } from "../../utils/routes/routes.util";
 import { EventListV1Props } from "./event-list-v1.interfaces";
 
@@ -22,7 +23,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
 ) => {
     const { t } = useTranslation();
     const [selectedEvent, setSelectedEvent] =
-        useState<DataGridSelectionModelV1<UiEvent>>();
+        useState<DataGridSelectionModelV1<Event>>();
     const navigate = useNavigate();
 
     const handleEventDelete = (): void => {
@@ -45,7 +46,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     );
 
     const nameRenderer = useCallback(
-        (_: Record<string, unknown>, data: UiEvent): ReactNode => (
+        (_: Record<string, unknown>, data: Event): ReactNode => (
             <Link onClick={() => handleEventViewDetailsById(data.id)}>
                 {data.name}
             </Link>
@@ -54,13 +55,14 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     );
 
     const startTimeRenderer = useCallback(
-        (_: Record<string, unknown>, data: UiEvent): ReactNode =>
-            data.startTime,
+        (_: Record<string, unknown>, data: Event): ReactNode =>
+            formatDateAndTimeV1(data.startTime),
         []
     );
 
     const endTimeRenderer = useCallback(
-        (_: Record<string, unknown>, data: UiEvent): ReactNode => data.endTime,
+        (_: Record<string, unknown>, data: Event): ReactNode =>
+            formatDateAndTimeV1(data.endTime),
         []
     );
 
@@ -74,8 +76,15 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             customCellRenderer: nameRenderer,
         },
         {
+            key: "type",
+            dataKey: "type",
+            header: t("label.type"),
+            minWidth: 300,
+            sortable: true,
+        },
+        {
             key: "startTime",
-            dataKey: "startTimeVal",
+            dataKey: "startTime",
             header: t("label.start"),
             minWidth: 300,
             sortable: true,
@@ -83,28 +92,21 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
         },
         {
             key: "endTime",
-            dataKey: "endTimeVal",
+            dataKey: "endTime",
             header: t("label.end"),
             minWidth: 300,
             sortable: true,
             customCellRenderer: endTimeRenderer,
-        },
-        {
-            key: "type",
-            dataKey: "type",
-            header: t("label.type"),
-            minWidth: 300,
-            sortable: true,
         },
     ];
 
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<UiEvent>
+                <DataGridV1<Event>
                     hideBorder
                     columns={uiEventColumns}
-                    data={props.events as UiEvent[]}
+                    data={props.events as Event[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {

@@ -14,14 +14,12 @@ import {
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
-import { UiEvent } from "../../rest/dto/ui-event.interfaces";
 import { useGetEvents } from "../../rest/event/event.actions";
 import { deleteEvent } from "../../rest/event/events.rest";
-import { getUiEvents } from "../../utils/events/events.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const EventsAllPage: FunctionComponent = () => {
-    const [uiEvents, setUiEvents] = useState<UiEvent[] | null>(null);
+    const [uiEvents, setUiEvents] = useState<Event[] | null>(null);
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
@@ -34,10 +32,10 @@ export const EventsAllPage: FunctionComponent = () => {
     const fetchAllEvents = (): void => {
         setUiEvents(null);
 
-        let fetchedEvents: UiEvent[] = [];
+        let fetchedEvents: Event[] = [];
         getEvents()
             .then((events) => {
-                fetchedEvents = getUiEvents(events || []);
+                fetchedEvents = events || [];
             })
             .catch((error: AxiosError) => {
                 const errMessages = getErrorMessages(error);
@@ -84,20 +82,20 @@ export const EventsAllPage: FunctionComponent = () => {
         }
     }, [status, uiEvents]);
 
-    const handleEventDelete = (uiEvent: UiEvent): void => {
+    const handleEventDelete = (event: Event): void => {
         showDialog({
             type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
-                name: uiEvent.name,
+                name: event.name,
             }),
             okButtonText: t("label.delete"),
             cancelButtonText: t("label.cancel"),
-            onOk: () => handleEventDeleteOk(uiEvent),
+            onOk: () => handleEventDeleteOk(event),
         });
     };
 
-    const handleEventDeleteOk = (uiEvent: UiEvent): void => {
-        deleteEvent(uiEvent.id)
+    const handleEventDeleteOk = (event: Event): void => {
+        deleteEvent(event.id)
             .then((event) => {
                 notify(
                     NotificationTypeV1.Success,

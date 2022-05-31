@@ -12,6 +12,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { getEventsViewPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -126,14 +127,18 @@ export const EventCard: FunctionComponent<EventCardProps> = (
                             <NameValueDisplayCard<string>
                                 name={t("label.start")}
                                 searchWords={props.searchWords}
-                                values={[props.event.startTime]}
+                                values={[
+                                    formatDateAndTimeV1(props.event.startTime),
+                                ]}
                             />
                         </Grid>
                         <Grid item md={4} xs={12}>
                             <NameValueDisplayCard<string>
                                 name={t("label.end")}
                                 searchWords={props.searchWords}
-                                values={[props.event.endTime]}
+                                values={[
+                                    formatDateAndTimeV1(props.event.endTime),
+                                ]}
                             />
                         </Grid>
 

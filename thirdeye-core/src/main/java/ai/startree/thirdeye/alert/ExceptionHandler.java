@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class ExceptionHandler {
 
-  // do not use Map.of. order is important and ImmutableList conserves order
+  // do not use Map.of. Order is important. ImmutableMap conserves order
   private static final Map<Class<?>, Function<Throwable, StatusApi>> ALERT_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
       .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
       .put(DataProviderException.class, e -> statusApi(ERR_DATA_UNAVAILABLE, e.getMessage()))

@@ -12,10 +12,12 @@ public class TaskDriverConfiguration {
 
   private Long id;
   private boolean enabled = false;
+  private boolean betaEnabled = false;
   private Duration noTaskDelay = Duration.ofSeconds(15);
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
   private Duration maxTaskRunTime = Duration.ofHours(6);
+  private Duration heartbeatInterval = Duration.ofSeconds(5);
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
@@ -25,11 +27,20 @@ public class TaskDriverConfiguration {
   }
 
   public TaskDriverConfiguration setId(final Long id) {
-    if(id == null || id < 0){
+    if(betaEnabled){
       this.id = Math.abs(new Random().nextLong());
     } else {
       this.id = id;
     }
+    return this;
+  }
+
+  public boolean isBetaEnabled() {
+    return betaEnabled;
+  }
+
+  public TaskDriverConfiguration setBetaEnabled(final boolean betaEnabled) {
+    this.betaEnabled = betaEnabled;
     return this;
   }
 
@@ -93,6 +104,15 @@ public class TaskDriverConfiguration {
 
   public TaskDriverConfiguration setMaxParallelTasks(final int maxParallelTasks) {
     this.maxParallelTasks = maxParallelTasks;
+    return this;
+  }
+
+  public Duration getHeartbeatInterval() {
+    return heartbeatInterval;
+  }
+
+  public TaskDriverConfiguration setHeartbeatInterval(final Duration heartbeatInterval) {
+    this.heartbeatInterval = heartbeatInterval;
     return this;
   }
 }

@@ -1,4 +1,14 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
@@ -41,7 +51,9 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
         useState<DatasourceWizardStep>(
             DatasourceWizardStep.DATASOURCE_CONFIGURATION
         );
+    const [autoOnboard, setAutoOnboard] = useState(false);
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const onDatasourceConfigurationChange = (value: string): void => {
         setNewDatasourceJSON(value);
@@ -49,6 +61,13 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
     const onCancel = (): void => {
         props.onCancel && props.onCancel();
+    };
+
+    const handleAutoOnboardChange = (
+        _: React.ChangeEvent<HTMLInputElement>,
+        checked: boolean
+    ): void => {
+        setAutoOnboard(checked);
     };
 
     const onBack = (): void => {
@@ -80,7 +99,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
         if (currentWizardStep === DatasourceWizardStep.REVIEW_AND_SUBMIT) {
             // On last step
-            props.onFinish && props.onFinish(newDatasource);
+            props.onFinish && props.onFinish(newDatasource, autoOnboard);
 
             return;
         }
@@ -206,6 +225,22 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                     onChange={onDatasourceConfigurationChange}
                                 />
                             </Grid>
+
+                            {/* Dataset onboard check */}
+                            <Grid item lg={4} md={5} sm={6} xs={12}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={autoOnboard}
+                                            color="primary"
+                                            onChange={handleAutoOnboardChange}
+                                        />
+                                    }
+                                    label={t("label.onboard-entity", {
+                                        entity: t("label.datasets"),
+                                    })}
+                                />
+                            </Grid>
                         </>
                     )}
 
@@ -220,6 +255,40 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                     readOnly
                                     value={newDatasource}
                                 />
+                            </Grid>
+
+                            {/* Dataset onboard information */}
+                            <Grid item sm={3}>
+                                <Typography variant="subtitle1">
+                                    <strong>
+                                        {t("label.onboard-entity", {
+                                            entity: t("label.datasets"),
+                                        })}
+                                    </strong>
+                                </Typography>
+                            </Grid>
+
+                            <Grid item sm={9}>
+                                <Typography variant="body2">
+                                    <>
+                                        {/* Active */}
+                                        {autoOnboard ? (
+                                            <CheckIcon
+                                                fontSize="small"
+                                                htmlColor={
+                                                    theme.palette.success.main
+                                                }
+                                            />
+                                        ) : (
+                                            <CloseIcon
+                                                fontSize="small"
+                                                htmlColor={
+                                                    theme.palette.error.main
+                                                }
+                                            />
+                                        )}
+                                    </>
+                                </Typography>
                             </Grid>
                         </>
                     )}

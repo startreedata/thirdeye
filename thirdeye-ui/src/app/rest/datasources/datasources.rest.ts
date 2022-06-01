@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
 
 const BASE_URL_DATASOURCES = "/api/data-sources";
@@ -43,6 +44,16 @@ export const updateDatasources = async (
     datasources: Datasource[]
 ): Promise<Datasource[]> => {
     const response = await axios.put(BASE_URL_DATASOURCES, datasources);
+
+    return response.data;
+};
+
+export const onboardAllDatasets = async (
+    datasourceName: string
+): Promise<Dataset[]> => {
+    const response = await axios.post(`${BASE_URL_DATASOURCES}/onboard-all`, {
+        name: datasourceName,
+    });
 
     return response.data;
 };

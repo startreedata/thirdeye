@@ -12,7 +12,10 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { createDatasource } from "../../rest/datasources/datasources.rest";
+import {
+    createDatasource,
+    onboardAllDatasets,
+} from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
@@ -22,7 +25,10 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    const onDatasourceWizardFinish = (datasource: Datasource): void => {
+    const onDatasourceWizardFinish = (
+        datasource: Datasource,
+        onboardDatasets: boolean
+    ): void => {
         if (!datasource) {
             return;
         }
@@ -35,6 +41,34 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                         entity: t("label.datasource"),
                     })
                 );
+
+                // Onboarding datasets won't be a blocker.
+                // So we won't stop navigate for this API call
+                onboardDatasets &&
+                    onboardAllDatasets(datasource.name)
+                        .then((): void => {
+                            notify(
+                                NotificationTypeV1.Success,
+                                t("message.onboard-success", {
+                                    entity: t("label.datasets"),
+                                })
+                            );
+                        })
+                        .catch((error: AxiosError): void => {
+                            const errMessages = getErrorMessages(error);
+
+                            isEmpty(errMessages)
+                                ? notify(
+                                      NotificationTypeV1.Error,
+                                      t("message.onboard-error", {
+                                          entity: t("label.datasets"),
+                                      })
+                                  )
+                                : errMessages.map((err) =>
+                                      notify(NotificationTypeV1.Error, err)
+                                  );
+                        });
+
                 // Redirect to datasources detail path
                 navigate(getDatasourcesViewPath(datasource.id));
             })

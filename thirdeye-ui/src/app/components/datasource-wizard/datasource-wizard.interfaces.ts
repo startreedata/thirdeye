@@ -4,7 +4,7 @@ export interface DatasourceWizardProps {
     datasource?: Datasource;
     showCancel?: boolean;
     onCancel?: () => void;
-    onFinish?: (datasource: Datasource) => void;
+    onFinish?: (datasource: Datasource, onboardDatasets: boolean) => void;
 }
 
 export enum DatasourceWizardStep {

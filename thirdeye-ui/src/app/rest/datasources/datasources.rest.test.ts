@@ -152,7 +152,7 @@ describe("Datasources REST", () => {
 
         expect(axios.post).toHaveBeenCalledWith(
             "/api/data-sources/onboard-all",
-            mockDatasourceRequest.name
+            mockDatasourceRequest
         );
     });
 

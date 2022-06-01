@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import org.testng.annotations.Test;
 
-// test protected
 public class TestEventManagerImpl {
 
   private static final String COUNTRY_DIMENSION_KEY = "country";

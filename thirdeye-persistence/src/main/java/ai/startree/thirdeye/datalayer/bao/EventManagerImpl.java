@@ -11,7 +11,11 @@ import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements EventManager {
@@ -26,14 +30,6 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     return findByPredicate(predicate);
   }
 
-  public List<EventDTO> findEventsBetweenTimeRangeWithType(String eventType, long startTime,
-      long endTime) {
-    Predicate predicate = Predicate
-        .AND(Predicate.EQ("eventType", eventType), Predicate.GT("endTime", startTime),
-            Predicate.LT("startTime", endTime));
-    return findByPredicate(predicate);
-  }
-
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime) {
     Predicate predicate = Predicate
@@ -42,6 +38,54 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     return findByPredicate(predicate);
   }
 
+  @Override
+  public List<EventDTO> findEventsBetweenTimeRange(final long startTime,
+      final long endTime, @Nullable final String eventType) {
+    if (eventType == null) {
+      return findEventsBetweenTimeRange(startTime, endTime);
+    }
+    Predicate predicate = Predicate
+        .AND(Predicate.EQ("eventType", eventType), Predicate.GT("endTime", startTime),
+            Predicate.LT("startTime", endTime));
+    return findByPredicate(predicate);
+  }
+
+  @Override
+  public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
+      final @Nullable String eventType, final @Nullable Map<String, Set<String>> dimensionFilters) {
+    List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventType);
+
+    return applyDimensionFilters(events, dimensionFilters);
+  }
+
+  private List<EventDTO> applyDimensionFilters(final List<EventDTO> events,
+      final @Nullable Map<String, Set<String>> dimensionFilters) {
+    if (dimensionFilters == null) {
+      return events;
+    }
+
+    final List<EventDTO> filteredEvents = new ArrayList<>();
+    for (EventDTO e : events) {
+      Map<String, List<String>> eventDimensions = e.getTargetDimensionMap();
+      for (String filterKey : dimensionFilters.keySet()) {
+        final Set<String> filterValues = dimensionFilters.get(filterKey);
+        final List<String> eventValues = eventDimensions.get(filterKey);
+        if (eventValues == null) {
+          continue;
+        }
+        for (String value : eventValues) {
+          if (filterValues.contains(value)) {
+            filteredEvents.add(e);
+            break;
+          }
+        }
+      }
+    }
+
+    return filteredEvents;
+  }
+
+  @Override
   public List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long start,
       long end) {
     Predicate predicate = Predicate

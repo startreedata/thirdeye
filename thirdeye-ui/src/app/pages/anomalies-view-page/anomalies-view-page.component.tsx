@@ -1,12 +1,5 @@
-import {
-    Box,
-    Card,
-    CardContent,
-    Grid,
-    Link,
-    Paper,
-    Typography,
-} from "@material-ui/core";
+import { Box, Grid, Link, Paper, Typography } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,9 +12,9 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
-    AppLoadingIndicatorV1,
     HelpLinkIconV1,
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     TooltipV1,
@@ -226,10 +219,33 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 >
                     <Grid item lg={9} md={8} sm={12} xs={12}>
                         <Paper className={style.fullHeight} elevation={0}>
-                            <AnomalyCard
-                                uiAnomaly={uiAnomaly}
-                                onDelete={handleAnomalyDelete}
-                            />
+                            {anomalyRequestStatus === ActionStatus.Working && (
+                                <PageContentsCardV1>
+                                    <Skeleton
+                                        animation="pulse"
+                                        variant="text"
+                                    />
+                                    <Skeleton
+                                        animation="pulse"
+                                        variant="text"
+                                    />
+                                    <Skeleton
+                                        animation="pulse"
+                                        variant="text"
+                                    />
+                                    <Skeleton
+                                        animation="pulse"
+                                        variant="text"
+                                    />
+                                </PageContentsCardV1>
+                            )}
+
+                            {anomalyRequestStatus === ActionStatus.Done && (
+                                <AnomalyCard
+                                    uiAnomaly={uiAnomaly}
+                                    onDelete={handleAnomalyDelete}
+                                />
+                            )}
                         </Paper>
                     </Grid>
                     <Grid item lg={3} md={4} sm={12} xs={12}>
@@ -252,13 +268,21 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
                     {getEvaluationRequestStatus === ActionStatus.Error && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
+                        <PageContentsCardV1>
+                            <Box pb={20} pt={20}>
+                                <NoDataIndicator />
+                            </Box>
+                        </PageContentsCardV1>
+                    )}
+                    {(getEvaluationRequestStatus === ActionStatus.Working ||
+                        anomalyRequestStatus === ActionStatus.Working) && (
+                        <PageContentsCardV1>
+                            <Skeleton
+                                animation="pulse"
+                                height={500}
+                                variant="rect"
+                            />
+                        </PageContentsCardV1>
                     )}
                     {getEvaluationRequestStatus === ActionStatus.Done && (
                         <AlertEvaluationTimeSeriesCard
@@ -274,22 +298,19 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     {getInvestigationsRequestStatus ===
                         ActionStatus.Working && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <AppLoadingIndicatorV1 />
-                                </Box>
-                            </CardContent>
-                        </Card>
+                        <PageContentsCardV1>
+                            <Skeleton animation="pulse" variant="text" />
+                            <Skeleton animation="pulse" variant="text" />
+                            <Skeleton animation="pulse" variant="text" />
+                            <Skeleton animation="pulse" variant="text" />
+                        </PageContentsCardV1>
                     )}
                     {getInvestigationsRequestStatus === ActionStatus.Error && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
+                        <PageContentsCardV1>
+                            <Box pb={20} pt={20}>
+                                <NoDataIndicator />
+                            </Box>
+                        </PageContentsCardV1>
                     )}
                     {getInvestigationsRequestStatus === ActionStatus.Done &&
                         investigations &&
@@ -301,17 +322,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     {getInvestigationsRequestStatus === ActionStatus.Done &&
                         investigations &&
                         investigations.length === 0 && (
-                            <Card variant="outlined">
-                                <CardContent>
-                                    <Box pb={3} pt={3} textAlign="center">
-                                        <Typography variant="h6">
-                                            {t(
-                                                "message.no-saved-investigations"
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                </CardContent>
-                            </Card>
+                            <PageContentsCardV1>
+                                <Box pb={3} pt={3} textAlign="center">
+                                    <Typography variant="h6">
+                                        {t("message.no-saved-investigations")}
+                                    </Typography>
+                                </Box>
+                            </PageContentsCardV1>
                         )}
                 </Grid>
             </PageContentsGridV1>

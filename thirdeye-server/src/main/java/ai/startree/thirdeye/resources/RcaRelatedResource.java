@@ -91,9 +91,8 @@ public class RcaRelatedResource {
         .plus(lookaroundPeriod)
         .getMillis(), anomalyInterval.getEnd().getMillis());
 
-    final List<EventDTO> events = type != null ?
-        eventDAO.findEventsBetweenTimeRangeWithType(type, startWithLookback, endWithLookahead) :
-        eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead);
+    // todo add event filters for rca type and dimension filters could be set at the alert metadata level or at call time?
+    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead, type, null);
 
     final Comparator<EventDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,

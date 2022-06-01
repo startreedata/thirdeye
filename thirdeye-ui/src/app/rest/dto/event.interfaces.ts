@@ -8,8 +8,3 @@ export interface EditableEvent {
     startTime: number;
     endTime: number;
 }
-
-export interface InvestigationEvent {
-    id: number;
-    name: string;
-}

@@ -1,7 +1,7 @@
 import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "./anomaly.interfaces";
-import { InvestigationEvent } from "./event.interfaces";
+import { Event } from "./event.interfaces";
 
 export interface AnomalyBreakdown {
     metric: {
@@ -114,7 +114,7 @@ export enum SavedStateKeys {
 export interface UIStateMetaData {
     [SavedStateKeys.QUERY_SEARCH_STRING]?: string;
     [SavedStateKeys.CHART_FILTER_SET]?: AnomalyFilterOption[][];
-    [SavedStateKeys.EVENT_SET]?: InvestigationEvent[];
+    [SavedStateKeys.EVENT_SET]?: Event[];
 }
 
 export interface Investigation {

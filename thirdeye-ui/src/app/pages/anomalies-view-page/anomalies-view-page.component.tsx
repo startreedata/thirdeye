@@ -188,7 +188,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title="">
+            <PageHeader showCreateButton showTimeRange title="">
                 {anomaly && uiAnomaly && (
                     <>
                         <Link href={getAlertsViewPath(anomaly.alert.id)}>
@@ -256,15 +256,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             <CardContent>
                                 <Box pb={20} pt={20}>
                                     <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {getEvaluationRequestStatus === ActionStatus.Working && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <AppLoadingIndicatorV1 />
                                 </Box>
                             </CardContent>
                         </Card>

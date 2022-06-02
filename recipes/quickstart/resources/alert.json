@@ -14,7 +14,8 @@
       "timeColumn": "timestamp",
       "timeColumnFormat": "1:MILLISECONDS:EPOCH",
       "max": "900",
-      "min": "200"
+      "min": "200",
+      "rcaAggregationFunction": "COUNT"
     },
     "cron": "0 0 0/2 1/1 * ? *"
   }

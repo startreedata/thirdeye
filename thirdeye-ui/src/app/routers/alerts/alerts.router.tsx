@@ -1,11 +1,13 @@
-import { DateTime } from "luxon";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+import {
+    AppRouteRelative,
+    generateDateRangeMonthsFromNow,
+} from "../../utils/routes/routes.util";
 import { SaveLastUsedSearchParams } from "../../utils/routes/save-last-used-search-params/save-last-used-search-params.component";
 
 const AlertsAllPage = lazy(() =>
@@ -74,16 +76,7 @@ export const AlertsRouter: FunctionComponent = () => {
                             <RedirectWithDefaultParams
                                 useStoredLastUsedParamsPathKey
                                 customDurationGenerator={() => {
-                                    const now = DateTime.local();
-                                    const roundedNow = now.endOf("hour");
-                                    const threeMonthsAgo = now
-                                        .minus({ month: 1 })
-                                        .startOf("month");
-
-                                    return [
-                                        threeMonthsAgo.toMillis(),
-                                        roundedNow.toMillis(),
-                                    ];
+                                    return generateDateRangeMonthsFromNow(1);
                                 }}
                                 to={AppRouteRelative.ALERTS_VIEW}
                             />

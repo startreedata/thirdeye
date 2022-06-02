@@ -6,15 +6,23 @@
 package ai.startree.thirdeye.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 
 public class TimeUtils {
 
-
-  public static Period isoPeriod(String period) {
+  public static Period isoPeriod(@NonNull final String period) {
     return Period.parse(period, ISOPeriodFormat.standard());
+  }
+
+  public static Period isoPeriod(@Nullable final String period, final Period defaultIfNull) {
+    return Optional.ofNullable(period)
+        .map(p -> Period.parse(p, ISOPeriodFormat.standard()))
+        .orElse(defaultIfNull);
   }
 
   /**

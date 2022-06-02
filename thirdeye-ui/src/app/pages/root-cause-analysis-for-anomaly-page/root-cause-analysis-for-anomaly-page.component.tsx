@@ -1,5 +1,5 @@
 import { Card, CardContent, Grid } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { clone, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
@@ -50,7 +50,13 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             []
         )
     );
-    const [selectedEvents, setSelectedEvents] = useState<Event[]>([]);
+    const [selectedEvents, setSelectedEvents] = useState<Event[]>(
+        getFromSavedInvestigationOrDefault<Event[]>(
+            investigation,
+            SavedStateKeys.EVENT_SET,
+            []
+        )
+    );
 
     const { notify } = useNotificationProviderV1();
     const { id: anomalyId } =
@@ -66,6 +72,15 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             investigationHasChanged(copied);
         }
     }, [chartTimeSeriesFilterSet]);
+
+    // save selected events to investigation
+    useEffect(() => {
+        if (investigation) {
+            const copied: Investigation = { ...investigation };
+            copied.uiMetadata[SavedStateKeys.EVENT_SET] = clone(selectedEvents);
+            investigationHasChanged(copied);
+        }
+    }, [selectedEvents]);
 
     useEffect(() => {
         !!anomalyId &&

@@ -38,11 +38,6 @@ load_default_alert_templates() {
   curl -X POST  http://${COORDINATOR_HOST}:${COORDINATOR_PORT}/api/alert-templates/load-defaults -d "updateExisting=true"
 }
 
-create_metric() {
-  curl -X POST http://${COORDINATOR_HOST}:${COORDINATOR_PORT}/api/metrics -H "Content-Type: application/json" \
-      --data-binary "@/home/thirdeye/resources/metric.json"
-}
-
 create_alert() {
   curl -X POST http://${COORDINATOR_HOST}:${COORDINATOR_PORT}/api/alerts -H "Content-Type: application/json" \
     --data-binary "@/home/thirdeye/resources/alert.json"
@@ -56,9 +51,6 @@ onboard_dataset
 
 # Load the default alert templates into ThirdEye
 load_default_alert_templates
-
-# create metric in ThirdEye
-create_metric
 
 # create alert in ThirdEye
 create_alert

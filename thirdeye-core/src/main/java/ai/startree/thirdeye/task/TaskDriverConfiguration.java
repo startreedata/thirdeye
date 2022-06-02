@@ -17,6 +17,7 @@ public class TaskDriverConfiguration {
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
   private Duration maxTaskRunTime = Duration.ofHours(6);
+  private Duration heartbeatInterval = Duration.ofMinutes(5);
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;

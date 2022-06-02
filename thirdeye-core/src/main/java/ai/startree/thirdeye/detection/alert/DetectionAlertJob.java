@@ -23,6 +23,7 @@ import ai.startree.thirdeye.task.DetectionAlertTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -78,6 +79,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
   }
 
   private boolean taskAlreadyRunning(final TaskManager taskDAO, final String jobName) {
+    final long orphanTime = System.currentTimeMillis() - ORPHAN_TASK_THRESHOLD;
     // check if a notification task for the job is already scheduled and not timed-out
     // todo cyril current implementation does not check the timeout
     List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
@@ -86,7 +88,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
             Predicate.EQ("status", TaskStatus.RUNNING.toString()),
             Predicate.EQ("status", TaskStatus.WAITING.toString())
         ))
-    );
+    ).stream().filter(task -> task.getLastActive() >= orphanTime).collect(Collectors.toList());
     return !scheduledTasks.isEmpty();
   }
 

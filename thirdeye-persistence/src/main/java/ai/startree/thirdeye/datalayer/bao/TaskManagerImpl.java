@@ -116,6 +116,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       task.setStatus(TaskStatus.RUNNING);
       task.setWorkerId(workerId);
       task.setStartTime(System.currentTimeMillis());
+      task.setLastActive(System.currentTimeMillis());
       //increment the version
       task.setVersion(expectedVersion + 1);
       final Predicate predicate = Predicate.AND(
@@ -145,6 +146,13 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   public void updateTaskStartTime(final Long id, final Long taskStartTime) {
     final TaskDTO task = findById(id);
     task.setStartTime(taskStartTime);
+    save(task);
+  }
+
+  @Override
+  public void updateTaskLastActiveTime(final Long id, final Long taskActiveTime) {
+    final TaskDTO task = findById(id);
+    task.setLastActive(taskActiveTime);
     save(task);
   }
 

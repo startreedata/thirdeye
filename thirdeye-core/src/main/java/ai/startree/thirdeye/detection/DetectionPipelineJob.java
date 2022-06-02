@@ -87,6 +87,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
 
   private static boolean taskAlreadyRunning(String jobName, DetectionPipelineTaskInfo taskInfo,
       final TaskManager taskDAO) {
+    final long orphanTime = System.currentTimeMillis() - ORPHAN_TASK_THRESHOLD;
     // check if a task for this detection pipeline is already scheduled
     List<TaskDTO> scheduledTasks = taskDAO
         .findByPredicate(Predicate.AND(
@@ -95,7 +96,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
                     Predicate.EQ("status", TaskStatus.RUNNING.toString()),
                     Predicate.EQ("status", TaskStatus.WAITING.toString()))
             )
-        );
+        ).stream().filter(task -> task.getLastActive() >= orphanTime).collect(Collectors.toList());
 
     List<DetectionPipelineTaskInfo> scheduledTaskInfos = scheduledTasks.stream().map(taskDTO -> {
       try {

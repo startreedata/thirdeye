@@ -9,6 +9,7 @@ import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
 import static java.util.Objects.requireNonNull;
 
 import com.google.inject.Injector;
+import java.util.concurrent.TimeUnit;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeAbstractJob implements Job {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeAbstractJob.class);
+  protected static final long ORPHAN_TASK_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
 
   protected final <T> T getInstance(final JobExecutionContext context, Class<T> clazz) {
     final Injector injector = (Injector) getObjectFromContext(context, CTX_INJECTOR);

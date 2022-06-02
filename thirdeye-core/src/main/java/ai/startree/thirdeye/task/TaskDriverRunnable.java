@@ -95,6 +95,8 @@ public class TaskDriverRunnable implements Runnable {
     final long tStart = System.currentTimeMillis();
     taskCounter.inc();
 
+    Thread heartbeat = new Thread(() -> taskExecutionHeartbeat(taskDTO), String.format("HEARTBEAT_%s", taskDTO.getJobName()));
+    heartbeat.start();
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
@@ -117,6 +119,20 @@ public class TaskDriverRunnable implements Runnable {
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
+      heartbeat.interrupt();
+    }
+  }
+
+  private void taskExecutionHeartbeat(final TaskDTO taskDTO) {
+    LOG.info("Heartbeat started for task {}", taskDTO.getTaskInfo());
+    try {
+      while(true) {
+        taskManager.updateTaskLastActiveTime(taskDTO.getId(), System.currentTimeMillis());
+        LOG.info("Last active time updated");
+        Thread.sleep(config.getHeartbeatInterval().toMillis());
+      }
+    } catch (InterruptedException e) {
+      LOG.info("Heartbeat stopped for task {}", taskDTO.getTaskInfo());
     }
   }
 

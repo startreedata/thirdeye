@@ -1,6 +1,7 @@
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 
 export interface DatasourceWizardProps {
+    isCreate?: boolean;
     datasource?: Datasource;
     showCancel?: boolean;
     onCancel?: () => void;

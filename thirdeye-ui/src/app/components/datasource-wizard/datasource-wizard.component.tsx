@@ -227,20 +227,22 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                             </Grid>
 
                             {/* Dataset onboard check */}
-                            <Grid item lg={4} md={5} sm={6} xs={12}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={autoOnboard}
-                                            color="primary"
-                                            onChange={handleAutoOnboardChange}
-                                        />
-                                    }
-                                    label={t("label.onboard-entity", {
-                                        entity: t("label.datasets"),
-                                    })}
-                                />
-                            </Grid>
+                            {props.isCreate && (
+                                <Grid item lg={4} md={5} sm={6} xs={12}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={autoOnboard}
+                                                color="primary"
+                                                onChange={
+                                                    handleAutoOnboardChange
+                                                }
+                                            />
+                                        }
+                                        label={t("label.datasets-auto-onboard")}
+                                    />
+                                </Grid>
+                            )}
                         </>
                     )}
 
@@ -261,9 +263,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                             <Grid item sm={3}>
                                 <Typography variant="subtitle1">
                                     <strong>
-                                        {t("label.onboard-entity", {
-                                            entity: t("label.datasets"),
-                                        })}
+                                        {t("label.datasets-auto-onboard")}
                                     </strong>
                                 </Typography>
                             </Grid>

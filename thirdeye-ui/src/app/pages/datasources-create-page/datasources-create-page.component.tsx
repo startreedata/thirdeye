@@ -97,7 +97,10 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <DatasourceWizard onFinish={onDatasourceWizardFinish} />
+                    <DatasourceWizard
+                        isCreate
+                        onFinish={onDatasourceWizardFinish}
+                    />
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

@@ -1,9 +1,9 @@
-import { Box, CardContent } from "@material-ui/core";
+import { CardContent } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -51,28 +51,29 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
     }, [anomalyDimensionAnalysisReqStatus]);
 
     return (
-        <>
-            <CardContent>
-                {/* Loading Indicator when request is in flight */}
-                {anomalyDimensionAnalysisReqStatus === ActionStatus.Working && (
-                    <Box pb={20} pt={20}>
-                        <AppLoadingIndicatorV1 />
-                    </Box>
-                )}
+        <CardContent>
+            {/* Loading Indicator when request is in flight */}
+            {anomalyDimensionAnalysisReqStatus === ActionStatus.Working && (
+                <>
+                    <Skeleton height={50} variant="text" />
+                    <Skeleton height={50} variant="text" />
+                    <Skeleton height={50} variant="text" />
+                    <Skeleton height={50} variant="text" />
+                </>
+            )}
 
-                {anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&
-                    anomalyDimensionAnalysisData && (
-                        <AnomalyDimensionAnalysisTable
-                            anomaly={anomaly}
-                            anomalyDimensionAnalysisData={
-                                anomalyDimensionAnalysisData
-                            }
-                            chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
-                            comparisonOffset={comparisonOffset}
-                            onCheckClick={onCheckClick}
-                        />
-                    )}
-            </CardContent>
-        </>
+            {anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&
+                anomalyDimensionAnalysisData && (
+                    <AnomalyDimensionAnalysisTable
+                        anomaly={anomaly}
+                        anomalyDimensionAnalysisData={
+                            anomalyDimensionAnalysisData
+                        }
+                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
+                        comparisonOffset={comparisonOffset}
+                        onCheckClick={onCheckClick}
+                    />
+                )}
+        </CardContent>
     );
 };

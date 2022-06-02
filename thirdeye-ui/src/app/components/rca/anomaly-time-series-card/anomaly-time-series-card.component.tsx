@@ -6,6 +6,7 @@ import {
     CardContent,
     Grid,
 } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { debounce, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
@@ -16,7 +17,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
     TooltipV1,
     useNotificationProviderV1,
@@ -280,9 +280,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             </CardContent>
             {getEvaluationRequestStatus === ActionStatus.Working && (
                 <CardContent>
-                    <Box pb={20} pt={20}>
-                        <AppLoadingIndicatorV1 />
-                    </Box>
+                    <Skeleton height={350} variant="rect" />
                 </CardContent>
             )}
             {getEvaluationRequestStatus === ActionStatus.Error && (

@@ -1,4 +1,5 @@
-import { Card, CardContent, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { clone, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,8 +11,8 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { AnomalyTimeSeriesCard } from "../../components/rca/anomaly-time-series-card/anomaly-time-series-card.component";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -148,52 +149,61 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         <PageContentsGridV1>
             {/* Anomaly Summary */}
             <Grid item xs={12}>
-                {getAnomalyRequestStatus === ActionStatus.Working && (
-                    <Card variant="outlined">
-                        <CardContent>
-                            <AppLoadingIndicatorV1 />
-                        </CardContent>
-                    </Card>
-                )}
-                {getAnomalyRequestStatus !== ActionStatus.Working &&
-                    getAnomalyRequestStatus !== ActionStatus.Error && (
-                        <Grid
-                            container
-                            alignItems="stretch"
-                            justifyContent="space-between"
-                        >
-                            <Grid item lg={9} md={8} sm={12} xs={12}>
-                                <AnomalySummaryCard
-                                    className={style.fullHeight}
-                                    uiAnomaly={uiAnomaly}
-                                />
-                            </Grid>
-                            <Grid item lg={3} md={4} sm={12} xs={12}>
-                                {anomaly && (
-                                    <AnomalyFeedback
-                                        anomalyFeedback={
-                                            anomaly.feedback || {
-                                                ...DEFAULT_FEEDBACK,
-                                            }
-                                        }
-                                        anomalyId={anomaly.id}
-                                        className={style.fullHeight}
-                                    />
-                                )}
-                            </Grid>
-                        </Grid>
-                    )}
+                <Grid
+                    container
+                    alignItems="stretch"
+                    justifyContent="space-between"
+                >
+                    <Grid item lg={9} md={8} sm={12} xs={12}>
+                        {getAnomalyRequestStatus === ActionStatus.Working && (
+                            <PageContentsCardV1 className={style.fullHeight}>
+                                <Skeleton variant="text" />
+                                <Skeleton variant="text" />
+                                <Skeleton variant="text" />
+                            </PageContentsCardV1>
+                        )}
+                        {getAnomalyRequestStatus === ActionStatus.Done && (
+                            <AnomalySummaryCard
+                                className={style.fullHeight}
+                                uiAnomaly={uiAnomaly}
+                            />
+                        )}
+                    </Grid>
+                    <Grid item lg={3} md={4} sm={12} xs={12}>
+                        {getAnomalyRequestStatus === ActionStatus.Working && (
+                            <PageContentsCardV1 className={style.fullHeight}>
+                                <Skeleton height={50} variant="rect" />
+                            </PageContentsCardV1>
+                        )}
+                        {anomaly && (
+                            <AnomalyFeedback
+                                anomalyFeedback={
+                                    anomaly.feedback || {
+                                        ...DEFAULT_FEEDBACK,
+                                    }
+                                }
+                                anomalyId={anomaly.id}
+                                className={style.fullHeight}
+                            />
+                        )}
+                    </Grid>
+                </Grid>
                 {getAnomalyRequestStatus === ActionStatus.Error && (
-                    <Card variant="outlined">
-                        <CardContent>
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
                             <NoDataIndicator />
-                        </CardContent>
-                    </Card>
+                        </PageContentsCardV1>
+                    </Grid>
                 )}
             </Grid>
 
             {/* Trending */}
             <Grid item xs={12}>
+                {getAnomalyRequestStatus === ActionStatus.Working && (
+                    <PageContentsCardV1>
+                        <Skeleton height={400} variant="rect" />
+                    </PageContentsCardV1>
+                )}
                 {anomaly && (
                     <AnomalyTimeSeriesCard
                         anomaly={anomaly}
@@ -207,6 +217,11 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
 
             {/* Dimension Related */}
             <Grid item xs={12}>
+                {getAnomalyRequestStatus === ActionStatus.Working && (
+                    <PageContentsCardV1>
+                        <Skeleton height={500} variant="rect" />
+                    </PageContentsCardV1>
+                )}
                 {anomaly && (
                     <AnalysisTabs
                         anomaly={anomaly}

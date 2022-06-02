@@ -8,11 +8,11 @@ import {
     TableHead,
     TableRow,
 } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -80,78 +80,76 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     }, [events]);
 
     return (
-        <>
-            <CardContent>
-                {/* Loading Indicator when request is in flight */}
-                {status === ActionStatus.Working && (
-                    <Box pb={20} pt={20}>
-                        <AppLoadingIndicatorV1 />
-                    </Box>
-                )}
+        <CardContent>
+            {/* Loading Indicator when request is in flight */}
+            {status === ActionStatus.Working && (
+                <>
+                    <Skeleton height={50} variant="text" />
+                    <Skeleton height={50} variant="text" />
+                    <Skeleton height={50} variant="text" />
+                    <Skeleton height={50} variant="text" />
+                </>
+            )}
 
-                {status === ActionStatus.Done && events && events.length ? (
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell />
+            {status === ActionStatus.Done && events && events.length > 0 && (
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell />
+                            <TableCell>
+                                <strong>Name</strong>
+                            </TableCell>
+                            <TableCell>
+                                <strong>Start time</strong>
+                            </TableCell>
+                            <TableCell>
+                                <strong>End time</strong>
+                            </TableCell>
+                            <TableCell>
+                                <strong>Type</strong>
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {events.map((row) => (
+                            <TableRow key={row.id}>
                                 <TableCell>
-                                    <strong>Name</strong>
+                                    <Checkbox
+                                        checked={Boolean(
+                                            selectedEvents.find(
+                                                (selectedEvent) =>
+                                                    selectedEvent.id === row.id
+                                            )
+                                        )}
+                                        onChange={(_event, checked) =>
+                                            handleOnCheckboxClick(row, checked)
+                                        }
+                                    />
+                                </TableCell>
+                                <TableCell component="th" scope="row">
+                                    {row.name}
                                 </TableCell>
                                 <TableCell>
-                                    <strong>Start time</strong>
+                                    {formatDateAndTimeV1(row.startTime)}
                                 </TableCell>
                                 <TableCell>
-                                    <strong>End time</strong>
+                                    {formatDateAndTimeV1(row.endTime)}
                                 </TableCell>
-                                <TableCell>
-                                    <strong>Type</strong>
-                                </TableCell>
+                                <TableCell>{row.type || "-"}</TableCell>
                             </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {events.map((row) => (
-                                <TableRow key={row.id}>
-                                    <TableCell>
-                                        <Checkbox
-                                            checked={Boolean(
-                                                selectedEvents.find(
-                                                    (selectedEvent) =>
-                                                        selectedEvent.id ===
-                                                        row.id
-                                                )
-                                            )}
-                                            onChange={(_event, checked) =>
-                                                handleOnCheckboxClick(
-                                                    row,
-                                                    checked
-                                                )
-                                            }
-                                        />
-                                    </TableCell>
-                                    <TableCell component="th" scope="row">
-                                        {row.name}
-                                    </TableCell>
-                                    <TableCell>
-                                        {formatDateAndTimeV1(row.startTime)}
-                                    </TableCell>
-                                    <TableCell>
-                                        {formatDateAndTimeV1(row.endTime)}
-                                    </TableCell>
-                                    <TableCell>{row.type || "-"}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                ) : (
-                    <Box pb={20} pt={20}>
-                        <NoDataIndicator
-                            text={t("message.no-data-for-entity", {
-                                entity: t("label.events"),
-                            })}
-                        />
-                    </Box>
-                )}
-            </CardContent>
-        </>
+                        ))}
+                    </TableBody>
+                </Table>
+            )}
+            {status === ActionStatus.Done && events && events.length === 0 && (
+                <Box pb={20} pt={20}>
+                    <NoDataIndicator
+                        text={t("message.no-data-for-entity", {
+                            entity: t("label.events"),
+                        })}
+                    />
+                </Box>
+            )}
+        </CardContent>
     );
 };

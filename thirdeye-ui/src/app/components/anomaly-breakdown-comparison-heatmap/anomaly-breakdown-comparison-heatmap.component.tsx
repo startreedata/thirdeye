@@ -9,13 +9,13 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { HierarchyNode } from "d3-hierarchy";
 import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -296,9 +296,12 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             <CardContent>
                 {/* Loading Indicator when requests are in flight */}
                 {anomalyBreakdownReqStatus === ActionStatus.Working && (
-                    <Box pb={20} pt={20}>
-                        <AppLoadingIndicatorV1 />
-                    </Box>
+                    <>
+                        <Skeleton height={50} variant="text" />
+                        <Skeleton height={50} variant="text" />
+                        <Skeleton height={50} variant="text" />
+                        <Skeleton height={50} variant="text" />
+                    </>
                 )}
 
                 {/* If breakdownComparisonData is not empty render treemaps */}

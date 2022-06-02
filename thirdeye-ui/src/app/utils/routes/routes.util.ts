@@ -51,6 +51,10 @@ export const AppRouteRelative = {
     ROOT_CAUSE_ANALYSIS: `root-cause-analysis`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE: `investigate`,
+    EVENTS: "events",
+    EVENTS_ALL: "all",
+    EVENTS_CREATE: "create",
+    EVENTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
 };
 
 export const AppRoute = {
@@ -104,6 +108,9 @@ export const AppRoute = {
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE:
         `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
         `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}`,
+    EVENTS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}`,
+    EVENTS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_CREATE}`,
+    EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -310,6 +317,21 @@ export const getMetricsUpdatePath = (id: number): string => {
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return path;
+};
+
+export const getEventsAllPath = (): string => {
+    return AppRoute.EVENTS_ALL;
+};
+
+export const getEventsViewPath = (id: number): string => {
+    let path: string = AppRoute.EVENTS_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getEventsCreatePath = (): string => {
+    return AppRoute.EVENTS_CREATE;
 };
 
 export const getRootCauseAnalysisForAnomalyPath = (id: number): string => {

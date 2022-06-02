@@ -28,6 +28,7 @@ coordinator:
   name: coordinator
   replicaCount: 1
   port: 8080
+  tlsPort: 8443
   serviceType: LoadBalancer
 
   resources: {}

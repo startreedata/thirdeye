@@ -7,7 +7,6 @@ import {
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
@@ -78,7 +77,8 @@ export const offsetMilliseconds = (
 export const generateComparisonChartOptions = (
     nonFiltered: AlertEvaluation,
     filtered: AlertEvaluation,
-    anomaly: Anomaly,
+    startTime: number,
+    endTime: number,
     comparisonOffset: AnomalyBreakdownAPIOffsetValues,
     translation: (labelName: string) => string = (s) => s
 ): TimeSeriesChartProps => {
@@ -142,18 +142,15 @@ export const generateComparisonChartOptions = (
         xAxis: {
             plotBands: [
                 {
-                    start: anomaly.startTime,
-                    end: anomaly.endTime,
+                    start: startTime,
+                    end: endTime,
                     name: translation("label.anomaly-period"),
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,
                 },
                 {
-                    start: offsetMilliseconds(
-                        anomaly.startTime,
-                        comparisonOffset
-                    ),
-                    end: offsetMilliseconds(anomaly.endTime, comparisonOffset),
+                    start: offsetMilliseconds(startTime, comparisonOffset),
+                    end: offsetMilliseconds(endTime, comparisonOffset),
                     name: OFFSET_TO_HUMAN_READABLE[comparisonOffset],
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,

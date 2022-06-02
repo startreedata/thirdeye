@@ -10,6 +10,7 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,7 +20,9 @@ import {
     BASELINE_OPTIONS,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { PageContentsCardV1 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
@@ -37,6 +40,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     chartTimeSeriesFilterSet,
     selectedEvents,
     onEventSelectionChange,
+    isLoading,
 }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
@@ -67,6 +71,14 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         searchParams.set(ANALYSIS_TAB_IDX_KEY, newValue.toString());
         setSearchParams(searchParams);
     };
+
+    if (isLoading) {
+        return (
+            <PageContentsCardV1>
+                <Skeleton height={500} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
 
     return (
         <Card variant="outlined">
@@ -185,7 +197,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             {selectedTabIndex === 0 && (
                 <Box mt={-4}>
                     <AnomalyDimensionAnalysis
-                        anomaly={anomaly}
+                        anomaly={anomaly as Anomaly}
                         anomalyId={toNumber(anomalyId)}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}

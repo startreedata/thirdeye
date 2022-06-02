@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
     TooltipV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -52,7 +53,13 @@ const CHART_SIZE_OPTIONS = [
 
 export const AnomalyTimeSeriesCard: FunctionComponent<
     AnomalyTimeSeriesCardProps
-> = ({ anomaly, timeSeriesFiltersSet, onRemoveBtnClick, events }) => {
+> = ({
+    anomaly,
+    timeSeriesFiltersSet,
+    onRemoveBtnClick,
+    events,
+    isLoading,
+}) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -84,12 +91,6 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         determineInitialZoom(searchParams)
     );
 
-    const alertEvaluationPayload = createAlertEvaluation(
-        anomaly.alert.id,
-        Number(startTsStr),
-        Number(endTsStr)
-    );
-
     const fetchAlertEvaluation = (): void => {
         setAlertEvaluation(null);
 
@@ -97,7 +98,13 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             return;
         }
 
-        getEvaluation(alertEvaluationPayload).then(
+        getEvaluation(
+            createAlertEvaluation(
+                anomaly.alert.id,
+                Number(startTsStr),
+                Number(endTsStr)
+            )
+        ).then(
             (fetchedEvaluation) =>
                 fetchedEvaluation && setAlertEvaluation(fetchedEvaluation)
         );
@@ -113,7 +120,14 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         const dataRequests = timeSeriesFiltersSet.map((filterSet) => {
             const filters = filterSet.map(concatKeyValueWithEqual);
 
-            return getAlertEvaluation(alertEvaluationPayload, filters);
+            return getAlertEvaluation(
+                createAlertEvaluation(
+                    anomaly.alert.id,
+                    Number(startTsStr),
+                    Number(endTsStr)
+                ),
+                filters
+            );
         });
 
         Promise.all(dataRequests).then((dataFromRequests) => {
@@ -214,6 +228,14 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         );
     };
 
+    if (isLoading) {
+        return (
+            <PageContentsCardV1>
+                <Skeleton height={400} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
+
     return (
         <Card variant="outlined">
             <CardContent>
@@ -290,7 +312,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                     </Box>
                 </CardContent>
             )}
-            {getEvaluationRequestStatus === ActionStatus.Done &&
+            {anomaly &&
+                getEvaluationRequestStatus === ActionStatus.Done &&
                 alertEvaluation !== null &&
                 (timeSeriesFiltersSet.length === 0 || !showFilterSetTable) && (
                     <CardContent>
@@ -310,7 +333,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                         />
                     </CardContent>
                 )}
-            {getEvaluationRequestStatus === ActionStatus.Done &&
+            {anomaly &&
+                getEvaluationRequestStatus === ActionStatus.Done &&
                 alertEvaluation !== null &&
                 timeSeriesFiltersSet.length > 0 &&
                 showFilterSetTable && (

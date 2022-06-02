@@ -1,18 +1,12 @@
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Grid,
-    MenuItem,
-    TextField,
-} from "@material-ui/core";
+import { Box, Button, Grid, MenuItem, TextField } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -36,6 +30,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     anomalyId,
     anomalyFeedback,
     className,
+    isLoading,
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
@@ -158,39 +153,45 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             });
     };
 
+    if (isLoading) {
+        return (
+            <PageContentsCardV1 className={className}>
+                <Skeleton height={50} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
+
     return (
-        <Card className={className} variant="outlined">
-            <CardContent>
-                <Grid container>
-                    <Grid item xs={12}>
-                        <label>
-                            <strong>Is this an anomaly?</strong>
-                        </label>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            select
-                            id="anomaly-feedback-select"
-                            value={currentlySelected}
-                            onChange={handleLabelChange}
-                        >
-                            {Object.keys(OPTION_TO_DESCRIPTIONS).map(
-                                (optionKey: string) => (
-                                    <MenuItem key={optionKey} value={optionKey}>
-                                        {OPTION_TO_DESCRIPTIONS[optionKey]}
-                                    </MenuItem>
-                                )
-                            )}
-                        </TextField>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Button onClick={handleCommentUpdateClick}>
-                            View / Edit comment
-                        </Button>
-                    </Grid>
+        <PageContentsCardV1>
+            <Grid container>
+                <Grid item xs={12}>
+                    <label>
+                        <strong>Is this an anomaly?</strong>
+                    </label>
                 </Grid>
-            </CardContent>
-        </Card>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        select
+                        id="anomaly-feedback-select"
+                        value={currentlySelected}
+                        onChange={handleLabelChange}
+                    >
+                        {Object.keys(OPTION_TO_DESCRIPTIONS).map(
+                            (optionKey: string) => (
+                                <MenuItem key={optionKey} value={optionKey}>
+                                    {OPTION_TO_DESCRIPTIONS[optionKey]}
+                                </MenuItem>
+                            )
+                        )}
+                    </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                    <Button onClick={handleCommentUpdateClick}>
+                        View / Edit comment
+                    </Button>
+                </Grid>
+            </Grid>
+        </PageContentsCardV1>
     );
 };

@@ -45,7 +45,9 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     row,
     totalSum,
     dimensionColumns,
-    anomaly,
+    alertId,
+    startTime,
+    endTime,
     comparisonOffset,
     checked,
     onCheckClick,
@@ -128,10 +130,12 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                     <Collapse unmountOnExit in={open} timeout="auto">
                         {open && (
                             <AlgorithmRowExpanded
-                                anomaly={anomaly}
+                                alertId={alertId}
                                 comparisonOffset={comparisonOffset}
                                 dimensionColumns={dimensionColumns}
+                                endTime={endTime}
                                 row={row}
+                                startTime={startTime}
                             />
                         )}
                     </Collapse>

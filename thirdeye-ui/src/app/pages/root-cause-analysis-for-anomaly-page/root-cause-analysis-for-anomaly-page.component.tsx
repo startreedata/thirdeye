@@ -1,5 +1,4 @@
 import { Grid } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
 import { clone, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -155,37 +154,27 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     justifyContent="space-between"
                 >
                     <Grid item lg={9} md={8} sm={12} xs={12}>
-                        {getAnomalyRequestStatus === ActionStatus.Working && (
-                            <PageContentsCardV1 className={style.fullHeight}>
-                                <Skeleton variant="text" />
-                                <Skeleton variant="text" />
-                                <Skeleton variant="text" />
-                            </PageContentsCardV1>
-                        )}
-                        {getAnomalyRequestStatus === ActionStatus.Done && (
-                            <AnomalySummaryCard
-                                className={style.fullHeight}
-                                uiAnomaly={uiAnomaly}
-                            />
-                        )}
+                        <AnomalySummaryCard
+                            className={style.fullHeight}
+                            isLoading={
+                                getAnomalyRequestStatus === ActionStatus.Working
+                            }
+                            uiAnomaly={uiAnomaly}
+                        />
                     </Grid>
                     <Grid item lg={3} md={4} sm={12} xs={12}>
-                        {getAnomalyRequestStatus === ActionStatus.Working && (
-                            <PageContentsCardV1 className={style.fullHeight}>
-                                <Skeleton height={50} variant="rect" />
-                            </PageContentsCardV1>
-                        )}
-                        {anomaly && (
-                            <AnomalyFeedback
-                                anomalyFeedback={
-                                    anomaly.feedback || {
-                                        ...DEFAULT_FEEDBACK,
-                                    }
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
                                 }
-                                anomalyId={anomaly.id}
-                                className={style.fullHeight}
-                            />
-                        )}
+                            }
+                            anomalyId={toNumber(anomalyId)}
+                            className={style.fullHeight}
+                            isLoading={
+                                getAnomalyRequestStatus === ActionStatus.Working
+                            }
+                        />
                     </Grid>
                 </Grid>
                 {getAnomalyRequestStatus === ActionStatus.Error && (
@@ -199,39 +188,27 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
 
             {/* Trending */}
             <Grid item xs={12}>
-                {getAnomalyRequestStatus === ActionStatus.Working && (
-                    <PageContentsCardV1>
-                        <Skeleton height={400} variant="rect" />
-                    </PageContentsCardV1>
-                )}
-                {anomaly && (
-                    <AnomalyTimeSeriesCard
-                        anomaly={anomaly}
-                        // Selected events should be shown on the graph
-                        events={selectedEvents}
-                        timeSeriesFiltersSet={chartTimeSeriesFilterSet}
-                        onRemoveBtnClick={handleRemoveBtnClick}
-                    />
-                )}
+                <AnomalyTimeSeriesCard
+                    anomaly={anomaly}
+                    // Selected events should be shown on the graph
+                    events={selectedEvents}
+                    isLoading={getAnomalyRequestStatus === ActionStatus.Working}
+                    timeSeriesFiltersSet={chartTimeSeriesFilterSet}
+                    onRemoveBtnClick={handleRemoveBtnClick}
+                />
             </Grid>
 
             {/* Dimension Related */}
             <Grid item xs={12}>
-                {getAnomalyRequestStatus === ActionStatus.Working && (
-                    <PageContentsCardV1>
-                        <Skeleton height={500} variant="rect" />
-                    </PageContentsCardV1>
-                )}
-                {anomaly && (
-                    <AnalysisTabs
-                        anomaly={anomaly}
-                        anomalyId={toNumber(anomalyId)}
-                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
-                        selectedEvents={selectedEvents}
-                        onAddFilterSetClick={handleAddFilterSetClick}
-                        onEventSelectionChange={handleEventSelectionChange}
-                    />
-                )}
+                <AnalysisTabs
+                    anomaly={anomaly}
+                    anomalyId={toNumber(anomalyId)}
+                    chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
+                    isLoading={getAnomalyRequestStatus === ActionStatus.Working}
+                    selectedEvents={selectedEvents}
+                    onAddFilterSetClick={handleAddFilterSetClick}
+                    onEventSelectionChange={handleEventSelectionChange}
+                />
             </Grid>
         </PageContentsGridV1>
     );

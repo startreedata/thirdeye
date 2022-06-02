@@ -15,7 +15,9 @@ export interface AlgorithmTableProps {
 }
 
 export interface AlgorithmRowProps {
-    anomaly: Anomaly;
+    alertId: number;
+    startTime: number;
+    endTime: number;
     comparisonOffset: AnomalyBreakdownAPIOffsetValues;
     dataset: string;
     metric: string;
@@ -27,7 +29,9 @@ export interface AlgorithmRowProps {
 }
 
 export interface AlgorithmRowExpandedProps {
-    anomaly: Anomaly;
+    startTime: number;
+    endTime: number;
+    alertId: number;
     row: AnomalyDimensionAnalysisMetricRow;
     dimensionColumns: string[];
     comparisonOffset: AnomalyBreakdownAPIOffsetValues;

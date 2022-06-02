@@ -187,7 +187,8 @@
         "hide-filters-table": "Hide filters table",
         "show-filters-table": "Show filters table",
         "heatmap": "Heatmap",
-        "top-contributors": "Top Contributors"
+        "top-contributors": "Top Contributors",
+        "datasets-auto-onboard": "Auto onboard all datasets"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

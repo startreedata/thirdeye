@@ -31,7 +31,6 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
-import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -76,7 +75,6 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
         setAlertConfigurationNewAlertTemplateId,
     ] = useState(DEFAULT_ALERT_TEMPLATE_ID);
     const [wizard, setWizard] = useState("");
-    const { timeRangeDuration } = useTimeRange();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -84,8 +82,11 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
     }, [subs]);
 
     useEffect(() => {
-        refreshAlertEvaluation();
-    }, [timeRangeDuration]);
+        // Only auto fetch data when not in create new mode
+        if (!props.createNewMode) {
+            refreshAlertEvaluation();
+        }
+    }, []);
 
     useEffect(() => {
         if (currentWizardStep !== AlertWizardStep.SUBSCRIPTION_GROUPS) {
@@ -365,6 +366,16 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                         </TooltipV1>
                                     )}
                                 </Typography>
+                                {currentWizardStep ===
+                                    AlertWizardStep.DETECTION_CONFIGURATION && (
+                                    <>
+                                        <Typography variant="subtitle2">
+                                            {t(
+                                                "message.preview-anomalies-created-below"
+                                            )}
+                                        </Typography>
+                                    </>
+                                )}
                             </Grid>
 
                             {/* Spacer */}
@@ -418,6 +429,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     {/* Alert evaluation */}
                                     <Grid item sm={12}>
                                         <AlertEvaluationTimeSeriesCard
+                                            showPreviewButton
                                             alertEvaluation={alertEvaluation}
                                             alertEvaluationTimeSeriesHeight={
                                                 500

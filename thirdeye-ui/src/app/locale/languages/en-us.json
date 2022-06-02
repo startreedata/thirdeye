@@ -236,6 +236,7 @@
         "no-saved-investigations": "No saved investigations for Anomaly",
         "extend-entity-by-week": "Extend {{entity}} by a week",
         "filter-by-entity": "Filter by {{entity}}",
-        "no-filter-options-available-entity": "No filter {{entity}} options available"
+        "no-filter-options-available-entity": "No filter {{entity}} options available",
+        "preview-anomalies-created-below": "Preview the anomalies created for configuration below"
     }
 }

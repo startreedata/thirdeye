@@ -5,3 +5,7 @@ export interface TimeRangeButtonProps {
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;
 }
+
+export interface TimeRangeButtonWithContextProps {
+    onTimeRangeChange?: (start: number, end: number) => void;
+}

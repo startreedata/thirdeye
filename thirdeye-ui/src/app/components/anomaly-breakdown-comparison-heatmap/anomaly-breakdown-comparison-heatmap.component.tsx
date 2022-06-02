@@ -296,12 +296,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             <CardContent>
                 {/* Loading Indicator when requests are in flight */}
                 {anomalyBreakdownReqStatus === ActionStatus.Working && (
-                    <>
-                        <Skeleton height={50} variant="text" />
-                        <Skeleton height={50} variant="text" />
-                        <Skeleton height={50} variant="text" />
-                        <Skeleton height={50} variant="text" />
-                    </>
+                    <Skeleton height={200} variant="rect" />
                 )}
 
                 {/* If breakdownComparisonData is not empty render treemaps */}

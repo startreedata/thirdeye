@@ -83,12 +83,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
         <CardContent>
             {/* Loading Indicator when request is in flight */}
             {status === ActionStatus.Working && (
-                <>
-                    <Skeleton height={50} variant="text" />
-                    <Skeleton height={50} variant="text" />
-                    <Skeleton height={50} variant="text" />
-                    <Skeleton height={50} variant="text" />
-                </>
+                <Skeleton height={200} variant="rect" />
             )}
 
             {status === ActionStatus.Done && events && events.length > 0 && (

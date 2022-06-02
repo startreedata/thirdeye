@@ -52,9 +52,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
-                <Skeleton variant="text" />
-                <Skeleton variant="text" />
-                <Skeleton variant="text" />
+                <Skeleton height={150} variant="rect" />
             </PageContentsCardV1>
         );
     }

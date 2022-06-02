@@ -54,12 +54,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
         <CardContent>
             {/* Loading Indicator when request is in flight */}
             {anomalyDimensionAnalysisReqStatus === ActionStatus.Working && (
-                <>
-                    <Skeleton height={50} variant="text" />
-                    <Skeleton height={50} variant="text" />
-                    <Skeleton height={50} variant="text" />
-                    <Skeleton height={50} variant="text" />
-                </>
+                <Skeleton height={200} variant="rect" />
             )}
 
             {anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&

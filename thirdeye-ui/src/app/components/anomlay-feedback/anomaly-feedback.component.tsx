@@ -156,7 +156,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
-                <Skeleton height={50} variant="rect" />
+                <Skeleton height={150} variant="rect" />
             </PageContentsCardV1>
         );
     }

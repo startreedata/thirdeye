@@ -17,7 +17,7 @@ public enum ThirdEyeStatus {
   ERR_CRON_INVALID("Failed to parse cron expression: %s"),
   ERR_MISSING_CONFIGURATION_FIELD("Missing configuration field in alert: %s"),
   ERR_TEMPLATE_MISSING_PROPERTY("Failed to apply templateProperties to template. Missing property: %s"),
-  ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Invalid metadata? Error caused by : %s"),
+  ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Error caused by : %s"),
   ERR_ALERT_PIPELINE_EXECUTION("Failed to run alert pipeline. Error caused by : %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
   ERR_MISSING_ID("ID is null!"),
@@ -34,7 +34,7 @@ public enum ThirdEyeStatus {
   ERR_TIMEOUT("Operation timed out!"),
   ERR_UNKNOWN("%s"),
   HEALTHY("Healthy"),
-  ERR_RCA_DIM_ANALYSIS("Failed running the dimension analysis: %s"),
+  ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
   ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
   UNHEALTHY("Unhealthy %s : %s");
 

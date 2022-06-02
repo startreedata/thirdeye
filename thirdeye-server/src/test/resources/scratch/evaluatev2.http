@@ -530,7 +530,7 @@ Content-Type: application/json
             "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
-            "component.url": "http://localhost:8080/internal/",
+            "component.url": "http://localhost:5000/api/http-detector",
             "anomaly.metric": "${metric}"
           },
           "inputs": [

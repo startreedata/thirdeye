@@ -9,11 +9,12 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import com.codahale.metrics.Gauge;
+import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -24,9 +25,9 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   public AlertManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
-    metricRegistry.register("activeAlertsCount", new Gauge<Long>() {
+    metricRegistry.register("activeAlertsCount", new CachedGauge<Long>(5, TimeUnit.MINUTES) {
       @Override
-      public Long getValue() {
+      public Long loadValue() {
         return countActive();
       }
     });

@@ -1,8 +1,8 @@
 import {
+    Button,
     Card,
     CardContent,
     CardHeader,
-    Divider,
     Grid,
     IconButton,
     Link,
@@ -15,7 +15,6 @@ import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-    getAlertsViewPath,
     getAnomaliesAnomalyPath,
     getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../../utils/routes/routes.util";
@@ -63,29 +62,24 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         handleAnomalyOptionsClose();
     };
 
-    const handleAlertViewDetails = (): void => {
-        if (!props.uiAnomaly) {
-            return;
-        }
-
-        navigate(getAlertsViewPath(props.uiAnomaly.alertId));
-    };
-
     return (
         <Card variant="outlined">
             {props.uiAnomaly && (
                 <CardHeader
                     action={
                         <>
-                            <Link
+                            <Button
+                                color="primary"
+                                component="button"
                                 href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
                                     props.uiAnomaly.id
                                 )}?${searchParams.toString()}`}
+                                variant="contained"
                             >
                                 {t("label.investigate-entity", {
                                     entity: t("label.anomaly"),
                                 })}
-                            </Link>
+                            </Button>
                             {/* Anomaly options button */}
                             <IconButton
                                 color="secondary"
@@ -141,33 +135,8 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             <CardContent>
                 {props.uiAnomaly && (
                     <Grid container>
-                        {/* Alert */}
-                        <Grid item md={3} xs={6}>
-                            <NameValueDisplayCard<string>
-                                link
-                                name={t("label.alert")}
-                                searchWords={props.searchWords}
-                                values={[props.uiAnomaly.alertName]}
-                                onClick={handleAlertViewDetails}
-                            />
-                        </Grid>
-
-                        {/* Duration */}
-                        <Grid item md={3} xs={6}>
-                            <NameValueDisplayCard<string>
-                                name={t("label.duration")}
-                                searchWords={props.searchWords}
-                                values={[props.uiAnomaly.duration]}
-                            />
-                        </Grid>
-
-                        {/* Separator */}
-                        <Grid item xs={12}>
-                            <Divider variant="fullWidth" />
-                        </Grid>
-
                         {/* Start */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={t("label.start")}
                                 searchWords={props.searchWords}
@@ -176,7 +145,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         </Grid>
 
                         {/* End */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={t("label.end")}
                                 searchWords={props.searchWords}
@@ -184,8 +153,17 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             />
                         </Grid>
 
+                        {/* Duration */}
+                        <Grid item>
+                            <NameValueDisplayCard<string>
+                                name={t("label.duration")}
+                                searchWords={props.searchWords}
+                                values={[props.uiAnomaly.duration]}
+                            />
+                        </Grid>
+
                         {/* Current/Predicted */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={`${t("label.current")}${t(
                                     "label.pair-separator"
@@ -200,7 +178,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         </Grid>
 
                         {/* Deviation */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={t("label.deviation")}
                                 searchWords={props.searchWords}

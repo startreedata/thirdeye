@@ -20,8 +20,8 @@ spec:
     {{- if .Values.tls.enabled }}
     - name: https
       protocol: TCP
-      port: 443
-      targetPort: 443
+      port: {{ .Values.coordinator.tlsPort }}
+      targetPort: {{ .Values.coordinator.tlsPort }}
     {{- end }}
   selector:
     app: {{ include "thirdeye.name" . }}

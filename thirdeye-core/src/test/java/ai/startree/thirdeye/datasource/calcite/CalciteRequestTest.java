@@ -588,7 +588,12 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeFilterInSimpleDateFormat() throws SqlParseException {
     final String timeAggregationColumn = "date_sdf";
-    final Interval timeFilterInterval = new Interval(new DateTime(2020, 1, 1, 0, 0, DateTimeZone.UTC),
+    final Interval timeFilterInterval = new Interval(new DateTime(2020,
+        1,
+        1,
+        0,
+        0,
+        DateTimeZone.UTC),
         new DateTime(2021, 10, 10, 0, 0, DateTimeZone.UTC));
     final String simpleDateFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
@@ -614,7 +619,9 @@ public class CalciteRequestTest {
   @Test
   public void testGetSqlWithTimeAggregationAndTimeFilter() throws SqlParseException {
     final String timeAggregationColumn = "date_sdf";
-    final Interval timeFilterInterval = new Interval(100L, 100000000L, DateTimeZone.UTC); // 19700101 - 19700102
+    final Interval timeFilterInterval = new Interval(100L,
+        100000000L,
+        DateTimeZone.UTC); // 19700101 - 19700102
     final String timeColumnFormat = "yyyyMMdd";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
@@ -701,6 +708,7 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final String timeColumnFormat = "yyyyMMdd";
     final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ")";
+    final String notProjectedColumn = "not_projected_column";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .withTimeAggregation(Period.days(1),
@@ -711,6 +719,8 @@ public class CalciteRequestTest {
             null)
         // missing projection on col3 : because group by col3 but don't select it for test purpose
         .addOrderByProjection(QueryProjection.of(COLUMN_NAME_2))
+        // test desc order
+        .addOrderByProjection(QueryProjection.of(notProjectedColumn).withDescOrder())
         .addOrderByProjection(freeTextProjection)
         .addOrderByProjection(identifierOf(COLUMN_NAME_3));
     // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
@@ -718,7 +728,7 @@ public class CalciteRequestTest {
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
     final String expected = String.format(
-        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s GROUP BY %s ORDER BY %s, %s, %s, %s",
+        "SELECT SUM(%s), DATETIMECONVERT(%s, '1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd', '1:MILLISECONDS:EPOCH', '%s') AS %s FROM %s.%s GROUP BY %s ORDER BY %s, %s DESC, %s, %s, %s",
         COLUMN_NAME_1,
         timeAggregationColumn,
         "1:DAYS",
@@ -727,6 +737,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS,
         COLUMN_NAME_2,
+        notProjectedColumn,
         freeTextProjection,
         COLUMN_NAME_3,
         TIME_AGGREGATION_ALIAS
@@ -852,13 +863,17 @@ public class CalciteRequestTest {
 
     @Override
     public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-        final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
+        final Period granularity, final @Nullable String timeUnit,
+        @Nullable final String timezone) {
       if (timeFormat == null) {
         return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
       }
       if ("EPOCH".equals(timeFormat)) {
         Objects.requireNonNull(timeUnit);
-        return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
+        return getTimeGroupExpression(timeColumn,
+            "1:" + timeUnit + ":EPOCH",
+            granularity,
+            timezone);
       }
       // case simple date format
       return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
@@ -1024,7 +1039,8 @@ public class CalciteRequestTest {
             timeFormatter = d -> {
               final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
                   cleanSimpleDateFormat).withChronology(d.getChronology());
-              return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d) + STRING_LITERAL_QUOTE;
+              return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d)
+                  + STRING_LITERAL_QUOTE;
             };
         }
       }

@@ -19,11 +19,17 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   private Boolean additive;
   private List<String> dimensions;
   private TimeColumnApi timeColumn;
-  @Deprecated // use completenessDelay 
+  @Deprecated // use completenessDelay
   private Duration expectedDelay;
   private DataSourceApi dataSource;
-  /** Expected delay for data to be complete. In ISO 8601. Eg P1D.*/
+  /**
+   * Expected delay for data to be complete. In ISO 8601. Eg P1D.
+   */
   private String completenessDelay;
+  /**
+   * Dimensions to exclude from RCA algorithm runs.
+   */
+  private List<String> rcaExcludedDimensions;
 
   public Long getId() {
     return id;
@@ -105,6 +111,15 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   public DatasetApi setCompletenessDelay(final String completenessDelay) {
     this.completenessDelay = completenessDelay;
+    return this;
+  }
+
+  public List<String> getRcaExcludedDimensions() {
+    return rcaExcludedDimensions;
+  }
+
+  public DatasetApi setRcaExcludedDimensions(final List<String> rcaExcludedDimensions) {
+    this.rcaExcludedDimensions = rcaExcludedDimensions;
     return this;
   }
 }

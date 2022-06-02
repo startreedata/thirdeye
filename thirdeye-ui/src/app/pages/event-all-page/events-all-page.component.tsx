@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { EventListV1 } from "../../components/event-list-v1/event-list-v1.component";
@@ -19,42 +19,14 @@ import { deleteEvent } from "../../rest/event/events.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const EventsAllPage: FunctionComponent = () => {
-    const [uiEvents, setUiEvents] = useState<Event[] | null>(null);
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
-    const { getEvents, status, errorMessages } = useGetEvents();
+    const { getEvents, status, errorMessages, events } = useGetEvents();
 
     useEffect(() => {
-        fetchAllEvents();
+        getEvents();
     }, []);
-
-    const fetchAllEvents = (): void => {
-        setUiEvents(null);
-
-        let fetchedEvents: Event[] = [];
-        getEvents()
-            .then((events) => {
-                fetchedEvents = events || [];
-            })
-            .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.error-while-fetching", {
-                              entity: t("label.events"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
-            })
-            .finally(() => {
-                setUiEvents(fetchedEvents);
-            });
-    };
 
     useEffect(() => {
         if (status === ActionStatus.Error) {
@@ -72,7 +44,7 @@ export const EventsAllPage: FunctionComponent = () => {
     }, [status]);
 
     useEffect(() => {
-        if (status === ActionStatus.Done && uiEvents && uiEvents.length === 0) {
+        if (status === ActionStatus.Done && events && events.length === 0) {
             notify(
                 NotificationTypeV1.Info,
                 t("message.no-data-for-entity", {
@@ -80,7 +52,7 @@ export const EventsAllPage: FunctionComponent = () => {
                 })
             );
         }
-    }, [status, uiEvents]);
+    }, [status, events]);
 
     const handleEventDelete = (event: Event): void => {
         showDialog({
@@ -96,7 +68,7 @@ export const EventsAllPage: FunctionComponent = () => {
 
     const handleEventDeleteOk = (event: Event): void => {
         deleteEvent(event.id)
-            .then((event) => {
+            .then(() => {
                 notify(
                     NotificationTypeV1.Success,
                     t("message.delete-success", {
@@ -104,8 +76,8 @@ export const EventsAllPage: FunctionComponent = () => {
                     })
                 );
 
-                // Remove deleted event from fetched events
-                removeUiEvent(event);
+                // Refresh list
+                getEvents();
             })
             .catch((error: AxiosError) => {
                 const errMessages = getErrorMessages(error);
@@ -123,23 +95,11 @@ export const EventsAllPage: FunctionComponent = () => {
             });
     };
 
-    const removeUiEvent = (event: Event): void => {
-        if (!event) {
-            return;
-        }
-
-        setUiEvents(
-            (uiEvents) =>
-                uiEvents &&
-                uiEvents.filter((uiEvents) => uiEvents.id !== event.id)
-        );
-    };
-
     return (
         <PageV1>
             <ConfigurationPageHeader selectedIndex={5} />
             <PageContentsGridV1 fullHeight>
-                <EventListV1 events={uiEvents} onDelete={handleEventDelete} />
+                <EventListV1 events={events} onDelete={handleEventDelete} />
             </PageContentsGridV1>
         </PageV1>
     );

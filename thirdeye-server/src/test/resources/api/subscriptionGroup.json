@@ -49,5 +49,17 @@
         }
       }
     ]
+  },
+  {
+    "name": "webhook",
+    "cron": "*/1 * * * * ?",
+    "specs": [
+      {
+        "type": "webhook",
+        "params": {
+          "url": "http://localhost:8080/internal/webhook"
+        }
+      }
+    ]
   }
 ]

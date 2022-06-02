@@ -11,7 +11,6 @@ import {
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -20,30 +19,26 @@ import {
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
-import { useGetEvents } from "../../../rest/event/event.actions";
+import { useGetEventsForAnomaly } from "../../../rest/event/event.actions";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
-import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { EventsTabProps } from "./event-tab.interfaces";
 
 export const EventsTab: FunctionComponent<EventsTabProps> = ({
+    anomalyId,
     selectedEvents,
     onCheckClick,
 }: EventsTabProps) => {
     const { t } = useTranslation();
-    const [searchParams] = useSearchParams();
-    const { getEvents, errorMessages, status, events } = useGetEvents();
+    const { getEventsForAnomaly, errorMessages, status, events } =
+        useGetEventsForAnomaly();
 
     const { notify } = useNotificationProviderV1();
 
-    const startTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-    const endTime = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-
     useEffect(() => {
-        getEvents({
-            startTime: Number(startTime),
-            endTime: Number(endTime),
+        getEventsForAnomaly({
+            anomalyId,
         });
-    }, [startTime, endTime]);
+    }, [anomalyId]);
 
     useEffect(() => {
         if (status === ActionStatus.Error) {
@@ -60,11 +55,6 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
         }
     }, [status]);
 
-    useEffect(() => {
-        // Reset selected event on event list change
-        onCheckClick([]);
-    }, [events]);
-
     const handleOnCheckboxClick = (event: Event, checked: boolean): void => {
         let events: Event[];
 
@@ -78,6 +68,16 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
 
         onCheckClick(events);
     };
+
+    // Update investigation events with actual event
+    useEffect(() => {
+        if (selectedEvents && selectedEvents.length && !isEmpty(events)) {
+            const copiedSelectedEvents = events?.filter((event) =>
+                selectedEvents.find((e) => e.id === event.id)
+            );
+            onCheckClick(copiedSelectedEvents || []);
+        }
+    }, [events]);
 
     return (
         <>

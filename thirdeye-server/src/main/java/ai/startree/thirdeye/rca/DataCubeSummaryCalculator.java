@@ -126,7 +126,6 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
       Preconditions.checkNotNull(dimensions);
       checkArgument(dimensions.size() > 0);
       this.dimensions = dimensions;
-      // fixme cyril prefer parsing to List<Predicate>
       this.dataFilters = Predicate.parseAndCombinePredicates(filters);
       checkArgument(summarySize > 1);
       this.summarySize = summarySize;

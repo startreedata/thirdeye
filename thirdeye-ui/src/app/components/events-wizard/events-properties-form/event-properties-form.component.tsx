@@ -14,11 +14,11 @@ import { useEventPropertiesFormStyles } from "./event-properties-form.styles";
 
 export const EventPropertiesForm: FunctionComponent<
     EventPropertiesFormProps
-> = (props: EventPropertiesFormProps) => {
+> = ({ event, id, onSubmit }: EventPropertiesFormProps) => {
     const eventPropertiesFormStyles = useEventPropertiesFormStyles();
 
     const { t } = useTranslation();
-    const defaultValues = props.event || createEmptyEvent();
+    const defaultValues = event || createEmptyEvent();
 
     const { register, handleSubmit, errors, control } = useForm<Event>({
         defaultValues,
@@ -37,13 +37,13 @@ export const EventPropertiesForm: FunctionComponent<
     });
 
     const onSubmitEventPropertiesForm = (event: Event): void => {
-        props.onSubmit && props.onSubmit(event);
+        onSubmit && onSubmit(event);
     };
 
     return (
         <form
             noValidate
-            id={props.id}
+            id={id}
             onSubmit={handleSubmit(onSubmitEventPropertiesForm)}
         >
             <Grid container alignItems="center">

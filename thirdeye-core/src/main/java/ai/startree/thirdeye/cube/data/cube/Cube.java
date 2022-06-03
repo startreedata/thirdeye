@@ -16,10 +16,7 @@ import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,11 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Cube { // the cube (Ca|Cb)
+public class Cube {
 
   private static final Logger LOG = LoggerFactory.getLogger(Cube.class);
 
-  private static final int DEFAULT_DEPTH = 3;
   private static final int TOP_COST_ENTRIES_TO_LOG = 20;
 
   // Node value
@@ -507,18 +503,6 @@ public class Cube { // the cube (Ca|Cb)
         return Double.compare(o2.cost, o1.cost);
       }
     });
-  }
-
-  public void toJson(String fileName)
-      throws IOException {
-    new ObjectMapper().writeValue(new File(fileName), this);
-  }
-
-  public static Cube fromJson(String fileName)
-      throws IOException {
-    Cube cube = new ObjectMapper().readValue(new File(fileName), Cube.class);
-    cube.rebuildHierarchy();
-    return cube;
   }
 
   /**

@@ -66,7 +66,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
         []
     );
 
-    const uiEventColumns = [
+    const eventColumns = [
         {
             key: "name",
             dataKey: "name",
@@ -105,7 +105,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1<Event>
                     hideBorder
-                    columns={uiEventColumns}
+                    columns={eventColumns}
                     data={props.events as Event[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}

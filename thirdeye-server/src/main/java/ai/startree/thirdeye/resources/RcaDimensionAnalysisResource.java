@@ -116,8 +116,7 @@ public class RcaDimensionAnalysisResource {
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
-    DimensionAnalysisResultApi resultApi;
-      resultApi = dataCubeSummaryCalculator.computeCube(
+      final DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
           rootCauseAnalysisInfo.getMetricConfigDTO(),
           datasetConfigDTO,
           currentInterval,

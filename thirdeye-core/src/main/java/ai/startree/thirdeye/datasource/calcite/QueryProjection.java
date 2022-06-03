@@ -22,17 +22,21 @@ import org.apache.calcite.sql.SqlUnresolvedFunction;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class QueryProjection {
 
+  @Nullable
   final private String operator;
   final private List<String> operands;
+  @Nullable
   final private String quantifier;
+  @Nullable
   final private String alias;
   final private boolean isDescOrder;
 
-  private QueryProjection(final String operator, final List<String> operands,
-      final String quantifier, final String alias, final boolean isDescOrder) {
+  private QueryProjection(@Nullable final String operator, final List<String> operands,
+      @Nullable final String quantifier, @Nullable final String alias, final boolean isDescOrder) {
     this.operator = operator;
     this.operands = List.copyOf(operands);
     this.quantifier = quantifier;
@@ -40,11 +44,12 @@ public class QueryProjection {
     this.isDescOrder = isDescOrder;
   }
 
-  public static QueryProjection of(final String operator, final List<String> operands, final String quantifier) {
+  public static QueryProjection of(@Nullable final String operator, final List<String> operands,
+      @Nullable final String quantifier) {
     return new QueryProjection(operator, operands, quantifier, null, false);
   }
 
-  public static QueryProjection of(final String operator, final List<String> operands) {
+  public static QueryProjection of(@Nullable final String operator, final List<String> operands) {
     return new QueryProjection(operator, operands, null, null, false);
   }
 
@@ -52,11 +57,15 @@ public class QueryProjection {
     return new QueryProjection(null, List.of(column), null, null, false);
   }
 
-  public QueryProjection withAlias(final String alias) {
+  public QueryProjection withAlias(@Nullable final String alias) {
     if (isDescOrder) {
       throw new IllegalStateException("isDescOrder is true. Cannot combine alias and desc order.");
     }
-    return new QueryProjection(this.operator, this.operands, this.quantifier, alias, this.isDescOrder);
+    return new QueryProjection(this.operator,
+        this.operands,
+        this.quantifier,
+        alias,
+        this.isDescOrder);
   }
 
   public QueryProjection withDescOrder() {
@@ -142,5 +151,35 @@ public class QueryProjection {
   // todo cyril see if it's possible to deprecrate aggregation column
   public static String getFunctionName(final MetricConfigDTO metricConfigDTO) {
     return optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName());
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final QueryProjection that = (QueryProjection) o;
+    return isDescOrder == that.isDescOrder && Objects.equals(operator, that.operator)
+        && Objects.equals(operands, that.operands) && Objects.equals(quantifier,
+        that.quantifier) && Objects.equals(alias, that.alias);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(operator, operands, quantifier, alias, isDescOrder);
+  }
+
+  @Override
+  public String toString() {
+    return "QueryProjection{" +
+        "operator='" + operator + '\'' +
+        ", operands=" + operands +
+        ", quantifier='" + quantifier + '\'' +
+        ", alias='" + alias + '\'' +
+        ", isDescOrder=" + isDescOrder +
+        '}';
   }
 }

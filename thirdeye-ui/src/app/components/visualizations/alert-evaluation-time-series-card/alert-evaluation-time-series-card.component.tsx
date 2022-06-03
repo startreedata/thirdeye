@@ -1,13 +1,14 @@
 import {
+    Box,
+    Button,
     Card,
     CardContent,
     CardHeader,
     FormHelperText,
     Grid,
-    IconButton,
 } from "@material-ui/core";
-import RefreshIcon from "@material-ui/icons/Refresh";
 import React, { FunctionComponent } from "react";
+import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertEvaluationTimeSeries } from "../alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.component";
 import { VisualizationCard } from "../visualization-card/visualization-card.component";
 import { AlertEvaluationTimeSeriesCardProps } from "./alert-evaluation-time-series-card.interfaces";
@@ -23,7 +24,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
         <Card variant="outlined">
             <CardHeader
                 action={
-                    <Grid container alignItems="center" spacing={0}>
+                    <Grid container>
                         {/* Helper text */}
                         {props.helperText && (
                             <Grid item>
@@ -38,17 +39,26 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                             </Grid>
                         )}
 
-                        {/* Refresh button */}
-                        {!props.hideRefreshButton && (
+                        <Grid item>
+                            <TimeRangeButtonWithContext
+                                onTimeRangeChange={() =>
+                                    props.onRefresh && props.onRefresh()
+                                }
+                            />
+                        </Grid>
+
+                        {/* Preview button */}
+                        {props.showPreviewButton && (
                             <Grid item>
-                                <IconButton
-                                    className={
-                                        alertEvaluationTimeSeriesCardClasses.refreshIcon
-                                    }
-                                    onClick={props.onRefresh}
-                                >
-                                    <RefreshIcon />
-                                </IconButton>
+                                <Box>
+                                    <Button
+                                        color="primary"
+                                        variant="contained"
+                                        onClick={props.onRefresh}
+                                    >
+                                        Preview
+                                    </Button>
+                                </Box>
                             </Grid>
                         )}
                     </Grid>
@@ -61,7 +71,6 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                 <VisualizationCard
                     error={props.error}
                     helperText={props.helperText}
-                    hideRefreshButton={props.hideRefreshButton}
                     title={props.maximizedTitle || props.title}
                     visualizationHeight={props.alertEvaluationTimeSeriesHeight}
                     visualizationMaximizedHeight={

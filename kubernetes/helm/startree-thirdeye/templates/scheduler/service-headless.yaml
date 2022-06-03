@@ -18,6 +18,10 @@ spec:
       protocol: TCP
       port: {{ .Values.scheduler.port }}
       targetPort: {{ .Values.scheduler.port }}
+    - name: admin
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
     {{- if .Values.scheduler.tls.enabled }}
     - name: https
       protocol: TCP

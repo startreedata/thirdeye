@@ -10,6 +10,7 @@ import {
     getAlertTemplatesCreatePath,
     getDatasetsOnboardPath,
     getDatasourcesCreatePath,
+    getEventsCreatePath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
 
@@ -37,6 +38,10 @@ export const CreateMenuButton: FunctionComponent = () => {
         navigate(getAlertTemplatesCreatePath());
     };
 
+    const handleCreateEvent = (): void => {
+        navigate(getEventsCreatePath());
+    };
+
     const shortcutCreateMenuItems = [
         {
             id: "createAlert",
@@ -60,6 +65,12 @@ export const CreateMenuButton: FunctionComponent = () => {
             id: "createDatasource",
             text: t("label.create-entity", {
                 entity: t("label.datasource"),
+            }),
+        },
+        {
+            id: "createEvent",
+            text: t("label.create-entity", {
+                entity: t("label.event"),
             }),
         },
         {
@@ -91,6 +102,10 @@ export const CreateMenuButton: FunctionComponent = () => {
                 break;
             case "createAlertTemplate":
                 handleCreateAlertTemplate();
+
+                break;
+            case "createEvent":
+                handleCreateEvent();
 
                 break;
             default:

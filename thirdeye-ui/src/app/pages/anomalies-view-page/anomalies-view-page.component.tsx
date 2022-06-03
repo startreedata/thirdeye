@@ -188,7 +188,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader showCreateButton showTimeRange title="">
+            <PageHeader title="">
                 {anomaly && uiAnomaly && (
                     <>
                         <Link href={getAlertsViewPath(anomaly.alert.id)}>

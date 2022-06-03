@@ -16,6 +16,7 @@ import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -130,5 +131,32 @@ public class QueryPredicate {
         .map(literalOf)
         .collect(Collectors.toList());
     return SqlNodeList.of(SqlParserPos.ZERO, stringNodes);
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final QueryPredicate that = (QueryPredicate) o;
+    return Objects.equals(predicate, that.predicate) && metricType == that.metricType
+        && Objects.equals(dataset, that.dataset);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(predicate, metricType, dataset);
+  }
+
+  @Override
+  public String toString() {
+    return "QueryPredicate{" +
+        "predicate=" + predicate +
+        ", metricType=" + metricType +
+        ", dataset='" + dataset + '\'' +
+        '}';
   }
 }

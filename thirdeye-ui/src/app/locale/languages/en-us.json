@@ -186,8 +186,13 @@
         "thirdeye-website-url": "https://www.startree.ai",
         "hide-filters-table": "Hide filters table",
         "show-filters-table": "Show filters table",
+        "event-properties": "Event Properties",
+        "current-duration": "Current Duration",
+        "start-time": "Start time",
+        "end-time": "End time",
         "heatmap": "Heatmap",
-        "top-contributors": "Top Contributors"
+        "top-contributors": "Top Contributors",
+        "datasets-auto-onboard": "Auto onboard all datasets"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -235,6 +240,10 @@
         "no-saved-investigations": "No saved investigations for Anomaly",
         "extend-entity-by-week": "Extend {{entity}} by a week",
         "filter-by-entity": "Filter by {{entity}}",
-        "no-filter-options-available-entity": "No filter {{entity}} options available"
+        "no-filter-options-available-entity": "No filter {{entity}} options available",
+        "event-name-required": "Name is required",
+        "event-start-time-required": "Start time is required",
+        "event-end-time-required": "End time is required",
+        "preview-anomalies-created-below": "Preview the anomalies created for configuration below"
     }
 }

@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.cube.data.cube;
 
+import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Cube<R extends Row> {
+public class Cube {
 
   private static final Logger LOG = LoggerFactory.getLogger(Cube.class);
 
@@ -52,16 +52,16 @@ public class Cube<R extends Row> {
 
   // The actual data is stored in levels
   @JsonProperty("hierarchicalRows")
-  private final List<List<R>> hierarchicalRows = new ArrayList<>();
+  private final List<List<AdditiveRow>> hierarchicalRows = new ArrayList<>();
 
   // The logical nodes of the hierarchy among the actual data
   @JsonIgnore
   private List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
 
-  private final CubeFetcher<R> olapClient;
+  private final CubeFetcher olapClient;
   private final CostFunction costFunction;
 
-  public Cube(final CubeFetcher<R> cubeFetcher, final CostFunction costFunction) {
+  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction) {
     this.olapClient = cubeFetcher;
     this.costFunction = costFunction;
   }
@@ -192,9 +192,9 @@ public class Cube<R extends Row> {
     //                       / \   \
     //     Level 2          d   e   f
     // The Comparator for generating the order is implemented in the class DimensionValues.
-    List<List<R>> rowOfLevels = olapClient.getAggregatedValuesOfLevels(dimensions, dataFilter);
+    List<List<AdditiveRow>> rowOfLevels = olapClient.getAggregatedValuesOfLevels(dimensions, dataFilter);
     for (int i = 0; i <= dimensions.size(); ++i) {
-      List<R> rowAtLevelI = rowOfLevels.get(i);
+      List<AdditiveRow> rowAtLevelI = rowOfLevels.get(i);
       rowAtLevelI.sort(new RowDimensionValuesComparator());
       hierarchicalRows.add(rowAtLevelI);
       size += rowAtLevelI.size();
@@ -212,7 +212,7 @@ public class Cube<R extends Row> {
   private void initializeBasicInfo(List<Predicate> dataFilters)
       throws Exception {
 
-    Row topAggValues = olapClient.getTopAggregatedValues(dataFilters);
+    AdditiveRow topAggValues = olapClient.getTopAggregatedValues(dataFilters);
     CubeNode node = topAggValues.toNode();
 
     baselineTotal = node.getBaselineValue();
@@ -225,10 +225,10 @@ public class Cube<R extends Row> {
   /**
    * Sort the rows in the post-order of their hierarchical relationship
    */
-  static class RowDimensionValuesComparator implements Comparator<Row> {
+  static class RowDimensionValuesComparator implements Comparator<AdditiveRow> {
 
     @Override
-    public int compare(Row r1, Row r2) {
+    public int compare(AdditiveRow r1, AdditiveRow r2) {
       return r1.getDimensionValues().compareTo(r2.getDimensionValues());
     }
   }
@@ -241,7 +241,7 @@ public class Cube<R extends Row> {
    * @param dimensions the dimension names of the actual data.
    * @return CubeNode that contains the hierarchical relationship.
    */
-  public static <R extends Row> List<List<CubeNode>> dataRowToCubeNode(List<List<R>> dataRows,
+  public static List<List<CubeNode>> dataRowToCubeNode(List<List<AdditiveRow>> dataRows,
       Dimensions dimensions) {
 
     List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
@@ -253,7 +253,7 @@ public class Cube<R extends Row> {
 
       if (level != 0) {
         for (int index = 0; index < dataRows.get(level).size(); ++index) {
-          Row row = dataRows.get(level).get(index);
+          AdditiveRow row = dataRows.get(level).get(index);
           StringBuilder parentDimValues = new StringBuilder();
           for (int i = 0; i < level - 1; ++i) {
             parentDimValues.append(row.getDimensionValues().get(i));
@@ -270,7 +270,7 @@ public class Cube<R extends Row> {
           nextParent.put(parentDimValues.toString(), node);
         }
       } else { // root
-        Row row = dataRows.get(0).get(0);
+        AdditiveRow row = dataRows.get(0).get(0);
         CubeNode node = row.toNode();
         hierarchicalNodes.get(0).add(node);
         nextParent.put("", node);
@@ -296,13 +296,13 @@ public class Cube<R extends Row> {
         topCurrentValue, topRatio);
 
     List<DimNameValueCostEntry> costSet = new ArrayList<>();
-    List<List<R>> wowValuesOfDimensions = this.olapClient.getAggregatedValuesOfDimension(
+    List<List<AdditiveRow>> wowValuesOfDimensions = this.olapClient.getAggregatedValuesOfDimension(
         dimensions,
         filterSets);
     for (int i = 0; i < dimensions.size(); ++i) {
       String dimensionName = dimensions.get(i);
-      List<R> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
-      for (Row wowValues : wowValuesOfOneDimension) {
+      List<AdditiveRow> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
+      for (AdditiveRow wowValues : wowValuesOfOneDimension) {
         CubeNode wowNode = wowValues.toNode();
         String dimensionValue = wowNode.getDimensionValues().get(0);
         double contributionFactor =

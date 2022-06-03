@@ -14,7 +14,6 @@ import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
@@ -72,28 +71,28 @@ public class DimensionAnalysisResultApiTest {
    *     /  |  \
    *    US  IN  FR
    */
-  private List<List<Row>> buildHierarchicalRows() {
-    List<List<Row>> hierarchicalRows = new ArrayList<>();
+  private List<List<AdditiveRow>> buildHierarchicalRows() {
+    List<List<AdditiveRow>> hierarchicalRows = new ArrayList<>();
     List<String> dimensions = Collections.singletonList("country");
 
     // Root level
-    List<Row> rootLevel = new ArrayList<>();
+    List<AdditiveRow> rootLevel = new ArrayList<>();
     rootLevel.add(new AdditiveRow(new Dimensions(dimensions), new DimensionValues(), 45, 58));
     hierarchicalRows.add(rootLevel);
 
     // Level 1
-    List<Row> level1 = new ArrayList<>();
-    Row row1 =
+    List<AdditiveRow> level1 = new ArrayList<>();
+    AdditiveRow row1 =
         new AdditiveRow(new Dimensions(dimensions),
             new DimensionValues(Collections.singletonList("US")), 20, 30);
     level1.add(row1);
 
-    Row row2 =
+    AdditiveRow row2 =
         new AdditiveRow(new Dimensions(dimensions),
             new DimensionValues(Collections.singletonList("IN")), 10, 11);
     level1.add(row2);
 
-    Row row3 =
+    AdditiveRow row3 =
         new AdditiveRow(new Dimensions(dimensions),
             new DimensionValues(Collections.singletonList("FR")), 15, 17);
     level1.add(row3);
@@ -110,7 +109,7 @@ public class DimensionAnalysisResultApiTest {
    *    US
    */
   private List<CubeNode> buildHierarchicalNodes() {
-    List<List<Row>> rows = buildHierarchicalRows();
+    List<List<AdditiveRow>> rows = buildHierarchicalRows();
     // Root level
     AdditiveRow rootRow = (AdditiveRow) rows.get(0).get(0);
     AdditiveCubeNode rootNode = new AdditiveCubeNode(rootRow);

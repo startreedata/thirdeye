@@ -5,10 +5,10 @@
 
 package ai.startree.thirdeye.cube.data.node;
 
+import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.cube.CubeUtils;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -20,14 +20,13 @@ import java.util.List;
  * Provides basic implementation for hierarchical cube nodes.
  *
  * @param <N> the class of the inherited cube node.
- * @param <R> the Row class of the inherited cube node.
  */
-public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implements CubeNode<N> {
+public abstract class BaseCubeNode<N extends BaseCubeNode> implements CubeNode<N> {
 
   protected int level;
   protected int index;
   protected double cost;
-  protected R data;
+  protected AdditiveRow data;
   protected N parent;
   protected List<N> children = new ArrayList<>();
 
@@ -38,7 +37,7 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
    *
    * @param data the data of this cube node.
    */
-  public BaseCubeNode(R data) {
+  public BaseCubeNode(AdditiveRow data) {
     this.data = Preconditions.checkNotNull(data);
   }
 
@@ -50,7 +49,7 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
    * @param data the data of this cube node.
    * @param parent the parent of this cube node.
    */
-  public BaseCubeNode(int level, int index, R data, N parent) {
+  public BaseCubeNode(int level, int index, AdditiveRow data, N parent) {
     this(data);
     this.level = level;
     this.index = index;
@@ -162,7 +161,7 @@ public abstract class BaseCubeNode<N extends BaseCubeNode, R extends Row> implem
     if (!(o instanceof BaseCubeNode)) {
       return false;
     }
-    BaseCubeNode<?, ?> that = (BaseCubeNode<?, ?>) o;
+    BaseCubeNode<?> that = (BaseCubeNode<?>) o;
     return level == that.level && index == that.index && Double.compare(that.cost, cost) == 0
         && Objects.equal(data,
         that.data);

@@ -5,15 +5,15 @@
 
 package ai.startree.thirdeye.cube.data.dbclient;
 
+import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import java.util.List;
 
 /**
  * The database client that provides the function of data retrieval for the cube algorithm.
  */
-public interface CubeFetcher<R extends Row> {
+public interface CubeFetcher {
 
   /**
    * Returns the baseline and current value for the root node.
@@ -21,7 +21,7 @@ public interface CubeFetcher<R extends Row> {
    * @param predicates the filter predicates.
    * @return a row of data that contains the baseline and current value for the root node.
    */
-  R getTopAggregatedValues(List<Predicate> predicates) throws Exception;
+  AdditiveRow getTopAggregatedValues(List<Predicate> predicates) throws Exception;
 
   /**
    * Returns the baseline and current value for nodes at each dimension from the given list.
@@ -33,7 +33,7 @@ public interface CubeFetcher<R extends Row> {
    * @param predicates the filter predicates.
    * @return the baseline and current value for nodes at each dimension from the given list.
    */
-  List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
+  List<List<AdditiveRow>> getAggregatedValuesOfDimension(Dimensions dimensions,
       List<Predicate> predicates)
       throws Exception;
 
@@ -50,7 +50,7 @@ public interface CubeFetcher<R extends Row> {
    * @param predicates the filter predicates.
    * @return the baseline and current value for nodes for each dimension combination.
    */
-  List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
+  List<List<AdditiveRow>> getAggregatedValuesOfLevels(Dimensions dimensions,
       List<Predicate> predicates)
       throws Exception;
 }

@@ -16,7 +16,6 @@ import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
 import ai.startree.thirdeye.cube.data.dbclient.CubeMetric;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.api.DatasetApi;
@@ -154,8 +153,8 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           baselineInterval);
       final CostFunction costFunction = new BalancedCostFunction();
 
-      final CubeFetcher<? extends Row> cubeFetcher =
-          new CubeFetcherImpl<>(dataSourceCache, cubeMetric);
+      final CubeFetcher cubeFetcher =
+          new CubeFetcherImpl(dataSourceCache, cubeMetric);
 
       return buildSummary(cubeFetcher, costFunction);
     }
@@ -172,9 +171,9 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
       return false;
     }
 
-    public DimensionAnalysisResultApi buildSummary(CubeFetcher<? extends Row> cubeFetcher,
+    public DimensionAnalysisResultApi buildSummary(CubeFetcher cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube<? extends Row> cube = new Cube<>(cubeFetcher, costFunction);
+      Cube cube = new Cube(cubeFetcher, costFunction);
       final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
         cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);

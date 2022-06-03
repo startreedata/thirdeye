@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Summary {
+public class Summary<R> {
 
   public final static int MAX_GAINER_LOSER_COUNT = 5;
 

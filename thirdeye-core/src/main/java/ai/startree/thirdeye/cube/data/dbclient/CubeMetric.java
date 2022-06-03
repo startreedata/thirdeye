@@ -6,12 +6,11 @@
 package ai.startree.thirdeye.cube.data.dbclient;
 
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
 import java.util.Map;
 
-public interface CubeMetric<T extends Row> {
+public interface CubeMetric<T> {
   DatasetConfigDTO getDataset();
 
   List<CubeSpec> getCubeSpecs();

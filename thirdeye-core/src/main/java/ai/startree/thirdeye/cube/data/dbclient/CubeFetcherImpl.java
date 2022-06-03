@@ -8,8 +8,8 @@ package ai.startree.thirdeye.cube.data.dbclient;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * GroupBy dimension are
  * located together.
  */
-public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
+public class CubeFetcherImpl implements CubeFetcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(CubeFetcherImpl.class);
   private final static int TIME_OUT_VALUE = 1200;
@@ -56,12 +56,12 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   public static final int QUERY_LIMIT = 100000;
 
   private final DataSourceCache dataSourceCache;
-  private final CubeMetric<R> cubeMetric;
+  private final CubeMetric<AdditiveRow> cubeMetric;
 
   /**
    * Constructs a Cube client.
    */
-  public CubeFetcherImpl(DataSourceCache dataSourceCache, CubeMetric<R> cubeMetric) {
+  public CubeFetcherImpl(DataSourceCache dataSourceCache, CubeMetric<AdditiveRow> cubeMetric) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
     this.cubeMetric = cubeMetric;
   }
@@ -129,7 +129,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param value the value to be filled in to the row.
    * @param tag The field of the row where the value is filled in.
    */
-  protected void fillValueToRowTable(Map<List<String>, R> rowTable, Dimensions dimensions,
+  protected void fillValueToRowTable(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
       List<String> dimensionValues, double value, CubeTag tag) {
     cubeMetric.fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
   }
@@ -143,7 +143,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param tag true if the response is for baseline values
    */
   protected void buildMetricFunctionOrExpressionsRows(Dimensions dimensions, DataFrame dataFrame,
-      Map<List<String>, R> rowTable, CubeTag tag) {
+      Map<List<String>, AdditiveRow> rowTable, CubeTag tag) {
     for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
       // If the metric expression is a single metric function, then we get the value immediately
       double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
@@ -164,7 +164,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
    * @param bulkRequests the original requests of those results.
    * @return Cube rows.
    */
-  protected List<List<R>> constructAggregatedValues(Dimensions dimensions,
+  protected List<List<AdditiveRow>> constructAggregatedValues(Dimensions dimensions,
       List<Map<CubeTag, CalciteRequest>> bulkRequests) throws Exception {
 
     List<CalciteRequest> allRequests = new ArrayList<>();
@@ -174,10 +174,10 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
         allRequests,
         cubeMetric.getDataset().getDataSource());
 
-    List<List<R>> res = new ArrayList<>();
+    List<List<AdditiveRow>> res = new ArrayList<>();
     int level = 0;
     for (Map<CubeTag, CalciteRequest> bulkRequest : bulkRequests) {
-      Map<List<String>, R> rowOfSameLevel = new HashMap<>();
+      Map<List<String>, AdditiveRow> rowOfSameLevel = new HashMap<>();
 
       for (Map.Entry<CubeTag, CalciteRequest> entry : bulkRequest.entrySet()) {
         CubeTag tag = entry.getKey();
@@ -199,7 +199,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
             level,
             bulkRequest);
       }
-      List<R> rows = new ArrayList<>(rowOfSameLevel.values());
+      List<AdditiveRow> rows = new ArrayList<>(rowOfSameLevel.values());
       res.add(rows);
       ++level;
     }
@@ -208,24 +208,24 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   }
 
   @Override
-  public R getTopAggregatedValues(List<Predicate> predicates) throws Exception {
+  public AdditiveRow getTopAggregatedValues(List<Predicate> predicates) throws Exception {
     List<Map<CubeTag, CalciteRequest>> bulkRequests = List.of(constructBulkRequests(cubeMetric.getDataset(),
         cubeMetric.getCubeSpecs(),
         List.of(),
         predicates));
     // quickfix - redundant local variables for better IndexOutOfBoundsException logging
-    List<List<R>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
+    List<List<AdditiveRow>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
     checkArgument(aggregatedValues.size() > 0,
         "No data found in timeframe. Cannot perform dimension analysis.");
-    List<R> aggregatedValue = aggregatedValues.get(0);
+    List<AdditiveRow> aggregatedValue = aggregatedValues.get(0);
     checkArgument(aggregatedValue.size() > 0,
         "No data found in timeframe. Cannot perform dimension analysis.");
-    R topValue = aggregatedValue.get(0);
+    AdditiveRow topValue = aggregatedValue.get(0);
     return topValue;
   }
 
   @Override
-  public List<List<R>> getAggregatedValuesOfDimension(Dimensions dimensions,
+  public List<List<AdditiveRow>> getAggregatedValuesOfDimension(Dimensions dimensions,
       List<Predicate> predicates) throws Exception {
     List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size(); ++level) {
@@ -239,7 +239,7 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
   }
 
   @Override
-  public List<List<R>> getAggregatedValuesOfLevels(Dimensions dimensions,
+  public List<List<AdditiveRow>> getAggregatedValuesOfLevels(Dimensions dimensions,
       List<Predicate> predicates) throws Exception {
     List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
     for (int level = 0; level < dimensions.size() + 1; ++level) {

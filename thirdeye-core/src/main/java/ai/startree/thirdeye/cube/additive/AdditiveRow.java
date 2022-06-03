@@ -7,7 +7,6 @@ package ai.startree.thirdeye.cube.additive;
 
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.data.node.CubeNode;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
@@ -16,8 +15,7 @@ import java.util.Objects;
 /**
  * Stores the additive metric that is returned from DB.
  */
-public class AdditiveRow implements Row {
-
+public class AdditiveRow {
 
   protected double baselineValue;
   protected double currentValue;
@@ -86,32 +84,59 @@ public class AdditiveRow implements Row {
     this.currentValue = currentValue;
   }
 
-  @Override
+  /**
+   * Returns the dimension names of this row, such as ["country", "page key"].
+   *
+   * @return the dimension names of this row.
+   */
   public Dimensions getDimensions() {
     return dimensions;
   }
 
-  @Override
+  /**
+   * Sets dimension names of this row, such as ["country", "page key"].
+   *
+   * @param dimensions the dimension names for this row.
+   */
   public void setDimensions(Dimensions dimensions) {
     this.dimensions = Preconditions.checkNotNull(dimensions);
   }
 
-  @Override
+  /**
+   * Returns dimension values of this row, such as ["US", "linkedin.com"]
+   *
+   * @return dimension values of this row, such as ["US", "linkedin.com"]
+   */
   public DimensionValues getDimensionValues() {
     return dimensionValues;
   }
 
-  @Override
+  /**
+   * Sets dimension values of this row, such as ["US", "linkedin.com"]
+   *
+   * @param dimensionValues the dimension values for this row.
+   */
   public void setDimensionValues(DimensionValues dimensionValues) {
     this.dimensionValues = Preconditions.checkNotNull(dimensionValues);
   }
 
-  @Override
+  /**
+   * Converts current row to a CubeNode.
+   *
+   * @return a CubeNode of this row.
+   */
   public CubeNode toNode() {
     return new AdditiveCubeNode(this);
   }
 
-  @Override
+  /**
+   * Converts current row to a CubeNode.
+   *
+   * @param level the level of this node; 0 is the top level.
+   * @param index the index of this node, which is used for speeding up algorithm speed.
+   * @param parent the parent of this node.
+   * @return a CubeNode of this row.
+   */
   public CubeNode toNode(int level, int index, CubeNode parent) {
     return new AdditiveCubeNode(level, index, this, (AdditiveCubeNode) parent);
   }

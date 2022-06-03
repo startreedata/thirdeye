@@ -13,7 +13,7 @@ import com.google.common.base.Objects;
 /**
  * A CubeNode for additive metrics such as page view count.
  */
-public class AdditiveCubeNode extends BaseCubeNode<AdditiveCubeNode, AdditiveRow> {
+public class AdditiveCubeNode extends BaseCubeNode<AdditiveCubeNode> {
 
   private double baselineValue;
   private double currentValue;

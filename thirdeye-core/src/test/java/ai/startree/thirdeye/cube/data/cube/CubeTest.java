@@ -11,7 +11,6 @@ import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.cube.data.node.CubeNodeUtils;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
@@ -107,7 +106,7 @@ public class CubeTest {
 
   @Test
   public void testHierarchyRowToHierarchyNode() {
-    List<List<Row>> hierarchicalRows = buildHierarchicalRows();
+    List<List<AdditiveRow>> hierarchicalRows = buildHierarchicalRows();
     List<List<CubeNode>> actualNodes = Cube.dataRowToCubeNode(hierarchicalRows,
         new Dimensions(List.of(DIM_COUNTRY, DIM_PAGE)));
 
@@ -121,16 +120,16 @@ public class CubeTest {
         expectedNodes.get(0).get(0))).isTrue();
   }
 
-  private List<List<Row>> buildHierarchicalRows() {
-    List<List<Row>> hierarchicalRows = new ArrayList<>();
+  private List<List<AdditiveRow>> buildHierarchicalRows() {
+    List<List<AdditiveRow>> hierarchicalRows = new ArrayList<>();
     // Root level
     {
-      List<Row> rootLevel = new ArrayList<>();
+      List<AdditiveRow> rootLevel = new ArrayList<>();
       rootLevel.add(new AdditiveRow(new Dimensions(), new DimensionValues(), 30, 45));
       hierarchicalRows.add(rootLevel);
     }
     // Level 1
-    List<Row> level1 = new ArrayList<>();
+    List<AdditiveRow> level1 = new ArrayList<>();
     level1.add(
         new AdditiveRow(
             new Dimensions(Collections.singletonList(DIM_COUNTRY)),
@@ -144,7 +143,7 @@ public class CubeTest {
             15));
     hierarchicalRows.add(level1);
     // Level 2
-    List<Row> level2 = new ArrayList<>();
+    List<AdditiveRow> level2 = new ArrayList<>();
     level2.add(new AdditiveRow(new Dimensions(List.of(DIM_COUNTRY, DIM_PAGE)),
         new DimensionValues(List.of("US", "page1")),
         8,
@@ -163,13 +162,13 @@ public class CubeTest {
   }
 
   private List<List<CubeNode>> expectedHierarchicalNodes() {
-    List<List<Row>> rows = buildHierarchicalRows();
+    List<List<AdditiveRow>> rows = buildHierarchicalRows();
     List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
     // Root level
     List<CubeNode> rootLevel = new ArrayList<>();
     hierarchicalNodes.add(rootLevel);
 
-    Row rootRow = rows.get(0).get(0);
+    AdditiveRow rootRow = rows.get(0).get(0);
     AdditiveCubeNode rootNode = new AdditiveCubeNode((AdditiveRow) rootRow);
     rootLevel.add(rootNode);
 

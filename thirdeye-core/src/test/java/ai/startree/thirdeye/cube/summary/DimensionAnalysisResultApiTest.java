@@ -54,7 +54,7 @@ public class DimensionAnalysisResultApiTest {
       SummaryResponseRow actualRow = responseRows.get(i);
       SummaryResponseRow expectedRow = expectedResponseRows.get(i);
       assertThat(actualRow.getNames()).isEqualTo(expectedRow.getNames());
-      assertThat(actualRow.getOtherDimensionValues()).isEqualTo(expectedRow.getOtherDimensionValues());
+      assertThat(actualRow.getOtherDimensionValues()).hasSameElementsAs(expectedRow.getOtherDimensionValues());
       assertThat(actualRow.getMoreOtherDimensionNumber()).isEqualTo(expectedRow.getMoreOtherDimensionNumber());
       assertThat(actualRow.getCost()).isCloseTo(expectedRow.getCost(), EPSILON);
       assertThat(actualRow.getBaselineValue()).isEqualTo(expectedRow.getBaselineValue());

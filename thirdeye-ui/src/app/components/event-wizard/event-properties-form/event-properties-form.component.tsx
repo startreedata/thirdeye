@@ -65,6 +65,7 @@ export const EventPropertiesForm: FunctionComponent<
                         }
                         inputRef={register}
                         name="name"
+                        placeholder={t("label.enter-name-of-event")}
                         type="string"
                         variant="outlined"
                     />
@@ -87,6 +88,7 @@ export const EventPropertiesForm: FunctionComponent<
                         required
                         inputRef={register}
                         name="type"
+                        placeholder={t("label.enter-a-type-event")}
                         type="string"
                         variant="outlined"
                     />

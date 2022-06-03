@@ -1,11 +1,11 @@
-import { Event } from "../../rest/dto/event.interfaces";
+import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
 
 export interface EventWizardProps {
-    event?: Event;
+    event?: Event | EditableEvent;
     showCancel?: boolean;
     onCancel?: () => void;
     onChange?: (eventWizardStep: EventsWizardStep) => void;
-    onFinish?: (event: Event) => void;
+    onFinish?: (event: EditableEvent) => void;
 }
 
 export enum EventsWizardStep {

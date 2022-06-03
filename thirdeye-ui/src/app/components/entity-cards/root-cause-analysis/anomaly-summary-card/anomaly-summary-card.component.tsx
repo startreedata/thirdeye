@@ -27,6 +27,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     const commonClasses = useCommonStyles();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    let metricName;
 
     useEffect(() => {
         if (uiAnomaly && uiAnomaly.alertId) {
@@ -49,6 +50,17 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
         }
     }, [status, errorMessages]);
 
+    if (alert && alert.templateProperties) {
+        if (
+            alert.templateProperties.aggregationColumn &&
+            alert.templateProperties.aggregationFunction
+        ) {
+            metricName = `${alert.templateProperties.aggregationFunction}(${alert.templateProperties.aggregationColumn})`;
+        } else if (uiAnomaly && uiAnomaly.metricName) {
+            metricName = uiAnomaly.metricName;
+        }
+    }
+
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
@@ -67,15 +79,13 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
         <PageContentsCardV1 className={className}>
             {uiAnomaly && (
                 <Grid container spacing={4}>
-                    {/* Alert */}
+                    {/* Metric */}
                     <Grid item lg={3} sm={6} xs={12}>
                         <div className={anomalySummaryCardStyles.valueText}>
                             {status === ActionStatus.Working && (
                                 <span>Loading ...</span>
                             )}
-                            {status === ActionStatus.Done &&
-                                alert &&
-                                alert.templateProperties.metric}
+                            {status === ActionStatus.Done && metricName}
                         </div>
                         <div className={anomalySummaryCardStyles.label}>
                             {t("label.metric")}{" "}

@@ -25,7 +25,14 @@ import {
 
 export const AlgorithmRowExpanded: FunctionComponent<
     AlgorithmRowExpandedProps
-> = ({ row, anomaly, dimensionColumns, comparisonOffset }) => {
+> = ({
+    row,
+    startTime,
+    endTime,
+    alertId,
+    dimensionColumns,
+    comparisonOffset,
+}) => {
     const commonClasses = useCommonStyles();
     const {
         evaluation: nonFilteredEvaluationData,
@@ -53,7 +60,7 @@ export const AlgorithmRowExpanded: FunctionComponent<
     useEffect(() => {
         setChartData(null);
         fetchAlertEvaluation();
-    }, [anomaly, searchParams]);
+    }, [startTime, endTime, alertId, searchParams]);
 
     useEffect(() => {
         if (
@@ -65,7 +72,8 @@ export const AlgorithmRowExpanded: FunctionComponent<
                     generateComparisonChartOptions(
                         nonFilteredEvaluationData,
                         filteredEvaluationData,
-                        anomaly,
+                        startTime,
+                        endTime,
                         comparisonOffset,
                         t
                     )
@@ -124,11 +132,11 @@ export const AlgorithmRowExpanded: FunctionComponent<
         );
 
         getNonFilteredEvaluation(
-            createAlertEvaluation(anomaly.alert.id, Number(start), Number(end))
+            createAlertEvaluation(alertId, Number(start), Number(end))
         );
 
         getFilteredEvaluation(
-            createAlertEvaluation(anomaly.alert.id, Number(start), Number(end)),
+            createAlertEvaluation(alertId, Number(start), Number(end)),
             filters
         );
     };

@@ -19,7 +19,9 @@ import {
     BASELINE_OPTIONS,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
@@ -37,6 +39,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     chartTimeSeriesFilterSet,
     selectedEvents,
     onEventSelectionChange,
+    isLoading,
 }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
@@ -68,6 +71,14 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         setSearchParams(searchParams);
     };
 
+    if (isLoading) {
+        return (
+            <PageContentsCardV1>
+                <SkeletonV1 preventDelay height={500} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
+
     return (
         <Card variant="outlined">
             <CardContent>
@@ -86,40 +97,48 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         </Tabs>
                     </Grid>
                     <Grid item md={5} sm={6} xs={12}>
-                        <Grid container spacing={0}>
-                            <Grid item sm={6} xs={12}>
-                                <Box
-                                    className={
-                                        classes.baselineWeekOffsetLabelContainer
-                                    }
-                                    p="10.5px 0"
-                                >
-                                    <label>
-                                        <strong>
-                                            {t("label.baseline-week-offset")}:
-                                        </strong>
-                                    </label>
-                                </Box>
+                        {/* Hide baseline offset selector if events tab is selected */}
+                        {selectedTabIndex !== 2 && (
+                            <Grid container spacing={0}>
+                                <Grid item sm={6} xs={12}>
+                                    <Box
+                                        className={
+                                            classes.baselineWeekOffsetLabelContainer
+                                        }
+                                        p="10.5px 0"
+                                    >
+                                        <label>
+                                            <strong>
+                                                {t(
+                                                    "label.baseline-week-offset"
+                                                )}
+                                                :
+                                            </strong>
+                                        </label>
+                                    </Box>
+                                </Grid>
+                                <Grid item sm={6} xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        select
+                                        size="small"
+                                        value={comparisonOffset}
+                                        onChange={
+                                            onHandleComparisonOffsetSelection
+                                        }
+                                    >
+                                        {BASELINE_OPTIONS.map((option) => (
+                                            <MenuItem
+                                                key={option.key}
+                                                value={option.key}
+                                            >
+                                                {option.description}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
                             </Grid>
-                            <Grid item sm={6} xs={12}>
-                                <TextField
-                                    fullWidth
-                                    select
-                                    size="small"
-                                    value={comparisonOffset}
-                                    onChange={onHandleComparisonOffsetSelection}
-                                >
-                                    {BASELINE_OPTIONS.map((option) => (
-                                        <MenuItem
-                                            key={option.key}
-                                            value={option.key}
-                                        >
-                                            {option.description}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                        </Grid>
+                        )}
                     </Grid>
                 </Grid>
             </CardContent>
@@ -177,7 +196,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             {selectedTabIndex === 0 && (
                 <Box mt={-4}>
                     <AnomalyDimensionAnalysis
-                        anomaly={anomaly}
+                        anomaly={anomaly as Anomaly}
                         anomalyId={toNumber(anomalyId)}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}

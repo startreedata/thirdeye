@@ -67,7 +67,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<
 
                     return (
                         <AlgorithmRow
-                            anomaly={anomaly}
+                            alertId={anomaly.alert.id}
                             checked={checked}
                             comparisonOffset={comparisonOffset}
                             dataset={
@@ -76,9 +76,11 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<
                             dimensionColumns={
                                 anomalyDimensionAnalysisData.dimensions
                             }
+                            endTime={anomaly.endTime}
                             key={row.names.join()}
                             metric={anomalyDimensionAnalysisData.metric.name}
                             row={row}
+                            startTime={anomaly.startTime}
                             totalSum={totalSum}
                             onCheckClick={onCheckClick}
                         />

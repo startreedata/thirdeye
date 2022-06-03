@@ -10,21 +10,18 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.cost.RatioCostFunction;
 import ai.startree.thirdeye.cube.data.cube.Cube;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
 import ai.startree.thirdeye.cube.data.dbclient.CubeMetric;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.data.dbrow.Row;
-import ai.startree.thirdeye.cube.ratio.RatioCubeMetric;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.base.Preconditions;
@@ -32,7 +29,6 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.joda.time.Interval;
@@ -44,14 +40,11 @@ public class DataCubeSummaryCalculator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
 
-  private final MetricConfigManager metricConfigManager;
   private final DataSourceCache dataSourceCache;
 
   @Inject
   public DataCubeSummaryCalculator(
-      final MetricConfigManager metricDAO,
       final DataSourceCache dataSourceCache) {
-    this.metricConfigManager = metricDAO;
     this.dataSourceCache = dataSourceCache;
   }
 
@@ -148,39 +141,20 @@ public class DataCubeSummaryCalculator {
      * @return the summary result of cube algorithm.
      */
     public DimensionAnalysisResultApi run() throws Exception {
-      final CubeMetric<? extends Row> cubeMetric;
-      final CostFunction costFunction;
-      if (isRatioMetric()) {
-        cubeMetric = buildRatioCubeMetric();
-        costFunction = new RatioCostFunction();
-      } else {
-        // additive - nominal case
-        cubeMetric =
-            new AdditiveCubeMetric(datasetConfigDTO, metricConfigDTO, currentInterval, baselineInterval);
-        costFunction = new BalancedCostFunction();
-      }
+      checkArgument(!isRatioMetric(),
+          String.format("Metric is a legacy ratio metric: %s It is not supported anymore",
+              metricConfigDTO.getDerivedMetricExpression()));
+
+      final CubeMetric<? extends Row> cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
+          metricConfigDTO,
+          currentInterval,
+          baselineInterval);
+      final CostFunction costFunction = new BalancedCostFunction();
 
       final CubeFetcher<? extends Row> cubeFetcher =
           new CubeFetcherImpl<>(dataSourceCache, cubeMetric);
 
       return buildSummary(cubeFetcher, costFunction);
-    }
-
-    private CubeMetric<? extends Row> buildRatioCubeMetric() {
-      Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(metricConfigDTO.getDerivedMetricExpression());
-      // Extract numerator and denominator id
-      long numeratorId = Long.parseLong(matcher.group(NUMERATOR_GROUP_NAME));
-      long denominatorId = Long.parseLong(matcher.group(DENOMINATOR_GROUP_NAME));
-
-      // Get numerator and denominator's metric name
-      MetricConfigDTO numeratorMetric = Objects.requireNonNull(metricConfigManager.findById(numeratorId));
-      MetricConfigDTO denominatorMetric = Objects.requireNonNull(metricConfigManager.findById(denominatorId));
-      // Generate cube result
-      return new RatioCubeMetric(datasetConfigDTO,
-          numeratorMetric,
-          denominatorMetric,
-          currentInterval,
-          baselineInterval);
     }
 
     /**

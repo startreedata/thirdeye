@@ -58,6 +58,14 @@ public class Cube {
   @JsonIgnore
   private List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
 
+  private final CubeFetcher olapClient;
+  private final CostFunction costFunction;
+
+  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction) {
+    this.olapClient = cubeFetcher;
+    this.costFunction = costFunction;
+  }
+
   public double getBaselineTotal() {
     return baselineTotal;
   }
@@ -76,12 +84,6 @@ public class Cube {
 
   public Dimensions getDimensions() {
     return dimensions;
-  }
-
-  private final CostFunction costFunction;
-
-  public Cube(CostFunction costFunction) {
-    this.costFunction = costFunction;
   }
 
   @JsonIgnore
@@ -105,15 +107,14 @@ public class Cube {
    * Automatically orders of the given dimensions depending on their error cost and builds the
    * subcube of data according to that order.
    *
-   * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions to be ordered.
    * @param dataFilters the filter to be applied on the incoming data.
    * @param depth the number of the top dimensions to be considered in the subcube.
    * @param hierarchy the hierarchy among the given dimensions, whose order will be honors
    *     before dimensions' cost.
    */
-  public void buildWithAutoDimensionOrder(CubeFetcher olapClient,
-      Dimensions dimensions, List<Predicate> dataFilters, int depth,
+  public void buildWithAutoDimensionOrder(Dimensions dimensions, List<Predicate> dataFilters,
+      int depth,
       List<List<String>> hierarchy)
       throws Exception {
     long tStart = System.nanoTime();
@@ -122,9 +123,9 @@ public class Cube {
           "Dimensions cannot be empty.");
       Preconditions.checkNotNull(hierarchy, "hierarchy cannot be null.");
 
-      initializeBasicInfo(olapClient, dataFilters);
+      initializeBasicInfo(dataFilters);
       Dimensions shrankDimensions = CubeUtils.shrinkDimensionsByFilterSets(dimensions, dataFilters);
-      costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize,
+      costSet = computeOneDimensionCost(baselineTotal, currentTotal, baselineTotalSize,
           currentTotalSize,
           shrankDimensions, dataFilters);
       sortedDimensionCosts = calculateSortedDimensionCost(costSet);
@@ -132,7 +133,7 @@ public class Cube {
 
       LOG.info("Auto-dimension order: " + this.dimensions);
 
-      buildSubCube(olapClient, this.dimensions, dataFilters);
+      buildSubCube(this.dimensions, dataFilters);
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
@@ -145,16 +146,15 @@ public class Cube {
   /**
    * Builds the subcube of data according to the given dimensions.
    *
-   * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions, whose order has been given, of the subcube.
    * @param dataFilters the filter to be applied on the incoming data.
    */
-  public void buildWithManualDimensionOrder(CubeFetcher olapClient, Dimensions dimensions,
+  public void buildWithManualDimensionOrder(Dimensions dimensions,
       List<Predicate> dataFilters)
       throws Exception {
     long tStart = System.nanoTime();
     try {
-      buildSubCube(olapClient, dimensions, dataFilters);
+      buildSubCube(dimensions, dataFilters);
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
@@ -167,19 +167,17 @@ public class Cube {
   /**
    * Builds the subcube according to the given dimension order.
    *
-   * @param olapClient the data client to retrieve data.
    * @param dimensions the given dimension order.
    * @param dataFilter the data filter to applied on the data cube.
    */
-  private void buildSubCube(CubeFetcher olapClient, Dimensions dimensions,
-      List<Predicate> dataFilter)
+  private void buildSubCube(Dimensions dimensions, List<Predicate> dataFilter)
       throws Exception {
     Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
         "Dimensions cannot be empty.");
     if (this.dimensions == null) { // which means buildWithAutoDimensionOrder is not triggered
-      initializeBasicInfo(olapClient, dataFilter);
+      initializeBasicInfo(dataFilter);
       this.dimensions = dimensions;
-      costSet = computeOneDimensionCost(olapClient, baselineTotal, currentTotal, baselineTotalSize,
+      costSet = computeOneDimensionCost(baselineTotal, currentTotal, baselineTotalSize,
           currentTotalSize,
           dimensions, dataFilter);
     }
@@ -211,7 +209,7 @@ public class Cube {
    *
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
-  private void initializeBasicInfo(CubeFetcher olapClient, List<Predicate> dataFilters)
+  private void initializeBasicInfo(List<Predicate> dataFilters)
       throws Exception {
 
     Row topAggValues = olapClient.getTopAggregatedValues(dataFilters);
@@ -289,8 +287,7 @@ public class Cube {
     return hierarchicalNodes;
   }
 
-  private List<DimNameValueCostEntry> computeOneDimensionCost(CubeFetcher olapClient,
-      double topBaselineValue,
+  private List<DimNameValueCostEntry> computeOneDimensionCost(double topBaselineValue,
       double topCurrentValue, double topBaselineSize, double topCurrentSize, Dimensions dimensions,
       List<Predicate> filterSets) throws Exception {
 
@@ -299,8 +296,9 @@ public class Cube {
         topCurrentValue, topRatio);
 
     List<DimNameValueCostEntry> costSet = new ArrayList<>();
-    List<List<Row>> wowValuesOfDimensions = olapClient
-        .getAggregatedValuesOfDimension(dimensions, filterSets);
+    List<List<Row>> wowValuesOfDimensions = this.olapClient.getAggregatedValuesOfDimension(
+        dimensions,
+        filterSets);
     for (int i = 0; i < dimensions.size(); ++i) {
       String dimensionName = dimensions.get(i);
       List<Row> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
@@ -503,14 +501,6 @@ public class Cube {
         return Double.compare(o2.cost, o1.cost);
       }
     });
-  }
-
-  /**
-   * Reestablishes the hierarchy between aggregated and detailed rows after the cube is read from a
-   * Json string.
-   */
-  private void rebuildHierarchy() {
-    this.hierarchicalNodes = dataRowToCubeNode(hierarchicalRows, dimensions);
   }
 
   @Override

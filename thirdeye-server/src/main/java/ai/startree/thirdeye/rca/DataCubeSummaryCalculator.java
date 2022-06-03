@@ -173,14 +173,14 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
     public DimensionAnalysisResultApi buildSummary(CubeFetcher<? extends Row> cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube cube = new Cube(costFunction);
-      DimensionAnalysisResultApi response;
+      Cube cube = new Cube(cubeFetcher, costFunction);
+      final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
-        cube.buildWithAutoDimensionOrder(cubeFetcher, dimensions, dataFilters, depth, hierarchies);
+        cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);
         Summary summary = new Summary(cube, costFunction);
         response = summary.computeSummary(summarySize, doOneSideError, depth);
       } else { // manual dimension order
-        cube.buildWithManualDimensionOrder(cubeFetcher, dimensions, dataFilters);
+        cube.buildWithManualDimensionOrder(dimensions, dataFilters);
         Summary summary = new Summary(cube, costFunction);
         response = summary.computeSummary(summarySize, doOneSideError);
       }

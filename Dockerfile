@@ -1,6 +1,8 @@
 FROM adoptopenjdk/openjdk11:alpine
 
 EXPOSE 8080
+EXPOSE 8081
+EXPOSE 8443
 
 RUN addgroup -S thirdeye && \
   adduser -S thirdeye -G thirdeye && \

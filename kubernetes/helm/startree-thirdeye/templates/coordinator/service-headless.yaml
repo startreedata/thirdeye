@@ -17,6 +17,10 @@ spec:
       protocol: TCP
       port: {{ .Values.coordinator.port }}
       targetPort: {{ .Values.coordinator.port }}
+    - name: admin
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
     {{- if .Values.tls.enabled }}
     - name: https
       protocol: TCP

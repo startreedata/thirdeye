@@ -20,6 +20,7 @@ export * from "./page-not-found-indicator-v1";
 export * from "./page-v1";
 export * from "./password-input-v1";
 export * from "./search-input-v1";
+export * from "./skeleton-v1";
 export * from "./square-svg-icon-button-v1";
 export * from "./stepper-v1";
 export * from "./tile-button-v1";

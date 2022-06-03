@@ -9,5 +9,5 @@ package ai.startree.thirdeye.cube.data.dbclient;
  * The field names where the metric value should be filled in.
  */
 public enum CubeTag {
-  Baseline, Current, BaselineNumerator, CurrentNumerator, BaselineDenominator, CurrentDenominator
+  Baseline, Current,
 }

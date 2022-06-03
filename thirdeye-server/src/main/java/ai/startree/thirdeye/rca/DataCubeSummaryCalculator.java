@@ -8,6 +8,7 @@ package ai.startree.thirdeye.rca;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
+import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.cube.Cube;
@@ -147,7 +148,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           String.format("Metric is a legacy ratio metric: %s It is not supported anymore",
               metricConfigDTO.getDerivedMetricExpression()));
 
-      final CubeMetric<? extends Row> cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
+      final CubeMetric<AdditiveRow> cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
           metricConfigDTO,
           currentInterval,
           baselineInterval);
@@ -173,7 +174,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
     public DimensionAnalysisResultApi buildSummary(CubeFetcher<? extends Row> cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube cube = new Cube(cubeFetcher, costFunction);
+      Cube<? extends Row> cube = new Cube<>(cubeFetcher, costFunction);
       final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
         cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);

@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Cube {
+public class Cube<R extends Row> {
 
   private static final Logger LOG = LoggerFactory.getLogger(Cube.class);
 
@@ -52,16 +52,16 @@ public class Cube {
 
   // The actual data is stored in levels
   @JsonProperty("hierarchicalRows")
-  private final List<List<Row>> hierarchicalRows = new ArrayList<>();
+  private final List<List<R>> hierarchicalRows = new ArrayList<>();
 
   // The logical nodes of the hierarchy among the actual data
   @JsonIgnore
   private List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
 
-  private final CubeFetcher olapClient;
+  private final CubeFetcher<R> olapClient;
   private final CostFunction costFunction;
 
-  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction) {
+  public Cube(final CubeFetcher<R> cubeFetcher, final CostFunction costFunction) {
     this.olapClient = cubeFetcher;
     this.costFunction = costFunction;
   }
@@ -192,9 +192,9 @@ public class Cube {
     //                       / \   \
     //     Level 2          d   e   f
     // The Comparator for generating the order is implemented in the class DimensionValues.
-    List<List<Row>> rowOfLevels = olapClient.getAggregatedValuesOfLevels(dimensions, dataFilter);
+    List<List<R>> rowOfLevels = olapClient.getAggregatedValuesOfLevels(dimensions, dataFilter);
     for (int i = 0; i <= dimensions.size(); ++i) {
-      List<Row> rowAtLevelI = rowOfLevels.get(i);
+      List<R> rowAtLevelI = rowOfLevels.get(i);
       rowAtLevelI.sort(new RowDimensionValuesComparator());
       hierarchicalRows.add(rowAtLevelI);
       size += rowAtLevelI.size();
@@ -241,7 +241,7 @@ public class Cube {
    * @param dimensions the dimension names of the actual data.
    * @return CubeNode that contains the hierarchical relationship.
    */
-  public static List<List<CubeNode>> dataRowToCubeNode(List<List<Row>> dataRows,
+  public static <R extends Row> List<List<CubeNode>> dataRowToCubeNode(List<List<R>> dataRows,
       Dimensions dimensions) {
 
     List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
@@ -296,12 +296,12 @@ public class Cube {
         topCurrentValue, topRatio);
 
     List<DimNameValueCostEntry> costSet = new ArrayList<>();
-    List<List<Row>> wowValuesOfDimensions = this.olapClient.getAggregatedValuesOfDimension(
+    List<List<R>> wowValuesOfDimensions = this.olapClient.getAggregatedValuesOfDimension(
         dimensions,
         filterSets);
     for (int i = 0; i < dimensions.size(); ++i) {
       String dimensionName = dimensions.get(i);
-      List<Row> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
+      List<R> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
       for (Row wowValues : wowValuesOfOneDimension) {
         CubeNode wowNode = wowValues.toNode();
         String dimensionValue = wowNode.getDimensionValues().get(0);

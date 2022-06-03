@@ -4,7 +4,7 @@ import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { EventsWizard } from "../../components/events-wizard/events-wizard.component";
+import { EventsWizard } from "../../components/event-wizard/event-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
@@ -12,7 +12,7 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { Event } from "../../rest/dto/event.interfaces";
+import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
 import { createEvent } from "../../rest/event/events.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getEventsViewPath } from "../../utils/routes/routes.util";
@@ -22,7 +22,7 @@ export const EventsCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    const onEventWizardFinish = (event: Event): void => {
+    const onEventWizardFinish = (event: Event | EditableEvent): void => {
         if (!event) {
             return;
         }

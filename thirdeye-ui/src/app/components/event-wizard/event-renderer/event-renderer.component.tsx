@@ -2,7 +2,7 @@ import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
-import { EventRendererProps } from "./events-renderer.interfaces";
+import { EventRendererProps } from "./event-renderer.interfaces";
 
 export const EventRenderer: FunctionComponent<EventRendererProps> = (
     props: EventRendererProps

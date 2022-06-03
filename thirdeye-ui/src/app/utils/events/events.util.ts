@@ -1,14 +1,13 @@
-import i18n from "i18next";
-import { Event } from "../../rest/dto/event.interfaces";
+import { EditableEvent } from "../../rest/dto/event.interfaces";
+import { generateDateRangeMonthsFromNow } from "../routes/routes.util";
 
-export const createEmptyEvent = (): Event => {
-    const noDataMarker = i18n.t("label.no-data-marker");
+export const createEmptyEvent = (): EditableEvent => {
+    const [start, end] = generateDateRangeMonthsFromNow(0);
 
     return {
-        id: -1,
-        name: noDataMarker,
-        startTime: 1,
-        endTime: 1,
-        type: noDataMarker,
+        name: "",
+        startTime: start,
+        endTime: end,
+        type: "",
     };
 };

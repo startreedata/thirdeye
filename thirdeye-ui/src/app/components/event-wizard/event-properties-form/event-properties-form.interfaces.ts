@@ -1,7 +1,7 @@
-import { Event } from "../../../rest/dto/event.interfaces";
+import { EditableEvent, Event } from "../../../rest/dto/event.interfaces";
 
 export interface EventPropertiesFormProps {
     id: string;
-    event: Event;
+    event: EditableEvent;
     onSubmit?: (event: Event) => void;
 }

@@ -3,21 +3,21 @@ import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, StepperV1 } from "../../platform/components";
-import { Event } from "../../rest/dto/event.interfaces";
+import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
 import { createEmptyEvent } from "../../utils/events/events.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
+import { EventPropertiesForm } from "./event-properties-form/event-properties-form.component";
+import { EventRenderer } from "./event-renderer/event-renderer.component";
 import { EventsWizardStep, EventWizardProps } from "./event-wizard.interface";
-import { EventPropertiesForm } from "./events-properties-form/event-properties-form.component";
-import { EventRenderer } from "./events-renderer/events-renderer.component";
-import { useEventWizardStyles } from "./events-wizard.styles";
+import { useEventWizardStyles } from "./event-wizard.styles";
 
 const FORM_ID_EVENT_PROPERTIES = "FORM_ID_EVENT_PROPERTIES";
 
 export const EventsWizard: FunctionComponent<EventWizardProps> = (
     props: EventWizardProps
 ) => {
-    const [newEvent, setNewEvent] = useState<Event>(
+    const [newEvent, setNewEvent] = useState<EditableEvent>(
         props.event || createEmptyEvent()
     );
     const [currentWizardStep, setCurrentWizardStep] =

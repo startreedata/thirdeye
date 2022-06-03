@@ -51,20 +51,20 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
     this.dataSourceCache = dataSourceCache;
   }
 
-  public ContributorsFinderResult search(final ContributorsSearchConfiguration tempClass)
+  public ContributorsFinderResult search(final ContributorsSearchConfiguration searchConfiguration)
       throws Exception {
 
     final CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
-        tempClass.getDatasetConfigDTO(),
-        tempClass.getMetricConfigDTO(),
-        tempClass.getCurrentInterval(),
-        tempClass.getCurrentBaseline(),
-        new Dimensions(tempClass.getDatasetConfigDTO().getDimensions()),
-        tempClass.getFilters(),
-        tempClass.getSummarySize(),
-        tempClass.getDepth(),
-        tempClass.getHierarchies(),
-        tempClass.isDoOneSideError()
+        searchConfiguration.getDatasetConfigDTO(),
+        searchConfiguration.getMetricConfigDTO(),
+        searchConfiguration.getCurrentInterval(),
+        searchConfiguration.getCurrentBaseline(),
+        new Dimensions(searchConfiguration.getDatasetConfigDTO().getDimensions()),
+        searchConfiguration.getFilters(),
+        searchConfiguration.getSummarySize(),
+        searchConfiguration.getDepth(),
+        searchConfiguration.getHierarchies(),
+        searchConfiguration.isDoOneSideError()
     );
 
 

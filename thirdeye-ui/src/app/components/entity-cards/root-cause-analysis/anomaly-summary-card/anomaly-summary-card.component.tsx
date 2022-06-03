@@ -1,13 +1,13 @@
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import Skeleton from "@material-ui/lab/Skeleton";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
@@ -52,7 +52,13 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
-                <Skeleton height={150} variant="rect" />
+                <Typography variant="body1">
+                    <SkeletonV1 preventDelay />
+                    <SkeletonV1 preventDelay />
+                    <SkeletonV1 preventDelay />
+                    <SkeletonV1 preventDelay />
+                    <SkeletonV1 preventDelay />
+                </Typography>
             </PageContentsCardV1>
         );
     }

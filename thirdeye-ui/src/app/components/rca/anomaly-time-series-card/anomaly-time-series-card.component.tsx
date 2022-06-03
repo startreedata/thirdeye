@@ -6,7 +6,6 @@ import {
     CardContent,
     Grid,
 } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
 import { debounce, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
@@ -19,6 +18,7 @@ import { useSearchParams } from "react-router-dom";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
+    SkeletonV1,
     TooltipV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -231,7 +231,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     if (isLoading) {
         return (
             <PageContentsCardV1>
-                <Skeleton height={400} variant="rect" />
+                <SkeletonV1 preventDelay height={400} variant="rect" />
             </PageContentsCardV1>
         );
     }
@@ -302,7 +302,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             </CardContent>
             {getEvaluationRequestStatus === ActionStatus.Working && (
                 <CardContent>
-                    <Skeleton height={350} variant="rect" />
+                    <SkeletonV1 preventDelay height={350} variant="rect" />
                 </CardContent>
             )}
             {getEvaluationRequestStatus === ActionStatus.Error && (

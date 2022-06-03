@@ -10,7 +10,6 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +19,7 @@ import {
     BASELINE_OPTIONS,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { PageContentsCardV1 } from "../../../platform/components";
+import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
@@ -75,7 +74,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     if (isLoading) {
         return (
             <PageContentsCardV1>
-                <Skeleton height={500} variant="rect" />
+                <SkeletonV1 preventDelay height={500} variant="rect" />
             </PageContentsCardV1>
         );
     }

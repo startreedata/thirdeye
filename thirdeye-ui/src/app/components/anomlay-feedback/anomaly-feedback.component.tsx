@@ -1,5 +1,4 @@
 import { Box, Button, Grid, MenuItem, TextField } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useRef, useState } from "react";
@@ -7,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
+    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -156,7 +156,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
-                <Skeleton height={150} variant="rect" />
+                <SkeletonV1 preventDelay height={150} variant="rect" />
             </PageContentsCardV1>
         );
     }

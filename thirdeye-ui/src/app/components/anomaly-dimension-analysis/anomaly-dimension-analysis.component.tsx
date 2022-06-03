@@ -1,10 +1,10 @@
 import { CardContent } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -54,7 +54,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
         <CardContent>
             {/* Loading Indicator when request is in flight */}
             {anomalyDimensionAnalysisReqStatus === ActionStatus.Working && (
-                <Skeleton height={200} variant="rect" />
+                <SkeletonV1 preventDelay height={200} variant="rect" />
             )}
 
             {anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&

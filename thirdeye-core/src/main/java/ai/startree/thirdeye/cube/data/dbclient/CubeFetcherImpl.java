@@ -8,6 +8,7 @@ package ai.startree.thirdeye.cube.data.dbclient;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -56,12 +57,12 @@ public class CubeFetcherImpl implements CubeFetcher {
   public static final int QUERY_LIMIT = 100000;
 
   private final DataSourceCache dataSourceCache;
-  private final CubeMetric<AdditiveRow> cubeMetric;
+  private final AdditiveCubeMetric cubeMetric;
 
   /**
    * Constructs a Cube client.
    */
-  public CubeFetcherImpl(DataSourceCache dataSourceCache, CubeMetric<AdditiveRow> cubeMetric) {
+  public CubeFetcherImpl(DataSourceCache dataSourceCache, AdditiveCubeMetric cubeMetric) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
     this.cubeMetric = cubeMetric;
   }

@@ -14,7 +14,6 @@ import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.cube.SummaryResponseRow;
@@ -31,7 +30,7 @@ public class DimensionAnalysisResultApiTest {
   @Test
   public void testBuildDiffSummary() {
     // Create test case
-    List<CubeNode> cubeNodes = buildHierarchicalNodes();
+    List<AdditiveCubeNode> cubeNodes = buildHierarchicalNodes();
     int rootIdx = cubeNodes.size() - 1;
     double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineValue();
     double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentValue();
@@ -108,26 +107,26 @@ public class DimensionAnalysisResultApiTest {
    *     /
    *    US
    */
-  private List<CubeNode> buildHierarchicalNodes() {
+  private List<AdditiveCubeNode> buildHierarchicalNodes() {
     List<List<AdditiveRow>> rows = buildHierarchicalRows();
     // Root level
-    AdditiveRow rootRow = (AdditiveRow) rows.get(0).get(0);
+    AdditiveRow rootRow = rows.get(0).get(0);
     AdditiveCubeNode rootNode = new AdditiveCubeNode(rootRow);
 
     // Level 1
-    AdditiveRow USRow = (AdditiveRow) rows.get(1).get(0);
+    AdditiveRow USRow = rows.get(1).get(0);
     AdditiveCubeNode USNode = new AdditiveCubeNode(1, 0, USRow, rootNode);
 
-    AdditiveRow INRow = (AdditiveRow) rows.get(1).get(1);
+    AdditiveRow INRow = rows.get(1).get(1);
     AdditiveCubeNode INNode = new AdditiveCubeNode(1, 1, INRow, rootNode);
 
-    AdditiveRow FRRow = (AdditiveRow) rows.get(1).get(2);
+    AdditiveRow FRRow = rows.get(1).get(2);
     AdditiveCubeNode FRNode = new AdditiveCubeNode(1, 2, FRRow, rootNode);
 
     // Assume that US is the only child that is picked by the summary
     rootNode.removeNodeValues(USNode);
 
-    List<CubeNode> res = new ArrayList<>();
+    List<AdditiveCubeNode> res = new ArrayList<>();
     res.add(USNode);
     // Root node is located at the end of this list.
     res.add(rootNode);

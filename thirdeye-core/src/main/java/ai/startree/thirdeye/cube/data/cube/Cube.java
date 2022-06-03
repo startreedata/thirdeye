@@ -5,11 +5,11 @@
 
 package ai.startree.thirdeye.cube.data.cube;
 
+import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
@@ -56,7 +56,7 @@ public class Cube {
 
   // The logical nodes of the hierarchy among the actual data
   @JsonIgnore
-  private List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
+  private List<List<AdditiveCubeNode>> hierarchicalNodes = new ArrayList<>();
 
   private final CubeFetcher olapClient;
   private final CostFunction costFunction;
@@ -87,7 +87,7 @@ public class Cube {
   }
 
   @JsonIgnore
-  public CubeNode getRoot() {
+  public AdditiveCubeNode getRoot() {
     if (hierarchicalNodes.size() != 0 && hierarchicalNodes.get(0).size() != 0) {
       return hierarchicalNodes.get(0).get(0);
     } else {
@@ -213,7 +213,7 @@ public class Cube {
       throws Exception {
 
     AdditiveRow topAggValues = olapClient.getTopAggregatedValues(dataFilters);
-    CubeNode node = topAggValues.toNode();
+    AdditiveCubeNode node = topAggValues.toNode();
 
     baselineTotal = node.getBaselineValue();
     currentTotal = node.getCurrentValue();
@@ -241,12 +241,12 @@ public class Cube {
    * @param dimensions the dimension names of the actual data.
    * @return CubeNode that contains the hierarchical relationship.
    */
-  public static List<List<CubeNode>> dataRowToCubeNode(List<List<AdditiveRow>> dataRows,
+  public static List<List<AdditiveCubeNode>> dataRowToCubeNode(List<List<AdditiveRow>> dataRows,
       Dimensions dimensions) {
 
-    List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
-    HashMap<String, CubeNode> curParent = new HashMap<>();
-    HashMap<String, CubeNode> nextParent = new HashMap<>();
+    List<List<AdditiveCubeNode>> hierarchicalNodes = new ArrayList<>();
+    HashMap<String, AdditiveCubeNode> curParent = new HashMap<>();
+    HashMap<String, AdditiveCubeNode> nextParent = new HashMap<>();
 
     for (int level = 0; level <= dimensions.size(); ++level) {
       hierarchicalNodes.add(new ArrayList<>(dataRows.get(level).size()));
@@ -258,12 +258,12 @@ public class Cube {
           for (int i = 0; i < level - 1; ++i) {
             parentDimValues.append(row.getDimensionValues().get(i));
           }
-          CubeNode parentNode = curParent.get(parentDimValues.toString());
+          AdditiveCubeNode parentNode = curParent.get(parentDimValues.toString());
           // Sometimes Pinot returns a node without any matching parent; we discard those nodes.
           if (parentNode == null) {
             continue;
           }
-          CubeNode node = row.toNode(level, index, parentNode);
+          AdditiveCubeNode node = row.toNode(level, index, parentNode);
           hierarchicalNodes.get(level).add(node);
           // Add current node's dimension values to next parent lookup table for the next level of nodes
           parentDimValues.append(row.getDimensionValues().get(level - 1));
@@ -271,7 +271,7 @@ public class Cube {
         }
       } else { // root
         AdditiveRow row = dataRows.get(0).get(0);
-        CubeNode node = row.toNode();
+        AdditiveCubeNode node = row.toNode();
         hierarchicalNodes.get(0).add(node);
         nextParent.put("", node);
       }
@@ -303,7 +303,7 @@ public class Cube {
       String dimensionName = dimensions.get(i);
       List<AdditiveRow> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);
       for (AdditiveRow wowValues : wowValuesOfOneDimension) {
-        CubeNode wowNode = wowValues.toNode();
+        AdditiveCubeNode wowNode = wowValues.toNode();
         String dimensionValue = wowNode.getDimensionValues().get(0);
         double contributionFactor =
             (wowNode.getBaselineSize() + wowNode.getCurrentSize()) / (topBaselineSize

@@ -7,7 +7,6 @@ package ai.startree.thirdeye.cube.additive;
 
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.util.Objects;
@@ -125,7 +124,7 @@ public class AdditiveRow {
    *
    * @return a CubeNode of this row.
    */
-  public CubeNode toNode() {
+  public AdditiveCubeNode toNode() {
     return new AdditiveCubeNode(this);
   }
 
@@ -137,7 +136,7 @@ public class AdditiveRow {
    * @param parent the parent of this node.
    * @return a CubeNode of this row.
    */
-  public CubeNode toNode(int level, int index, CubeNode parent) {
+  public AdditiveCubeNode toNode(int level, int index, AdditiveCubeNode parent) {
     return new AdditiveCubeNode(level, index, this, (AdditiveCubeNode) parent);
   }
 

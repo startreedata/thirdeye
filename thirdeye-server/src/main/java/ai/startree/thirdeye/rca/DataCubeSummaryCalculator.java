@@ -8,13 +8,11 @@ package ai.startree.thirdeye.rca;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
-import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.cube.Cube;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
-import ai.startree.thirdeye.cube.data.dbclient.CubeMetric;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -147,7 +145,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           String.format("Metric is a legacy ratio metric: %s It is not supported anymore",
               metricConfigDTO.getDerivedMetricExpression()));
 
-      final CubeMetric<AdditiveRow> cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
+      final AdditiveCubeMetric cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
           metricConfigDTO,
           currentInterval,
           baselineInterval);

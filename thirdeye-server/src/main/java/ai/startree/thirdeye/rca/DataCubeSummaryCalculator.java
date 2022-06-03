@@ -24,6 +24,9 @@ import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.rca.ContributorsFinder;
+import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
+import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -36,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DataCubeSummaryCalculator {
+public class DataCubeSummaryCalculator implements ContributorsFinder {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
 
@@ -48,27 +51,26 @@ public class DataCubeSummaryCalculator {
     this.dataSourceCache = dataSourceCache;
   }
 
-  public DimensionAnalysisResultApi computeCube(
-      final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
-      final Interval currentInterval, final Interval currentBaseline, final int summarySize,
-      final int depth, final boolean doOneSideError,
-      final List<String> filters, final List<List<String>> hierarchies)
+  public ContributorsFinderResult search(final ContributorsSearchConfiguration searchConfiguration)
       throws Exception {
 
-    CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
-        datasetConfigDTO,
-        metricConfigDTO,
-        currentInterval,
-        currentBaseline,
-        new Dimensions(datasetConfigDTO.getDimensions()),
-        filters,
-        summarySize,
-        depth,
-        hierarchies,
-        doOneSideError
+    final CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
+        searchConfiguration.getDatasetConfigDTO(),
+        searchConfiguration.getMetricConfigDTO(),
+        searchConfiguration.getCurrentInterval(),
+        searchConfiguration.getCurrentBaseline(),
+        new Dimensions(searchConfiguration.getDatasetConfigDTO().getDimensions()),
+        searchConfiguration.getFilters(),
+        searchConfiguration.getSummarySize(),
+        searchConfiguration.getDepth(),
+        searchConfiguration.getHierarchies(),
+        searchConfiguration.isDoOneSideError()
     );
 
-    return cubeAlgorithmRunner.run();
+
+    // todo cyril rewrite this part - cube runner does not have to build an API result directly
+    final DimensionAnalysisResultApi runResult = cubeAlgorithmRunner.run();
+    return () -> runResult;
   }
 
   private class CubeAlgorithmRunner {

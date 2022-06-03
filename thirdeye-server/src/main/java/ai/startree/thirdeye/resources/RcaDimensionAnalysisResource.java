@@ -12,8 +12,9 @@ import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
+import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -96,27 +97,29 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) {
     try {
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
-        anomalyId);
-    final Interval currentInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        rootCauseAnalysisInfo.getTimezone());
+      RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+          anomalyId);
+      final Interval currentInterval = new Interval(
+          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
+          rootCauseAnalysisInfo.getTimezone());
 
-    Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
-    final Interval baselineInterval = new Interval(
-        currentInterval.getStart().minus(baselineOffsetPeriod),
-        currentInterval.getEnd().minus(baselineOffsetPeriod)
-    );
+      Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
+      final Interval baselineInterval = new Interval(
+          currentInterval.getStart().minus(baselineOffsetPeriod),
+          currentInterval.getEnd().minus(baselineOffsetPeriod)
+      );
 
-    // override dimensions
-    final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
-    List<String> rcaDimensions = getRcaDimensions(dimensions, excludedDimensions, datasetConfigDTO);
-    datasetConfigDTO.setDimensions(rcaDimensions);
+      // override dimensions
+      final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+      List<String> rcaDimensions = getRcaDimensions(dimensions,
+          excludedDimensions,
+          datasetConfigDTO);
+      datasetConfigDTO.setDimensions(rcaDimensions);
 
-    final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
+      final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
-      final DimensionAnalysisResultApi resultApi = dataCubeSummaryCalculator.computeCube(
+      final ContributorsSearchConfiguration searchConfiguration = new ContributorsSearchConfiguration(
           rootCauseAnalysisInfo.getMetricConfigDTO(),
           datasetConfigDTO,
           currentInterval,
@@ -125,9 +128,9 @@ public class RcaDimensionAnalysisResource {
           depth,
           doOneSideError,
           filters,
-          hierarchies
-      );
-      return Response.ok(resultApi).build();
+          hierarchies);
+      final ContributorsFinderResult result = dataCubeSummaryCalculator.search(searchConfiguration);
+      return Response.ok(result.getDimensionAnalysisResult()).build();
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {

@@ -81,7 +81,7 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "Number of entries to put in the summary.")
       @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @ApiParam(value = "Number of dimensions to drill down by.")
+      @ApiParam(value = "Maximum number of dimensions to drill down by.")
       @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
       @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
       @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,

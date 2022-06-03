@@ -243,6 +243,7 @@
         "no-filter-options-available-entity": "No filter {{entity}} options available",
         "event-name-required": "Name is required",
         "event-start-time-required": "Start time is required",
-        "event-end-time-required": "End time is required"
+        "event-end-time-required": "End time is required",
+        "preview-anomalies-created-below": "Preview the anomalies created for configuration below"
     }
 }

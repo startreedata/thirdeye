@@ -9,7 +9,8 @@ export interface AlertEvaluationTimeSeriesCardProps {
     alertEvaluation: AlertEvaluation | null;
     error?: boolean;
     helperText?: string;
-    hideRefreshButton?: boolean;
+    showPreviewButton?: boolean;
+    showDatePicker?: boolean;
     onRefresh?: () => void;
     onAnomalyBarClick?: (anomaly: Anomaly) => void;
 }

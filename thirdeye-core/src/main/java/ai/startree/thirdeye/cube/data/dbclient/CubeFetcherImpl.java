@@ -218,6 +218,8 @@ public class CubeFetcherImpl<R extends Row> implements CubeFetcher<R> {
     checkArgument(aggregatedValues.size() > 0,
         "No data found in timeframe. Cannot perform dimension analysis.");
     List<R> aggregatedValue = aggregatedValues.get(0);
+    checkArgument(aggregatedValue.size() > 0,
+        "No data found in timeframe. Cannot perform dimension analysis.");
     R topValue = aggregatedValue.get(0);
     return topValue;
   }

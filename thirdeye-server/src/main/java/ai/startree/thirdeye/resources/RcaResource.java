@@ -17,6 +17,7 @@ import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -34,14 +35,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +68,7 @@ public class RcaResource {
   private final Map<String, RCAFramework> frameworks;
   private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RcaInvestigationResource rcaInvestigationResource;
-  private final RootCauseMetricResource rootCauseMetricResource;
+  private final RcaMetricResource rcaMetricResource;
   private final RcaDimensionAnalysisResource rcaDimensionAnalysisResource;
   private final RcaRelatedResource rcaRelatedResource;
 
@@ -73,14 +77,14 @@ public class RcaResource {
       final RootCauseAnalysisService rootCauseAnalysisService,
       final RootCauseTemplateResource rootCauseTemplateResource,
       final RcaInvestigationResource rcaInvestigationResource,
-      final RootCauseMetricResource rootCauseMetricResource,
+      final RcaMetricResource rcaMetricResource,
       final RcaDimensionAnalysisResource rcaDimensionAnalysisResource,
       final RcaRelatedResource rcaRelatedResource) {
     this.frameworks = rootCauseAnalysisService.getFrameworks();
     this.formatters = rootCauseAnalysisService.getFormatters();
     this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rcaInvestigationResource = rcaInvestigationResource;
-    this.rootCauseMetricResource = rootCauseMetricResource;
+    this.rcaMetricResource = rcaMetricResource;
     this.rcaDimensionAnalysisResource = rcaDimensionAnalysisResource;
     this.rcaRelatedResource = rcaRelatedResource;
   }
@@ -101,8 +105,8 @@ public class RcaResource {
   }
 
   @Path(value = "/metrics")
-  public RootCauseMetricResource getRootCauseMetricResource() {
-    return rootCauseMetricResource;
+  public RcaMetricResource getRcaMetricResource() {
+    return rcaMetricResource;
   }
 
   @Path(value = "/related")
@@ -263,5 +267,26 @@ public class RcaResource {
       }
     }
     throw new IllegalArgumentException(String.format("No formatter for Entity '%s'", e.getUrn()));
+  }
+
+  @NonNull
+  protected static List<String> getRcaDimensions(List<String> dimensions,
+      List<String> excludedDimensions,
+      DatasetConfigDTO datasetConfigDTO) {
+    if (dimensions.isEmpty()) {
+      dimensions = Optional.ofNullable(datasetConfigDTO.getDimensions()).orElse(List.of());
+    }
+    dimensions = cleanDimensionStrings(dimensions);
+    if (excludedDimensions.isEmpty()) {
+      excludedDimensions = Optional.ofNullable(datasetConfigDTO.getRcaExcludedDimensions())
+          .orElse(List.of());
+    }
+    excludedDimensions = cleanDimensionStrings(excludedDimensions);
+    dimensions.removeAll(excludedDimensions);
+    return dimensions;
+  }
+
+  private static List<String> cleanDimensionStrings(@NonNull final List<String> dimensions) {
+    return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 }

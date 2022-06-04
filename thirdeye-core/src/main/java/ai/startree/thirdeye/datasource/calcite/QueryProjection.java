@@ -3,6 +3,7 @@ package ai.startree.thirdeye.datasource.calcite;
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
+import static ai.startree.thirdeye.util.CalciteUtils.addDesc;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.symbolLiteralOf;
@@ -21,41 +22,62 @@ import org.apache.calcite.sql.SqlUnresolvedFunction;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class QueryProjection {
 
+  @Nullable
   final private String operator;
   final private List<String> operands;
+  @Nullable
   final private String quantifier;
+  @Nullable
   final private String alias;
+  final private boolean isDescOrder;
 
-  private QueryProjection(final String operator, final List<String> operands,
-      final String quantifier, final String alias) {
+  private QueryProjection(@Nullable final String operator, final List<String> operands,
+      @Nullable final String quantifier, @Nullable final String alias, final boolean isDescOrder) {
     this.operator = operator;
     this.operands = List.copyOf(operands);
     this.quantifier = quantifier;
     this.alias = alias;
+    this.isDescOrder = isDescOrder;
   }
 
-  public static QueryProjection of(String operator, List<String> operands, String quantifier) {
-    return new QueryProjection(operator, operands, quantifier, null);
+  public static QueryProjection of(@Nullable final String operator, final List<String> operands,
+      @Nullable final String quantifier) {
+    return new QueryProjection(operator, operands, quantifier, null, false);
   }
 
-  public static QueryProjection of(String operator, List<String> operands) {
-    return new QueryProjection(operator, operands, null, null);
+  public static QueryProjection of(@Nullable final String operator, final List<String> operands) {
+    return new QueryProjection(operator, operands, null, null, false);
   }
 
-  public static QueryProjection of(String column) {
-    return new QueryProjection(null, List.of(column), null, null);
+  public static QueryProjection of(final String column) {
+    return new QueryProjection(null, List.of(column), null, null, false);
   }
 
-  public QueryProjection withAlias(String alias) {
-    return new QueryProjection(this.operator, this.operands, this.quantifier, alias);
+  public QueryProjection withAlias(@Nullable final String alias) {
+    if (isDescOrder) {
+      throw new IllegalStateException("isDescOrder is true. Cannot combine alias and desc order.");
+    }
+    return new QueryProjection(this.operator,
+        this.operands,
+        this.quantifier,
+        alias,
+        this.isDescOrder);
+  }
+
+  public QueryProjection withDescOrder() {
+    if (alias != null) {
+      throw new IllegalStateException("alias is not null. Cannot combine alias and desc order.");
+    }
+    return new QueryProjection(this.operator, this.operands, this.quantifier, this.alias, true);
   }
 
   public SqlNode toSqlNode() {
     if (operator != null) {
-      return applyAlias(new SqlBasicCall(
+      return applySpecialOperators(new SqlBasicCall(
           new SqlUnresolvedFunction(identifierOf(operator),
               null,
               null,
@@ -66,7 +88,7 @@ public class QueryProjection {
           SqlParserPos.ZERO,
           quantifier != null ? symbolLiteralOf(quantifier) : null));
     } else if (operands.size() == 1 && quantifier == null) {
-      return applyAlias(identifierOf(operands.get(0)));
+      return applySpecialOperators(identifierOf(operands.get(0)));
     } else {
       throw new UnsupportedOperationException(String.format(
           "Unsupported combination for QueryProjection: %s",
@@ -86,12 +108,12 @@ public class QueryProjection {
           String customDialectSql = expressionBuilder.getCustomDialectSql(metricAggFunction,
               operands,
               quantifier);
-          return applyAlias(expressionToNode(customDialectSql, sqlParserConfig));
+          return applySpecialOperators(expressionToNode(customDialectSql, sqlParserConfig));
         }
       }
       // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...)
       if (MetricAggFunction.COUNT_DISTINCT.name().equals(operator)) {
-        return applyAlias(QueryProjection.of("COUNT", operands, "DISTINCT")
+        return applySpecialOperators(QueryProjection.of("COUNT", operands, "DISTINCT")
             .toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
       }
     }
@@ -99,11 +121,15 @@ public class QueryProjection {
     return toSqlNode();
   }
 
-  private SqlNode applyAlias(final SqlNode node) {
-    if (alias == null) {
-      return node;
+  private SqlNode applySpecialOperators(final SqlNode node) {
+    if (alias != null) {
+      return addAlias(node, alias);
     }
-    return addAlias(node, alias);
+    if (isDescOrder) {
+      return addDesc(node);
+    }
+
+    return node;
   }
 
   /**
@@ -125,5 +151,35 @@ public class QueryProjection {
   // todo cyril see if it's possible to deprecrate aggregation column
   public static String getFunctionName(final MetricConfigDTO metricConfigDTO) {
     return optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName());
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final QueryProjection that = (QueryProjection) o;
+    return isDescOrder == that.isDescOrder && Objects.equals(operator, that.operator)
+        && Objects.equals(operands, that.operands) && Objects.equals(quantifier,
+        that.quantifier) && Objects.equals(alias, that.alias);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(operator, operands, quantifier, alias, isDescOrder);
+  }
+
+  @Override
+  public String toString() {
+    return "QueryProjection{" +
+        "operator='" + operator + '\'' +
+        ", operands=" + operands +
+        ", quantifier='" + quantifier + '\'' +
+        ", alias='" + alias + '\'' +
+        ", isDescOrder=" + isDescOrder +
+        '}';
   }
 }

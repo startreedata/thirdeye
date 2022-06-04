@@ -21,6 +21,14 @@ server:
     - type: http
       port: 8090
 
+  requestLog:
+    appenders:
+      - type: console
+        filterFactories:
+          - type: uri
+            uris:
+              - "/admin/prometheus"
+
 logging:
   level: INFO
   loggers:

@@ -5,14 +5,16 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_RCA_DIM_ANALYSIS;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
+import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 
 import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
+import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfoFetcher;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
+import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,12 +30,9 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -62,54 +61,14 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
   private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
-  private final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher;
+  private final RcaInfoFetcher rcaInfoFetcher;
 
   @Inject
   public RcaDimensionAnalysisResource(
       final DataCubeSummaryCalculator dataCubeSummaryCalculator,
-      final RootCauseAnalysisInfoFetcher rootCauseAnalysisInfoFetcher) {
+      final RcaInfoFetcher rcaInfoFetcher) {
     this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
-    this.rootCauseAnalysisInfoFetcher = rootCauseAnalysisInfoFetcher;
-  }
-
-  @GET
-  @Path("anomaly/{id}")
-  @ApiOperation("Retrieve the likely root causes behind an anomaly")
-  @Deprecated
-  // todo cyril remove once removed by frontend - september max
-  public Response dataCubeSummaryDeprecated(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @PathParam("id") long anomalyId,
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
-      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "Number of entries to put in the summary.")
-      @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @ApiParam(value = "Number of dimensions to drill down by.")
-      @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
-      @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
-      @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
-      @QueryParam("dimensions") List<String> dimensions,
-      @ApiParam(value = "List of dimensions to exclude from the analysis.")
-      @QueryParam("excludedDimensions") List<String> excludedDimensions,
-      @ApiParam(value =
-          "Hierarchy among some dimensions. The order will be respected in the result. "
-              + "An example of a hierarchical group is {continent, country}. "
-              + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
-      @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
-  ) throws Exception {
-    return dataCubeSummary(principal,
-        anomalyId,
-        baselineOffset,
-        filters,
-        summarySize,
-        depth,
-        doOneSideError,
-        dimensions,
-        excludedDimensions,
-        hierarchiesPayload);
+    this.rcaInfoFetcher = rcaInfoFetcher;
   }
 
   @GET
@@ -123,7 +82,7 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("filters") List<String> filters,
       @ApiParam(value = "Number of entries to put in the summary.")
       @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @ApiParam(value = "Number of dimensions to drill down by.")
+      @ApiParam(value = "Maximum number of dimensions to drill down by.")
       @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
       @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
       @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
@@ -136,54 +95,49 @@ public class RcaDimensionAnalysisResource {
               + "An example of a hierarchical group is {continent, country}. "
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
-  ) throws Exception {
-    RootCauseAnalysisInfo rootCauseAnalysisInfo = rootCauseAnalysisInfoFetcher.getRootCauseAnalysisInfo(
-        anomalyId);
-    final Interval currentInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        rootCauseAnalysisInfo.getTimezone());
-
-    Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
-    final Interval baselineInterval = new Interval(
-        currentInterval.getStart().minus(baselineOffsetPeriod),
-        currentInterval.getEnd().minus(baselineOffsetPeriod)
-    );
-
-    dimensions = cleanDimensionStrings(dimensions);
-    if (dimensions.isEmpty()) {
-      dimensions = rootCauseAnalysisInfo.getDatasetConfigDTO().getDimensions();
-    }
-    excludedDimensions = cleanDimensionStrings(excludedDimensions);
-
-    final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
-
-    DimensionAnalysisResultApi resultApi;
+  ) {
     try {
-      resultApi = dataCubeSummaryCalculator.computeCube(
+      RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+          anomalyId);
+      final Interval currentInterval = new Interval(
+          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
+          rootCauseAnalysisInfo.getTimezone());
+
+      Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
+      final Interval baselineInterval = new Interval(
+          currentInterval.getStart().minus(baselineOffsetPeriod),
+          currentInterval.getEnd().minus(baselineOffsetPeriod)
+      );
+
+      // override dimensions
+      final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+      List<String> rcaDimensions = getRcaDimensions(dimensions,
+          excludedDimensions,
+          datasetConfigDTO);
+      datasetConfigDTO.setDimensions(rcaDimensions);
+
+      final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
+
+      final ContributorsSearchConfiguration searchConfiguration = new ContributorsSearchConfiguration(
           rootCauseAnalysisInfo.getMetricConfigDTO(),
-          rootCauseAnalysisInfo.getDatasetConfigDTO(),
+          datasetConfigDTO,
           currentInterval,
           baselineInterval,
           summarySize,
           depth,
           doOneSideError,
-          dimensions,
-          excludedDimensions,
           filters,
-          hierarchies
-      );
+          hierarchies);
+      final ContributorsFinderResult result = dataCubeSummaryCalculator.search(searchConfiguration);
+      return Response.ok(result.getDimensionAnalysisResult()).build();
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
-      throw serverError(ERR_RCA_DIM_ANALYSIS, e.getCause().getMessage());
+      handleRcaAlgorithmException(e);
     }
 
-    return Response.ok(resultApi).build();
-  }
-
-  private static List<String> cleanDimensionStrings(List<String> dimensions) {
-    return dimensions.stream().map(String::trim).collect(Collectors.toList());
+    return null;
   }
 
   private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)

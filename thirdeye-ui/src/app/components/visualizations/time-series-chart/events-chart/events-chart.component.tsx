@@ -59,7 +59,7 @@ export const EventsChart: FunctionComponent<EventsChartProps> = ({
     const yScale = useMemo(
         () =>
             scaleLinear<number>({
-                range: [height, 0],
+                range: [0, height],
                 domain: [
                     0,
                     (events.length + 1) *
@@ -76,10 +76,6 @@ export const EventsChart: FunctionComponent<EventsChartProps> = ({
     });
 
     const xScaleToUse = xScale || dateScale;
-
-    // Inverting range so that placement should be done upside down
-    const inverseScale = yScale.copy();
-    inverseScale.range([yScale.range()[1], yScale.range()[0]]);
 
     return (
         <>

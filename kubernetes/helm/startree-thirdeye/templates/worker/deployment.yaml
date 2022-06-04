@@ -91,6 +91,8 @@ spec:
         ports:
           - containerPort: {{ .Values.worker.port }}
             protocol: TCP
+          - containerPort: 8081
+            protocol: TCP
         volumeMounts:
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"

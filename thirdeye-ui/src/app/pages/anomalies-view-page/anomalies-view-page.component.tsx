@@ -253,12 +253,16 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             {anomaly && (
                                 <AnomalyFeedback
                                     anomalyFeedback={
-                                        anomaly.feedback || {
+                                        (anomaly && anomaly.feedback) || {
                                             ...DEFAULT_FEEDBACK,
                                         }
                                     }
                                     anomalyId={anomaly.id}
                                     className={style.fullHeight}
+                                    isLoading={
+                                        anomalyRequestStatus ===
+                                        ActionStatus.Working
+                                    }
                                 />
                             )}
                         </Paper>

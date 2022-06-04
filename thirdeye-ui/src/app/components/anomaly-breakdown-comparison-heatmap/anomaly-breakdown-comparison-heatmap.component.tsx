@@ -15,8 +15,8 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -296,9 +296,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             <CardContent>
                 {/* Loading Indicator when requests are in flight */}
                 {anomalyBreakdownReqStatus === ActionStatus.Working && (
-                    <Box pb={20} pt={20}>
-                        <AppLoadingIndicatorV1 />
-                    </Box>
+                    <SkeletonV1 preventDelay height={200} variant="rect" />
                 )}
 
                 {/* If breakdownComparisonData is not empty render treemaps */}

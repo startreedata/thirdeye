@@ -33,6 +33,12 @@ const AlertTemplatesRouter = lazy(() =>
     ).then((module) => ({ default: module.AlertTemplatesRouter }))
 );
 
+const EventsRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "metrics-router" */ "../event/event.router"
+    ).then((module) => ({ default: module.EventRouter }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -79,6 +85,11 @@ export const ConfigurationRouter: FunctionComponent = () => {
                 <Route
                     element={<AlertTemplatesRouter />}
                     path={`${AppRouteRelative.ALERT_TEMPLATES}/*`}
+                />
+
+                <Route
+                    element={<EventsRouter />}
+                    path={`${AppRouteRelative.EVENTS}/*`}
                 />
 
                 {/* No match found, render page not found */}

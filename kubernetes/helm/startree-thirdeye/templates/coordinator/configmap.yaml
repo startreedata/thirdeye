@@ -17,7 +17,7 @@ data:
       applicationConnectors:
         {{- if .Values.tls.enabled }}
         - type: https
-          port: 443
+          port: {{ .Values.coordinator.tlsPort }}
           idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
@@ -26,6 +26,14 @@ data:
         - type: http
           port: {{ .Values.coordinator.port }}
           idleTimeout: 620s
+  
+      requestLog:
+        appenders:
+        - type: console
+          filterFactories:
+          - type: uri
+            uris:
+            - "/admin/prometheus"
 
     logging:
       level: INFO

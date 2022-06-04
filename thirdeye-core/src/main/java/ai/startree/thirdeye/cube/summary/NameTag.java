@@ -13,7 +13,7 @@ public class NameTag {
 
   public static final String ALL = "(ALL)";
   public static final String ALL_OTHERS = "(ALL_OTHERS)";
-  public static final String EMPTY = "";
+  public static final String EMPTY = "(NO_FILTER)";
 
   public final List<String> names;
 

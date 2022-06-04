@@ -35,6 +35,7 @@ public interface DatasetMapper {
     dto.setDisplayName(api.getName());
     dto.setActive(api.getActive());
     optional(api.getDimensions()).ifPresent(dto::setDimensions);
+    optional(api.getRcaExcludedDimensions()).ifPresent(dto::setRcaExcludedDimensions);
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
       updateTimeGranularityOnDataset(dto, timeColumn);
@@ -58,6 +59,7 @@ public interface DatasetMapper {
             .map(datasourceName -> new DataSourceApi().setName(datasourceName))
             .orElse(null))
         .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null));
+    optional(dto.getRcaExcludedDimensions()).ifPresent(datasetApi::setRcaExcludedDimensions);
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()
             .setName(timeColumn)

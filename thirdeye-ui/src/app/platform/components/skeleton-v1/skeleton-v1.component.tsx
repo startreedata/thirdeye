@@ -6,7 +6,7 @@ import classNames from "classnames";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { SkeletonV1Props } from "./skeleton-v1.interfaces";
 
-export const DEFAULT_DELAY = 500;
+export const DEFAULT_DELAY = 100;
 
 export const SkeletonV1: FunctionComponent<SkeletonV1Props> = ({
     className,

@@ -1,5 +1,4 @@
-import { Box, Grid, Link, Paper, Typography } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
+import { Box, Grid, Link } from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -218,54 +217,28 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     xs={12}
                 >
                     <Grid item lg={9} md={8} sm={12} xs={12}>
-                        <Paper className={style.fullHeight} elevation={0}>
-                            {anomalyRequestStatus === ActionStatus.Working && (
-                                <PageContentsCardV1>
-                                    <Skeleton
-                                        animation="pulse"
-                                        variant="text"
-                                    />
-                                    <Skeleton
-                                        animation="pulse"
-                                        variant="text"
-                                    />
-                                    <Skeleton
-                                        animation="pulse"
-                                        variant="text"
-                                    />
-                                    <Skeleton
-                                        animation="pulse"
-                                        variant="text"
-                                    />
-                                </PageContentsCardV1>
-                            )}
-
-                            {anomalyRequestStatus === ActionStatus.Done && (
-                                <AnomalyCard
-                                    uiAnomaly={uiAnomaly}
-                                    onDelete={handleAnomalyDelete}
-                                />
-                            )}
-                        </Paper>
+                        <AnomalyCard
+                            className={style.fullHeight}
+                            isLoading={
+                                anomalyRequestStatus === ActionStatus.Working
+                            }
+                            uiAnomaly={uiAnomaly}
+                            onDelete={handleAnomalyDelete}
+                        />
                     </Grid>
                     <Grid item lg={3} md={4} sm={12} xs={12}>
-                        <Paper className={style.fullHeight} elevation={0}>
-                            {anomaly && (
-                                <AnomalyFeedback
-                                    anomalyFeedback={
-                                        (anomaly && anomaly.feedback) || {
-                                            ...DEFAULT_FEEDBACK,
-                                        }
-                                    }
-                                    anomalyId={anomaly.id}
-                                    className={style.fullHeight}
-                                    isLoading={
-                                        anomalyRequestStatus ===
-                                        ActionStatus.Working
-                                    }
-                                />
-                            )}
-                        </Paper>
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
+                                }
+                            }
+                            anomalyId={Number(anomalyId)}
+                            className={style.fullHeight}
+                            isLoading={
+                                anomalyRequestStatus === ActionStatus.Working
+                            }
+                        />
                     </Grid>
                 </Grid>
 
@@ -278,62 +251,27 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             </Box>
                         </PageContentsCardV1>
                     )}
-                    {(getEvaluationRequestStatus === ActionStatus.Working ||
-                        anomalyRequestStatus === ActionStatus.Working) && (
-                        <PageContentsCardV1>
-                            <Skeleton
-                                animation="pulse"
-                                height={500}
-                                variant="rect"
-                            />
-                        </PageContentsCardV1>
-                    )}
-                    {getEvaluationRequestStatus === ActionStatus.Done && (
-                        <AlertEvaluationTimeSeriesCard
-                            alertEvaluation={alertEvaluation}
-                            alertEvaluationTimeSeriesHeight={500}
-                            maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                            onRefresh={fetchAlertEvaluation}
-                        />
-                    )}
+                    <AlertEvaluationTimeSeriesCard
+                        alertEvaluation={alertEvaluation}
+                        alertEvaluationTimeSeriesHeight={500}
+                        isLoading={
+                            getEvaluationRequestStatus ===
+                                ActionStatus.Working ||
+                            anomalyRequestStatus === ActionStatus.Working
+                        }
+                        maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
+                        onRefresh={fetchAlertEvaluation}
+                    />
                 </Grid>
 
                 {/* Existing investigations */}
                 <Grid item xs={12}>
-                    {getInvestigationsRequestStatus ===
-                        ActionStatus.Working && (
-                        <PageContentsCardV1>
-                            <Skeleton animation="pulse" variant="text" />
-                            <Skeleton animation="pulse" variant="text" />
-                            <Skeleton animation="pulse" variant="text" />
-                            <Skeleton animation="pulse" variant="text" />
-                        </PageContentsCardV1>
-                    )}
-                    {getInvestigationsRequestStatus === ActionStatus.Error && (
-                        <PageContentsCardV1>
-                            <Box pb={20} pt={20}>
-                                <NoDataIndicator />
-                            </Box>
-                        </PageContentsCardV1>
-                    )}
-                    {getInvestigationsRequestStatus === ActionStatus.Done &&
-                        investigations &&
-                        investigations.length > 0 && (
-                            <InvestigationsList
-                                investigations={investigations}
-                            />
-                        )}
-                    {getInvestigationsRequestStatus === ActionStatus.Done &&
-                        investigations &&
-                        investigations.length === 0 && (
-                            <PageContentsCardV1>
-                                <Box pb={3} pt={3} textAlign="center">
-                                    <Typography variant="h6">
-                                        {t("message.no-saved-investigations")}
-                                    </Typography>
-                                </Box>
-                            </PageContentsCardV1>
-                        )}
+                    <InvestigationsList
+                        getInvestigationsRequestStatus={
+                            getInvestigationsRequestStatus
+                        }
+                        investigations={investigations}
+                    />
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

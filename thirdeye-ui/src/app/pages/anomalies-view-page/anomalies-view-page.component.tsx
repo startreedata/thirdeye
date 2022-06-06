@@ -251,17 +251,18 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             </Box>
                         </PageContentsCardV1>
                     )}
-                    <AlertEvaluationTimeSeriesCard
-                        alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={500}
-                        isLoading={
-                            getEvaluationRequestStatus ===
-                                ActionStatus.Working ||
-                            anomalyRequestStatus === ActionStatus.Working
-                        }
-                        maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                        onRefresh={fetchAlertEvaluation}
-                    />
+                    {getEvaluationRequestStatus !== ActionStatus.Error && (
+                        <AlertEvaluationTimeSeriesCard
+                            alertEvaluation={alertEvaluation}
+                            alertEvaluationTimeSeriesHeight={500}
+                            isLoading={
+                                getEvaluationRequestStatus ===
+                                ActionStatus.Working
+                            }
+                            maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
+                            onRefresh={fetchAlertEvaluation}
+                        />
+                    )}
                 </Grid>
 
                 {/* Existing investigations */}

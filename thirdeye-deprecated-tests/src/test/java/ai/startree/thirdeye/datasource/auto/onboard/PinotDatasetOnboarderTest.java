@@ -9,7 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
-import ai.startree.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.ConfigGenerator;
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.PinotDatasetOnboarder;
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.ThirdEyePinotClient;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;

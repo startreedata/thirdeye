@@ -15,7 +15,7 @@ import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
-import ai.startree.thirdeye.datasource.csv.CSVThirdEyeDataSource;
+import ai.startree.thirdeye.plugins.datasource.csv.CSVThirdEyeDataSource;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.detection.cache.builder.AnomaliesCacheBuilder;
 import ai.startree.thirdeye.spi.Constants;

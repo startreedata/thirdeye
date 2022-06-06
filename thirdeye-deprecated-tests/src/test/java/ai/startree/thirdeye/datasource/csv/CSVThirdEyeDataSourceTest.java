@@ -7,6 +7,8 @@ package ai.startree.thirdeye.datasource.csv;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import ai.startree.thirdeye.plugins.datasource.csv.CSVThirdEyeDataSource;
+import ai.startree.thirdeye.plugins.datasource.csv.CSVThirdEyeResponse;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.MetricFunction;

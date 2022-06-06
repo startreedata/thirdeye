@@ -1,6 +1,6 @@
 import { CardContent } from "@material-ui/core";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
@@ -8,7 +8,9 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { AnomalyDimensionAnalysisData } from "../../rest/dto/rca.interfaces";
 import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";
+import { getFilterDimensionAnalysisData } from "../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
 import { AnomalyDimensionAnalysisTable } from "./algorithm-table/algorithm-table.component";
 import { AnomalyDimensionAnalysisProps } from "./anomaly-dimension-analysis.interfaces";
 
@@ -24,14 +26,23 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const {
-        anomalyDimensionAnalysisData,
         getDimensionAnalysisData,
         status: anomalyDimensionAnalysisReqStatus,
         errorMessages,
     } = useGetAnomalyDimensionAnalysis();
+
+    const [anomalyDimensionAnalysisData, setAnomalyDimensionAnalysisData] =
+        useState<AnomalyDimensionAnalysisData | null>();
+
     useEffect(() => {
         getDimensionAnalysisData(anomalyId, {
             baselineOffset: comparisonOffset,
+        }).then((data: AnomalyDimensionAnalysisData | undefined) => {
+            if (data) {
+                setAnomalyDimensionAnalysisData(
+                    getFilterDimensionAnalysisData(data)
+                );
+            }
         });
     }, [anomalyId, comparisonOffset]);
 

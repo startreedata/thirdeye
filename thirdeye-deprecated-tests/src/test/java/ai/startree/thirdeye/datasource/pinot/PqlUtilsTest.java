@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.MetricDataset;
+import ai.startree.thirdeye.plugins.datasource.pinot.SqlUtils;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;

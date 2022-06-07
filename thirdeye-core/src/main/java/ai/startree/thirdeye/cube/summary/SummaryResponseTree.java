@@ -5,9 +5,9 @@
 
 package ai.startree.thirdeye.cube.summary;
 
+import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
@@ -24,9 +24,9 @@ public class SummaryResponseTree {
 
   @JsonProperty("dimensions")
   private final List<String> dimensions = new ArrayList<>();
-  private final List<CubeNode> hierarchicalNodes = new ArrayList<>();
+  private final List<AdditiveCubeNode> hierarchicalNodes = new ArrayList<>();
 
-  public static List<CubeNode> sortResponseTree(List<CubeNode> nodes, int levelCount,
+  public static List<AdditiveCubeNode> sortResponseTree(List<AdditiveCubeNode> nodes, int levelCount,
       CostFunction costFunction) {
     SummaryResponseTree responseTree = new SummaryResponseTree();
 
@@ -35,9 +35,9 @@ public class SummaryResponseTree {
     responseTree.dimensions.addAll(dimensions.names().subList(0, levelCount));
 
     // take the first node as the top Node
-    CubeNode topNode = nodes.get(0);
+    AdditiveCubeNode topNode = nodes.get(0);
     // replace topNode by the root node if it is found
-    for (CubeNode node : nodes) {
+    for (AdditiveCubeNode node : nodes) {
       if (node.getLevel() == 0) {
         topNode = node;
         break;
@@ -47,7 +47,7 @@ public class SummaryResponseTree {
     List<SummaryResponseTreeNode> treeNodes = new ArrayList<>();
     // Build the response tree
     nodes.sort(Collections.reverseOrder(Summary.NODE_COMPARATOR)); // pre-order traversal
-    for (CubeNode node : nodes) {
+    for (AdditiveCubeNode node : nodes) {
       SummaryResponseTreeNode treeNode = new SummaryResponseTreeNode();
       treeNode.cubeNode = node;
       treeNode.level = node.getLevel();
@@ -80,7 +80,7 @@ public class SummaryResponseTree {
   }
 
   private static void insertChildNodes(SummaryResponseTreeNode node,
-      List<CubeNode> hierarchicalNodes) {
+      List<AdditiveCubeNode> hierarchicalNodes) {
     if (node.cubeNode != null) {
       hierarchicalNodes.add(node.cubeNode);
     }
@@ -92,7 +92,7 @@ public class SummaryResponseTree {
   /**
    * A recursive function to sort response tree.
    */
-  private static void sortChildNodes(SummaryResponseTreeNode node, final CubeNode topNode,
+  private static void sortChildNodes(SummaryResponseTreeNode node, final AdditiveCubeNode topNode,
       CostFunction costFunction) {
     if (node.children.size() == 0) {
       return;
@@ -108,7 +108,7 @@ public class SummaryResponseTree {
   }
 
   private static void computeCost(SummaryResponseTreeNode node, double targetChangeRatio,
-      final CubeNode topNode, CostFunction costFunction) {
+      final AdditiveCubeNode topNode, CostFunction costFunction) {
     if (node.cubeNode != null) {
       double nodeCost = costFunction
           .computeCost(targetChangeRatio,
@@ -140,7 +140,7 @@ public class SummaryResponseTree {
 
   public static class SummaryResponseTreeNode {
 
-    CubeNode cubeNode; // If it is null, this node is a dummy node.
+    AdditiveCubeNode cubeNode; // If it is null, this node is a dummy node.
     double subTreeCost;
     int level;
 
@@ -236,7 +236,7 @@ public class SummaryResponseTree {
     }
 
     private void swapContent(SummaryResponseTreeNode A, SummaryResponseTreeNode B) {
-      CubeNode tmpNode = A.cubeNode;
+      AdditiveCubeNode tmpNode = A.cubeNode;
       A.cubeNode = B.cubeNode;
       B.cubeNode = tmpNode;
       List<SummaryResponseTreeNode> tmpChildren = A.children;

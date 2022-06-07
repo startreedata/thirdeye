@@ -13,9 +13,7 @@ import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.cube.Cube;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
-import ai.startree.thirdeye.cube.data.dbclient.CubeMetric;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.api.DatasetApi;
@@ -128,7 +126,6 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
       Preconditions.checkNotNull(dimensions);
       checkArgument(dimensions.size() > 0);
       this.dimensions = dimensions;
-      // fixme cyril prefer parsing to List<Predicate>
       this.dataFilters = Predicate.parseAndCombinePredicates(filters);
       checkArgument(summarySize > 1);
       this.summarySize = summarySize;
@@ -147,14 +144,14 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           String.format("Metric is a legacy ratio metric: %s It is not supported anymore",
               metricConfigDTO.getDerivedMetricExpression()));
 
-      final CubeMetric<? extends Row> cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
+      final AdditiveCubeMetric cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
           metricConfigDTO,
           currentInterval,
           baselineInterval);
       final CostFunction costFunction = new BalancedCostFunction();
 
-      final CubeFetcher<? extends Row> cubeFetcher =
-          new CubeFetcherImpl<>(dataSourceCache, cubeMetric);
+      final CubeFetcher cubeFetcher =
+          new CubeFetcherImpl(dataSourceCache, cubeMetric);
 
       return buildSummary(cubeFetcher, costFunction);
     }
@@ -171,16 +168,16 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
       return false;
     }
 
-    public DimensionAnalysisResultApi buildSummary(CubeFetcher<? extends Row> cubeFetcher,
+    public DimensionAnalysisResultApi buildSummary(CubeFetcher cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube cube = new Cube(costFunction);
-      DimensionAnalysisResultApi response;
+      Cube cube = new Cube(cubeFetcher, costFunction);
+      final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
-        cube.buildWithAutoDimensionOrder(cubeFetcher, dimensions, dataFilters, depth, hierarchies);
+        cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);
         Summary summary = new Summary(cube, costFunction);
         response = summary.computeSummary(summarySize, doOneSideError, depth);
       } else { // manual dimension order
-        cube.buildWithManualDimensionOrder(cubeFetcher, dimensions, dataFilters);
+        cube.buildWithManualDimensionOrder(dimensions, dataFilters);
         Summary summary = new Summary(cube, costFunction);
         response = summary.computeSummary(summarySize, doOneSideError);
       }

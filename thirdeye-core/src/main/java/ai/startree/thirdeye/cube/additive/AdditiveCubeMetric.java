@@ -8,7 +8,6 @@ package ai.startree.thirdeye.cube.additive;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
-import ai.startree.thirdeye.cube.data.dbclient.CubeMetric;
 import ai.startree.thirdeye.cube.data.dbclient.CubeSpec;
 import ai.startree.thirdeye.cube.data.dbclient.CubeTag;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see CubeFetcherImpl
  */
-public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
+public class AdditiveCubeMetric {
 
   private static final Logger LOG = LoggerFactory.getLogger(AdditiveCubeMetric.class);
 
@@ -54,12 +53,10 @@ public class AdditiveCubeMetric implements CubeMetric<AdditiveRow> {
     this.baselineInterval = Preconditions.checkNotNull(baselineInterval);
   }
 
-  @Override
   public DatasetConfigDTO getDataset() {
     return datasetConfigDTO;
   }
 
-  @Override
   public List<CubeSpec> getCubeSpecs() {
     List<CubeSpec> cubeSpecs = new ArrayList<>();
 

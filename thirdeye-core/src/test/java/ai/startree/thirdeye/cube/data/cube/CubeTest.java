@@ -11,8 +11,6 @@ import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
 import ai.startree.thirdeye.cube.data.node.CubeNodeUtils;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import java.util.ArrayList;
@@ -107,11 +105,11 @@ public class CubeTest {
 
   @Test
   public void testHierarchyRowToHierarchyNode() {
-    List<List<Row>> hierarchicalRows = buildHierarchicalRows();
-    List<List<CubeNode>> actualNodes = Cube.dataRowToCubeNode(hierarchicalRows,
+    List<List<AdditiveRow>> hierarchicalRows = buildHierarchicalRows();
+    List<List<AdditiveCubeNode>> actualNodes = Cube.dataRowToCubeNode(hierarchicalRows,
         new Dimensions(List.of(DIM_COUNTRY, DIM_PAGE)));
 
-    List<List<CubeNode>> expectedNodes = expectedHierarchicalNodes();
+    List<List<AdditiveCubeNode>> expectedNodes = expectedHierarchicalNodes();
 
     // Test if the data is current; the reference (i.e., tree structure is not tested)
     assertThat(actualNodes).isEqualTo(expectedNodes);
@@ -121,16 +119,16 @@ public class CubeTest {
         expectedNodes.get(0).get(0))).isTrue();
   }
 
-  private List<List<Row>> buildHierarchicalRows() {
-    List<List<Row>> hierarchicalRows = new ArrayList<>();
+  private List<List<AdditiveRow>> buildHierarchicalRows() {
+    List<List<AdditiveRow>> hierarchicalRows = new ArrayList<>();
     // Root level
     {
-      List<Row> rootLevel = new ArrayList<>();
+      List<AdditiveRow> rootLevel = new ArrayList<>();
       rootLevel.add(new AdditiveRow(new Dimensions(), new DimensionValues(), 30, 45));
       hierarchicalRows.add(rootLevel);
     }
     // Level 1
-    List<Row> level1 = new ArrayList<>();
+    List<AdditiveRow> level1 = new ArrayList<>();
     level1.add(
         new AdditiveRow(
             new Dimensions(Collections.singletonList(DIM_COUNTRY)),
@@ -144,7 +142,7 @@ public class CubeTest {
             15));
     hierarchicalRows.add(level1);
     // Level 2
-    List<Row> level2 = new ArrayList<>();
+    List<AdditiveRow> level2 = new ArrayList<>();
     level2.add(new AdditiveRow(new Dimensions(List.of(DIM_COUNTRY, DIM_PAGE)),
         new DimensionValues(List.of("US", "page1")),
         8,
@@ -162,19 +160,19 @@ public class CubeTest {
     return hierarchicalRows;
   }
 
-  private List<List<CubeNode>> expectedHierarchicalNodes() {
-    List<List<Row>> rows = buildHierarchicalRows();
-    List<List<CubeNode>> hierarchicalNodes = new ArrayList<>();
+  private List<List<AdditiveCubeNode>> expectedHierarchicalNodes() {
+    List<List<AdditiveRow>> rows = buildHierarchicalRows();
+    List<List<AdditiveCubeNode>> hierarchicalNodes = new ArrayList<>();
     // Root level
-    List<CubeNode> rootLevel = new ArrayList<>();
+    List<AdditiveCubeNode> rootLevel = new ArrayList<>();
     hierarchicalNodes.add(rootLevel);
 
-    Row rootRow = rows.get(0).get(0);
+    AdditiveRow rootRow = rows.get(0).get(0);
     AdditiveCubeNode rootNode = new AdditiveCubeNode((AdditiveRow) rootRow);
     rootLevel.add(rootNode);
 
     // Level 1
-    List<CubeNode> level1 = new ArrayList<>();
+    List<AdditiveCubeNode> level1 = new ArrayList<>();
     hierarchicalNodes.add(level1);
 
     AdditiveRow USRow = (AdditiveRow) rows.get(1).get(0);
@@ -186,19 +184,19 @@ public class CubeTest {
     level1.add(INNode);
 
     // Level 2
-    List<CubeNode> level2 = new ArrayList<>();
+    List<AdditiveCubeNode> level2 = new ArrayList<>();
     hierarchicalNodes.add(level2);
 
     AdditiveRow USPage1Row = (AdditiveRow) rows.get(2).get(0);
-    CubeNode USPage1Node = new AdditiveCubeNode(2, 0, USPage1Row, USNode);
+    AdditiveCubeNode USPage1Node = new AdditiveCubeNode(2, 0, USPage1Row, USNode);
     level2.add(USPage1Node);
 
     AdditiveRow USPage2Row = (AdditiveRow) rows.get(2).get(1);
-    CubeNode USPage2Node = new AdditiveCubeNode(2, 1, USPage2Row, USNode);
+    AdditiveCubeNode USPage2Node = new AdditiveCubeNode(2, 1, USPage2Row, USNode);
     level2.add(USPage2Node);
 
     AdditiveRow INPage1Row = (AdditiveRow) rows.get(2).get(2);
-    CubeNode INPage1Node = new AdditiveCubeNode(2, 2, INPage1Row, INNode);
+    AdditiveCubeNode INPage1Node = new AdditiveCubeNode(2, 2, INPage1Row, INNode);
     level2.add(INPage1Node);
 
     return hierarchicalNodes;

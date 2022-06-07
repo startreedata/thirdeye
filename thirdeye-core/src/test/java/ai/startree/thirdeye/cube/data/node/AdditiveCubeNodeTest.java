@@ -45,7 +45,7 @@ public class AdditiveCubeNodeTest {
 
     AdditiveRow root3 = new AdditiveRow(new Dimensions(Collections.singletonList("country")),
         new DimensionValues(Collections.singletonList("US")));
-    CubeNode rootNode3 = new AdditiveCubeNode(root3);
+    AdditiveCubeNode rootNode3 = new AdditiveCubeNode(root3);
     assertThat(rootNode1).isNotEqualTo(rootNode3);
     assertThat(rootNode1.hashCode()).isNotEqualTo(rootNode3.hashCode());
   }

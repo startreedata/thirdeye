@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.cube.summary;
 
-import ai.startree.thirdeye.cube.data.node.CubeNode;
+import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +45,7 @@ public class DPArray {
     this.shrankSize = size;
   }
 
-  public Set<CubeNode> getAnswer() {
+  public Set<AdditiveCubeNode> getAnswer() {
     return slots.get(this.shrankSize - 1).ans;
   }
 
@@ -78,7 +78,7 @@ public class DPArray {
   public static class DPSlot {
 
     double cost;
-    Set<CubeNode> ans = new HashSet<>();
+    Set<AdditiveCubeNode> ans = new HashSet<>();
 
     public String toString() {
       return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);

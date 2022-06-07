@@ -22,17 +22,17 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>ai.startree.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-datasources</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>ai.startree.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-pinot</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>ai.startree.thirdeye</groupId>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-detection-components</artifactId>
       <scope>test</scope>
     </dependency>

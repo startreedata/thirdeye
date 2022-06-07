@@ -28,9 +28,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,6 +186,33 @@ public class CubeFetcherImpl implements CubeFetcher {
     }
   }
 
+  protected void fillValueToRowTable2(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
+      List<String> dimensionValues, double value, CubeTag tag) {
+    if (Double.compare(0d, value) >= 0) {
+      LOG.warn("Value not added to rowTable: it is too small. Value: {}. Tag: {}", value, tag);
+      return;
+    }
+    if (Double.isInfinite(value)) {
+      LOG.warn("Value not added to rowTable: it is infinite. Value: {}. Tag: {}", value, tag);
+      return;
+    }
+    AdditiveRow row = rowTable.get(dimensionValues);
+    if (row == null) {
+      row = new AdditiveRow(dimensions, new DimensionValues(dimensionValues));
+      rowTable.put(dimensionValues, row);
+    }
+    switch (tag) {
+      case Baseline:
+        row.setBaselineValue(value);
+        break;
+      case Current:
+        row.setCurrentValue(value);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported CubeTag: " + tag.name());
+    }
+  }
+
   /**
    * Returns a list of rows. The value of each row is evaluated and no further processing is needed.
    *
@@ -203,6 +233,21 @@ public class CubeFetcherImpl implements CubeFetcher {
           .map(dimensionName -> dataFrame.getString(dimensionName, finalRowIdx))
           .collect(Collectors.toList());
       fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
+    }
+  }
+
+  protected void buildMetricFunctionOrExpressionsRows2(List<String> dimensions, DataFrame dataFrame,
+      Map<List<String>, AdditiveRow> rowTable, CubeTag tag) {
+    for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
+      // If the metric expression is a single metric function, then we get the value immediately
+      double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
+      final int finalRowIdx = rowIdx;
+      List<String> dimensionValues = dataFrame.getSeriesNames()
+          .stream()
+          .filter(name -> !name.equals(Constants.COL_VALUE))
+          .map(dimensionName -> dataFrame.getString(dimensionName, finalRowIdx))
+          .collect(Collectors.toList());
+      fillValueToRowTable2(rowTable, new Dimensions(dimensions), dimensionValues, value, tag);
     }
   }
 
@@ -259,15 +304,61 @@ public class CubeFetcherImpl implements CubeFetcher {
   @Override
   public List<List<AdditiveRow>> getAggregatedValuesOfDimension(Dimensions dimensions,
       List<Predicate> predicates) throws Exception {
-    List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
-    for (int level = 0; level < dimensions.size(); ++level) {
-      final Map<CubeTag, CalciteRequest> requests = constructBulkRequests(cubeMetric.getDataset(),
-          cubeMetric.getCubeSpecs(),
-          List.of(dimensions.get(level)),
-          predicates);
-      bulkRequests.add(requests);
+
+    List<List<String>> dimensionsLists = new ArrayList<>();
+    List<Future<DataFrame>> baselineResults = new ArrayList<>();
+    List<Future<DataFrame>> currentResults = new ArrayList<>();
+    for (int i = 0; i < dimensions.size(); ++i) {
+      dimensionsLists.add(List.of(dimensions.get(i)));
+      baselineResults.add(aggregationLoader.loadAggregateAsync(baselineSlice,
+          List.of(dimensions.get(i)),
+          QUERY_LIMIT));
+      currentResults.add(aggregationLoader.loadAggregateAsync(currentSlice,
+          List.of(dimensions.get(i)),
+          QUERY_LIMIT));
     }
-    return constructAggregatedValues(dimensions, bulkRequests);
+
+    return constructRows(dimensionsLists, baselineResults, currentResults);
+  }
+
+  @NonNull
+  private List<List<AdditiveRow>> constructRows(List<List<String>> dimensionsLists,
+      final List<Future<DataFrame>> baselineResults,
+      final List<Future<DataFrame>> currentResults)
+      throws InterruptedException, ExecutionException, TimeoutException {
+    List<List<AdditiveRow>> res = new ArrayList<>();
+    for (int i = 0; i < dimensionsLists.size(); i++) {
+      Map<List<String>, AdditiveRow> rowOfSameLevel = new HashMap<>();
+      final List<String> dimensions = dimensionsLists.get(i);
+      addRow(rowOfSameLevel, dimensions, CubeTag.Baseline, baselineResults.get(i));
+      addRow(rowOfSameLevel, dimensions, CubeTag.Current, currentResults.get(i));
+      if (rowOfSameLevel.size() == 0) {
+        LOG.warn("Failed to retrieve non-zero results for dimensions {}.", dimensions);
+      }
+      List<AdditiveRow> rows = new ArrayList<>(rowOfSameLevel.values());
+      res.add(rows);
+    }
+
+    return res;
+  }
+
+  private void addRow(final Map<List<String>, AdditiveRow> rowOfSameLevel,
+      final List<String> dimensions, final CubeTag tag, final Future<DataFrame> future)
+      throws InterruptedException, ExecutionException, TimeoutException {
+    // fixme build a function and call 2 times rather than looping on map
+    final DataFrame df = future.get(TIME_OUT_VALUE, TIME_OUT_UNIT);
+    if (df.size() == 0) {
+      LOG.warn("Got 0 rows for dimensions: {} for {} timeframe", dimensions, tag);
+    }
+    if (df.size() == QUERY_LIMIT) {
+      LOG.warn(
+          "Got {} rows for dimensions: {} for {} timeframe. This corresponds to the LIMIT clause. "
+              + "Rows are randomly chosen, dimension analysis algorithm may not return the best results.",
+          QUERY_LIMIT,
+          dimensions,
+          tag);
+    }
+    buildMetricFunctionOrExpressionsRows2(dimensions, df, rowOfSameLevel, tag);
   }
 
   @Override

@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -105,7 +107,15 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   @Override
   public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
-      throws Exception {
+      throws ExecutionException, InterruptedException, TimeoutException {
+    final Future<DataFrame> future = loadAggregateAsync(slice, dimensions, limit);
+
+    return future.get(TIMEOUT, TimeUnit.MILLISECONDS);
+  }
+
+  @Override
+  public Future<DataFrame> loadAggregateAsync(final MetricSlice slice,
+      final List<String> dimensions, final int limit) {
     LOG.info("Aggregating '{}'", slice);
     final CalciteRequest.Builder requestBuilder = CalciteRequest
         .newBuilderFrom(slice)
@@ -116,30 +126,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
           .addSelectProjection(dimensionProjection)
           .addGroupByProjection(dimensionProjection);
     }
-    final DataFrame res = dataSourceCache.getQueryResult(requestBuilder.build(),
+    return dataSourceCache.getQueryResultAsync(requestBuilder.build(),
         slice.getDatasetConfigDTO().getDataSource());
-
-    if (res.size() == 0) {
-      return emptyDataframe(dimensions);
-    }
-
-    // fill in timestamps
-    return res
-        .addSeries(Constants.COL_TIME,
-            LongSeries.fillValues(res.size(), slice.getInterval().getStartMillis()))
-        .setIndex(Constants.COL_TIME);
-  }
-
-  private DataFrame emptyDataframe(final List<String> dimensions) {
-    List<String> cols = new ArrayList<>();
-    cols.add(Constants.COL_TIME + ":LONG");
-    dimensions.forEach(dimName -> cols.add(dimName + ":STRING"));
-    cols.add(Constants.COL_VALUE + ":DOUBLE");
-
-    List<String> indexes = new ArrayList<>();
-    indexes.add(Constants.COL_TIME);
-    indexes.addAll(dimensions);
-    return DataFrame.builder(cols).build().setIndex(indexes);
   }
 
   /**

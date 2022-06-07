@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi.HeatMapBreakdownApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -417,20 +418,35 @@ public class RcaMetricResource {
   private Map<MetricSlice, DataFrame> fetchAggregates(List<MetricSlice> slices) throws Exception {
     Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
     for (final MetricSlice slice : slices) {
-      futures.put(slice, this.executor.submit(() -> {
-        final DataFrame df = aggregationLoader.loadAggregate(slice, Collections.emptyList(), 2);
-        if (df.isEmpty()) {
-          return new DataFrame().addSeries(Constants.COL_TIME, slice.getInterval().getStartMillis())
-              .addSeries(Constants.COL_VALUE, Double.NaN).setIndex(Constants.COL_TIME);
-        }
-        if (df.size() > 1) {
-          throw new RuntimeException("Aggregation returned more than 1 line.");
-        }
-        return df;
-      }));
+      futures.put(slice, aggregationLoader.loadAggregateAsync(slice, Collections.emptyList(), 2));
     }
 
-    return collectFutures(futures);
+    Map<MetricSlice, DataFrame> output = new HashMap<>();
+    for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
+      final MetricSlice slice = entry.getKey();
+      final DataFrame df = entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
+
+      if (df.size() <= 0) {
+        output.put(entry.getKey(),
+            new DataFrame()
+                .addSeries(Constants.COL_TIME, entry.getKey().getInterval().getStartMillis())
+                .addSeries(Constants.COL_VALUE, Double.NaN)
+                .setIndex(Constants.COL_TIME));
+        continue;
+      }
+      if (df.size() > 1) {
+        throw new RuntimeException("Aggregation returned more than 1 line.");
+      }
+
+      // fill in timestamps
+      df.addSeries(Constants.COL_TIME,
+              LongSeries.fillValues(df.size(), slice.getInterval().getStartMillis()))
+          .setIndex(Constants.COL_TIME);
+
+      output.put(entry.getKey(), df);
+    }
+
+    return output;
   }
 
   /**

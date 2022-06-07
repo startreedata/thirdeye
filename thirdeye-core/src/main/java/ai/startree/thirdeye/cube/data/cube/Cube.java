@@ -223,15 +223,16 @@ public class Cube {
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
   private void initializeBasicInfo() throws Exception {
+    // fixme cyril maybe move back to cube fetcher impl??
     final DataFrame currentDf = aggregationLoader.loadAggregate(
         // todo remove temp refactoring only
         cubeFetcher.getCurrentSlice(), List.of(), 2);
-    checkArgument(currentDf.size() == 1,
+    checkArgument(!currentDf.isEmpty(),
         "No data found in current timeframe. Cannot perform dimension analysis.");
     final DataFrame baselineDf = aggregationLoader.loadAggregate(
         // todo remove temp refactoring only
         cubeFetcher.getBaselineSlice(), List.of(), 2);
-    checkArgument(baselineDf.size() == 1,
+    checkArgument(!baselineDf.isEmpty(),
         "No data found in baseline timeframe. Cannot perform dimension analysis.");
 
     baselineTotal = baselineDf.getDouble(Constants.COL_VALUE, 0);

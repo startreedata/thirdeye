@@ -16,12 +16,14 @@ import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.rca.ContributorsFinder;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
@@ -42,18 +44,19 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
 
   private final DataSourceCache dataSourceCache;
+  private final AggregationLoader aggregationLoader;
 
   @Inject
-  public DataCubeSummaryCalculator(
-      final DataSourceCache dataSourceCache) {
+  public DataCubeSummaryCalculator(final DataSourceCache dataSourceCache,
+      final AggregationLoader aggregationLoader) {
     this.dataSourceCache = dataSourceCache;
+    this.aggregationLoader = aggregationLoader;
   }
 
   public ContributorsFinderResult search(final ContributorsSearchConfiguration searchConfiguration)
       throws Exception {
 
-    final CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(
-        searchConfiguration.getDatasetConfigDTO(),
+    final CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(searchConfiguration.getDatasetConfigDTO(),
         searchConfiguration.getMetricConfigDTO(),
         searchConfiguration.getCurrentInterval(),
         searchConfiguration.getCurrentBaseline(),
@@ -62,9 +65,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
         searchConfiguration.getSummarySize(),
         searchConfiguration.getDepth(),
         searchConfiguration.getHierarchies(),
-        searchConfiguration.isDoOneSideError()
-    );
-
+        searchConfiguration.isDoOneSideError());
 
     // todo cyril rewrite this part - cube runner does not have to build an API result directly
     final DimensionAnalysisResultApi runResult = cubeAlgorithmRunner.run();
@@ -111,14 +112,11 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
      * @param doOneSideError if the summary should only consider one side error. (global change
      *     side)
      */
-    public CubeAlgorithmRunner(
-        final DatasetConfigDTO datasetConfigDTO,
-        final MetricConfigDTO metricConfigDTO,
-        final Interval currentInterval,
-        final Interval baselineInterval,
-        final Dimensions dimensions,
-        final List<String> filters, final int summarySize, final int depth,
-        final List<List<String>> hierarchies, final boolean doOneSideError) {
+    public CubeAlgorithmRunner(final DatasetConfigDTO datasetConfigDTO,
+        final MetricConfigDTO metricConfigDTO, final Interval currentInterval,
+        final Interval baselineInterval, final Dimensions dimensions, final List<String> filters,
+        final int summarySize, final int depth, final List<List<String>> hierarchies,
+        final boolean doOneSideError) {
       this.datasetConfigDTO = datasetConfigDTO;
       this.metricConfigDTO = metricConfigDTO;
       this.currentInterval = currentInterval;
@@ -146,12 +144,24 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
       final AdditiveCubeMetric cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
           metricConfigDTO,
+          currentInterval, baselineInterval);
+
+      final MetricSlice currentSlice = MetricSlice.from(metricConfigDTO,
           currentInterval,
-          baselineInterval);
+          dataFilters,
+          datasetConfigDTO);
+      final MetricSlice baselineSlice = MetricSlice.from(metricConfigDTO,
+          baselineInterval,
+          dataFilters,
+          datasetConfigDTO);
       final CostFunction costFunction = new BalancedCostFunction();
 
-      final CubeFetcher cubeFetcher =
-          new CubeFetcherImpl(dataSourceCache, cubeMetric);
+      // todo cyril dont pass such the fetchers downstream - use it here
+      final CubeFetcher cubeFetcher = new CubeFetcherImpl(dataSourceCache,
+          aggregationLoader,
+          currentSlice,
+          baselineSlice,
+          cubeMetric);
 
       return buildSummary(cubeFetcher, costFunction);
     }
@@ -170,7 +180,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
     public DimensionAnalysisResultApi buildSummary(CubeFetcher cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube cube = new Cube(cubeFetcher, costFunction);
+      Cube cube = new Cube(cubeFetcher, costFunction, aggregationLoader);
       final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
         cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);
@@ -182,10 +192,8 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
         response = summary.computeSummary(summarySize, doOneSideError);
       }
 
-      response.setMetric(new MetricApi()
-          .setName(metricConfigDTO.getName())
-          .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset()))
-      );
+      response.setMetric(new MetricApi().setName(metricConfigDTO.getName())
+          .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset())));
 
       return response;
     }

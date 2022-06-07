@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.cube.data.dbclient;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
@@ -16,12 +15,14 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.DimensionType;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,15 +58,39 @@ public class CubeFetcherImpl implements CubeFetcher {
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
   public static final int QUERY_LIMIT = 100000;
 
+  // todo this is temporary for step by step refactoring
+  // dataSourceCache is legacy in cube fetcher - prefer using aggregationLoader - add methods to aggregationLoader if required
   private final DataSourceCache dataSourceCache;
   private final AdditiveCubeMetric cubeMetric;
+
+  // todo this is new
+  private final AggregationLoader aggregationLoader;
+  private final MetricSlice currentSlice;
+  private final MetricSlice baselineSlice;
 
   /**
    * Constructs a Cube client.
    */
-  public CubeFetcherImpl(DataSourceCache dataSourceCache, AdditiveCubeMetric cubeMetric) {
+  public CubeFetcherImpl(final DataSourceCache dataSourceCache,
+      final AggregationLoader aggregationLoader,
+      final MetricSlice currentSlice,
+      final MetricSlice baselineSlice,
+      @Deprecated final AdditiveCubeMetric cubeMetric) {
     this.dataSourceCache = Preconditions.checkNotNull(dataSourceCache);
+    this.aggregationLoader = aggregationLoader;
+    this.currentSlice = currentSlice;
+    this.baselineSlice = baselineSlice;
     this.cubeMetric = cubeMetric;
+  }
+
+  @Override
+  public MetricSlice getCurrentSlice() {
+    return currentSlice;
+  }
+
+  @Override
+  public MetricSlice getBaselineSlice() {
+    return baselineSlice;
   }
 
   /**
@@ -196,7 +221,7 @@ public class CubeFetcherImpl implements CubeFetcher {
 
     Map<CalciteRequest, Future<DataFrame>> queryResponses = dataSourceCache.getQueryResultsAsync(
         allRequests,
-        cubeMetric.getDataset().getDataSource());
+        baselineSlice.getDatasetConfigDTO().getDataSource());
 
     List<List<AdditiveRow>> res = new ArrayList<>();
     int level = 0;
@@ -232,23 +257,6 @@ public class CubeFetcherImpl implements CubeFetcher {
   }
 
   @Override
-  public AdditiveRow getTopAggregatedValues(List<Predicate> predicates) throws Exception {
-    List<Map<CubeTag, CalciteRequest>> bulkRequests = List.of(constructBulkRequests(cubeMetric.getDataset(),
-        cubeMetric.getCubeSpecs(),
-        List.of(),
-        predicates));
-    // quickfix - redundant local variables for better IndexOutOfBoundsException logging
-    List<List<AdditiveRow>> aggregatedValues = constructAggregatedValues(new Dimensions(), bulkRequests);
-    checkArgument(aggregatedValues.size() > 0,
-        "No data found in timeframe. Cannot perform dimension analysis.");
-    List<AdditiveRow> aggregatedValue = aggregatedValues.get(0);
-    checkArgument(aggregatedValue.size() > 0,
-        "No data found in timeframe. Cannot perform dimension analysis.");
-    AdditiveRow topValue = aggregatedValue.get(0);
-    return topValue;
-  }
-
-  @Override
   public List<List<AdditiveRow>> getAggregatedValuesOfDimension(Dimensions dimensions,
       List<Predicate> predicates) throws Exception {
     List<Map<CubeTag, CalciteRequest>> bulkRequests = new ArrayList<>();
@@ -275,5 +283,4 @@ public class CubeFetcherImpl implements CubeFetcher {
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }
-
 }

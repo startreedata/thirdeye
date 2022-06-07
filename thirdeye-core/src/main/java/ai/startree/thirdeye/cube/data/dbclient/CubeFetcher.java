@@ -8,6 +8,7 @@ package ai.startree.thirdeye.cube.data.dbclient;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.List;
 
 /**
@@ -16,12 +17,12 @@ import java.util.List;
 public interface CubeFetcher {
 
   /**
-   * Returns the baseline and current value for the root node.
+   * todo temp for refactoring
    *
-   * @param predicates the filter predicates.
-   * @return a row of data that contains the baseline and current value for the root node.
    */
-  AdditiveRow getTopAggregatedValues(List<Predicate> predicates) throws Exception;
+
+  MetricSlice getCurrentSlice();
+  MetricSlice getBaselineSlice();
 
   /**
    * Returns the baseline and current value for nodes at each dimension from the given list.

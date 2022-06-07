@@ -1,12 +1,4 @@
-import {
-    Box,
-    Card,
-    CardContent,
-    Grid,
-    Link,
-    Paper,
-    Typography,
-} from "@material-ui/core";
+import { Box, Grid, Link } from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,9 +11,9 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
-    AppLoadingIndicatorV1,
     HelpLinkIconV1,
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     TooltipV1,
@@ -225,49 +217,48 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     xs={12}
                 >
                     <Grid item lg={9} md={8} sm={12} xs={12}>
-                        <Paper className={style.fullHeight} elevation={0}>
-                            <AnomalyCard
-                                uiAnomaly={uiAnomaly}
-                                onDelete={handleAnomalyDelete}
-                            />
-                        </Paper>
+                        <AnomalyCard
+                            className={style.fullHeight}
+                            isLoading={
+                                anomalyRequestStatus === ActionStatus.Working
+                            }
+                            uiAnomaly={uiAnomaly}
+                            onDelete={handleAnomalyDelete}
+                        />
                     </Grid>
                     <Grid item lg={3} md={4} sm={12} xs={12}>
-                        <Paper className={style.fullHeight} elevation={0}>
-                            {anomaly && (
-                                <AnomalyFeedback
-                                    anomalyFeedback={
-                                        (anomaly && anomaly.feedback) || {
-                                            ...DEFAULT_FEEDBACK,
-                                        }
-                                    }
-                                    anomalyId={anomaly.id}
-                                    className={style.fullHeight}
-                                    isLoading={
-                                        anomalyRequestStatus ===
-                                        ActionStatus.Working
-                                    }
-                                />
-                            )}
-                        </Paper>
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
+                                }
+                            }
+                            anomalyId={Number(anomalyId)}
+                            className={style.fullHeight}
+                            isLoading={
+                                anomalyRequestStatus === ActionStatus.Working
+                            }
+                        />
                     </Grid>
                 </Grid>
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
                     {getEvaluationRequestStatus === ActionStatus.Error && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
+                        <PageContentsCardV1>
+                            <Box pb={20} pt={20}>
+                                <NoDataIndicator />
+                            </Box>
+                        </PageContentsCardV1>
                     )}
-                    {getEvaluationRequestStatus === ActionStatus.Done && (
+                    {getEvaluationRequestStatus !== ActionStatus.Error && (
                         <AlertEvaluationTimeSeriesCard
                             alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
+                            isLoading={
+                                getEvaluationRequestStatus ===
+                                ActionStatus.Working
+                            }
                             maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
                             onRefresh={fetchAlertEvaluation}
                         />
@@ -276,47 +267,12 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
                 {/* Existing investigations */}
                 <Grid item xs={12}>
-                    {getInvestigationsRequestStatus ===
-                        ActionStatus.Working && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <AppLoadingIndicatorV1 />
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {getInvestigationsRequestStatus === ActionStatus.Error && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {getInvestigationsRequestStatus === ActionStatus.Done &&
-                        investigations &&
-                        investigations.length > 0 && (
-                            <InvestigationsList
-                                investigations={investigations}
-                            />
-                        )}
-                    {getInvestigationsRequestStatus === ActionStatus.Done &&
-                        investigations &&
-                        investigations.length === 0 && (
-                            <Card variant="outlined">
-                                <CardContent>
-                                    <Box pb={3} pt={3} textAlign="center">
-                                        <Typography variant="h6">
-                                            {t(
-                                                "message.no-saved-investigations"
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        )}
+                    <InvestigationsList
+                        getInvestigationsRequestStatus={
+                            getInvestigationsRequestStatus
+                        }
+                        investigations={investigations}
+                    />
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

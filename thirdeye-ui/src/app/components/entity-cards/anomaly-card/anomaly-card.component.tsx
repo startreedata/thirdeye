@@ -14,6 +14,7 @@ import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import {
     getAnomaliesAnomalyPath,
     getRootCauseAnalysisForAnomalyInvestigatePath,
@@ -62,8 +63,16 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         handleAnomalyOptionsClose();
     };
 
+    if (props.isLoading) {
+        return (
+            <PageContentsCardV1 className={props.className}>
+                <SkeletonV1 height={150} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
+
     return (
-        <Card variant="outlined">
+        <Card className={props.className} variant="outlined">
             {props.uiAnomaly && (
                 <CardHeader
                     action={

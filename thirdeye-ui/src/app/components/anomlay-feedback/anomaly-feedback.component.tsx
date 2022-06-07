@@ -156,13 +156,13 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
-                <SkeletonV1 preventDelay height={150} variant="rect" />
+                <SkeletonV1 height={150} variant="rect" />
             </PageContentsCardV1>
         );
     }
 
     return (
-        <PageContentsCardV1>
+        <PageContentsCardV1 className={className}>
             <Grid container>
                 <Grid item xs={12}>
                     <label>

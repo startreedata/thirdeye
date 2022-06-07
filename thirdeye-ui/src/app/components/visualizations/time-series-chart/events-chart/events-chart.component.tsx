@@ -28,6 +28,7 @@ export const EventsChart: FunctionComponent<EventsChartProps> = ({
         isTooltipEnabled && tooltipData
             ? events.filter((event) => {
                   return (
+                      event.enabled &&
                       tooltipData.xValue >= event.startTime &&
                       tooltipData.xValue <= event.endTime
                   );
@@ -82,50 +83,52 @@ export const EventsChart: FunctionComponent<EventsChartProps> = ({
             <svg height={height} width={width}>
                 <Group left={marginLeft}>
                     {events &&
-                        events.map((event, index) => {
-                            const from = {
-                                x: dateScale(event.startTime),
-                                y: yScale(
-                                    (index + 1) * DEFAULT_GAP_BETWEEN_LINES
-                                ),
-                            };
-                            const to = {
-                                x: xScaleToUse(event.endTime),
-                                y: yScale(
-                                    (index + 1) * DEFAULT_GAP_BETWEEN_LINES
-                                ),
-                            };
+                        events
+                            .filter((event) => event.enabled)
+                            .map((event, index) => {
+                                const from = {
+                                    x: dateScale(event.startTime),
+                                    y: yScale(
+                                        (index + 1) * DEFAULT_GAP_BETWEEN_LINES
+                                    ),
+                                };
+                                const to = {
+                                    x: xScaleToUse(event.endTime),
+                                    y: yScale(
+                                        (index + 1) * DEFAULT_GAP_BETWEEN_LINES
+                                    ),
+                                };
 
-                            return (
-                                <React.Fragment key={`event-line-${index}`}>
-                                    <Circle
-                                        cx={from.x}
-                                        cy={from.y}
-                                        fill={colorScale(event.id)}
-                                        r={
-                                            Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE
-                                        }
-                                    />
-                                    <Circle
-                                        cx={to.x}
-                                        cy={to.y}
-                                        fill={colorScale(event.id)}
-                                        r={
-                                            Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE
-                                        }
-                                    />
-                                    <Line
-                                        from={from}
-                                        key={index}
-                                        stroke={colorScale(event.id)}
-                                        strokeWidth={
-                                            Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE
-                                        }
-                                        to={to}
-                                    />
-                                </React.Fragment>
-                            );
-                        })}
+                                return (
+                                    <React.Fragment key={`event-line-${index}`}>
+                                        <Circle
+                                            cx={from.x}
+                                            cy={from.y}
+                                            fill={colorScale(event.id)}
+                                            r={
+                                                Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE
+                                            }
+                                        />
+                                        <Circle
+                                            cx={to.x}
+                                            cy={to.y}
+                                            fill={colorScale(event.id)}
+                                            r={
+                                                Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE
+                                            }
+                                        />
+                                        <Line
+                                            from={from}
+                                            key={index}
+                                            stroke={colorScale(event.id)}
+                                            strokeWidth={
+                                                Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE
+                                            }
+                                            to={to}
+                                        />
+                                    </React.Fragment>
+                                );
+                            })}
                 </Group>
                 {tooltipData && (
                     <Group left={marginLeft}>

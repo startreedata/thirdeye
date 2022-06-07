@@ -7,6 +7,7 @@ import { ChartCore } from "./chart-core/chart-core.component";
 import { EventsChart } from "./events-chart/events-chart.component";
 import { Legend } from "./legend/legend.component";
 import {
+    EventWithChartState,
     NormalizedSeries,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
@@ -101,7 +102,8 @@ export const TimeSeriesChartInternal: FunctionComponent<
     tooltip,
     initialZoom,
     chartEvents,
-    events,
+    events = [],
+    LegendComponent = Legend,
 }) => {
     const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
         initialZoom
@@ -112,9 +114,17 @@ export const TimeSeriesChartInternal: FunctionComponent<
     const [processedBrushChartSeries, setProcessedBrushChartSeries] = useState<
         NormalizedSeries[]
     >(normalizeSeries(series));
-    const [enabledDisabledMapping, setEnabledDisabledMapping] = useState<
-        boolean[]
-    >(series.map(syncEnabledDisabled));
+    const [enabledDisabledSeriesMapping, setEnabledDisabledSeriesMapping] =
+        useState<boolean[]>(series.map(syncEnabledDisabled));
+
+    const [processedEvents, setProcessedEvents] = useState<
+        EventWithChartState[]
+    >(
+        events.map((event) => {
+            return { ...event, enabled: true };
+        })
+    );
+
     const tooltipUtils = useTooltip<{ xValue: number }>();
     const { tooltipData, tooltipLeft, tooltipTop } = tooltipUtils;
 
@@ -162,7 +172,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         processedMainChartSeries &&
             setProcessedMainChartSeries([
                 ...processedMainChartSeries.map((seriesData, idx) => {
-                    seriesData.enabled = enabledDisabledMapping[idx];
+                    seriesData.enabled = enabledDisabledSeriesMapping[idx];
 
                     return seriesData;
                 }),
@@ -170,27 +180,51 @@ export const TimeSeriesChartInternal: FunctionComponent<
         processedBrushChartSeries &&
             setProcessedBrushChartSeries([
                 ...processedBrushChartSeries.map((seriesData, idx) => {
-                    seriesData.enabled = enabledDisabledMapping[idx];
+                    seriesData.enabled = enabledDisabledSeriesMapping[idx];
 
                     return seriesData;
                 }),
             ]);
-    }, [enabledDisabledMapping]);
+    }, [enabledDisabledSeriesMapping]);
 
     // If series changed, reset everything
     useEffect(() => {
         setProcessedMainChartSeries(normalizeSeries(series, currentZoom));
         setProcessedBrushChartSeries(normalizeSeries(series));
-        setEnabledDisabledMapping(series.map(syncEnabledDisabled));
+        setEnabledDisabledSeriesMapping(series.map(syncEnabledDisabled));
     }, [series]);
+
+    // If events change, figure out what was removed and added and sync the processedEvents
+    useEffect(() => {
+        setProcessedEvents((original) => {
+            const newProcessedEvents: EventWithChartState[] = [];
+
+            events.forEach((event) => {
+                const result = original.find(
+                    (candidate) => candidate.id === event.id
+                );
+
+                if (result) {
+                    newProcessedEvents.push(result);
+                } else {
+                    newProcessedEvents.push({
+                        ...event,
+                        enabled: true,
+                    });
+                }
+            });
+
+            return newProcessedEvents;
+        });
+    }, [events]);
 
     /**
      * Flip the enabled flag and force a re-render by creating a new array
      */
     const handleSeriesClickFromLegend = (idx: number): void => {
-        const copied = [...enabledDisabledMapping];
+        const copied = [...enabledDisabledSeriesMapping];
         copied[idx] = !copied[idx];
-        setEnabledDisabledMapping([...copied]);
+        setEnabledDisabledSeriesMapping([...copied]);
     };
 
     const handleBrushChange = (domain: ZoomDomain | null): void => {
@@ -206,7 +240,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
                 return x > x0 && x < x1;
             });
-            copied.enabled = enabledDisabledMapping[idx];
+            copied.enabled = enabledDisabledSeriesMapping[idx];
 
             return copied;
         });
@@ -221,7 +255,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     const handleBrushClick = (): void => {
         const seriesDataCopy = series.map((seriesData, idx) => {
             const copied = { ...seriesData };
-            copied.enabled = enabledDisabledMapping[idx];
+            copied.enabled = enabledDisabledSeriesMapping[idx];
 
             return copied;
         });
@@ -238,7 +272,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         <div style={{ position: "relative" }}>
             {events && events.length > 0 && (
                 <EventsChart
-                    events={events}
+                    events={processedEvents}
                     isTooltipEnabled={isTooltipEnabled}
                     margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
                     series={processedMainChartSeries}
@@ -310,9 +344,11 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 </TooltipWithBounds>
             )}
             {isLegendEnabled && (
-                <Legend
+                <LegendComponent
                     colorScale={colorScale}
+                    events={processedEvents}
                     series={processedMainChartSeries}
+                    onEventsStateChange={setProcessedEvents}
                     onSeriesClick={handleSeriesClickFromLegend}
                 />
             )}

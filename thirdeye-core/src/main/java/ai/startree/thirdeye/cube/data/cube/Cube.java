@@ -129,14 +129,13 @@ public class Cube {
           currentTotal,
           baselineTotalSize,
           currentTotalSize,
-          shrankDimensions,
-          dataFilters);
+          shrankDimensions);
       sortedDimensionCosts = calculateSortedDimensionCost(costSet);
       this.dimensions = sortDimensions(sortedDimensionCosts, depth, hierarchy);
 
       LOG.info("Auto-dimension order: " + this.dimensions);
 
-      buildSubCube(this.dimensions, dataFilters);
+      buildSubCube(this.dimensions);
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
@@ -150,13 +149,12 @@ public class Cube {
    * Builds the subcube of data according to the given dimensions.
    *
    * @param dimensions the dimensions, whose order has been given, of the subcube.
-   * @param dataFilters the filter to be applied on the incoming data.
    */
-  public void buildWithManualDimensionOrder(Dimensions dimensions, List<Predicate> dataFilters)
+  public void buildWithManualDimensionOrder(Dimensions dimensions)
       throws Exception {
     long tStart = System.nanoTime();
     try {
-      buildSubCube(dimensions, dataFilters);
+      buildSubCube(dimensions);
     } catch (Exception e) {
       ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
       throw e;
@@ -170,9 +168,8 @@ public class Cube {
    * Builds the subcube according to the given dimension order.
    *
    * @param dimensions the given dimension order.
-   * @param dataFilter the data filter to applied on the data cube.
    */
-  private void buildSubCube(Dimensions dimensions, List<Predicate> dataFilter) throws Exception {
+  private void buildSubCube(Dimensions dimensions) throws Exception {
     Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
         "Dimensions cannot be empty.");
     if (this.dimensions == null) { // which means buildWithAutoDimensionOrder is not triggered
@@ -182,8 +179,7 @@ public class Cube {
           currentTotal,
           baselineTotalSize,
           currentTotalSize,
-          dimensions,
-          dataFilter);
+          dimensions);
     }
 
     int size = 0;
@@ -196,8 +192,7 @@ public class Cube {
     //                       / \   \
     //     Level 2          d   e   f
     // The Comparator for generating the order is implemented in the class DimensionValues.
-    List<List<AdditiveRow>> rowOfLevels = cubeFetcher.getAggregatedValuesOfLevels(dimensions,
-        dataFilter);
+    List<List<AdditiveRow>> rowOfLevels = cubeFetcher.getAggregatedValuesOfLevels(dimensions);
     for (int i = 0; i <= dimensions.size(); ++i) {
       List<AdditiveRow> rowAtLevelI = rowOfLevels.get(i);
       rowAtLevelI.sort(new RowDimensionValuesComparator());
@@ -288,8 +283,7 @@ public class Cube {
   }
 
   private List<DimNameValueCostEntry> computeOneDimensionCost(double topBaselineValue,
-      double topCurrentValue, double topBaselineSize, double topCurrentSize, Dimensions dimensions,
-      List<Predicate> filterSets) throws Exception {
+      double topCurrentValue, double topBaselineSize, double topCurrentSize, Dimensions dimensions) throws Exception {
 
     double topRatio = topCurrentValue / topBaselineValue;
     LOG.info("topBaselineValue:{}, topCurrentValue:{}, changeRatio:{}",
@@ -298,9 +292,7 @@ public class Cube {
         topRatio);
 
     List<DimNameValueCostEntry> costSet = new ArrayList<>();
-    List<List<AdditiveRow>> wowValuesOfDimensions = this.cubeFetcher.getAggregatedValuesOfDimension(
-        dimensions,
-        filterSets);
+    List<List<AdditiveRow>> wowValuesOfDimensions = this.cubeFetcher.getAggregatedValuesOfDimension(dimensions);
     for (int i = 0; i < dimensions.size(); ++i) {
       String dimensionName = dimensions.get(i);
       List<AdditiveRow> wowValuesOfOneDimension = wowValuesOfDimensions.get(i);

@@ -7,7 +7,7 @@ package ai.startree.thirdeye.cube.additive;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
+import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbclient.CubeSpec;
 import ai.startree.thirdeye.cube.data.dbclient.CubeTag;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Describes a CubeMetric that is additive.
  *
- * @see CubeFetcherImpl
+ * @see CubeFetcher
  */
 public class AdditiveCubeMetric {
 

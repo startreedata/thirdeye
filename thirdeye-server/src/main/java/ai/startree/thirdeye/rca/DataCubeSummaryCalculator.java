@@ -11,7 +11,6 @@ import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.cube.Cube;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
-import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
@@ -148,7 +147,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
       final CostFunction costFunction = new BalancedCostFunction();
 
       // todo cyril dont pass such the fetchers downstream - use it here
-      final CubeFetcher cubeFetcher = new CubeFetcherImpl(aggregationLoader,
+      final CubeFetcher cubeFetcher = new CubeFetcher(aggregationLoader,
           currentSlice,
           baselineSlice);
 
@@ -176,7 +175,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
         Summary summary = new Summary(cube, costFunction);
         response = summary.computeSummary(summarySize, doOneSideError, depth);
       } else { // manual dimension order
-        cube.buildWithManualDimensionOrder(dimensions, dataFilters);
+        cube.buildWithManualDimensionOrder(dimensions);
         Summary summary = new Summary(cube, costFunction);
         response = summary.computeSummary(summarySize, doOneSideError);
       }

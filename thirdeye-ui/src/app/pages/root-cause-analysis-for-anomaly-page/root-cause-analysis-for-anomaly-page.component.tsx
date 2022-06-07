@@ -194,6 +194,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     events={selectedEvents}
                     isLoading={getAnomalyRequestStatus === ActionStatus.Working}
                     timeSeriesFiltersSet={chartTimeSeriesFilterSet}
+                    onEventSelectionChange={handleEventSelectionChange}
                     onRemoveBtnClick={handleRemoveBtnClick}
                 />
             </Grid>

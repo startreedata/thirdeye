@@ -1,0 +1,136 @@
+import { Box, Typography } from "@material-ui/core";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import { scaleOrdinal } from "@visx/scale";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { Event } from "../../../../rest/dto/event.interfaces";
+import { Legend } from "../../../visualizations/time-series-chart/legend/legend.component";
+import { EventWithChartState } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { COLOR_PALETTE } from "../../../visualizations/time-series-chart/time-series-chart.utils";
+import { EventRow } from "./event-row/event-row.component";
+import { FilteredTimeSeriesRow } from "./filtered-time-series-row/filtered-time-series-row.component";
+import { RCAChartLegendProps } from "./rca-chart-legend.interfaces";
+
+const OTHER_TIME_SERIES_IDX_OFFSET = 3;
+
+export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
+    series,
+    onSeriesClick,
+    colorScale,
+    timeSeriesFiltersSet,
+    events,
+    onRemoveBtnClick,
+    onEventSelectionChange,
+    onEventsStateChange,
+}) => {
+    const { t } = useTranslation();
+
+    const currentBaselineBoundsSeries = series.slice(0, 3);
+    const currentBaselineBoundsColorScale = scaleOrdinal({
+        domain: currentBaselineBoundsSeries.map((x) => x.name) as string[],
+        range: currentBaselineBoundsSeries.map((x) =>
+            colorScale(x.name as string)
+        ),
+    });
+
+    const eventsColorScale = scaleOrdinal({
+        domain: events.map((x) => x.id) as number[],
+        range: COLOR_PALETTE,
+    });
+
+    const handleEventRemove = (event: Event): void => {
+        onEventSelectionChange(
+            events.filter((existingEvent) => existingEvent.id !== event.id)
+        );
+    };
+
+    const handleEventCheckClick = (
+        event: EventWithChartState,
+        newCheckedState: boolean
+    ): void => {
+        event.enabled = newCheckedState;
+        onEventsStateChange([...events]);
+    };
+
+    return (
+        <>
+            <Legend
+                colorScale={currentBaselineBoundsColorScale}
+                events={events}
+                series={currentBaselineBoundsSeries}
+                onEventsStateChange={onEventsStateChange}
+                onSeriesClick={onSeriesClick}
+            />
+            {(timeSeriesFiltersSet.length > 0 || events.length > 0) && (
+                <>
+                    <Box padding="30px">
+                        <Typography variant="subtitle2">
+                            {t("message.rca-legend-information")}
+                        </Typography>
+                    </Box>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell width="40px" />
+                                <TableCell width="100px">
+                                    <strong>Type</strong>
+                                </TableCell>
+                                <TableCell>
+                                    <strong>
+                                        {t("label.additional-chart-items")}
+                                    </strong>
+                                </TableCell>
+                                <TableCell width="150px" />
+                            </TableRow>
+                        </TableHead>
+                        {timeSeriesFiltersSet.length > 0 && (
+                            <TableBody>
+                                {timeSeriesFiltersSet.map((filterSet, idx) => {
+                                    return (
+                                        <FilteredTimeSeriesRow
+                                            colorScale={colorScale}
+                                            filterSet={filterSet}
+                                            key={idx}
+                                            series={series}
+                                            onCheckBoxClick={() => {
+                                                onSeriesClick &&
+                                                    onSeriesClick(
+                                                        idx +
+                                                            OTHER_TIME_SERIES_IDX_OFFSET
+                                                    );
+                                            }}
+                                            onRemoveBtnClick={() =>
+                                                onRemoveBtnClick(idx)
+                                            }
+                                        />
+                                    );
+                                })}
+                            </TableBody>
+                        )}
+                        {events.length > 0 && (
+                            <TableBody>
+                                {events.map((event, idx) => {
+                                    return (
+                                        <EventRow
+                                            colorScale={eventsColorScale}
+                                            event={event}
+                                            key={`event-${idx}`}
+                                            onCheckBoxClick={
+                                                handleEventCheckClick
+                                            }
+                                            onRemoveBtnClick={handleEventRemove}
+                                        />
+                                    );
+                                })}
+                            </TableBody>
+                        )}
+                    </Table>
+                </>
+            )}
+        </>
+    );
+};

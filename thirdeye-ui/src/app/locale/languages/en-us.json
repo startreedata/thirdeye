@@ -173,7 +173,7 @@
         "remove": "Remove",
         "add-to-chart": "Add to Chart",
         "remove-from-chart": "Remove from Chart",
-        "filter-sets": "Filter Sets",
+        "additional-chart-items": "Additional Chart Items",
         "last-updated": "Last Updated",
         "investigation": "Investigation",
         "save-investigation": "Save Investigation",
@@ -184,8 +184,8 @@
         "view-investigation": "View Investigation",
         "about": "About",
         "thirdeye-website-url": "https://www.startree.ai",
-        "hide-filters-table": "Hide filters table",
-        "show-filters-table": "Show filters table",
+        "remove-filter": "Remove Filter",
+        "remove-event": "Remove Event",
         "event-properties": "Event Properties",
         "current-duration": "Current Duration",
         "start-time": "Start time",
@@ -246,6 +246,7 @@
         "event-name-required": "Name is required",
         "event-start-time-required": "Start time is required",
         "event-end-time-required": "End time is required",
-        "preview-anomalies-created-below": "Preview the anomalies created for configuration below"
+        "preview-anomalies-created-below": "Preview the anomalies created for configuration below",
+        "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section"
     }
 }

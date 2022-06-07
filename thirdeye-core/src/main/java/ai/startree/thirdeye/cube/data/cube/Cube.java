@@ -59,17 +59,13 @@ public class Cube {
   @JsonIgnore
   private List<List<AdditiveCubeNode>> hierarchicalNodes = new ArrayList<>();
 
-  @Deprecated // todo use aggregationLoader
   private final CubeFetcher cubeFetcher;
   private final CostFunction costFunction;
-
-  private final AggregationLoader aggregationLoader;
 
   public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction,
       final AggregationLoader aggregationLoader) {
     this.cubeFetcher = cubeFetcher;
     this.costFunction = costFunction;
-    this.aggregationLoader = aggregationLoader;
   }
 
   public double getBaselineTotal() {

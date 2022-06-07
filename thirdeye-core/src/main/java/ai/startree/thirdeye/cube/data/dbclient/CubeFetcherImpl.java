@@ -10,6 +10,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
+import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
@@ -132,7 +133,29 @@ public class CubeFetcherImpl implements CubeFetcher {
    */
   protected void fillValueToRowTable(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
       List<String> dimensionValues, double value, CubeTag tag) {
-    cubeMetric.fillValueToRowTable(rowTable, dimensions, dimensionValues, value, tag);
+    if (Double.compare(0d, value) >= 0) {
+      LOG.warn("Value not added to rowTable: it is too small. Value: {}. Tag: {}", value, tag);
+      return;
+    }
+    if (Double.isInfinite(value)) {
+      LOG.warn("Value not added to rowTable: it is infinite. Value: {}. Tag: {}", value, tag);
+      return;
+    }
+    AdditiveRow row = rowTable.get(dimensionValues);
+    if (row == null) {
+      row = new AdditiveRow(dimensions, new DimensionValues(dimensionValues));
+      rowTable.put(dimensionValues, row);
+    }
+    switch (tag) {
+      case Baseline:
+        row.setBaselineValue(value);
+        break;
+      case Current:
+        row.setCurrentValue(value);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported CubeTag: " + tag.name());
+    }
   }
 
   /**
@@ -252,4 +275,5 @@ public class CubeFetcherImpl implements CubeFetcher {
     }
     return constructAggregatedValues(dimensions, bulkRequests);
   }
+
 }

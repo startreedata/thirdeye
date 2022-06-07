@@ -5,17 +5,13 @@
 
 package ai.startree.thirdeye.cube.data.cube;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
-import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -223,23 +219,11 @@ public class Cube {
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
   private void initializeBasicInfo() throws Exception {
-    // fixme cyril maybe move back to cube fetcher impl??
-    final DataFrame currentDf = aggregationLoader.loadAggregate(
-        // todo remove temp refactoring only
-        cubeFetcher.getCurrentSlice(), List.of(), 2);
-    checkArgument(!currentDf.isEmpty(),
-        "No data found in current timeframe. Cannot perform dimension analysis.");
-    final DataFrame baselineDf = aggregationLoader.loadAggregate(
-        // todo remove temp refactoring only
-        cubeFetcher.getBaselineSlice(), List.of(), 2);
-    checkArgument(!baselineDf.isEmpty(),
-        "No data found in baseline timeframe. Cannot perform dimension analysis.");
+    this.baselineTotal = cubeFetcher.getBaselineTotal();
+    this.currentTotal = cubeFetcher.getCurrentTotal();
 
-    baselineTotal = baselineDf.getDouble(Constants.COL_VALUE, 0);
-    currentTotal = currentDf.getDouble(Constants.COL_VALUE, 0);
-
-    baselineTotalSize = baselineTotal;
-    currentTotalSize = currentTotal;
+    this.baselineTotalSize = this.baselineTotal;
+    this.currentTotalSize = currentTotal;
   }
 
   /**

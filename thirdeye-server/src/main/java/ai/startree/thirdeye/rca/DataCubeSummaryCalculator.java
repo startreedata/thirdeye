@@ -7,7 +7,6 @@ package ai.startree.thirdeye.rca;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeMetric;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.cube.Cube;
@@ -15,7 +14,6 @@ import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
 import ai.startree.thirdeye.cube.data.dbclient.CubeFetcherImpl;
 import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.cube.summary.Summary;
-import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
@@ -43,13 +41,10 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataCubeSummaryCalculator.class);
 
-  private final DataSourceCache dataSourceCache;
   private final AggregationLoader aggregationLoader;
 
   @Inject
-  public DataCubeSummaryCalculator(final DataSourceCache dataSourceCache,
-      final AggregationLoader aggregationLoader) {
-    this.dataSourceCache = dataSourceCache;
+  public DataCubeSummaryCalculator(final AggregationLoader aggregationLoader) {
     this.aggregationLoader = aggregationLoader;
   }
 
@@ -142,10 +137,6 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           String.format("Metric is a legacy ratio metric: %s It is not supported anymore",
               metricConfigDTO.getDerivedMetricExpression()));
 
-      final AdditiveCubeMetric cubeMetric = new AdditiveCubeMetric(datasetConfigDTO,
-          metricConfigDTO,
-          currentInterval, baselineInterval);
-
       final MetricSlice currentSlice = MetricSlice.from(metricConfigDTO,
           currentInterval,
           dataFilters,
@@ -157,11 +148,9 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
       final CostFunction costFunction = new BalancedCostFunction();
 
       // todo cyril dont pass such the fetchers downstream - use it here
-      final CubeFetcher cubeFetcher = new CubeFetcherImpl(dataSourceCache,
-          aggregationLoader,
+      final CubeFetcher cubeFetcher = new CubeFetcherImpl(aggregationLoader,
           currentSlice,
-          baselineSlice,
-          cubeMetric);
+          baselineSlice);
 
       return buildSummary(cubeFetcher, costFunction);
     }

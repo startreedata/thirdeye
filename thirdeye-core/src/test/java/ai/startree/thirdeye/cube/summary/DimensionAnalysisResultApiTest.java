@@ -32,8 +32,8 @@ public class DimensionAnalysisResultApiTest {
     // Create test case
     List<AdditiveCubeNode> cubeNodes = buildHierarchicalNodes();
     int rootIdx = cubeNodes.size() - 1;
-    double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineValue();
-    double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentValue();
+    double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineSize();
+    double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     double baselineSize = cubeNodes.get(rootIdx).getOriginalBaselineSize();
     double currentSize = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     // Build the response

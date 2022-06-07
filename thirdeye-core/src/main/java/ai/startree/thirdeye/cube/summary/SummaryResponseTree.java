@@ -116,8 +116,8 @@ public class SummaryResponseTree {
               node.getCurrentValue(),
               node.getBaselineSize(),
               node.getCurrentSize(),
-              topNode.getOriginalBaselineValue(),
-              topNode.getOriginalCurrentValue(),
+              topNode.getOriginalBaselineSize(),
+              topNode.getOriginalCurrentSize(),
               topNode.getOriginalBaselineSize(),
               topNode.getOriginalCurrentSize());
       node.cubeNode.setCost(nodeCost);

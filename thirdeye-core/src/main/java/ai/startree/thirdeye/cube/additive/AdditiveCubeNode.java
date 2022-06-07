@@ -145,26 +145,6 @@ public class AdditiveCubeNode {
   }
 
   /**
-   * Returns the original baseline value.
-   *
-   * @return the original baseline value.
-   */
-  @JsonIgnore
-  public double getOriginalBaselineValue() {
-    return data.getBaselineValue();
-  }
-
-  /**
-   * Return the original current value.
-   *
-   * @return the original current value.
-   */
-  @JsonIgnore
-  public double getOriginalCurrentValue() {
-    return data.getCurrentValue();
-  }
-
-  /**
    * Returns the changeRatio that is calculated by the aggregate current and aggregate baseline
    * values of all children node.
    *

@@ -215,8 +215,8 @@ public class Cube {
     AdditiveRow topAggValues = olapClient.getTopAggregatedValues(dataFilters);
     AdditiveCubeNode node = topAggValues.toNode();
 
-    baselineTotal = node.getBaselineValue();
-    currentTotal = node.getCurrentValue();
+    baselineTotal = node.getBaselineSize();
+    currentTotal = node.getCurrentSize();
 
     baselineTotalSize = node.getBaselineSize();
     currentTotalSize = node.getCurrentSize();
@@ -310,8 +310,8 @@ public class Cube {
                 + topCurrentSize);
         double cost = costFunction
             .computeCost(topRatio,
-                wowNode.getBaselineValue(),
-                wowNode.getCurrentValue(),
+                wowNode.getBaselineSize(),
+                wowNode.getCurrentSize(),
                 wowNode.getBaselineSize(),
                 wowNode.getCurrentSize(),
                 topBaselineValue,
@@ -322,10 +322,10 @@ public class Cube {
         costSet.add(
             new DimNameValueCostEntry(dimensionName,
                 dimensionValue,
-                wowNode.getBaselineValue(),
-                wowNode.getCurrentValue(),
+                wowNode.getBaselineSize(),
+                wowNode.getCurrentSize(),
                 wowNode.changeRatio(),
-                wowNode.getCurrentValue() - wowNode.getBaselineValue(),
+                wowNode.getCurrentSize() - wowNode.getBaselineSize(),
                 wowNode.getBaselineSize(),
                 wowNode.getCurrentSize(),
                 contributionFactor,

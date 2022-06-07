@@ -162,11 +162,11 @@ public class SummaryResponseTree {
     }
 
     public double getBaselineValue() {
-      return cubeNode.getBaselineValue();
+      return cubeNode.getBaselineSize();
     }
 
     public double getCurrentValue() {
-      return cubeNode.getCurrentValue();
+      return cubeNode.getCurrentSize();
     }
 
     public double getBaselineSize() {

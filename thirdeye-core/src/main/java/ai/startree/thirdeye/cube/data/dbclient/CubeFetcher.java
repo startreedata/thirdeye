@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,10 +116,16 @@ public class CubeFetcher {
     for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
       // If the metric expression is a single metric function, then we get the value immediately
       double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
-      final int finalRowIdx = rowIdx;
-      List<String> dimensionValues = dimensions.stream()
-          .map(name -> dataFrame.getString(name, finalRowIdx))
-          .collect(Collectors.toList());
+      // todo cyril - investigate why null values happen - in the mean time mitigate by replacing by "null"
+      List<@NonNull String> dimensionValues = new ArrayList<>();
+      for (String dimensionName: dimensions) {
+        String dimensionValue = dataFrame.getString(dimensionName, rowIdx);
+        if (dimensionValue == null) {
+          LOG.warn("Encountered null dimension value for dimension: {}. Should not happen.", dimensionName);
+          dimensionValue = "null";
+        }
+        dimensionValues.add(dimensionValue);
+      }
       fillValueToRowTable(rowTable, baseDimensions, dimensionValues, value, tag);
     }
   }

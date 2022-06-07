@@ -146,24 +146,11 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           datasetConfigDTO);
       final CostFunction costFunction = new BalancedCostFunction();
 
-      // todo cyril dont pass such the fetchers downstream - use it here
       final CubeFetcher cubeFetcher = new CubeFetcher(aggregationLoader,
           currentSlice,
           baselineSlice);
 
       return buildSummary(cubeFetcher, costFunction);
-    }
-
-    /**
-     * Returns true if the derived metric is a simple ratio metric such as "A/B" where A and B is a
-     * metric.
-     */
-    private boolean isRatioMetric() {
-      if (!Strings.isNullOrEmpty(metricConfigDTO.getDerivedMetricExpression())) {
-        Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(metricConfigDTO.getDerivedMetricExpression());
-        return matcher.matches();
-      }
-      return false;
     }
 
     public DimensionAnalysisResultApi buildSummary(CubeFetcher cubeFetcher,
@@ -184,6 +171,18 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
           .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset())));
 
       return response;
+    }
+
+    /**
+     * Returns true if the derived metric is a simple ratio metric such as "A/B" where A and B is a
+     * metric.
+     */
+    private boolean isRatioMetric() {
+      if (!Strings.isNullOrEmpty(metricConfigDTO.getDerivedMetricExpression())) {
+        Matcher matcher = SIMPLE_RATIO_METRIC_EXPRESSION_PARSER.matcher(metricConfigDTO.getDerivedMetricExpression());
+        return matcher.matches();
+      }
+      return false;
     }
   }
 }

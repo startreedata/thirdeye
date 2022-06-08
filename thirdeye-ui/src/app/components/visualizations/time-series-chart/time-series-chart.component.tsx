@@ -102,7 +102,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     tooltip,
     initialZoom,
     chartEvents,
-    events = [],
+    events,
     LegendComponent = Legend,
 }) => {
     const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
@@ -119,11 +119,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     const [processedEvents, setProcessedEvents] = useState<
         EventWithChartState[]
-    >(
-        events.map((event) => {
-            return { ...event, enabled: true };
-        })
-    );
+    >([]);
 
     const tooltipUtils = useTooltip<{ xValue: number }>();
     const { tooltipData, tooltipLeft, tooltipTop } = tooltipUtils;
@@ -196,10 +192,12 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     // If events change, figure out what was removed and added and sync the processedEvents
     useEffect(() => {
+        const eventsToUse = events || [];
+
         setProcessedEvents((original) => {
             const newProcessedEvents: EventWithChartState[] = [];
 
-            events.forEach((event) => {
+            eventsToUse.forEach((event) => {
                 const result = original.find(
                     (candidate) => candidate.id === event.id
                 );

@@ -145,44 +145,6 @@ public class AdditiveCubeNode {
   }
 
   /**
-   * Returns the latest baseline value.
-   *
-   * @return the latest baseline value.
-   */
-  public double getBaselineValue() {
-    return baselineValue;
-  }
-
-  /**
-   * Returns the latest current value.
-   *
-   * @return the latest current value.
-   */
-  public double getCurrentValue() {
-    return currentValue;
-  }
-
-  /**
-   * Returns the original baseline value.
-   *
-   * @return the original baseline value.
-   */
-  @JsonIgnore
-  public double getOriginalBaselineValue() {
-    return data.getBaselineValue();
-  }
-
-  /**
-   * Return the original current value.
-   *
-   * @return the original current value.
-   */
-  @JsonIgnore
-  public double getOriginalCurrentValue() {
-    return data.getCurrentValue();
-  }
-
-  /**
    * Returns the changeRatio that is calculated by the aggregate current and aggregate baseline
    * values of all children node.
    *
@@ -356,10 +318,10 @@ public class AdditiveCubeNode {
     } else {
       ratio = originalChangeRatio();
       if (Double.isFinite(ratio) && Double.compare(ratio, 0d) != 0) {
-        return CubeUtils.ensureChangeRatioDirection(getBaselineValue(), getCurrentValue(), ratio);
+        return CubeUtils.ensureChangeRatioDirection(getBaselineSize(), getCurrentSize(), ratio);
       } else {
         if (parent != null) {
-          return CubeUtils.ensureChangeRatioDirection(getBaselineValue(), getCurrentValue(),
+          return CubeUtils.ensureChangeRatioDirection(getBaselineSize(), getCurrentSize(),
               parent.safeChangeRatio());
         } else {
           return 1.;

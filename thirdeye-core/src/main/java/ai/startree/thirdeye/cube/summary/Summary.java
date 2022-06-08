@@ -160,8 +160,8 @@ public class Summary {
     for (AdditiveCubeNode node : nodes) {
       SummaryResponseRow row = new SummaryResponseRow();
       row.setNames(nameTags.get(node).getNames());
-      row.setBaselineValue(node.getBaselineValue());
-      row.setCurrentValue(node.getCurrentValue());
+      row.setBaselineValue(node.getBaselineSize());
+      row.setCurrentValue(node.getCurrentSize());
       row.setChangePercentage(computePercentageChange(row.getBaselineValue(),
           row.getCurrentValue()));
       row.setSizeFactor((node.getBaselineSize() + node.getCurrentSize()) / (
@@ -532,8 +532,8 @@ public class Summary {
     @Override
     public void insertRowToDPArray(DPArray dp, AdditiveCubeNode node, double targetRatio) {
       double cost = costFunction.computeCost(targetRatio,
-          node.getBaselineValue(),
-          node.getCurrentValue(),
+          node.getBaselineSize(),
+          node.getCurrentSize(),
           node.getBaselineSize(),
           node.getCurrentSize(),
           globalBaselineValue,

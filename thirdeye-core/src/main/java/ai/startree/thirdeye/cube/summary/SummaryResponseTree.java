@@ -116,8 +116,8 @@ public class SummaryResponseTree {
               node.getCurrentValue(),
               node.getBaselineSize(),
               node.getCurrentSize(),
-              topNode.getOriginalBaselineValue(),
-              topNode.getOriginalCurrentValue(),
+              topNode.getOriginalBaselineSize(),
+              topNode.getOriginalCurrentSize(),
               topNode.getOriginalBaselineSize(),
               topNode.getOriginalCurrentSize());
       node.cubeNode.setCost(nodeCost);
@@ -162,11 +162,11 @@ public class SummaryResponseTree {
     }
 
     public double getBaselineValue() {
-      return cubeNode.getBaselineValue();
+      return cubeNode.getBaselineSize();
     }
 
     public double getCurrentValue() {
-      return cubeNode.getCurrentValue();
+      return cubeNode.getCurrentSize();
     }
 
     public double getBaselineSize() {

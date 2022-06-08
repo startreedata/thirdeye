@@ -14,6 +14,7 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+// fixme cyril remove this is weaker than a list + isParentof is containsAll
 public class Dimensions {
 
   @JsonProperty("names")

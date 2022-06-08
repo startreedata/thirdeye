@@ -433,11 +433,6 @@ public class RcaMetricResource {
       futures.put(slice, this.executor.submit(() -> aggregationLoader.loadBreakdown(slice, limit)));
     }
 
-    return collectFutures(futures);
-  }
-
-  private Map<MetricSlice, DataFrame> collectFutures(
-      final Map<MetricSlice, Future<DataFrame>> futures) throws Exception {
     Map<MetricSlice, DataFrame> output = new HashMap<>();
     for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
       output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));

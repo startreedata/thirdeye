@@ -1,3 +1,5 @@
+import { ScaleOrdinal } from "d3-scale";
+import { FunctionComponent } from "react";
 import { Event } from "../../../rest/dto/event.interfaces";
 
 export interface DataPoint {
@@ -71,6 +73,7 @@ export interface TimeSeriesChartProps {
     xAxis?: XAxisOptions;
     yAxis?: boolean;
     legend?: boolean;
+    LegendComponent?: FunctionComponent<LegendProps>;
     brush?: boolean;
     height?: number;
     chartEvents?: {
@@ -93,4 +96,16 @@ export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
 export enum SeriesType {
     LINE = "line",
     AREA_CLOSED = "areaclosed",
+}
+
+export interface LegendProps {
+    series: Series[];
+    onSeriesClick?: (idx: number) => void;
+    colorScale: ScaleOrdinal<string, string, never>;
+    events: EventWithChartState[];
+    onEventsStateChange: (events: EventWithChartState[]) => void;
+}
+
+export interface EventWithChartState extends Event {
+    enabled: boolean;
 }

@@ -13,15 +13,21 @@ export const EventsTooltipPopover: FunctionComponent<
             <Grid item xs={12}>
                 <table className={timeSeriesChartTooltipClasses.table}>
                     <tbody>
-                        {events.map((event) => {
-                            return (
-                                <tr key={event.id}>
-                                    <td style={{ color: colorScale(event.id) }}>
-                                        {event.name}
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                        {events
+                            .filter((event) => event.enabled)
+                            .map((event) => {
+                                return (
+                                    <tr key={event.id}>
+                                        <td
+                                            style={{
+                                                color: colorScale(event.id),
+                                            }}
+                                        >
+                                            {event.name}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                     </tbody>
                 </table>
             </Grid>

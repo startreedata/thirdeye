@@ -1,7 +1,8 @@
 import { Grid } from "@material-ui/core";
 import { LegendItem, LegendLabel, LegendOrdinal } from "@visx/legend";
+import { ScaleOrdinal } from "d3-scale";
 import React, { FunctionComponent } from "react";
-import { LegendProps } from "./legend.interfaces";
+import { LegendProps } from "../time-series-chart.interfaces";
 
 const LEGEND_CONTAINER_STYLE = {
     cursor: "pointer",
@@ -18,7 +19,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
     };
 
     return (
-        <LegendOrdinal scale={colorScale}>
+        <LegendOrdinal<ScaleOrdinal<string, string, never>> scale={colorScale}>
             {(labels) => (
                 <Grid container justifyContent="center">
                     {labels.map((label, idx) => {

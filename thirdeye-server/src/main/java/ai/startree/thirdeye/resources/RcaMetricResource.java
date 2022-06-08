@@ -105,8 +105,7 @@ public class RcaMetricResource {
 
   @Inject
   public RcaMetricResource(final AggregationLoader aggregationLoader,
-      final MetricConfigManager metricDAO,
-      final DatasetConfigManager datasetDAO,
+      final MetricConfigManager metricDAO, final DatasetConfigManager datasetDAO,
       final RcaInfoFetcher rcaInfoFetcher) {
     this.aggregationLoader = aggregationLoader;
     this.metricDAO = metricDAO;
@@ -132,8 +131,7 @@ public class RcaMetricResource {
   @GET
   @Path("/aggregate")
   @ApiOperation(value = "Returns an aggregate value for the specified metric and time range, and (optionally) offset.")
-  public Response getAggregate(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAggregate(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -166,8 +164,7 @@ public class RcaMetricResource {
   @GET
   @Path("/aggregate/batch")
   @ApiOperation(value = "Returns a list of aggregate value for the specified metric and time range, and (optionally) offset.")
-  public Response getAggregateBatch(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAggregateBatch(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -204,8 +201,7 @@ public class RcaMetricResource {
   @GET
   @Path("/aggregate/chunk")
   @ApiOperation(value = "Returns a map of lists (keyed by urn) of aggregate value for the specified metrics and time range, and offsets.")
-  public Response getAggregateChunk(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAggregateChunk(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urns", required = true) @QueryParam("urns") @NotNull List<String> urns,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
@@ -226,36 +222,27 @@ public class RcaMetricResource {
   @GET
   @Path("/heatmap")
   @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
-  public Response getAnomalyHeatmap(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAnomalyHeatmap(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "id of the anomaly") @QueryParam("id") long anomalyId,
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
-      @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
-      @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
-      @QueryParam("limit") Integer limit,
-      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
-      @QueryParam("dimensions") List<String> dimensions,
-      @ApiParam(value = "List of dimensions to exclude from the analysis.")
-      @QueryParam("excludedDimensions") List<String> excludedDimensions) {
+      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").") @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
+      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")") @QueryParam("filters") List<String> filters,
+      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element") @QueryParam("limit") Integer limit,
+      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.") @QueryParam("dimensions") List<String> dimensions,
+      @ApiParam(value = "List of dimensions to exclude from the analysis.") @QueryParam("excludedDimensions") List<String> excludedDimensions) {
     try {
       if (limit == null) {
         limit = LIMIT_DEFAULT;
       }
       final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
           anomalyId);
-      final Interval currentInterval = new Interval(
-          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
+      final Interval currentInterval = new Interval(rootCauseAnalysisInfo.getMergedAnomalyResultDTO()
+          .getStartTime(),
           rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-          rootCauseAnalysisInfo.getTimezone()
-      );
+          rootCauseAnalysisInfo.getTimezone());
 
       Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
-      final Interval baselineInterval = new Interval(
-          currentInterval.getStart().minus(baselineOffsetPeriod),
-          currentInterval.getEnd().minus(baselineOffsetPeriod)
-      );
+      final Interval baselineInterval = new Interval(currentInterval.getStart()
+          .minus(baselineOffsetPeriod), currentInterval.getEnd().minus(baselineOffsetPeriod));
 
       // override dimensions
       final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
@@ -284,9 +271,8 @@ public class RcaMetricResource {
       fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
       fillMissingKeysWithZeroes(anomalyBreakdown, baselineBreakdown);
 
-      final HeatMapResultApi resultApi = new HeatMapResultApi()
-          .setMetric(new MetricApi()
-              .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
+      final HeatMapResultApi resultApi = new HeatMapResultApi().setMetric(new MetricApi().setName(
+                  rootCauseAnalysisInfo.getMetricConfigDTO().getName())
               .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
           .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
           .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
@@ -331,10 +317,7 @@ public class RcaMetricResource {
    * May be removed once timeseries filtering and timeseries baseline is implemented.
    */
   private Baseline getSimpleRange() {
-    return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM,
-        1,
-        0,
-        DateTimeZone.UTC);
+    return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM, 1, 0, DateTimeZone.UTC);
   }
 
   private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
@@ -350,13 +333,9 @@ public class RcaMetricResource {
     }
   }
 
-  private Map<String, Map<String, Double>> computeBreakdown(
-      final MetricConfigDTO metricConfigDTO,
-      final List<Predicate> predicates,
-      final Interval interval,
-      final Baseline range,
-      final int limit,
-      final DatasetConfigDTO datasetConfigDTO) throws Exception {
+  private Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
+      final List<Predicate> predicates, final Interval interval, final Baseline range,
+      final int limit, final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
@@ -376,9 +355,7 @@ public class RcaMetricResource {
   }
 
   private double computeAggregate(final long metricId, final List<String> filters, final long start,
-      final long end,
-      final String offset,
-      final DateTimeZone dateTimeZone) throws Exception {
+      final long end, final String offset, final DateTimeZone dateTimeZone) throws Exception {
     DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
     List<Predicate> predicates = parseAndCombinePredicates(filters);
     MetricSlice baseSlice = MetricSlice.from(findMetricConfig(metricId),
@@ -397,9 +374,8 @@ public class RcaMetricResource {
   }
 
   private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters,
-      final long start,
-      final long end,
-      final List<String> offsets, final DateTimeZone dateTimeZone) throws Exception {
+      final long start, final long end, final List<String> offsets, final DateTimeZone dateTimeZone)
+      throws Exception {
     List<Double> aggregateValues = new ArrayList<>();
     for (String offset : offsets) {
       double value = computeAggregate(metricId, filters, start, end, offset, dateTimeZone);
@@ -424,20 +400,12 @@ public class RcaMetricResource {
     Map<MetricSlice, DataFrame> output = new HashMap<>();
     for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
       final MetricSlice slice = entry.getKey();
-      final DataFrame df = entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
-
-      if (df.size() <= 0) {
-        output.put(entry.getKey(),
-            new DataFrame()
-                .addSeries(Constants.COL_TIME, entry.getKey().getInterval().getStartMillis())
-                .addSeries(Constants.COL_VALUE, Double.NaN)
-                .setIndex(Constants.COL_TIME));
-        continue;
-      }
-      if (df.size() > 1) {
+      DataFrame df = entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
+      if (df.isEmpty()) {
+        df = new DataFrame().addSeries(Constants.COL_VALUE, Double.NaN);
+      } else if (df.size() > 1) {
         throw new RuntimeException("Aggregation returned more than 1 line.");
       }
-
       // fill in timestamps
       df.addSeries(Constants.COL_TIME,
               LongSeries.fillValues(df.size(), slice.getInterval().getStartMillis()))
@@ -469,8 +437,7 @@ public class RcaMetricResource {
   }
 
   private Map<MetricSlice, DataFrame> collectFutures(
-      final Map<MetricSlice, Future<DataFrame>> futures)
-      throws Exception {
+      final Map<MetricSlice, Future<DataFrame>> futures) throws Exception {
     Map<MetricSlice, DataFrame> output = new HashMap<>();
     for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
       output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
@@ -482,8 +449,7 @@ public class RcaMetricResource {
   @Deprecated
   // prefer getting MetricConfigDTO from RootCauseAnalysisInfo
   private MetricConfigDTO findMetricConfig(final long metricId) {
-    return ensureExists(metricDAO.findById(metricId),
-        String.format("metric id: %d", metricId));
+    return ensureExists(metricDAO.findById(metricId), String.format("metric id: %d", metricId));
   }
 
   @Deprecated

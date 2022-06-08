@@ -116,12 +116,12 @@ public class CubeFetcher {
     for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
       // If the metric expression is a single metric function, then we get the value immediately
       double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
-      // todo cyril - investigate why null values happen - in the mean time mitigate by replacing by "null"
+      // fixme cyril - investigate why null values happen - in the mean time mitigate by replacing by "null"
       List<@NonNull String> dimensionValues = new ArrayList<>();
       for (String dimensionName: dimensions) {
         String dimensionValue = dataFrame.getString(dimensionName, rowIdx);
         if (dimensionValue == null) {
-          LOG.warn("Encountered null dimension value for dimension: {}. Should not happen.", dimensionName);
+          LOG.warn("Encountered null dimension value for dimension: {}. Should not happen. Mitigating - replacing by \"null\".", dimensionName);
           dimensionValue = "null";
         }
         dimensionValues.add(dimensionValue);

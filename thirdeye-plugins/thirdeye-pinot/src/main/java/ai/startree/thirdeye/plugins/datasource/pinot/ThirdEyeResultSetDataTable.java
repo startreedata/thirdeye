@@ -137,7 +137,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
           value = getObject(rowIdx, columnIdx);
         } catch (Exception e) {
           // will add a null
-          LOG.error("Could not get value of position {},{}. Replacing by null. Error: {}",
+          LOG.error("Could not get value of position {},{}. Replacing by null. Error: ",
               rowIdx, columnIdx, e);
         }
         row[columnIdx] = value;

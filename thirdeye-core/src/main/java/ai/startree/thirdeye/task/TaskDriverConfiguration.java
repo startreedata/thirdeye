@@ -17,7 +17,6 @@ public class TaskDriverConfiguration {
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
   private Duration maxTaskRunTime = Duration.ofHours(6);
-  private Duration heartbeatInterval = Duration.ofSeconds(5);
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
@@ -104,15 +103,6 @@ public class TaskDriverConfiguration {
 
   public TaskDriverConfiguration setMaxParallelTasks(final int maxParallelTasks) {
     this.maxParallelTasks = maxParallelTasks;
-    return this;
-  }
-
-  public Duration getHeartbeatInterval() {
-    return heartbeatInterval;
-  }
-
-  public TaskDriverConfiguration setHeartbeatInterval(final Duration heartbeatInterval) {
-    this.heartbeatInterval = heartbeatInterval;
     return this;
   }
 }

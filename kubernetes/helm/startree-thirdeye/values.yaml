@@ -67,6 +67,7 @@ worker:
     prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
+  betaEnabled: false
 
 persistence:
   enabled: true

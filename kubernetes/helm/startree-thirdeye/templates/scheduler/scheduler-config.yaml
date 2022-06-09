@@ -16,7 +16,7 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.enabled }}
         - type: https
           port: 443
           idleTimeout: 620s

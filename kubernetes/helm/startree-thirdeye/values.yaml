@@ -50,8 +50,6 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-  tls:
-    enabled: false
 
 worker:
   enabled: true
@@ -65,8 +63,6 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-  tls:
-    enabled: false
 
 persistence:
   enabled: true

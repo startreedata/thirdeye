@@ -28,10 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CubeFetcher {
 
-  private enum CubeTag {
-    Baseline, Current,
-  }
-
   private static final Logger LOG = LoggerFactory.getLogger(CubeFetcher.class);
   private final static int TIME_OUT_VALUE = 1200;
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
@@ -52,11 +48,11 @@ public class CubeFetcher {
   }
 
   public double getBaselineTotal() throws Exception {
-    return getTotal(baselineSlice, CubeTag.Baseline.name());
+    return getTotal(baselineSlice, "baseline");
   }
 
   public double getCurrentTotal() throws Exception {
-    return getTotal(currentSlice, CubeTag.Current.name());
+    return getTotal(currentSlice, "current");
   }
 
   private double getTotal(final MetricSlice slice, final String sliceName) throws Exception {
@@ -69,77 +65,16 @@ public class CubeFetcher {
   }
 
   /**
-   * Fills in multiple Pinot results to one Cube row.
+   * Returns the baseline and current value for nodes at each dimension from the given list.
+   * For instance, if the list has ["country", "page name"], then it returns nodes of ["US", "IN",
+   * "JP", ...,
+   * "linkedin.com", "google.com", ...]
    *
-   * @param rowTable the table from dimension values to cube row; the return of this method.
-   * @param dimensions the dimension names of the row.
-   * @param dimensionValues the dimension values of the row.
-   * @param value the value to be filled in to the row.
-   * @param tag The field of the row where the value is filled in.
+   * @param dimensions the list of dimensions.
+   * @return the baseline and current value for nodes at each dimension from the given list.
    */
-  protected void fillValueToRowTable(Map<List<String>, AdditiveRow> rowTable, Dimensions dimensions,
-      List<String> dimensionValues, double value, CubeTag tag) {
-    if (Double.compare(0d, value) >= 0) {
-      LOG.warn("Value not added to rowTable: it is too small. Value: {}. Tag: {}", value, tag);
-      return;
-    }
-    if (Double.isInfinite(value)) {
-      LOG.warn("Value not added to rowTable: it is infinite. Value: {}. Tag: {}", value, tag);
-      return;
-    }
-    AdditiveRow row = rowTable.get(dimensionValues);
-    if (row == null) {
-      row = new AdditiveRow(dimensions, new DimensionValues(dimensionValues));
-      rowTable.put(dimensionValues, row);
-    }
-    switch (tag) {
-      case Baseline:
-        row.setBaselineValue(value);
-        break;
-      case Current:
-        row.setCurrentValue(value);
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported CubeTag: " + tag.name());
-    }
-  }
-
-  /**
-   * Returns a list of rows. The value of each row is evaluated and no further processing is needed.
-   *
-   * @param dimensions dimensions of the response
-   * @param dataFrame the response dataFrame from backend database
-   * @param rowTable the storage for rows
-   * @param tag true if the response is for baseline values
-   */
-  protected void buildMetricFunctionOrExpressionsRows(List<String> dimensions, DataFrame dataFrame,
-      Map<List<String>, AdditiveRow> rowTable, CubeTag tag, final Dimensions baseDimensions) {
-    for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
-      double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
-      // fixme cyril - investigate why null values happen - in the mean time mitigate by replacing by "null"
-      List<@NonNull String> dimensionValues = new ArrayList<>();
-      for (String dimensionName: dimensions) {
-        String dimensionValue = dataFrame.getString(dimensionName, rowIdx);
-        if (dimensionValue == null) {
-          LOG.warn("Encountered null dimension value for dimension: {}. Should not happen. Mitigating - replacing by \"null\".", dimensionName);
-          dimensionValue = "null";
-        }
-        dimensionValues.add(dimensionValue);
-      }
-      fillValueToRowTable(rowTable, baseDimensions, dimensionValues, value, tag);
-    }
-  }
-
-  /**
-     * Returns the baseline and current value for nodes at each dimension from the given list.
-     * For instance, if the list has ["country", "page name"], then it returns nodes of ["US", "IN",
-     * "JP", ...,
-     * "linkedin.com", "google.com", ...]
-     *
-     * @param dimensions the list of dimensions.
-     * @return the baseline and current value for nodes at each dimension from the given list.
-     */
-  public List<List<AdditiveRow>> getAggregatedValuesOfDimension(Dimensions dimensions) throws Exception {
+  public List<List<AdditiveRow>> getAggregatedValuesOfDimension(Dimensions dimensions)
+      throws Exception {
 
     List<List<String>> dimensionsLists = new ArrayList<>();
     List<Future<DataFrame>> baselineResults = new ArrayList<>();
@@ -158,7 +93,6 @@ public class CubeFetcher {
     return constructRows(dimensionsLists, baselineResults, currentResults, dimensions);
   }
 
-
   /**
    * Returns the baseline and current value for nodes for each dimension combination.
    * For instance, if the list has ["country", "page name"], then it returns nodes of
@@ -171,7 +105,8 @@ public class CubeFetcher {
    * @param dimensions the dimensions to be drilled down.
    * @return the baseline and current value for nodes for each dimension combination.
    */
-  public List<List<AdditiveRow>> getAggregatedValuesOfLevels(Dimensions dimensions) throws Exception {
+  public List<List<AdditiveRow>> getAggregatedValuesOfLevels(Dimensions dimensions)
+      throws Exception {
 
     List<List<String>> dimensionsLists = new ArrayList<>();
     List<Future<DataFrame>> baselineResults = new ArrayList<>();
@@ -196,37 +131,108 @@ public class CubeFetcher {
       final Dimensions baseDimensions)
       throws InterruptedException, ExecutionException, TimeoutException {
     List<List<AdditiveRow>> res = new ArrayList<>();
-    for (int i = 0; i < dimensionsLists.size(); i++) {
-      Map<List<String>, AdditiveRow> rowOfSameLevel = new HashMap<>();
-      final List<String> dimensions = dimensionsLists.get(i);
-      addRow(rowOfSameLevel, dimensions, CubeTag.Baseline, baselineResults.get(i), baseDimensions);
-      addRow(rowOfSameLevel, dimensions, CubeTag.Current, currentResults.get(i), baseDimensions);
-      if (rowOfSameLevel.size() == 0) {
-        LOG.warn("Failed to retrieve non-zero results for dimensions {}.", dimensions);
+    for (int level = 0; level < dimensionsLists.size(); level++) {
+      final List<String> levelDimensions = dimensionsLists.get(level);
+      final List<AdditiveRow> rows = new RowsBuilder(baseDimensions, levelDimensions)
+          .addBaselineRows(baselineResults.get(level).get(TIME_OUT_VALUE, TIME_OUT_UNIT))
+          .addCurrentRows(currentResults.get(level).get(TIME_OUT_VALUE, TIME_OUT_UNIT))
+          .build();
+      if (rows.size() == 0) {
+        LOG.warn("Failed to retrieve non-zero results for dimensions {}.", levelDimensions);
       }
-      List<AdditiveRow> rows = new ArrayList<>(rowOfSameLevel.values());
       res.add(rows);
     }
 
     return res;
   }
 
-  private void addRow(final Map<List<String>, AdditiveRow> rowOfSameLevel,
-      final List<String> dimensions, final CubeTag tag, final Future<DataFrame> future,
-      final Dimensions baseDimensions)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    final DataFrame df = future.get(TIME_OUT_VALUE, TIME_OUT_UNIT);
-    if (df.size() == 0) {
-      LOG.warn("Got 0 rows for dimensions: {} for {} timeframe", dimensions, tag);
+  private static class RowsBuilder {
+
+    private enum CubeTag {
+      Baseline, Current,
     }
-    if (df.size() == QUERY_LIMIT) {
-      LOG.warn(
-          "Got {} rows for dimensions: {} for {} timeframe. This corresponds to the LIMIT clause. "
-              + "Rows are randomly chosen, dimension analysis algorithm may not return the best results.",
-          QUERY_LIMIT,
-          dimensions,
-          tag);
+
+    private final Map<List<String>, AdditiveRow> rows = new HashMap<>();
+    private final Dimensions baseDimensions;
+    private final List<String> levelDimensions;
+
+    public RowsBuilder(final Dimensions baseDimensions, final List<String> levelDimensions) {
+      this.baseDimensions = baseDimensions;
+      this.levelDimensions = levelDimensions;
     }
-    buildMetricFunctionOrExpressionsRows(dimensions, df, rowOfSameLevel, tag, baseDimensions);
+
+    public List<AdditiveRow> build() {
+      return new ArrayList<>(rows.values());
+    }
+
+    public RowsBuilder addBaselineRows(final DataFrame baselineDf) {
+      addRows(CubeTag.Baseline, baselineDf);
+      return this;
+    }
+
+    public RowsBuilder addCurrentRows(final DataFrame currentDf) {
+      addRows(CubeTag.Current, currentDf);
+      return this;
+    }
+
+    private void addRows(final CubeTag tag, final DataFrame df) {
+      if (df.size() == 0) {
+        LOG.warn("Got 0 rows for dimensions: {} for {} timeframe", levelDimensions, tag);
+        return;
+      }
+      if (df.size() == QUERY_LIMIT) {
+        LOG.warn(
+            "Got {} rows for dimensions: {} for {} timeframe. This corresponds to the LIMIT clause. "
+                + "Rows are randomly chosen, dimension analysis algorithm may not return the best results.",
+            QUERY_LIMIT,
+            levelDimensions,
+            tag);
+      }
+
+      for (int rowIdx = 0; rowIdx < df.size(); ++rowIdx) {
+        double metricValue = df.getDouble(Constants.COL_VALUE, rowIdx);
+        // fixme cyril - investigate why null values happen - in the mean time mitigate by replacing by "null"
+        List<@NonNull String> dimensionValues = new ArrayList<>();
+        for (String dimensionName : levelDimensions) {
+          String dimensionValue = df.getString(dimensionName, rowIdx);
+          if (dimensionValue == null) {
+            LOG.warn(
+                "Encountered null dimension value for dimension: {}. Should not happen. Mitigating - replacing by \"null\".",
+                dimensionName);
+            dimensionValue = "null";
+          }
+          dimensionValues.add(dimensionValue);
+        }
+        addOrUpdateRow(dimensionValues, metricValue, tag);
+      }
+    }
+
+    private void addOrUpdateRow(final List<String> dimensionValues, double metricValue,
+        CubeTag tag) {
+      if (Double.compare(0d, metricValue) >= 0) {
+        LOG.warn("Value not added to rowTable: it is too small. Value: {}. Tag: {}", metricValue, tag);
+        return;
+      }
+      if (Double.isInfinite(metricValue)) {
+        LOG.warn("Value not added to rowTable: it is infinite. Value: {}. Tag: {}", metricValue, tag);
+        return;
+      }
+      AdditiveRow row = rows.get(dimensionValues);
+      if (row == null) {
+        // fixme cyril - due to incorect implementation in AdditiveCubeNode, baseDimensons must be passed rather than levelDimensions
+        row = new AdditiveRow(baseDimensions, new DimensionValues(dimensionValues));
+        rows.put(dimensionValues, row);
+      }
+      switch (tag) {
+        case Baseline:
+          row.setBaselineValue(metricValue);
+          break;
+        case Current:
+          row.setCurrentValue(metricValue);
+          break;
+        default:
+          throw new IllegalArgumentException("Unsupported CubeTag: " + tag.name());
+      }
+    }
   }
 }

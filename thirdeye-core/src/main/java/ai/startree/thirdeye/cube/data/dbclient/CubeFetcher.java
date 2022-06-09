@@ -114,7 +114,6 @@ public class CubeFetcher {
   protected void buildMetricFunctionOrExpressionsRows(List<String> dimensions, DataFrame dataFrame,
       Map<List<String>, AdditiveRow> rowTable, CubeTag tag, final Dimensions baseDimensions) {
     for (int rowIdx = 0; rowIdx < dataFrame.size(); ++rowIdx) {
-      // If the metric expression is a single metric function, then we get the value immediately
       double value = dataFrame.getDouble(Constants.COL_VALUE, rowIdx);
       // fixme cyril - investigate why null values happen - in the mean time mitigate by replacing by "null"
       List<@NonNull String> dimensionValues = new ArrayList<>();
@@ -227,5 +226,9 @@ public class CubeFetcher {
     }
 
     return constructRows(dimensionsLists, baselineResults, currentResults, dimensions);
+  }
+
+  private enum CubeTag {
+    Baseline, Current,
   }
 }

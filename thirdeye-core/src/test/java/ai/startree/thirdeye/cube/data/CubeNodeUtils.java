@@ -3,9 +3,8 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.node;
+package ai.startree.thirdeye.cube.data;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 

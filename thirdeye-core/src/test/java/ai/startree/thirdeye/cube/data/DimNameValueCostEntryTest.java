@@ -3,9 +3,8 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.cube;
+package ai.startree.thirdeye.cube.data;
 
-import ai.startree.thirdeye.cube.data.DimNameValueCostEntry;
 import org.testng.annotations.Test;
 
 public class DimNameValueCostEntryTest {

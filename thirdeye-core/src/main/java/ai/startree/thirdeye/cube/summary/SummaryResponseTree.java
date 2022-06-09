@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.cube.summary;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.cost.CostFunction;
 import ai.startree.thirdeye.cube.data.Dimensions;
 import com.fasterxml.jackson.annotation.JsonIgnore;

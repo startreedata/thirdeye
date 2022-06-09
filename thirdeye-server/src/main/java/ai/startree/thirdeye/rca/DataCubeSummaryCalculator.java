@@ -155,7 +155,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
     public DimensionAnalysisResultApi buildSummary(CubeFetcher cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube cube = new Cube(cubeFetcher, costFunction, aggregationLoader);
+      Cube cube = new Cube(cubeFetcher, costFunction);
       final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
         cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);

@@ -8,7 +8,6 @@ package ai.startree.thirdeye.cube.data;
 import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -59,8 +58,7 @@ public class Cube {
   private final CubeFetcher cubeFetcher;
   private final CostFunction costFunction;
 
-  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction,
-      final AggregationLoader aggregationLoader) {
+  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction) {
     this.cubeFetcher = cubeFetcher;
     this.costFunction = costFunction;
   }

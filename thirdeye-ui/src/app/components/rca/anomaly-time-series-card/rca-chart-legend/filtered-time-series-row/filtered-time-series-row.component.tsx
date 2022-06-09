@@ -31,10 +31,9 @@ export const FilteredTimeSeriesRow: FunctionComponent<
     return (
         <TableRow>
             <TableCell
+                className={classes.assignedChartColorCell}
                 style={{
-                    borderLeftWidth: "5px",
                     borderLeftColor: color,
-                    borderLeftStyle: "solid",
                 }}
             >
                 {seriesData && (
@@ -55,7 +54,7 @@ export const FilteredTimeSeriesRow: FunctionComponent<
                         size="small"
                         onClick={onRemoveBtnClick}
                     >
-                        {t("label.remove-metric")}
+                        {t("label.remove")}
                     </Button>
                 </LocalThemeProviderV1>
             </TableCell>

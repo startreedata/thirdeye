@@ -1,4 +1,4 @@
-import { Box } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -85,14 +85,18 @@ export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
                             <TableRow>
                                 <TableCell width="40px" />
                                 <TableCell width="100px">
-                                    <strong>Type</strong>
+                                    <Typography variant="body2">
+                                        <strong>Type</strong>
+                                    </Typography>
                                 </TableCell>
                                 <TableCell>
-                                    <strong>
-                                        {t("label.additional-chart-items")}
-                                    </strong>
+                                    <Typography variant="body2">
+                                        <strong>
+                                            {t("label.additional-chart-items")}
+                                        </strong>
+                                    </Typography>
                                 </TableCell>
-                                <TableCell width="170px" />
+                                <TableCell />
                             </TableRow>
                         </TableHead>
                         {timeSeriesFiltersSet.length > 0 && (

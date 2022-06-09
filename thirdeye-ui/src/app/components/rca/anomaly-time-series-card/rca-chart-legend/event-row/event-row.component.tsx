@@ -1,4 +1,4 @@
-import { Button, Checkbox } from "@material-ui/core";
+import { Button, Checkbox, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import React, { FunctionComponent } from "react";
@@ -20,10 +20,9 @@ export const EventRow: FunctionComponent<EventRowProps> = ({
     return (
         <TableRow>
             <TableCell
+                className={classes.assignedChartColorCell}
                 style={{
-                    borderLeftWidth: "5px",
                     borderLeftColor: colorScale(event.id),
-                    borderLeftStyle: "solid",
                 }}
             >
                 <Checkbox
@@ -32,9 +31,13 @@ export const EventRow: FunctionComponent<EventRowProps> = ({
                     onChange={(_, checked) => onCheckBoxClick(event, checked)}
                 />
             </TableCell>
-            <TableCell>{t("label.event")}</TableCell>
             <TableCell>
-                {event.type} | {event.name}
+                <Typography variant="body2">{t("label.event")}</Typography>
+            </TableCell>
+            <TableCell>
+                <Typography variant="body2">
+                    {event.type}/{event.name}
+                </Typography>
             </TableCell>
             <TableCell align="right">
                 <LocalThemeProviderV1 primary={lightV1.palette.error}>
@@ -44,7 +47,7 @@ export const EventRow: FunctionComponent<EventRowProps> = ({
                         size="small"
                         onClick={() => onRemoveBtnClick(event)}
                     >
-                        {t("label.remove-event")}
+                        {t("label.remove")}
                     </Button>
                 </LocalThemeProviderV1>
             </TableCell>

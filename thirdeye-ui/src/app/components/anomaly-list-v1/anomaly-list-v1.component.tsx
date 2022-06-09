@@ -80,12 +80,6 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         []
     );
 
-    const durationRenderer = useCallback(
-        // use formatted value to display
-        (_, data: UiAnomaly) => data.duration,
-        []
-    );
-
     const startTimeRenderer = useCallback(
         // use formatted value to display
         (_, data: UiAnomaly) => data.startTime,
@@ -116,22 +110,6 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     const anomalyListColumns = useMemo(
         () => [
             {
-                key: "name",
-                dataKey: "name",
-                header: t("label.name"),
-                sortable: true,
-                minWidth: 200,
-                customCellRenderer: anomalyNameRenderer,
-            },
-            {
-                key: "alertName",
-                dataKey: "alertName",
-                header: t("label.alert"),
-                sortable: true,
-                minWidth: 300,
-                customCellRenderer: alertNameRenderer,
-            },
-            {
                 key: "metricName",
                 dataKey: "metricName",
                 header: t("label.metric"),
@@ -140,12 +118,12 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 customCellRenderer: metricNameRenderer,
             },
             {
-                key: "duration",
-                dataKey: "durationVal",
-                header: t("label.duration"),
+                key: "alertName",
+                dataKey: "alertName",
+                header: t("label.alert"),
                 sortable: true,
-                minWidth: 150,
-                customCellRenderer: durationRenderer,
+                minWidth: 300,
+                customCellRenderer: alertNameRenderer,
             },
             {
                 key: "startTime",
@@ -164,6 +142,14 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 customCellRenderer: endTimeRenderer,
             },
             {
+                key: "deviation",
+                dataKey: "deviationVal",
+                header: t("label.deviation"),
+                sortable: true,
+                minWidth: 150,
+                customCellRenderer: deviationRenderer,
+            },
+            {
                 key: "current",
                 dataKey: "currentVal",
                 header: t("label.current"),
@@ -179,14 +165,6 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 minWidth: 150,
                 customCellRenderer: predicatedRenderer,
             },
-            {
-                key: "deviation",
-                dataKey: "deviationVal",
-                header: t("label.deviation"),
-                sortable: true,
-                minWidth: 150,
-                customCellRenderer: deviationRenderer,
-            },
         ],
         [
             anomalyNameRenderer,
@@ -194,7 +172,6 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             deviationRenderer,
             currentRenderer,
             predicatedRenderer,
-            durationRenderer,
             startTimeRenderer,
             endTimeRenderer,
             metricNameRenderer,

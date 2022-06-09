@@ -32,8 +32,10 @@ export const EventRow: FunctionComponent<EventRowProps> = ({
                     onChange={(_, checked) => onCheckBoxClick(event, checked)}
                 />
             </TableCell>
-            <TableCell>{event.type}</TableCell>
-            <TableCell>{event.name}</TableCell>
+            <TableCell>{t("label.event")}</TableCell>
+            <TableCell>
+                {event.type} | {event.name}
+            </TableCell>
             <TableCell align="right">
                 <LocalThemeProviderV1 primary={lightV1.palette.error}>
                     <Button

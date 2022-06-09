@@ -1,9 +1,11 @@
-import { Box, Typography } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import InfoIcon from "@material-ui/icons/Info";
+import Alert from "@material-ui/lab/Alert";
 import { scaleOrdinal } from "@visx/scale";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +16,7 @@ import { COLOR_PALETTE } from "../../../visualizations/time-series-chart/time-se
 import { EventRow } from "./event-row/event-row.component";
 import { FilteredTimeSeriesRow } from "./filtered-time-series-row/filtered-time-series-row.component";
 import { RCAChartLegendProps } from "./rca-chart-legend.interfaces";
+import { useRCACHartLegendStyles } from "./rca-chart-legend.styles";
 
 const OTHER_TIME_SERIES_IDX_OFFSET = 3;
 
@@ -27,6 +30,7 @@ export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
     onEventSelectionChange,
     onEventsStateChange,
 }) => {
+    const classes = useRCACHartLegendStyles();
     const { t } = useTranslation();
 
     const currentBaselineBoundsSeries = series.slice(0, 3);
@@ -68,9 +72,13 @@ export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
             {(timeSeriesFiltersSet.length > 0 || events.length > 0) && (
                 <>
                     <Box padding="30px">
-                        <Typography variant="subtitle2">
+                        <Alert
+                            className={classes.infoAlert}
+                            icon={<InfoIcon />}
+                            severity="info"
+                        >
                             {t("message.rca-legend-information")}
-                        </Typography>
+                        </Alert>
                     </Box>
                     <Table size="small">
                         <TableHead>
@@ -84,7 +92,7 @@ export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
                                         {t("label.additional-chart-items")}
                                     </strong>
                                 </TableCell>
-                                <TableCell width="150px" />
+                                <TableCell width="170px" />
                             </TableRow>
                         </TableHead>
                         {timeSeriesFiltersSet.length > 0 && (

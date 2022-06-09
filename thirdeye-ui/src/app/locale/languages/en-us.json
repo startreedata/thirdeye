@@ -184,7 +184,7 @@
         "view-investigation": "View Investigation",
         "about": "About",
         "thirdeye-website-url": "https://www.startree.ai",
-        "remove-filter": "Remove Filter",
+        "remove-metric": "Remove Metric",
         "remove-event": "Remove Event",
         "event-properties": "Event Properties",
         "current-duration": "Current Duration",

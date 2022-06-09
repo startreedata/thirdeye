@@ -45,7 +45,7 @@ export const FilteredTimeSeriesRow: FunctionComponent<
                     />
                 )}
             </TableCell>
-            <TableCell>Filtered Time Series</TableCell>
+            <TableCell>{t("label.metric")}</TableCell>
             <TableCell>{name}</TableCell>
             <TableCell align="right">
                 <LocalThemeProviderV1 primary={lightV1.palette.error}>
@@ -55,7 +55,7 @@ export const FilteredTimeSeriesRow: FunctionComponent<
                         size="small"
                         onClick={onRemoveBtnClick}
                     >
-                        {t("label.remove-filter")}
+                        {t("label.remove-metric")}
                     </Button>
                 </LocalThemeProviderV1>
             </TableCell>

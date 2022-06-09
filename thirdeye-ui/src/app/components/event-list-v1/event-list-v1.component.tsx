@@ -1,4 +1,5 @@
 import { Button, Grid, Link } from "@material-ui/core";
+import { map } from "lodash";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -66,6 +67,14 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
         []
     );
 
+    const dimensionMapRenderer = useCallback(
+        (_: Record<string, unknown>, data: Event): ReactNode =>
+            map(data.targetDimensionMap, (value: string[]) =>
+                value.join(", ")
+            ).join(", "),
+        []
+    );
+
     const eventColumns = [
         {
             key: "name",
@@ -97,6 +106,13 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             minWidth: 300,
             sortable: true,
             customCellRenderer: endTimeRenderer,
+        },
+        {
+            key: "targetDimensionMap",
+            dataKey: "targetDimensionMap.countryCode",
+            header: t("label.dimensions"),
+            minWidth: 300,
+            customCellRenderer: dimensionMapRenderer,
         },
     ];
 

@@ -729,7 +729,8 @@ export function DataGridV1<T>({
                     isNil(searchKeyValue) ||
                     (typeof searchKeyValue !== "string" &&
                         typeof searchKeyValue !== "number" &&
-                        typeof searchKeyValue !== "boolean")
+                        typeof searchKeyValue !== "boolean" &&
+                        !Array.isArray(searchKeyValue))
                 ) {
                     // Skip searching
                     continue;

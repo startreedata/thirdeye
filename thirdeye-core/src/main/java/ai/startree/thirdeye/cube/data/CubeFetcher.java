@@ -29,6 +29,10 @@ import org.slf4j.LoggerFactory;
  */
 public class CubeFetcher {
 
+  private enum CubeTag {
+    Baseline, Current,
+  }
+
   private static final Logger LOG = LoggerFactory.getLogger(CubeFetcher.class);
   private final static int TIME_OUT_VALUE = 1200;
   private final static TimeUnit TIME_OUT_UNIT = TimeUnit.SECONDS;
@@ -155,6 +159,38 @@ public class CubeFetcher {
     return constructRows(dimensionsLists, baselineResults, currentResults, dimensions);
   }
 
+
+  /**
+   * Returns the baseline and current value for nodes for each dimension combination.
+   * For instance, if the list has ["country", "page name"], then it returns nodes of
+   * [
+   * ["US", "IN", "JP", ...,],
+   * ["US, linkedin.com", "US, google.com", "IN, linkedin.com", "IN, google.com", "JP,
+   * linkedin.com", "JP, google.com", ...]
+   * ]
+   *
+   * @param dimensions the dimensions to be drilled down.
+   * @return the baseline and current value for nodes for each dimension combination.
+   */
+  public List<List<AdditiveRow>> getAggregatedValuesOfLevels(Dimensions dimensions) throws Exception {
+
+    List<List<String>> dimensionsLists = new ArrayList<>();
+    List<Future<DataFrame>> baselineResults = new ArrayList<>();
+    List<Future<DataFrame>> currentResults = new ArrayList<>();
+    for (int level = 0; level < dimensions.size() + 1; ++level) {
+      final List<String> groupByDimensions = dimensions.namesToDepth(level);
+      dimensionsLists.add(groupByDimensions);
+      baselineResults.add(aggregationLoader.loadAggregateAsync(baselineSlice,
+          groupByDimensions,
+          QUERY_LIMIT));
+      currentResults.add(aggregationLoader.loadAggregateAsync(currentSlice,
+          groupByDimensions,
+          QUERY_LIMIT));
+    }
+
+    return constructRows(dimensionsLists, baselineResults, currentResults, dimensions);
+  }
+
   @NonNull
   private List<List<AdditiveRow>> constructRows(List<List<String>> dimensionsLists,
       final List<Future<DataFrame>> baselineResults, final List<Future<DataFrame>> currentResults,
@@ -193,40 +229,5 @@ public class CubeFetcher {
           tag);
     }
     buildMetricFunctionOrExpressionsRows(dimensions, df, rowOfSameLevel, tag, baseDimensions);
-  }
-
-  /**
-     * Returns the baseline and current value for nodes for each dimension combination.
-     * For instance, if the list has ["country", "page name"], then it returns nodes of
-     * [
-     * ["US", "IN", "JP", ...,],
-     * ["US, linkedin.com", "US, google.com", "IN, linkedin.com", "IN, google.com", "JP,
-     * linkedin.com", "JP, google.com", ...]
-     * ]
-     *
-     * @param dimensions the dimensions to be drilled down.
-     * @return the baseline and current value for nodes for each dimension combination.
-     */
-  public List<List<AdditiveRow>> getAggregatedValuesOfLevels(Dimensions dimensions) throws Exception {
-
-    List<List<String>> dimensionsLists = new ArrayList<>();
-    List<Future<DataFrame>> baselineResults = new ArrayList<>();
-    List<Future<DataFrame>> currentResults = new ArrayList<>();
-    for (int level = 0; level < dimensions.size() + 1; ++level) {
-      final List<String> groupByDimensions = dimensions.namesToDepth(level);
-      dimensionsLists.add(groupByDimensions);
-      baselineResults.add(aggregationLoader.loadAggregateAsync(baselineSlice,
-          groupByDimensions,
-          QUERY_LIMIT));
-      currentResults.add(aggregationLoader.loadAggregateAsync(currentSlice,
-          groupByDimensions,
-          QUERY_LIMIT));
-    }
-
-    return constructRows(dimensionsLists, baselineResults, currentResults, dimensions);
-  }
-
-  private enum CubeTag {
-    Baseline, Current,
   }
 }

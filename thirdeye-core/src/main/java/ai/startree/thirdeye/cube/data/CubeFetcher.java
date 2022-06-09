@@ -196,9 +196,11 @@ public class CubeFetcher {
         for (String dimensionName : levelDimensions) {
           String dimensionValue = df.getString(dimensionName, rowIdx);
           if (dimensionValue == null) {
-            LOG.warn(
-                "Encountered null dimension value for dimension: {}. Should not happen. Mitigating - replacing by \"null\".",
-                dimensionName);
+            LOG.error(
+                "Encountered null dimension value for dimension: {}. Should not happen. Mitigating - replacing by \"null\". Level dimensions: {}. Full dataframe: \n{}",
+                dimensionName,
+                levelDimensions,
+                df);
             dimensionValue = "null";
           }
           dimensionValues.add(dimensionValue);

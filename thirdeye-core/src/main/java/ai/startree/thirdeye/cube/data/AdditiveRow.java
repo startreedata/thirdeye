@@ -3,10 +3,8 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.additive;
+package ai.startree.thirdeye.cube.data;
 
-import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.util.Objects;

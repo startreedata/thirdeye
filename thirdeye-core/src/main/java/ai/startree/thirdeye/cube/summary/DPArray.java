@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.cube.summary;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

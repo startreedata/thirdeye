@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.dbrow;
+package ai.startree.thirdeye.cube.data;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

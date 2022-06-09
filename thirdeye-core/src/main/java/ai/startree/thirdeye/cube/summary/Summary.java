@@ -7,11 +7,11 @@ package ai.startree.thirdeye.cube.summary;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.cube.Cube;
-import ai.startree.thirdeye.cube.data.cube.DimNameValueCostEntry;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.Cube;
+import ai.startree.thirdeye.cube.data.DimNameValueCostEntry;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.cube.SummaryGainerLoserResponseRow;
 import ai.startree.thirdeye.spi.api.cube.SummaryResponseRow;

@@ -3,10 +3,11 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.dbrow;
+package ai.startree.thirdeye.cube.data;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.cube.data.Dimensions;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

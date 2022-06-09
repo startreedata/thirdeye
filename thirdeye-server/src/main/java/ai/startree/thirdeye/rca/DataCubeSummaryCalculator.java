@@ -9,9 +9,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.cube.Cube;
-import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.Cube;
+import ai.startree.thirdeye.cube.data.CubeFetcher;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import ai.startree.thirdeye.cube.summary.Summary;
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.api.DatasetApi;
@@ -155,7 +155,7 @@ public class DataCubeSummaryCalculator implements ContributorsFinder {
 
     public DimensionAnalysisResultApi buildSummary(CubeFetcher cubeFetcher,
         CostFunction costFunction) throws Exception {
-      Cube cube = new Cube(cubeFetcher, costFunction, aggregationLoader);
+      Cube cube = new Cube(cubeFetcher, costFunction);
       final DimensionAnalysisResultApi response;
       if (depth > 0) { // depth != 0 means auto dimension order
         cube.buildWithAutoDimensionOrder(dimensions, dataFilters, depth, hierarchies);

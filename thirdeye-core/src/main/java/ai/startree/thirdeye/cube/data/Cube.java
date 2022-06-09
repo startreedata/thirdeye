@@ -3,17 +3,11 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.cube;
+package ai.startree.thirdeye.cube.data;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
-import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -62,8 +56,7 @@ public class Cube {
   private final CubeFetcher cubeFetcher;
   private final CostFunction costFunction;
 
-  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction,
-      final AggregationLoader aggregationLoader) {
+  public Cube(final CubeFetcher cubeFetcher, final CostFunction costFunction) {
     this.cubeFetcher = cubeFetcher;
     this.costFunction = costFunction;
   }
@@ -117,32 +110,23 @@ public class Cube {
    */
   public void buildWithAutoDimensionOrder(Dimensions dimensions, List<Predicate> dataFilters,
       int depth, List<List<String>> hierarchy) throws Exception {
-    long tStart = System.nanoTime();
-    try {
-      Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
-          "Dimensions cannot be empty.");
-      Preconditions.checkNotNull(hierarchy, "hierarchy cannot be null.");
+    Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
+        "Dimensions cannot be empty.");
+    Preconditions.checkNotNull(hierarchy, "hierarchy cannot be null.");
 
-      initializeBasicInfo();
-      Dimensions shrankDimensions = CubeUtils.shrinkDimensionsByFilterSets(dimensions, dataFilters);
-      costSet = computeOneDimensionCost(baselineTotal,
-          currentTotal,
-          baselineTotalSize,
-          currentTotalSize,
-          shrankDimensions);
-      sortedDimensionCosts = calculateSortedDimensionCost(costSet);
-      this.dimensions = sortDimensions(sortedDimensionCosts, depth, hierarchy);
+    initializeBasicInfo();
+    final Dimensions shrankDimensions = CubeUtils.shrinkDimensionsByFilterSets(dimensions, dataFilters);
+    costSet = computeOneDimensionCost(baselineTotal,
+        currentTotal,
+        baselineTotalSize,
+        currentTotalSize,
+        shrankDimensions);
+    sortedDimensionCosts = calculateSortedDimensionCost(costSet);
+    this.dimensions = sortDimensions(sortedDimensionCosts, depth, hierarchy);
 
-      LOG.info("Auto-dimension order: " + this.dimensions);
+    LOG.info("Auto-dimension order: " + this.dimensions);
 
-      buildSubCube(this.dimensions);
-    } catch (Exception e) {
-      ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
-      throw e;
-    } finally {
-      ThirdeyeMetricsUtil.cubeCallCounter.inc();
-      ThirdeyeMetricsUtil.cubeDurationCounter.inc(System.nanoTime() - tStart);
-    }
+    buildSubCube(this.dimensions);
   }
 
   /**
@@ -152,16 +136,7 @@ public class Cube {
    */
   public void buildWithManualDimensionOrder(Dimensions dimensions)
       throws Exception {
-    long tStart = System.nanoTime();
-    try {
       buildSubCube(dimensions);
-    } catch (Exception e) {
-      ThirdeyeMetricsUtil.cubeExceptionCounter.inc();
-      throw e;
-    } finally {
-      ThirdeyeMetricsUtil.cubeCallCounter.inc();
-      ThirdeyeMetricsUtil.cubeDurationCounter.inc(System.nanoTime() - tStart);
-    }
   }
 
   /**

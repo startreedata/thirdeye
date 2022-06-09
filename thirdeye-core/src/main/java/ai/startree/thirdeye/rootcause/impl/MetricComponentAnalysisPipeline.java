@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.cube.data.cube.Cube;
+import ai.startree.thirdeye.cube.data.Cube;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.MaxScoreSet;

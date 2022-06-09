@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.cube;
+package ai.startree.thirdeye.cube.data;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;

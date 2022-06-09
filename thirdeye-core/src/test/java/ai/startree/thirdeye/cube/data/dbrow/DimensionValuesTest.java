@@ -7,6 +7,7 @@ package ai.startree.thirdeye.cube.data.dbrow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.cube.data.DimensionValues;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

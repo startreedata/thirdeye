@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.cube.data.cube;
 
+import ai.startree.thirdeye.cube.data.DimNameValueCostEntry;
 import org.testng.annotations.Test;
 
 public class DimNameValueCostEntryTest {

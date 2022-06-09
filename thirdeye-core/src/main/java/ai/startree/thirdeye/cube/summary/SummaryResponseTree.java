@@ -7,7 +7,7 @@ package ai.startree.thirdeye.cube.summary;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;

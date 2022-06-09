@@ -3,13 +3,11 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.cube.data.cube;
+package ai.startree.thirdeye.cube.data;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.dbclient.CubeFetcher;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
 import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import ai.startree.thirdeye.spi.datalayer.Predicate;

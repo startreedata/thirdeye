@@ -9,8 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.additive.AdditiveRow;
-import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.DimensionValues;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import java.util.Collections;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;

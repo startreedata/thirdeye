@@ -5,9 +5,9 @@
 
 package ai.startree.thirdeye.cube.additive;
 
-import ai.startree.thirdeye.cube.data.cube.CubeUtils;
-import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.CubeUtils;
+import ai.startree.thirdeye.cube.data.DimensionValues;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;

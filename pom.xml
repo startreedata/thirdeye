@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 StarTree Inc. All rights reserved.
-  ~ Confidential and Proprietary Information of StarTree Inc.
-  -->
+
+    Copyright 2022 StarTree Inc
+
+    Licensed under the StarTree Community License (the "License"); you may not use
+    this file except in compliance with the License. You may obtain a copy of the
+    License at http://www.startree.ai/legal/startree-community-license
+
+    Unless required by applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+    either express or implied.
+    See the License for the specific language governing permissions and limitations under
+    the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
@@ -148,6 +159,10 @@
         <configuration>
           <generateBackupPoms>false</generateBackupPoms>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -329,6 +344,70 @@
               <format>xml</format>
             </formats>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>4.0</version>
+          <configuration>
+            <header>HEADER</header>
+            <excludes>
+              <!-- Text and log files -->
+              <exclude>**/*.txt</exclude>
+              <exclude>**/*.log</exclude>
+              <exclude>**/*.list</exclude>
+              <exclude>**/*.out</exclude>
+              <exclude>**/*.generated</exclude>
+              <exclude>**/*.json</exclude>
+              <exclude>**/*.schema</exclude>
+
+              <!-- Binary files -->
+              <exclude>**/*.avro</exclude>
+              <exclude>**/*.avsc</exclude>
+              <exclude>**/*.csv</exclude>
+              <exclude>**/*.desc</exclude>
+              <exclude>**/*.parquet</exclude>
+              <exclude>**/*.gz</exclude>
+              <exclude>**/*.orc</exclude>
+              <exclude>**/*.dict</exclude>
+              <exclude>**/*.raw</exclude>
+              <exclude>**/*.mapping</exclude>
+              <exclude>**/*.ser</exclude>
+              <exclude>**/*.v1</exclude>
+              <exclude>**/*.v2</exclude>
+
+              <!-- Auto-generated target directories -->
+              <exclude>target/**</exclude>
+              <exclude>thirdeye-*/target/**</exclude>
+
+
+              <!-- Top level files -->
+              <exclude>HEADER</exclude>
+              <exclude>LICENSE*</exclude>
+              <exclude>NOTICE*</exclude>
+
+              <exclude>**/node_modules/**</exclude>
+              <exclude>**/dist/**</exclude>
+              <exclude>src/test/resources/**</exclude>
+              <exclude>src/main/resources/**</exclude>
+              <exclude>thirdeye-ui/build</exclude>
+              <exclude>thirdeye-ui/dist</exclude>
+
+              <!-- files from Eclipse -->
+              <exclude>**/maven-eclipse.xml</exclude>
+              <exclude>.externalToolBuilders/**</exclude>
+
+              <!-- files from IntelliJ -->
+              <exclude>.idea/**</exclude>
+            </excludes>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

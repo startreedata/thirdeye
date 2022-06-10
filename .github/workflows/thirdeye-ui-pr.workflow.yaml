@@ -3,6 +3,7 @@ name: thirdeye-ui-pr-workflow
 
 on:
     pull_request:
+        paths: thirdeye-ui/**
         types:
             - opened
             - reopened

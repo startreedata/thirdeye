@@ -11,12 +11,14 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
+import ai.startree.thirdeye.rootcause.ContributorsFinderRegistry;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
+import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.File;
@@ -47,6 +49,7 @@ public class PluginLoader {
   private final DataSourcesLoader dataSourcesLoader;
   private final DetectionRegistry detectionRegistry;
   private final NotificationServiceRegistry notificationServiceRegistry;
+  private final ContributorsFinderRegistry contributorsFinderRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -56,10 +59,12 @@ public class PluginLoader {
       final DataSourcesLoader dataSourcesLoader,
       final DetectionRegistry detectionRegistry,
       final NotificationServiceRegistry notificationServiceRegistry,
+      final ContributorsFinderRegistry contributorsFinderRegistry,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
+    this.contributorsFinderRegistry = contributorsFinderRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -106,6 +111,9 @@ public class PluginLoader {
     }
     for (NotificationServiceFactory f : plugin.getNotificationServiceFactories()) {
       notificationServiceRegistry.addNotificationServiceFactory(f);
+    }
+    for (ContributorsFinderFactory f: plugin.getContributorsFinderFactories()) {
+      contributorsFinderRegistry.addContributorsFinderFactory(f);
     }
   }
 

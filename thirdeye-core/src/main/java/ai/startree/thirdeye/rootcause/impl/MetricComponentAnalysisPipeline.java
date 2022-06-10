@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.rootcause.impl;
 
-import ai.startree.thirdeye.cube.data.Cube;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.rootcause.MaxScoreSet;
@@ -57,7 +56,6 @@ import org.slf4j.LoggerFactory;
  * slices from the dataset. The result is an ordered list of the top k slices with the biggest
  * relative change.
  *
- * @see Cube
  */
 public class MetricComponentAnalysisPipeline extends Pipeline {
 

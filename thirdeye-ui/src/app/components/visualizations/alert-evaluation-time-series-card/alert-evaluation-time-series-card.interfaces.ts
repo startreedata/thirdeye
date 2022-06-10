@@ -13,4 +13,5 @@ export interface AlertEvaluationTimeSeriesCardProps {
     showDatePicker?: boolean;
     onRefresh?: () => void;
     onAnomalyBarClick?: (anomaly: Anomaly) => void;
+    isLoading?: boolean;
 }

@@ -22,7 +22,7 @@ spec:
       protocol: TCP
       port: 8081
       targetPort: 8081
-    {{- if .Values.scheduler.tls.enabled }}
+    {{- if .Values.tls.enabled }}
     - name: https
       protocol: TCP
       port: 443

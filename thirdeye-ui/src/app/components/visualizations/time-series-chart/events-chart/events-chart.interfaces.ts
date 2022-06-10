@@ -1,11 +1,13 @@
 import { AxisScale } from "@visx/axis";
 import { UseTooltipParams } from "@visx/tooltip/lib/hooks/useTooltip";
-import { Event } from "../../../../rest/dto/event.interfaces";
-import { NormalizedSeries } from "../time-series-chart.interfaces";
+import {
+    EventWithChartState,
+    NormalizedSeries,
+} from "../time-series-chart.interfaces";
 
 export interface EventsChartProps {
     series: NormalizedSeries[];
-    events: Event[];
+    events: EventWithChartState[];
     xScale?: AxisScale<number>;
     width: number;
     xMax: number;
@@ -16,6 +18,6 @@ export interface EventsChartProps {
 }
 
 export interface EventsTooltipPopoverProps {
-    events: Event[];
+    events: EventWithChartState[];
     colorScale: (id: number) => string;
 }

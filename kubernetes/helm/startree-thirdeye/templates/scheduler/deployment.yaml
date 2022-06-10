@@ -38,7 +38,7 @@ spec:
         {{- toYaml .Values.scheduler.affinity | nindent 8 }}
       tolerations:
         {{- toYaml .Values.scheduler.tolerations | nindent 8 }}
-      {{- if .Values.scheduler.tls.enabled }}
+      {{- if .Values.tls.enabled }}
       initContainers:
       - name: init-keystore
         image: eclipse-temurin:17-jdk
@@ -76,7 +76,7 @@ spec:
                 key: {{ $name }}
           {{- end }}
           {{- end }}
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.enabled }}
           - name: JAVA_OPTS
             value: >
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
@@ -100,7 +100,7 @@ spec:
             subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
-          {{- if .Values.scheduler.tls.enabled }}
+          {{- if .Values.tls.enabled }}
           - name: keystore
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
@@ -112,10 +112,10 @@ spec:
         - name: thirdeye-config
           configMap:
             name: thirdeye-scheduler
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.enabled }}
         - name: tls-internal
           secret:
-            secretName: {{ include "thirdeye.scheduler.fullname" . }}-internal-tls
+            secretName: {{ include "thirdeye.coordinator.fullname" . }}-internal-tls
         - name: keystore
           emptyDir: {}
         {{- end }}

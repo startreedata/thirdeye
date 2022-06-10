@@ -5,9 +5,9 @@
 
 package ai.startree.thirdeye.cube.summary;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
@@ -116,8 +116,8 @@ public class SummaryResponseTree {
               node.getCurrentValue(),
               node.getBaselineSize(),
               node.getCurrentSize(),
-              topNode.getOriginalBaselineValue(),
-              topNode.getOriginalCurrentValue(),
+              topNode.getOriginalBaselineSize(),
+              topNode.getOriginalCurrentSize(),
               topNode.getOriginalBaselineSize(),
               topNode.getOriginalCurrentSize());
       node.cubeNode.setCost(nodeCost);
@@ -162,11 +162,11 @@ public class SummaryResponseTree {
     }
 
     public double getBaselineValue() {
-      return cubeNode.getBaselineValue();
+      return cubeNode.getBaselineSize();
     }
 
     public double getCurrentValue() {
-      return cubeNode.getCurrentValue();
+      return cubeNode.getCurrentSize();
     }
 
     public double getBaselineSize() {

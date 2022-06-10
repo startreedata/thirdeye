@@ -9,11 +9,11 @@ import static ai.startree.thirdeye.cube.summary.NameTag.ALL_OTHERS;
 import static ai.startree.thirdeye.cube.summary.Summary.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
-import ai.startree.thirdeye.cube.additive.AdditiveRow;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
-import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
+import ai.startree.thirdeye.cube.data.DimensionValues;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.cube.SummaryResponseRow;
@@ -32,8 +32,8 @@ public class DimensionAnalysisResultApiTest {
     // Create test case
     List<AdditiveCubeNode> cubeNodes = buildHierarchicalNodes();
     int rootIdx = cubeNodes.size() - 1;
-    double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineValue();
-    double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentValue();
+    double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineSize();
+    double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     double baselineSize = cubeNodes.get(rootIdx).getOriginalBaselineSize();
     double currentSize = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     // Build the response

@@ -8,6 +8,7 @@ package ai.startree.thirdeye.datasource.loader;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public interface AggregationLoader {
 
@@ -30,4 +31,6 @@ public interface AggregationLoader {
    * @return aggregates data frame
    */
   DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit) throws Exception;
+
+  Future<DataFrame> loadAggregateAsync(MetricSlice slice, List<String> dimensions, int limit) throws Exception;
 }

@@ -8,4 +8,5 @@ export interface AnomalyTimeSeriesCardProps {
     timeSeriesFiltersSet: AnomalyFilterOption[][];
     onRemoveBtnClick: (idx: number) => void;
     isLoading: boolean;
+    onEventSelectionChange: (events: Event[]) => void;
 }

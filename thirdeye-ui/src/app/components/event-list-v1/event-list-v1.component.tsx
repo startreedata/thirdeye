@@ -1,10 +1,10 @@
 import { Box, Button, Grid, Link } from "@material-ui/core";
-import { flattenDeep, map, uniq } from "lodash";
+import { map } from "lodash";
 import React, {
     FunctionComponent,
     ReactNode,
     useCallback,
-    useMemo,
+    useEffect,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,7 @@ import {
 } from "../../platform/components";
 import { formatDateAndTimeV1 } from "../../platform/utils";
 import { Event } from "../../rest/dto/event.interfaces";
+import { getSearchDataKeysForEvents } from "../../utils/events/events.util";
 import { getEventsViewPath } from "../../utils/routes/routes.util";
 import { EventListV1Props } from "./event-list-v1.interfaces";
 
@@ -27,6 +28,17 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     const [selectedEvent, setSelectedEvent] =
         useState<DataGridSelectionModelV1<Event>>();
     const navigate = useNavigate();
+    const [searchDataKeys, setSearchDataKeys] = useState<string[]>(
+        getSearchDataKeysForEvents([])
+    );
+
+    useEffect(() => {
+        if (!props.events) {
+            return;
+        }
+
+        setSearchDataKeys(getSearchDataKeysForEvents(props.events));
+    }, [props.events]);
 
     const handleEventDelete = (): void => {
         if (!isActionButtonDisable) {
@@ -124,30 +136,6 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             customCellRenderer: metadataRenderer,
         },
     ];
-
-    // To allow search over custom keys from the data
-    const searchDataKeys = useMemo(() => {
-        return props.events
-            ? [
-                  "name",
-                  "type",
-                  "startTime",
-                  "endTime",
-                  // Extract keys from targetDimensionMap to allow search over map
-                  ...uniq(
-                      flattenDeep(
-                          props.events.map((event) =>
-                              map(
-                                  event.targetDimensionMap,
-                                  (_value: string[], key: string) =>
-                                      `targetDimensionMap.${key}`
-                              )
-                          )
-                      )
-                  ),
-              ]
-            : [];
-    }, [props.events]);
 
     return (
         <Grid item xs={12}>

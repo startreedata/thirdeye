@@ -67,7 +67,7 @@ swagger:
 # Start the Task Driver. This module runs the detection and notification tasks
 taskDriver:
   enabled: true
-  betaEnabled: false
+  randomWorkerIdEnabled: false
   id: 0 # must be a non-negative integer unique per instance/worker
 
 time:

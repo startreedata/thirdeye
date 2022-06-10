@@ -12,7 +12,7 @@ public class TaskDriverConfiguration {
 
   private Long id;
   private boolean enabled = false;
-  private boolean betaEnabled = false;
+  private boolean randomWorkerIdEnabled = false;
   private Duration noTaskDelay = Duration.ofSeconds(15);
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
@@ -26,7 +26,7 @@ public class TaskDriverConfiguration {
   }
 
   public TaskDriverConfiguration setId(final Long id) {
-    if(betaEnabled){
+    if(isRandomWorkerIdEnabled()){
       this.id = Math.abs(new Random().nextLong());
     } else {
       this.id = id;
@@ -34,12 +34,12 @@ public class TaskDriverConfiguration {
     return this;
   }
 
-  public boolean isBetaEnabled() {
-    return betaEnabled;
+  public boolean isRandomWorkerIdEnabled() {
+    return randomWorkerIdEnabled;
   }
 
-  public TaskDriverConfiguration setBetaEnabled(final boolean betaEnabled) {
-    this.betaEnabled = betaEnabled;
+  public TaskDriverConfiguration setRandomWorkerIdEnabled(final boolean randomWorkerIdEnabled) {
+    this.randomWorkerIdEnabled = randomWorkerIdEnabled;
     return this;
   }
 

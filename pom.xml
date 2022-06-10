@@ -376,10 +376,11 @@
               <exclude>**/*.v1</exclude>
               <exclude>**/*.v2</exclude>
 
-              <!-- Auto-generated target directories -->
+              <!-- Auto-generated files -->
               <exclude>target/**</exclude>
               <exclude>thirdeye-*/target/**</exclude>
-
+              <exclude>**/mem.script</exclude>
+              <exclude>**/mem.properties</exclude>
 
               <!-- Top level files -->
               <exclude>HEADER</exclude>

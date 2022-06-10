@@ -1,12 +1,12 @@
 # Label when configuration files in ThirdEye UI project root change
 thirdeye-ui config:
+    - ".github/pr-labels.yaml"
+    - ".github/workflows/thirdeye-ui-pr.workflow.yaml"
     - "thirdeye-ui/*"
     - "thirdeye-ui/.*"
-    - ".github/pr-labels.yaml"
-    - ".github/workflows/pr-labels.workflow.yaml"
-    - ".github/workflows/thirdeye-ui-merge.workflow.yaml"
-    - ".github/workflows/thirdeye-ui-pr.workflow.yaml"
     - "thirdeye-ui/.vscode/**/*"
+    - "thirdeye-ui/docker/**/*"
+    - "thirdeye-ui/scripts/**/*"
 
 # Label when source files in ThirdEye UI project change
 thirdeye-ui:

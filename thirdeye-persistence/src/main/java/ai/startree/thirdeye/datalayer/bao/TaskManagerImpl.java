@@ -55,15 +55,8 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
   @Inject
-  public TaskManagerImpl(final GenericPojoDao genericPojoDao,
-      final MetricRegistry metricRegistry) {
+  public TaskManagerImpl(final GenericPojoDao genericPojoDao) {
     super(TaskDTO.class, genericPojoDao);
-    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return count();
-      }
-    });
   }
 
   @Override

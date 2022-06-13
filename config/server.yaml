@@ -67,6 +67,7 @@ swagger:
 # Start the Task Driver. This module runs the detection and notification tasks
 taskDriver:
   enabled: true
+  # When enabled generates a random id which overrides taskDriver.id (below) to achieve unique worker id in multi worker setup
   randomWorkerIdEnabled: false
   id: 0 # must be a non-negative integer unique per instance/worker
 

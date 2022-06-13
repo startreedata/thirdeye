@@ -1,5 +1,5 @@
 import { Box, CardContent } from "@material-ui/core";
-import { isEmpty } from "lodash";
+import { get, isEmpty, isNil, map, toString } from "lodash";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -22,7 +22,6 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { useGetEventsForAnomaly } from "../../../rest/event/event.actions";
 import { getSearchDataKeysForEvents } from "../../../utils/events/events.util";
-import { EventCardV1 } from "../../entity-cards/event-card-v1/event-card-v1.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EventsTabProps } from "./event-tab.interfaces";
 
@@ -30,6 +29,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     anomalyId,
     selectedEvents,
     onCheckClick,
+    searchValue,
 }: EventsTabProps) => {
     const { t } = useTranslation();
     const { getEventsForAnomaly, errorMessages, status, events } =
@@ -37,10 +37,10 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
 
     const { notify } = useNotificationProviderV1();
 
-    const [eventsData, setEventsData] = useState<Event[] | null>(null);
     const [searchDataKeys, setSearchDataKeys] = useState<string[]>(
         getSearchDataKeysForEvents([])
     );
+    const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
     // SelectionModel to show selection on data-grid
     const selectionModel: DataGridSelectionModelV1<Event> = useMemo(
@@ -53,18 +53,60 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
         [selectedEvents]
     );
 
-    // Support expanded row to show metadata of events
-    const generateDataWithChildren = (data: Event[]): Event[] => {
-        return data.map((event, index) => ({
-            ...event,
-            children: [
-                {
-                    id: index,
-                    expandPanelContents: <EventCardV1 event={event} />,
-                },
-            ],
-        }));
-    };
+    useEffect(() => {
+        handleSearch(searchValue);
+    }, [searchValue, events, searchDataKeys]);
+
+    const handleSearch = useCallback(
+        (searchValue: string) => {
+            let updatedEvents: Event[];
+            const filteredRowKeyValues = new Set();
+            if (!events) {
+                updatedEvents = [];
+            } else if (!searchValue) {
+                updatedEvents = [...events];
+            } else {
+                updatedEvents = [];
+                for (const eachSearchDataKey of searchDataKeys) {
+                    for (const eachData of events) {
+                        const rowKeyValue = get(eachData, "id");
+                        if (filteredRowKeyValues.has(rowKeyValue)) {
+                            // Row already filtered
+                            continue;
+                        }
+
+                        // Get data at search key
+                        const searchKeyValue = get(eachData, eachSearchDataKey);
+                        if (
+                            isNil(searchKeyValue) ||
+                            (typeof searchKeyValue !== "string" &&
+                                typeof searchKeyValue !== "number" &&
+                                typeof searchKeyValue !== "boolean" &&
+                                !Array.isArray(searchKeyValue))
+                        ) {
+                            // Skip searching
+                            continue;
+                        }
+
+                        if (
+                            toString(searchKeyValue)
+                                .toLocaleLowerCase()
+                                .includes(
+                                    searchValue.toLocaleLowerCase().trim()
+                                )
+                        ) {
+                            // Match found
+                            filteredRowKeyValues.add(rowKeyValue);
+                            updatedEvents.push(eachData);
+                        }
+                    }
+                }
+            }
+
+            setFilteredEvents(updatedEvents);
+        },
+        [events, searchDataKeys]
+    );
 
     const onSelectionChange = (
         selectedEvent: DataGridSelectionModelV1<Event>
@@ -99,7 +141,6 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
             return;
         }
 
-        setEventsData(generateDataWithChildren(events));
         setSearchDataKeys(getSearchDataKeysForEvents(events));
 
         if (selectedEvents && selectedEvents.length) {
@@ -122,6 +163,22 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
         []
     );
 
+    const metadataRenderer = useCallback(
+        (_: Record<string, unknown>, data: Event): ReactNode => (
+            <Box marginY={0.5}>
+                {map(
+                    data.targetDimensionMap,
+                    (value: string[], key: string) => (
+                        <div key={key}>
+                            {key}: {value.join(", ")}
+                        </div>
+                    )
+                )}
+            </Box>
+        ),
+        []
+    );
+
     const eventColumns = [
         {
             key: "name",
@@ -133,7 +190,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
             key: "type",
             dataKey: "type",
             header: t("label.type"),
-            minWidth: 300,
+            minWidth: 180,
         },
         {
             key: "startTime",
@@ -149,6 +206,13 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
             minWidth: 300,
             customCellRenderer: endTimeRenderer,
         },
+        {
+            key: "targetDimensionMap",
+            dataKey: "targetDimensionMap",
+            header: t("label.metadata"),
+            minWidth: 300,
+            customCellRenderer: metadataRenderer,
+        },
     ];
 
     return (
@@ -161,9 +225,9 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
             {status === ActionStatus.Done && events && events.length > 0 && (
                 <DataGridV1<Event>
                     hideBorder
+                    hideToolbar
                     columns={eventColumns}
-                    data={eventsData as Event[]}
-                    expandColumnKey="name"
+                    data={filteredEvents as Event[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Body}
                     searchDataKeys={searchDataKeys}

@@ -4,7 +4,6 @@ import React, {
     FunctionComponent,
     ReactNode,
     useCallback,
-    useEffect,
     useMemo,
     useState,
 } from "react";
@@ -19,7 +18,6 @@ import {
 import { formatDateAndTimeV1 } from "../../platform/utils";
 import { Event } from "../../rest/dto/event.interfaces";
 import { getEventsViewPath } from "../../utils/routes/routes.util";
-import { EventCardV1 } from "../entity-cards/event-card-v1/event-card-v1.component";
 import { EventListV1Props } from "./event-list-v1.interfaces";
 
 export const EventListV1: FunctionComponent<EventListV1Props> = (
@@ -29,29 +27,6 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     const [selectedEvent, setSelectedEvent] =
         useState<DataGridSelectionModelV1<Event>>();
     const navigate = useNavigate();
-    const [eventsData, setEventsData] = useState<Event[] | null>(null);
-
-    // Support expanded row to show metadata of events
-    const generateDataWithChildren = (data: Event[]): Event[] => {
-        return data.map((event, index) => ({
-            ...event,
-            children: [
-                {
-                    id: index,
-                    expandPanelContents: <EventCardV1 event={event} />,
-                },
-            ],
-        }));
-    };
-
-    useEffect(() => {
-        if (!props.events) {
-            return;
-        }
-
-        const eventData = generateDataWithChildren(props.events);
-        setEventsData(eventData);
-    }, [props.events]);
 
     const handleEventDelete = (): void => {
         if (!isActionButtonDisable) {
@@ -180,8 +155,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
                 <DataGridV1<Event>
                     hideBorder
                     columns={eventColumns}
-                    data={eventsData as Event[]}
-                    expandColumnKey="name"
+                    data={props.events as Event[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchDataKeys={searchDataKeys}

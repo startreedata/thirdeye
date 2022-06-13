@@ -195,7 +195,7 @@
         "datasets-auto-onboard": "Auto onboard all datasets",
         "enter-name-of-event": "Enter name of event",
         "enter-a-type-event": "Enter type for event",
-        "dimensions": "Dimensions"
+        "metadata": "Metadata"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

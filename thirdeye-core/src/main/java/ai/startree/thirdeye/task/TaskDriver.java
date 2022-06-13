@@ -10,11 +10,9 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
-import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -22,7 +20,6 @@ import com.google.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +53,6 @@ public class TaskDriver {
     checkArgument(workerId >= 0,
         "worker id is expected to be a non negative integer");
 
-    registerMetrics();
-
     taskExecutorService = Executors.newFixedThreadPool(
         config.getMaxParallelTasks(),
         new ThreadFactoryBuilder()
@@ -74,41 +69,6 @@ public class TaskDriver {
     taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeServerConfiguration);
 
     this.taskRunnerFactory = taskRunnerFactory;
-  }
-
-  private void registerMetrics() {
-    final long timeout = config.isRandomWorkerIdEnabled() ? 15 : 1;
-    final TimeUnit unit = config.isRandomWorkerIdEnabled() ? TimeUnit.SECONDS : TimeUnit.MINUTES;
-    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(timeout, unit) {
-      @Override
-      protected Long loadValue() {
-        return taskManager.count();
-      }
-    });
-    metricRegistry.register("taskCount_RUNNING", new CachedGauge<Long>(timeout, unit) {
-      @Override
-      protected Long loadValue() {
-        return countByStatus(TaskStatus.RUNNING);
-      }
-    });
-    metricRegistry.register("taskCount_FAILED", new CachedGauge<Long>(timeout, unit) {
-      @Override
-      protected Long loadValue() {
-        return countByStatus(TaskStatus.FAILED);
-      }
-    });
-    metricRegistry.register("taskCount_COMPLETED", new CachedGauge<Long>(timeout, unit) {
-      @Override
-      protected Long loadValue() {
-        return countByStatus(TaskStatus.COMPLETED);
-      }
-    });
-    metricRegistry.register("taskCount_WAITING", new CachedGauge<Long>(timeout, unit) {
-      @Override
-      protected Long loadValue() {
-        return countByStatus(TaskStatus.WAITING);
-      }
-    });
   }
 
   public void start() {
@@ -152,11 +112,6 @@ public class TaskDriver {
             "FAILED status updated by the worker at start");
       }
     }
-  }
-
-
-  private Long countByStatus(final TaskStatus status) {
-    return taskManager.count(Predicate.EQ("status", status.toString()));
   }
 
   public void shutdown() {

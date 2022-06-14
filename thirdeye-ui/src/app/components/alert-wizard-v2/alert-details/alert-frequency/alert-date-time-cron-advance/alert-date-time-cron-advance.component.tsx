@@ -1,4 +1,4 @@
-import { Grid, InputLabel, TextField, Typography } from "@material-ui/core";
+import { FormHelperText, Grid, InputLabel, TextField } from "@material-ui/core";
 import cronValidator from "cron-validate";
 import cronstrue from "cronstrue";
 import React, { FunctionComponent, useState } from "react";
@@ -48,17 +48,25 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                 />
 
                 {cronIsValidateResults.isValid() && (
-                    <Typography variant="caption">
+                    <FormHelperText className={classes.label}>
                         {cronstrue.toString(currentCron, {
                             verbose: true,
                         })}
-                    </Typography>
+                    </FormHelperText>
                 )}
 
                 {/* If there are errors, render them */}
                 {!cronIsValidateResults.isValid() &&
                     cronIsValidateResults.getError().map((item, idx) => {
-                        return <div key={`${idx}`}>{item}</div>;
+                        return (
+                            <FormHelperText
+                                error
+                                className={classes.label}
+                                key={`${idx}`}
+                            >
+                                {item}
+                            </FormHelperText>
+                        );
                     })}
             </Grid>
         </Grid>

@@ -38,7 +38,6 @@ spec:
         {{- toYaml .Values.scheduler.affinity | nindent 8 }}
       tolerations:
         {{- toYaml .Values.scheduler.tolerations | nindent 8 }}
-      {{- if .Values.tls.enabled }}
       initContainers:
       - name: init-keystore
         image: eclipse-temurin:17-jdk
@@ -47,19 +46,27 @@ spec:
         - /bin/sh
         - -c
         - >
+          {{- if .Values.scheduler.tls.enabled }}
           echo "importing internal tls key" &&
           openssl pkcs12 -export -name internalTls -in /opt/thirdeye/server/tls-internal/tls.crt -inkey /opt/thirdeye/server/tls-internal/tls.key -out /opt/thirdeye/server/keystore-internal.p12 -password pass:changeit &&
           keytool -noprompt  -importkeystore -alias internalTls -srckeystore /opt/thirdeye/server/keystore-internal.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore &&
+          {{- end }}
           echo "importing ca cert" &&
-          keytool -noprompt  -import -alias startreePlatformCa -srcstorepass changeit -deststorepass changeit -keystore /opt/java/openjdk/lib/security/cacerts -file /opt/thirdeye/server/tls-internal/ca.crt &&
-          cp /opt/java/openjdk/lib/security/cacerts /opt/thirdeye/server/keystore/truststore
+          if [ -e /opt/thirdeye/server/tls-internal/ca.crt ];
+          then 
+              keytool -noprompt  -import -alias startreePlatformCa -srcstorepass changeit -deststorepass changeit -keystore /opt/java/openjdk/lib/security/cacerts -file /opt/thirdeye/server/tls-internal/ca.crt
+          fi &&
+          cp /opt/java/openjdk/lib/security/cacerts /opt/thirdeye/server/truststore/truststore
         volumeMounts:
         - name: tls-internal
           mountPath: /opt/thirdeye/server/tls-internal
           readOnly: true
+        {{- if .Values.scheduler.tls.enabled }}
         - name: keystore
           mountPath: /opt/thirdeye/server/keystore
-      {{- end }}
+        {{- end }}
+        - name: truststore
+          mountPath: /opt/thirdeye/server/truststore
       containers:
       - name: scheduler
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -76,14 +83,14 @@ spec:
                 key: {{ $name }}
           {{- end }}
           {{- end }}
-        {{- if .Values.tls.enabled }}
           - name: JAVA_OPTS
             value: >
+              {{- if .Values.scheduler.tls.enabled }}
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
               -Djavax.net.ssl.keyStorePassword=changeit
-              -Djavax.net.ssl.trustStore=/opt/thirdeye/server/keystore/truststore
+              {{- end }}
+              -Djavax.net.ssl.trustStore=/opt/thirdeye/server/truststore/truststore
               -Djavax.net.ssl.trustStorePassword=changeit
-        {{- end }}
         ports:
           - containerPort: {{ .Values.scheduler.port }}
             protocol: TCP
@@ -100,11 +107,14 @@ spec:
             subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
-          {{- if .Values.tls.enabled }}
+          {{- if .Values.scheduler.tls.enabled }}
           - name: keystore
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
           {{- end }}
+          - name: truststore
+            mountPath: /opt/thirdeye/server/truststore
+            readOnly: true
         resources:
           {{- toYaml .Values.scheduler.resources | nindent 12 }}
       restartPolicy: Always
@@ -112,10 +122,13 @@ spec:
         - name: thirdeye-config
           configMap:
             name: thirdeye-scheduler
-        {{- if .Values.tls.enabled }}
         - name: tls-internal
           secret:
             secretName: {{ include "thirdeye.coordinator.fullname" . }}-internal-tls
+            optional: true
+        - name: truststore
+          emptyDir: {}
+        {{- if .Values.scheduler.tls.enabled }}
         - name: keystore
           emptyDir: {}
         {{- end }}

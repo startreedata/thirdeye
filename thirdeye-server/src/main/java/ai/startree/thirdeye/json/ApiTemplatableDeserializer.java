@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 
@@ -51,8 +52,18 @@ public class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
     }
 
     // case value is of type T in Templatable<T>
-    final Templatable<?> templatable = new Templatable<>();
-    templatable.setValue(context.readValue(jsonParser, valueType));
-    return templatable;
+    try {
+      final Templatable<?> templatable = new Templatable<>();
+      templatable.setValue(context.readValue(jsonParser, valueType));
+      return templatable;
+    } catch (MismatchedInputException e) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid value: %s.Templatable field is of type %s. "
+                  + "Value should be in templated format \"${VAR_NAME}\" or in the object field map format {\"key\": \"value\"}",
+              textValue,
+              valueType
+          ), e);
+    }
   }
 }

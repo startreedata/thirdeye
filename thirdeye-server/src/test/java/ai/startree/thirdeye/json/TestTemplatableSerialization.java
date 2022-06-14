@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +39,15 @@ public class TestTemplatableSerialization {
     final ObjectWithTemplatable expected = new ObjectWithTemplatable().setListOfStrings(templatable);
 
     assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testTemplatableDeserizalizationOfStringVariableThrowsWhenStringIsInvalid() {
+    final String variableProperty = "NOT_VALID${list}";
+    final String jsonString = String.format("{\"listOfStrings\":\"%s\"}", variableProperty);
+
+    assertThatThrownBy(() -> OBJECT_MAPPER.readValue(jsonString, ObjectWithTemplatable.class)).isInstanceOf(
+        JsonMappingException.class);
   }
 
   @Test

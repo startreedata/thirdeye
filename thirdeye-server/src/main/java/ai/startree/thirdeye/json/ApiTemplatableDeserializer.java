@@ -1,5 +1,7 @@
 package ai.startree.thirdeye.json;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +30,8 @@ public class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
   @Override
   public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
       throws JsonMappingException {
+    checkArgument(property != null,
+        "Cannot deserialize Templatable object without its generic type. Attempt to use Templatable as root object?");
     final JavaType wrapperType = property.getType();
     final JavaType valueType = wrapperType.containedType(0);
     final ApiTemplatableDeserializer deserializer = new ApiTemplatableDeserializer();

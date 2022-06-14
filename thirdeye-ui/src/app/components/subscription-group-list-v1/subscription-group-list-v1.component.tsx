@@ -97,7 +97,7 @@ export const SubscriptionGroupListV1: FunctionComponent<
         {
             key: "cron",
             dataKey: "cron",
-            header: t("label.cron"),
+            header: t("label.schedule"),
             minWidth: 0,
             flex: 1,
         },

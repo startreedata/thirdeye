@@ -4,6 +4,7 @@ import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     HelpLinkIconV1,
@@ -76,6 +77,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
     ] = useState(DEFAULT_ALERT_TEMPLATE_ID);
     const [wizard, setWizard] = useState("");
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         initSubs();
@@ -87,6 +89,11 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
             refreshAlertEvaluation();
         }
     }, []);
+
+    useEffect(() => {
+        // Refresh evaluation on startTime or endTime change
+        refreshAlertEvaluation();
+    }, [searchParams]);
 
     useEffect(() => {
         if (currentWizardStep !== AlertWizardStep.SUBSCRIPTION_GROUPS) {

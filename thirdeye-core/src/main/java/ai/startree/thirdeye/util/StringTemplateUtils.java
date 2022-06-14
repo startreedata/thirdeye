@@ -13,7 +13,10 @@
  */
 package ai.startree.thirdeye.util;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import groovy.text.SimpleTemplateEngine;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -26,7 +29,6 @@ import java.util.TimeZone;
 
 public class StringTemplateUtils {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final SimpleTemplateEngine GROOVY_TEMPLATE_ENGINE = new SimpleTemplateEngine();
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -60,7 +62,11 @@ public class StringTemplateUtils {
   public static <T> T applyContext(final T template,
       final Map<String, Object> valuesMap)
       throws IOException, ClassNotFoundException {
-    final String jsonString = OBJECT_MAPPER.writeValueAsString(template);
-    return (T) OBJECT_MAPPER.readValue(renderTemplate(jsonString, valuesMap), template.getClass());
+
+    final Module module = new SimpleModule().addSerializer(Templatable.class, new TemplateEngineTemplatableSerializer(valuesMap));
+    final ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
+
+    final String jsonString = objectMapper.writeValueAsString(template);
+    return (T) objectMapper.readValue(renderTemplate(jsonString, valuesMap), template.getClass());
   }
 }

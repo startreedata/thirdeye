@@ -36,6 +36,8 @@ import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
+import ai.startree.thirdeye.json.ApiTemplatableDeserializer;
+import ai.startree.thirdeye.json.ApiTemplatableSerializer;
 import ai.startree.thirdeye.task.TaskDriver;
 import ai.startree.thirdeye.tracking.RequestStatisticsLogger;
 import com.google.inject.Guice;
@@ -98,6 +100,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         return configuration.getSwaggerBundleConfiguration();
       }
     });
+    bootstrap.getObjectMapper().registerModule(ApiTemplatableDeserializer.MODULE);
+    bootstrap.getObjectMapper().registerModule(ApiTemplatableSerializer.MODULE);
   }
 
   @Override

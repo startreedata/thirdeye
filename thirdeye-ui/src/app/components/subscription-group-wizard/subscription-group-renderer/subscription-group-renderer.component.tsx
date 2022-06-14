@@ -29,7 +29,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<
             {/* Schedule(or Cron) */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">
-                    <strong>{t("label.cron")}</strong>
+                    <strong>{t("label.schedule")}</strong>
                 </Typography>
             </Grid>
 

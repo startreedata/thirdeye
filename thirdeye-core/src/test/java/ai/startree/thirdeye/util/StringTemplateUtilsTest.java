@@ -14,9 +14,14 @@
 package ai.startree.thirdeye.util;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.testng.annotations.Test;
 
@@ -29,5 +34,118 @@ public class StringTemplateUtilsTest {
         new HashMap<>(Map.of("k", "${k1}")),
         values);
     assertThat(map1).isEqualTo(Map.of("k", "v1"));
+  }
+
+  @Test
+  public void testTemplatableFieldReplacement() throws IOException, ClassNotFoundException {
+    // check that the replacement is done correctly with Templatable<T>, for different Ts
+    final String datasetKey = "datasetDto";
+    final String mapKey = "map";
+    final String listKey = "list";
+
+    final ObjectWithTemplatableFields input = new ObjectWithTemplatableFields();
+    input.templatableDto = new Templatable<DatasetConfigDTO>().setTemplatedValue(
+        templateVariableOf(datasetKey));
+    input.templatableMap = new Templatable<Map<String, String>>().setTemplatedValue(
+        templateVariableOf(mapKey));
+    input.templatableList = new Templatable<List<String>>().setTemplatedValue(
+        templateVariableOf(listKey));
+
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
+    final Map<String, String> map = Map.of("test", "test2");
+    final List<String> list = List.of("test");
+    final Map<String, Object> properties = Map.of(datasetKey,
+        datasetConfigDTO,
+        mapKey,
+        map,
+        listKey, list);
+    final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(
+        input,
+        properties);
+
+    assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableDto.getTemplatedValue()).isNull();
+
+    assertThat(output.templatableMap.getValue()).isEqualTo(map);
+    assertThat(output.templatableMap.getTemplatedValue()).isNull();
+
+    assertThat(output.templatableList.getValue()).isEqualTo(list);
+    assertThat(output.templatableList.getTemplatedValue()).isNull();
+  }
+
+  @Test
+  public void testTemplatableReplacementValueAlreadySet()
+      throws IOException, ClassNotFoundException {
+    // check that the replacement does not break when a Templatable<T> has its value NOT templated
+    final String datasetKey = "datasetDto";
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
+
+    final ObjectWithTemplatableFields input = new ObjectWithTemplatableFields();
+    input.templatableDto = new Templatable<DatasetConfigDTO>().setValue(datasetConfigDTO);
+
+    final Map<String, Object> properties = Map.of(datasetKey, datasetConfigDTO);
+    final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(
+        input,
+        properties);
+
+    assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableDto.getTemplatedValue()).isNull();
+  }
+
+  @Test
+  public void testTemplatableReplacementErrorWhenKeyIsMissingInProperty() {
+    final String datasetKey = "datasetDto";
+
+    final ObjectWithTemplatableFields input = new ObjectWithTemplatableFields();
+    input.templatableDto = new Templatable<DatasetConfigDTO>().setTemplatedValue(templateVariableOf(
+        datasetKey));
+
+    // datasetKey is missing
+    final Map<String, Object> properties = Map.of();
+
+    assertThatThrownBy(() -> StringTemplateUtils.applyContext(input, properties)).isInstanceOf(
+        JsonMappingException.class);
+  }
+
+  private static String templateVariableOf(String key) {
+    return "${" + key + "}";
+  }
+
+  private static class ObjectWithTemplatableFields {
+    // getter and setters are used by jackson
+
+    private Templatable<List<String>> templatableList;
+    private Templatable<Map<String, String>> templatableMap;
+    private Templatable<DatasetConfigDTO> templatableDto;
+
+    public Templatable<List<String>> getTemplatableList() {
+      return templatableList;
+    }
+
+    public ObjectWithTemplatableFields setTemplatableList(
+        final Templatable<List<String>> templatableList) {
+      this.templatableList = templatableList;
+      return this;
+    }
+
+    public Templatable<Map<String, String>> getTemplatableMap() {
+      return templatableMap;
+    }
+
+    public ObjectWithTemplatableFields setTemplatableMap(
+        final Templatable<Map<String, String>> templatableMap) {
+      this.templatableMap = templatableMap;
+      return this;
+    }
+
+    public Templatable<DatasetConfigDTO> getTemplatableDto() {
+      return templatableDto;
+    }
+
+    public ObjectWithTemplatableFields setTemplatableDto(
+        final Templatable<DatasetConfigDTO> templatableDto) {
+      this.templatableDto = templatableDto;
+      return this;
+    }
   }
 }

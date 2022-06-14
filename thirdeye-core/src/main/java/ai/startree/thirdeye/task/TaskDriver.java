@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.task;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -49,7 +50,7 @@ public class TaskDriver {
     this.taskManager = taskManager;
     this.metricRegistry = metricRegistry;
     config = thirdEyeServerConfiguration.getTaskDriverConfiguration();
-    workerId = getWorkerId(config);
+    workerId = fetchWorkerId(config);
 
     taskExecutorService = Executors.newFixedThreadPool(
         config.getMaxParallelTasks(),
@@ -69,16 +70,22 @@ public class TaskDriver {
     this.taskRunnerFactory = taskRunnerFactory;
   }
 
-  private Long getWorkerId(final TaskDriverConfiguration config) {
+  private Long fetchWorkerId(final TaskDriverConfiguration config) {
     if(config.isRandomWorkerIdEnabled()) {
-      config.setId(Math.abs(new Random().nextLong()));
+      checkArgument(isNull(config.getId()),
+          "worker id should be null when randomWorkerIdEnabled is true");
+      return Math.abs(new Random().nextLong());
     } else {
       requireNonNull(config.getId(),
           "worker id must be provided and unique for every worker");
       checkArgument(config.getId() >= 0,
           "worker id is expected to be a non negative integer");
+      return config.getId();
     }
-    return config.getId();
+  }
+
+  public Long getWorkerId() {
+    return this.workerId;
   }
 
   public void start() {

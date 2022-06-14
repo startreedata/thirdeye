@@ -68,10 +68,10 @@ swagger:
 taskDriver:
   enabled: true
   # When enabled generates a random id to achieve unique worker id in multi worker setup
-  randomWorkerIdEnabled: true
+  randomWorkerIdEnabled: false
   # must be a non-negative integer unique per instance/worker
   # must be omitted when `randomWorkerIdEnabled` is set `true`
-#  id: 0
+  id: 0
 
 time:
   timezone: UTC

@@ -197,7 +197,8 @@
         "cron": "Cron",
         "alert-frequency": "Alert Frequency",
         "alert-details": "Alert Details",
-        "optional": "Optional"
+        "optional": "Optional",
+        "name-of-your-alert": "Name of your alert"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -251,6 +252,7 @@
         "event-end-time-required": "End time is required",
         "preview-anomalies-created-below": "Preview the anomalies created for configuration below",
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
-        "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system"
+        "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
+        "cannot-be-empty": "Cannot be empty"
     }
 }

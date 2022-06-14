@@ -9,7 +9,7 @@ server:
 
   applicationConnectors:
     - type: http
-      port: 8085
+      port: 8080
       idleTimeout: 620s
 #    - type: https
 #      port: 443

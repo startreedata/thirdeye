@@ -41,3 +41,8 @@ swagger:
 
   # package to scan for jersey resources
   resourcePackage: ai.startree.thirdeye.resources
+
+# Start the Task Driver. This module runs the detection and notification tasks
+taskDriver:
+  enabled: false
+  id: 0

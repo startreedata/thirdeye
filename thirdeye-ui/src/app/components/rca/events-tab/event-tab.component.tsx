@@ -1,5 +1,5 @@
 import { Box, CardContent } from "@material-ui/core";
-import { get, isEmpty, isNil, map, toString } from "lodash";
+import { isEmpty, map } from "lodash";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -21,7 +21,10 @@ import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { useGetEventsForAnomaly } from "../../../rest/event/event.actions";
-import { getSearchDataKeysForEvents } from "../../../utils/events/events.util";
+import {
+    getSearchDataKeysForEvents,
+    handleEventsSearch,
+} from "../../../utils/events/events.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EventsTabProps } from "./event-tab.interfaces";
 
@@ -54,59 +57,10 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     );
 
     useEffect(() => {
-        handleSearch(searchValue);
+        setFilteredEvents(
+            handleEventsSearch(searchValue, events, searchDataKeys)
+        );
     }, [searchValue, events, searchDataKeys]);
-
-    const handleSearch = useCallback(
-        (searchValue: string) => {
-            let updatedEvents: Event[];
-            const filteredRowKeyValues = new Set();
-            if (!events) {
-                updatedEvents = [];
-            } else if (!searchValue) {
-                updatedEvents = [...events];
-            } else {
-                updatedEvents = [];
-                for (const eachSearchDataKey of searchDataKeys) {
-                    for (const eachData of events) {
-                        const rowKeyValue = get(eachData, "id");
-                        if (filteredRowKeyValues.has(rowKeyValue)) {
-                            // Row already filtered
-                            continue;
-                        }
-
-                        // Get data at search key
-                        const searchKeyValue = get(eachData, eachSearchDataKey);
-                        if (
-                            isNil(searchKeyValue) ||
-                            (typeof searchKeyValue !== "string" &&
-                                typeof searchKeyValue !== "number" &&
-                                typeof searchKeyValue !== "boolean" &&
-                                !Array.isArray(searchKeyValue))
-                        ) {
-                            // Skip searching
-                            continue;
-                        }
-
-                        if (
-                            toString(searchKeyValue)
-                                .toLocaleLowerCase()
-                                .includes(
-                                    searchValue.toLocaleLowerCase().trim()
-                                )
-                        ) {
-                            // Match found
-                            filteredRowKeyValues.add(rowKeyValue);
-                            updatedEvents.push(eachData);
-                        }
-                    }
-                }
-            }
-
-            setFilteredEvents(updatedEvents);
-        },
-        [events, searchDataKeys]
-    );
 
     const onSelectionChange = (
         selectedEvent: DataGridSelectionModelV1<Event>

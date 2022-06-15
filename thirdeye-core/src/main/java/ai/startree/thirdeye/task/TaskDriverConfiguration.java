@@ -5,8 +5,7 @@
 
 package ai.startree.thirdeye.task;
 
-import java.time.Duration;
-import java.util.Random;
+import java.time.Duration;  
 
 public class TaskDriverConfiguration {
 
@@ -26,20 +25,7 @@ public class TaskDriverConfiguration {
   }
 
   public TaskDriverConfiguration setId(final Long id) {
-    if(isRandomWorkerIdEnabled()){
-      this.id = Math.abs(new Random().nextLong());
-    } else {
-      this.id = id;
-    }
-    return this;
-  }
-
-  public boolean isRandomWorkerIdEnabled() {
-    return randomWorkerIdEnabled;
-  }
-
-  public TaskDriverConfiguration setRandomWorkerIdEnabled(final boolean randomWorkerIdEnabled) {
-    this.randomWorkerIdEnabled = randomWorkerIdEnabled;
+    this.id = id;
     return this;
   }
 

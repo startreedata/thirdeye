@@ -112,4 +112,7 @@ spec:
             optional: true
         - name: truststore
           emptyDir: {}
+        {{- end }}
+  strategy:
+    {{- toYaml .Values.worker.strategy | nindent 4 }}
 {{ end }}

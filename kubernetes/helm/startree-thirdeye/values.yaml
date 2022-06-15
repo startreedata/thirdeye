@@ -38,6 +38,11 @@ coordinator:
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
 #  tlsSecretName: tls-secret-name
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
 scheduler:
   enabled: true
@@ -52,6 +57,10 @@ scheduler:
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
 #  truststoreSecretName: truststore-name
+  tls:
+    enabled: false
+  strategy:
+    type: Recreate
 
 worker:
   enabled: true
@@ -66,6 +75,13 @@ worker:
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
 #  truststoreSecretName: truststore-name
+  tls:
+    enabled: false
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
   randomWorkerIdEnabled: false
 
 persistence:

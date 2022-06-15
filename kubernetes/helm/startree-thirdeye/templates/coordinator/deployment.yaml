@@ -144,3 +144,5 @@ spec:
           secret:
             secretName: thirdeye-secrets
         {{- end }}
+  strategy:
+    {{- toYaml .Values.coordinator.strategy | nindent 4 }}

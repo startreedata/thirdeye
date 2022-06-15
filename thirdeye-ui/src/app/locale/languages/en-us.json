@@ -253,6 +253,6 @@
         "preview-anomalies-created-below": "Preview the anomalies created for configuration below",
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
         "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
-        "cannot-be-empty": "Cannot be empty"
+        "please-enter-valid-name": "Please enter valid name"
     }
 }

@@ -74,7 +74,7 @@ function AlertDetails<NewOrExistingAlert extends EditableAlert | Alert>({
                         />
                         {nameHasError && (
                             <FormHelperText error>
-                                {t("message.cannot-be-empty")}
+                                {t("message.please-enter-valid-name")}
                             </FormHelperText>
                         )}
                     </Grid>

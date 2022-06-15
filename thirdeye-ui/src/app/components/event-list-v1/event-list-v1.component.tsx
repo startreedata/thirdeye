@@ -19,6 +19,7 @@ import { formatDateAndTimeV1 } from "../../platform/utils";
 import { Event } from "../../rest/dto/event.interfaces";
 import { getSearchDataKeysForEvents } from "../../utils/events/events.util";
 import { getEventsViewPath } from "../../utils/routes/routes.util";
+import { TimeRangeButtonWithContext } from "../time-range/time-range-button-with-context/time-range-button.component";
 import { EventListV1Props } from "./event-list-v1.interfaces";
 
 export const EventListV1: FunctionComponent<EventListV1Props> = (
@@ -151,8 +152,13 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
                         entity: t("label.event"),
                     })}
                     toolbarComponent={
-                        <Grid container alignItems="center" spacing={2}>
-                            <Grid>
+                        <Grid
+                            container
+                            alignItems="center"
+                            justifyContent="space-between"
+                            spacing={2}
+                        >
+                            <Grid item>
                                 <Button
                                     disabled={isActionButtonDisable}
                                     variant="contained"
@@ -160,6 +166,9 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
                                 >
                                     {t("label.delete")}
                                 </Button>
+                            </Grid>
+                            <Grid item>
+                                <TimeRangeButtonWithContext />
                             </Grid>
                         </Grid>
                     }

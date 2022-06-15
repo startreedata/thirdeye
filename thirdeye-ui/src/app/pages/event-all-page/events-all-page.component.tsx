@@ -1,9 +1,11 @@
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { EventListV1 } from "../../components/event-list-v1/event-list-v1.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -24,9 +26,19 @@ export const EventsAllPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
     const { getEvents, status, errorMessages, events } = useGetEvents();
 
+    const [searchParams] = useSearchParams();
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+
     useEffect(() => {
-        getEvents();
-    }, []);
+        // Refetch events on update of start / end time
+        getEvents({ startTime, endTime });
+    }, [startTime, endTime]);
 
     useEffect(() => {
         if (status === ActionStatus.Error) {

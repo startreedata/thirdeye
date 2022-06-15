@@ -55,6 +55,7 @@ export const AppRouteRelative = {
     EVENTS_ALL: "all",
     EVENTS_CREATE: "create",
     EVENTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
+    EVENTS_ALL_RANGE: "range",
 };
 
 export const AppRoute = {
@@ -111,6 +112,8 @@ export const AppRoute = {
     EVENTS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}`,
     EVENTS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_CREATE}`,
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
+    EVENTS_ALL_RANGE: `/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}/${AppRouteRelative.EVENTS_ALL_RANGE}`,
+    EVENTS: `/${AppRouteRelative.EVENTS}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -319,10 +322,6 @@ export const getMetricsUpdatePath = (id: number): string => {
     return path;
 };
 
-export const getEventsAllPath = (): string => {
-    return AppRoute.EVENTS_ALL;
-};
-
 export const getEventsViewPath = (id: number): string => {
     let path: string = AppRoute.EVENTS_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
@@ -332,6 +331,30 @@ export const getEventsViewPath = (id: number): string => {
 
 export const getEventsCreatePath = (): string => {
     return AppRoute.EVENTS_CREATE;
+};
+
+export const getEventsPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.EVENTS);
+};
+
+export const getEventsAllPath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.EVENTS_ALL}?${urlQuery.toString()}`;
+};
+
+export const getEventsAllRangePath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.EVENTS_ALL_RANGE}?${urlQuery.toString()}`;
 };
 
 export const getRootCauseAnalysisForAnomalyPath = (id: number): string => {

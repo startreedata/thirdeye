@@ -43,6 +43,15 @@ public class TaskDriverConfiguration {
     return this;
   }
 
+  public boolean isRandomWorkerIdEnabled() {
+    return randomWorkerIdEnabled;
+  }
+
+  public TaskDriverConfiguration setRandomWorkerIdEnabled(final boolean randomWorkerIdEnabled) {
+    this.randomWorkerIdEnabled = randomWorkerIdEnabled;
+    return this;
+  }
+
   public boolean isEnabled() {
     return enabled;
   }

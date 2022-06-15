@@ -6,6 +6,7 @@
 package ai.startree.thirdeye.task;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -20,6 +21,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -51,10 +53,7 @@ public class TaskDriver {
     this.taskManager = taskManager;
     this.metricRegistry = metricRegistry;
     config = thirdEyeServerConfiguration.getTaskDriverConfiguration();
-    workerId = requireNonNull(config.getId(),
-        "worker id must be provided and unique for every worker");
-    checkArgument(workerId >= 0,
-        "worker id is expected to be a non negative integer");
+    workerId = fetchWorkerId(config);
 
     registerMetrics();
 
@@ -109,6 +108,24 @@ public class TaskDriver {
         return countByStatus(TaskStatus.WAITING);
       }
     });
+  }
+
+  private Long fetchWorkerId(final TaskDriverConfiguration config) {
+    if(config.isRandomWorkerIdEnabled()) {
+      checkArgument(isNull(config.getId()),
+          "worker id should be null when randomWorkerIdEnabled is true");
+      return Math.abs(new Random().nextLong());
+    } else {
+      requireNonNull(config.getId(),
+          "worker id must be provided and unique for every worker");
+      checkArgument(config.getId() >= 0,
+          "worker id is expected to be a non negative integer");
+      return config.getId();
+    }
+  }
+
+  public Long getWorkerId() {
+    return this.workerId;
   }
 
   public void start() {

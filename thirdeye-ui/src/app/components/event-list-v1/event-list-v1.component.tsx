@@ -1,8 +1,10 @@
-import { Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link } from "@material-ui/core";
+import { flattenDeep, map, uniq } from "lodash";
 import React, {
     FunctionComponent,
     ReactNode,
     useCallback,
+    useMemo,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -66,6 +68,22 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
         []
     );
 
+    const metadataRenderer = useCallback(
+        (_: Record<string, unknown>, data: Event): ReactNode => (
+            <Box marginY={0.5}>
+                {map(
+                    data.targetDimensionMap,
+                    (value: string[], key: string) => (
+                        <div key={key}>
+                            {key}: {value.join(", ")}
+                        </div>
+                    )
+                )}
+            </Box>
+        ),
+        []
+    );
+
     const eventColumns = [
         {
             key: "name",
@@ -79,7 +97,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             key: "type",
             dataKey: "type",
             header: t("label.type"),
-            minWidth: 300,
+            minWidth: 150,
             sortable: true,
         },
         {
@@ -98,7 +116,38 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             sortable: true,
             customCellRenderer: endTimeRenderer,
         },
+        {
+            key: "targetDimensionMap",
+            dataKey: "targetDimensionMap",
+            header: t("label.metadata"),
+            minWidth: 300,
+            customCellRenderer: metadataRenderer,
+        },
     ];
+
+    // To allow search over custom keys from the data
+    const searchDataKeys = useMemo(() => {
+        return props.events
+            ? [
+                  "name",
+                  "type",
+                  "startTime",
+                  "endTime",
+                  // Extract keys from targetDimensionMap to allow search over map
+                  ...uniq(
+                      flattenDeep(
+                          props.events.map((event) =>
+                              map(
+                                  event.targetDimensionMap,
+                                  (_value: string[], key: string) =>
+                                      `targetDimensionMap.${key}`
+                              )
+                          )
+                      )
+                  ),
+              ]
+            : [];
+    }, [props.events]);
 
     return (
         <Grid item xs={12}>
@@ -109,6 +158,7 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
                     data={props.events as Event[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
+                    searchDataKeys={searchDataKeys}
                     searchPlaceholder={t("label.search-entity", {
                         entity: t("label.event"),
                     })}

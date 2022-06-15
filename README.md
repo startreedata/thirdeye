@@ -122,6 +122,9 @@ docker run \
 
 Please use Intellij and import ThirdEye as a maven project. Please import the code style from the file `intellij-code-style.xml`.
 
+License headers will be checked during build time to ensure license are up-to-date.  
+To add/update license headers to the files run `mvn license:format`
+
 ### Running ThirdEye Coordinator in debug mode
 After setting up IntelliJ, navigate to `ai.startree.thirdeye.ThirdEyeServer` class. Press the `play ▶️` icon
 and choose debug. This should run the application. However, it would need the right args to start the server.

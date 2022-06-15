@@ -11,6 +11,7 @@ import React, {
     FunctionComponent,
     useCallback,
     useEffect,
+    useMemo,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -41,10 +42,9 @@ import {
     ZOOM_END_KEY,
     ZOOM_START_KEY,
 } from "./anomaly-time-series-card.utils";
-import { FiltersSetTable } from "./filters-set-table/filters-set-table.component";
+import { RCAChartLegend } from "./rca-chart-legend/rca-chart-legend.component";
 
 const CHART_HEIGHT_KEY = "chartHeight";
-const SHOW_FILTER_TABLE = "showFilterTable";
 const CHART_SIZE_OPTIONS = [
     ["S", 500],
     ["M", 800],
@@ -59,6 +59,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     onRemoveBtnClick,
     events,
     isLoading,
+    onEventSelectionChange,
 }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
@@ -74,18 +75,18 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const [filteredAlertEvaluation, setFilteredAlertEvaluation] = useState<
         [AlertEvaluation, AnomalyFilterOption[]][]
     >([]);
-    const [startTsStr, setStartTsStr] = useState<string | null>(
-        searchParams.get(TimeRangeQueryStringKey.START_TIME)
-    );
-    const [endTsStr, setEndTsStr] = useState<string | null>(
-        searchParams.get(TimeRangeQueryStringKey.END_TIME)
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
     );
     const [chartHeight, setChartHeight] = useState<number>(
         searchParams.get(CHART_HEIGHT_KEY) !== null
             ? Number(searchParams.get(CHART_HEIGHT_KEY))
             : 500
     );
-    const [showFilterSetTable, setShowFilterSetTable] = useState<boolean>(true);
 
     const [initialZoom, setInitialZoom] = useState<ZoomDomain | undefined>(
         determineInitialZoom(searchParams)
@@ -94,16 +95,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const fetchAlertEvaluation = (): void => {
         setAlertEvaluation(null);
 
-        if (!anomaly || !anomaly.alert || !startTsStr || !endTsStr) {
+        if (!anomaly || !anomaly.alert || !startTime || !endTime) {
             return;
         }
 
         getEvaluation(
-            createAlertEvaluation(
-                anomaly.alert.id,
-                Number(startTsStr),
-                Number(endTsStr)
-            )
+            createAlertEvaluation(anomaly.alert.id, startTime, endTime)
         ).then(
             (fetchedEvaluation) =>
                 fetchedEvaluation && setAlertEvaluation(fetchedEvaluation)
@@ -113,7 +110,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const fetchFilteredAlertEvaluations = (): void => {
         setFilteredAlertEvaluation([]);
 
-        if (!anomaly || !anomaly.alert || !startTsStr || !endTsStr) {
+        if (!anomaly || !anomaly.alert || !startTime || !endTime) {
             return;
         }
 
@@ -121,11 +118,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             const filters = filterSet.map(concatKeyValueWithEqual);
 
             return getAlertEvaluation(
-                createAlertEvaluation(
-                    anomaly.alert.id,
-                    Number(startTsStr),
-                    Number(endTsStr)
-                ),
+                createAlertEvaluation(anomaly.alert.id, startTime, endTime),
                 filters
             );
         });
@@ -140,26 +133,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     };
 
     useEffect(() => {
-        /**
-         * Ensure the chart data only refreshes when the start and end from the
-         * query params change
-         */
-        setStartTsStr(searchParams.get(TimeRangeQueryStringKey.START_TIME));
-        setEndTsStr(searchParams.get(TimeRangeQueryStringKey.END_TIME));
-
-        if (searchParams.has(SHOW_FILTER_TABLE)) {
-            setShowFilterSetTable(
-                searchParams.get(SHOW_FILTER_TABLE) === "true"
-            );
-        } else {
-            // If missing from query params, assume true
-            setShowFilterSetTable(true);
-        }
-    }, [searchParams]);
-
-    useEffect(() => {
         fetchAlertEvaluation();
-    }, [anomaly, startTsStr, endTsStr]);
+    }, [anomaly, startTime, endTime]);
 
     useEffect(() => {
         fetchFilteredAlertEvaluations();
@@ -183,15 +158,6 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const handleChartHeightChange = (height: number): void => {
         setChartHeight(height);
         searchParams.set(CHART_HEIGHT_KEY, height.toString());
-        setSearchParams(searchParams);
-    };
-
-    const handleShowHideFiltersTable = (status: boolean): void => {
-        if (status) {
-            searchParams.delete(SHOW_FILTER_TABLE);
-        } else {
-            searchParams.set(SHOW_FILTER_TABLE, "false");
-        }
         setSearchParams(searchParams);
     };
 
@@ -231,7 +197,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     if (isLoading) {
         return (
             <PageContentsCardV1>
-                <SkeletonV1 preventDelay height={400} variant="rect" />
+                <SkeletonV1 height={400} variant="rect" />
             </PageContentsCardV1>
         );
     }
@@ -265,44 +231,11 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                             </ButtonGroup>
                         </TooltipV1>
                     </Grid>
-                    {timeSeriesFiltersSet.length > 0 && (
-                        <Grid item>
-                            <TooltipV1
-                                placement="top"
-                                title="Show advanced options"
-                            >
-                                <>
-                                    {showFilterSetTable && (
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() =>
-                                                handleShowHideFiltersTable(
-                                                    false
-                                                )
-                                            }
-                                        >
-                                            {t("label.hide-filters-table")}
-                                        </Button>
-                                    )}
-                                    {!showFilterSetTable && (
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() =>
-                                                handleShowHideFiltersTable(true)
-                                            }
-                                        >
-                                            {t("label.show-filters-table")}
-                                        </Button>
-                                    )}
-                                </>
-                            </TooltipV1>
-                        </Grid>
-                    )}
                 </Grid>
             </CardContent>
             {getEvaluationRequestStatus === ActionStatus.Working && (
                 <CardContent>
-                    <SkeletonV1 preventDelay height={350} variant="rect" />
+                    <SkeletonV1 height={350} variant="rect" />
                 </CardContent>
             )}
             {getEvaluationRequestStatus === ActionStatus.Error && (
@@ -314,8 +247,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             )}
             {anomaly &&
                 getEvaluationRequestStatus === ActionStatus.Done &&
-                alertEvaluation !== null &&
-                (timeSeriesFiltersSet.length === 0 || !showFilterSetTable) && (
+                alertEvaluation !== null && (
                     <CardContent>
                         <TimeSeriesChart
                             events={events}
@@ -326,43 +258,21 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                                 filteredAlertEvaluation,
                                 t
                             )}
+                            LegendComponent={(props) => (
+                                <RCAChartLegend
+                                    {...props}
+                                    timeSeriesFiltersSet={timeSeriesFiltersSet}
+                                    onEventSelectionChange={
+                                        onEventSelectionChange
+                                    }
+                                    onRemoveBtnClick={onRemoveBtnClick}
+                                />
+                            )}
                             chartEvents={{
                                 onZoomChange: handleZoomChange,
                             }}
                             initialZoom={initialZoom}
                         />
-                    </CardContent>
-                )}
-            {anomaly &&
-                getEvaluationRequestStatus === ActionStatus.Done &&
-                alertEvaluation !== null &&
-                timeSeriesFiltersSet.length > 0 &&
-                showFilterSetTable && (
-                    <CardContent>
-                        <Grid container>
-                            <Grid item md={8} sm={12} xs={12}>
-                                <TimeSeriesChart
-                                    events={events}
-                                    height={chartHeight}
-                                    {...generateChartOptions(
-                                        alertEvaluation,
-                                        anomaly,
-                                        filteredAlertEvaluation,
-                                        t
-                                    )}
-                                    chartEvents={{
-                                        onZoomChange: handleZoomChange,
-                                    }}
-                                    initialZoom={initialZoom}
-                                />
-                            </Grid>
-                            <Grid item md={4} sm={12} xs={12}>
-                                <FiltersSetTable
-                                    timeSeriesFiltersSet={timeSeriesFiltersSet}
-                                    onRemoveBtnClick={onRemoveBtnClick}
-                                />
-                            </Grid>
-                        </Grid>
                     </CardContent>
                 )}
         </Card>

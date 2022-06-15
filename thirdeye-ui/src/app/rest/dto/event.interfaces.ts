@@ -7,4 +7,9 @@ export interface EditableEvent {
     type?: string;
     startTime: number;
     endTime: number;
+    targetDimensionMap?: TargetDimensionMap;
+}
+
+interface TargetDimensionMap {
+    [key: string]: string[];
 }

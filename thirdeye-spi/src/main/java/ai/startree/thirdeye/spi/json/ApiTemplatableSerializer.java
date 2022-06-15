@@ -1,21 +1,12 @@
-package ai.startree.thirdeye.json;
+package ai.startree.thirdeye.spi.json;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 
-public class ApiTemplatableSerializer extends JsonSerializer<Templatable> {
-
-  public static final Module MODULE = new SimpleModule().addSerializer(new ApiTemplatableSerializer());
-
-  @Override
-  public Class<Templatable> handledType() {
-    return Templatable.class;
-  }
+class ApiTemplatableSerializer extends JsonSerializer<Templatable> {
 
   @Override
   public void serialize(final Templatable templatable, final JsonGenerator jsonGenerator,

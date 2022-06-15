@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.json.SerializationModules;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +15,7 @@ import org.testng.annotations.Test;
 public class TestTemplatableSerialization {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(
-      ApiTemplatableDeserializer.MODULE).registerModule(ApiTemplatableSerializer.MODULE);
+      SerializationModules.TEMPLATABLE);
   private static final String DOUBLE_QUOTE = "\"";
 
   @Test
@@ -33,9 +34,11 @@ public class TestTemplatableSerialization {
     final String variableProperty = "${list}";
     final String jsonString = String.format("{\"listOfStrings\":\"%s\"}", variableProperty);
 
-    final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString, ObjectWithTemplatable.class);
+    final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+        ObjectWithTemplatable.class);
 
-    final Templatable<List<String>> templatable = new Templatable<List<String>>().setTemplatedValue(variableProperty);
+    final Templatable<List<String>> templatable = new Templatable<List<String>>().setTemplatedValue(
+        variableProperty);
     final ObjectWithTemplatable expected = new ObjectWithTemplatable().setListOfStrings(templatable);
 
     assertThat(output).isEqualTo(expected);
@@ -46,7 +49,8 @@ public class TestTemplatableSerialization {
     final String variableProperty = "NOT_VALID${list}";
     final String jsonString = String.format("{\"listOfStrings\":\"%s\"}", variableProperty);
 
-    assertThatThrownBy(() -> OBJECT_MAPPER.readValue(jsonString, ObjectWithTemplatable.class)).isInstanceOf(
+    assertThatThrownBy(() -> OBJECT_MAPPER.readValue(jsonString,
+        ObjectWithTemplatable.class)).isInstanceOf(
         JsonMappingException.class);
   }
 
@@ -77,7 +81,8 @@ public class TestTemplatableSerialization {
     final List<String> value = List.of(listElement);
     final String jsonString = String.format("{\"listOfStrings\":[\"%s\"]}", listElement);
 
-    final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString, ObjectWithTemplatable.class);
+    final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+        ObjectWithTemplatable.class);
 
     final Templatable<List<String>> templatable = new Templatable<List<String>>().setValue(value);
     final ObjectWithTemplatable expected = new ObjectWithTemplatable().setListOfStrings(templatable);

@@ -1,4 +1,4 @@
-package ai.startree.thirdeye.json;
+package ai.startree.thirdeye.spi.json;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -10,21 +10,16 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 
 /**
  * For wrapped generic type inference at runtime,
  * see https://stackoverflow.com/questions/36159677/how-to-create-a-custom-deserializer-in-jackson-for-a-generic-type
  */
-public class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
+class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
     implements ContextualDeserializer {
-
-  public static final Module MODULE = new SimpleModule().addDeserializer(Templatable.class,
-      new ApiTemplatableDeserializer());
 
   private JavaType valueType;
 

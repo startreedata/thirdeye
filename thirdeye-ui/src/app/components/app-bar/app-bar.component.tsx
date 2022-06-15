@@ -92,7 +92,7 @@ export const AppBar: FunctionComponent = () => {
                 {/* Documentation */}
                 <NavBarLinkV1
                     externalLink
-                    href="https://dev.startree.ai/docs/thirdeye/"
+                    href="https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/"
                     target="_blank"
                 >
                     <NavBarLinkIconV1>

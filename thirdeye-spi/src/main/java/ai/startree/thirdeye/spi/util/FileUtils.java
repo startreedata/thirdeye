@@ -15,7 +15,7 @@ package ai.startree.thirdeye.spi.util;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.json.SerializationModules;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +30,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FileUtils {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(
-      SerializationModules.TEMPLATABLE);
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
 
   @NonNull
   public static <T> T readJsonObject(File file, Class<T> clazz) {

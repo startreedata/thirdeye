@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.json.SerializationModules;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +14,7 @@ import org.testng.annotations.Test;
 
 public class TestTemplatableSerialization {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(
-      SerializationModules.TEMPLATABLE);
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
   private static final String DOUBLE_QUOTE = "\"";
 
   @Test

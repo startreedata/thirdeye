@@ -851,7 +851,7 @@ export function DataGridV1<T>({
             width="100%"
         >
             {/* Toolbar */}
-            {!hideToolbar && (
+            {!hideToolbar ? (
                 <Toolbar
                     className={classNames(
                         dataGridV1Classes.dataGridToolbar,
@@ -908,6 +908,13 @@ export function DataGridV1<T>({
                         </>
                     )}
                 </Toolbar>
+            ) : (
+                // When hideToolbar is present <AutoResizer> get's height as 0
+                // Which leads to Table un-rendered and ref is not set
+                // If ref is not set and scroll is set to Body then,
+                // Height of the table will be undefined and table won't rendered
+                // Issue arise when hideToolbar is true and DataGridScrollV1 is Body
+                <Box padding={0.1} />
             )}
 
             {/* Data grid */}

@@ -68,7 +68,7 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<
                 {/* Schedule (or Cron) label */}
                 <Grid item lg={2} md={3} sm={5} xs={12}>
                     <Typography variant="subtitle2">
-                        {t("label.cron")}
+                        {t("label.schedule")}
                     </Typography>
                 </Grid>
 

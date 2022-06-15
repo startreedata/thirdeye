@@ -66,6 +66,7 @@ worker:
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
 #  truststoreSecretName: truststore-name
+  randomWorkerIdEnabled: false
 
 persistence:
   enabled: true

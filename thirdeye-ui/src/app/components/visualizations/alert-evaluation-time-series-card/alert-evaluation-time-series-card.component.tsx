@@ -49,11 +49,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                         )}
 
                         <Grid item>
-                            <TimeRangeButtonWithContext
-                                onTimeRangeChange={() =>
-                                    props.onRefresh && props.onRefresh()
-                                }
-                            />
+                            <TimeRangeButtonWithContext />
                         </Grid>
 
                         {/* Preview button */}

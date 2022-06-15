@@ -2,8 +2,9 @@ import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     HelpLinkIconV1,
@@ -31,6 +32,7 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
+import { TimeRangeQueryStringKey } from "../time-range/time-range-provider/time-range-provider.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -76,6 +78,15 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
     ] = useState(DEFAULT_ALERT_TEMPLATE_ID);
     const [wizard, setWizard] = useState("");
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
+
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
 
     useEffect(() => {
         initSubs();
@@ -87,6 +98,11 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
             refreshAlertEvaluation();
         }
     }, []);
+
+    useEffect(() => {
+        // Refresh evaluation on startTime or endTime change
+        refreshAlertEvaluation();
+    }, [startTime, endTime]);
 
     useEffect(() => {
         if (currentWizardStep !== AlertWizardStep.SUBSCRIPTION_GROUPS) {

@@ -5,7 +5,6 @@
 
 package ai.startree.thirdeye.restclient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -32,7 +31,6 @@ public abstract class AbstractRestClient {
 
   private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final Client client;
 
   /**

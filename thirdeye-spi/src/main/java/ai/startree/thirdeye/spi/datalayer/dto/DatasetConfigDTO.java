@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -46,7 +47,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   /**
    * Dimensions to exclude from RCA algorithm runs.
    */
-  private List<String> rcaExcludedDimensions;
+  private Templatable<List<String>> rcaExcludedDimensions;
 
   /**
    * Configuration for non-additive dataset
@@ -286,12 +287,12 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public List<String> getRcaExcludedDimensions() {
+  public Templatable<List<String>> getRcaExcludedDimensions() {
     return rcaExcludedDimensions;
   }
 
   public DatasetConfigDTO setRcaExcludedDimensions(
-      final List<String> rcaExcludedDimensions) {
+      final Templatable<List<String>> rcaExcludedDimensions) {
     this.rcaExcludedDimensions = rcaExcludedDimensions;
     return this;
   }

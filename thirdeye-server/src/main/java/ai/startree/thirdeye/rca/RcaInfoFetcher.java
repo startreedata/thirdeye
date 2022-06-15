@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -133,8 +134,10 @@ public class RcaInfoFetcher {
     // fields that can be configured at the alert level can be added here
     optional(metadataDatasetDTO.getDimensions())
         .ifPresent(datasetConfigDTO::setDimensions);
-    optional(metadataDatasetDTO.getRcaExcludedDimensions())
-        .ifPresent(datasetConfigDTO::setRcaExcludedDimensions);
+    final Templatable<List<String>> customRcaExcludedDimensions = metadataDatasetDTO.getRcaExcludedDimensions();
+    if (customRcaExcludedDimensions != null && customRcaExcludedDimensions.getValue() != null) {
+      datasetConfigDTO.setRcaExcludedDimensions(customRcaExcludedDimensions);
+    }
   }
 
   private void addCustomFields(final MetricConfigDTO metricConfigDTO,

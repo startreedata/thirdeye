@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -126,8 +127,8 @@ public class RcaResource {
   }
 
   @NonNull
-  protected static List<String> getRcaDimensions(List<String> dimensions,
-      List<String> excludedDimensions,
+  protected static List<String> getRcaDimensions(@NonNull List<String> dimensions,
+      @NonNull List<String> excludedDimensions,
       DatasetConfigDTO datasetConfigDTO) {
     if (dimensions.isEmpty()) {
       dimensions = optional(datasetConfigDTO.getDimensions()).orElse(List.of());
@@ -135,6 +136,7 @@ public class RcaResource {
     dimensions = cleanDimensionStrings(dimensions);
     if (excludedDimensions.isEmpty()) {
       excludedDimensions = optional(datasetConfigDTO.getRcaExcludedDimensions())
+          .map(Templatable::getValue)
           .orElse(List.of());
     }
     excludedDimensions = cleanDimensionStrings(excludedDimensions);

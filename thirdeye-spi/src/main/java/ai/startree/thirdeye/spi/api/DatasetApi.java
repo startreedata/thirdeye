@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.time.Duration;
@@ -37,7 +38,7 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   /**
    * Dimensions to exclude from RCA algorithm runs.
    */
-  private List<String> rcaExcludedDimensions;
+  private Templatable<List<String>> rcaExcludedDimensions;
 
   public Long getId() {
     return id;
@@ -122,11 +123,11 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return this;
   }
 
-  public List<String> getRcaExcludedDimensions() {
+  public Templatable<List<String>> getRcaExcludedDimensions() {
     return rcaExcludedDimensions;
   }
 
-  public DatasetApi setRcaExcludedDimensions(final List<String> rcaExcludedDimensions) {
+  public DatasetApi setRcaExcludedDimensions(final Templatable<List<String>> rcaExcludedDimensions) {
     this.rcaExcludedDimensions = rcaExcludedDimensions;
     return this;
   }

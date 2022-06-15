@@ -11,7 +11,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertSnapshotDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFetcherConfig;
 import ai.startree.thirdeye.spi.util.SpiUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collection;
 import java.util.Properties;
 import org.joda.time.DateTime;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseAnomalyFetcher implements AnomalyFetcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseAnomalyFetcher.class);
-  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static final String ANOMALY_SOURCE_TYPE = "anomalySourceType";
   public static final String ANOMALY_SOURCE = "anomalySource";

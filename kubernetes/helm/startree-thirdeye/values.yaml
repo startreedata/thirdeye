@@ -65,6 +65,7 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  randomWorkerIdEnabled: false
 
 persistence:
   enabled: true

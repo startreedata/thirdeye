@@ -216,4 +216,8 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
         tasksToBeDeleted.size(),
         totalTime));
   }
+
+  public long countByStatus(final TaskStatus status) {
+    return count(Predicate.EQ("status", status.toString()));
+  }
 }

@@ -87,25 +87,25 @@ public class TaskDriver {
     metricRegistry.register("taskCount_RUNNING", new CachedGauge<Long>(timeout, unit) {
       @Override
       protected Long loadValue() {
-        return countByStatus(TaskStatus.RUNNING);
+        return taskManager.countByStatus(TaskStatus.RUNNING);
       }
     });
     metricRegistry.register("taskCount_FAILED", new CachedGauge<Long>(timeout, unit) {
       @Override
       protected Long loadValue() {
-        return countByStatus(TaskStatus.FAILED);
+        return taskManager.countByStatus(TaskStatus.FAILED);
       }
     });
     metricRegistry.register("taskCount_COMPLETED", new CachedGauge<Long>(timeout, unit) {
       @Override
       protected Long loadValue() {
-        return countByStatus(TaskStatus.COMPLETED);
+        return taskManager.countByStatus(TaskStatus.COMPLETED);
       }
     });
     metricRegistry.register("taskCount_WAITING", new CachedGauge<Long>(timeout, unit) {
       @Override
       protected Long loadValue() {
-        return countByStatus(TaskStatus.WAITING);
+        return taskManager.countByStatus(TaskStatus.WAITING);
       }
     });
   }
@@ -169,11 +169,6 @@ public class TaskDriver {
             "FAILED status updated by the worker at start");
       }
     }
-  }
-
-
-  private Long countByStatus(final TaskStatus status) {
-    return taskManager.count(Predicate.EQ("status", status.toString()));
   }
 
   public void shutdown() {

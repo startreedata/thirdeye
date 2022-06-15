@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.task;
 
-import java.time.Duration;  
+import java.time.Duration;
 
 public class TaskDriverConfiguration {
 

@@ -19,7 +19,11 @@ import {
     BASELINE_OPTIONS,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import {
+    PageContentsCardV1,
+    SearchInputV1,
+    SkeletonV1,
+} from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
@@ -47,6 +51,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     const [selectedTabIndex, setSelectedTabIndex] = useState(
         Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 0
     );
+    const [eventsSearchValue, setEventsSearchValue] = useState("");
     const [comparisonOffset, setComparisonWeekOffset] =
         useState<AnomalyBreakdownAPIOffsetValues>(
             (searchParams.get(
@@ -96,9 +101,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             <Tab label={t("label.events")} value={2} />
                         </Tabs>
                     </Grid>
-                    <Grid item md={5} sm={6} xs={12}>
-                        {/* Hide baseline offset selector if events tab is selected */}
-                        {selectedTabIndex !== 2 && (
+                    {/* Hide baseline offset selector if events tab is selected */}
+                    {selectedTabIndex !== 2 ? (
+                        <Grid item md={5} sm={6} xs={12}>
                             <Grid container spacing={0}>
                                 <Grid item sm={6} xs={12}>
                                     <Box
@@ -138,13 +143,23 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     </TextField>
                                 </Grid>
                             </Grid>
-                        )}
-                    </Grid>
+                        </Grid>
+                    ) : (
+                        <Grid item md={3} sm={3} xs={12}>
+                            <SearchInputV1
+                                fullWidth
+                                placeholder={t("label.search-entity", {
+                                    entity: t("label.event"),
+                                })}
+                                onChange={setEventsSearchValue}
+                            />
+                        </Grid>
+                    )}
                 </Grid>
             </CardContent>
 
-            <CardContent>
-                {anomaly && selectedTabIndex !== 2 && (
+            {anomaly && selectedTabIndex !== 2 && (
+                <CardContent>
                     <Grid container>
                         <Grid item xs={12}>
                             <Typography variant="h6">Date Reference</Typography>
@@ -191,8 +206,8 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             <Divider />
                         </Grid>
                     </Grid>
-                )}
-            </CardContent>
+                </CardContent>
+            )}
             {selectedTabIndex === 0 && (
                 <Box mt={-4}>
                     <AnomalyDimensionAnalysis
@@ -215,9 +230,10 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                 </Box>
             )}
             {selectedTabIndex === 2 && (
-                <Box mt={-4}>
+                <Box mt={-2}>
                     <EventsTab
                         anomalyId={anomalyId}
+                        searchValue={eventsSearchValue}
                         selectedEvents={selectedEvents}
                         onCheckClick={onEventSelectionChange}
                     />

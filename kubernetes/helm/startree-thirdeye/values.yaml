@@ -37,12 +37,12 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+#  tlsSecretName: tls-secret-name
 
 scheduler:
   enabled: true
   name: scheduler
   port: 8082
-  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -51,14 +51,12 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-  tls:
-    enabled: false
+#  truststoreSecretName: truststore-name
 
 worker:
   enabled: true
   name: worker
   port: 8083
-  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -67,8 +65,7 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-  tls:
-    enabled: false
+#  truststoreSecretName: truststore-name
 
 persistence:
   enabled: true

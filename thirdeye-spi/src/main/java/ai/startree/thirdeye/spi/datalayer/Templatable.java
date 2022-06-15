@@ -9,6 +9,9 @@ import java.util.Objects;
 @JsonInclude(Include.NON_NULL)
 public class Templatable<T> {
 
+  /**name of the field containing the value */
+  public static final String VALUE_FIELD_STRING = "value";
+
   private String templatedValue;
   private T value;
 

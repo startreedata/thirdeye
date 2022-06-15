@@ -5,21 +5,24 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @JsonInclude(Include.NON_NULL)
 public class Templatable<T> {
 
-  /**name of the field containing the value */
+  private @Nullable String templatedValue;
+  private @Nullable T value;
+  /**
+   * Name of the field containing the value. Used by TemplateEngineTemplatableSerializer.
+   */
   public static final String VALUE_FIELD_STRING = "value";
 
-  private String templatedValue;
-  private T value;
-
-  public String getTemplatedValue() {
+  public @Nullable String getTemplatedValue() {
     return templatedValue;
   }
 
-  public Templatable<T> setTemplatedValue(final String templatedValue) {
+  public Templatable<T> setTemplatedValue(final @NonNull String templatedValue) {
     checkArgument(templatedValue.length() >= 4,
         "Invalid templated value variable string: %s. Expected format is ${VARIABLE_NAME}",
         templatedValue);
@@ -27,11 +30,11 @@ public class Templatable<T> {
     return this;
   }
 
-  public T getValue() {
+  public @Nullable T getValue() {
     return value;
   }
 
-  public Templatable<T> setValue(final T value) {
+  public Templatable<T> setValue(@Nullable final T value) {
     this.value = value;
     return this;
   }

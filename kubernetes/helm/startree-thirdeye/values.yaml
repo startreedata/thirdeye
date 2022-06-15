@@ -81,6 +81,7 @@ worker:
     rollingUpdate:
       maxUnavailable: 25%
       maxSurge: 25%
+  randomWorkerIdEnabled: false
 
 persistence:
   enabled: true

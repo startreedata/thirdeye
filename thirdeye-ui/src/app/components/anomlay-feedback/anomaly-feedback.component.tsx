@@ -1,7 +1,7 @@
 import { Box, Button, Grid, MenuItem, TextField } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
@@ -153,16 +153,21 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             });
     };
 
+    useEffect(() => {
+        setCurrentlySelected(anomalyFeedback.type);
+        setModifiedFeedbackComment(anomalyFeedback.comment);
+    }, [anomalyFeedback]);
+
     if (isLoading) {
         return (
             <PageContentsCardV1 className={className}>
-                <SkeletonV1 preventDelay height={150} variant="rect" />
+                <SkeletonV1 height={150} variant="rect" />
             </PageContentsCardV1>
         );
     }
 
     return (
-        <PageContentsCardV1>
+        <PageContentsCardV1 className={className}>
             <Grid container>
                 <Grid item xs={12}>
                     <label>

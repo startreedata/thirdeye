@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.cube.summary;
 
-import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
+import ai.startree.thirdeye.cube.data.DimensionValues;
 import java.util.ArrayList;
 import java.util.List;
 

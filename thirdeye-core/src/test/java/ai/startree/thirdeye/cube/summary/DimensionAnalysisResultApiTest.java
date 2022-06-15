@@ -9,13 +9,11 @@ import static ai.startree.thirdeye.cube.summary.NameTag.ALL_OTHERS;
 import static ai.startree.thirdeye.cube.summary.Summary.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.cube.additive.AdditiveCubeNode;
-import ai.startree.thirdeye.cube.additive.AdditiveRow;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.AdditiveRow;
 import ai.startree.thirdeye.cube.cost.BalancedCostFunction;
-import ai.startree.thirdeye.cube.data.dbrow.DimensionValues;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.dbrow.Row;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
+import ai.startree.thirdeye.cube.data.DimensionValues;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.cube.SummaryResponseRow;
@@ -32,10 +30,10 @@ public class DimensionAnalysisResultApiTest {
   @Test
   public void testBuildDiffSummary() {
     // Create test case
-    List<CubeNode> cubeNodes = buildHierarchicalNodes();
+    List<AdditiveCubeNode> cubeNodes = buildHierarchicalNodes();
     int rootIdx = cubeNodes.size() - 1;
-    double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineValue();
-    double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentValue();
+    double baselineTotal = cubeNodes.get(rootIdx).getOriginalBaselineSize();
+    double currentTotal = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     double baselineSize = cubeNodes.get(rootIdx).getOriginalBaselineSize();
     double currentSize = cubeNodes.get(rootIdx).getOriginalCurrentSize();
     // Build the response
@@ -56,7 +54,7 @@ public class DimensionAnalysisResultApiTest {
       SummaryResponseRow actualRow = responseRows.get(i);
       SummaryResponseRow expectedRow = expectedResponseRows.get(i);
       assertThat(actualRow.getNames()).isEqualTo(expectedRow.getNames());
-      assertThat(actualRow.getOtherDimensionValues()).isEqualTo(expectedRow.getOtherDimensionValues());
+      assertThat(actualRow.getOtherDimensionValues()).hasSameElementsAs(expectedRow.getOtherDimensionValues());
       assertThat(actualRow.getMoreOtherDimensionNumber()).isEqualTo(expectedRow.getMoreOtherDimensionNumber());
       assertThat(actualRow.getCost()).isCloseTo(expectedRow.getCost(), EPSILON);
       assertThat(actualRow.getBaselineValue()).isEqualTo(expectedRow.getBaselineValue());
@@ -72,28 +70,28 @@ public class DimensionAnalysisResultApiTest {
    *     /  |  \
    *    US  IN  FR
    */
-  private List<List<Row>> buildHierarchicalRows() {
-    List<List<Row>> hierarchicalRows = new ArrayList<>();
+  private List<List<AdditiveRow>> buildHierarchicalRows() {
+    List<List<AdditiveRow>> hierarchicalRows = new ArrayList<>();
     List<String> dimensions = Collections.singletonList("country");
 
     // Root level
-    List<Row> rootLevel = new ArrayList<>();
+    List<AdditiveRow> rootLevel = new ArrayList<>();
     rootLevel.add(new AdditiveRow(new Dimensions(dimensions), new DimensionValues(), 45, 58));
     hierarchicalRows.add(rootLevel);
 
     // Level 1
-    List<Row> level1 = new ArrayList<>();
-    Row row1 =
+    List<AdditiveRow> level1 = new ArrayList<>();
+    AdditiveRow row1 =
         new AdditiveRow(new Dimensions(dimensions),
             new DimensionValues(Collections.singletonList("US")), 20, 30);
     level1.add(row1);
 
-    Row row2 =
+    AdditiveRow row2 =
         new AdditiveRow(new Dimensions(dimensions),
             new DimensionValues(Collections.singletonList("IN")), 10, 11);
     level1.add(row2);
 
-    Row row3 =
+    AdditiveRow row3 =
         new AdditiveRow(new Dimensions(dimensions),
             new DimensionValues(Collections.singletonList("FR")), 15, 17);
     level1.add(row3);
@@ -109,26 +107,26 @@ public class DimensionAnalysisResultApiTest {
    *     /
    *    US
    */
-  private List<CubeNode> buildHierarchicalNodes() {
-    List<List<Row>> rows = buildHierarchicalRows();
+  private List<AdditiveCubeNode> buildHierarchicalNodes() {
+    List<List<AdditiveRow>> rows = buildHierarchicalRows();
     // Root level
-    AdditiveRow rootRow = (AdditiveRow) rows.get(0).get(0);
+    AdditiveRow rootRow = rows.get(0).get(0);
     AdditiveCubeNode rootNode = new AdditiveCubeNode(rootRow);
 
     // Level 1
-    AdditiveRow USRow = (AdditiveRow) rows.get(1).get(0);
+    AdditiveRow USRow = rows.get(1).get(0);
     AdditiveCubeNode USNode = new AdditiveCubeNode(1, 0, USRow, rootNode);
 
-    AdditiveRow INRow = (AdditiveRow) rows.get(1).get(1);
+    AdditiveRow INRow = rows.get(1).get(1);
     AdditiveCubeNode INNode = new AdditiveCubeNode(1, 1, INRow, rootNode);
 
-    AdditiveRow FRRow = (AdditiveRow) rows.get(1).get(2);
+    AdditiveRow FRRow = rows.get(1).get(2);
     AdditiveCubeNode FRNode = new AdditiveCubeNode(1, 2, FRRow, rootNode);
 
     // Assume that US is the only child that is picked by the summary
     rootNode.removeNodeValues(USNode);
 
-    List<CubeNode> res = new ArrayList<>();
+    List<AdditiveCubeNode> res = new ArrayList<>();
     res.add(USNode);
     // Root node is located at the end of this list.
     res.add(rootNode);

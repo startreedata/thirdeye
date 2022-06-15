@@ -8,6 +8,7 @@ import {
     Grid,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertEvaluationTimeSeries } from "../alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.component";
 import { VisualizationCard } from "../visualization-card/visualization-card.component";
@@ -19,6 +20,14 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
 > = (props: AlertEvaluationTimeSeriesCardProps) => {
     const alertEvaluationTimeSeriesCardClasses =
         useAlertEvaluationTimeSeriesCardStyles();
+
+    if (props.isLoading) {
+        return (
+            <PageContentsCardV1>
+                <SkeletonV1 animation="pulse" height={500} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
 
     return (
         <Card variant="outlined">

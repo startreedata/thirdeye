@@ -47,6 +47,7 @@ scheduler:
   enabled: true
   name: scheduler
   port: 8082
+  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -64,6 +65,7 @@ worker:
   enabled: true
   name: worker
   port: 8083
+  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}

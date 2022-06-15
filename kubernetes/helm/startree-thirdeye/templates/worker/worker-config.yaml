@@ -16,9 +16,9 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
-        {{- if .Values.worker.tls.enabled }}
+        {{- if .Values.tls.enabled }}
         - type: https
-          port: 443
+          port: {{ .Values.worker.tlsPort }}
           idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}

@@ -5,6 +5,7 @@
 
 package ai.startree.thirdeye.datasource.pinot;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.ResultSetUtils;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.ObjectSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;

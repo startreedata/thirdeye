@@ -1,0 +1,21 @@
+
+{
+  "tableName": "pageviews_with_nulls",
+  "segmentsConfig" : {
+    "timeColumnName": "date",
+    "timeType": "DAYS",
+    "replication" : "1",
+    "schemaName" : "pageviews"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP",
+    "nullHandlingEnabled": true
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

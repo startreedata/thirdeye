@@ -160,7 +160,7 @@ export const SubscriptionGroupCard: FunctionComponent<
                         {/* Schedule(or Cron) */}
                         <Grid item sm={6} xs={12}>
                             <NameValueDisplayCard<string>
-                                name={t("label.cron")}
+                                name={t("label.schedule")}
                                 searchWords={props.searchWords}
                                 values={[props.uiSubscriptionGroup.cron]}
                             />

@@ -133,7 +133,7 @@
         "email": "Email",
         "emails": "Emails",
         "name": "Name",
-        "cron": "Schedule",
+        "schedule": "Schedule",
         "detection-configuration": "Detection Configuration",
         "preview-alert": "Preview Alert",
         "reset-configuration": "Reset Configuration",
@@ -173,7 +173,7 @@
         "remove": "Remove",
         "add-to-chart": "Add to Chart",
         "remove-from-chart": "Remove from Chart",
-        "filter-sets": "Filter Sets",
+        "additional-chart-items": "Additional Chart Items",
         "last-updated": "Last Updated",
         "investigation": "Investigation",
         "save-investigation": "Save Investigation",
@@ -184,8 +184,6 @@
         "view-investigation": "View Investigation",
         "about": "About",
         "thirdeye-website-url": "https://www.startree.ai",
-        "hide-filters-table": "Hide filters table",
-        "show-filters-table": "Show filters table",
         "event-properties": "Event Properties",
         "current-duration": "Current Duration",
         "start-time": "Start time",
@@ -194,7 +192,12 @@
         "top-contributors": "Top Contributors",
         "datasets-auto-onboard": "Auto onboard all datasets",
         "enter-name-of-event": "Enter name of event",
-        "enter-a-type-event": "Enter type for event"
+        "enter-a-type-event": "Enter type for event",
+        "metadata": "Metadata",
+        "cron": "Cron",
+        "alert-frequency": "Alert Frequency",
+        "alert-details": "Alert Details",
+        "optional": "Optional"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -246,6 +249,8 @@
         "event-name-required": "Name is required",
         "event-start-time-required": "Start time is required",
         "event-end-time-required": "End time is required",
-        "preview-anomalies-created-below": "Preview the anomalies created for configuration below"
+        "preview-anomalies-created-below": "Preview the anomalies created for configuration below",
+        "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
+        "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system"
     }
 }

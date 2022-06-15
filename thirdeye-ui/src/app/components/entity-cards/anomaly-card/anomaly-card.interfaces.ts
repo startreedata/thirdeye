@@ -5,4 +5,6 @@ export interface AnomalyCardProps {
     searchWords?: string[];
     showViewDetails?: boolean;
     onDelete?: (uiAnomaly: UiAnomaly) => void;
+    className?: string;
+    isLoading?: boolean;
 }

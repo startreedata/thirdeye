@@ -8,6 +8,8 @@ package ai.startree.thirdeye.detection.components;
 import static ai.startree.thirdeye.spi.detection.DetectionUtils.mergeAndSortAnomalies;
 
 import ai.startree.thirdeye.detection.DetectionTestUtils;
+import ai.startree.thirdeye.plugins.detection.components.TriggerConditionGrouper;
+import ai.startree.thirdeye.plugins.detection.components.TriggerConditionGrouperSpec;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.ArrayList;
 import java.util.Collections;

@@ -8,10 +8,10 @@ package ai.startree.thirdeye.cube.summary;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.cube.cost.CostFunction;
-import ai.startree.thirdeye.cube.data.cube.Cube;
-import ai.startree.thirdeye.cube.data.cube.DimNameValueCostEntry;
-import ai.startree.thirdeye.cube.data.dbrow.Dimensions;
-import ai.startree.thirdeye.cube.data.node.CubeNode;
+import ai.startree.thirdeye.cube.data.AdditiveCubeNode;
+import ai.startree.thirdeye.cube.data.Cube;
+import ai.startree.thirdeye.cube.data.DimNameValueCostEntry;
+import ai.startree.thirdeye.cube.data.Dimensions;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.cube.SummaryGainerLoserResponseRow;
 import ai.startree.thirdeye.spi.api.cube.SummaryResponseRow;
@@ -101,7 +101,7 @@ public class Summary {
   }
 
   public static void buildDiffSummary(final DimensionAnalysisResultApi dimensionAnalysisResultApi,
-      List<CubeNode> nodes,
+      List<AdditiveCubeNode> nodes,
       CostFunction costFunction) {
     // Build the header
     Dimensions dimensions = nodes.get(0).getDimensions();
@@ -109,15 +109,15 @@ public class Summary {
 
     // get the maxLevel - it is not necessary to print the summary with bigger depth,
     // even if the config depth was bigger
-    int maxNodeLevel = nodes.stream().mapToInt(CubeNode::getLevel).max()
+    int maxNodeLevel = nodes.stream().mapToInt(AdditiveCubeNode::getLevel).max()
         .orElseThrow(NoSuchElementException::new);
 
     // Build the response
     nodes = SummaryResponseTree.sortResponseTree(nodes, maxNodeLevel, costFunction);
     //   Build name tag for each row of responses
-    Map<CubeNode, NameTag> nameTags = new HashMap<>();
-    Map<CubeNode, LinkedHashSet<String>> otherDimensionValues = new HashMap<>();
-    for (CubeNode node : nodes) {
+    Map<AdditiveCubeNode, NameTag> nameTags = new HashMap<>();
+    Map<AdditiveCubeNode, LinkedHashSet<String>> otherDimensionValues = new HashMap<>();
+    for (AdditiveCubeNode node : nodes) {
       NameTag tag = new NameTag(maxNodeLevel);
       nameTags.put(node, tag);
       tag.copyNames(node.getDimensionValues());
@@ -125,8 +125,8 @@ public class Summary {
       // Put all children name to other dimension values, which will be shown on UI if this node is (ALL)-
       // Later, each picked child will remove itself from this parent's other dimension values.
       LinkedHashSet<String> childrenNames = new LinkedHashSet<>();
-      List<CubeNode> children = node.getChildren();
-      for (CubeNode child : children) {
+      List<AdditiveCubeNode> children = node.getChildren();
+      for (AdditiveCubeNode child : children) {
         String childName = child.getDimensionValues().get(node.getLevel()).trim();
         if (!childName.isEmpty()) {
           childrenNames.add(child.getDimensionValues().get(node.getLevel()));
@@ -135,8 +135,8 @@ public class Summary {
       otherDimensionValues.put(node, childrenNames);
     }
     //   pre-condition: parent node is processed before its children nodes
-    for (CubeNode node : nodes) {
-      CubeNode parent = node;
+    for (AdditiveCubeNode node : nodes) {
+      AdditiveCubeNode parent = node;
       int levelDiff = 1;
       while ((parent = parent.getParent()) != null) {
         NameTag parentNameTag = nameTags.get(parent);
@@ -157,11 +157,11 @@ public class Summary {
       }
     }
     //    Fill in the information of each response row
-    for (CubeNode node : nodes) {
+    for (AdditiveCubeNode node : nodes) {
       SummaryResponseRow row = new SummaryResponseRow();
       row.setNames(nameTags.get(node).getNames());
-      row.setBaselineValue(node.getBaselineValue());
-      row.setCurrentValue(node.getCurrentValue());
+      row.setBaselineValue(node.getBaselineSize());
+      row.setCurrentValue(node.getCurrentSize());
       row.setChangePercentage(computePercentageChange(row.getBaselineValue(),
           row.getCurrentValue()));
       row.setSizeFactor((node.getBaselineSize() + node.getCurrentSize()) / (
@@ -226,7 +226,7 @@ public class Summary {
 
   // TODO: Need a better definition for "a node is thinned out by its children."
   // We also need to look into the case where parent node is much smaller than its children.
-  private static boolean nodeIsThinnedOut(CubeNode node) {
+  private static boolean nodeIsThinnedOut(AdditiveCubeNode node) {
     return Double.compare(0., node.getBaselineSize()) == 0
         && Double.compare(0., node.getCurrentSize()) == 0;
   }
@@ -235,9 +235,9 @@ public class Summary {
    * Recompute the baseline value and current value the node. The change is induced by the chosen
    * nodes in the answer. Note that the current node may be in the answer.
    */
-  private static void updateWowValues(CubeNode node, Set<CubeNode> answer) {
+  private static void updateWowValues(AdditiveCubeNode node, Set<AdditiveCubeNode> answer) {
     node.resetValues();
-    for (CubeNode child : answer) {
+    for (AdditiveCubeNode child : answer) {
       if (child == node) {
         continue;
       }
@@ -253,12 +253,12 @@ public class Summary {
    * @param answer The new answer.
    * @param removedNodes The nodes removed from the subtree of node.
    */
-  private static void updateWowValuesDueToRemoval(CubeNode node, Set<CubeNode> answer,
-      Set<CubeNode> removedNodes) {
-    List<CubeNode> removedNodesList = new ArrayList<>(removedNodes);
+  private static void updateWowValuesDueToRemoval(AdditiveCubeNode node, Set<AdditiveCubeNode> answer,
+      Set<AdditiveCubeNode> removedNodes) {
+    List<AdditiveCubeNode> removedNodesList = new ArrayList<>(removedNodes);
     removedNodesList.sort(NODE_COMPARATOR); // Process lower level nodes first
-    for (CubeNode removedNode : removedNodesList) {
-      CubeNode parents = findAncestor(removedNode, node, answer);
+    for (AdditiveCubeNode removedNode : removedNodesList) {
+      AdditiveCubeNode parents = findAncestor(removedNode, node, answer);
       if (parents != null) {
         parents.addNodeValues(removedNode);
       }
@@ -270,7 +270,8 @@ public class Summary {
    * of CubeNode.
    * Returns null if no ancestor exists in the target set.
    */
-  private static CubeNode findAncestor(CubeNode node, CubeNode ceiling, Set<CubeNode> targets) {
+  private static AdditiveCubeNode findAncestor(
+      AdditiveCubeNode node, AdditiveCubeNode ceiling, Set<AdditiveCubeNode> targets) {
     while (node != null && (node = node.getParent()) != ceiling) {
       if (targets.contains(node)) {
         return node;
@@ -292,7 +293,7 @@ public class Summary {
     }
 
     // init inserters
-    CubeNode root = cube.getRoot();
+    AdditiveCubeNode root = cube.getRoot();
     if (doOneSideError) {
       oneSideErrorRowInserter =
           new OneSideErrorRowInserter(basicRowInserter, root.safeChangeRatio() >= 1.0);
@@ -307,7 +308,7 @@ public class Summary {
     final List<DPArray> dpArrays = Stream.generate(() -> new DPArray(answerSize))
         .limit(levelCount).collect(Collectors.toList());
     computeChildDPArray(root, levelCount, dpArrays);
-    List<CubeNode> answer = new ArrayList<>(dpArrays.get(0).getAnswer());
+    List<AdditiveCubeNode> answer = new ArrayList<>(dpArrays.get(0).getAnswer());
 
     // translate answer to api result
     DimensionAnalysisResultApi response = buildApiResponse(answer);
@@ -315,7 +316,7 @@ public class Summary {
     return response;
   }
 
-  private DimensionAnalysisResultApi buildApiResponse(final List<CubeNode> answer) {
+  private DimensionAnalysisResultApi buildApiResponse(final List<AdditiveCubeNode> answer) {
     // build general info
     DimensionAnalysisResultApi response = new DimensionAnalysisResultApi()
         .setBaselineTotal(cube.getBaselineTotal())
@@ -339,9 +340,9 @@ public class Summary {
    * dpArrays should be correctly initialized with n=levelCount  DpArray of size answerSize
    * So, the final answer is located at dpArray[0].
    */
-  private void computeChildDPArray(CubeNode node, final int levelCount,
+  private void computeChildDPArray(AdditiveCubeNode node, final int levelCount,
       final List<DPArray> dpArrays) {
-    CubeNode parent = node.getParent();
+    AdditiveCubeNode parent = node.getParent();
     DPArray dpArray = dpArrays.get(node.getLevel());
     dpArray.fullReset();
     dpArray.targetRatio = node.safeChangeRatio();
@@ -351,13 +352,13 @@ public class Summary {
     if (node.getLevel() == levelCount - 1) {
       // Shrink answer size for getting a higher level view, which gives larger picture of the dataset
       // GIT REF - roll-up rows aggressively code suggestion removed - see previous commit
-      for (CubeNode child : (List<CubeNode>) node.getChildren()) {
+      for (AdditiveCubeNode child : node.getChildren()) {
         leafRowInserter.insertRowToDPArray(dpArray, child, node.safeChangeRatio());
         updateWowValues(node, dpArray.getAnswer());
         dpArray.targetRatio = node.safeChangeRatio(); // get updated changeRatio
       }
     } else {
-      for (CubeNode child : (List<CubeNode>) node.getChildren()) {
+      for (AdditiveCubeNode child : node.getChildren()) {
         computeChildDPArray(child, levelCount, dpArrays);
         mergeDPArray(node, dpArray, dpArrays.get(node.getLevel() + 1));
         updateWowValues(node, dpArray.getAnswer());
@@ -380,11 +381,11 @@ public class Summary {
         if (dpArray.size() == 1) {
           dpArray.setShrinkSize(2);
         }
-        Set<CubeNode> removedNode = new HashSet<>(dpArray.getAnswer());
+        Set<AdditiveCubeNode> removedNode = new HashSet<>(dpArray.getAnswer());
         basicRowInserter.insertRowToDPArray(dpArray, node, targetRatio);
         // The following block is trying to achieve removedNode.removeAll(dpArray.getAnswer());
         // However, removeAll uses equalsTo() instead of equals() to determine if two objects are equal.
-        for (CubeNode cubeNode : dpArray.getAnswer()) {
+        for (AdditiveCubeNode cubeNode : dpArray.getAnswer()) {
           removedNode.remove(cubeNode);
         }
         if (removedNode.size() != 0) {
@@ -403,15 +404,15 @@ public class Summary {
    * After merging, the baseline and current values of the removed nodes (rows) will be added back
    * to those of their parent node.
    */
-  private Set<CubeNode> mergeDPArray(CubeNode parentNode, DPArray parentArray, DPArray childArray) {
-    Set<CubeNode> removedNodes = new HashSet<>(parentArray.getAnswer());
+  private Set<AdditiveCubeNode> mergeDPArray(AdditiveCubeNode parentNode, DPArray parentArray, DPArray childArray) {
+    Set<AdditiveCubeNode> removedNodes = new HashSet<>(parentArray.getAnswer());
     removedNodes.addAll(childArray.getAnswer());
     // Compute the merged answer
     double targetRatio = (parentArray.targetRatio + childArray.targetRatio) / 2.;
     recomputeCostAndRemoveSmallNodes(parentNode, parentArray, targetRatio);
-    List<CubeNode> childNodeList = new ArrayList<>(childArray.getAnswer());
+    List<AdditiveCubeNode> childNodeList = new ArrayList<>(childArray.getAnswer());
     childNodeList.sort(NODE_COMPARATOR);
-    for (CubeNode childNode : childNodeList) {
+    for (AdditiveCubeNode childNode : childNodeList) {
       insertRowWithAdaptiveRatio(parentArray, childNode, targetRatio);
     }
     // Update an internal node's baseline and current value if any of its child is removed due to the merge
@@ -423,13 +424,13 @@ public class Summary {
   /**
    * Recompute costs of the nodes in a DPArray using bootStrapChangeRatio for calculating the cost.
    */
-  private void recomputeCostAndRemoveSmallNodes(CubeNode parentNode, DPArray dp,
+  private void recomputeCostAndRemoveSmallNodes(AdditiveCubeNode parentNode, DPArray dp,
       double targetRatio) {
-    Set<CubeNode> removedNodes = new HashSet<>(dp.getAnswer());
-    List<CubeNode> ans = new ArrayList<>(dp.getAnswer());
+    Set<AdditiveCubeNode> removedNodes = new HashSet<>(dp.getAnswer());
+    List<AdditiveCubeNode> ans = new ArrayList<>(dp.getAnswer());
     ans.sort(NODE_COMPARATOR);
     dp.reset();
-    for (CubeNode node : ans) {
+    for (AdditiveCubeNode node : ans) {
       insertRowWithAdaptiveRatioNoOneSideError(dp, node, targetRatio);
     }
     removedNodes.removeAll(dp.getAnswer());
@@ -447,7 +448,7 @@ public class Summary {
    * the target changeRatio for
    * calculating the cost of the node; otherwise, bootStrapChangeRatio is used.
    */
-  private void insertRowWithAdaptiveRatioNoOneSideError(DPArray dp, CubeNode node,
+  private void insertRowWithAdaptiveRatioNoOneSideError(DPArray dp, AdditiveCubeNode node,
       double targetRatio) {
     if (dp.getAnswer().contains(node.getParent())) {
       // For one side error if node's parent is included in the solution, then its cost will be calculated normally.
@@ -462,7 +463,7 @@ public class Summary {
    * the target changeRatio for calculating the cost of the node;
    * otherwise, targetRatio is used.
    */
-  private void insertRowWithAdaptiveRatio(DPArray dp, CubeNode node, double targetRatio) {
+  private void insertRowWithAdaptiveRatio(DPArray dp, AdditiveCubeNode node, double targetRatio) {
     if (dp.getAnswer().contains(node.getParent())) {
       // For one side error if node's parent is included in the solution, then its cost will be calculated normally.
       basicRowInserter.insertRowToDPArray(dp, node, node.getParent().safeChangeRatio());
@@ -473,13 +474,13 @@ public class Summary {
 
   private interface RowInserter {
 
-    void insertRowToDPArray(DPArray dp, CubeNode node, double targetRatio);
+    void insertRowToDPArray(DPArray dp, AdditiveCubeNode node, double targetRatio);
   }
 
-  static class NodeDimensionValuesComparator implements Comparator<CubeNode> {
+  static class NodeDimensionValuesComparator implements Comparator<AdditiveCubeNode> {
 
     @Override
-    public int compare(CubeNode n1, CubeNode n2) {
+    public int compare(AdditiveCubeNode n1, AdditiveCubeNode n2) {
       return n1.getDimensionValues().compareTo(n2.getDimensionValues());
     }
   }
@@ -499,12 +500,12 @@ public class Summary {
     }
 
     @Override
-    public void insertRowToDPArray(DPArray dp, CubeNode node, double targetRatio) {
+    public void insertRowToDPArray(DPArray dp, AdditiveCubeNode node, double targetRatio) {
       // If the row has the same change trend with the top row, then it is inserted.
       if (side == node.side()) {
         basicRowInserter.insertRowToDPArray(dp, node, targetRatio);
       } else { // Otherwise, it is inserted only there exists an intermediate parent besides root node
-        CubeNode parent = findAncestor(node, null, dp.getAnswer());
+        AdditiveCubeNode parent = findAncestor(node, null, dp.getAnswer());
         if (parent != null && parent.side() == side) {
           basicRowInserter.insertRowToDPArray(dp, node, targetRatio);
         }
@@ -529,10 +530,10 @@ public class Summary {
     }
 
     @Override
-    public void insertRowToDPArray(DPArray dp, CubeNode node, double targetRatio) {
+    public void insertRowToDPArray(DPArray dp, AdditiveCubeNode node, double targetRatio) {
       double cost = costFunction.computeCost(targetRatio,
-          node.getBaselineValue(),
-          node.getCurrentValue(),
+          node.getBaselineSize(),
+          node.getCurrentSize(),
           node.getBaselineSize(),
           node.getCurrentSize(),
           globalBaselineValue,

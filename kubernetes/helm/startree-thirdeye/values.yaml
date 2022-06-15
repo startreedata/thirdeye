@@ -37,6 +37,11 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
 scheduler:
   enabled: true
@@ -51,6 +56,10 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  tls:
+    enabled: false
+  strategy:
+    type: Recreate
 
 worker:
   enabled: true
@@ -65,6 +74,13 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  tls:
+    enabled: false
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
   randomWorkerIdEnabled: false
 
 persistence:

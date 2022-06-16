@@ -13,21 +13,15 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.LogicalView;
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
-import ai.startree.thirdeye.spi.datasource.MetricFunction;
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
-import ai.startree.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetUtils;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.util.FilterPredicate;
@@ -64,7 +58,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private PinotResponseCacheLoader pinotResponseCacheLoader;
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
   private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
-  private PinotDataSourceDimensionFilters pinotDataSourceDimensionFilters;
   private ThirdEyeDataSourceContext context;
   private SqlExpressionBuilder sqlExpressionBuilder;
   private SqlLanguage sqlLanguage;
@@ -162,98 +155,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     // TODO Refactor. remove inverse hierarchical dependency
     pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
-    pinotDataSourceDimensionFilters = new PinotDataSourceDimensionFilters(this);
   }
 
   @Override
   public String getName() {
     return this.name;
-  }
-
-  @Override
-  public RelationalThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
-    Preconditions.checkNotNull(this.pinotResponseCache,
-        "{} doesn't connect to Pinot or cache is not initialized.",
-        getName());
-
-    long tStart = System.nanoTime();
-    try {
-      LinkedHashMap<MetricFunction, List<ThirdEyeResultSet>> metricFunctionToResultSetList = new LinkedHashMap<>();
-
-      TimeSpec timeSpec = null;
-      final MetricFunction metricFunction = request.getMetricFunction();
-      String dataset = metricFunction.getDataset();
-      DatasetConfigDTO datasetConfig = metricFunction.getDatasetConfig();
-      TimeSpec dataTimeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-      if (timeSpec == null) {
-        timeSpec = dataTimeSpec;
-      }
-
-      MetricConfigDTO metricConfig = metricFunction.getMetricConfig();
-      Multimap<String, String> filterSetFromView;
-      Map<String, Map<String, Object[]>> filterContextMap = new LinkedHashMap<>();
-      if (metricConfig != null && metricConfig.getViews() != null
-          && metricConfig.getViews().size() > 0) {
-        Map<String, ResultSetGroup> viewToTEResultSet = constructViews(metricConfig.getViews());
-        filterContextMap = convertToContextMap(viewToTEResultSet);
-        filterSetFromView = resolveFilterSetFromView(viewToTEResultSet, request.getFilterSet());
-      } else {
-        filterSetFromView = request.getFilterSet();
-      }
-
-      Multimap<String, String> decoratedFilterSet = filterSetFromView;
-      // Decorate filter set for pre-computed (non-additive) dataset
-      // NOTE: We do not decorate the filter if the metric name is '*', which is used by count(*) query, because
-      // the results are usually meta-data and should be shown regardless the filter setting.
-      if (!datasetConfig.isAdditive() && !"*".equals(metricFunction.getMetricName())) {
-        decoratedFilterSet =
-            generateFilterSetWithPreAggregatedDimensionValue(filterSetFromView,
-                request.getGroupBy(),
-                datasetConfig.getDimensions(), datasetConfig.getDimensionsHaveNoPreAggregation(),
-                datasetConfig.getPreAggregatedKeyword());
-      }
-      String sql;
-      if (metricConfig != null && metricConfig.isDimensionAsMetric()) {
-        sql = SqlUtils
-            .getDimensionAsMetricSql(request, metricFunction, decoratedFilterSet,
-                filterContextMap, dataTimeSpec,
-                datasetConfig);
-      } else {
-        sql = SqlUtils
-            .getSql(request, metricFunction, decoratedFilterSet, filterContextMap, dataTimeSpec);
-      }
-
-      ThirdEyeResultSetGroup resultSetGroup;
-      final long tStartFunction = System.nanoTime();
-      try {
-        resultSetGroup = this.executeSQL(new PinotQuery(sql, dataset));
-        if (metricConfig != null) {
-//            RequestStatisticsLogger.getRequestLog()
-//                .success(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
-//                    tStartFunction, System.nanoTime());
-        }
-      } catch (Exception e) {
-        if (metricConfig != null) {
-//            RequestStatisticsLogger.getRequestLog()
-//                .failure(this.getName(), metricConfig.getDataset(), metricConfig.getName(),
-//                    tStartFunction, System.nanoTime(), e);
-        }
-        throw e;
-      }
-
-      metricFunctionToResultSetList.put(metricFunction, resultSetGroup.getResultSets());
-
-      List<String[]> resultRows = ThirdEyeResultSetUtils
-          .parseResultSets(request, metricFunctionToResultSetList,
-              PINOT);
-      return new RelationalThirdEyeResponse(request, resultRows, timeSpec);
-    } catch (Exception e) {
-//      ThirdeyeMetricsUtil.pinotExceptionCounter.inc();
-      throw e;
-    } finally {
-//      ThirdeyeMetricsUtil.pinotCallCounter.inc();
-//      ThirdeyeMetricsUtil.pinotDurationCounter.inc(System.nanoTime() - tStart);
-    }
   }
 
   private Map<String, ResultSetGroup> constructViews(List<LogicalView> views) {
@@ -450,12 +356,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
     return pinotDataSourceTimeQuery.getMinDateTime(datasetConfig);
-  }
-
-  @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception {
-    return pinotDataSourceDimensionFilters.getDimensionFilters(datasetConfig);
   }
 
   @Override

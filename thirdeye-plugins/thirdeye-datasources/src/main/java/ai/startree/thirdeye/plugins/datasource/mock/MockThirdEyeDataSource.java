@@ -22,9 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -428,11 +426,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
-    return this.delegate.execute(request);
-  }
-
-  @Override
   public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
     return this.delegate.fetchDataTable(request);
   }
@@ -455,12 +448,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
     return this.delegate.getMaxDataTime(datasetConfig);
-  }
-
-  @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception {
-    return this.delegate.getDimensionFilters(datasetConfig);
   }
 
   /**

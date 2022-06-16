@@ -5,19 +5,12 @@
 
 package ai.startree.thirdeye.rootcause;
 
-import ai.startree.thirdeye.util.ThirdeyeMetricsUtil;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,50 +78,9 @@ public class RCAFramework {
    * @param input user-specified search entities
    * @return aggregated results
    */
+  @Deprecated
   public RCAFrameworkExecutionResult run(Set<Entity> input) throws Exception {
-    long tStart = System.nanoTime();
-    try {
-      Map<String, Pipeline> pipelines = new HashMap<>(this.pipelines);
-
-      final StaticPipeline staticPipeline = new StaticPipeline(input);
-      staticPipeline.init(new PipelineInitContext()
-          .setInputNames(Collections.emptySet())
-          .setOutputName(INPUT)
-      );
-
-      pipelines.put(INPUT, staticPipeline);
-
-      LOG.info("Constructing flow for input '{}'", input);
-      Map<String, Future<PipelineResult>> flow = constructDAG(pipelines);
-
-      Map<String, PipelineResult> results = new HashMap<>();
-      for (Map.Entry<String, Future<PipelineResult>> e : flow.entrySet()) {
-        PipelineResult r = e.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Results for pipeline '{}':", e.getKey());
-          logResultDetails(r);
-        }
-        results.put(e.getKey(), r);
-      }
-
-      return new RCAFrameworkExecutionResult(results.get(OUTPUT).getEntities(), results);
-    } catch (Exception e) {
-      ThirdeyeMetricsUtil.rcaFrameworkExceptionCounter.inc();
-      throw e;
-    } finally {
-      ThirdeyeMetricsUtil.rcaFrameworkCallCounter.inc();
-      ThirdeyeMetricsUtil.rcaFrameworkDurationCounter.inc(System.nanoTime() - tStart);
-    }
-  }
-
-  static void logResultDetails(PipelineResult result) {
-    List<Entity> entities = new ArrayList<>(result.getEntities());
-    entities.sort((o1, o2) -> -Double.compare(o1.getScore(), o2.getScore()));
-
-    for (Entity e : entities) {
-      LOG.debug("{} [{}] {}", Math.round(e.getScore() * 1000) / 1000.0,
-          e.getClass().getSimpleName(), e.getUrn());
-    }
+    throw new UnsupportedOperationException("deprecated");
   }
 
   static boolean isValidDAG(Collection<Pipeline> pipelines) {
@@ -146,33 +98,5 @@ public class RCAFramework {
     }
 
     return visited.contains(OUTPUT);
-  }
-
-  Map<String, Future<PipelineResult>> constructDAG(Map<String, Pipeline> pipelines) {
-    // TODO purge pipelines not on critical path
-    Map<String, Future<PipelineResult>> tasks = new LinkedHashMap<>();
-    Pipeline input = pipelines.get(INPUT);
-    PipelineCallable inputCallable = new PipelineCallable(
-        Collections.emptyMap(), input);
-    tasks.put(INPUT, this.executor.submit(inputCallable));
-
-    int prevSize = 0;
-    while (prevSize < tasks.size()) {
-      prevSize = tasks.size();
-      for (Pipeline p : pipelines.values()) {
-        if (!tasks.containsKey(p.getOutputName()) && tasks.keySet()
-            .containsAll(p.getInputNames())) {
-          Map<String, Future<PipelineResult>> dependencies = new HashMap<>();
-          for (String inputName : p.getInputNames()) {
-            dependencies.put(inputName, tasks.get(inputName));
-          }
-
-          PipelineCallable c = new PipelineCallable(dependencies, p);
-          tasks.put(p.getOutputName(), this.executor.submit(c));
-        }
-      }
-    }
-
-    return tasks;
   }
 }

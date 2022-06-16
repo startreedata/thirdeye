@@ -46,7 +46,7 @@ function AlertDetails<NewOrExistingAlert extends EditableAlert | Alert>({
             <Grid container>
                 <Grid item xs={12}>
                     <Box marginBottom={2}>
-                        <Typography variant="h6">
+                        <Typography variant="h5">
                             {t("label.alert-details")}
                         </Typography>
                     </Box>

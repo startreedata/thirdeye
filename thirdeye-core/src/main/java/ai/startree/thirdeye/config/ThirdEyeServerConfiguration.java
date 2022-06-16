@@ -13,7 +13,7 @@ import ai.startree.thirdeye.events.MockEventsConfiguration;
 import ai.startree.thirdeye.metric.PrometheusConfiguration;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.restclient.ThirdEyeRestClientConfiguration;
-import ai.startree.thirdeye.rootcause.impl.RCAConfiguration;
+import ai.startree.thirdeye.rootcause.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,7 +45,7 @@ public class ThirdEyeServerConfiguration extends Configuration {
   private CacheConfig cacheConfig = new CacheConfig();
 
   @JsonProperty("rca")
-  private RCAConfiguration rcaConfiguration = new RCAConfiguration();
+  private RcaConfiguration rcaConfiguration = new RcaConfiguration();
 
   @JsonProperty("notifications")
   private NotificationConfiguration notificationConfiguration = new NotificationConfiguration();
@@ -224,12 +224,12 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return this;
   }
 
-  public RCAConfiguration getRcaConfiguration() {
+  public RcaConfiguration getRcaConfiguration() {
     return rcaConfiguration;
   }
 
   public ThirdEyeServerConfiguration setRcaConfiguration(
-      final RCAConfiguration rcaConfiguration) {
+      final RcaConfiguration rcaConfiguration) {
     this.rcaConfiguration = rcaConfiguration;
     return this;
   }

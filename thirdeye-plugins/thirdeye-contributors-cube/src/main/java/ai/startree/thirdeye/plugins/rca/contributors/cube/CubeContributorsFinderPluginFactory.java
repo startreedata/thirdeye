@@ -4,6 +4,7 @@ import ai.startree.thirdeye.spi.rca.ContributorsFinder;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderContext;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CubeContributorsFinderPluginFactory implements ContributorsFinderFactory {
 
@@ -13,7 +14,7 @@ public class CubeContributorsFinderPluginFactory implements ContributorsFinderFa
   }
 
   @Override
-  public ContributorsFinder build(final ContributorsFinderContext context) {
+  public @NonNull ContributorsFinder build(final ContributorsFinderContext context) {
     final CubeConfiguration configuration = new ObjectMapper().convertValue(context.getParams(), CubeConfiguration.class);
 
     return new CubeContributorsFinder(

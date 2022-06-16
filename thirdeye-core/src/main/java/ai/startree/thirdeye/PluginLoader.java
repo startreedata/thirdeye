@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.rootcause.ContributorsFinderRegistry;
+import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
@@ -49,7 +49,7 @@ public class PluginLoader {
   private final DataSourcesLoader dataSourcesLoader;
   private final DetectionRegistry detectionRegistry;
   private final NotificationServiceRegistry notificationServiceRegistry;
-  private final ContributorsFinderRegistry contributorsFinderRegistry;
+  private final ContributorsFinderRunner contributorsFinderRunner;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -59,12 +59,12 @@ public class PluginLoader {
       final DataSourcesLoader dataSourcesLoader,
       final DetectionRegistry detectionRegistry,
       final NotificationServiceRegistry notificationServiceRegistry,
-      final ContributorsFinderRegistry contributorsFinderRegistry,
+      final ContributorsFinderRunner contributorsFinderRunner,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
-    this.contributorsFinderRegistry = contributorsFinderRegistry;
+    this.contributorsFinderRunner = contributorsFinderRunner;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -113,7 +113,7 @@ public class PluginLoader {
       notificationServiceRegistry.addNotificationServiceFactory(f);
     }
     for (ContributorsFinderFactory f: plugin.getContributorsFinderFactories()) {
-      contributorsFinderRegistry.addContributorsFinderFactory(f);
+      contributorsFinderRunner.addContributorsFinderFactory(f);
     }
   }
 

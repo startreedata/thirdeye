@@ -7,15 +7,13 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
-import ai.startree.thirdeye.rootcause.ContributorsFinderRegistry;
+import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.rca.ContributorsFinder;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +31,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.Map;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -64,17 +61,14 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
-  // todo cyril make this a configuration in yaml
-  private static final String DEFAULT_TOP_CONTRIBUTOR_ALGORITHM = "cube";
-
-  private final ContributorsFinderRegistry contributorsFinderRegistry;
+  private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
 
   @Inject
   public RcaDimensionAnalysisResource(
-      final ContributorsFinderRegistry contributorsFinderRegistry,
+      final ContributorsFinderRunner contributorsFinderRunner,
       final RcaInfoFetcher rcaInfoFetcher) {
-    this.contributorsFinderRegistry = contributorsFinderRegistry;
+    this.contributorsFinderRunner = contributorsFinderRunner;
     this.rcaInfoFetcher = rcaInfoFetcher;
   }
 
@@ -137,10 +131,8 @@ public class RcaDimensionAnalysisResource {
           Predicate.parseAndCombinePredicates(filters),
           hierarchies);
 
-      final ContributorsFinder contributorsFinder = contributorsFinderRegistry.get(DEFAULT_TOP_CONTRIBUTOR_ALGORITHM, Map.of());
-      checkArgument(contributorsFinder != null, "Unknown contributors finder algorithm: %s", DEFAULT_TOP_CONTRIBUTOR_ALGORITHM);
+      final ContributorsFinderResult result = contributorsFinderRunner.run(searchConfiguration);
 
-      final ContributorsFinderResult result = contributorsFinder.search(searchConfiguration);
       return Response.ok(result.getDimensionAnalysisResult()).build();
     } catch (final WebApplicationException e) {
       throw e;

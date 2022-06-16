@@ -1,5 +1,6 @@
 package ai.startree.thirdeye.spi.rca;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import java.util.List;
@@ -14,12 +15,12 @@ public class ContributorsSearchConfiguration {
   private final int summarySize;
   private final int depth;
   private final boolean doOneSideError;
-  private final List<String> filters;
+  private final List<Predicate> filters;
   private final List<List<String>> hierarchies;
 
   public ContributorsSearchConfiguration(final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
       final Interval currentInterval, final Interval currentBaseline, final int summarySize,
-      final int depth, final boolean doOneSideError, final List<String> filters,
+      final int depth, final boolean doOneSideError, final List<Predicate> filters,
       final List<List<String>> hierarchies) {
     this.metricConfigDTO = metricConfigDTO;
     this.datasetConfigDTO = datasetConfigDTO;
@@ -60,7 +61,7 @@ public class ContributorsSearchConfiguration {
     return doOneSideError;
   }
 
-  public List<String> getFilters() {
+  public List<Predicate> getFilters() {
     return filters;
   }
 

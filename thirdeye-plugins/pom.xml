@@ -18,6 +18,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>thirdeye-contributors-cube</module>
     <module>thirdeye-datasources</module>
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-detection-components</module>

@@ -69,6 +69,10 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-slack/target/thirdeye-notification-slack-${project.version}-dist</directory>
       <outputDirectory>plugins/notification-slack/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-contributors-cube/target/thirdeye-contributors-cube-${project.version}-dist</directory>
+      <outputDirectory>plugins/contributors-cube/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

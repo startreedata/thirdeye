@@ -21,6 +21,7 @@ import {
     TooltipV1,
 } from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
@@ -198,7 +199,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                             displayInline
                                             enablePadding
                                             externalLink
-                                            href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                            href={`${THIRDEYE_DOC_LINK}/how-tos/database/`}
                                         />
                                     </span>
                                 </TooltipV1>

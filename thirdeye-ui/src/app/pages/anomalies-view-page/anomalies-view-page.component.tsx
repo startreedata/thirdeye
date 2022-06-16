@@ -33,6 +33,7 @@ import {
     createAlertEvaluation,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
     getAlertsViewPath,
@@ -202,7 +203,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             displayInline
                             enablePadding
                             externalLink
-                            href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                            href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
                         />
                     </span>
                 </TooltipV1>

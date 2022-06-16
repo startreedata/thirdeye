@@ -19,6 +19,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     createNewInvestigation,
     determineInvestigationIDFromSearchParams,
@@ -206,7 +207,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                         displayInline
                                         enablePadding
                                         externalLink
-                                        href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                                        href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
                                     />
                                 </span>
                             </TooltipV1>

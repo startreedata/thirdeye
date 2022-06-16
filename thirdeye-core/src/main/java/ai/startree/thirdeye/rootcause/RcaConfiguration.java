@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.rootcause.impl;
+package ai.startree.thirdeye.rootcause;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * Maintain a list of configs for each external event data provider
  * Maintain a list of configs for each external pipeline using this config
  */
-public class RCAConfiguration {
+public class RcaConfiguration {
 
   private List<String> formatters = Collections.emptyList();
   private int parallelism = 1;
@@ -22,7 +22,7 @@ public class RCAConfiguration {
     return parallelism;
   }
 
-  public RCAConfiguration setParallelism(final int parallelism) {
+  public RcaConfiguration setParallelism(final int parallelism) {
     this.parallelism = parallelism;
     return this;
   }
@@ -31,7 +31,7 @@ public class RCAConfiguration {
     return formatters;
   }
 
-  public RCAConfiguration setFormatters(final List<String> formatters) {
+  public RcaConfiguration setFormatters(final List<String> formatters) {
     this.formatters = formatters;
     return this;
   }

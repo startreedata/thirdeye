@@ -1,5 +1,10 @@
 // Copyright 2021 StarTree Inc.
 // All rights reserved. Confidential and proprietary information of StarTree Inc.
+import {
+    IconButtonProps,
+    LabelDisplayedRowsArgs,
+    SelectProps,
+} from "@material-ui/core";
 import { ReactNode } from "react";
 
 export interface DataGridV1Props<T> {
@@ -29,6 +34,8 @@ export interface DataGridV1Props<T> {
         selectedCount: number
     ) => string; // Search and selection status text to render next to search input
     onRowExpand?: (expanded: boolean, data: T) => void;
+    showPagination?: boolean;
+    pagination?: Pagination;
 }
 
 export interface DataGridColumnV1<T> {
@@ -103,4 +110,18 @@ export interface DataGridSelectionModelInternalV1<T> {
     rowKeyValues: Set<unknown>;
     rowKeyValueMap: Map<unknown, T>;
     dirty?: boolean;
+}
+
+export interface Pagination {
+    backIconButtonText?: string;
+    backIconButtonProps?: Partial<IconButtonProps>;
+    labelDisplayedRows?: (
+        paginationInfo: LabelDisplayedRowsArgs
+    ) => React.ReactNode;
+    labelRowsPerPage?: React.ReactNode;
+    nextIconButtonProps?: Partial<IconButtonProps>;
+    nextIconButtonText?: string;
+    rowsPerPage?: number;
+    rowsPerPageOptions?: Array<number | { value: number; label: string }>;
+    SelectProps?: Partial<SelectProps>;
 }

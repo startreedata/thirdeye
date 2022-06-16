@@ -1,6 +1,12 @@
 // Copyright 2021 StarTree Inc.
 // All rights reserved. Confidential and proprietary information of StarTree Inc.
-import { Box, Checkbox, Toolbar, Typography } from "@material-ui/core";
+import {
+    Box,
+    Checkbox,
+    TablePagination,
+    Toolbar,
+    Typography,
+} from "@material-ui/core";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBox";
 import { Skeleton } from "@material-ui/lab";
@@ -55,6 +61,9 @@ import "./data-grid-v1.styles.scss";
 
 const KEY_VALUE_ROW_SELECTION_COLUMN = "row-selection-column";
 const ROW_COUNT_PERFORMANCE_THRESHOLD = 100;
+const DEFAULT_ROW_PER_PAGE_OPTIONS = [10, 25, 50, { label: "All", value: -1 }];
+// Setting default as 10 have comfortable view
+const DEFAULT_ROW_PER_PAGE = 10;
 
 export function DataGridV1<T>({
     columns,
@@ -79,6 +88,8 @@ export function DataGridV1<T>({
     onRowExpand,
     searchFilterValue,
     onSearchFilterValueChange,
+    showPagination,
+    pagination,
     ...otherProps
 }: DataGridV1Props<T>): ReactElement {
     const dataGridV1Classes = useDataGridV1Styles();
@@ -107,6 +118,33 @@ export function DataGridV1<T>({
         number | string
     >("100%");
     const [tableRef, setTableRef] = useState<Table<unknown> | null>(null);
+
+    // Pagination
+    const { rowsPerPage, rowsPerPageOptions, ...restPaginationProps } =
+        pagination || {};
+    const [rowsPerPageInternal, setRowsPerPageInternal] = useState(
+        rowsPerPage || DEFAULT_ROW_PER_PAGE
+    );
+    const [currentPage, setCurrentPage] = useState(0);
+
+    const handleChangePage = (
+        _event: React.ChangeEvent<unknown> | null,
+        newPage: number
+    ): void => {
+        setCurrentPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ): void => {
+        setRowsPerPageInternal(parseInt(event.target.value, 10));
+        setCurrentPage(0);
+    };
+
+    useEffect(() => {
+        // Reset page on search
+        setCurrentPage(0);
+    }, [filteredData]);
 
     // Data to be rendered as loading indicator
     const loadingIndicatorData = [{ id: 0 }, { id: 1 }, { id: 2 }];
@@ -836,6 +874,42 @@ export function DataGridV1<T>({
         setSearchValue(value);
     };
 
+    const dataToDisplay = useMemo(() => {
+        if (!showPagination) {
+            return filteredData;
+        } else {
+            const start = currentPage * rowsPerPageInternal;
+
+            return filteredData?.slice(start, start + rowsPerPageInternal);
+        }
+    }, [filteredData, showPagination, currentPage, rowsPerPageInternal]);
+
+    const totalRecords = useMemo(() => filteredData.length, [filteredData]);
+
+    const paginationRenderer = useCallback(() => {
+        return (
+            <TablePagination
+                {...restPaginationProps}
+                component="div"
+                count={totalRecords}
+                page={currentPage}
+                rowsPerPage={rowsPerPageInternal}
+                rowsPerPageOptions={
+                    rowsPerPageOptions || DEFAULT_ROW_PER_PAGE_OPTIONS
+                }
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+        );
+    }, [
+        restPaginationProps,
+        totalRecords,
+        rowsPerPageInternal,
+        rowsPerPageOptions,
+        handleChangePage,
+        handleChangeRowsPerPage,
+    ]);
+
     return (
         <Box
             {...otherProps}
@@ -926,11 +1000,14 @@ export function DataGridV1<T>({
                             SortIndicator: DataGridSortIndicatorV1,
                             ExpandIcon: DataGridExpandIconV1,
                         }}
-                        data={data ? filteredData : loadingIndicatorData}
+                        data={data ? dataToDisplay : loadingIndicatorData}
                         estimatedRowHeight={HEIGHT_DATA_GRID_ROW}
                         expandColumnKey={expandColumnKey}
                         fixed={fixedTable}
-                        headerHeight={HEIGHT_DATA_GRID_HEADER_ROW}
+                        footerHeight={
+                            showPagination ? HEIGHT_DATA_GRID_TOOLBAR : 0
+                        }
+                        footerRenderer={paginationRenderer}
                         height={
                             hideToolbar
                                 ? height

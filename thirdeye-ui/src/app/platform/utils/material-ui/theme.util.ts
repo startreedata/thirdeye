@@ -31,6 +31,7 @@ import { popoverClassesV1, popoverPropsV1 } from "./popover.util";
 import { radioPropsV1 } from "./radio.util";
 import { shapeOptionsV1 } from "./shape.util";
 import { switchPropsV1 } from "./switch.util";
+import { tablePaginationClassesV1 } from "./table-pagination.util";
 import { tabClassesV1, tabsClassesV1, tabsPropsV1 } from "./tabs.util";
 import { textFieldPropsV1 } from "./text-field.util";
 import { typographyOptionsV1 } from "./typography.util";
@@ -73,6 +74,7 @@ export const lightV1: Theme = createTheme({
         MuiOutlinedInput: outlinedInputClassesV1,
         MuiPopover: popoverClassesV1,
         MuiTab: tabClassesV1,
+        MuiTablePagination: tablePaginationClassesV1,
         MuiTabs: tabsClassesV1,
     },
     shape: shapeOptionsV1,

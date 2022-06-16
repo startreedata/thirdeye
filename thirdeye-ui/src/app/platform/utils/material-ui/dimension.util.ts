@@ -18,4 +18,5 @@ export const DimensionV1 = {
     BorderRadiusDefault: 4,
     GridSpacingDefault: 2,
     PageGridSpacing: 3,
+    ToolbarHeight: 56,
 } as const;

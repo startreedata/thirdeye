@@ -23,4 +23,24 @@ public class BalancedCostFunctionTest {
 
     assertThat(function.getChangeContributionThreshold()).isEqualTo(expectedThreshold);
   }
+
+  @Test
+  public void testCorrectFloatingPointArithmeticError() {
+    final double outputForaboveZero = BalancedCostFunction.correctFloatingPointArithmeticError(
+        0.000001);
+    assertThat(outputForaboveZero).isEqualTo(0);
+
+    final double outputForBelowZero = BalancedCostFunction.correctFloatingPointArithmeticError(-0.000001);
+    assertThat(outputForBelowZero).isEqualTo(0);
+  }
+
+  @Test
+  public void testCorrectFloatingPointArithmeticErrorAroundOne() {
+    final double outputForaboveZero = BalancedCostFunction.correctFloatingPointArithmeticError(
+        1.000001);
+    assertThat(outputForaboveZero).isEqualTo(1);
+
+    final double outputForBelowZero = BalancedCostFunction.correctFloatingPointArithmeticError(0.999999);
+    assertThat(outputForBelowZero).isEqualTo(1);
+  }
 }

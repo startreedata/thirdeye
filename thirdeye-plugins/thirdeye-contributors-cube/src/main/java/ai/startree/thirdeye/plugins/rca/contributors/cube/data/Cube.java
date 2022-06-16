@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.plugins.rca.contributors.cube.data;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import ai.startree.thirdeye.plugins.rca.contributors.cube.cost.CostFunction;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -300,9 +302,7 @@ public class Cube {
       }
     }
     // fixme cyril do better error management after refactoring
-    if (costSet.isEmpty()) {
-      throw new RuntimeException("No data found. Cannot run top contributors algorithm. No data in baseline/current timeframe?");
-    }
+    checkState(!costSet.isEmpty(), "No data found. Cannot run top contributors algorithm. No data in baseline/current timeframe?");
 
     costSet.sort(Collections.reverseOrder());
     LOG.info("Top {} nodes (depth=1):", TOP_COST_ENTRIES_TO_LOG);

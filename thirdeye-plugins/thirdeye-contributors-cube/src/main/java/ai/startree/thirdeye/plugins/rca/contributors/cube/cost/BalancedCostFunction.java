@@ -20,9 +20,9 @@ public class BalancedCostFunction implements CostFunction {
 
   @VisibleForTesting
   protected static final String CHANGE_CONTRIBUTION_THRESHOLD_PARAM = "threshold";
+  private static final double FLOATING_POINT_ERROR_EPSILON = 0.00001;
   // The threshold to the contribution to overall changes in percentage
   private double changeContributionThreshold = 3;
-  private final double epsilon = 0.00001;
 
   public BalancedCostFunction() {
   }
@@ -72,13 +72,8 @@ public class BalancedCostFunction implements CostFunction {
     }
     // Contribution is the size of the node
     double contribution = (baselineSize + currentSize) / (topBaselineSize + topCurrentSize);
-    if (Math.abs(0d - contribution) < epsilon) {
-      contribution = 0d;
-    }
-    //fixme cyril do better logging
-    if (Double.compare(contribution, 1) > 0 || Double.compare(contribution, 0) < 0) {
-      System.out.println("Here");
-    }
+    // fixme cyril chekState here - contribution can be nan ?
+    contribution = correctFloatingPointArithmeticError(contribution);
     Preconditions
         .checkState(Double.compare(contribution, 0) >= 0, "Contribution {} is smaller than 0.",
             contribution);
@@ -87,6 +82,17 @@ public class BalancedCostFunction implements CostFunction {
             contribution);
     // The cost function considers change difference, change changeRatio, and node size (i.e., contribution)
     return fillEmptyValuesAndGetError(baselineValue, currentValue, parentChangeRatio, contribution);
+  }
+
+  @VisibleForTesting
+  protected static double correctFloatingPointArithmeticError(double contribution) {
+    // fixme cyril no need to round if contribution is in [0,1] - see checks after call to this function
+    if (Math.abs(0d - contribution) < FLOATING_POINT_ERROR_EPSILON) {
+      contribution = 0d;
+    } else if (Math.abs(1d - contribution) < FLOATING_POINT_ERROR_EPSILON) {
+      contribution = 1d;
+    }
+    return contribution;
   }
 
   private static double error(double baselineValue, double currentValue, double parentRatio,

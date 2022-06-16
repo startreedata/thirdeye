@@ -40,7 +40,6 @@ public class RcaResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(RcaResource.class);
 
-  private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RcaInvestigationResource rcaInvestigationResource;
   private final RcaMetricResource rcaMetricResource;
   private final RcaDimensionAnalysisResource rcaDimensionAnalysisResource;
@@ -48,12 +47,10 @@ public class RcaResource {
 
   @Inject
   public RcaResource(
-      final RootCauseTemplateResource rootCauseTemplateResource,
       final RcaInvestigationResource rcaInvestigationResource,
       final RcaMetricResource rcaMetricResource,
       final RcaDimensionAnalysisResource rcaDimensionAnalysisResource,
       final RcaRelatedResource rcaRelatedResource) {
-    this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rcaInvestigationResource = rcaInvestigationResource;
     this.rcaMetricResource = rcaMetricResource;
     this.rcaDimensionAnalysisResource = rcaDimensionAnalysisResource;
@@ -63,11 +60,6 @@ public class RcaResource {
   @Path(value = "/dim-analysis")
   public RcaDimensionAnalysisResource getDimensionAnalysisResource() {
     return rcaDimensionAnalysisResource;
-  }
-
-  @Path(value = "/template")
-  public RootCauseTemplateResource getRootCauseTemplateResource() {
-    return rootCauseTemplateResource;
   }
 
   @Path(value = "/investigations")

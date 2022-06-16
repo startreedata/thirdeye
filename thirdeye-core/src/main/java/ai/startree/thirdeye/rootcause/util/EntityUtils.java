@@ -194,21 +194,6 @@ public class EntityUtils {
     return new ParsedUrn(prefixes, predicates);
   }
 
-  /**
-   * Return the urn parsed for the given type. Validates whether urn matches type and extracts
-   * optional filter tail.
-   *
-   * @param urn entity urn string
-   * @param type expected entity type
-   * @return ParsedUrn
-   */
-  public static ParsedUrn parseUrnString(String urn, EntityType type) {
-    if (!type.isType(urn)) {
-      throw new IllegalArgumentException(
-          String.format("Expected type '%s' but got '%s'", type.getPrefix(), urn));
-    }
-    return parseUrnString(urn);
-  }
 
   /**
    * Return the urn parsed for the given type. Validates whether urn matches type and extracts

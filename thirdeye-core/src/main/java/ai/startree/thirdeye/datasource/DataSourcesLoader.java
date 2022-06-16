@@ -14,6 +14,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -32,13 +34,16 @@ public class DataSourcesLoader {
   private final MetricConfigManager metricConfigManager;
   private final DatasetConfigManager datasetConfigManager;
   private final Map<String, ThirdEyeDataSourceFactory> dataSourceFactoryMap = new HashMap<>();
+  private final MetricRegistry metricRegistry;
 
   @Inject
   public DataSourcesLoader(
       final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final MetricRegistry metricRegistry) {
     this.metricConfigManager = metricConfigManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.metricRegistry = metricRegistry;
   }
 
   public void addThirdEyeDataSourceFactory(ThirdEyeDataSourceFactory f) {
@@ -58,9 +63,17 @@ public class DataSourcesLoader {
           factoryName,
           dataSource.getProperties());
 
-      return dataSourceFactoryMap
+      final ThirdEyeDataSource ds = dataSourceFactoryMap
           .get(factoryName)
           .build(buildContext(dataSource));
+      metricRegistry.register(String.format("%sDatasource_HEALTH", ds.getName()),
+          new Gauge<Boolean>() {
+            @Override
+            public Boolean getValue() {
+              return ds.validate();
+            }
+          });
+      return ds;
     } catch (Exception e) {
       LOG.error("Exception in creating thirdeye data source type {}", factoryName, e);
     }

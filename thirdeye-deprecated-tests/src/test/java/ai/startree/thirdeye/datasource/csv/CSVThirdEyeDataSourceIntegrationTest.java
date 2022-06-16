@@ -37,12 +37,14 @@ public class CSVThirdEyeDataSourceIntegrationTest {
 
   private DatasetConfigManager datasetConfigDAO;
   private MetricConfigManager metricConfigDAO;
+  private MetricRegistry metricRegistry;
 
   @BeforeMethod
   void beforeMethod() {
     final Injector injector = new TestDbEnv().getInjector();
     datasetConfigDAO = injector.getInstance(DatasetConfigManager.class);
     metricConfigDAO = injector.getInstance(MetricConfigManager.class);
+    metricRegistry = injector.getInstance(MetricRegistry.class);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -72,7 +74,7 @@ public class CSVThirdEyeDataSourceIntegrationTest {
     Assert.assertNotNull(configDTO.getId());
 
     final DataSourcesLoader dataSourcesLoader = new DataSourcesLoader(metricConfigDAO,
-        datasetConfigDAO);
+        datasetConfigDAO, metricRegistry);
     final DataSourceCache dataSourceCache = new DataSourceCache(mock(DataSourceManager.class),
         dataSourcesLoader,
         new MetricRegistry());

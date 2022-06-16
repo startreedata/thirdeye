@@ -6,9 +6,7 @@
 package ai.startree.thirdeye.rootcause.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Config class for RCA's yml config
@@ -17,19 +15,8 @@ import java.util.Map;
  */
 public class RCAConfiguration {
 
-  private Map<String, List<PipelineConfiguration>> frameworks = new HashMap<>();
   private List<String> formatters = Collections.emptyList();
   private int parallelism = 1;
-
-  public Map<String, List<PipelineConfiguration>> getFrameworks() {
-    return frameworks;
-  }
-
-  public RCAConfiguration setFrameworks(
-      final Map<String, List<PipelineConfiguration>> frameworks) {
-    this.frameworks = frameworks;
-    return this;
-  }
 
   public int getParallelism() {
     return parallelism;

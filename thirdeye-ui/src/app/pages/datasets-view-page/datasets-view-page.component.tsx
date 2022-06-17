@@ -4,16 +4,16 @@ import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
@@ -27,7 +27,7 @@ import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 
 export const DatasetsViewPage: FunctionComponent = () => {
     const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const params = useParams<DatasetsViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -81,8 +81,11 @@ export const DatasetsViewPage: FunctionComponent = () => {
     const handleDatasetDelete = (uiDataset: UiDataset): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiDataset.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiDataset.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasetDeleteOk(uiDataset),
         });
     };

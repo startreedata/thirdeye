@@ -1,4 +1,14 @@
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useState } from "react";
@@ -11,6 +21,7 @@ import {
     TooltipV1,
 } from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
@@ -41,7 +52,9 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
         useState<DatasourceWizardStep>(
             DatasourceWizardStep.DATASOURCE_CONFIGURATION
         );
+    const [autoOnboard, setAutoOnboard] = useState(false);
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const onDatasourceConfigurationChange = (value: string): void => {
         setNewDatasourceJSON(value);
@@ -49,6 +62,13 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
     const onCancel = (): void => {
         props.onCancel && props.onCancel();
+    };
+
+    const handleAutoOnboardChange = (
+        _: React.ChangeEvent<HTMLInputElement>,
+        checked: boolean
+    ): void => {
+        setAutoOnboard(checked);
     };
 
     const onBack = (): void => {
@@ -80,7 +100,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
 
         if (currentWizardStep === DatasourceWizardStep.REVIEW_AND_SUBMIT) {
             // On last step
-            props.onFinish && props.onFinish(newDatasource);
+            props.onFinish && props.onFinish(newDatasource, autoOnboard);
 
             return;
         }
@@ -179,7 +199,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                             displayInline
                                             enablePadding
                                             externalLink
-                                            href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                            href={`${THIRDEYE_DOC_LINK}/how-tos/database/`}
                                         />
                                     </span>
                                 </TooltipV1>
@@ -206,6 +226,24 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                     onChange={onDatasourceConfigurationChange}
                                 />
                             </Grid>
+
+                            {/* Dataset onboard check */}
+                            {props.isCreate && (
+                                <Grid item lg={4} md={5} sm={6} xs={12}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={autoOnboard}
+                                                color="primary"
+                                                onChange={
+                                                    handleAutoOnboardChange
+                                                }
+                                            />
+                                        }
+                                        label={t("label.datasets-auto-onboard")}
+                                    />
+                                </Grid>
+                            )}
                         </>
                     )}
 
@@ -220,6 +258,38 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                     readOnly
                                     value={newDatasource}
                                 />
+                            </Grid>
+
+                            {/* Dataset onboard information */}
+                            <Grid item sm={3}>
+                                <Typography variant="subtitle1">
+                                    <strong>
+                                        {t("label.datasets-auto-onboard")}
+                                    </strong>
+                                </Typography>
+                            </Grid>
+
+                            <Grid item sm={9}>
+                                <Typography variant="body2">
+                                    <>
+                                        {/* Active */}
+                                        {autoOnboard ? (
+                                            <CheckIcon
+                                                fontSize="small"
+                                                htmlColor={
+                                                    theme.palette.success.main
+                                                }
+                                            />
+                                        ) : (
+                                            <CloseIcon
+                                                fontSize="small"
+                                                htmlColor={
+                                                    theme.palette.error.main
+                                                }
+                                            />
+                                        )}
+                                    </>
+                                </Typography>
                             </Grid>
                         </>
                     )}

@@ -12,6 +12,7 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.TestDatabase;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.resources.RootResource;
+import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -22,11 +23,12 @@ public class ThirdEyeServerModuleTest {
 
   @Test
   public void testRootResourceInjection() throws Exception {
-    TestDatabase db = new TestDatabase();
+    final TestDatabase db = new TestDatabase();
     final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
         .setAuthConfiguration(new AuthConfiguration())
+        .setTaskDriverConfiguration(new TaskDriverConfiguration().setId(0L))
         .setConfigPath("../config");
 
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(

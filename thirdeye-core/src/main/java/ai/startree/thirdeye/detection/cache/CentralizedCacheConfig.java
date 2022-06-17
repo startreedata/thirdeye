@@ -11,6 +11,7 @@ import java.util.Map;
 /**
  * settings for centralized caches
  */
+@Deprecated // cache needs reimplementation with v2 query system
 public class CentralizedCacheConfig {
 
   /**

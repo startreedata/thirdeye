@@ -1,3 +1,17 @@
+///
+/// Copyright 2022 StarTree Inc
+///
+/// Licensed under the StarTree Community License (the "License"); you may not use
+/// this file except in compliance with the License. You may obtain a copy of the
+/// License at http://www.startree.ai/legal/startree-community-license
+///
+/// Unless required by applicable law or agreed to in writing, software distributed under the
+/// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+/// either express or implied.
+/// See the License for the specific language governing permissions and limitations under
+/// the License.
+///
+
 import axios from "axios";
 import { duplicateKeyForArrayQueryParams } from "../../platform/utils/axios/axios.util";
 import {
@@ -5,16 +19,23 @@ import {
     AnomalyBreakdownRequest,
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisRequest,
+    Investigation,
 } from "../dto/rca.interfaces";
 
+const ANOMALY_ID_QUERY_PARAM_KEY = "id";
+const ANOMALY_ID_FILTER_QUERY_PARAM_KEY = "anomaly.id";
 const BASE_URL_RCA = "/api/rca";
+const INVESTIGATIONS_ENDPOINT = `${BASE_URL_RCA}/investigations`;
 
 export const getAnomalyMetricBreakdown = async (
     id: number,
     params: AnomalyBreakdownRequest
 ): Promise<AnomalyBreakdown> => {
+    const queryParams = new URLSearchParams([
+        [ANOMALY_ID_QUERY_PARAM_KEY, id.toString()],
+    ]);
     const response = await axios.get(
-        `${BASE_URL_RCA}/metrics/heatmap/anomaly/${id}`,
+        `${BASE_URL_RCA}/metrics/heatmap?${queryParams.toString()}`,
         {
             params,
             paramsSerializer: duplicateKeyForArrayQueryParams,
@@ -35,8 +56,11 @@ export const getDimensionAnalysisForAnomaly = async (
     id: number,
     params: AnomalyDimensionAnalysisRequest
 ): Promise<AnomalyDimensionAnalysisData> => {
+    const queryParams = new URLSearchParams([
+        [ANOMALY_ID_QUERY_PARAM_KEY, id.toString()],
+    ]);
     const response = await axios.get(
-        `${BASE_URL_RCA}/dim-analysis/anomaly/${id}`,
+        `${BASE_URL_RCA}/dim-analysis?${queryParams.toString()}`,
         {
             params,
             paramsSerializer: duplicateKeyForArrayQueryParams,
@@ -44,4 +68,63 @@ export const getDimensionAnalysisForAnomaly = async (
     );
 
     return response.data;
+};
+
+export const getInvestigations = async (
+    anomalyId?: number
+): Promise<Investigation[]> => {
+    const queryParams = new URLSearchParams();
+    let queryString = "";
+
+    if (anomalyId) {
+        queryParams.set(
+            ANOMALY_ID_FILTER_QUERY_PARAM_KEY,
+            anomalyId.toString()
+        );
+        queryString = `?${queryParams.toString()}`;
+    }
+
+    const response = await axios.get(
+        `${INVESTIGATIONS_ENDPOINT}${queryString}`
+    );
+
+    return response.data;
+};
+
+export const getInvestigation = async (
+    investigationId: number
+): Promise<Investigation> => {
+    const response = await axios.get(
+        `${INVESTIGATIONS_ENDPOINT}/${investigationId}`
+    );
+
+    return response.data;
+};
+
+export const deleteInvestigation = async (
+    id: number
+): Promise<Investigation> => {
+    const response = await axios.delete(`${INVESTIGATIONS_ENDPOINT}/${id}`);
+
+    return response.data;
+};
+
+export const createInvestigation = async (
+    investigation: Investigation
+): Promise<Investigation> => {
+    const response = await axios.post(`${INVESTIGATIONS_ENDPOINT}`, [
+        investigation,
+    ]);
+
+    return response.data[0];
+};
+
+export const updateInvestigation = async (
+    investigation: Investigation
+): Promise<Investigation> => {
+    const response = await axios.put(`${INVESTIGATIONS_ENDPOINT}`, [
+        investigation,
+    ]);
+
+    return response.data[0];
 };

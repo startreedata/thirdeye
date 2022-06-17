@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
+import ai.startree.thirdeye.task.TaskDriver;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.task.runner.NotificationTaskRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,6 +66,7 @@ public class InternalResource {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final TaskDriverConfiguration taskDriverConfiguration;
+  private final TaskDriver taskDriver;
 
   @Inject
   public InternalResource(
@@ -75,7 +77,8 @@ public class InternalResource {
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
       final NotificationSchemeFactory notificationSchemeFactory,
-      final TaskDriverConfiguration taskDriverConfiguration) {
+      final TaskDriverConfiguration taskDriverConfiguration,
+      final TaskDriver taskDriver) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
@@ -84,6 +87,7 @@ public class InternalResource {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.taskDriverConfiguration = taskDriverConfiguration;
+    this.taskDriver = taskDriver;
   }
 
   @Path("http-detector")
@@ -100,12 +104,6 @@ public class InternalResource {
   @Path("ping")
   public Response ping() {
     return Response.ok("pong").build();
-  }
-
-  @GET
-  @Path("version")
-  public Response getVersion() {
-    return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();
   }
 
   @GET
@@ -189,7 +187,9 @@ public class InternalResource {
     String result = hmacSHA512(payload, secretKey);
     log.info("Header signature: {}", signature);
     log.info("Generated signature: {}", result);
-    ensure(result.equals(signature), "Broken request!");
+    if (signature != null) {
+      ensure(result.equals(signature), "Broken request!");
+    }
     log.info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(payload));
     log.info("========================================================================");
     return Response.ok().build();
@@ -198,8 +198,8 @@ public class InternalResource {
   @GET
   @Path("worker/id")
   public Response workerId(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    if(taskDriverConfiguration.isEnabled()) {
-      return Response.ok(taskDriverConfiguration.getId()).build();
+    if (taskDriverConfiguration.isEnabled()) {
+      return Response.ok(taskDriver.getWorkerId()).build();
     } else {
       return Response.ok(-1).build();
     }

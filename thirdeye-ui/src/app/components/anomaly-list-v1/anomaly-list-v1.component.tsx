@@ -1,4 +1,4 @@
-import { Button, Typography } from "@material-ui/core";
+import { Box, Button, Typography } from "@material-ui/core";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -16,7 +16,9 @@ import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,
     getAnomaliesAnomalyPath,
+    getMetricsViewPath,
 } from "../../utils/routes/routes.util";
+import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
@@ -36,6 +38,17 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
             return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
+        },
+        []
+    );
+
+    const metricNameRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            // currently we don't have id with us
+            // but it will be good to have id to redirect
+            return data.metricId
+                ? linkRendererV1(cellValue, getMetricsViewPath(data.metricId))
+                : cellValue;
         },
         []
     );
@@ -73,6 +86,18 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         []
     );
 
+    const startTimeRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => data.startTime,
+        []
+    );
+
+    const endTimeRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => data.endTime,
+        []
+    );
+
     const isActionButtonDisable = !(
         selectedAnomaly && selectedAnomaly.rowKeyValues.length === 1
     );
@@ -107,6 +132,14 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 customCellRenderer: alertNameRenderer,
             },
             {
+                key: "metricName",
+                dataKey: "metricName",
+                header: t("label.metric"),
+                sortable: true,
+                minWidth: 180,
+                customCellRenderer: metricNameRenderer,
+            },
+            {
                 key: "duration",
                 dataKey: "durationVal",
                 header: t("label.duration"),
@@ -116,17 +149,19 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             },
             {
                 key: "startTime",
-                dataKey: "startTime",
+                dataKey: "startTimeVal",
                 header: t("label.start"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: startTimeRenderer,
             },
             {
                 key: "endTime",
-                dataKey: "endTime",
+                dataKey: "endTimeVal",
                 header: t("label.end"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: endTimeRenderer,
             },
             {
                 key: "current",
@@ -160,6 +195,9 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             currentRenderer,
             predicatedRenderer,
             durationRenderer,
+            startTimeRenderer,
+            endTimeRenderer,
+            metricNameRenderer,
         ]
     );
 
@@ -174,14 +212,17 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                 entity: t("label.anomalies"),
             })}
             toolbarComponent={
-                <Button
-                    data-testid="button-delete"
-                    disabled={isActionButtonDisable}
-                    variant="contained"
-                    onClick={handleAnomalyDelete}
-                >
-                    {t("label.delete")}
-                </Button>
+                <Box display="flex" justifyContent="space-between">
+                    <Button
+                        data-testid="button-delete"
+                        disabled={isActionButtonDisable}
+                        variant="contained"
+                        onClick={handleAnomalyDelete}
+                    >
+                        {t("label.delete")}
+                    </Button>
+                    <AnomalyQuickFilters />
+                </Box>
             }
             onSearchFilterValueChange={props.onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}

@@ -22,8 +22,8 @@ public class EventDTO extends AbstractDTO {
   long endTime;
 
   /**
-   * targetDimesionMap will hold metadata of the event. for example holiday event will have
-   * coutntryCode --> {US, CA, ...}
+   * targetDimensionMap will hold metadata of the event. for example holiday event will have
+   * countryCode --> {US, CA, ...}
    * DeploymentEvent will have fabric --- > {prod-lva1, prod-ltx1..} hostname ---> {hosta, hostb,
    * hostc...}
    */

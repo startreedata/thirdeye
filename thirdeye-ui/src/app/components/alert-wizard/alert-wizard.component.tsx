@@ -2,8 +2,9 @@ import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     HelpLinkIconV1,
@@ -25,13 +26,14 @@ import {
     getUiAlert,
     omitNonUpdatableData,
 } from "../../utils/alerts/alerts.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
-import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../time-range/time-range-provider/time-range-provider.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -76,16 +78,32 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
         setAlertConfigurationNewAlertTemplateId,
     ] = useState(DEFAULT_ALERT_TEMPLATE_ID);
     const [wizard, setWizard] = useState("");
-    const { timeRangeDuration } = useTimeRange();
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
+
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
 
     useEffect(() => {
         initSubs();
     }, [subs]);
 
     useEffect(() => {
+        // Only auto fetch data when not in create new mode
+        if (!props.createNewMode) {
+            refreshAlertEvaluation();
+        }
+    }, []);
+
+    useEffect(() => {
+        // Refresh evaluation on startTime or endTime change
         refreshAlertEvaluation();
-    }, [timeRangeDuration]);
+    }, [startTime, endTime]);
 
     useEffect(() => {
         if (currentWizardStep !== AlertWizardStep.SUBSCRIPTION_GROUPS) {
@@ -359,12 +377,22 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                                     displayInline
                                                     enablePadding
                                                     externalLink
-                                                    href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                                    href={`${THIRDEYE_DOC_LINK}/concepts/alert-configuration`}
                                                 />
                                             </span>
                                         </TooltipV1>
                                     )}
                                 </Typography>
+                                {currentWizardStep ===
+                                    AlertWizardStep.DETECTION_CONFIGURATION && (
+                                    <>
+                                        <Typography variant="subtitle2">
+                                            {t(
+                                                "message.preview-anomalies-created-below"
+                                            )}
+                                        </Typography>
+                                    </>
+                                )}
                             </Grid>
 
                             {/* Spacer */}
@@ -418,6 +446,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     {/* Alert evaluation */}
                                     <Grid item sm={12}>
                                         <AlertEvaluationTimeSeriesCard
+                                            showPreviewButton
                                             alertEvaluation={alertEvaluation}
                                             alertEvaluationTimeSeriesHeight={
                                                 500

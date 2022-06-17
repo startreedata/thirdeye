@@ -1,4 +1,5 @@
 import {
+    Checkbox,
     Collapse,
     LinearProgress,
     TableCell,
@@ -16,6 +17,7 @@ import { AlgorithmRowExpanded } from "./algorithm-row-expanded.component";
 import { useAlgorithmRowExpandedStyles } from "./algorithm-row-expanded.styles";
 import { AlgorithmRowProps } from "./algorithm-table.interfaces";
 import {
+    generateFilterOptions,
     generateName,
     generateOtherDimensionTooltipString,
     SERVER_VALUE_FOR_OTHERS,
@@ -43,8 +45,12 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     row,
     totalSum,
     dimensionColumns,
-    anomaly,
+    alertId,
+    startTime,
+    endTime,
     comparisonOffset,
+    checked,
+    onCheckClick,
 }) => {
     const [open, setOpen] = useState(false);
     const classes = useAlgorithmRowExpandedStyles();
@@ -60,10 +66,27 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
         parentRowClasses.push(classes.expandedRowParent);
     }
 
+    const handleOnCheckboxClick = (): void => {
+        onCheckClick &&
+            onCheckClick(
+                generateFilterOptions(
+                    row.names,
+                    dimensionColumns,
+                    row.otherDimensionValues
+                )
+            );
+    };
+
     return (
         <>
             {/** Main Content */}
             <TableRow className={classNames(...parentRowClasses)}>
+                <TableCell>
+                    <Checkbox
+                        checked={checked}
+                        onChange={handleOnCheckboxClick}
+                    />
+                </TableCell>
                 <TableCell component="th" scope="row">
                     {row.names.includes(SERVER_VALUE_FOR_OTHERS) ? (
                         <Tooltip
@@ -107,10 +130,12 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                     <Collapse unmountOnExit in={open} timeout="auto">
                         {open && (
                             <AlgorithmRowExpanded
-                                anomaly={anomaly}
+                                alertId={alertId}
                                 comparisonOffset={comparisonOffset}
                                 dimensionColumns={dimensionColumns}
+                                endTime={endTime}
                                 row={row}
+                                startTime={startTime}
                             />
                         )}
                     </Collapse>

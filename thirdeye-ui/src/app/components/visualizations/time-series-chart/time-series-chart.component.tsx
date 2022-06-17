@@ -4,20 +4,24 @@ import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
+import { EventsChart } from "./events-chart/events-chart.component";
 import { Legend } from "./legend/legend.component";
 import {
-    Series,
+    EventWithChartState,
+    NormalizedSeries,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
+    ZoomDomain,
 } from "./time-series-chart.interfaces";
 import {
+    COLOR_PALETTE,
     normalizeSeries,
     syncEnabledDisabled,
 } from "./time-series-chart.utils";
 import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 
-const TOP_CHART_HEIGHT_RATIO = 0.8;
+const TOP_CHART_HEIGHT_RATIO = 0.85;
 const CHART_SEPARATION = 50;
 const CHART_MARGINS = {
     top: 20,
@@ -25,17 +29,6 @@ const CHART_MARGINS = {
     bottom: 20,
     right: 20,
 };
-const COLOR_PALETTE = [
-    "#fd7f6f",
-    "#7eb0d5",
-    "#b2e061",
-    "#bd7ebe",
-    "#ffb55a",
-    "#ffee65",
-    "#beb9db",
-    "#fdcce5",
-    "#8bd3c7",
-];
 
 /**
  *
@@ -98,14 +91,36 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
 
 export const TimeSeriesChartInternal: FunctionComponent<
     TimeSeriesChartInternalProps
-> = ({ series, legend, brush, height, width, xAxis, yAxis, tooltip }) => {
-    const [processedMainChartSeries, setProcessedMainChartSeries] =
-        useState<Series[]>(series);
-    const [processedBrushChartSeries, setProcessedBrushChartSeries] =
-        useState<Series[]>(series);
-    const [enabledDisabledMapping, setEnabledDisabledMapping] = useState<
-        boolean[]
-    >(series.map(syncEnabledDisabled));
+> = ({
+    series,
+    legend,
+    brush,
+    height,
+    width,
+    xAxis,
+    yAxis,
+    tooltip,
+    initialZoom,
+    chartEvents,
+    events,
+    LegendComponent = Legend,
+}) => {
+    const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
+        initialZoom
+    );
+    const [processedMainChartSeries, setProcessedMainChartSeries] = useState<
+        NormalizedSeries[]
+    >(normalizeSeries(series, currentZoom));
+    const [processedBrushChartSeries, setProcessedBrushChartSeries] = useState<
+        NormalizedSeries[]
+    >(normalizeSeries(series));
+    const [enabledDisabledSeriesMapping, setEnabledDisabledSeriesMapping] =
+        useState<boolean[]>(series.map(syncEnabledDisabled));
+
+    const [processedEvents, setProcessedEvents] = useState<
+        EventWithChartState[]
+    >([]);
+
     const tooltipUtils = useTooltip<{ xValue: number }>();
     const { tooltipData, tooltipLeft, tooltipTop } = tooltipUtils;
 
@@ -128,7 +143,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     if (brush) {
         topChartBottomMargin = isXAxisEnabled
-            ? CHART_SEPARATION / 2
+            ? CHART_SEPARATION
             : CHART_SEPARATION + 10;
         topChartHeight =
             TOP_CHART_HEIGHT_RATIO * innerHeight - topChartBottomMargin;
@@ -153,7 +168,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         processedMainChartSeries &&
             setProcessedMainChartSeries([
                 ...processedMainChartSeries.map((seriesData, idx) => {
-                    seriesData.enabled = enabledDisabledMapping[idx];
+                    seriesData.enabled = enabledDisabledSeriesMapping[idx];
 
                     return seriesData;
                 }),
@@ -161,32 +176,56 @@ export const TimeSeriesChartInternal: FunctionComponent<
         processedBrushChartSeries &&
             setProcessedBrushChartSeries([
                 ...processedBrushChartSeries.map((seriesData, idx) => {
-                    seriesData.enabled = enabledDisabledMapping[idx];
+                    seriesData.enabled = enabledDisabledSeriesMapping[idx];
 
                     return seriesData;
                 }),
             ]);
-    }, [enabledDisabledMapping]);
+    }, [enabledDisabledSeriesMapping]);
 
     // If series changed, reset everything
     useEffect(() => {
-        setProcessedMainChartSeries(normalizeSeries(series));
+        setProcessedMainChartSeries(normalizeSeries(series, currentZoom));
         setProcessedBrushChartSeries(normalizeSeries(series));
-        setEnabledDisabledMapping(series.map(syncEnabledDisabled));
+        setEnabledDisabledSeriesMapping(series.map(syncEnabledDisabled));
     }, [series]);
+
+    // If events change, figure out what was removed and added and sync the processedEvents
+    useEffect(() => {
+        const eventsToUse = events || [];
+
+        setProcessedEvents((original) => {
+            const newProcessedEvents: EventWithChartState[] = [];
+
+            eventsToUse.forEach((event) => {
+                const result = original.find(
+                    (candidate) => candidate.id === event.id
+                );
+
+                if (result) {
+                    newProcessedEvents.push(result);
+                } else {
+                    newProcessedEvents.push({
+                        ...event,
+                        enabled: true,
+                    });
+                }
+            });
+
+            return newProcessedEvents;
+        });
+    }, [events]);
 
     /**
      * Flip the enabled flag and force a re-render by creating a new array
      */
     const handleSeriesClickFromLegend = (idx: number): void => {
-        const copied = [...enabledDisabledMapping];
+        const copied = [...enabledDisabledSeriesMapping];
         copied[idx] = !copied[idx];
-        setEnabledDisabledMapping([...copied]);
+        setEnabledDisabledSeriesMapping([...copied]);
     };
 
-    const handleBrushChange = (
-        domain: { x0: number; x1: number } | null
-    ): void => {
+    const handleBrushChange = (domain: ZoomDomain | null): void => {
         if (!domain) {
             return;
         }
@@ -199,25 +238,47 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
                 return x > x0 && x < x1;
             });
-            copied.enabled = enabledDisabledMapping[idx];
+            copied.enabled = enabledDisabledSeriesMapping[idx];
 
             return copied;
         });
-        setProcessedMainChartSeries(seriesDataCopy);
+        setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
+        setCurrentZoom({ x0, x1 });
+
+        if (chartEvents && chartEvents.onZoomChange) {
+            chartEvents.onZoomChange(domain);
+        }
     };
 
     const handleBrushClick = (): void => {
         const seriesDataCopy = series.map((seriesData, idx) => {
             const copied = { ...seriesData };
-            copied.enabled = enabledDisabledMapping[idx];
+            copied.enabled = enabledDisabledSeriesMapping[idx];
 
             return copied;
         });
-        setProcessedMainChartSeries(seriesDataCopy);
+
+        setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
+        setCurrentZoom(undefined);
+
+        if (chartEvents && chartEvents.onZoomChange) {
+            chartEvents.onZoomChange(null);
+        }
     };
 
     return (
         <div style={{ position: "relative" }}>
+            {events && events.length > 0 && (
+                <EventsChart
+                    events={processedEvents}
+                    isTooltipEnabled={isTooltipEnabled}
+                    margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
+                    series={processedMainChartSeries}
+                    tooltipUtils={tooltipUtils}
+                    width={width}
+                    xMax={xMax}
+                />
+            )}
             <svg height={height} width={width}>
                 <ChartCore
                     colorScale={colorScale}
@@ -252,6 +313,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     <ChartBrush
                         colorScale={colorScale}
                         height={brushChartHeight}
+                        initialZoom={currentZoom}
                         series={processedBrushChartSeries}
                         top={
                             topChartHeight +
@@ -280,9 +342,11 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 </TooltipWithBounds>
             )}
             {isLegendEnabled && (
-                <Legend
+                <LegendComponent
                     colorScale={colorScale}
+                    events={processedEvents}
                     series={processedMainChartSeries}
+                    onEventsStateChange={setProcessedEvents}
                     onSeriesClick={handleSeriesClickFromLegend}
                 />
             )}

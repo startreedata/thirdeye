@@ -5,7 +5,8 @@
 
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.DaoFilterBuilder;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.TaskApi;
@@ -23,10 +24,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,10 +34,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 @Api(tags = "Task", authorizations = {@Authorization(value = "oauth")})
@@ -48,17 +45,22 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("type", "type")
       .put("status", "status")
       .put("created", "createTime")
       .put("updated", "updateTime")
       .put("startTime", "startTime")
       .build();
+  public static final String N_DAYS_TO_DELETE = "30";
+  public static final String MAX_ENTRIES_TO_DELETE = "1000";
+
+  private final TaskManager taskManager;
 
   @Inject
   public TaskResource(final TaskManager taskManager) {
-    super(taskManager, API_TO_BEAN_MAP);
+    super(taskManager, API_TO_INDEX_FILTER_MAP);
+    this.taskManager = taskManager;
   }
 
   // Operation not supported to prevent create of tasks
@@ -97,18 +99,17 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   }
 
   @DELETE
-  @Path("/cleanup")
+  @Path("/purge")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response cleanUp(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
-    final MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
-    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    final long twoMonthsBack = System.currentTimeMillis() - Duration.ofDays(60).toMillis();
-    map.add("created", "[lt]" + df.format(new Date(twoMonthsBack)));
+  public Response purge(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @ApiParam(value = "Older than (number of days)", defaultValue = N_DAYS_TO_DELETE) @QueryParam("olderThanInDays") Integer nDays,
+      @ApiParam(value = "Max Entries to delete", defaultValue = MAX_ENTRIES_TO_DELETE) @QueryParam("limit") Integer limitOptional
+  ) {
+    final int nDaysToDelete = optional(nDays).orElse(Integer.valueOf(N_DAYS_TO_DELETE));
+    final int limit = optional(limitOptional).orElse(Integer.valueOf(MAX_ENTRIES_TO_DELETE));
 
-    dtoManager
-        .filter(new DaoFilterBuilder(apiToBeanMap).buildFilter(map))
-        .forEach(this::deleteDto);
+    taskManager.purge(Duration.ofDays(nDaysToDelete), limit);
     return Response.ok().build();
   }
 

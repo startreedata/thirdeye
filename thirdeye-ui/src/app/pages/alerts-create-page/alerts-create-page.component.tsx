@@ -1,12 +1,12 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -32,7 +32,10 @@ import {
     createDefaultAlert,
 } from "../../utils/alerts/alerts.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import {
+    generateDateRangeMonthsFromNow,
+    getAlertsViewPath,
+} from "../../utils/routes/routes.util";
 
 export const AlertsCreatePage: FunctionComponent = () => {
     const {
@@ -40,10 +43,31 @@ export const AlertsCreatePage: FunctionComponent = () => {
         errorMessages,
         status: getEvaluationStatus,
     } = useGetEvaluation();
-    const { timeRangeDuration } = useTimeRange();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+
+    useEffect(() => {
+        // Default the time range to 6 months ago
+        const [defaultStart, defaultEnd] = generateDateRangeMonthsFromNow(6);
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            defaultStart.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            defaultEnd.toString()
+        );
+        setSearchParams(searchParams, { replace: true });
+    }, []);
 
     const onAlertWizardFinish = (
         alert: EditableAlert,
@@ -197,11 +221,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         alert: EditableAlert
     ): Promise<AlertEvaluation> => {
         const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(
-                alert,
-                timeRangeDuration.startTime,
-                timeRangeDuration.endTime
-            )
+            createAlertEvaluation(alert, startTime, endTime)
         );
 
         if (fetchedAlertEvaluation === undefined) {
@@ -229,7 +249,6 @@ export const AlertsCreatePage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
-                showTimeRange
                 title={t("label.create-entity", {
                     entity: t("label.alert"),
                 })}

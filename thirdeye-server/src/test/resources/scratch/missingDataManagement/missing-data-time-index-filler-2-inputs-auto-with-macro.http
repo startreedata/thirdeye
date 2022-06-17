@@ -44,6 +44,9 @@ Content-Type: application/json
         {
           "name": "currentMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "currentDataFetcher",
@@ -59,6 +62,9 @@ Content-Type: application/json
         {
           "name": "baselineMissingDataManager",
           "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
           "inputs": [
             {
               "sourcePlanNode": "baselineDataFetcher",
@@ -76,7 +82,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts, '${offsetJava}', '${offsetJava}') GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${offsetJava}', '${offsetJava}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [
@@ -91,7 +97,7 @@ Content-Type: application/json
           "type": "DataFetcher",
           "params": {
             "component.dataSource": "${dataSource}",
-            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(ts) GROUP BY ts ORDER BY ts LIMIT 1000"
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
           },
           "inputs": [],
           "outputs": [

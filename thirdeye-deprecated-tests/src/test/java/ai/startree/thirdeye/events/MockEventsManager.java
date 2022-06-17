@@ -13,6 +13,9 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * The Mock events manager for testing
@@ -71,7 +74,18 @@ public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements 
   }
 
   @Override
-  public List<EventDTO> findEventsBetweenTimeRange(String eventType, long startTime, long endTime) {
+  public List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, String eventType) {
+    throw new AssertionError("not implemented");
+  }
+
+  @Override
+  public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime) {
+    throw new AssertionError("not implemented");
+  }
+
+  @Override
+  public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
+      final @Nullable String eventType, final @Nullable Map<String, Set<String>> dimensionFilters) {
     throw new AssertionError("not implemented");
   }
 

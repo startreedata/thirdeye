@@ -1,42 +1,53 @@
-import { Box, Card, CardContent, Grid, Paper } from "@material-ui/core";
+import { Box, Grid, Link } from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     TooltipV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getAnomaliesAllPath } from "../../utils/routes/routes.util";
+import {
+    getAlertsViewPath,
+    getAnomaliesAllPath,
+} from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
+    const {
+        investigations,
+        getInvestigations,
+        status: getInvestigationsRequestStatus,
+    } = useGetInvestigations();
     const {
         evaluation,
         getEvaluation,
@@ -53,7 +64,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
     const [searchParams] = useSearchParams();
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -61,7 +72,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const style = useAnomaliesViewPageStyles();
 
     useEffect(() => {
-        // Time range refreshed, fetch anomaly
+        anomalyId && getInvestigations(Number(anomalyId));
         anomalyId &&
             isValidNumberId(anomalyId) &&
             getAnomaly(toNumber(anomalyId));
@@ -132,8 +143,11 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiAnomaly.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
     };
@@ -167,11 +181,15 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                showCreateButton
-                showTimeRange
-                title={uiAnomaly ? uiAnomaly.name : ""}
-            >
+            <PageHeader title="">
+                {anomaly && uiAnomaly && (
+                    <>
+                        <Link href={getAlertsViewPath(anomaly.alert.id)}>
+                            {anomaly.alert.name}
+                        </Link>
+                        : {uiAnomaly.name}
+                    </>
+                )}
                 <TooltipV1
                     placement="top"
                     title={
@@ -185,7 +203,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             displayInline
                             enablePadding
                             externalLink
-                            href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                            href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
                         />
                     </span>
                 </TooltipV1>
@@ -200,58 +218,62 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     xs={12}
                 >
                     <Grid item lg={9} md={8} sm={12} xs={12}>
-                        <Paper className={style.fullHeight} elevation={0}>
-                            <AnomalyCard
-                                uiAnomaly={uiAnomaly}
-                                onDelete={handleAnomalyDelete}
-                            />
-                        </Paper>
+                        <AnomalyCard
+                            className={style.fullHeight}
+                            isLoading={
+                                anomalyRequestStatus === ActionStatus.Working
+                            }
+                            uiAnomaly={uiAnomaly}
+                            onDelete={handleAnomalyDelete}
+                        />
                     </Grid>
                     <Grid item lg={3} md={4} sm={12} xs={12}>
-                        <Paper className={style.fullHeight} elevation={0}>
-                            {anomaly && (
-                                <AnomalyFeedback
-                                    anomalyFeedback={
-                                        anomaly.feedback || {
-                                            ...DEFAULT_FEEDBACK,
-                                        }
-                                    }
-                                    anomalyId={anomaly.id}
-                                    className={style.fullHeight}
-                                />
-                            )}
-                        </Paper>
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
+                                }
+                            }
+                            anomalyId={Number(anomalyId)}
+                            className={style.fullHeight}
+                            isLoading={
+                                anomalyRequestStatus === ActionStatus.Working
+                            }
+                        />
                     </Grid>
                 </Grid>
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
                     {getEvaluationRequestStatus === ActionStatus.Error && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
+                        <PageContentsCardV1>
+                            <Box pb={20} pt={20}>
+                                <NoDataIndicator />
+                            </Box>
+                        </PageContentsCardV1>
                     )}
-                    {getEvaluationRequestStatus === ActionStatus.Done && (
+                    {getEvaluationRequestStatus !== ActionStatus.Error && (
                         <AlertEvaluationTimeSeriesCard
                             alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
+                            isLoading={
+                                getEvaluationRequestStatus ===
+                                ActionStatus.Working
+                            }
                             maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
                             onRefresh={fetchAlertEvaluation}
                         />
                     )}
                 </Grid>
 
+                {/* Existing investigations */}
                 <Grid item xs={12}>
-                    {anomaly && (
-                        <AnalysisTabs
-                            anomaly={anomaly}
-                            anomalyId={toNumber(anomalyId)}
-                        />
-                    )}
+                    <InvestigationsList
+                        getInvestigationsRequestStatus={
+                            getInvestigationsRequestStatus
+                        }
+                        investigations={investigations}
+                    />
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

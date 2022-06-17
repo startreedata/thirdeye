@@ -19,12 +19,12 @@ components.
 
 #### Docker Registry Credentials for Kubernetes
 
-To deploy thirdeye on Kubernetes, you may need access credentials to fetch the docker image from the
-startree artifactory. To do that, simply create a kubernetes secret using the vault credentials.
+To deploy thirdeye on Kubernetes, you may need access credentials to fetch docker images from the
+Startree artifactory. To do that, simply create a kubernetes secret using the vault credentials.
 
 ```bash
 kubectl create secret docker-registry startree \ 
-  --docker-server="repo.startreedata.io/external-docker-registry" \
+  --docker-server="<DOCKER-REPO>" \
   --docker-username=<your-name> \
   --docker-password=<your-pword> \
   --docker-email=<your-email>
@@ -56,8 +56,12 @@ Make sure you pass the `ui.publicUrl` as it will be used to form the anomaly pag
 export SMTP_PASSWORD="password"
 export SMTP_USERNAME="from.email@gmail.com"
 export THIRDEYE_UI_PUBLIC_URL="http://localhost:8081"
+# please ask for access to Startree repo - see https://github.com/startreedata/thirdeye/tree/master/recipes/quickstart 
+export DOCKER_CONTAINER_URL=<TE_DOCKER_CONTAINER_URL>
 
 helm install thirdeye . \
+  --set image.repository="${DOCKER_CONTAINER_URL}thirdeye" \
+  --set ui.image.repository="${DOCKER_CONTAINER_URL}thirdeye-ui" \
   --set ui.publicUrl="${THIRDEYE_UI_PUBLIC_URL}" \
   --set smtp.host="smtp.gmail.com" \
   --set smtp.port="465" \
@@ -221,20 +225,21 @@ Details
 
 ### Other useful configurations
 
-| Property                 | Description                                                                                                          |
-|--------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `image.repository`       | Docker repository where ThirdEye server image is present                                                             |
-| `image.tag`              | Docker image tag of ThirdEye server image                                                                            |
-| `ui.image.repository`    | Docker repository where ThirdEye UI image is present                                                                 |
-| `ui.image.tag`           | Docker image tag of ThirdEye UI image                                                                                |
-| `ui.port`                | UI service port                                                                                                      |
-| `ui.publicUrl`           | Url on which ThirdEye UI is exposed publicly. All the notifications will use this url to share the anomaly page link |
-| `scheduler.enabled`      | Flag to run a separate scheduler. If not enabled then coordinator itself will take care of scheduling tasks          |
-| `worker.enabled`         | Flag to run a separate worker. If not enabled then coordinator itself will take care of running tasks                |
-| `prometheus.enabled`     | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
-| `mysql.mysqlUser`        | Database username                                                                                                    |
-| `mysql.mysqlPassword`    | Database password                                                                                                    |
-| `mysql.persistence.size` | Size of persistent volume created for database storage                                                               |
-| `config.jdbcParameters`  | Config to pass additional parameters to the jdbc connection string                                                   |
+| Property                                  | Description                                                                                                          |
+|-------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `image.repository`                        | Docker repository where ThirdEye server image is present                                                             |
+| `image.tag`                               | Docker image tag of ThirdEye server image                                                                            |
+| `ui.image.repository`                     | Docker repository where ThirdEye UI image is present                                                                 |
+| `ui.image.tag`                            | Docker image tag of ThirdEye UI image                                                                                |
+| `ui.port`                                 | UI service port                                                                                                      |
+| `ui.publicUrl`                            | Url on which ThirdEye UI is exposed publicly. All the notifications will use this url to share the anomaly page link |
+| `scheduler.enabled`                       | Flag to run a separate scheduler. If not enabled then coordinator itself will take care of scheduling tasks          |
+| `worker.enabled`                          | Flag to run a separate worker. If not enabled then coordinator itself will take care of running tasks                |
+| `prometheus.enabled`                      | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
+| `mysql.mysqlUser`                         | Database username                                                                                                    |
+| `mysql.mysqlPassword`                     | Database password                                                                                                    |
+| `mysql.persistence.size`                  | Size of persistent volume created for database storage                                                               |
+| `config.jdbcParameters`                   | Config to pass additional parameters to the jdbc connection string                                                   |
+| `[coordinator/worker/scheduler].strategy` | Specifies the strategy used to replace old Pods by new ones.                                                         |
 
 Please refer [values.yaml](values.yaml) for default values.

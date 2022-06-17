@@ -27,9 +27,6 @@ logging:
 
 auth:
   enabled: false
-  oauth:
-    exactMatch:
-      iss: http://identity.example.com
 
 database:
   # Assuming a local MySQL server running on the default port 3306
@@ -44,3 +41,8 @@ swagger:
 
   # package to scan for jersey resources
   resourcePackage: ai.startree.thirdeye.resources
+
+# Start the Task Driver. This module runs the detection and notification tasks
+taskDriver:
+  enabled: false
+  id: 0

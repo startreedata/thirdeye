@@ -1,25 +1,19 @@
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Grid,
-    MenuItem,
-    TextField,
-} from "@material-ui/core";
+import { Box, Button, Grid, MenuItem, TextField } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
+    SkeletonV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { useDialog } from "../dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../dialogs/dialog-provider/dialog-provider.interfaces";
 import { AnomalyFeedbackProps } from "./anomaly-feedback.interfaces";
 
 const OPTION_TO_DESCRIPTIONS = {
@@ -36,6 +30,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     anomalyId,
     anomalyFeedback,
     className,
+    isLoading,
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
@@ -43,7 +38,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         anomalyFeedback.comment
     );
     const [updateHasError, setUpdateHasError] = useState(false);
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     /*
@@ -64,10 +59,11 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         ) {
             showDialog({
                 type: DialogType.ALERT,
-                text: t("message.change-confirmation-to", {
+                contents: t("message.change-confirmation-to", {
                     value: `"${OPTION_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
                 }),
-                okButtonLabel: t("label.change"),
+                okButtonText: t("label.change"),
+                cancelButtonText: t("label.cancel"),
                 onOk: () =>
                     handleFeedbackChangeOk(
                         newSelectedFeedbackType,
@@ -80,8 +76,11 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     const handleCommentUpdateClick = (): void => {
         showDialog({
             type: DialogType.CUSTOM,
-            title: t("label.update-entity", { entity: t("label.comment") }),
-            children: (
+            headerText: t("label.update-entity", {
+                entity: t("label.comment"),
+            }),
+            cancelButtonText: t("label.cancel"),
+            contents: (
                 <>
                     {updateHasError && (
                         <Box
@@ -102,7 +101,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     />
                 </>
             ),
-            okButtonLabel: t("label.change"),
+            okButtonText: t("label.change"),
             onOk: () =>
                 handleFeedbackChangeOk(
                     currentlySelected,
@@ -154,39 +153,50 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             });
     };
 
+    useEffect(() => {
+        setCurrentlySelected(anomalyFeedback.type);
+        setModifiedFeedbackComment(anomalyFeedback.comment);
+    }, [anomalyFeedback]);
+
+    if (isLoading) {
+        return (
+            <PageContentsCardV1 className={className}>
+                <SkeletonV1 height={150} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
+
     return (
-        <Card className={className} variant="outlined">
-            <CardContent>
-                <Grid container>
-                    <Grid item xs={12}>
-                        <label>
-                            <strong>Is this an anomaly?</strong>
-                        </label>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            select
-                            id="anomaly-feedback-select"
-                            value={currentlySelected}
-                            onChange={handleLabelChange}
-                        >
-                            {Object.keys(OPTION_TO_DESCRIPTIONS).map(
-                                (optionKey: string) => (
-                                    <MenuItem key={optionKey} value={optionKey}>
-                                        {OPTION_TO_DESCRIPTIONS[optionKey]}
-                                    </MenuItem>
-                                )
-                            )}
-                        </TextField>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Button onClick={handleCommentUpdateClick}>
-                            View / Edit comment
-                        </Button>
-                    </Grid>
+        <PageContentsCardV1 className={className}>
+            <Grid container>
+                <Grid item xs={12}>
+                    <label>
+                        <strong>Is this an anomaly?</strong>
+                    </label>
                 </Grid>
-            </CardContent>
-        </Card>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        select
+                        id="anomaly-feedback-select"
+                        value={currentlySelected}
+                        onChange={handleLabelChange}
+                    >
+                        {Object.keys(OPTION_TO_DESCRIPTIONS).map(
+                            (optionKey: string) => (
+                                <MenuItem key={optionKey} value={optionKey}>
+                                    {OPTION_TO_DESCRIPTIONS[optionKey]}
+                                </MenuItem>
+                            )
+                        )}
+                    </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                    <Button onClick={handleCommentUpdateClick}>
+                        View / Edit comment
+                    </Button>
+                </Grid>
+            </Grid>
+        </PageContentsCardV1>
     );
 };

@@ -40,7 +40,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class EventResource extends CrudResource<EventApi, EventDTO>{
 
-  public static final ImmutableMap<String, String> API_TO_BEAN_MAP = ImmutableMap.<String, String>builder()
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("type", "eventType")
       .put("startTime", "startTime")
       .put("endTime", "endTime")
@@ -53,7 +53,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final HolidayEventsLoader holidayEventsLoader) {
-    super(eventManager, API_TO_BEAN_MAP);
+    super(eventManager, API_TO_INDEX_FILTER_MAP);
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.holidayEventsLoader = holidayEventsLoader;
   }

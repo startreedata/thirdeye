@@ -52,7 +52,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
 
   // Test is located at TestAlertConfigManager.testBatchUpdate()
   @Override
-  public int update(List<E> entities) {
+  public int update(final List<E> entities) {
     return genericPojoDao.update(entities);
   }
 
@@ -67,7 +67,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   @Override
-  public List<E> findByName(String name) {
+  public List<E> findByName(final String name) {
     return findByPredicate(Predicate.EQ("name", name));
   }
 
@@ -124,5 +124,10 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   @Override
   public long count() {
     return genericPojoDao.count(dtoClass);
+  }
+
+  @Override
+  public long count(final Predicate predicate) {
+    return genericPojoDao.count(predicate, dtoClass);
   }
 }

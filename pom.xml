@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.43.0-SNAPSHOT</version>
+  <version>1.54.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -84,6 +84,7 @@
     <swagger.version>1.3.17-1</swagger.version>
     <testcontainers.version>1.15.3</testcontainers.version>
     <flyway.version>8.5.7</flyway.version>
+    <modelmapper.version>3.1.0</modelmapper.version>
   </properties>
 
   <licenses>
@@ -147,6 +148,10 @@
         <configuration>
           <generateBackupPoms>false</generateBackupPoms>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -329,6 +334,64 @@
             </formats>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>4.0</version>
+          <configuration>
+            <header>HEADER</header>
+            <excludes>
+              <!-- Text and log files -->
+              <exclude>**/*.txt</exclude>
+              <exclude>**/*.log</exclude>
+              <exclude>**/*.list</exclude>
+              <exclude>**/*.out</exclude>
+              <exclude>**/*.generated</exclude>
+              <exclude>**/*.json</exclude>
+              <exclude>**/*.schema</exclude>
+
+              <!-- Binary files -->
+              <exclude>**/*.avro</exclude>
+              <exclude>**/*.avsc</exclude>
+              <exclude>**/*.csv</exclude>
+              <exclude>**/*.desc</exclude>
+              <exclude>**/*.parquet</exclude>
+              <exclude>**/*.gz</exclude>
+              <exclude>**/*.orc</exclude>
+              <exclude>**/*.dict</exclude>
+              <exclude>**/*.raw</exclude>
+              <exclude>**/*.mapping</exclude>
+              <exclude>**/*.ser</exclude>
+              <exclude>**/*.v1</exclude>
+              <exclude>**/*.v2</exclude>
+
+              <!-- Auto-generated files -->
+              <exclude>target/**</exclude>
+              <exclude>thirdeye-*/target/**</exclude>
+              <exclude>**/mem.script</exclude>
+              <exclude>**/mem.properties</exclude>
+
+              <!-- Top level files -->
+              <exclude>HEADER</exclude>
+              <exclude>LICENSE*</exclude>
+              <exclude>NOTICE*</exclude>
+
+              <exclude>**/node_modules/**</exclude>
+              <exclude>**/dist/**</exclude>
+              <exclude>src/test/resources/**</exclude>
+              <exclude>src/main/resources/**</exclude>
+              <exclude>thirdeye-ui/build</exclude>
+              <exclude>thirdeye-ui/dist</exclude>
+
+              <!-- files from Eclipse -->
+              <exclude>**/maven-eclipse.xml</exclude>
+              <exclude>.externalToolBuilders/**</exclude>
+
+              <!-- files from IntelliJ -->
+              <exclude>.idea/**</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -351,17 +414,17 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-datasources</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-pinot</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-detection-components</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -381,18 +444,23 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-notification-email</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-notification-webhook</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-notification-slack</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-contributors-cube</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -449,6 +517,11 @@
         <groupId>com.slack.api</groupId>
         <artifactId>slack-api-client</artifactId>
         <version>${slack.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.modelmapper</groupId>
+        <artifactId>modelmapper</artifactId>
+        <version>${modelmapper.version}</version>
       </dependency>
 
       <!-- This helps map pojos from one model to another. API <> DTO, etc -->

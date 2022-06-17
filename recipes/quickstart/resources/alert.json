@@ -1,0 +1,22 @@
+[
+  {
+    "name": "threshold-alert-orders-sample",
+    "description": "Threshold alert on orders",
+    "template": {
+      "name": "startree-threshold"
+    },
+    "templateProperties": {
+      "dataSource": "pinot",
+      "dataset": "order_events",
+      "aggregationFunction": "count",
+      "aggregationColumn": "event_type",
+      "monitoringGranularity": "P1D",
+      "timeColumn": "timestamp",
+      "timeColumnFormat": "1:MILLISECONDS:EPOCH",
+      "max": "900",
+      "min": "200",
+      "rcaAggregationFunction": "COUNT"
+    },
+    "cron": "0 0 0/2 1/1 * ? *"
+  }
+]

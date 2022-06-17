@@ -7,7 +7,6 @@ package ai.startree.thirdeye.rootcause.entity;
 
 import ai.startree.thirdeye.rootcause.Entity;
 import ai.startree.thirdeye.rootcause.util.EntityUtils;
-import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.util.ParsedUrn;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -70,17 +69,8 @@ public class MetricEntity extends Entity {
         new ArrayList<>(related), id, TreeMultimap.create(filters));
   }
 
-  public static MetricEntity fromMetric(double score, Collection<? extends Entity> related,
-      long id) {
-    return fromMetric(score, related, id, TreeMultimap.create());
-  }
-
   public static MetricEntity fromMetric(double score, long id, Multimap<String, String> filters) {
     return fromMetric(score, new ArrayList<>(), id, filters);
-  }
-
-  public static MetricEntity fromMetric(double score, long id) {
-    return fromMetric(score, new ArrayList<>(), id, TreeMultimap.create());
   }
 
   public static MetricEntity fromMetric(Map<String, Collection<String>> filterMaps, long id) {
@@ -102,9 +92,5 @@ public class MetricEntity extends Entity {
 
   public static MetricEntity fromURN(String urn) {
     return fromURN(urn, 1.0);
-  }
-
-  public static MetricEntity fromSlice(MetricSlice slice, double score) {
-    return fromMetric(score, slice.getMetricId(), slice.getFilters());
   }
 }

@@ -1,3 +1,17 @@
+///
+/// Copyright 2022 StarTree Inc
+///
+/// Licensed under the StarTree Community License (the "License"); you may not use
+/// this file except in compliance with the License. You may obtain a copy of the
+/// License at http://www.startree.ai/legal/startree-community-license
+///
+/// Unless required by applicable law or agreed to in writing, software distributed under the
+/// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+/// either express or implied.
+/// See the License for the specific language governing permissions and limitations under
+/// the License.
+///
+
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
 import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
@@ -33,6 +47,8 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         alertId: -1,
         alertName: noDataMarker,
         current: noDataMarker,
+        metricId: -1,
+        metricName: noDataMarker,
         currentVal: -1,
         predicted: noDataMarker,
         predictedVal: -1,
@@ -43,6 +59,8 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         durationVal: 0,
         startTime: noDataMarker,
         endTime: noDataMarker,
+        endTimeVal: -1,
+        startTimeVal: -1,
     };
 };
 
@@ -94,7 +112,9 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             anomaly.avgBaselineVal;
-        uiAnomaly.deviation = formatPercentageV1(deviation);
+        uiAnomaly.deviation = isNaN(deviation)
+            ? i18n.t("label.no-data-marker")
+            : formatPercentageV1(deviation);
         uiAnomaly.deviationVal = deviation;
         uiAnomaly.negativeDeviation = deviation < 0;
     }
@@ -102,9 +122,11 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     // Start and end time
     if (anomaly.startTime) {
         uiAnomaly.startTime = formatDateAndTimeV1(anomaly.startTime);
+        uiAnomaly.startTimeVal = anomaly.startTime;
     }
     if (anomaly.endTime) {
         uiAnomaly.endTime = formatDateAndTimeV1(anomaly.endTime);
+        uiAnomaly.endTimeVal = anomaly.endTime;
     }
 
     // Duration
@@ -114,6 +136,12 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
             anomaly.endTime
         );
         uiAnomaly.durationVal = anomaly.endTime - anomaly.startTime;
+    }
+
+    // Metric
+    if (anomaly.metric) {
+        uiAnomaly.metricId = anomaly.metric.id;
+        uiAnomaly.metricName = anomaly.metric.name;
     }
 
     return uiAnomaly;

@@ -1,6 +1,7 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { InvestigationStateTracker } from "../../pages/root-cause-analysis-investigation-state-tracker/investigation-state-tracker.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
@@ -30,6 +31,7 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 <Route
+                    element={<InvestigationStateTracker />}
                     path={`/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}/*`}
                 >
                     {/* Root cause for an anomaly index path. */}

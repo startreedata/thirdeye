@@ -4,8 +4,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
-import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
-import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
+import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
@@ -15,14 +14,18 @@ import {
     PageContentsGridV1,
     PageV1,
     TooltipV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
+import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
@@ -33,7 +36,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         status: getAnomaliesRequestStatus,
         errorMessages: anomaliesRequestErrors,
     } = useGetAnomalies();
-    const { showDialog } = useDialog();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
@@ -62,9 +65,32 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+        const params: GetAnomaliesProps = {
+            startTime: Number(start),
+            endTime: Number(end),
+        };
+
+        if (searchParams.has(AnomalyFilterQueryStringKey.ALERT)) {
+            params.alertId = parseInt(
+                searchParams.get(AnomalyFilterQueryStringKey.ALERT) || ""
+            );
+        }
+
+        if (searchParams.has(AnomalyFilterQueryStringKey.DATASET)) {
+            params.dataset = searchParams.get(
+                AnomalyFilterQueryStringKey.DATASET
+            ) as string;
+        }
+
+        if (searchParams.has(AnomalyFilterQueryStringKey.METRIC)) {
+            params.metric = searchParams.get(
+                AnomalyFilterQueryStringKey.METRIC
+            ) as string;
+        }
 
         let fetchedUiAnomalies: UiAnomaly[] = [];
-        getAnomalies({ startTime: Number(start), endTime: Number(end) })
+
+        getAnomalies(params)
             .then((anomalies) => {
                 if (anomalies && anomalies.length) {
                     fetchedUiAnomalies = getUiAnomalies(anomalies);
@@ -76,8 +102,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         showDialog({
             type: DialogType.ALERT,
-            text: t("message.delete-confirmation", { name: uiAnomaly.name }),
-            okButtonLabel: t("label.delete"),
+            contents: t("message.delete-confirmation", {
+                name: uiAnomaly.name,
+            }),
+            okButtonText: t("label.delete"),
+            cancelButtonText: t("label.cancel"),
             onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
     };
@@ -150,7 +179,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                             displayInline
                             enablePadding
                             externalLink
-                            href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                            href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
                         />
                     </span>
                 </TooltipV1>

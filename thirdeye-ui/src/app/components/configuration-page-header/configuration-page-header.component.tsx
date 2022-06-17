@@ -11,6 +11,7 @@ import {
     getAlertTemplatesPath,
     getDatasetsPath,
     getDatasourcesPath,
+    getEventsAllPath,
     getMetricsPath,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
@@ -45,6 +46,9 @@ export const ConfigurationPageHeader: FunctionComponent<
                 </PageHeaderTabV1>
                 <PageHeaderTabV1 href={getSubscriptionGroupsPath()}>
                     {t("label.subscription-groups")}
+                </PageHeaderTabV1>
+                <PageHeaderTabV1 href={getEventsAllPath()}>
+                    {t("label.events")}
                 </PageHeaderTabV1>
             </PageHeaderTabsV1>
         </PageHeaderV1>

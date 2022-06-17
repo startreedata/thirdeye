@@ -38,7 +38,7 @@ spec:
         {{- toYaml .Values.worker.affinity | nindent 8 }}
       tolerations:
         {{- toYaml .Values.worker.tolerations | nindent 8 }}
-      {{- if .Values.worker.tls.enabled }}
+      {{- if .Values.tls.enabled }}
       initContainers:
       - name: init-keystore
         image: eclipse-temurin:17-jdk
@@ -80,7 +80,7 @@ spec:
             value: {{ .Values.smtp.host | quote }}
           - name: SMTP_PORT
             value: {{ .Values.smtp.port  | quote }}
-          {{- if .Values.worker.tls.enabled }}
+          {{- if .Values.tls.enabled }}
           - name: JAVA_OPTS
             value: >
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
@@ -91,12 +91,14 @@ spec:
         ports:
           - containerPort: {{ .Values.worker.port }}
             protocol: TCP
+          - containerPort: 8081
+            protocol: TCP
         volumeMounts:
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"
             subPath: "server.yaml"
             readOnly: true
-          {{- if .Values.worker.tls.enabled }}
+          {{- if .Values.tls.enabled }}
           - name: keystore
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
@@ -108,11 +110,13 @@ spec:
         - name: thirdeye-config
           configMap:
             name: thirdeye-worker
-        {{- if .Values.worker.tls.enabled }}
+        {{- if .Values.tls.enabled }}
         - name: tls-internal
           secret:
-            secretName: {{ include "thirdeye.worker.fullname" . }}-internal-tls
+            secretName: {{ include "thirdeye.coordinator.fullname" . }}-internal-tls
         - name: keystore
           emptyDir: {}
         {{- end }}
+  strategy:
+    {{- toYaml .Values.worker.strategy | nindent 4 }}
 {{ end }}

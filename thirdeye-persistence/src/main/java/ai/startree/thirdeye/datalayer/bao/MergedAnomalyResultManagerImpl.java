@@ -14,6 +14,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,8 +59,15 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
 
   @Inject
-  public MergedAnomalyResultManagerImpl(GenericPojoDao genericPojoDao) {
+  public MergedAnomalyResultManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(MergedAnomalyResultDTO.class, genericPojoDao);
+    metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return count();
+      }
+    });
   }
 
   @Override

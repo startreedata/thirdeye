@@ -18,7 +18,11 @@ spec:
       protocol: TCP
       port: {{ .Values.worker.port }}
       targetPort: {{ .Values.worker.port }}
-    {{- if .Values.worker.tls.enabled }}
+    - name: admin
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    {{- if .Values.tls.enabled }}
     - name: https
       protocol: TCP
       port: 443

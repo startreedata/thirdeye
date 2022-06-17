@@ -1,3 +1,17 @@
+///
+/// Copyright 2022 StarTree Inc
+///
+/// Licensed under the StarTree Community License (the "License"); you may not use
+/// this file except in compliance with the License. You may obtain a copy of the
+/// License at http://www.startree.ai/legal/startree-community-license
+///
+/// Unless required by applicable law or agreed to in writing, software distributed under the
+/// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+/// either express or implied.
+/// See the License for the specific language governing permissions and limitations under
+/// the License.
+///
+
 import { act, renderHook } from "@testing-library/react-hooks";
 import axios from "axios";
 import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
@@ -5,6 +19,8 @@ import { ActionStatus } from "../actions.interfaces";
 import {
     useGetAnomalyDimensionAnalysis,
     useGetAnomalyMetricBreakdown,
+    useGetInvestigation,
+    useGetInvestigations,
 } from "./rca.actions";
 
 jest.mock("axios");
@@ -108,6 +124,94 @@ describe("RCA Actions", () => {
             });
         });
     });
+
+    describe("useGetInvestigations", () => {
+        it("should return initial default values", () => {
+            const { result } = renderHook(() => useGetInvestigations());
+
+            expect(result.current.investigations).toBeNull();
+            expect(result.current.getInvestigations).toBeDefined();
+            expect(result.current.status).toEqual(ActionStatus.Initial);
+            expect(result.current.errorMessages).toEqual([]);
+        });
+
+        it("should update data appropriately when making a successful REST call", async () => {
+            mockedAxios.get.mockResolvedValueOnce({
+                data: [mockInvestigation],
+            });
+            const { result, waitFor } = renderHook(() =>
+                useGetInvestigations()
+            );
+
+            await act(async () => {
+                const promise = result.current.getInvestigations();
+
+                // Wait for state update
+                await waitFor(
+                    () => result.current.status === ActionStatus.Initial
+                );
+
+                // When REST call is in progress
+                expect(result.current.investigations).toBeNull();
+                expect(result.current.getInvestigations).toBeDefined();
+                expect(result.current.status).toEqual(ActionStatus.Working);
+                expect(result.current.errorMessages).toEqual([]);
+
+                return promise.then(() => {
+                    // When REST call is completed
+                    expect(result.current.investigations).toEqual([
+                        mockInvestigation,
+                    ]);
+                    expect(result.current.getInvestigations).toBeDefined();
+                    expect(result.current.status).toEqual(ActionStatus.Done);
+                    expect(result.current.errorMessages).toEqual([]);
+                });
+            });
+        });
+    });
+
+    describe("useGetInvestigation", () => {
+        it("should return initial default values", () => {
+            const { result } = renderHook(() => useGetInvestigation());
+
+            expect(result.current.investigation).toBeNull();
+            expect(result.current.getInvestigation).toBeDefined();
+            expect(result.current.status).toEqual(ActionStatus.Initial);
+            expect(result.current.errorMessages).toEqual([]);
+        });
+
+        it("should update data appropriately when making a successful REST call", async () => {
+            mockedAxios.get.mockResolvedValueOnce({
+                data: mockInvestigation,
+            });
+            const { result, waitFor } = renderHook(() => useGetInvestigation());
+
+            await act(async () => {
+                const promise = result.current.getInvestigation(1);
+
+                // Wait for state update
+                await waitFor(
+                    () => result.current.status === ActionStatus.Initial
+                );
+
+                // When REST call is in progress
+                expect(result.current.investigation).toBeNull();
+                expect(result.current.getInvestigation).toBeDefined();
+                expect(result.current.status).toEqual(ActionStatus.Working);
+                expect(result.current.errorMessages).toEqual([]);
+
+                return promise.then(() => {
+                    // When REST call is completed
+                    expect(result.current.investigation).toEqual(
+                        mockInvestigation
+                    );
+                    expect(result.current.getInvestigation).toBeDefined();
+                    expect(result.current.status).toEqual(ActionStatus.Done);
+                    expect(result.current.errorMessages).toEqual([]);
+                });
+            });
+        });
+    });
 });
 
 const mockDataResponse = {
@@ -165,4 +269,23 @@ const mockDimensionAnalysisResult = {
             cost: 0.024159221341796367,
         },
     ],
+};
+
+const mockInvestigation = {
+    id: 1928705,
+    name: "problem investigation",
+    text: "Problem is caused by rollout of new feature xx",
+    uiMetadata: {
+        additionalProp3: [1, 2, 3],
+        additionalProp2: 3,
+        additionalProp1: "yes",
+    },
+    created: 1651236574971,
+    createdBy: {
+        principal: "no-auth-user",
+    },
+    updated: 1651236574971,
+    updatedBy: {
+        principal: "no-auth-user",
+    },
 };

@@ -13,6 +13,7 @@ public class AlertMetadataDTO {
    * For instance: P1D. Recommendation: same as in __timeGroup macro.
    */
   private String granularity;
+  private String timezone;
 
   public DataSourceDTO getDatasource() {
     return datasource;
@@ -49,6 +50,15 @@ public class AlertMetadataDTO {
 
   public AlertMetadataDTO setGranularity(final String granularity) {
     this.granularity = granularity;
+    return this;
+  }
+
+  public String getTimezone() {
+    return timezone;
+  }
+
+  public AlertMetadataDTO setTimezone(final String timezone) {
+    this.timezone = timezone;
     return this;
   }
 }

@@ -10,7 +10,6 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.List;
-import java.util.Map;
 
 public interface ThirdEyeDataSource {
 
@@ -25,8 +24,6 @@ public interface ThirdEyeDataSource {
    * @param context Provides initialization parameters and relevant services.
    */
   void init(ThirdEyeDataSourceContext context);
-
-  ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception;
 
   List<String> getDatasets() throws Exception;
 
@@ -64,14 +61,6 @@ public interface ThirdEyeDataSource {
    * Returns max dateTime in millis for the dataset
    */
   long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception;
-
-  /**
-   * Returns map of dimension name to dimension values for filters
-   *
-   * @return dimension map
-   */
-  Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception;
 
   /**
    * Returns boolean value to validate the health of data source

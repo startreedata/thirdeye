@@ -1,3 +1,18 @@
+///
+/// Copyright 2022 StarTree Inc
+///
+/// Licensed under the StarTree Community License (the "License"); you may not use
+/// this file except in compliance with the License. You may obtain a copy of the
+/// License at http://www.startree.ai/legal/startree-community-license
+///
+/// Unless required by applicable law or agreed to in writing, software distributed under the
+/// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+/// either express or implied.
+/// See the License for the specific language governing permissions and limitations under
+/// the License.
+///
+
+import { DateTime, DurationUnit } from "luxon";
 import {
     getRecognizedQuery,
     SEARCH_TERM_QUERY_PARAM_KEY,
@@ -50,6 +65,11 @@ export const AppRouteRelative = {
     ROOT_CAUSE_ANALYSIS: `root-cause-analysis`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE: `investigate`,
+    EVENTS: "events",
+    EVENTS_ALL: "all",
+    EVENTS_CREATE: "create",
+    EVENTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
+    EVENTS_ALL_RANGE: "range",
 };
 
 export const AppRoute = {
@@ -103,6 +123,11 @@ export const AppRoute = {
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE:
         `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
         `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}`,
+    EVENTS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}`,
+    EVENTS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_CREATE}`,
+    EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
+    EVENTS_ALL_RANGE: `/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}/${AppRouteRelative.EVENTS_ALL_RANGE}`,
+    EVENTS: `/${AppRouteRelative.EVENTS}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -311,6 +336,41 @@ export const getMetricsUpdatePath = (id: number): string => {
     return path;
 };
 
+export const getEventsViewPath = (id: number): string => {
+    let path: string = AppRoute.EVENTS_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getEventsCreatePath = (): string => {
+    return AppRoute.EVENTS_CREATE;
+};
+
+export const getEventsPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.EVENTS);
+};
+
+export const getEventsAllPath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.EVENTS_ALL}?${urlQuery.toString()}`;
+};
+
+export const getEventsAllRangePath = (searchTerm?: string): string => {
+    const urlQuery = getRecognizedQuery();
+
+    if (searchTerm) {
+        urlQuery.set(SEARCH_TERM_QUERY_PARAM_KEY, searchTerm);
+    }
+
+    return `${AppRoute.EVENTS_ALL_RANGE}?${urlQuery.toString()}`;
+};
+
 export const getRootCauseAnalysisForAnomalyPath = (id: number): string => {
     let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
@@ -339,4 +399,24 @@ export const getLogoutPath = (): string => {
 // to be carried forward when navigating
 export const createPathWithRecognizedQueryString = (path: string): string => {
     return `${path}?${getRecognizedQuery().toString()}`;
+};
+
+/**
+ * Helper function to quickly generate a date range for any number of months from
+ * now. The month ago will start at the beginning of the month.
+ *
+ * @param monthsAgo - Number of months to set the start of range
+ * @param nowOverride - Override now with this value
+ * @param roundNowTime - Round the end time
+ */
+export const generateDateRangeMonthsFromNow = (
+    monthsAgo: number,
+    nowOverride?: DateTime,
+    roundNowTime?: DurationUnit
+): [number, number] => {
+    const now = nowOverride || DateTime.local();
+    const roundedNow = now.endOf(roundNowTime || "hour");
+    const xMonthsAgo = now.minus({ month: monthsAgo }).startOf("month");
+
+    return [xMonthsAgo.toMillis(), roundedNow.toMillis()];
 };

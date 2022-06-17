@@ -11,6 +11,7 @@ public class TaskDriverConfiguration {
 
   private Long id;
   private boolean enabled = false;
+  private boolean randomWorkerIdEnabled = false;
   private Duration noTaskDelay = Duration.ofSeconds(15);
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
@@ -25,6 +26,15 @@ public class TaskDriverConfiguration {
 
   public TaskDriverConfiguration setId(final Long id) {
     this.id = id;
+    return this;
+  }
+
+  public boolean isRandomWorkerIdEnabled() {
+    return randomWorkerIdEnabled;
+  }
+
+  public TaskDriverConfiguration setRandomWorkerIdEnabled(final boolean randomWorkerIdEnabled) {
+    this.randomWorkerIdEnabled = randomWorkerIdEnabled;
     return this;
   }
 

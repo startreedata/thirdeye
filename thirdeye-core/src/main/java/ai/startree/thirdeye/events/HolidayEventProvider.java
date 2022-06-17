@@ -25,9 +25,9 @@ public class HolidayEventProvider implements EventDataProvider<EventDTO> {
   @Override
   public List<EventDTO> getEvents(EventFilter eventFilter) {
     List<EventDTO> allEventsBetweenTimeRange = eventDAO.findEventsBetweenTimeRange(
-        eventFilter.getEventType(),
         eventFilter.getStartTime(),
-        eventFilter.getEndTime());
+        eventFilter.getEndTime(),
+        eventFilter.getEventType());
 
     LOG.info("Fetched {} {} events between {} and {}", allEventsBetweenTimeRange.size(),
         eventFilter.getEventType(), eventFilter.getStartTime(), eventFilter.getEndTime());

@@ -1,14 +1,12 @@
 # Default values for ThirdEye Deployment
 
 image:
-  repository: repo.startreedata.io/external-docker-registry/thirdeye
   tag: latest
   pullPolicy: Always
   pullSecretsName: startree
 
 ui:
   image:
-    repository: repo.startreedata.io/external-docker-registry/thirdeye-ui
     tag: latest
     pullPolicy: Always
     pullSecretsName: startree
@@ -17,6 +15,7 @@ ui:
   port: 8081
   publicUrl: http://localhost:8081
   serviceType: LoadBalancer
+  resolver: kube-dns.kube-system.svc.cluster.local
 
   resources: {}
   nodeSelector: {}
@@ -29,6 +28,7 @@ coordinator:
   name: coordinator
   replicaCount: 1
   port: 8080
+  tlsPort: 8443
   serviceType: LoadBalancer
 
   resources: {}
@@ -37,11 +37,17 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
 scheduler:
   enabled: true
   name: scheduler
   port: 8082
+  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -52,11 +58,14 @@ scheduler:
     prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
+  strategy:
+    type: Recreate
 
 worker:
   enabled: true
   name: worker
   port: 8083
+  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -67,6 +76,12 @@ worker:
     prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  randomWorkerIdEnabled: false
 
 persistence:
   enabled: true
@@ -80,7 +95,7 @@ smtp:
 
 tls:
   enabled: false
-  password: password
+  password: changeit
   type: PKCS12
 
 # Expose prometheus metrics.
@@ -89,6 +104,12 @@ prometheus:
 
 time:
   timezone: UTC
+
+rca:
+  topContributors:
+    # todo cyril replace by source available algorithm once implemented
+    algorithm: cube
+    params: {}
 
 auth:
   enabled: false

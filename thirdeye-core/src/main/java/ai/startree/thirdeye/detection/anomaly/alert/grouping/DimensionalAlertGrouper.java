@@ -8,7 +8,6 @@ package ai.startree.thirdeye.detection.anomaly.alert.grouping;
 import ai.startree.thirdeye.spi.datalayer.dto.GroupedAnomalyResultsDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 public class DimensionalAlertGrouper extends BaseAlertGrouper {
 
   private static final Logger LOG = LoggerFactory.getLogger(DimensionalAlertGrouper.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // Used when the user does not specify any dimensions to group by
   private static final DummyAlertGrouper DUMMY_ALERT_GROUPER = new DummyAlertGrouper();

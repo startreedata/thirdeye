@@ -9,15 +9,17 @@ import static ai.startree.thirdeye.AppUtils.logJvmSettings;
 
 import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
-import ai.startree.thirdeye.datasource.DefaultDataSourcesPlugin;
-import ai.startree.thirdeye.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
-import ai.startree.thirdeye.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.notification.email.EmailSendgridNotificationServiceFactory;
-import ai.startree.thirdeye.notification.email.EmailSmtpNotificationServiceFactory;
-import ai.startree.thirdeye.notification.slack.SlackNotificationServiceFactory;
-import ai.startree.thirdeye.notification.webhook.WebhookNotificationServiceFactory;
+import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
+import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
+import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
+import ai.startree.thirdeye.plugins.notification.email.EmailSendgridNotificationServiceFactory;
+import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServiceFactory;
+import ai.startree.thirdeye.plugins.notification.slack.SlackNotificationServiceFactory;
+import ai.startree.thirdeye.plugins.notification.webhook.WebhookNotificationServiceFactory;
+import ai.startree.thirdeye.plugins.rca.contributors.cube.CubeContributorsFinderPlugin;
+import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -38,6 +40,16 @@ public class ThirdEyeServerDebug {
     loadDefaultDataSources(injector.getInstance(DataSourcesLoader.class));
     loadDetectors(injector.getInstance(DetectionRegistry.class));
     loadNotificationServiceFactories(injector.getInstance(NotificationServiceRegistry.class));
+    loadContributorsFinderFactories(injector.getInstance(ContributorsFinderRunner.class));
+  }
+
+  private static void loadContributorsFinderFactories(
+      final ContributorsFinderRunner contributorsFinderRunner) {
+    Stream.of(
+            new CubeContributorsFinderPlugin()
+        )
+        .forEach(plugin -> plugin.getContributorsFinderFactories()
+            .forEach(contributorsFinderRunner::addContributorsFinderFactory));
   }
 
   /**

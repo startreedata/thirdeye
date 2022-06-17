@@ -9,7 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
-import ai.startree.thirdeye.datasource.pinot.PinotThirdEyeDataSource;
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.ConfigGenerator;
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.PinotDatasetOnboarder;
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.ThirdEyePinotClient;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -96,10 +99,10 @@ public class PinotDatasetOnboarderTest {
       assertThat(schemaMetricNames.contains(metricConfig.getName())).isTrue();
       metricIds.add(metricConfig.getId());
       if (metricConfig.getName().equals("latency_tdigest")) {
-        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_TDIGEST_AGG_FUNCTION);
+        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_TDIGEST_AGG_FUNCTION.toString());
         assertThat(metricConfig.getDatatype()).isEqualTo(MetricType.DOUBLE);
       } else {
-        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_AGG_FUNCTION);
+        assertThat(metricConfig.getDefaultAggFunction()).isEqualTo(ConfigGenerator.DEFAULT_AGG_FUNCTION.toString());
       }
     }
   }

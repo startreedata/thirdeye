@@ -48,7 +48,7 @@ describe("Redirect Validation", () => {
         });
     });
 
-    it("should call navigate with path to redirect to if missing one expected params", async () => {
+    it("should call navigate with path to redirect to if missing one expected params carrying over the one that exists", async () => {
         mockSearchParams = new URLSearchParams([["hello", "1"]]);
         render(
             <RedirectValidation
@@ -60,9 +60,12 @@ describe("Redirect Validation", () => {
             </RedirectValidation>
         );
 
-        expect(mockNavigate).toHaveBeenLastCalledWith("path-to-redirect-to", {
-            replace: false,
-        });
+        expect(mockNavigate).toHaveBeenLastCalledWith(
+            "path-to-redirect-to?hello=1",
+            {
+                replace: false,
+            }
+        );
     });
 });
 

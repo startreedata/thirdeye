@@ -1,8 +1,8 @@
 import {
+    Button,
     Card,
     CardContent,
     CardHeader,
-    Divider,
     Grid,
     IconButton,
     Link,
@@ -13,10 +13,11 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import classnames from "classnames";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import {
-    getAlertsViewPath,
     getAnomaliesAnomalyPath,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
@@ -31,6 +32,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     const [anomalyOptionsAnchorElement, setAnomalyOptionsAnchorElement] =
         useState<HTMLElement | null>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
     const handleAnomalyOptionsClick = (
@@ -52,10 +54,6 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         handleAnomalyOptionsClose();
     };
 
-    const handleAnomalyInvestigate = (): void => {
-        handleAnomalyOptionsClose();
-    };
-
     const handleAnomalyDelete = (): void => {
         if (!props.uiAnomaly) {
             return;
@@ -65,20 +63,32 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         handleAnomalyOptionsClose();
     };
 
-    const handleAlertViewDetails = (): void => {
-        if (!props.uiAnomaly) {
-            return;
-        }
-
-        navigate(getAlertsViewPath(props.uiAnomaly.alertId));
-    };
+    if (props.isLoading) {
+        return (
+            <PageContentsCardV1 className={props.className}>
+                <SkeletonV1 height={150} variant="rect" />
+            </PageContentsCardV1>
+        );
+    }
 
     return (
-        <Card variant="outlined">
+        <Card className={props.className} variant="outlined">
             {props.uiAnomaly && (
                 <CardHeader
                     action={
                         <>
+                            <Button
+                                color="primary"
+                                component="button"
+                                href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
+                                    props.uiAnomaly.id
+                                )}?${searchParams.toString()}`}
+                                variant="contained"
+                            >
+                                {t("label.investigate-entity", {
+                                    entity: t("label.anomaly"),
+                                })}
+                            </Button>
                             {/* Anomaly options button */}
                             <IconButton
                                 color="secondary"
@@ -101,16 +111,6 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                                         {t("label.view-details")}
                                     </MenuItem>
                                 )}
-
-                                {/* Investigate anomaly */}
-                                <MenuItem
-                                    disabled
-                                    onClick={handleAnomalyInvestigate}
-                                >
-                                    {t("label.investigate-entity", {
-                                        entity: t("label.anomaly"),
-                                    })}
-                                </MenuItem>
 
                                 {/* Delete anomaly */}
                                 <MenuItem onClick={handleAnomalyDelete}>
@@ -144,33 +144,8 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             <CardContent>
                 {props.uiAnomaly && (
                     <Grid container>
-                        {/* Alert */}
-                        <Grid item md={3} xs={6}>
-                            <NameValueDisplayCard<string>
-                                link
-                                name={t("label.alert")}
-                                searchWords={props.searchWords}
-                                values={[props.uiAnomaly.alertName]}
-                                onClick={handleAlertViewDetails}
-                            />
-                        </Grid>
-
-                        {/* Duration */}
-                        <Grid item md={3} xs={6}>
-                            <NameValueDisplayCard<string>
-                                name={t("label.duration")}
-                                searchWords={props.searchWords}
-                                values={[props.uiAnomaly.duration]}
-                            />
-                        </Grid>
-
-                        {/* Separator */}
-                        <Grid item xs={12}>
-                            <Divider variant="fullWidth" />
-                        </Grid>
-
                         {/* Start */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={t("label.start")}
                                 searchWords={props.searchWords}
@@ -179,7 +154,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         </Grid>
 
                         {/* End */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={t("label.end")}
                                 searchWords={props.searchWords}
@@ -187,8 +162,17 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             />
                         </Grid>
 
+                        {/* Duration */}
+                        <Grid item>
+                            <NameValueDisplayCard<string>
+                                name={t("label.duration")}
+                                searchWords={props.searchWords}
+                                values={[props.uiAnomaly.duration]}
+                            />
+                        </Grid>
+
                         {/* Current/Predicted */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={`${t("label.current")}${t(
                                     "label.pair-separator"
@@ -203,7 +187,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         </Grid>
 
                         {/* Deviation */}
-                        <Grid item md={3} xs={6}>
+                        <Grid item>
                             <NameValueDisplayCard<string>
                                 name={t("label.deviation")}
                                 searchWords={props.searchWords}

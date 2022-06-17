@@ -1,4 +1,19 @@
+///
+/// Copyright 2022 StarTree Inc
+///
+/// Licensed under the StarTree Community License (the "License"); you may not use
+/// this file except in compliance with the License. You may obtain a copy of the
+/// License at http://www.startree.ai/legal/startree-community-license
+///
+/// Unless required by applicable law or agreed to in writing, software distributed under the
+/// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+/// either express or implied.
+/// See the License for the specific language governing permissions and limitations under
+/// the License.
+///
+
 import axios from "axios";
+import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
 import {
     createDatasource,
@@ -6,6 +21,7 @@ import {
     deleteDatasource,
     getAllDatasources,
     getDatasource,
+    onboardAllDatasets,
     updateDatasource,
     updateDatasources,
 } from "./datasources.rest";
@@ -139,6 +155,29 @@ describe("Datasources REST", () => {
         ).rejects.toThrow("testError");
     });
 
+    it("onboardAllDatasets should invoke axios.post with appropriate input and return appropriate datasets", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: [mockDatasetsResponse],
+        });
+
+        await expect(
+            onboardAllDatasets(mockDatasourceRequest.name)
+        ).resolves.toEqual([mockDatasetsResponse]);
+
+        expect(axios.post).toHaveBeenCalledWith(
+            "/api/data-sources/onboard-all",
+            mockDatasourceRequest
+        );
+    });
+
+    it("onboardAllDatasets should throw encountered error", async () => {
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
+
+        await expect(
+            onboardAllDatasets(mockDatasourceRequest.name)
+        ).rejects.toThrow("testError");
+    });
+
     it("deleteDatasource should invoke axios.delete with appropriate input and return appropriate datasource", async () => {
         jest.spyOn(axios, "delete").mockResolvedValue({
             data: mockDatasourceResponse,
@@ -161,6 +200,10 @@ describe("Datasources REST", () => {
 const mockDatasourceRequest = {
     name: "testNameDatasourceRequest",
 } as Datasource;
+
+const mockDatasetsResponse = {
+    name: "testNameDatasetResponse",
+} as Dataset;
 
 const mockDatasourceResponse = {
     name: "testNameDatasourceResponse",

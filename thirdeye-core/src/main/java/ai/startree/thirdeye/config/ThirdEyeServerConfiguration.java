@@ -13,7 +13,7 @@ import ai.startree.thirdeye.events.MockEventsConfiguration;
 import ai.startree.thirdeye.metric.PrometheusConfiguration;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.restclient.ThirdEyeRestClientConfiguration;
-import ai.startree.thirdeye.rootcause.RcaConfiguration;
+import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;

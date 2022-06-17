@@ -81,6 +81,11 @@ data:
     
     time:
       timezone: {{ .Values.time.timezone }}
+    
+    rca:
+      topContributors:
+        algorithm: {{ .Values.rca.topContributors.algorithm }}
+        params: {{ .Values.rca.topContributors.params }}
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}

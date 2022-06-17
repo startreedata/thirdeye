@@ -89,7 +89,7 @@ data:
     rca:
       topContributors:
         algorithm: {{ .Values.rca.topContributors.algorithm }}
-        params: {{ .Values.rca.topContributors.params }}
+        params: {{ toYaml .Values.rca.topContributors.params | nindent 10}}
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}

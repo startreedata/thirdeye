@@ -198,7 +198,16 @@
         "alert-frequency": "Alert Frequency",
         "alert-details": "Alert Details",
         "optional": "Optional",
-        "name-of-your-alert": "Name of your alert"
+        "name-of-your-alert": "Name of your alert",
+        "detection-template": "Detection template",
+        "template-type": "Template type",
+        "template-configuration": "Template configuration",
+        "alert-preview": "Alert preview",
+        "add-property-value": "Add property value",
+        "show-count-more": "Show {{count}} more",
+        "hide-count-optional-properties": "Hide {{count}} optional properties",
+        "fields-with-default-values": "Fields with Default Values",
+        "reload-preview": "Reload preview"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -247,12 +256,17 @@
         "extend-entity-by-week": "Extend {{entity}} by a week",
         "filter-by-entity": "Filter by {{entity}}",
         "no-filter-options-available-entity": "No filter {{entity}} options available",
+        "default-value-is": "Default value is: {{value}}",
         "event-name-required": "Name is required",
         "event-start-time-required": "Start time is required",
         "event-end-time-required": "End time is required",
         "preview-anomalies-created-below": "Preview the anomalies created for configuration below",
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
         "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
-        "please-enter-valid-name": "Please enter valid name"
+        "please-enter-valid-name": "Please enter valid name",
+        "select-a-template-to-preview-alert": "Select a template to detect anomalies",
+        "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
+        "select-template-to-preview-alert": "Select a template to preview the alert",
+        "enter-value-to-override-defaults": "Enter a value to override the defaults"
     }
 }
